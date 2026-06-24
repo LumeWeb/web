@@ -173,6 +173,28 @@ describe("appStore helpers", () => {
       expect(result[2]).toEqual({ children: [], id: core("item3"), label: "Item 3" });
     });
 
+    it("should replace an existing item at the root level", () => {
+      const existingItems: NavigationItem[] = [
+        { id: core("item1"), label: "Item 1" },
+      ];
+      const newItems: NavigationItem[] = [
+        { id: core("item1"), label: "Item 1 Updated" },
+        { id: core("item2"), label: "Item 2" },
+      ];
+      const result = helpers.addItemsToRoot(newItems, existingItems);
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({
+        children: [],
+        id: core("item1"),
+        label: "Item 1 Updated",
+      });
+      expect(result[1]).toEqual({
+        children: [],
+        id: core("item2"),
+        label: "Item 2",
+      });
+    });
+
     it("should not add duplicate items to the root level", () => {
       const existingItems: NavigationItem[] = [
         { id: core("item1"), label: "Item 1" },
@@ -183,8 +205,16 @@ describe("appStore helpers", () => {
       ];
       const result = helpers.addItemsToRoot(newItems, existingItems);
       expect(result).toHaveLength(2);
-      expect(result[0]).toEqual({ id: core("item1"), label: "Item 1" });
-      expect(result[1]).toEqual({ children: [], id: core("item2"), label: "Item 2" });
+      expect(result[0]).toEqual({
+        children: [],
+        id: core("item1"),
+        label: "Item 1",
+      });
+      expect(result[1]).toEqual({
+        children: [],
+        id: core("item2"),
+        label: "Item 2",
+      });
     });
   });
 
@@ -225,7 +255,11 @@ describe("appStore helpers", () => {
       ];
       const result = helpers.addItemsToChildren(newItems, parent);
       expect(result.children).toHaveLength(2);
-      expect(result.children![0]).toEqual({ id: core("child1"), label: "Child 1" });
+      expect(result.children![0]).toEqual({
+        children: [],
+        id: core("child1"),
+        label: "Child 1",
+      });
       expect(result.children![1]).toEqual({
         children: [],
         id: core("child2"),

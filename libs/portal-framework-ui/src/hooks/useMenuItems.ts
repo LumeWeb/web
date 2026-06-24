@@ -7,7 +7,6 @@ export function useMenuItems() {
 
   return {
     addMenuItem,
-    getMenuItems: () => menuItems,
     menuItems,
     removeMenuItem,
   };

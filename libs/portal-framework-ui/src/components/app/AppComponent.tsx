@@ -36,9 +36,20 @@ import { registerAllActionItems } from "@/components/actions";
 import { registerAllFormComponents } from "@/components/form";
 import { Loading } from "@/components/Loading";
 import { useAppStore } from "@/store/appStore";
-import { useFrameworkSync } from "@/store/portalStore";
 
 import { DialogProvider, DialogRenderer } from "@/components";
+
+export function useFrameworkSync() {
+  const framework = useFramework();
+  const setFramework = useAppStore((state) => state.setFramework);
+
+  useEffect(() => {
+    if (!framework?.framework) {
+      return;
+    }
+    setFramework(framework.framework);
+  }, [framework?.framework, setFramework]);
+}
 
 // Register all form components at module load time
 registerAllFormComponents();
@@ -81,13 +92,13 @@ function AppContent({
     framework,
     isLoading: isFrameworkLoading,
   } = useFramework();
-  const addMenuItems = useAppStore((state) => state.addMenuItems);
   const error = useAppStore((state) => state.error);
   const isLoading = useAppStore((state) => state.isLoading);
   const pluginConfigs = useAppStore((state) => state.pluginConfigs);
   const routes = useAppStore((state) => state.routes);
   const setError = useAppStore((state) => state.setError);
   const setIsLoading = useAppStore((state) => state.setIsLoading);
+  const setMenuItems = useAppStore((state) => state.setMenuItems);
   const setPluginConfigs = useAppStore((state) => state.setPluginConfigs);
   const setRoutes = useAppStore((state) => state.setRoutes);
   useFrameworkSync();
@@ -147,7 +158,7 @@ function AppContent({
 
         if (mounted) {
           setRoutes(routes);
-          addMenuItems(navigation);
+          setMenuItems(navigation);
           setPluginConfigs(configs);
           setIsLoading(false);
         }
@@ -177,7 +188,7 @@ function AppContent({
     setIsLoading,
     setRoutes,
     setPluginConfigs,
-    addMenuItems,
+    setMenuItems,
   ]);
 
   const combinedPluginConfig = Object.assign({}, ...pluginConfigs);

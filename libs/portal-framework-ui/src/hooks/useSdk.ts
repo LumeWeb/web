@@ -2,7 +2,7 @@ import { Sdk } from "@lumeweb/portal-sdk";
 import { useEffect, useRef } from "react";
 
 import { useApiUrl } from "@/hooks/useApiUrl"; // Import the updated useApiUrl hook
-import { usePortalActions, usePortalStore } from "@/store/portalStore";
+import { useAppStore } from "@/store/appStore";
 
 // Global flag to ensure SDK is initialized only once across all instances
 let isGloballyInitialized = false;
@@ -15,10 +15,8 @@ export const resetGloballyInitialized = () => {
 export function useSdk() {
   // Use the useApiUrl hook to get the API base URL
   const apiUrl = useApiUrl();
-  const { sdk } = usePortalStore((state) => ({
-    sdk: state.sdk,
-  }));
-  const { setSdk } = usePortalActions();
+  const sdk = useAppStore((state) => state.sdk);
+  const setSdk = useAppStore((state) => state.setSdk);
   const initializationAttempted = useRef(false);
 
   useEffect(() => {

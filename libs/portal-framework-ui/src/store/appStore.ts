@@ -1,7 +1,12 @@
-import type {
-  NamespacedId,
-  NavigationItem,
-  RouteDefinition,
+import {
+  CORE_NS,
+  createNamespacedId,
+  type Framework,
+  type NamespacedId,
+  NavigationFeature,
+  type NavigationItem,
+  type PortalMeta,
+  type RouteDefinition,
 } from "@lumeweb/portal-framework-core";
 
 import { createStore, useStore } from "zustand";
@@ -11,87 +16,112 @@ export interface AppActions {
   addMenuItems: (items: NavigationItem[], parentKey?: NamespacedId) => void;
   removeMenuItem: (key: NamespacedId) => void;
   setError: (error: Error | null) => void;
+  setFramework: (framework: Framework) => void;
   setIsLoading: (isLoading: boolean) => void;
+  setIsMetaLoading: (isMetaLoading: boolean) => void;
+  setMenuItems: (items: NavigationItem[]) => void;
+  setMeta: (meta: PortalMeta | undefined) => void;
   setPluginConfigs: (configs: Record<string, any>[]) => void;
+  setPortalUrl: (portalUrl: string) => void;
   setRoutes: (routes: RouteDefinition[]) => void;
+  setSdk: (sdk: any) => void;
+  syncFromFramework: () => Promise<void>;
 }
+
+const emptyFrameworkFeatureId = createNamespacedId(CORE_NS, "navigation");
 
 export interface AppState {
   error: Error | null;
+  framework: Framework | null;
   isLoading: boolean;
+  isMetaLoading: boolean;
   menuItems: NavigationItem[];
+  meta?: PortalMeta;
   pluginConfigs: Record<string, any>[];
+  portalUrl: string;
   routes: RouteDefinition[];
+  sdk: any;
 }
 
-// Define helpers outside the store creation
+const navigationFeatureId = createNamespacedId(CORE_NS, "navigation");
+
 export const helpers = {
   /**
-   * Adds new items as children to a parent menu item, preventing duplicates by ID.
+   * Adds new items as children to a parent menu item, replacing any child with
+   * the same ID.
    * @param newItems The array of NavigationItems to add.
    * @param parent The parent NavigationItem to add the items to.
-   * @returns A new array with the new items added as children to the parent.
+   * @returns A new parent item with the new items added or replaced as children.
    */
   addItemsToChildren: (
     newItems: NavigationItem[],
     parent: NavigationItem,
   ): NavigationItem => {
-    const existingChildIds = new Set(
-      parent.children?.map((item) => item.id).filter(Boolean),
-    );
-    const itemsToAdd = newItems.filter(
-      (item) => item.id && !existingChildIds.has(item.id),
-    );
-    const newChildren = [
-      ...(parent.children || []),
-      ...itemsToAdd.map((item) => {
-        const child = { ...item, children: item.children || [] };
-        // Only prefix path if:
-        // 1. Parent has a path
-        // 2. Child has a path
-        // 3. Child path isn't already absolute (doesn't start with /)
-        if (parent.path && child.path && !child.path.startsWith("/")) {
-          // Ensure parent path doesn't end with / and child path doesn't start with /
-          const parentPath = parent.path.endsWith("/")
-            ? parent.path.slice(0, -1)
-            : parent.path;
-          const childPath = child.path.startsWith("/")
-            ? child.path.slice(1)
-            : child.path;
-          child.path = `${parentPath}/${childPath}`;
-        }
-        return child;
-      }),
-    ];
-    return { ...parent, children: newChildren };
+    let children = [...(parent.children || [])];
+
+    for (const newItem of newItems) {
+      const index = children.findIndex(
+        (item) => item.id && item.id === newItem.id,
+      );
+
+      const child = { ...newItem, children: newItem.children || [] };
+      // Only prefix path if:
+      // 1. Parent has a path
+      // 2. Child has a path
+      // 3. Child path isn't already absolute (doesn't start with /)
+      if (parent.path && child.path && !child.path.startsWith("/")) {
+        // Ensure parent path doesn't end with / and child path doesn't start with /
+        const parentPath = parent.path.endsWith("/")
+          ? parent.path.slice(0, -1)
+          : parent.path;
+        const childPath = child.path.startsWith("/")
+          ? child.path.slice(1)
+          : child.path;
+        child.path = `${parentPath}/${childPath}`;
+      }
+
+      if (index === -1) {
+        children = [...children, child];
+      } else {
+        children = [...children.slice(0, index), child, ...children.slice(index + 1)];
+      }
+    }
+
+    return { ...parent, children };
   },
 
   /**
-   * Adds new items to the root level of the menu, preventing duplicates by ID.
+   * Adds new items to the root level of the menu, replacing any existing item
+   * with the same ID.
    * @param newItems The array of NavigationItems to add.
    * @param existingItems The existing array of NavigationItems.
-   * @returns a new array with the new items added.
+   * @returns a new array with the new items added or replaced.
    */
   addItemsToRoot: (
     newItems: NavigationItem[],
     existingItems: NavigationItem[],
   ): NavigationItem[] => {
-    // Filter out duplicate IDs within newItems
-    const newItemsFiltered = newItems.filter(
-      (item, index, self) =>
-        item.id && self.findIndex((i) => i.id === item.id) === index,
-    );
+    let result = [...existingItems];
 
-    const existingIds = new Set(
-      existingItems.map((item) => item.id).filter(Boolean),
-    );
-    const itemsToAdd = newItemsFiltered.filter(
-      (item) => item.id && !existingIds.has(item.id),
-    );
-    return [
-      ...existingItems,
-      ...itemsToAdd.map((item) => ({ ...item, children: item.children || [] })),
-    ];
+    for (const newItem of newItems) {
+      const index = result.findIndex((item) => item.id === newItem.id);
+      const normalizedItem = {
+        ...newItem,
+        children: newItem.children || [],
+      };
+
+      if (index === -1) {
+        result = [...result, normalizedItem];
+      } else {
+        result = [
+          ...result.slice(0, index),
+          normalizedItem,
+          ...result.slice(index + 1),
+        ];
+      }
+    }
+
+    return result;
   },
 
   // Helper to find and modify a menu item recursively
@@ -186,7 +216,7 @@ export const helpers = {
   },
 };
 
-export const appStore = createStore<AppActions & AppState>((set) => ({
+export const appStore = createStore<AppActions & AppState>((set, get) => ({
   addMenuItem: (newItem: NavigationItem, parentKey?: NamespacedId) =>
     set((state) => {
       if (parentKey) {
@@ -250,20 +280,49 @@ export const appStore = createStore<AppActions & AppState>((set) => ({
       return { menuItems: newMenuItems };
     }),
   error: null,
+  framework: null,
   isLoading: false,
+  isMetaLoading: false,
   menuItems: [],
   pluginConfigs: [],
+  portalUrl: "",
   removeMenuItem: (key: NamespacedId) =>
     set((state) => {
       return { menuItems: helpers.removeItemFromMenu(state.menuItems, key) };
     }),
   routes: [],
   setError: (error) => set({ error }),
+  setFramework: (framework) => set({ framework }),
   setIsLoading: (isLoading) => set({ isLoading }),
-
+  setIsMetaLoading: (isMetaLoading) => set({ isMetaLoading }),
+  setMenuItems: (items) => set({ menuItems: items }),
+  setMeta: (meta) => set({ meta }),
   setPluginConfigs: (pluginConfigs) => set({ pluginConfigs }),
-
+  setPortalUrl: (portalUrl) => set({ portalUrl }),
   setRoutes: (routes) => set({ routes }),
+  setSdk: (sdk) => set({ sdk }),
+  sdk: null,
+  syncFromFramework: async () => {
+    const framework = get().framework;
+    if (!framework) {
+      return;
+    }
+
+    const navigationFeature = await framework.getFeature<NavigationFeature>(
+      navigationFeatureId,
+    );
+
+    if (!navigationFeature) {
+      return;
+    }
+
+    const [routes, menuItems] = await Promise.all([
+      navigationFeature.getRoutes(),
+      navigationFeature.getNavigation(),
+    ]);
+
+    set({ menuItems, routes });
+  },
 }));
 
 export const useAppStore = <T>(selector: (state: AppActions & AppState) => T) =>

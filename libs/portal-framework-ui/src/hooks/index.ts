@@ -16,7 +16,9 @@ export * from './useRegisterUrl';
 export * from './useResetPasswordUrl';
 
 // Portal and Framework Hooks
+export * from './useBreadcrumbs';
 export * from './useMenuItems';
+export * from './useNavigationTree';
 export * from './usePluginMeta';
 export * from './usePortalMeta';
 export * from './usePortalUrl';

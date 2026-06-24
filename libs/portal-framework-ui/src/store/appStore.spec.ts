@@ -1,6 +1,7 @@
+import { type Framework } from "@lumeweb/portal-framework-core";
 import { createNamespacedId } from "@lumeweb/portal-framework-core";
 import { act } from "@testing-library/react";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { storeResetFns } from "@/../__mocks__/zustand"; // Import the reset function set
 
@@ -198,9 +199,26 @@ describe("appStore", () => {
     });
   });
 
+  it("should replace an existing item when using addMenuItem", () => {
+    const item1 = { id: core("item1"), label: "Item 1" };
+    const item1Updated = { id: core("item1"), label: "Item 1 Updated" };
+
+    act(() => {
+      appStore.getState().addMenuItem(item1);
+    });
+    expect(appStore.getState().menuItems).toHaveLength(1);
+    expect(appStore.getState().menuItems[0].label).toBe("Item 1");
+
+    act(() => {
+      appStore.getState().addMenuItem(item1Updated);
+    });
+    expect(appStore.getState().menuItems).toHaveLength(1);
+    expect(appStore.getState().menuItems[0].label).toBe("Item 1 Updated");
+  });
+
   it("should not add duplicate menu items (by id) to the same level when using addMenuItem", () => {
     const item1 = { id: core("item1"), label: "Item 1" };
-    const item1Duplicate = { id: core("item1"), label: "Item 1 Updated" }; // Same ID, different label
+    const item1Duplicate = { id: core("item1"), label: "Item 1" }; // Same ID, same label
 
     act(() => {
       appStore.getState().addMenuItem(item1);
@@ -218,7 +236,7 @@ describe("appStore", () => {
 
   it("should not add duplicate menu items (by id) to the same level when using addMenuItems", () => {
     const item1 = { id: core("item1"), label: "Item 1" };
-    const item1Duplicate = { id: core("item1"), label: "Item 1 Updated" }; // Same ID, different label
+    const item1Duplicate = { id: core("item1"), label: "Item 1" }; // Same ID, same label
     const item2 = { id: core("item2"), label: "Item 2" };
 
     act(() => {
@@ -488,5 +506,96 @@ describe("appStore", () => {
         }),
       ]),
     );
+  });
+
+  describe("setMenuItems", () => {
+    it("replaces all menu items at once", () => {
+      act(() => {
+        appStore.getState().setMenuItems([
+          { id: core("a"), label: "A", path: "/a" },
+          { id: core("b"), label: "B", path: "/b" },
+        ]);
+      });
+      expect(appStore.getState().menuItems).toHaveLength(2);
+
+      act(() => {
+        appStore.getState().setMenuItems([
+          { id: core("c"), label: "C", path: "/c" },
+        ]);
+      });
+      expect(appStore.getState().menuItems).toHaveLength(1);
+      expect(appStore.getState().menuItems[0].id).toBe(core("c"));
+    });
+  });
+
+  describe("appStore unified state", () => {
+    it("holds framework instance", () => {
+      const mockFramework = { getFeature: vi.fn() } as unknown as Framework;
+      act(() => {
+        appStore.getState().setFramework(mockFramework);
+      });
+      expect(appStore.getState().framework).toBe(mockFramework);
+    });
+
+    it("syncs routes and nav items from framework", async () => {
+      const mockRoutes = [{ id: createNamespacedId(CORE_NS, "route1"), path: "/test" }];
+      const mockNavigation = [{ id: createNamespacedId(CORE_NS, "nav1"), label: "Nav 1" }];
+      const mockFramework = {
+        getFeature: vi.fn().mockResolvedValue({
+          getNavigation: vi.fn().mockResolvedValue(mockNavigation),
+          getRoutes: vi.fn().mockResolvedValue(mockRoutes),
+        }),
+      } as unknown as Framework;
+
+      act(() => {
+        appStore.getState().setFramework(mockFramework);
+      });
+      await act(async () => {
+        await appStore.getState().syncFromFramework();
+      });
+
+      expect(appStore.getState().routes).toEqual(mockRoutes);
+      expect(appStore.getState().menuItems).toEqual(mockNavigation);
+    });
+
+    it("returns early when no framework is set", async () => {
+      await act(async () => {
+        await appStore.getState().syncFromFramework();
+      });
+      expect(appStore.getState().routes).toEqual([]);
+      expect(appStore.getState().menuItems).toEqual([]);
+    });
+
+    it("returns early when navigation feature is missing", async () => {
+      const mockFramework = {
+        getFeature: vi.fn().mockResolvedValue(undefined),
+      } as unknown as Framework;
+
+      act(() => {
+        appStore.getState().setFramework(mockFramework);
+      });
+      await act(async () => {
+        await appStore.getState().syncFromFramework();
+      });
+
+      expect(appStore.getState().routes).toEqual([]);
+      expect(appStore.getState().menuItems).toEqual([]);
+    });
+  });
+
+  describe("setMenuItems", () => {
+    it("replaces all menu items at once", () => {
+      appStore.getState().setMenuItems([
+        { id: "a", label: "A", path: "/a" },
+        { id: "b", label: "B", path: "/b" },
+      ]);
+      expect(appStore.getState().menuItems).toHaveLength(2);
+
+      appStore.getState().setMenuItems([
+        { id: "c", label: "C", path: "/c" },
+      ]);
+      expect(appStore.getState().menuItems).toHaveLength(1);
+      expect(appStore.getState().menuItems[0].id).toBe("c");
+    });
   });
 });
