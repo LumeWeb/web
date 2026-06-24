@@ -1,16 +1,24 @@
-import type { BaseCapability } from "@lumeweb/portal-framework-core";
-
-import { createLargeFilePlugin, createSmallFilePlugin } from "@lib/util/uppy";
 import {
+  CORE_NS,
   createNamespacedId,
   Framework,
   FrameworkFeature,
   getSdk,
   NamespacedId,
 } from "@lumeweb/portal-framework-core";
-import { Body, Meta, UppyEventMap } from "@uppy/core";
+
+import type {
+  BaseCapability,
+  FeatureStatus,
+} from "@lumeweb/portal-framework-core";
 
 import type { UploadCapability } from "@lib/types/capabilities/upload";
+import { UPLOAD_CAPABILITY_TYPE } from "@lib/types/capabilities/upload";
+import { PROTOCOL_CAPABILITY_TYPE } from "@lib/types/capabilities/protocol";
+import {
+  createLargeFilePlugin,
+  createSmallFilePlugin,
+} from "@lib/util/uppy";
 
 import { Manager, UppyFileDefault } from "@/features/upload/Manager";
 import {
@@ -21,25 +29,19 @@ import {
   UploadStatusType,
 } from "@/types/upload";
 
-// Capability type constants
-export const PROTOCOL_CAPABILITY_TYPE = "core:protocol";
-export const UPLOAD_CAPABILITY_TYPE = "core:upload";
-
 export class Feature implements FrameworkFeature, IUploadManager {
-  readonly id: NamespacedId = createNamespacedId("dashboard", "upload");
-  status;
+  readonly id: NamespacedId = createNamespacedId(CORE_NS, "dashboard-upload");
+  status: FeatureStatus = "enabled";
   version = "0.1.0";
-  #uploadManager: Manager;
+  // initialized in initialize()
+  #uploadManager!: Manager;
 
-  addEvent<K extends keyof UppyEventMap<Meta, Body>>(
-    event: K,
-    callback: UppyEventMap<Meta, Body>[K],
-  ) {
-    return this.#uploadManager.addEvent(event, callback);
+  addEvent(event: string, callback: (...args: any[]) => void) {
+    return this.#uploadManager.addEvent(event as any, callback as any);
   }
 
   // Expose upload manager methods
-  addFile(file: File, serviceId: string) {
+  addFile(file: File, serviceId?: string) {
     return this.#uploadManager.addFile(file, serviceId);
   }
 
@@ -51,7 +53,7 @@ export class Feature implements FrameworkFeature, IUploadManager {
     return this.#uploadManager.clearErrors();
   }
 
-  async destroy(framework: Framework): Promise<void> {
+  async destroy(_framework: Framework): Promise<void> {
     // Cleanup logic
     this.#uploadManager.reset();
   }
@@ -72,7 +74,7 @@ export class Feature implements FrameworkFeature, IUploadManager {
   ): Promise<BaseCapability[]> {
     const protocols: BaseCapability[] = [];
 
-    // Get all capabilities of type "core:protocol"
+    // Get all capabilities of type framework:protocol
     const protocolCapabilities =
       await framework.getCapabilitiesByType<BaseCapability>(
         PROTOCOL_CAPABILITY_TYPE,
@@ -109,7 +111,7 @@ export class Feature implements FrameworkFeature, IUploadManager {
    */
   async getUploadCapabilitiesForProtocol(
     framework: Framework,
-    protocolId: string,
+    protocolId: NamespacedId,
   ): Promise<BaseCapability[]> {
     const associatedIds = await framework.getAssociatedCapabilities(protocolId);
     const associatedCaps = await Promise.all(

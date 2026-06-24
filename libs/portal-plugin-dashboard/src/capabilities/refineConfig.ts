@@ -1,19 +1,25 @@
 import type { RefineProps } from "@refinedev/core";
 import {
-  Framework,
-  RefineConfigCapability,
+  createNamespacedId,
+  type CapabilityStatus,
+  type Framework,
+  type NamespacedId,
+  type RefineConfigCapability,
 } from "@lumeweb/portal-framework-core";
 import { resolveDashboardApiUrl, setupDataProvider } from "@lib/util";
 import { DATA_PROVIDER_NAME } from "@lumeweb/portal-framework-auth";
 
 export class Capability implements RefineConfigCapability {
-  readonly id: string = "dashboard:refine-config";
-  status;
-  readonly type = "core:refine-config";
-  version: string;
-  #apiUrl: string;
-
-  async destroy() {}
+  readonly id: NamespacedId = createNamespacedId(
+    "dashboard",
+    "refine-config",
+  );
+  status: CapabilityStatus = "active";
+  readonly type = "framework:refine-config";
+  version: string = "0.0.1";
+  // constructor must set; placeholder avoids definite assignment errors
+  #apiUrl: string = "";
+  async destroy(_framework?: Framework) {}
 
   /**
    * Gets the resolved API URL for the dashboard

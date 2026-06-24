@@ -1,6 +1,16 @@
-import type { BaseCapability } from "@lumeweb/portal-framework-core";
+import {
+  FRAMEWORK_NS,
+  createNamespacedId,
+  type BaseCapability,
+} from "@lumeweb/portal-framework-core";
 
-export interface ProtocolCapability extends BaseCapability<"core:protocol"> {
+export const PROTOCOL_CAPABILITY_TYPE = createNamespacedId(
+  FRAMEWORK_NS,
+  "protocol",
+);
+
+export interface ProtocolCapability
+  extends BaseCapability {
   /**
    * Get the protocol description for display in UI
    */
