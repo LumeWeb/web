@@ -1,8 +1,12 @@
-import type { WidgetAreaDefinition } from "@lumeweb/portal-framework-core";
+import {
+  CORE_NS,
+  createNamespacedId,
+  type WidgetAreaDefinition,
+} from "@lumeweb/portal-framework-core";
 
 export const widgetAreas: WidgetAreaDefinition[] = [
   {
-    id: "core:desktop-sidebar",
+    id: createNamespacedId(CORE_NS, "desktop-sidebar"),
   },
 ];
 export default {
