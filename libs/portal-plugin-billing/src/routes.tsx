@@ -1,10 +1,13 @@
-import type { RouteDefinition } from "@lumeweb/portal-framework-core";
+import {
+  createNamespacedId,
+  type RouteDefinition,
+} from "@lumeweb/portal-framework-core";
 import { Coins, CreditCard } from "lucide-react";
 
 const routes = [
   {
     component: "account/subscription",
-    id: "account_subscription",
+    id: createNamespacedId("billing", "subscription"),
     navigation: {
       icon: CreditCard,
       label: "Subscription",
@@ -13,7 +16,7 @@ const routes = [
   },
   {
     component: "account/credits",
-    id: "account_credits",
+    id: createNamespacedId("billing", "credits"),
     navigation: {
       icon: Coins,
       label: "Credits",

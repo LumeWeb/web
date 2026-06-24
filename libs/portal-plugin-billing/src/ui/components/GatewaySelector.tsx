@@ -4,12 +4,12 @@ import {
   cn,
   Skeleton,
 } from "@lumeweb/portal-framework-ui-core";
-import { useCapability } from "@lumeweb/portal-framework-core";
+import { createNamespacedId, useCapability } from "@lumeweb/portal-framework-core";
 import type { Capability as BillingRefineConfig } from "@/capabilities/refineConfig";
 import { useEffect, useRef, useState } from "react";
 
 function useBillingApiUrl(): string {
-  const { data: capability } = useCapability<BillingRefineConfig>("billing:refine-config");
+  const { data: capability } = useCapability<BillingRefineConfig>(createNamespacedId("billing", "refine-config"));
   return capability?.getApiUrl() ?? "";
 }
 
