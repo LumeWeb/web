@@ -38,11 +38,23 @@ export function localhostAccessPlugin(): Plugin {
             ? JSON.parse(process.env.VITE_PORTAL_BRAND)
             : process.env.VITE_PORTAL_BRAND;
 
+        let updatedHtml = html;
+
         if (brand?.logoUrl) {
-          const updatedHtml = html.replace(
+          updatedHtml = updatedHtml.replace(
             /(<div\s+data-loader-logo\s+[^>]*>)([\s\S]*?)(<\/div>)/,
             `$1<img alt="Logo" src="${brand.logoUrl}" />$3`,
           );
+        }
+
+        if (brand?.faviconUrl) {
+          updatedHtml = updatedHtml.replace(
+            /(<link\s+rel=["']icon["'][^>]*\shref=["'])([^"']*)(["'])/,
+            `$1${brand.faviconUrl}$3`,
+          );
+        }
+
+        if (updatedHtml !== html) {
           return { html: updatedHtml, tags };
         }
       }
