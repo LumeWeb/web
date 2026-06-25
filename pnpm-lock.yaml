@@ -466,10 +466,10 @@ importers:
         version: 19.2.7(react@19.2.7)
       vocs:
         specifier: 'catalog:'
-        version: 2.0.15(patch_hash=d09bb41c090c7717924369ae328e85a5d79cae5288f0de08d82c63e3eb2f03b9)(a38e4a4101e45bfc460543ee87b605cb)
+        version: 2.0.15(patch_hash=d09bb41c090c7717924369ae328e85a5d79cae5288f0de08d82c63e3eb2f03b9)(b7d304f04a9317dc100c30d11a9758ee)
       waku:
-        specifier: 1.0.0-beta.0
-        version: 1.0.0-beta.0(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.3)(vite@8.0.16))(@types/node@25.9.4)(@vitejs/devtools@0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.5)(typescript@6.0.3)(vite@8.0.16))(babel-plugin-react-compiler@1.0.0)(esbuild@0.28.1)(jiti@2.7.0)(react-dom@19.2.7(react@19.2.7))(react-server-dom-webpack@19.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(webpack@5.107.2(esbuild@0.28.1)(postcss@8.5.13)))(react@19.2.7)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
+        specifier: 1.0.0-beta.4
+        version: 1.0.0-beta.4(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.3)(vite@8.0.16))(@types/node@25.9.4)(@vitejs/devtools@0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.5)(typescript@6.0.3)(vite@8.0.16))(babel-plugin-react-compiler@1.0.0)(esbuild@0.28.1)(jiti@2.7.0)(react-dom@19.2.7(react@19.2.7))(react-server-dom-webpack@19.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(webpack@5.107.2(esbuild@0.28.1)(postcss@8.5.13)))(react@19.2.7)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
 
   apps/docs.pinner.xyz:
     dependencies:
@@ -487,10 +487,10 @@ importers:
         version: 19.2.7(react@19.2.7)
       vocs:
         specifier: 'catalog:'
-        version: 2.0.15(patch_hash=d09bb41c090c7717924369ae328e85a5d79cae5288f0de08d82c63e3eb2f03b9)(a38e4a4101e45bfc460543ee87b605cb)
+        version: 2.0.15(patch_hash=d09bb41c090c7717924369ae328e85a5d79cae5288f0de08d82c63e3eb2f03b9)(b7d304f04a9317dc100c30d11a9758ee)
       waku:
-        specifier: 1.0.0-beta.0
-        version: 1.0.0-beta.0(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.3)(vite@8.0.16))(@types/node@25.9.4)(@vitejs/devtools@0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.5)(typescript@6.0.3)(vite@8.0.16))(babel-plugin-react-compiler@1.0.0)(esbuild@0.28.1)(jiti@2.7.0)(react-dom@19.2.7(react@19.2.7))(react-server-dom-webpack@19.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(webpack@5.107.2(esbuild@0.28.1)(postcss@8.5.13)))(react@19.2.7)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
+        specifier: 1.0.0-beta.4
+        version: 1.0.0-beta.4(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.3)(vite@8.0.16))(@types/node@25.9.4)(@vitejs/devtools@0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.5)(typescript@6.0.3)(vite@8.0.16))(babel-plugin-react-compiler@1.0.0)(esbuild@0.28.1)(jiti@2.7.0)(react-dom@19.2.7(react@19.2.7))(react-server-dom-webpack@19.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(webpack@5.107.2(esbuild@0.28.1)(postcss@8.5.13)))(react@19.2.7)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
     devDependencies:
       '@radix-ui/react-tabs':
         specifier: ^1.1.15
@@ -7239,9 +7239,6 @@ packages:
   '@rolldown/pluginutils@1.0.0-rc.3':
     resolution: {integrity: sha512-eybk3TjzzzV97Dlj5c+XrBFW57eTNhzod66y9HrBlzJ6NsCrWCp/2kaPS3K9wJmurBC0Tdw4yPjXKZqlznim3Q==}
 
-  '@rolldown/pluginutils@1.0.0-rc.7':
-    resolution: {integrity: sha512-qujRfC8sFVInYSPPMLQByRh7zhwkGFS4+tyMQ83srV1qrxL4g8E2tyxVVyxd0+8QeBM1mIk9KbWxkegRr76XzA==}
-
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
@@ -8724,19 +8721,6 @@ packages:
     engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
       vite: ^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
-
-  '@vitejs/plugin-react@6.0.1':
-    resolution: {integrity: sha512-l9X/E3cDb+xY3SWzlG1MOGt2usfEHGMNIaegaUGFsLkb3RCn/k8/TOXBcab+OndDI4TBtktT8/9BwwW8Vi9KUQ==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    peerDependencies:
-      '@rolldown/plugin-babel': ^0.1.7 || ^0.2.0
-      babel-plugin-react-compiler: ^1.0.0
-      vite: ^8.0.0
-    peerDependenciesMeta:
-      '@rolldown/plugin-babel':
-        optional: true
-      babel-plugin-react-compiler:
-        optional: true
 
   '@vitejs/plugin-react@6.0.2':
     resolution: {integrity: sha512-DlSMqo4WhThw4vB8Mpn0Woe9J+Jfq1geJ61AKW0QEgLzGMNwtIMdxbDUzLxcun8W7NbJO0e2Jg/Nxm3cCSVzzg==}
@@ -15942,9 +15926,9 @@ packages:
     resolution: {integrity: sha512-o8qghlI8NZHU1lLPrpi2+Uq7abh4GGPpYANlalzWxyWteJOCsr/P+oPBA49TOLu5FTZO4d3F9MnWJfiMo4BkmA==}
     engines: {node: '>=18'}
 
-  waku@1.0.0-beta.0:
-    resolution: {integrity: sha512-6UhIsxrN70g1nsACoEAmCriT15pnyH3CunhrckFZuARBkaFXUvN22dIQWdCTiA8JVeNXAnhFV85Tuko8uEqZKQ==}
-    engines: {node: ^26.0.0 || ^24.0.0 || ^22.12.0}
+  waku@1.0.0-beta.4:
+    resolution: {integrity: sha512-+n/dzqI8o/tbOsAh4uptBC1CqvgnH34Tzodqgx4a7o8EvvZjPEbEvtKb1PJeAYPnaiYd4cXOEazy5W9wDTjoAQ==}
+    engines: {node: ^26.0.0 || ^24.0.0 || ^22.13.0}
     hasBin: true
     peerDependencies:
       react: ~19.2.4
@@ -21678,8 +21662,6 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.0-rc.3': {}
 
-  '@rolldown/pluginutils@1.0.0-rc.7': {}
-
   '@rolldown/pluginutils@1.0.1': {}
 
   '@rollup/plugin-image@3.0.3(rollup@4.60.2)':
@@ -23511,14 +23493,6 @@ snapshots:
       vite: 7.3.2(@types/node@25.9.4)(jiti@2.7.0)(lightningcss@1.32.0)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
     transitivePeerDependencies:
       - supports-color
-
-  '@vitejs/plugin-react@6.0.1(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.3)(vite@8.0.16))(babel-plugin-react-compiler@1.0.0)(vite@8.0.16)':
-    dependencies:
-      '@rolldown/pluginutils': 1.0.0-rc.7
-      vite: 8.0.16(@types/node@25.9.4)(@vitejs/devtools@0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.5)(typescript@6.0.3)(vite@8.0.16))(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
-    optionalDependencies:
-      '@rolldown/plugin-babel': 0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.3)(vite@8.0.16)
-      babel-plugin-react-compiler: 1.0.0
 
   '@vitejs/plugin-react@6.0.2(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.3)(vite@8.0.16))(babel-plugin-react-compiler@1.0.0)(vite@8.0.16)':
     dependencies:
@@ -32271,7 +32245,7 @@ snapshots:
 
   vlq@1.0.1: {}
 
-  vocs@2.0.15(patch_hash=d09bb41c090c7717924369ae328e85a5d79cae5288f0de08d82c63e3eb2f03b9)(a38e4a4101e45bfc460543ee87b605cb):
+  vocs@2.0.15(patch_hash=d09bb41c090c7717924369ae328e85a5d79cae5288f0de08d82c63e3eb2f03b9)(b7d304f04a9317dc100c30d11a9758ee):
     dependencies:
       '@base-ui/react': 1.6.0(@date-fns/tz@1.4.1)(@types/react@19.2.17)(date-fns@4.4.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@codesandbox/sandpack-react': 2.20.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -32350,7 +32324,7 @@ snapshots:
     optionalDependencies:
       mermaid: 11.14.0
       vite: 8.0.16(@types/node@25.9.4)(@vitejs/devtools@0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.5)(typescript@6.0.3)(vite@8.0.16))(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
-      waku: 1.0.0-beta.0(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.3)(vite@8.0.16))(@types/node@25.9.4)(@vitejs/devtools@0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.5)(typescript@6.0.3)(vite@8.0.16))(babel-plugin-react-compiler@1.0.0)(esbuild@0.28.1)(jiti@2.7.0)(react-dom@19.2.7(react@19.2.7))(react-server-dom-webpack@19.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(webpack@5.107.2(esbuild@0.28.1)(postcss@8.5.13)))(react@19.2.7)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
+      waku: 1.0.0-beta.4(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.3)(vite@8.0.16))(@types/node@25.9.4)(@vitejs/devtools@0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.5)(typescript@6.0.3)(vite@8.0.16))(babel-plugin-react-compiler@1.0.0)(esbuild@0.28.1)(jiti@2.7.0)(react-dom@19.2.7(react@19.2.7))(react-server-dom-webpack@19.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(webpack@5.107.2(esbuild@0.28.1)(postcss@8.5.13)))(react@19.2.7)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
     transitivePeerDependencies:
       - '@cfworker/json-schema'
       - '@date-fns/tz'
@@ -32490,10 +32464,10 @@ snapshots:
     dependencies:
       xml-name-validator: 5.0.0
 
-  waku@1.0.0-beta.0(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.3)(vite@8.0.16))(@types/node@25.9.4)(@vitejs/devtools@0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.5)(typescript@6.0.3)(vite@8.0.16))(babel-plugin-react-compiler@1.0.0)(esbuild@0.28.1)(jiti@2.7.0)(react-dom@19.2.7(react@19.2.7))(react-server-dom-webpack@19.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(webpack@5.107.2(esbuild@0.28.1)(postcss@8.5.13)))(react@19.2.7)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0):
+  waku@1.0.0-beta.4(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.3)(vite@8.0.16))(@types/node@25.9.4)(@vitejs/devtools@0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.5)(typescript@6.0.3)(vite@8.0.16))(babel-plugin-react-compiler@1.0.0)(esbuild@0.28.1)(jiti@2.7.0)(react-dom@19.2.7(react@19.2.7))(react-server-dom-webpack@19.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(webpack@5.107.2(esbuild@0.28.1)(postcss@8.5.13)))(react@19.2.7)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0):
     dependencies:
       '@hono/node-server': 2.0.5(hono@4.12.14)
-      '@vitejs/plugin-react': 6.0.1(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.3)(vite@8.0.16))(babel-plugin-react-compiler@1.0.0)(vite@8.0.16)
+      '@vitejs/plugin-react': 6.0.2(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.3)(vite@8.0.16))(babel-plugin-react-compiler@1.0.0)(vite@8.0.16)
       '@vitejs/plugin-rsc': 0.5.27(react-dom@19.2.7(react@19.2.7))(react-server-dom-webpack@19.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(webpack@5.107.2(esbuild@0.28.1)(postcss@8.5.13)))(react@19.2.7)(vite@8.0.16)
       dotenv: 17.4.2
       hono: 4.12.14
