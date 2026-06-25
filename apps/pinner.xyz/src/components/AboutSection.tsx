@@ -10,6 +10,7 @@ interface AboutSectionProps {
 	buttonText?: string;
 	url?: string;
 	imageUrl?: { src: string };
+	imageAlt?: string;
 	imgageMobileUrl?: { src: string };
 	theme?: "gray" | "white";
 	imagePosition?: "left" | "right";
@@ -25,6 +26,7 @@ const AboutSection = ({
   buttonText,
   url,
   imageUrl,
+  imageAlt = "Diagram showing how Pinner stores and serves your files across a distributed network",
   imgageMobileUrl,
   theme,
   imagePosition,
@@ -35,7 +37,7 @@ const AboutSection = ({
     <>
       {imageUrl && (
         <div className="hidden md:block">
-          <img src={imageUrl.src} alt="about image" width={600} height={400} loading="lazy" className="max-w-full h-auto object-contain" />
+          <img src={imageUrl.src} alt={imageAlt} width={600} height={400} loading="lazy" className="max-w-full h-auto object-contain" />
         </div>
       )}
 
@@ -47,7 +49,7 @@ const AboutSection = ({
           )}>
           <img
             src={imgageMobileUrl.src}
-            alt="about image"
+            alt={imageAlt}
             width={400}
             height={300}
             loading="lazy"

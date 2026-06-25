@@ -10,11 +10,9 @@ import NewsletterSignup from '@/components/NewsletterSignup';
 import logos from '@/data/brand-logos';
 import { config, ctaCopy } from '@/lib/config';
 
-import HowItWorksImage from "@/assets/how-it-works-1.png";
-import HowItWorksMobile from "@/assets/how-it-works-mobile-1.png";
-import StorageImage from "@/assets/how-it-works-2.png";
-import StorageMobile from "@/assets/how-it-works-mobile-2.png";
 import EncryptionImage from "@/assets/solutions-website-static-sites.jpg";
+import UploadFlowSection from "@/components/HowItWorks/UploadFlowSection";
+import DistributionSection from "@/components/HowItWorks/DistributionSection";
 
 const faqs = [
   {
@@ -49,24 +47,20 @@ const faqs = [
     client:load
   />
 
-  <AboutSection
+  <UploadFlowSection
     subtitle="Drop-In Replacement"
     title="Change Your Endpoint, Keep Your Tools"
     description="Existing S3 tools work immediately. AWS CLI, boto3, rclone, Terraform. Point them at your gateway instead of AWS. Same API, your endpoint."
     theme="white"
-    imageUrl={HowItWorksImage}
-    imgageMobileUrl={HowItWorksMobile}
     client:load
   />
 
-  <AboutSection
+  <DistributionSection
     subtitle="Zero-Knowledge Encryption"
     title="Encrypted by Default"
     description="You deploy your own gateway appliance. It handles encryption locally and stores only encrypted fragments on the Sia network. You control the keys, the software, and the data. Minimal CPU requirements, runs on any VPS."
     theme="gray"
     imagePosition="right"
-    imageUrl={StorageImage}
-    imgageMobileUrl={StorageMobile}
     client:load
   />
 
@@ -76,6 +70,7 @@ const faqs = [
     description="Simple per-TB pricing. No per-request fees. Priced upfront. See our <a href='/pricing' class='underline'>pricing page</a> for details."
     theme="white"
     imageUrl={EncryptionImage}
+    imageAlt="Encryption process showing files encrypted client-side before distribution across independent storage hosts"
     client:load
   />
 
@@ -103,6 +98,7 @@ const faqs = [
   <RelatedPages links={[
     { href: "/solutions/private-storage", label: "Private Storage", description: "Encrypted file storage with zero-knowledge architecture" },
     { href: "/solutions/ipfs-pinning", label: "IPFS Pinning", description: "Pin files to a peer-to-peer network with permanent links" },
+    { href: "/how-it-works", label: "How It Works", description: "Understand where your money goes and how storage proofs work" },
   ]} />
 
   <BrandLogos logos={logos} logoType="light" title="Built On" variant="white" client:load />

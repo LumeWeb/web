@@ -1,7 +1,6 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import PageHeader from '@/components/PageHeader';
-import AboutSection from '@/components/AboutSection';
 import CallToAction from '@/components/CallToAction';
 import FAQ from '@/components/FAQ';
 import BrandLogos from '@/components/BrandLogos';
@@ -10,9 +9,9 @@ import PlanTable from '@/components/PlanTable.astro';
 import logos from '@/data/brand-logos';
 import { config, ctaCopy } from '@/lib/config';
 
-import AboutWhatIsPinner from "@/assets/about-what-is-pinner.jpg";
-import PinataDifferImage from "@/assets/solutions-pinata-differ.jpg";
-import PinataMigrateImage from "@/assets/solutions-pinata-migrate.jpg";
+import UploadFlowSection from "@/components/HowItWorks/UploadFlowSection";
+import PinataComparisonSection from "@/components/HowItWorks/PinataComparisonSection";
+import MigrationSection from "@/components/HowItWorks/MigrationSection";
 
 const planRows = [
   { factor: "What you pay for", detail: "Storage and bandwidth only" },
@@ -68,31 +67,29 @@ const faqs = [
     client:load
   />
 
-  <AboutSection
+  <UploadFlowSection
     subtitle="Why Pinner"
     title="IPFS pinning, plus website hosting and verifiable storage"
     description="You already know how IPFS pinning works: content addresses, CIDs, pinning to keep data online. Pinner adds website hosting from the same pinned content, storage on a verifiable provider network, and flexible payments including crypto with no KYC or card. Same content addressing you're used to, with a different approach underneath."
     theme="white"
-    imageUrl={AboutWhatIsPinner}
     client:load
   />
 
-  <AboutSection
+  <PinataComparisonSection
     subtitle="How It Works"
     title="Verifiable hosting, no-KYC payments, and more"
     description="Pay with crypto or card. No KYC for crypto. Your pins live across independent storage providers instead of centralized infrastructure. Host static websites from the same pinned content. Fully open source, no black box."
     theme="gray"
     imagePosition="right"
-    imageUrl={PinataDifferImage}
     client:load
   />
 
-  <AboutSection
+  <MigrationSection
     subtitle="Migration"
     title="Need help moving your pins? We'll help you migrate."
     description="Switching IPFS pinning providers is straightforward. Your content addresses stay the same because they're content hashes, not proprietary URLs. Pin your existing CIDs on Pinner and they're live. If you have a large collection or custom setup, reach out and we'll work with you on the transition."
     theme="white"
-    imageUrl={PinataMigrateImage}
+    imagePosition="left"
     client:load
   />
 

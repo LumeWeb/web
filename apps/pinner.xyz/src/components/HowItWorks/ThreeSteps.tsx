@@ -1,20 +1,20 @@
 const steps = [
   {
     number: "1",
-    title: "Pin",
-    description: "Upload files to IPFS and get a link that stays online as long as it's pinned. Use our command-line tool or developer SDK.",
+    title: "Upload",
+    description: "Upload files through your dashboard, command-line tool, or developer SDK. Your data is encrypted before it leaves your device.",
   },
   {
     number: "2",
     title: "Distribute",
     description:
-      "Files are copied across the network. Your files stay online even if individual servers go down.",
+      "Files are copied across independent hosts on the network. Your files stay online even if individual servers go down.",
   },
   {
     number: "3",
     title: "Access Anywhere",
     description:
-      "Retrieve your files from anywhere. Static websites serve directly. Private data stays encrypted until you need it.",
+      "Retrieve your files from anywhere. Serve websites, manage private data, or build apps. Your files are always available and always yours.",
   },
 ];
 

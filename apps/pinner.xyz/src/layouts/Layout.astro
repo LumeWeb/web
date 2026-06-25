@@ -12,7 +12,7 @@ const { title, variant = "content", description = "Website hosting, IPFS pinning
 const lastUpdated = getGitLastUpdated();
 const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? "https://pinner.xyz");
 const siteName = "Pinner";
-const ogImage = new URL(ogImageProp ?? "/images/og-default.png", canonicalURL.origin);
+const ogImage = new URL(ogImageProp ?? "/images/og/default.png", canonicalURL.origin);
 ---
 
 <!doctype html>

@@ -47,8 +47,17 @@ const TrustSection = ({ variant = "default" }: TrustSectionProps) => {
 						</div>
 					))}
 				</div>
-			</div>
-		</Section>
+
+				<div className="text-center mt-8">
+					<a
+						href="/how-it-works"
+						className="text-home-text-muted text-sm font-medium underline hover:text-white transition-colors duration-300"
+					>
+						See how it works →
+					</a>
+				</div>
+				</div>
+				</Section>
 	);
 };
 

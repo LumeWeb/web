@@ -10,11 +10,9 @@ import RelatedPages from '@/components/RelatedPages.astro';
 import logos from '@/data/brand-logos';
 import { config, ctaCopy } from '@/lib/config';
 
-import HowItWorksImage from "@/assets/how-it-works-1.png";
-import HowItWorksMobile from "@/assets/how-it-works-mobile-1.png";
-import StorageImage from "@/assets/how-it-works-2.png";
-import StorageMobile from "@/assets/how-it-works-mobile-2.png";
 import UseCasesImage from "@/assets/solutions-ipfs-use-cases.jpg";
+import UploadFlowSection from "@/components/HowItWorks/UploadFlowSection";
+import DistributionSection from "@/components/HowItWorks/DistributionSection";
 
 const faqs = [
   {
@@ -61,24 +59,20 @@ const faqs = [
     client:load
   />
 
-  <AboutSection
+  <UploadFlowSection
     subtitle="Content Addressing"
     title="Your file gets a permanent link"
     description="Upload any file and it's pinned to IPFS on a verifiable storage network. Your content receives a content address: a unique, verifiable link that points to your data regardless of where it's stored. Links stay valid as long as your content is pinned. No short URLs, no broken links, no platform dependencies."
     theme="white"
-    imageUrl={HowItWorksImage}
-    imgageMobileUrl={HowItWorksMobile}
     client:load
   />
 
-  <AboutSection
+  <DistributionSection
     subtitle="Verifiable Network"
     title="A network, not a data center"
     description="Your files are distributed across independent storage providers, not sitting in one company's servers. If individual hosts go down, your data stays online. Hosts only get paid when they prove your data is there. Crypto payments available for those who prefer them."
     theme="gray"
     imagePosition="right"
-    imageUrl={StorageImage}
-    imgageMobileUrl={StorageMobile}
     client:load
   />
 
@@ -88,6 +82,7 @@ const faqs = [
     description="IPFS pinning powers a range of use cases: NFT metadata and asset storage, dApp frontend hosting, scientific data publishing with verifiable hashes, archival content that needs to stay link-stable, and any data that benefits from content addressing. If you need a link that points to the same data forever, IPFS pinning is the answer."
     theme="white"
     imageUrl={UseCasesImage}
+    imageAlt="Use cases for IPFS pinning: NFT metadata, dApp assets, scientific data, and archival content"
     client:load
   />
 
@@ -102,6 +97,7 @@ const faqs = [
     { href: "/solutions/website-hosting", label: "Website Hosting", description: "Host static sites on a peer-to-peer network" },
     { href: "/alternatives/pinata", label: "Pinata Alternative", description: "Switching IPFS providers? See how Pinner is different" },
     { href: "/alternatives/fleek", label: "Fleek Alternative", description: "Fleek's IPFS hosting was discontinued. Pinner is built to stick around." },
+    { href: "/how-it-works", label: "How It Works", description: "Understand where your money goes and how storage proofs work" },
   ]} />
 
   <BrandLogos logos={logos} logoType="light" title="Built On" variant="white" client:load />

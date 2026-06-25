@@ -11,9 +11,9 @@ import logos from '@/data/brand-logos';
 import { config, ctaCopy } from '@/lib/config';
 import { frameworkList } from '@/lib/frameworks';
 
-import AboutWhatIsPinner from "@/assets/about-what-is-pinner.jpg";
-import AboutHowItWorks from "@/assets/about-how-it-works.jpg";
-import AboutValues from "@/assets/about-values.jpg";
+import ValuesSection from "@/components/HowItWorks/ValuesSection";
+import UploadFlowSection from "@/components/HowItWorks/UploadFlowSection";
+import DistributionSection from "@/components/HowItWorks/DistributionSection";
 
 const planRows = [
   { factor: "What you pay for", detail: "Storage and bandwidth only" },
@@ -65,33 +65,30 @@ const faqs = [
     client:load
   />
 
-  <AboutSection
+  <UploadFlowSection
     subtitle="What happened to Fleek?"
     title="A hosting service that's no longer hosting"
     description="Fleek retired their IPFS hosting services in January 2026, and hosted sites went offline with it. Pinner stores your data on the Sia network, distributed across independent hosts who are paid to store it and must prove they're doing it. Your data doesn't live on our servers. It lives on a network designed to keep it around."
     theme="white"
-    imageUrl={AboutWhatIsPinner}
     client:load
   />
 
-  <AboutSection
+  <DistributionSection
     subtitle="Storage"
     title="Your data lives on a network, not our servers"
     description="Your data is stored on the Sia network, distributed across independent hosts who are paid to store it and must prove they're doing it. If a host drops off, the network re-replicates to another. Hosts lose money if they lose your data, so they don't. On the serving side, we distribute your site over HTTP and peer-to-peer (IPFS). If our gateway goes down, your site goes down, but your data stays on the network because it doesn't live on our servers."
     theme="gray"
     imagePosition="right"
-    imageUrl={AboutHowItWorks}
     client:load
   />
 
-  <AboutSection
-    subtitle="Getting Started"
-    title="Deploy your static site"
-    description="If you have your site files (HTML, CSS, JS), deploy them to Pinner and get a live URL. Static sites, portfolios, documentation sites, and dApps all work. No server-side rendering or dynamic backends."
-    theme="white"
-    imageUrl={AboutValues}
-    client:load
-  />
+<ValuesSection
+  subtitle="Getting Started"
+  title="Getting Started"
+  description="If you have your site files (HTML, CSS, JS), deploy them to Pinner and get a live URL. Static sites, portfolios, documentation sites, and dApps all work. No server-side rendering or dynamic backends."
+  theme="white"
+  client:load
+/>
 
   <section class="py-[60px] md:py-[120px] bg-white">
     <div class="xl:container px-6">

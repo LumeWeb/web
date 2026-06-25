@@ -11,9 +11,9 @@ import logos from '@/data/brand-logos';
 import { config, ctaCopy } from '@/lib/config';
 import { frameworkList } from '@/lib/frameworks';
 
-import AboutWhatIsPinner from "@/assets/about-what-is-pinner.jpg";
-import AboutHowItWorks from "@/assets/about-how-it-works.jpg";
-import AboutValues from "@/assets/about-values.jpg";
+import ValuesSection from "@/components/HowItWorks/ValuesSection";
+import UploadFlowSection from "@/components/HowItWorks/UploadFlowSection";
+import DistributionSection from "@/components/HowItWorks/DistributionSection";
 
 const planRows = [
   { factor: "What you pay for", detail: "5 USD/mo for 250 GB bandwidth" },
@@ -61,33 +61,30 @@ const faqs = [
     client:load
   />
 
-  <AboutSection
+  <UploadFlowSection
     subtitle="Why Pinner"
     title="Static site hosting built to last"
     description="Your data lives on the Sia network across independent hosts who are paid to store it and must prove they're doing it. Pinner is built for static hosting and that's the product. Content addressing means your data is verifiable and portable."
     theme="white"
-    imageUrl={AboutWhatIsPinner}
     client:load
   />
 
-  <AboutSection
+  <DistributionSection
     subtitle="Storage"
     title="Your data lives on a network, not one company's servers"
     description="Pinner stores your data on the Sia network, distributed across independent hosts who are paid to store it and must prove they're doing it. Content addressing means your data is verifiable and portable with no vendor lock-in on storage. On the serving side, we distribute your site over HTTP and peer-to-peer (IPFS)."
     theme="gray"
     imagePosition="right"
-    imageUrl={AboutHowItWorks}
     client:load
   />
 
-  <AboutSection
-    subtitle="What Pinner does and doesn't"
-    title="Straightforward hosting with clear pricing"
-    description="No file count caps. No file size limits. Use any DNS provider. 5 USD/mo for 250 GB bandwidth. Crypto payments with no KYC. Pinner is open source. Your data on the Sia network lives across independent hosts, so no single entity can take it down."
-    theme="white"
-    imageUrl={AboutValues}
-    client:load
-  />
+<ValuesSection
+  subtitle="What Pinner does and doesn't"
+  title="What Pinner does and doesn't"
+  description="No file count caps. No file size limits. Use any DNS provider. 5 USD/mo for 250 GB bandwidth. Crypto payments with no KYC. Pinner is open source. Your data on the Sia network lives across independent hosts, so no single entity can take it down."
+  theme="white"
+  client:load
+/>
 
   <section class="py-[60px] md:py-[120px] bg-white">
     <div class="xl:container px-6">
