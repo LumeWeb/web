@@ -186,23 +186,38 @@ export class Navigation implements NavigationFeature {
     return !!route.navigation && (!(route.index ?? false) || !!route.navigation.forceShowInNavigation);
   }
 
-  private processRouteForNavigation(route: RouteDefinition, pluginId: NamespacedId): NavigationItem[] {
-    const item = this.createNavigationItem(route, pluginId);
+  /**
+   * A route is eligible for navigation processing if it either has navigation
+   * itself OR has children that might (e.g. a layout route with no navigation
+   * but nested children that do have navigation).
+   */
+  private isEligibleForNavProcessing(route: RouteDefinition): boolean {
+    if (this.shouldIncludeRouteInNavigation(route)) return true;
+    if (route.children && route.children.length > 0) return true;
+    return false;
+  }
+
+  private processRouteForNavigation(route: RouteDefinition, pluginId: NamespacedId, parentPath = "", parentId?: NamespacedId): NavigationItem[] {
+    const item = this.createNavigationItem(route, pluginId, parentPath, parentId);
+
+    // Route has no navigation itself — but it may have children that do
+    // (e.g. a layout route). Process children without creating a nav item
+    // for this route.
     if (!item) {
-      return [];
+      const childPath = resolveFullPath(parentPath, route.path ?? "");
+      return route.children
+        ?.filter((child) => this.isEligibleForNavProcessing(child))
+        .flatMap((child) =>
+          this.processRouteForNavigation(child, pluginId, childPath, parentId),
+        ) ?? [];
     }
 
     const childItems =
       route.children
-        ?.filter((child) => this.shouldIncludeRouteInNavigation(child))
-        .map((child) => {
-          const childItem = this.createNavigationItem(child, pluginId, item.path);
-          if (childItem) {
-            childItem.parentId = item.id;
-          }
-          return childItem;
-        })
-        .filter((item): item is NavigationItem => item !== null) ?? [];
+        ?.filter((child) => this.isEligibleForNavProcessing(child))
+        .flatMap((child) =>
+          this.processRouteForNavigation(child, pluginId, item.path, item.id),
+        ) ?? [];
 
     return [item, ...childItems];
   }
@@ -212,7 +227,7 @@ export class Navigation implements NavigationFeature {
       .flatMap(
         (plugin) =>
           plugin.routes
-            ?.filter((route) => this.shouldIncludeRouteInNavigation(route))
+            ?.filter((route) => this.isEligibleForNavProcessing(route))
             .flatMap((route) =>
               this.processRouteForNavigation(route, plugin.id),
             ) ?? [],

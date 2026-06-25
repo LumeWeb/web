@@ -457,6 +457,112 @@ describe("Navigation Feature", () => {
     ]);
   });
 
+  it("should handle deeply nested routes (3+ levels) with correct parentId and path", async () => {
+    const mockPlugins: Plugin[] = [
+      makePlugin("plugin1:core", [
+        {
+          id: createNamespacedId(pluginNs, "root"),
+          path: "/root",
+          component: "RootComponent",
+          navigation: { label: "Root" },
+          children: [
+            {
+              id: createNamespacedId(pluginNs, "child"),
+              path: "child",
+              component: "ChildComponent",
+              navigation: { label: "Child" },
+              children: [
+                {
+                  id: createNamespacedId(pluginNs, "grandchild"),
+                  path: "grandchild",
+                  component: "GrandchildComponent",
+                  navigation: { label: "Grandchild" },
+                  children: [
+                    {
+                      id: createNamespacedId(pluginNs, "great-grandchild"),
+                      path: "deep",
+                      component: "DeepComponent",
+                      navigation: { label: "Deep" },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ]),
+    ];
+
+    const navigationItems = navigationFeature.buildNavigation(mockPlugins);
+
+    expect(navigationItems).toEqual([
+      { id: "plugin1:root", label: "Root", path: "/root" },
+      {
+        id: "plugin1:child",
+        label: "Child",
+        parentId: "plugin1:root",
+        path: "/root/child",
+      },
+      {
+        id: "plugin1:grandchild",
+        label: "Grandchild",
+        parentId: "plugin1:child",
+        path: "/root/child/grandchild",
+      },
+      {
+        id: "plugin1:great-grandchild",
+        label: "Deep",
+        parentId: "plugin1:grandchild",
+        path: "/root/child/grandchild/deep",
+      },
+    ]);
+  });
+
+  it("should handle routes where intermediate parents have no navigation (group routes with nav children)", async () => {
+    const mockPlugins: Plugin[] = [
+      makePlugin("plugin1:core", [
+        {
+          id: createNamespacedId(pluginNs, "layout"),
+          path: "/section",
+          component: "LayoutComponent",
+          // No navigation — layout/group route
+          children: [
+            {
+              id: createNamespacedId(pluginNs, "group"),
+              path: "group",
+              component: "GroupComponent",
+              navigation: { label: "Group" },
+              children: [
+                {
+                  id: createNamespacedId(pluginNs, "item"),
+                  path: "item",
+                  component: "ItemComponent",
+                  navigation: { label: "Item" },
+                },
+              ],
+            },
+          ],
+        },
+      ]),
+    ];
+
+    const navigationItems = navigationFeature.buildNavigation(mockPlugins);
+
+    expect(navigationItems).toEqual([
+      {
+        id: "plugin1:group",
+        label: "Group",
+        path: "/section/group",
+      },
+      {
+        id: "plugin1:item",
+        label: "Item",
+        parentId: "plugin1:group",
+        path: "/section/group/item",
+      },
+    ]);
+  });
+
   it("should build routes from plugins", async () => {
     const mockPlugins: Plugin[] = [
       makePlugin("plugin1:core", [
