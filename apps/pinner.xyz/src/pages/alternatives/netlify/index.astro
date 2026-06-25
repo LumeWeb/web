@@ -11,11 +11,11 @@ import logos from '@/data/brand-logos';
 import { config, ctaCopy } from '@/lib/config';
 import { frameworkList, worksWithFrameworks } from '@/lib/frameworks';
 
-import AboutWhatIsPinner from "@/assets/about-what-is-pinner.jpg";
 import StaticSitesImage from "@/assets/solutions-website-static-sites.jpg";
-import HowItWorksImage from "@/assets/how-it-works-1.png";
 import BandwidthComparison from "@/components/BandwidthComparison";
 import MigrationNote from "@/components/MigrationNote";
+import UploadFlowSection from "@/components/HowItWorks/UploadFlowSection";
+import DistributionSection from "@/components/HowItWorks/DistributionSection";
 
 const planRows = [
   { factor: "What you pay for", detail: "Storage and bandwidth only" },
@@ -58,12 +58,11 @@ const faqs = [
     client:load
   />
 
-  <AboutSection
+  <UploadFlowSection
     subtitle="Why Pinner"
     title="Your static files, on a permanent address"
     description={`Trying to figure out how many credits your bandwidth costs? Every file you upload gets a permanent link that doesn't depend on any one company staying online. Your data lives across independent storage providers, not a single company's servers. Pay for storage and bandwidth. No per-member charges. No surprise overage bills. Works out-of-the-box with ${frameworkList({ format: "technical" })}: just build locally or in GitHub Actions and upload.`}
     theme="white"
-    imageUrl={AboutWhatIsPinner}
     client:load
   >
     <BandwidthComparison
@@ -76,7 +75,7 @@ const faqs = [
       verifiedDate="May 2026"
       className="mt-6"
     />
-  </AboutSection>
+  </UploadFlowSection>
 
   <AboutSection
     subtitle="How It Works"
@@ -85,15 +84,15 @@ const faqs = [
     theme="gray"
     imagePosition="right"
     imageUrl={StaticSitesImage}
+    imageAlt="Static site frameworks including Astro, Next.js, Hugo, and others that deploy to Pinner"
     client:load
   />
 
-  <AboutSection
+  <UploadFlowSection
     subtitle="What Pinner Does (And Doesn't)"
     title="Hosting only. No serverless, no CI/CD, no platform lock-in"
     description="Pinner hosts built static files. It does not offer serverless functions, CI/CD, form handling, or split testing. If you need those features, keep your current platform for the dev workflow and use Pinner for the hosting layer. If you want hosting with permanent links and no vendor lock-in on storage, Pinner is built for that."
     theme="white"
-    imageUrl={HowItWorksImage}
     client:load
   />
 

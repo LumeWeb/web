@@ -11,10 +11,8 @@ import { CodeBlock } from '@/components/CodeBlock';
 import logos from '@/data/brand-logos';
 import { ctaCopy } from '@/lib/config';
 
-import HowItWorksImage from "@/assets/how-it-works-1.png";
-import HowItWorksMobile from "@/assets/how-it-works-mobile-1.png";
-import StorageImage from "@/assets/how-it-works-2.png";
-import StorageMobile from "@/assets/how-it-works-mobile-2.png";
+import UploadFlowSection from "@/components/HowItWorks/UploadFlowSection";
+import DistributionSection from "@/components/HowItWorks/DistributionSection";
 
 const faqs = [
   {
@@ -39,37 +37,32 @@ const faqs = [
     client:load
   />
 
-  <AboutSection
+  <UploadFlowSection
     subtitle="Storage Layer"
     title="One Storage Layer, Many Applications"
     description="S3-compatible storage is just the first interface built on this layer. The same encrypted, peer-to-peer storage can power databases, file sync, backup tools, or anything else you want to build. Your app, our infrastructure."
     theme="white"
-    imageUrl={HowItWorksImage}
-    imgageMobileUrl={HowItWorksMobile}
     client:load
   />
 
-  <AboutSection
+  <DistributionSection
     subtitle="Architecture"
     title="How It Works"
     theme="gray"
     imagePosition="right"
-    imageUrl={StorageImage}
-    imgageMobileUrl={StorageMobile}
     client:load
   >
     <p>Technical overview. Your app sends data through the storage layer. Data is encrypted client-side. Fragments are distributed across the Sia network. Only your user holds the key.</p>
     <p>The live interface today is S3-compatible. Here's a simple example:</p>
     <CodeBlock commands={[{ label: "AWS CLI", command: "aws s3 cp backup.tar.gz s3://my-bucket/ --endpoint-url https://your-server.example" }, { label: "cURL", command: "curl -X PUT https://your-server.example/my-bucket/backup.tar.gz \\\n  -H \"Authorization: Bearer $TOKEN\" \\\n  -T backup.tar.gz" }]} client:load />
     <p>The Sia SDK is also available for direct access to the storage layer if you need lower-level control.</p>
-  </AboutSection>
+  </DistributionSection>
 
-  <AboutSection
+  <UploadFlowSection
     subtitle="Revenue Sharing"
     title="Earn When Your Users Store Data"
     description="When your app's users sign up for Pinner and store data, you earn a share. This is a program with eligibility and terms. Not a guarantee. <a href='/partners' class='underline hover:text-content-text transition-colors'>See the partner program</a> for full details."
     theme="white"
-    imageUrl={HowItWorksImage}
     client:load
   />
 
@@ -96,6 +89,12 @@ const faqs = [
         rounded
         client:load
       />
+    </div>
+  </section>
+
+  <section class="bg-white pb-[40px] md:pb-[80px]">
+    <div class="xl:container px-6 text-center">
+      <a href="/how-it-works" class="text-content-text-muted text-sm font-medium underline hover:text-content-text transition-colors duration-300">How it works →</a>
     </div>
   </section>
 

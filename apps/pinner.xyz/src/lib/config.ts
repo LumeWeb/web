@@ -64,8 +64,8 @@ export const ctaCopy = {
     subheading: "We can't look at it. We can't sell it. Open source; verify the architecture yourself.",
   },
   howItWorks: {
-    heading: "Pin, host, or store your data on a network.",
-    subheading: "Three products, one infrastructure. Crypto or card.",
+    heading: "Your data on a network, not in a data center.",
+    subheading: "One infrastructure for all your storage needs. Crypto or card.",
   },
   partners: {
     heading: "Build on Pinner.",

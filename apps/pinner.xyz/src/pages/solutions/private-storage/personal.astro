@@ -10,10 +10,8 @@ import NewsletterSignup from '@/components/NewsletterSignup';
 import logos from '@/data/brand-logos';
 import { ctaCopy } from '@/lib/config';
 
-import HowItWorksImage from "@/assets/how-it-works-1.png";
-import HowItWorksMobile from "@/assets/how-it-works-mobile-1.png";
-import StorageImage from "@/assets/how-it-works-2.png";
-import StorageMobile from "@/assets/how-it-works-mobile-2.png";
+import UploadFlowSection from "@/components/HowItWorks/UploadFlowSection";
+import DistributionSection from "@/components/HowItWorks/DistributionSection";
 
 const faqs = [
   {
@@ -46,33 +44,28 @@ const faqs = [
     client:load
   />
 
-  <AboutSection
+  <UploadFlowSection
     subtitle="Zero-Knowledge Encryption"
     title="Your Data, Your Keys"
     description="Files are encrypted before they leave your device. The encryption key lives on your machine. No one can read them without your key. Not us, not the Sia hosts that store the encrypted fragments."
     theme="white"
-    imageUrl={HowItWorksImage}
-    imgageMobileUrl={HowItWorksMobile}
     client:load
   />
 
-  <AboutSection
+  <DistributionSection
     subtitle="How You Access It"
     title="Apps and tools that work with your data"
     description="Use apps from the Sia ecosystem for backups, file sync, and more. As developers build on the platform, more options become available. If you already use S3-compatible backup software or file managers, those work too. S3 is one interface; apps are another."
     theme="gray"
     imagePosition="right"
-    imageUrl={StorageImage}
-    imgageMobileUrl={StorageMobile}
     client:load
   />
 
-  <AboutSection
+  <UploadFlowSection
     subtitle="Real Deletion"
     title="When you delete, it's gone"
     description="Your file is split into encrypted fragments across independent hosts, and no host ever has a complete copy. When you delete, the contract payments stop and hosts drop their fragments. Without enough fragments, the file can't be reconstructed by anyone."
     theme="white"
-    imageUrl={HowItWorksImage}
     client:load
   />
 
@@ -99,6 +92,12 @@ const faqs = [
         rounded
         client:load
       />
+    </div>
+  </section>
+
+  <section class="bg-white pb-[40px] md:pb-[80px]">
+    <div class="xl:container px-6 text-center">
+      <a href="/how-it-works" class="text-content-text-muted text-sm font-medium underline hover:text-content-text transition-colors duration-300">How it works →</a>
     </div>
   </section>
 

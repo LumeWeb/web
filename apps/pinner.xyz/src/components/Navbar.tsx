@@ -77,7 +77,7 @@ const Nav = ({ theme = "dark" }: NavProps) => {
               <div className="flex items-center xl:gap-[36px] 2xl:gap-[60px]">
               <div className="relative z-40 min-w-24 flex items-center">
                 <a href="/" aria-label="Pinner home">
-                  <img src={headerLogo.src} alt="site logo" width={160} height={40} className="h-10 w-auto" loading="eager" fetchPriority="high" />
+                  <img src={headerLogo.src} alt="Pinner logo" width={160} height={40} className="h-10 w-auto" loading="eager" fetchPriority="high" />
                 </a>
               </div>
               <nav
@@ -178,6 +178,20 @@ const Nav = ({ theme = "dark" }: NavProps) => {
                         isDark ? "hover:border-home-text" : "hover:border-content-text"
                       )}>
                       About Pinner
+                    </a>
+                  </li>
+
+                  <li>
+                    <a
+                      href="/how-it-works"
+                      className={cn(
+                        textColor,
+                        "leading-[50px] border-b",
+                        borderColor,
+                        "lg:border-transparent block lg:leading-5 text-[15px] lg:text-lg font-medium transition ease-in-out duration-300 hover:border-b",
+                        isDark ? "hover:border-home-text" : "hover:border-content-text"
+                      )}>
+                      How It Works
                     </a>
                   </li>
 

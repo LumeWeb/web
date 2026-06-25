@@ -120,7 +120,7 @@ const AccountSlider = () => {
             </div>
           </div>
           {/* <div className="mb-[80px]">
-            <img src={signUpImageTwo.src} alt="sign up" className="mx-auto" />
+            <img src={signUpImageTwo.src} alt="Account dashboard sign-up flow on Pinner" className="mx-auto" />
           </div> */}
         </SwiperSlide>
       </Swiper>

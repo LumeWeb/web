@@ -5,11 +5,13 @@ import AboutSection from '@/components/AboutSection';
 import CallToAction from '@/components/CallToAction';
 import { ctaCopy } from '@/lib/config';
 import ThreeSteps from '@/components/HowItWorks/ThreeSteps';
+import PaymentFlowDiagram from '@/components/HowItWorks/PaymentFlowDiagram';
 
-import HowItWorksImage from "@/assets/how-it-works-1.png";
-import HowItWorksMobile from "@/assets/how-it-works-mobile-1.png";
-import StorageImage from "@/assets/how-it-works-2.png";
-import StorageMobile from "@/assets/how-it-works-mobile-2.png";
+import UploadFlowSection from "@/components/HowItWorks/UploadFlowSection";
+import DistributionSection from "@/components/HowItWorks/DistributionSection";
+
+import s3StorageImg from "@/assets/how-it-works-s3-storage.jpg";
+import selfHostedImg from "@/assets/how-it-works-self-hosted.jpg";
 ---
 
 <Layout title="How Pinner Works. IPFS Pinning & Storage" description="Pin files to IPFS, host static websites, and store private data with zero-knowledge encryption. Three steps: pin, distribute, access anywhere.">
@@ -21,21 +23,17 @@ import StorageMobile from "@/assets/how-it-works-mobile-2.png";
 
   <ThreeSteps client:load />
 
-  <AboutSection
+  <UploadFlowSection
     title="Pin to IPFS, host to the web"
     subtitle="The Interface"
      description="Upload files through our CLI or SDK. We pin them to IPFS. Your content gets a link that stays online as long as it's pinned. Host static websites directly from pinned content. No setup required."
-    imageUrl={HowItWorksImage}
-    imgageMobileUrl={HowItWorksMobile}
     client:load
   />
 
-  <AboutSection
+  <DistributionSection
     title="A network, not a data center"
     subtitle="The Technology"
     description="Your files are distributed across many independent storage providers. No single entity controls your data, and your files stay online even if individual servers go down. Stored on IPFS with reliable addresses, encrypted for private storage. Depending on your storage model."
-    imageUrl={StorageImage}
-    imgageMobileUrl={StorageMobile}
     theme="gray"
     imagePosition="right"
     buttonText="Learn About Sia →"
@@ -43,11 +41,15 @@ import StorageMobile from "@/assets/how-it-works-mobile-2.png";
     client:load
   />
 
+  <PaymentFlowDiagram client:load />
+
   <AboutSection
     title="Private storage with S3 compatibility"
     subtitle="S3 Storage (Advanced)"
     description="For private data, Pinner offers S3-compatible storage, encrypted at rest with zero-knowledge encryption. Even we can't read your files. Currently available for advanced setups that deploy their own server. A streamlined 1-click setup is in development. Subscribe below to get notified."
     theme="white"
+    imageUrl={s3StorageImg}
+    imageAlt="Diagram showing encrypted files flowing through a padlock to a secured server, illustrating zero-knowledge encryption"
     client:load
   />
 
@@ -57,6 +59,8 @@ import StorageMobile from "@/assets/how-it-works-mobile-2.png";
     description="Deploy your own server to handle private data on your terms. Full control over storage limits and billing. For teams who want zero external dependencies. FOSS. Fully open source."
     theme="gray"
     imagePosition="right"
+    imageUrl={selfHostedImg}
+    imageAlt="Diagram showing a self-hosted server surrounded by configuration, storage, security, and access icons within a boundary circle"
     client:load
   />
 

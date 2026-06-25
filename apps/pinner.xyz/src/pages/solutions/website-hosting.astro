@@ -11,11 +11,9 @@ import logos from '@/data/brand-logos';
 import { config, ctaCopy } from '@/lib/config';
 import { frameworkList, worksWithFrameworks } from '@/lib/frameworks';
 
-import HowItWorksImage from "@/assets/how-it-works-1.png";
-import HowItWorksMobile from "@/assets/how-it-works-mobile-1.png";
-import StorageImage from "@/assets/how-it-works-2.png";
-import StorageMobile from "@/assets/how-it-works-mobile-2.png";
 import StaticSitesImage from "@/assets/solutions-website-static-sites.jpg";
+import UploadFlowSection from "@/components/HowItWorks/UploadFlowSection";
+import DistributionSection from "@/components/HowItWorks/DistributionSection";
 
 const faqs = [
   {
@@ -56,24 +54,20 @@ const faqs = [
     client:load
   />
 
-  <AboutSection
+  <UploadFlowSection
     subtitle="Permanent Hosting"
     title="Your site, on a permanent address"
     description="Upload your static site and get a permanent link. Your files live across independent providers so no single company can delete them. Deploy from the CLI, a zip file, or a GitHub Action. Your site is live in minutes."
     theme="white"
-    imageUrl={HowItWorksImage}
-    imgageMobileUrl={HowItWorksMobile}
     client:load
   />
 
-  <AboutSection
+  <DistributionSection
     subtitle="Built to Stay Up"
     title="No single point of control"
     description="Your files are stored across independent providers on the Sia network, not on one company's servers. Hosts only get paid when they prove they're storing your data. Pay with crypto or card."
     theme="gray"
     imagePosition="right"
-    imageUrl={StorageImage}
-    imgageMobileUrl={StorageMobile}
     client:load
   />
 
@@ -83,6 +77,7 @@ const faqs = [
     description={`If your site builds to static files, it works. That includes ${frameworkList({ format: "technical" })}. Point your build output at Pinner, deploy with one CLI command or a GitHub Action, and your site is live with a permanent link that never breaks.`}
     theme="white"
     imageUrl={StaticSitesImage}
+    imageAlt="Static site frameworks including Astro, Next.js, Hugo, and others that deploy to Pinner"
     client:load
   />
 
@@ -104,6 +99,7 @@ const faqs = [
     { href: "/alternatives/netlify", label: "Netlify Alternative", description: "Looking for a different approach to static hosting? See what Pinner offers" },
     { href: "/alternatives/fleek", label: "Fleek Alternative", description: "Fleek's IPFS hosting shut down in January 2026" },
     { href: "/alternatives/pinata", label: "Pinata Alternative", description: "Switching IPFS providers? See how Pinner is different" },
+    { href: "/how-it-works", label: "How It Works", description: "Understand where your money goes and how storage proofs work" },
   ]} />
 
   <BrandLogos logos={logos} logoType="light" title="Built On" variant="white" client:load />
