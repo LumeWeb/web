@@ -1,16 +1,14 @@
 import {
-  createNamespacedId,
   Framework,
-  FRAMEWORK_NS,
   getApiBaseUrl,
   SdkCapability,
 } from "@lumeweb/portal-framework-core";
 import { Sdk } from "@lumeweb/portal-sdk";
 
 export class Capability implements SdkCapability {
-  readonly id = createNamespacedId(FRAMEWORK_NS, "sdk-auth");
+  readonly id: string = "core:sdk-auth";
   status: "active" | "error" | "inactive";
-  readonly type = "framework:sdk" as const;
+  readonly type: "core:sdk" = "core:sdk";
   #sdk?: Sdk;
 
   async destroy() {
