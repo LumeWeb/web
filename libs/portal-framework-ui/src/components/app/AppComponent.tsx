@@ -42,13 +42,15 @@ import { DialogProvider, DialogRenderer } from "@/components";
 export function useFrameworkSync() {
   const framework = useFramework();
   const setFramework = useAppStore((state) => state.setFramework);
+  const setMeta = useAppStore((state) => state.setMeta);
 
   useEffect(() => {
     if (!framework?.framework) {
       return;
     }
     setFramework(framework.framework);
-  }, [framework?.framework, setFramework]);
+    setMeta(framework.framework.meta ?? undefined);
+  }, [framework?.framework, setFramework, setMeta]);
 }
 
 // Register all form components at module load time
