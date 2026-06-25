@@ -9,7 +9,7 @@ catalog:
   '@helia/car': ^5.4.2
   '@helia/http': ^3.1.4
   '@helia/unixfs': ^7.2.1
-  '@hookform/resolvers': 5.2.2
+  '@hookform/resolvers': 5.4.0
   '@ipfs-shipyard/pinning-service-client': ^3.0.0
   '@ipld/car': ^5.4.6
   '@module-federation/enhanced': ^2.5.1

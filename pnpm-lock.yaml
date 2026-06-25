@@ -25,8 +25,8 @@ catalogs:
       specifier: ^7.2.1
       version: 7.2.1
     '@hookform/resolvers':
-      specifier: 5.2.2
-      version: 5.2.2
+      specifier: 5.4.0
+      version: 5.4.0
     '@ipfs-shipyard/pinning-service-client':
       specifier: ^3.0.0
       version: 3.0.0
@@ -1025,7 +1025,7 @@ importers:
     dependencies:
       '@hookform/resolvers':
         specifier: 'catalog:'
-        version: 5.2.2(react-hook-form@7.80.0(react@19.2.7))
+        version: 5.4.0(react-hook-form@7.80.0(react@19.2.7))
       '@lumeweb/portal-framework-core':
         specifier: workspace:*
         version: link:../portal-framework-core
@@ -1156,7 +1156,7 @@ importers:
         version: 1.19.4(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@hookform/resolvers':
         specifier: 'catalog:'
-        version: 5.2.2(react-hook-form@7.80.0(react@19.2.7))
+        version: 5.4.0(react-hook-form@7.80.0(react@19.2.7))
       '@lexical/code':
         specifier: ^0.38.2 || ^0.39.0 || ^0.44.0
         version: 0.39.0
@@ -1757,7 +1757,7 @@ importers:
         version: 1.19.0(zod@4.4.3)
       '@hookform/resolvers':
         specifier: 'catalog:'
-        version: 5.2.2(react-hook-form@7.80.0(react@19.2.7))
+        version: 5.4.0(react-hook-form@7.80.0(react@19.2.7))
       '@lumeweb/advanced-rest-provider':
         specifier: workspace:*
         version: link:../advanced-rest
@@ -1824,7 +1824,7 @@ importers:
     dependencies:
       '@hookform/resolvers':
         specifier: 'catalog:'
-        version: 5.2.2(react-hook-form@7.80.0(react@19.2.7))
+        version: 5.4.0(react-hook-form@7.80.0(react@19.2.7))
       '@lumeweb/advanced-rest-provider':
         specifier: workspace:*
         version: link:../advanced-rest
@@ -4030,8 +4030,8 @@ packages:
     peerDependencies:
       hono: ^4
 
-  '@hookform/resolvers@5.2.2':
-    resolution: {integrity: sha512-A/IxlMLShx3KjV/HeTcTfaMxdwy690+L/ZADoeaTltLx+CVuzkeVIPuybK3jrRfw7YZnmdKsVVHAlEPIAEUNlA==}
+  '@hookform/resolvers@5.4.0':
+    resolution: {integrity: sha512-EIsqr/t/qbinPIhGjMdtvutIN1Kk4uwbROE9/UQ93CAVGR7GkA7Y92+fX80OzXi/OB67jVFYwKGO1WzkxmkFZw==}
     peerDependencies:
       react-hook-form: ^7.79.0
 
@@ -17995,7 +17995,7 @@ snapshots:
     dependencies:
       hono: 4.12.14
 
-  '@hookform/resolvers@5.2.2(react-hook-form@7.80.0(react@19.2.7))':
+  '@hookform/resolvers@5.4.0(react-hook-form@7.80.0(react@19.2.7))':
     dependencies:
       '@standard-schema/utils': 0.3.0
       react-hook-form: 7.80.0(react@19.2.7)
