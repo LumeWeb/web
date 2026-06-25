@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import ContentSection from "@/components/content/ContentSection";
 import DistributionDiagram from "./DistributionDiagram";
 
@@ -10,6 +11,7 @@ interface DistributionSectionProps {
   id?: string;
   buttonText?: string;
   url?: string;
+  children?: ReactNode;
 }
 
 /**
@@ -28,6 +30,7 @@ export default function DistributionSection({
   id,
   buttonText,
   url,
+  children,
 }: DistributionSectionProps) {
   return (
     <ContentSection
@@ -44,6 +47,8 @@ export default function DistributionSection({
       }
       imagePosition={imagePosition}
       className={theme === "gray" ? "bg-content-section-gray" : "bg-white"}
-    />
+    >
+      {children}
+    </ContentSection>
   );
 }

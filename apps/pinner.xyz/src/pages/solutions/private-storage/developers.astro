@@ -56,7 +56,7 @@ const faqs = [
     <p>The live interface today is S3-compatible. Here's a simple example:</p>
     <CodeBlock commands={[{ label: "AWS CLI", command: "aws s3 cp backup.tar.gz s3://my-bucket/ --endpoint-url https://your-server.example" }, { label: "cURL", command: "curl -X PUT https://your-server.example/my-bucket/backup.tar.gz \\\n  -H \"Authorization: Bearer $TOKEN\" \\\n  -T backup.tar.gz" }]} client:load />
     <p>The Sia SDK is also available for direct access to the storage layer if you need lower-level control.</p>
-  </AboutSection>
+  </DistributionSection>
 
   <UploadFlowSection
     subtitle="Revenue Sharing"
