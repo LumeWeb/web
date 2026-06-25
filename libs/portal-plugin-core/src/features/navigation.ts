@@ -146,6 +146,7 @@ export class Navigation implements NavigationFeature {
     route: RouteDefinition,
     pluginId: NamespacedId,
     parentPath = "",
+    parentId?: NamespacedId,
   ): NavigationItem | null {
     if (!route.navigation) return null;
 
@@ -155,6 +156,7 @@ export class Navigation implements NavigationFeature {
       id,
       label: route.navigation.label,
       path: resolveFullPath(parentPath, route.path ?? ""),
+      ...(parentId ? { parentId } : {}),
     };
 
     // Define properties and their inclusion criteria
@@ -186,17 +188,6 @@ export class Navigation implements NavigationFeature {
     return !!route.navigation && (!(route.index ?? false) || !!route.navigation.forceShowInNavigation);
   }
 
-  /**
-   * A route is eligible for navigation processing if it either has navigation
-   * itself OR has children that might (e.g. a layout route with no navigation
-   * but nested children that do have navigation).
-   */
-  private isEligibleForNavProcessing(route: RouteDefinition): boolean {
-    if (this.shouldIncludeRouteInNavigation(route)) return true;
-    if (route.children && route.children.length > 0) return true;
-    return false;
-  }
-
   private processRouteForNavigation(route: RouteDefinition, pluginId: NamespacedId, parentPath = "", parentId?: NamespacedId): NavigationItem[] {
     const item = this.createNavigationItem(route, pluginId, parentPath, parentId);
 
@@ -214,7 +205,7 @@ export class Navigation implements NavigationFeature {
 
     const childItems =
       route.children
-        ?.filter((child) => this.isEligibleForNavProcessing(child))
+        ?.filter((child) => this.shouldIncludeRouteInNavigation(child))
         .flatMap((child) =>
           this.processRouteForNavigation(child, pluginId, item.path, item.id),
         ) ?? [];
