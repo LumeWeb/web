@@ -8,11 +8,14 @@ import { MobileMenu } from "./MobileMenu";
 import { SidebarProvider } from "./SidebarContext";
 import { UserNav } from "./UserNav";
 
+import { usePortalUrl } from "@/hooks/usePortalUrl";
+
 interface GeneralLayoutProps {
   children?: React.ReactNode;
 }
 
 function GeneralLayoutComponent({ children }: GeneralLayoutProps) {
+  usePortalUrl();
   return (
     <SidebarProvider>
       <DesktopSidebar />
