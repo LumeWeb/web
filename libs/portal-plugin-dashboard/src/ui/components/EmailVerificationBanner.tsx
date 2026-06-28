@@ -1,15 +1,13 @@
 import { Identity, useFramework } from "@lumeweb/portal-framework-core";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-  Button,
-} from "@lumeweb/portal-framework-ui-core";
+import { Alert, AlertDescription, AlertTitle, Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { useGetIdentity } from "@refinedev/core";
-import { Loader2, Mail } from "lucide-react";
+
 import React from "react";
 
 import { useEmailVerification } from "@/ui/hooks/useEmailVerification";
+const Loader2 = lazyIcon("Loader2");
+const Mail = lazyIcon("Mail");
+
 
 function EmailVerificationBanner() {
   const { getAppName } = useFramework();

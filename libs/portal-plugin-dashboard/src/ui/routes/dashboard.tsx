@@ -5,7 +5,6 @@ import {
 import { GeneralLayout } from "@lumeweb/portal-framework-ui";
 import { Authenticated } from "@refinedev/core";
 import React from "react";
-import "@lumeweb/portal-framework-ui-core/tailwind-plugin.css";
 
 const DASHBOARD_HEADER_AREA = createNamespacedId("dashboard", "header");
 

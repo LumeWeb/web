@@ -2,8 +2,6 @@ import { ReportButton } from "@/ui/components/ReportButton";
 import { withTheme } from "@lumeweb/portal-framework-ui";
 import { useGo } from "@refinedev/core";
 import React from "react";
-import "@lumeweb/portal-framework-ui-core/tailwind.css";
-import "@/css/styles.css";
 import { Link, Outlet } from "react-router";
 
 import { Footer } from "./Footer";

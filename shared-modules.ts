@@ -1,5 +1,3 @@
-import type { ModuleFederationOptions } from "@module-federation/vite";
-
 const modules = [
   "@lumeweb/portal-framework-core",
   "@lumeweb/portal-framework-ui",
@@ -12,9 +10,19 @@ const modules = [
   "react-router",
   "react-hook-form",
   "@lumeweb/analytics",
+  "zod",
+  "@tanstack/react-table",
+  "@refinedev/react-router",
+  "@hookform/resolvers",
+  "@refinedev/react-hook-form",
+  "@uppy/core",
+  "nanoevents",
+  "react-icons",
+  "otpauth",
+  "qrcode",
 ];
 
-export function getSharedModules(): ModuleFederationOptions["shared"] {
+export function getSharedModules() {
   return modules.reduce<Record<string, { singleton: boolean }>>(
     (acc, module) => {
       acc[module] = {
@@ -22,6 +30,6 @@ export function getSharedModules(): ModuleFederationOptions["shared"] {
       };
       return acc;
     },
-    {}
-  ) satisfies ModuleFederationOptions["shared"];
+    {},
+  );
 }

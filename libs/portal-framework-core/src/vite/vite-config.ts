@@ -1,8 +1,9 @@
 import { DevTools } from "@vitejs/devtools";
 import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import babel from "@rolldown/plugin-babel";
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import { resolve } from "path";
+import { createHash } from "crypto";
 
 import { normalizeConfigOptions, setupPluginRegistryConfig } from "./config";
 import {
@@ -12,8 +13,86 @@ import {
 import { createExpressMiddlewarePlugin } from "./express-middleware";
 import { localhostAccessPlugin } from "./localhost-plugin";
 import type { ConfigOptions } from "./types";
-import type { SharedModules } from "./federation";
+import type { SharedModules } from "./shared-types";
 export const PLUGIN_TYPE = "plugin";
+
+/**
+ * In lib mode, Vite forces ALL assets to inline as base64 data URLs
+ * (shouldInline() returns true when build.lib is set). This plugin
+ * intercepts chunks after bundling and extracts inlined base64 images
+ * back into separate asset files, replacing the data URLs with file paths.
+ */
+function extractBase64ImagesPlugin(): Plugin {
+  return {
+    name: "extract-base64-images",
+    enforce: "post",
+    generateBundle(_options, bundle) {
+      const dataUrlRe =
+        /new URL\(`data:image\/([a-z]+);base64,([A-Za-z0-9+/=]+)`,[^)]*\)/g;
+      for (const [fileName, chunk] of Object.entries(bundle)) {
+        if (chunk.type !== "chunk") continue;
+        const code = chunk.code;
+        if (!code.includes("data:image/")) continue;
+        let replaced = false;
+        const newCode = code.replace(
+          dataUrlRe,
+          (_match, ext: string, b64: string) => {
+            replaced = true;
+            const buf = Buffer.from(b64, "base64");
+            const hash = createHash("sha256")
+              .update(buf)
+              .digest("hex")
+              .slice(0, 8);
+            const assetPath = `static/png/image-${hash}.${ext}`;
+            this.emitFile({
+              type: "asset",
+              source: buf,
+              fileName: assetPath,
+            });
+            // Use relative path from the JS output dir (static/js/) to the asset dir (static/png/)
+            return `new URL("../png/image-${hash}.${ext}", import.meta.url)`;
+          },
+        );
+        if (replaced) {
+          chunk.code = newCode;
+        }
+      }
+    },
+  };
+}
+
+/**
+ * MF injects modulepreload links for ALL shared modules into index.html,
+ * including ones not needed on initial load (uppy, otpauth, qrcode, etc).
+ * This plugin strips preloads for non-critical shared chunks so they only
+ * load on-demand when their routes/components are actually visited.
+ * Critical chunks (framework-core, react-dom, refinedev, etc.) are kept
+ * because they're statically imported by the entry chunk anyway.
+ */
+function stripNonCriticalPreloadsPlugin(): Plugin {
+  const NON_CRITICAL = [
+    "uppy",
+    "otpauth",
+    "qrcode",
+    "tanstack_mf_1_react_mf_2_table",
+    "refinedev_mf_1_react_mf_2_router",
+  ];
+  return {
+    name: "strip-non-critical-preloads",
+    enforce: "post",
+    generateBundle(_options, bundle) {
+      const html = bundle["index.html"];
+      if (!html || html.type !== "asset") return;
+      let source = typeof html.source === "string" ? html.source : new TextDecoder().decode(html.source as Uint8Array);
+      source = source.replace(
+        /<link\s+rel="modulepreload"[^>]*href="([^"]+)"[^>]*>/g,
+        (match, href: string) =>
+          NON_CRITICAL.some((p) => href.includes(p)) ? "" : match,
+      );
+      (html as any).source = source;
+    },
+  };
+}
 
 /** Shared build config fields for both host and plugin */
 function createBuildConfig(opts: ConfigOptions) {
@@ -30,7 +109,7 @@ function createBuildConfig(opts: ConfigOptions) {
       : {}),
     rolldownOptions: opts.devtools?.enabled ? { devtools: {} } : undefined,
     sourcemap: true,
-    minify: false,
+    assetsInlineLimit: 0,
     rollupOptions: {
       output: {
         assetFileNames: "static/[ext]/[name]-[hash].[ext]",
@@ -45,9 +124,9 @@ function createBuildConfig(opts: ConfigOptions) {
               }
             : undefined,
         minify: {
-          mangle: false,
+          compress: true,
+          mangle: opts.minifyMangle !== false,
         },
-        minifyInternalExports: false,
       },
     },
     target: "esnext" as const,
@@ -86,6 +165,8 @@ function createHostConfig(opts: ConfigOptions) {
     babel({ presets: [reactCompilerPreset()] }),
     createHostFederationConfig(opts, resolvedRuntimePlugins),
     localhostAccessPlugin(),
+    extractBase64ImagesPlugin(),
+    stripNonCriticalPreloadsPlugin(),
     ...(opts.plugins?.map((plugin) =>
       createPluginFederationConfig(
         plugin,
@@ -142,6 +223,7 @@ function createPluginConfig(opts: ConfigOptions) {
     }),
     babel({ presets: [reactCompilerPreset()] }),
     createHostFederationConfig(opts, resolvedRuntimePlugins),
+    extractBase64ImagesPlugin(),
     ...(opts.plugins?.map((plugin) =>
       createPluginFederationConfig(
         plugin,

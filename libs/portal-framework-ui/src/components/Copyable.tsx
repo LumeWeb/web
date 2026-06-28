@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Copy, Check } from "lucide-react";
-import { cn, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@lumeweb/portal-framework-ui-core";
+
+import { cn, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+const Copy = lazyIcon("Copy");
+const Check = lazyIcon("Check");
+
 
 interface CopyableProps {
   /**

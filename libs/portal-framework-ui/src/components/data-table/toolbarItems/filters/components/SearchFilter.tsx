@@ -1,9 +1,11 @@
 import React from "react";
-import { Search } from "lucide-react";
-import { Input } from "@lumeweb/portal-framework-ui-core";
+
+import { Input, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { BaseFilter } from "../BaseFilter";
 import type { BaseFilterComponentProps } from "@/components/data-table/toolbarItems/filters/types";
 import { BaseRecord } from "@refinedev/core";
+const Search = lazyIcon("Search");
+
 
 function SearchFilter<TData extends BaseRecord>({
   value,

@@ -17,37 +17,7 @@ import { PrioritySwitch } from "@/ui/components/case-management/PrioritySwitch";
 import { RiskFactorsCard } from "@/ui/components/case-management/RiskFactorsCard";
 import { StatusSwitch } from "@/ui/components/case-management/StatusSwitch";
 import { UserInfoCard } from "@/ui/components/case-management/UserInfoCard";
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  Input,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-  Textarea,
-} from "@lumeweb/portal-framework-ui-core";
+import { Button, Card, CardContent, CardHeader, CardTitle, Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, Form, FormControl, FormField, FormItem, FormLabel, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Tabs, TabsContent, TabsList, TabsTrigger, Textarea, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import {
   useCustom,
   useNavigation,
@@ -58,16 +28,16 @@ import {
 } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
 import { format } from "date-fns";
-import {
-  ArrowLeft,
-  CheckCircle,
-  Clock,
-  Edit,
-  FileText,
-  Trash2,
-  XCircle,
-} from "lucide-react";
+
 import React, { useState } from "react";
+const ArrowLeft = lazyIcon("ArrowLeft");
+const CheckCircle = lazyIcon("CheckCircle");
+const Clock = lazyIcon("Clock");
+const Edit = lazyIcon("Edit");
+const FileText = lazyIcon("FileText");
+const Trash2 = lazyIcon("Trash2");
+const XCircle = lazyIcon("XCircle");
+
 
 export default function View() {
   const params = useParsed();

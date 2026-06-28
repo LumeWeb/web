@@ -2,17 +2,15 @@ import type { SubjectResponse } from "@/types/subject";
 import type { ReporterResponse } from "@/types/reporter";
 import { Refine, useOne } from "@refinedev/core";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@lumeweb/portal-framework-ui-core";
+import { Card, CardContent, CardHeader, CardTitle, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { format } from "date-fns";
-import { Mail, User } from "lucide-react";
+
 import React from "react";
 import type { BaseKey } from "@refinedev/core";
 import { RefineResource } from "@/types/resources";
+const Mail = lazyIcon("Mail");
+const User = lazyIcon("User");
+
 
 interface UserInfoCardProps {
   isReporter?: boolean;

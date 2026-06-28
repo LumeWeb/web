@@ -1,13 +1,8 @@
-import {
-  Button,
-  cn,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@lumeweb/portal-framework-ui-core";
-import { MoreHorizontal } from "lucide-react";
+import { Button, cn, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import React from "react";
+const MoreHorizontal = lazyIcon("MoreHorizontal");
+
 
 export function TableActionsDropdown({
   actions,

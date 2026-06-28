@@ -3,15 +3,18 @@ import { RefineResource } from "@/types/resources";
 
 import { RelatedCasesPanel } from "@/ui/components/reporter-subject/RelatedCasesPanel";
 import { SubjectInfoCard } from "@/ui/components/reporter-subject/SubjectInfoCard";
-import { Button } from "@lumeweb/portal-framework-ui-core";
+import { Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import {
   type BaseKey,
   useNavigation,
   useParsed,
   useShow,
 } from "@refinedev/core";
-import { ArrowLeft, Edit } from "lucide-react";
+
 import React from "react";
+const ArrowLeft = lazyIcon("ArrowLeft");
+const Edit = lazyIcon("Edit");
+
 
 export default function View() {
   const params = useParsed();

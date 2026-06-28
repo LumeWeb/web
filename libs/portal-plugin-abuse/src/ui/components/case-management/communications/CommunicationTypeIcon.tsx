@@ -1,5 +1,9 @@
 import { CommunicationType } from "@/types/communication";
-import { Mail, MessageSquare, Reply } from "lucide-react";
+import { lazyIcon } from "@lumeweb/portal-framework-ui-core";
+const Mail = lazyIcon("Mail");
+const MessageSquare = lazyIcon("MessageSquare");
+const Reply = lazyIcon("Reply");
+
 
 interface CommunicationTypeIconProps {
   className?: string;

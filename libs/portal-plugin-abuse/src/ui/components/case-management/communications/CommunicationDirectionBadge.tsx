@@ -1,13 +1,13 @@
 import { CommunicationDirection } from "@/types/communication";
-import { Badge } from "@lumeweb/portal-framework-ui-core";
+import { Badge, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { cn } from "@lumeweb/portal-framework-ui-core";
-import {
-  ArrowDownLeft,
-  ArrowUpRight,
-  MessageSquare,
-  Users,
-} from "lucide-react";
+
 import React from "react";
+const ArrowDownLeft = lazyIcon("ArrowDownLeft");
+const ArrowUpRight = lazyIcon("ArrowUpRight");
+const MessageSquare = lazyIcon("MessageSquare");
+const Users = lazyIcon("Users");
+
 
 interface CommunicationDirectionBadgeProps {
   className?: string;

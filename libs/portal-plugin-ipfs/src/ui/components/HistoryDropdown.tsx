@@ -1,13 +1,10 @@
 import React from "react";
-import { ChevronDown, Home, Folder } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  Button,
-  cn,
-} from "@lumeweb/portal-framework-ui-core";
+
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, Button, cn, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+const ChevronDown = lazyIcon("ChevronDown");
+const Home = lazyIcon("Home");
+const Folder = lazyIcon("Folder");
+
 
 export interface HistoryDropdownProps {
   history: string[];

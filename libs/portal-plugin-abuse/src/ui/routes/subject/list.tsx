@@ -1,4 +1,5 @@
-import { AlertTriangle, Eye } from "lucide-react";
+import { lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import React from "react";
 import { format } from "date-fns";
 import { CoreTable, ThemedBadge } from "@lumeweb/portal-framework-ui";
@@ -6,6 +7,9 @@ import { RefineResource } from "@/types/resources";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Link } from "@refinedev/core";
 import { SubjectResponse } from "@/types/subject";
+const AlertTriangle = lazyIcon("AlertTriangle");
+const Eye = lazyIcon("Eye");
+
 
 export default function List() {
   const columnHelper = createColumnHelper<SubjectResponse>();

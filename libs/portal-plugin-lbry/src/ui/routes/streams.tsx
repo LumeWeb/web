@@ -7,13 +7,16 @@ import {
   useDialog,
 } from "@lumeweb/portal-framework-ui";
 import { format } from "date-fns";
-import { Trash2 } from "lucide-react";
+import { lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import { createColumnHelper } from "@tanstack/react-table";
 import { Authenticated, useDelete } from "@refinedev/core";
 
 import { createUnpinDialogConfig } from "@/ui/dialogs";
 import { PinItem } from "@/ui/components/toolbar";
 import type { StreamResponse } from "@/client";
+const Trash2 = lazyIcon("Trash2");
+
 
 const columnHelper = createColumnHelper<StreamResponse>();
 

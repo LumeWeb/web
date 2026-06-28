@@ -1,9 +1,11 @@
-import { Button, cn } from "@lumeweb/portal-framework-ui-core";
-import { X } from "lucide-react";
+import { Button, cn, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import React from "react";
 
 import { ThemedBadge } from "@/components/ThemedBadge";
 import { type BadgeConfig } from "@/types";
+const X = lazyIcon("X");
+
 
 type FilterChipVariant = "date" | "default" | "numeric" | "text";
 

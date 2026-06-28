@@ -34,9 +34,15 @@ import {
   FileManagerProvider,
   useFileManagerContext,
 } from "@/ui/context/FileManager";
-import { Download, File, Folder, PinOff } from "lucide-react";
+import { lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import { createUnpinDialogConfig } from "@/ui/dialogs/unpinDialog";
 import { useNotification } from "@refinedev/core";
+const Download = lazyIcon("Download");
+const File = lazyIcon("File");
+const Folder = lazyIcon("Folder");
+const PinOff = lazyIcon("PinOff");
+
 
 const FileManagerInner: React.FC = () => {
   const {

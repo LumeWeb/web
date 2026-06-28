@@ -1,6 +1,6 @@
 import type { ModuleFederationOptions } from "@module-federation/vite";
 
-import type { SharedModules } from "./federation";
+import type { SharedModules } from "./shared-types";
 
 /** Build info matching the Go build.Info struct. See schemas/portal-meta.v1.json */
 export interface BuildInfo {

@@ -1,10 +1,11 @@
 import { useDialog } from "@lumeweb/portal-framework-ui";
-import { Button } from "@lumeweb/portal-framework-ui-core";
+import { Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { useDelete, useLogout } from "@refinedev/core";
-import { AlertTriangle } from "lucide-react";
 
 import { Card } from "@/ui/components/Card";
 import { deleteAccountDialogConfig } from "@/ui/dialogs/deleteAccount";
+const AlertTriangle = lazyIcon("AlertTriangle");
+
 
 export default function DeleteAccount() {
   const { openDialog } = useDialog();

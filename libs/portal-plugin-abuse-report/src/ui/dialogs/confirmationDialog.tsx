@@ -3,10 +3,12 @@ import type { DialogConfig } from "@lumeweb/portal-framework-ui";
 
 import confirmMemeImg from "@/images/confirm-meme.gif";
 import { ActionItemType } from "@lumeweb/portal-framework-ui";
-import { Button } from "@lumeweb/portal-framework-ui-core";
-import { Copy, Flag } from "lucide-react";
+import { Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 
 import { DIALOG_IDS } from "./dialog-ids";
+const Copy = lazyIcon("Copy");
+const Flag = lazyIcon("Flag");
+
 
 interface ConfirmationDialogArgs {
   data: AbuseReportResponse;

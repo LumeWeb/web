@@ -1,8 +1,10 @@
 import { SchemaForm } from "@lumeweb/portal-framework-ui";
-import { User } from "lucide-react";
+import { lazyIcon } from "@lumeweb/portal-framework-ui-core";
 
 import { Card } from "@/ui/components/Card";
 import editProfileForm from "@/ui/forms/editProfile";
+const User = lazyIcon("User");
+
 
 export default function Profile() {
   return (

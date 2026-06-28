@@ -1,11 +1,14 @@
 import type { UppyFile } from "@uppy/core";
 
-import { cn } from "@lumeweb/portal-framework-ui-core";
+import { cn, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { Progress } from "@lumeweb/portal-framework-ui-core";
-import { AlertCircle, Check, Upload } from "lucide-react";
 
 import { UploadStatus, UploadStatusType } from "@/types/upload";
 import { FileItem } from "@/ui/components/FileItem";
+const AlertCircle = lazyIcon("AlertCircle");
+const Check = lazyIcon("Check");
+const Upload = lazyIcon("Upload");
+
 
 export interface UploadProgressProps {
   /**

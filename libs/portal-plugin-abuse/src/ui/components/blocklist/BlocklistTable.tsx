@@ -13,16 +13,19 @@ import {
   CrudTable,
   useDialog,
 } from "@lumeweb/portal-framework-ui";
-import { Button } from "@lumeweb/portal-framework-ui-core";
+import { Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 
 import { useDeleteMany, useNotification } from "@refinedev/core";
 import { createColumnHelper } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Eye, Trash2 } from "lucide-react";
+
 import React from "react";
 
 import { AddBlockConfig } from "./AddBlockDialog.config";
 import { BlockDetailsContent } from "./BlockDetailsContent";
+const Eye = lazyIcon("Eye");
+const Trash2 = lazyIcon("Trash2");
+
 
 export function BlocklistTable() {
   const { openDialog } = useDialog();

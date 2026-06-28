@@ -1,5 +1,7 @@
-import { cn } from "@lumeweb/portal-framework-ui-core";
-import { Check, X } from "lucide-react";
+import { cn, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+const Check = lazyIcon("Check");
+const X = lazyIcon("X");
+
 
 interface FeatureItemProps {
   text: string;

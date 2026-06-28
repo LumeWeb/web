@@ -1,8 +1,14 @@
 import { CaseStatus } from "@/types/case";
-import { CheckCircle2, CircleDot, Clock, XCircle } from "lucide-react";
+import { lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import React from "react";
 
 import { type SwitchOption, VerticalSwitch } from "./VerticalSwitch";
+const CheckCircle2 = lazyIcon("CheckCircle2");
+const CircleDot = lazyIcon("CircleDot");
+const Clock = lazyIcon("Clock");
+const XCircle = lazyIcon("XCircle");
+
 
 interface StatusSwitchProps {
   className?: string;

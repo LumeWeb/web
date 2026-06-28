@@ -23,7 +23,7 @@
     "waku": "1.0.0-beta.0"
   },
   "devDependencies": {
-    "@radix-ui/react-tabs": "^1.1.15",
+    "@radix-ui/react-tabs": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "clsx": "catalog:",

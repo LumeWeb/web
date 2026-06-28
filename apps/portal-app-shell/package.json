@@ -30,7 +30,18 @@
     "react-dom": "catalog:",
     "react-hook-form": "catalog:",
     "react-router": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "lucide-react": "catalog:",
+    "date-fns": "catalog:",
+    "@tanstack/react-table": "catalog:",
+    "@refinedev/react-router": "catalog:",
+    "@hookform/resolvers": "catalog:",
+    "@refinedev/react-hook-form": "catalog:",
+    "@uppy/core": "catalog:",
+    "nanoevents": "catalog:",
+    "react-icons": "catalog:",
+    "otpauth": "catalog:",
+    "qrcode": "catalog:"
   },
   "devDependencies": {
     "dotenv": "^17.4.2",

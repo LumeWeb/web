@@ -1,26 +1,18 @@
 import { type EvidenceResponse, EvidenceSource } from "@/types/evidence";
 import { RefineResource } from "@/types/resources";
 import { formatFileSize } from "@/ui/util";
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Skeleton,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@lumeweb/portal-framework-ui-core";
+import { Button, Card, CardContent, CardHeader, CardTitle, Skeleton, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { useList } from "@refinedev/core";
 import { format } from "date-fns";
-import { Download, Eye, FileIcon, FileText } from "lucide-react";
+
 import React, { useState } from "react";
 
 import { EvidenceDetailsDialog } from "./EvidenceDetailsDialog";
+const Download = lazyIcon("Download");
+const Eye = lazyIcon("Eye");
+const FileIcon = lazyIcon("FileIcon");
+const FileText = lazyIcon("FileText");
+
 
 interface EvidenceListProps {
   caseId: number;

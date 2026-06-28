@@ -1,16 +1,16 @@
 import { ReportButton } from "@/ui/components/ReportButton";
-import { Card } from "@lumeweb/portal-framework-ui-core";
-import {
-  AlertCircle,
-  Asterisk,
-  Clock,
-  Copyright,
-  LinkIcon,
-  Server,
-  UserRound,
-} from "lucide-react";
+import { Card, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import React from "react";
 import { Link } from "react-router";
+const AlertCircle = lazyIcon("AlertCircle");
+const Asterisk = lazyIcon("Asterisk");
+const Clock = lazyIcon("Clock");
+const Copyright = lazyIcon("Copyright");
+const LinkIcon = lazyIcon("LinkIcon");
+const Server = lazyIcon("Server");
+const UserRound = lazyIcon("UserRound");
+
 
 interface HomeProps {
   children?: React.ReactNode;

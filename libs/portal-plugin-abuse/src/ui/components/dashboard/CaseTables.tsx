@@ -9,17 +9,13 @@ import {
   CoreTable,
   ThemedBadge,
 } from "@lumeweb/portal-framework-ui";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@lumeweb/portal-framework-ui-core";
+import { Card, CardContent, CardHeader, CardTitle, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { createColumnHelper } from "@tanstack/react-table";
 import { differenceInDays, format, subDays } from "date-fns";
 import React from "react";
 import { type CrudFilter, GetListResponse, Link } from "@refinedev/core";
-import { AlertTriangle } from "lucide-react";
+const AlertTriangle = lazyIcon("AlertTriangle");
+
 
 interface CaseTablesProps {
   caseTypeFilter: any;

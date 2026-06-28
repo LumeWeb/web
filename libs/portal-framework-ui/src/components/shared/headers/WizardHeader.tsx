@@ -1,5 +1,5 @@
-import { cn } from "@lumeweb/portal-framework-ui-core";
-import { Check } from "lucide-react";
+import { cn, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import React, { useMemo } from "react";
 import { isElement, isValidElementType } from "react-is";
 
@@ -11,6 +11,8 @@ import {
   createStepClickHandler,
   createStepKeyHandler,
 } from "../utils/stepState";
+const Check = lazyIcon("Check");
+
 
 export function WizardHeader<T = any>({ className }: BaseHeaderProps<T>) {
   const context = useHeaderContext<T>();

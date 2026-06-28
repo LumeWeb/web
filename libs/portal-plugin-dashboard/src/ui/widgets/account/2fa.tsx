@@ -2,20 +2,21 @@ import type { Identity } from "@lumeweb/portal-framework-core";
 
 import { DATA_PROVIDER_NAME } from "@lumeweb/portal-framework-auth";
 import { useDialog } from "@lumeweb/portal-framework-ui";
-import { Button } from "@lumeweb/portal-framework-ui-core";
+import { Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { OTPDisableRequest, OTPVerifyRequest } from "@lumeweb/portal-sdk";
 import {
   useCustomMutation,
   useGetIdentity,
   useInvalidateAuthStore,
 } from "@refinedev/core";
-import { Smartphone } from "lucide-react";
 
 import { Card } from "@/ui/components/Card";
 import { disable2faDialogConfig } from "@/ui/dialogs/disable2fa";
 import { enable2faDialogConfig } from "@/ui/dialogs/enable2fa";
 import { OTPDisableHandler } from "@/ui/forms/disable2fa";
 import { OTPEnableHandler } from "@/ui/forms/enable2fa";
+const Smartphone = lazyIcon("Smartphone");
+
 
 export default function TwoFA() {
   const { openDialog } = useDialog();

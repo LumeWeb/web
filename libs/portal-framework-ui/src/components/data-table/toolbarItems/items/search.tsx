@@ -1,4 +1,5 @@
-import { Search } from "lucide-react";
+import { lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import React, { useEffect } from "react";
 import { useDebounce } from "use-debounce";
 import type {
@@ -13,6 +14,8 @@ import {
   LogicalFilterOperator,
   useRefineTable,
 } from "@/components";
+const Search = lazyIcon("Search");
+
 
 function SearchToolbarItem({
   value,

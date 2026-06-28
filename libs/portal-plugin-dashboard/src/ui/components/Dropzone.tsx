@@ -2,11 +2,11 @@
 
 import type { UppyFile } from "@uppy/core";
 
-import { Card, CardContent } from "@lumeweb/portal-framework-ui-core";
+import { Card, CardContent, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { UploadStatus } from "@/types/upload";
 import { Button } from "@lumeweb/portal-framework-ui-core";
 import { cn } from "@lumeweb/portal-framework-ui-core";
-import { Upload } from "lucide-react";
+
 import React, { useEffect, useState } from "react";
 
 import type { IUploadManager } from "@/types/upload";
@@ -17,6 +17,8 @@ import {
   useDropzoneContext,
 } from "@/contexts/DropzoneContext";
 import { FileItem } from "@/ui/components/FileItem";
+const Upload = lazyIcon("Upload");
+
 
 interface DropzoneProps {
   allowedFileTypes?: string[];

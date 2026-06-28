@@ -1,11 +1,8 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@lumeweb/portal-framework-ui-core";
-import { BarChart } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import React from "react";
+const BarChart = lazyIcon("BarChart");
+
 
 interface ClassificationScoresCardProps {
   scores: Record<string, number> | undefined;

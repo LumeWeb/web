@@ -1,17 +1,14 @@
 import { type EvidenceResponse, EvidenceSource } from "@/types/evidence";
 import { formatFileSize } from "@/ui/util";
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@lumeweb/portal-framework-ui-core";
+import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { format } from "date-fns";
-import { Download, FileIcon, FileText, Image } from "lucide-react";
+
 import React from "react";
+const Download = lazyIcon("Download");
+const FileIcon = lazyIcon("FileIcon");
+const FileText = lazyIcon("FileText");
+const Image = lazyIcon("Image");
+
 
 interface EvidenceDetailsDialogProps {
   evidence: EvidenceResponse;

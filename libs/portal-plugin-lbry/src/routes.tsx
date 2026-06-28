@@ -3,7 +3,10 @@ import {
   createNamespacedId,
   type RouteDefinition,
 } from "@lumeweb/portal-framework-core";
-import { Anchor, Monitor } from "lucide-react";
+import { lazyIcon } from "@lumeweb/portal-framework-ui-core";
+const Anchor = lazyIcon("Anchor");
+const Monitor = lazyIcon("Monitor");
+
 
 const routes = [
   {

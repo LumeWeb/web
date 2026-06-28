@@ -2,8 +2,9 @@ import type { CheckoutUIFragment } from "@/types/subscription";
 import type { GatewayPublicInfo } from "@/types/subscription";
 import { FragmentRenderer } from "@/ui/components/FragmentRenderer";
 import { formatAmount } from "@/utils/formatAmount";
-import { Button, Card, CardContent, CardHeader, CardTitle, cn } from "@lumeweb/portal-framework-ui-core";
-import { ArrowLeft } from "lucide-react";
+import { Button, Card, CardContent, CardHeader, CardTitle, cn, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+const ArrowLeft = lazyIcon("ArrowLeft");
+
 
 export interface CheckoutFormProps {
   fragments: CheckoutUIFragment[];

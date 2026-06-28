@@ -3,12 +3,9 @@ import {
   DialogTypes,
   ConfirmDialogConfig,
 } from "@lumeweb/portal-framework-ui";
-import { PinOff } from "lucide-react";
-import {
-  Button,
-  cn,
-  ScrollArea,
-} from "@lumeweb/portal-framework-ui-core";
+
+import { Button, cn, ScrollArea, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+const PinOff = lazyIcon("PinOff");
 
 
 export function createUnpinDialogConfig(

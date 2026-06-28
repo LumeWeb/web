@@ -1,7 +1,6 @@
 import type { ScanResponse, ScanStatus } from "@/types/evidence";
 
-import { Button } from "@lumeweb/portal-framework-ui-core";
-import { Eye } from "lucide-react";
+import { Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 
 interface ScanHistoryListProps {
   getStatusBadge: (status: ScanStatus) => React.ReactNode;
@@ -10,6 +9,8 @@ interface ScanHistoryListProps {
 }
 import { format } from "date-fns";
 import React from "react";
+const Eye = lazyIcon("Eye");
+
 
 export function ScanHistoryList({
   getStatusBadge,

@@ -6,11 +6,17 @@ import {
 
 import { useCaseTimeSeriesAnalytics } from "@/hooks/useCaseTimeSeriesAnalytics";
 import { useCaseAnalyticsMulti } from "@/hooks/useCaseAnalyticsMulti";
-import { Card, CardContent, Skeleton } from "@lumeweb/portal-framework-ui-core";
-import { ArrowDown, ArrowUp, Clock, FileText, Search } from "lucide-react";
+import { Card, CardContent, Skeleton, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import React, { useMemo } from "react";
 
 import { SparklineChart } from "./SparklineChart";
+const ArrowDown = lazyIcon("ArrowDown");
+const ArrowUp = lazyIcon("ArrowUp");
+const Clock = lazyIcon("Clock");
+const FileText = lazyIcon("FileText");
+const Search = lazyIcon("Search");
+
 
 interface SummaryCardsProps {
   caseTypeFilter: CaseTypeFilter;

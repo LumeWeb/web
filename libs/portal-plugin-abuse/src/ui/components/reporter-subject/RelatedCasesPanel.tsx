@@ -6,29 +6,17 @@ import {
   STATUS_BADGE_CONFIG,
 } from "@/types/badge-configs";
 import { ThemedBadge } from "@lumeweb/portal-framework-ui";
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@lumeweb/portal-framework-ui-core";
+import { Button, Card, CardContent, CardHeader, CardTitle, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { Link, useList } from "@refinedev/core";
 import { format } from "date-fns";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ExternalLink,
-  FileText,
-} from "lucide-react";
+
 import React, { useState } from "react";
 import { RefineResource } from "@/types/resources";
+const ChevronLeft = lazyIcon("ChevronLeft");
+const ChevronRight = lazyIcon("ChevronRight");
+const ExternalLink = lazyIcon("ExternalLink");
+const FileText = lazyIcon("FileText");
+
 
 interface RelatedCasesPanelProps {
   entityId: number;

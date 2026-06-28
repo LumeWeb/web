@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar } from "@/components/ui/lazy/calendar";
 import {
   Popover,
   PopoverContent,
@@ -7,8 +7,11 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { lazyIcon } from "@/components/lazy-icons";
+
 import React from "react";
+const CalendarIcon = lazyIcon("CalendarIcon");
+
 
 export interface DatePickerProps {
   className?: string;

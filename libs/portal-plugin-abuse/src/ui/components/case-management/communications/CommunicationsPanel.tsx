@@ -1,21 +1,17 @@
 import type { CommunicationResponse } from "@/types/communication";
 
 import { RefineResource } from "@/types/resources";
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Skeleton,
-} from "@lumeweb/portal-framework-ui-core";
+import { Button, Card, CardContent, CardHeader, CardTitle, Skeleton, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { useList } from "@refinedev/core";
-import { ArrowLeft, MessageSquare } from "lucide-react";
+
 import React, { useEffect, useState } from "react";
 
 import { ConversationView } from "./ConversationView";
 import { ReplyComposer } from "./ReplyComposer";
 import { ThreadList } from "./ThreadList";
+const ArrowLeft = lazyIcon("ArrowLeft");
+const MessageSquare = lazyIcon("MessageSquare");
+
 
 interface CommunicationsPanelProps {
   caseId: number;

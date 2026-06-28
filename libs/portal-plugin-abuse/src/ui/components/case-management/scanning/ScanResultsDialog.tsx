@@ -1,13 +1,7 @@
 import type { ScanResultResponse } from "@/types/evidence";
 
 import { RefineResource } from "@/types/resources";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@lumeweb/portal-framework-ui-core";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import {
   Tabs,
   TabsContent,
@@ -17,9 +11,13 @@ import {
 import { Skeleton } from "@lumeweb/portal-framework-ui-core";
 import { useList } from "@refinedev/core";
 import { format } from "date-fns";
-import { AlertCircle, CheckCircle, XCircle } from "lucide-react";
+
 import { useEffect, useState } from "react";
 import React from "react";
+const AlertCircle = lazyIcon("AlertCircle");
+const CheckCircle = lazyIcon("CheckCircle");
+const XCircle = lazyIcon("XCircle");
+
 
 interface ScanResultsDialogProps {
   onOpenChange: (open: boolean) => void;

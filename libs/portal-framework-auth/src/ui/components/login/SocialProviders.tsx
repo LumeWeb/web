@@ -1,21 +1,5 @@
-import {
-  Apple,
-  Box,
-  Chrome,
-  DollarSign,
-  Facebook,
-  Gamepad2,
-  Github,
-  Gitlab,
-  Instagram,
-  Link,
-  Linkedin,
-  MessageCircle,
-  Music,
-  ShoppingBag,
-  Twitter,
-  Video,
-} from "lucide-react";
+import { lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 /*
 Commented entries do not currently have an icon and so are not used
  */
@@ -61,6 +45,23 @@ import {
   SiXero,
   SiZoom,
 } from "react-icons/si";
+const Apple = lazyIcon("Apple");
+const Box = lazyIcon("Box");
+const Chrome = lazyIcon("Chrome");
+const DollarSign = lazyIcon("DollarSign");
+const Facebook = lazyIcon("Facebook");
+const Gamepad2 = lazyIcon("Gamepad2");
+const Github = lazyIcon("Github");
+const Gitlab = lazyIcon("Gitlab");
+const Instagram = lazyIcon("Instagram");
+const Link = lazyIcon("Link");
+const Linkedin = lazyIcon("Linkedin");
+const MessageCircle = lazyIcon("MessageCircle");
+const Music = lazyIcon("Music");
+const ShoppingBag = lazyIcon("ShoppingBag");
+const Twitter = lazyIcon("Twitter");
+const Video = lazyIcon("Video");
+
 
 type IconComponent = React.ComponentType<React.SVGAttributes<SVGElement>>;
 

@@ -4,7 +4,7 @@ import {
   CommunicationType,
 } from "@/types/communication";
 import { RefineResource } from "@/types/resources";
-import { Button } from "@lumeweb/portal-framework-ui-core";
+import { Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { Textarea } from "@lumeweb/portal-framework-ui-core";
 import {
   Select,
@@ -21,12 +21,14 @@ import {
 } from "@lumeweb/portal-framework-ui-core";
 import { useCreate } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
-import { Loader2 } from "lucide-react";
+
 import { useState } from "react";
 import React from "react";
 
 import { CommunicationDirectionBadge } from "./CommunicationDirectionBadge";
 import { CommunicationTypeIcon } from "./CommunicationTypeIcon";
+const Loader2 = lazyIcon("Loader2");
+
 
 interface ReplyComposerProps {
   caseId: number;

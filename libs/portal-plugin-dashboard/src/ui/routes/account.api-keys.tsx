@@ -1,13 +1,15 @@
 import { DataTable, PageHeader, useDialog } from "@lumeweb/portal-framework-ui";
-import { Button } from "@lumeweb/portal-framework-ui-core";
+import { Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { useDelete } from "@refinedev/core";
 import { createColumnHelper } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Plus, Trash2 } from "lucide-react";
 
 import { createApiKeyDialogConfig } from "@/ui/dialogs/createApiKey";
 
 import { ApiKeyAlertMessage } from "../components/ApiKeyAlertMessage";
+const Plus = lazyIcon("Plus");
+const Trash2 = lazyIcon("Trash2");
+
 
 interface APIKey {
   created_at: string;

@@ -5,12 +5,14 @@ import {
   useFormContext,
 } from "@lumeweb/portal-framework-ui";
 import { createNamespacedId } from "@lumeweb/portal-framework-core";
-import { Button, cn } from "@lumeweb/portal-framework-ui-core";
+import { Button, cn, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { useCustomMutation } from "@refinedev/core";
-import { Mail } from "lucide-react";
+
 import React from "react";
 
 import { updateEmailDialogConfig } from "@/ui/dialogs/updateEmail";
+const Mail = lazyIcon("Mail");
+
 
 const ACCOUNT_EMAIL_FIELD_TYPE = createNamespacedId(
   "dashboard",

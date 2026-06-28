@@ -1,18 +1,16 @@
 import type { Identity } from "@lumeweb/portal-framework-core";
 
 import { useAvatar, useDialog } from "@lumeweb/portal-framework-ui";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-  Button,
-} from "@lumeweb/portal-framework-ui-core";
+import { Avatar, AvatarFallback, AvatarImage, Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { useGetIdentity } from "@refinedev/core";
 import { format } from "date-fns";
-import { Calendar, Camera, Check } from "lucide-react";
 
 import { Card } from "@/ui/components/Card";
 import { uploadAvatarDialogConfig } from "@/ui/dialogs/uploadAvatar";
+const Calendar = lazyIcon("Calendar");
+const Camera = lazyIcon("Camera");
+const Check = lazyIcon("Check");
+
 
 export default function Bio() {
   const { data: identity, refetch } = useGetIdentity<Identity>();

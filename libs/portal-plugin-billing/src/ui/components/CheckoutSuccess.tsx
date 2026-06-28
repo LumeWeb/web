@@ -1,12 +1,9 @@
 import type { SubscriptionStatusResponse } from "@/types/subscription";
-import {
-  Button,
-  Card,
-  CardContent,
-  cn,
-} from "@lumeweb/portal-framework-ui-core";
-import { CheckCircle } from "lucide-react";
+import { Button, Card, CardContent, cn, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import { useState } from "react";
+const CheckCircle = lazyIcon("CheckCircle");
+
 interface CheckoutSuccessProps {
   subscription: SubscriptionStatusResponse | undefined;
   currentPlan: { plan: { name: string }; period: { cadence: string } } | null;

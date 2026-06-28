@@ -12,7 +12,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Loader2, Search, User, X } from "lucide-react"
+import { lazyIcon } from "@lumeweb/portal-framework-ui-core";
+const Loader2 = lazyIcon("Loader2");
+const Search = lazyIcon("Search");
+const User = lazyIcon("User");
+const X = lazyIcon("X");
+
 import { useNotification } from "@refinedev/core"
 import { type UserResponse, UserRole } from "@/types/user"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"

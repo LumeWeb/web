@@ -1,18 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@lumeweb/portal-framework-ui-core";
+import { Card, CardContent, CardHeader, CardTitle, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { Progress } from "@lumeweb/portal-framework-ui-core";
 import { Button } from "@lumeweb/portal-framework-ui-core";
 import { Skeleton } from "@lumeweb/portal-framework-ui-core";
-import { X, ChevronRight } from "lucide-react";
+
 import { useOnboardingStatus } from "@/hooks";
 import { useOnboardingAnalytics } from "@/analytics/useOnboardingAnalytics";
 import { OnboardingStepCard } from "./OnboardingStepCard";
+const X = lazyIcon("X");
+const ChevronRight = lazyIcon("ChevronRight");
+
 
 const STORAGE_KEY = "pinner_onboarding";
 const FIRST_SEEN_KEY = "pinner_onboarding_first_seen";

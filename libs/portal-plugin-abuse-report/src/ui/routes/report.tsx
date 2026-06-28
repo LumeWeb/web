@@ -2,7 +2,8 @@ import { AbuseReportResponse } from "@/types";
 import { Home } from "@/ui/components/Home";
 import { useDialog } from "@lumeweb/portal-framework-ui";
 import { useGo } from "@refinedev/core";
-import { FlagIcon } from "lucide-react";
+import { lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { useLocation } from "react-router";
 
@@ -11,6 +12,8 @@ import {
   getConfirmationDialogConfig,
   getReportDialogConfig,
 } from "../dialogs/reportDialogs";
+const FlagIcon = lazyIcon("FlagIcon");
+
 
 function Report() {
   const location = useLocation();

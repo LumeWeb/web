@@ -3,11 +3,14 @@ import type { ReporterDetailResponse } from "abuse-management/types/reporter-sub
 
 import { RelatedCasesPanel } from "@/ui/components/reporter-subject/RelatedCasesPanel";
 import { ReporterInfoCard } from "@/ui/components/reporter-subject/ReporterInfoCard";
-import { Button } from "@lumeweb/portal-framework-ui-core";
+import { Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { useNavigation, useParsed, useShow } from "@refinedev/core";
-import { ArrowLeft, Edit } from "lucide-react";
+
 import React from "react";
 import { RefineResource } from "@/types/resources";
+const ArrowLeft = lazyIcon("ArrowLeft");
+const Edit = lazyIcon("Edit");
+
 
 export default function CaseView() {
   const params = useParsed();

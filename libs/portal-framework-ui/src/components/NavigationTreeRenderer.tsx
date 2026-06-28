@@ -3,28 +3,18 @@ import type {
   NavigationItem as NavigationItemType,
 } from "@lumeweb/portal-framework-core";
 
-import {
-  Button,
-  cn,
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@lumeweb/portal-framework-ui-core";
+import { Button, cn, Collapsible, CollapsibleContent, CollapsibleTrigger, Popover, PopoverContent, PopoverTrigger, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { Link } from "@refinedev/core";
-import { ChevronDown, ChevronRight } from "lucide-react";
+
 import React from "react";
 import { useLocation } from "react-router";
 
 import type { NavigationTreeNode } from "@/hooks/useNavigationTree";
 
 import { useSidebarContext } from "./layout/SidebarContext";
+const ChevronDown = lazyIcon("ChevronDown");
+const ChevronRight = lazyIcon("ChevronRight");
+
 
 /* ------------------------------------------------------------------ */
 /* Route matching helpers                                              */

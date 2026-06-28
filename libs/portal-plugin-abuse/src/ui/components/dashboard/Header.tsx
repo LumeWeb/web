@@ -1,10 +1,13 @@
 import type { TimeRange } from "@/ui/types/dashboard";
 
-import { Button } from "@lumeweb/portal-framework-ui-core";
+import { Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { Tabs, TabsList, TabsTrigger } from "@lumeweb/portal-framework-ui-core";
 import { format } from "date-fns";
-import { Download, RefreshCw } from "lucide-react";
+
 import React from "react";
+const Download = lazyIcon("Download");
+const RefreshCw = lazyIcon("RefreshCw");
+
 
 interface DashboardHeaderProps {
   isLoading: boolean;

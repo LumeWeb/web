@@ -1,10 +1,12 @@
 import { useDialog } from "@lumeweb/portal-framework-ui";
-import { Button } from "@lumeweb/portal-framework-ui-core";
+import { Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { useUpdatePassword } from "@refinedev/core";
-import { Key } from "lucide-react";
+
 import { updatePasswordDialogConfig } from "@/ui/dialogs/updatePassword";
 
 import { Card } from "@/ui/components/Card";
+const Key = lazyIcon("Key");
+
 
 export default function Password() {
   const { mutateAsync: updatePassword } = useUpdatePassword();

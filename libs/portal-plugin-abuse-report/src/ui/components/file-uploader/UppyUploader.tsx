@@ -1,4 +1,4 @@
-import { Card } from "@lumeweb/portal-framework-ui-core";
+import { Card, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import Compressor from "@uppy/compressor";
 import Uppy from "@uppy/core";
 import ImageEditor from "@uppy/image-editor";
@@ -6,13 +6,15 @@ import { Dashboard } from "@uppy/react";
 import ScreenCapture from "@uppy/screen-capture";
 import Webcam from "@uppy/webcam";
 import XHRUpload from "@uppy/xhr-upload";
-import { AlertCircle } from "lucide-react";
+
 import React, { useEffect, useState } from "react";
 import "@uppy/core/dist/style.min.css";
 import "@uppy/dashboard/dist/style.min.css";
 import "@uppy/webcam/dist/style.min.css";
 import "@uppy/screen-capture/dist/style.min.css";
 import "@uppy/image-editor/dist/style.min.css";
+const AlertCircle = lazyIcon("AlertCircle");
+
 
 interface UppyUploaderProps {
   accessToken: string;

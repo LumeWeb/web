@@ -1,11 +1,8 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@lumeweb/portal-framework-ui-core";
-import { AlertTriangle } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import React from "react";
+const AlertTriangle = lazyIcon("AlertTriangle");
+
 
 interface RiskFactorsCardProps {
   riskFactors: string[] | undefined;

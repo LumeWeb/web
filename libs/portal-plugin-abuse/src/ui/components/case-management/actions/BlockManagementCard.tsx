@@ -7,28 +7,16 @@ import {
 import { CaseStatus } from "@/types/case";
 import { RefineResource } from "@/types/resources";
 import { useShow } from "@refinedev/core";
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  Label,
-  RadioGroup,
-  RadioGroupItem,
-  Textarea,
-} from "@lumeweb/portal-framework-ui-core";
+import { Button, Card, CardContent, CardHeader, CardTitle, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, Label, RadioGroup, RadioGroupItem, Textarea, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { useCustomMutation, useNotification } from "@refinedev/core";
-import { Shield, ShieldAlert, ShieldCheck, ShieldX } from "lucide-react";
+
 import React, { useState } from "react";
 import { SubjectResponse } from "@/types/subject";
+const Shield = lazyIcon("Shield");
+const ShieldAlert = lazyIcon("ShieldAlert");
+const ShieldCheck = lazyIcon("ShieldCheck");
+const ShieldX = lazyIcon("ShieldX");
+
 
 interface BlockManagementCardProps {
   caseId: number;

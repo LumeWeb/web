@@ -1,3 +1,5 @@
+import path from "node:path";
+import fs from "node:fs";
 import type { UserConfig } from "tsdown";
 
 /**
@@ -115,6 +117,40 @@ export function createLibraryConfigWithPlugins(
     },
     plugins,
     ...options,
+  };
+}
+
+const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".avif"];
+const imageExtRegex = new RegExp(
+  `(${IMAGE_EXTENSIONS.map((ext) => ext.replace(".", "\\.")).join("|")})$`,
+);
+
+/**
+ * Replacement for @rollup/plugin-image using rolldown's emitFile API.
+ * Emits images as separate asset files instead of inlining as base64 data URLs.
+ * Exports `import.meta.ROLLUP_FILE_URL_<ref>` so consumers get a URL string.
+ */
+export function rolldownImageAssetPlugin() {
+  return {
+    name: "rolldown-image-asset",
+    resolveId: {
+      filter: { id: imageExtRegex },
+      handler(source: string, importer: string) {
+        if (!importer || path.isAbsolute(source)) return null;
+        return path.resolve(path.dirname(importer), source);
+      },
+    },
+    load: {
+      filter: { id: imageExtRegex },
+      handler(id: string) {
+        const referenceId = this.emitFile({
+          type: "asset",
+          name: path.basename(id),
+          source: fs.readFileSync(id),
+        });
+        return `export default import.meta.ROLLUP_FILE_URL_${referenceId};`;
+      },
+    },
   };
 }
 

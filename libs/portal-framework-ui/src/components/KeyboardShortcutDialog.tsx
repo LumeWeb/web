@@ -1,13 +1,8 @@
-import {
-  Badge,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@lumeweb/portal-framework-ui-core";
-import { X } from "lucide-react";
+import { Badge, Button, Dialog, DialogContent, DialogHeader, DialogTitle, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import React, { type FunctionComponent } from "react";
+const X = lazyIcon("X");
+
 
 interface KeyboardShortcutDialogProps {
   onOpenChange: (open: boolean) => void;

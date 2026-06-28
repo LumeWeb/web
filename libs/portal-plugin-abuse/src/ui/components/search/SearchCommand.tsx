@@ -1,11 +1,13 @@
 import { type SearchResult, useGlobalSearch } from "@/hooks/useGlobalSearch";
-import { CommandDialog, CommandList } from "@lumeweb/portal-framework-ui-core";
+import { CommandDialog, CommandList, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { useGo } from "@refinedev/core";
-import { Search } from "lucide-react";
+
 import React from "react";
 import { useEffect, useState } from "react";
 
 import { SearchResults } from "./SearchResults";
+const Search = lazyIcon("Search");
+
 
 export function SearchCommand() {
   const go = useGo();

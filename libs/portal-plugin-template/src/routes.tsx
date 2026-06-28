@@ -2,7 +2,10 @@ import {
   createNamespacedId,
   type RouteDefinition,
 } from "@lumeweb/portal-framework-core";
-import { Home, Settings } from "lucide-react";
+import { lazyIcon } from "@lumeweb/portal-framework-ui-core";
+const Home = lazyIcon("Home");
+const Settings = lazyIcon("Settings");
+
 
 const routes = [
   {

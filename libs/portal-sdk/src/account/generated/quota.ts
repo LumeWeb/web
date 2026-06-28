@@ -10,18 +10,6 @@ import type {
   QuotaStatusResponse
 } from './accountAPI.schemas.ts';
 
-import {
-  faker
-} from '@faker-js/faker';
-
-import {
-  HttpResponse,
-  http
-} from 'msw';
-import type {
-  RequestHandlerOptions
-} from 'msw';
-
 
 
 export type getApiAccountQuotaResponse200 = {
@@ -84,22 +72,3 @@ export const getApiAccountQuota = async ( options?: RequestInit): Promise<getApi
 }
 
 
-
-
-export const getGetApiAccountQuotaResponseMock = (overrideResponse: Partial<Extract<QuotaStatusResponse, object>> = {}): QuotaStatusResponse => ({download: {limit: faker.helpers.arrayElement([faker.number.int(), undefined]), percentage: faker.number.int(), remaining: faker.helpers.arrayElement([faker.number.int(), undefined]), reserved: faker.helpers.arrayElement([faker.number.int(), undefined]), threshold: faker.helpers.arrayElement([faker.number.int(), undefined]), used: faker.number.int(), window: faker.helpers.arrayElement([{duration: faker.helpers.arrayElement([faker.number.int(), undefined]), end_date: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), start_date: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), timezone: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), type: faker.string.alpha({length: {min: 10, max: 20}})}, undefined])}, storage: {limit: faker.helpers.arrayElement([faker.number.int(), undefined]), percentage: faker.number.int(), remaining: faker.helpers.arrayElement([faker.number.int(), undefined]), reserved: faker.helpers.arrayElement([faker.number.int(), undefined]), threshold: faker.helpers.arrayElement([faker.number.int(), undefined]), used: faker.number.int(), window: faker.helpers.arrayElement([{duration: faker.helpers.arrayElement([faker.number.int(), undefined]), end_date: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), start_date: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), timezone: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), type: faker.string.alpha({length: {min: 10, max: 20}})}, undefined])}, upload: {limit: faker.helpers.arrayElement([faker.number.int(), undefined]), percentage: faker.number.int(), remaining: faker.helpers.arrayElement([faker.number.int(), undefined]), reserved: faker.helpers.arrayElement([faker.number.int(), undefined]), threshold: faker.helpers.arrayElement([faker.number.int(), undefined]), used: faker.number.int(), window: faker.helpers.arrayElement([{duration: faker.helpers.arrayElement([faker.number.int(), undefined]), end_date: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), start_date: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), timezone: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), type: faker.string.alpha({length: {min: 10, max: 20}})}, undefined])}, ...overrideResponse})
-
-
-export const getGetApiAccountQuotaMockHandler = (overrideResponse?: QuotaStatusResponse | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<QuotaStatusResponse> | QuotaStatusResponse), options?: RequestHandlerOptions) => {
-  return http.get('*/api/account/quota', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-
-
-    return HttpResponse.json(overrideResponse !== undefined
-    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getGetApiAccountQuotaResponseMock(),
-      { status: 200
-      })
-  }, options)
-}
-export const getQuotaMock = () => [
-  getGetApiAccountQuotaMockHandler()
-]
