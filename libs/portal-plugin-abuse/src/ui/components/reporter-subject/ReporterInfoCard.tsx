@@ -1,15 +1,14 @@
 import type { ReporterDetailResponse } from "@/types/reporter-subject";
 
-import {
-  Badge,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@lumeweb/portal-framework-ui-core";
+import { Badge, Card, CardContent, CardHeader, CardTitle, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { format } from "date-fns";
-import { Clock, Mail, Shield, User } from "lucide-react";
+
 import React from "react";
+const Clock = lazyIcon("Clock");
+const Mail = lazyIcon("Mail");
+const Shield = lazyIcon("Shield");
+const User = lazyIcon("User");
+
 
 interface ReporterInfoCardProps {
   reporter: ReporterDetailResponse;

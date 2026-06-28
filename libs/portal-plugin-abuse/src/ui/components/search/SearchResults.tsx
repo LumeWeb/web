@@ -2,8 +2,13 @@ import type { SearchResult, SearchResultType } from "@/hooks/useGlobalSearch";
 
 import { CasePriorityBadge } from "@/ui/components/case-management/CasePriorityBadge";
 import { CaseStatusBadge } from "@/ui/components/case-management/CaseStatusBadge";
-import { AlertTriangle, FileText, User } from "lucide-react";
+import { lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import React from "react";
+const AlertTriangle = lazyIcon("AlertTriangle");
+const FileText = lazyIcon("FileText");
+const User = lazyIcon("User");
+
 
 interface SearchResultsProps {
   className?: string;

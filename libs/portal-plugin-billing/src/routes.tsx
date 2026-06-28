@@ -2,7 +2,10 @@ import {
   createNamespacedId,
   type RouteDefinition,
 } from "@lumeweb/portal-framework-core";
-import { Coins, CreditCard } from "lucide-react";
+import { lazyIcon } from "@lumeweb/portal-framework-ui-core";
+const Coins = lazyIcon("Coins");
+const CreditCard = lazyIcon("CreditCard");
+
 
 const routes = [
   {

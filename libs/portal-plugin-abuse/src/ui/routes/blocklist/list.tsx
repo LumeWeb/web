@@ -1,9 +1,11 @@
 //import { AddBlockForm } from "@/ui/components/blocklist/AddBlockForm";
 import { BlocklistTable } from "@/ui/components/blocklist/BlocklistTable";
 //import { useDialog } from "@lumeweb/portal-framework-ui";
-import { Button } from "@lumeweb/portal-framework-ui-core";
-import { Plus } from "lucide-react";
+import { Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import React from "react";
+const Plus = lazyIcon("Plus");
+
 
 export default function List() {
   return (

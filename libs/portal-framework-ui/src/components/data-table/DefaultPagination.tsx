@@ -1,14 +1,14 @@
-import { Button } from "@lumeweb/portal-framework-ui-core";
+import { Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { BaseRecord } from "@refinedev/core";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-} from "lucide-react";
+
 import React from "react";
 
 import { useTableInstance } from "./contexts";
+const ChevronLeft = lazyIcon("ChevronLeft");
+const ChevronRight = lazyIcon("ChevronRight");
+const ChevronsLeft = lazyIcon("ChevronsLeft");
+const ChevronsRight = lazyIcon("ChevronsRight");
+
 
 function DefaultPagination<TData extends BaseRecord>() {
   const { table } = useTableInstance<TData>();

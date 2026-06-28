@@ -11,12 +11,16 @@ import {
   ThemedBadge,
   useDialog,
 } from "@lumeweb/portal-framework-ui";
-import { Button, Card } from "@lumeweb/portal-framework-ui-core";
+import { Button, Card, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { useShow } from "@refinedev/core";
 import { format, parseISO } from "date-fns";
-import { FileText, Lock, Upload } from "lucide-react";
+
 import React from "react";
 import * as z from "zod";
+const FileText = lazyIcon("FileText");
+const Lock = lazyIcon("Lock");
+const Upload = lazyIcon("Upload");
+
 
 interface UploadDialogProps {
   onClose: () => void;

@@ -4,14 +4,14 @@ import {
   type RouteDefinition,
 } from "@lumeweb/portal-framework-core";
 
-import {
-  Activity,
-  Key,
-  LayoutDashboard,
-  Shield,
-  User,
-  UserCog,
-} from "lucide-react";
+import { lazyIcon } from "@lumeweb/portal-framework-ui-core";
+const Activity = lazyIcon("Activity");
+const Key = lazyIcon("Key");
+const LayoutDashboard = lazyIcon("LayoutDashboard");
+const Shield = lazyIcon("Shield");
+const User = lazyIcon("User");
+const UserCog = lazyIcon("UserCog");
+
 
 const routes: RouteDefinition[] = [
   {

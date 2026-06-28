@@ -1,7 +1,7 @@
 import type { CaseStatus } from "@/types/case";
 
 import { StatusSwitch } from "@/ui/components/case-management/StatusSwitch";
-import { Button } from "@lumeweb/portal-framework-ui-core";
+import { Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import {
   Dialog,
   DialogContent,
@@ -13,8 +13,10 @@ import {
 } from "@lumeweb/portal-framework-ui-core";
 import { Textarea } from "@lumeweb/portal-framework-ui-core";
 import { useNotification } from "@refinedev/core";
-import { Loader2 } from "lucide-react";
+
 import React, { useState } from "react";
+const Loader2 = lazyIcon("Loader2");
+
 
 interface UpdateStatusDialogProps {
   caseId: number;

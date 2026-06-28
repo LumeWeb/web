@@ -4,36 +4,23 @@ import type { CaseResponse, CasePriority, CaseStatus } from "@/types/case";
 
 import { CaseEventType, type CaseHistoryEvent } from "@/types/case-history";
 import { RefineResource } from "@/types/resources";
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  ScrollArea,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@lumeweb/portal-framework-ui-core";
+import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, ScrollArea, Tabs, TabsContent, TabsList, TabsTrigger, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { useNotification, useShow } from "@refinedev/core";
 import { format } from "date-fns";
-import {
-  AlertTriangle,
-  Clock,
-  Download,
-  FileText,
-  Loader2,
-  MessageSquare,
-  User,
-} from "lucide-react";
+
 import { useState } from "react";
 import React from "react";
 
 import { CasePriorityBadge } from "../CasePriorityBadge";
 import { CaseStatusBadge } from "../CaseStatusBadge";
+const AlertTriangle = lazyIcon("AlertTriangle");
+const Clock = lazyIcon("Clock");
+const Download = lazyIcon("Download");
+const FileText = lazyIcon("FileText");
+const Loader2 = lazyIcon("Loader2");
+const MessageSquare = lazyIcon("MessageSquare");
+const User = lazyIcon("User");
+
 
 interface ViewTimelineDialogProps {
   caseId: number;

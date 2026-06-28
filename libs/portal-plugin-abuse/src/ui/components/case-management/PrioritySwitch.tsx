@@ -1,13 +1,14 @@
 import { CasePriority } from "@/types/case";
-import {
-  AlertCircle,
-  AlertTriangle,
-  CircleAlert,
-  CircleCheck,
-} from "lucide-react";
+import { lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import React from "react";
 
 import { type SwitchOption, VerticalSwitch } from "./VerticalSwitch";
+const AlertCircle = lazyIcon("AlertCircle");
+const AlertTriangle = lazyIcon("AlertTriangle");
+const CircleAlert = lazyIcon("CircleAlert");
+const CircleCheck = lazyIcon("CircleCheck");
+
 interface PrioritySwitchProps {
   className?: string;
   onChange: (value: CasePriority) => Promise<void>;

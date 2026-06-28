@@ -15,7 +15,6 @@ import {
 import { BillingProvider, CheckoutPhase, useBillingContext } from "@/ui/context/BillingContext";
 import { FragmentQueueProvider } from "@/ui/context/FragmentQueueContext";
 // @ts-ignore
-import "@lumeweb/portal-framework-ui-core/tailwind-plugin.css";
 
 function SubscriptionContentInner() {
   const { subscription, plans, checkout } = useBillingContext();

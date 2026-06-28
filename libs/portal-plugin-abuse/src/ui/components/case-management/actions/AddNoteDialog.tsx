@@ -3,21 +3,12 @@ import {
   CommunicationType,
 } from "@/types/communication";
 import { RefineResource } from "@/types/resources";
-import {
-  Button,
-  Checkbox,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  Textarea,
-} from "@lumeweb/portal-framework-ui-core";
+import { Button, Checkbox, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, Textarea, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { useCreate, useNotification } from "@refinedev/core";
-import { Loader2 } from "lucide-react";
+
 import React, { useState } from "react";
+const Loader2 = lazyIcon("Loader2");
+
 
 interface AddNoteDialogProps {
   caseId: number;

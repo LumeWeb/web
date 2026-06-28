@@ -1,5 +1,6 @@
-import { Button } from "@lumeweb/portal-framework-ui-core";
-import { ExternalLink } from "lucide-react";
+import { Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+const ExternalLink = lazyIcon("ExternalLink");
+
 
 interface RedirectViewProps {
   url: string;

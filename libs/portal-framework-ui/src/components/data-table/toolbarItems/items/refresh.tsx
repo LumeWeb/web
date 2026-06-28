@@ -1,5 +1,5 @@
-import { Button } from "@lumeweb/portal-framework-ui-core";
-import { RefreshCw } from "lucide-react";
+import { Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import React from "react";
 import { BaseRecord } from "@refinedev/core";
 
@@ -9,6 +9,8 @@ import type {
   ToolbarActionItem,
   ToolbarItemComponentProps,
 } from "@/components/data-table/DataTable.types";
+const RefreshCw = lazyIcon("RefreshCw");
+
 
 function RefreshToolbarItem<TData extends BaseRecord>({
   refineContext,

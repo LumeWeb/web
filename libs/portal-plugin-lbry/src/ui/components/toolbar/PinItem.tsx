@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Pin } from "lucide-react";
+
 import type { BaseRecord } from "@refinedev/core";
 import { useNotification } from "@refinedev/core";
 import {
@@ -9,9 +9,11 @@ import {
   ToolbarItemType,
   useDialog,
 } from "@lumeweb/portal-framework-ui";
-import { Button } from "@lumeweb/portal-framework-ui-core";
+import { Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { createPinDialogConfig } from "@/ui/dialogs/pinDialog";
 import { useLbryPinning } from "@/ui/hooks";
+const Pin = lazyIcon("Pin");
+
 
 export function PinItem<
   TData extends BaseRecord = any,

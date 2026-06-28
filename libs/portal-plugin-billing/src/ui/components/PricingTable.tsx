@@ -8,9 +8,10 @@ import { useCheckout } from "@/hooks/useCheckout";
 import { usePricingPlans } from "@/hooks/usePricingPlans";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { FragmentRenderer } from "@/ui/components/FragmentRenderer";
-import { Button, Card, CardContent, CardHeader, CardTitle, cn, Label, Switch } from "@lumeweb/portal-framework-ui-core";
+import { Button, Card, CardContent, CardHeader, CardTitle, cn, Label, Switch, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { PlanCard } from "./PricingTable/PlanCard";
-import { ArrowLeft } from "lucide-react";
+const ArrowLeft = lazyIcon("ArrowLeft");
+
 
 interface PricingTableProps {
   className?: string;

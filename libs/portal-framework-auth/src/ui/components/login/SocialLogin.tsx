@@ -3,19 +3,15 @@ import {
   useAccountSubdomain,
   usePluginMeta,
 } from "@lumeweb/portal-framework-ui";
-import {
-  Button,
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@lumeweb/portal-framework-ui-core";
+import { Button, Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { useParsed } from "@refinedev/core";
-import { MoreHorizontal, Search } from "lucide-react";
+
 import React, { useState } from "react";
 
 import socialLoginProviders from "./SocialProviders";
+const MoreHorizontal = lazyIcon("MoreHorizontal");
+const Search = lazyIcon("Search");
+
 
 export function SocialLogin() {
   const socialLoginProvidersList =

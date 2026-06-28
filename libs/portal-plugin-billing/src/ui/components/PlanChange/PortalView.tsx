@@ -1,5 +1,6 @@
-import { Button, Skeleton } from "@lumeweb/portal-framework-ui-core";
-import { ExternalLink } from "lucide-react";
+import { Button, Skeleton, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+const ExternalLink = lazyIcon("ExternalLink");
+
 
 interface PortalViewProps {
   loading: boolean;

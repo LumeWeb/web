@@ -1,7 +1,9 @@
-import { Check } from "lucide-react";
-import { Button } from "@lumeweb/portal-framework-ui-core";
+
+import { Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import type { OnboardingStep } from "@/types";
 import { CliInstallBlock } from "./CliInstallBlock";
+const Check = lazyIcon("Check");
+
 
 interface OnboardingStepCardProps {
   step: OnboardingStep;

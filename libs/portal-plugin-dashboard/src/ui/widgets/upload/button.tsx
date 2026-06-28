@@ -1,9 +1,10 @@
 import { useDialog } from "@lumeweb/portal-framework-ui";
-import { Button } from "@lumeweb/portal-framework-ui-core";
-import { Upload } from "lucide-react";
+import { Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 
 import { uploadWizardDialogConfig } from "@/ui/dialogs/uploadWizard";
 import { useUploadManager } from "@/ui/hooks/useUploadManager";
+const Upload = lazyIcon("Upload");
+
 
 export default function UploadButton() {
   const { openDialog } = useDialog();

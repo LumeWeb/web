@@ -9,11 +9,14 @@ import {
 import { RefineResource } from "@/types/resources";
 import { formatFileSize } from "@/ui/util";
 import { ThemedBadge } from "@lumeweb/portal-framework-ui";
-import { Button } from "@lumeweb/portal-framework-ui-core";
+import { Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { Link as RLink } from "@refinedev/core";
 import { format } from "date-fns";
-import { FileIcon, Link } from "lucide-react";
+
 import React from "react";
+const FileIcon = lazyIcon("FileIcon");
+const Link = lazyIcon("Link");
+
 
 export function BlockDetailsContent({ block }: { block: BlockedContent }) {
   return (

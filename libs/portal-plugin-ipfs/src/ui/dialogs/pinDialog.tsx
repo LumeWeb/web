@@ -6,17 +6,15 @@ import {
   FormFieldConfig,
   useFormContext,
 } from "@lumeweb/portal-framework-ui";
-import { AlertCircle, CheckCircle, Pin, X } from "lucide-react";
+
 import { forwardRef, useState, useMemo, useCallback } from "react";
-import {
-  Badge,
-  Button,
-  cn,
-  Input,
-  Label,
-  ScrollArea,
-} from "@lumeweb/portal-framework-ui-core";
+import { Badge, Button, cn, Input, Label, ScrollArea, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { CID } from "multiformats/cid";
+const AlertCircle = lazyIcon("AlertCircle");
+const CheckCircle = lazyIcon("CheckCircle");
+const Pin = lazyIcon("Pin");
+const X = lazyIcon("X");
+
 
 const pinSchema = z.object({
   cids: z.array(z.string()).min(1, "At least one CID is required"),

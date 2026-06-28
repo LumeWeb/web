@@ -1,9 +1,12 @@
-import { cn } from "@lumeweb/portal-framework-ui-core";
-import { User, UserRound } from "lucide-react";
+import { cn, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import React from "react";
 import Markdown from "react-markdown";
 
 import { TimelineItem } from "./Timeline";
+const User = lazyIcon("User");
+const UserRound = lazyIcon("UserRound");
+
 
 interface TimelineMessageProps {
   className?: string;

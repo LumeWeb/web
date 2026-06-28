@@ -1,15 +1,13 @@
 import type { SubjectDetailResponse } from "@/types/reporter-subject";
 
-import {
-  Badge,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@lumeweb/portal-framework-ui-core";
+import { Badge, Card, CardContent, CardHeader, CardTitle, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { format } from "date-fns";
-import { AlertTriangle, Clock, Link2 } from "lucide-react";
+
 import React from "react";
+const AlertTriangle = lazyIcon("AlertTriangle");
+const Clock = lazyIcon("Clock");
+const Link2 = lazyIcon("Link2");
+
 
 interface SubjectInfoCardProps {
   subject: SubjectDetailResponse;

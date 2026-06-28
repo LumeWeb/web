@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
-import { ChevronDown, Filter } from "lucide-react";
-import { Button, cn } from "@lumeweb/portal-framework-ui-core";
+
+import { Button, cn, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { BaseRecord } from "@refinedev/core";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import type {
@@ -11,6 +11,9 @@ import { FilterResolver } from "./FilterResolver";
 import { ComponentSize, getSizeClass } from "@/components/sizing";
 import { FilterOperator } from "./filters/types";
 import { createFilterOnChangeHandler } from "./filters";
+const ChevronDown = lazyIcon("ChevronDown");
+const Filter = lazyIcon("Filter");
+
 
 interface FilterGroupProps<TData extends BaseRecord> {
   item: ToolbarFilterGroupItem<TData>;

@@ -1,11 +1,9 @@
-import {
-  Button,
-  cn,
-  buttonVariants,
-} from "@lumeweb/portal-framework-ui-core";
+import { Button, cn, buttonVariants, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { type VariantProps } from "class-variance-authority";
-import { ArrowRight } from "lucide-react";
+
 import React, { type ButtonHTMLAttributes, type ReactNode } from "react";
+const ArrowRight = lazyIcon("ArrowRight");
+
 
 export interface ReportButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   showArrow?: boolean;
@@ -35,7 +33,6 @@ const ReportButton = React.forwardRef<HTMLButtonElement, ReportButtonProps>(
     );
   },
 );
-
 
 ReportButton.displayName = "ReportButton";
 

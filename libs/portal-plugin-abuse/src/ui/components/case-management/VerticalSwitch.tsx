@@ -1,14 +1,10 @@
-import {
-  Button,
-  cn,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-  toast,
-  ToastAction,
-} from "@lumeweb/portal-framework-ui-core";
-import { Check, ChevronDown, Loader2 } from "lucide-react";
+import { Button, cn, Popover, PopoverContent, PopoverTrigger, toast, ToastAction, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import React, { useState } from "react";
+const Check = lazyIcon("Check");
+const ChevronDown = lazyIcon("ChevronDown");
+const Loader2 = lazyIcon("Loader2");
+
 
 export interface SwitchOption<T extends string> {
   className?: string;

@@ -10,17 +10,9 @@ import {
   WizardStepDefinition,
   type NavigationType,
 } from "@lumeweb/portal-framework-ui";
-import { cn } from "@lumeweb/portal-framework-ui-core";
+import { cn, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { useNotification } from "@refinedev/core";
-import {
-  BarChart3,
-  Check,
-  Copy,
-  DatabaseIcon,
-  Eye,
-  FileText,
-  Folder,
-} from "lucide-react";
+
 import React, { useEffect } from "react";
 import { z } from "zod";
 
@@ -33,6 +25,14 @@ import {
 import { FileUploadZone } from "@/ui/components/form/FileUploadZone";
 import { UploadProgress } from "@/ui/components/UploadProgress";
 import filesize from "@/ui/util/filesize";
+const BarChart3 = lazyIcon("BarChart3");
+const Check = lazyIcon("Check");
+const Copy = lazyIcon("Copy");
+const DatabaseIcon = lazyIcon("DatabaseIcon");
+const Eye = lazyIcon("Eye");
+const FileText = lazyIcon("FileText");
+const Folder = lazyIcon("Folder");
+
 
 // Define schemas for each step
 const storageSchema = z.object({

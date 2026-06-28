@@ -2,28 +2,16 @@
 
 import type { Identity } from "@lumeweb/portal-framework-core";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-  Button,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@lumeweb/portal-framework-ui-core";
+import { Avatar, AvatarFallback, AvatarImage, Button, DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { Link, useGetIdentity, useLogout } from "@refinedev/core";
-import { LayoutGrid, LogOut, User } from "lucide-react";
+
 import React from "react";
 
 import { useAvatar } from "@/hooks/useAvatar";
+const LayoutGrid = lazyIcon("LayoutGrid");
+const LogOut = lazyIcon("LogOut");
+const User = lazyIcon("User");
+
 
 export function UserNav() {
   const { mutate: logout } = useLogout();

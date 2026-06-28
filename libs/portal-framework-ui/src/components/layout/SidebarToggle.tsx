@@ -1,6 +1,8 @@
-import { Button, cn } from "@lumeweb/portal-framework-ui-core";
-import { ChevronLeft } from "lucide-react";
+import { Button, cn, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import React from "react";
+const ChevronLeft = lazyIcon("ChevronLeft");
+
 
 interface SidebarToggleProps {
   isOpen: boolean | undefined;

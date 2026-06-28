@@ -1,10 +1,14 @@
 import { type SearchResult, useGlobalSearch } from "@/hooks/useGlobalSearch";
 import { useGo } from "@refinedev/core";
-import { Search, X } from "lucide-react";
+import { lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import { useEffect, useRef, useState } from "react";
 import React from "react";
 
 import { SearchResults } from "./SearchResults";
+const Search = lazyIcon("Search");
+const X = lazyIcon("X");
+
 
 export function GlobalSearch() {
   const go = useGo();

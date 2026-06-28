@@ -4,29 +4,24 @@ import {
   type SubjectResponse,
 } from "@/types/subject";
 import { RefineResource } from "@/types/resources";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@lumeweb/portal-framework-ui-core";
+import { Card, CardContent, CardHeader, CardTitle, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { Button } from "@lumeweb/portal-framework-ui-core";
 import { Skeleton } from "@lumeweb/portal-framework-ui-core";
 import { Badge } from "@lumeweb/portal-framework-ui-core";
 import { useCreate, useList, useNotification } from "@refinedev/core";
-import {
-  AlertTriangle,
-  Hash,
-  Link2,
-  Scan,
-  Shield,
-  ShieldAlert,
-  ShieldX,
-} from "lucide-react";
+
 import React, { useState } from "react";
 
 import { ScanHistoryList } from "./ScanHistoryList";
 import { ScanResultsDialog } from "./ScanResultsDialog";
+const AlertTriangle = lazyIcon("AlertTriangle");
+const Hash = lazyIcon("Hash");
+const Link2 = lazyIcon("Link2");
+const Scan = lazyIcon("Scan");
+const Shield = lazyIcon("Shield");
+const ShieldAlert = lazyIcon("ShieldAlert");
+const ShieldX = lazyIcon("ShieldX");
+
 
 interface SubjectScanPanelProps {
   caseId: number;

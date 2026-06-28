@@ -6,16 +6,14 @@ import {
   FormFieldConfig,
   useFormContext,
 } from "@lumeweb/portal-framework-ui";
-import { AlertCircle, CheckCircle, Hash, X } from "lucide-react";
+
 import { forwardRef, useCallback, useMemo, useState } from "react";
-import {
-  Badge,
-  Button,
-  cn,
-  Input,
-  Label,
-  ScrollArea,
-} from "@lumeweb/portal-framework-ui-core";
+import { Badge, Button, cn, Input, Label, ScrollArea, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+const AlertCircle = lazyIcon("AlertCircle");
+const CheckCircle = lazyIcon("CheckCircle");
+const Hash = lazyIcon("Hash");
+const X = lazyIcon("X");
+
 
 // Schema for pin dialog
 const pinSchema = z.object({

@@ -2,9 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import { useApiUrl } from "@lumeweb/portal-framework-ui";
-import { Button } from "@lumeweb/portal-framework-ui-core";
+import { Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { useNotification } from "@refinedev/core";
-import { Upload } from "lucide-react";
+
 import {
   UploadManagerProvider,
   useUploadManagerContext,
@@ -21,6 +21,8 @@ import {
 } from "@lumeweb/portal-framework-ui-core";
 import { createSmallFilePlugin, createLargeFilePlugin } from "@lib/util/uppy";
 import XHRUpload from "@uppy/xhr-upload";
+const Upload = lazyIcon("Upload");
+
 
 interface AvatarUploadInnerProps {
   currentAvatar?: string;

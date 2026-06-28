@@ -1,16 +1,11 @@
-import {
-  Button,
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@lumeweb/portal-framework-ui-core";
+import { Button, Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { Link } from "@refinedev/core";
-import { MenuIcon } from "lucide-react";
+
 import React from "react";
 
 import { MainNavigation } from "@/components/MainNavigation";
+const MenuIcon = lazyIcon("MenuIcon");
+
 
 export function MobileMenu() {
   const [open, setOpen] = React.useState(false);

@@ -1,17 +1,15 @@
 "use client";
 
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@lumeweb/portal-framework-ui-core";
-import { FileText, Scan } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import { useState } from "react";
 import React from "react";
 
 import { EvidenceList } from "./evidence/EvidenceList";
 import { SubjectScanPanel } from "./scanning/SubjectScanPanel";
+const FileText = lazyIcon("FileText");
+const Scan = lazyIcon("Scan");
+
 
 interface EvidenceScanningTabProps {
   caseId: number;

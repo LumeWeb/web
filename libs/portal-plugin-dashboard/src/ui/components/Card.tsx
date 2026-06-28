@@ -1,12 +1,6 @@
-import {
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Card as UICard,
-  CardContent as UICardContent,
-} from "@lumeweb/portal-framework-ui-core";
+import { CardDescription, CardHeader, CardTitle, Card as UICard, CardContent as UICardContent, type LucideIcon } from "@lumeweb/portal-framework-ui-core";
 import { cn } from "@lumeweb/portal-framework-ui-core";
-import { LucideIcon } from "lucide-react";
+
 import { ReactNode } from "react";
 
 interface CardProps {

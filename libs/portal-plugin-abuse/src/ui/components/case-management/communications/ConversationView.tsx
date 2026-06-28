@@ -1,19 +1,16 @@
 import type { CommunicationResponse } from "@/types/communication";
 
 import { RefineResource } from "@/types/resources";
-import {
-  Avatar,
-  AvatarFallback,
-  cn,
-  Skeleton,
-} from "@lumeweb/portal-framework-ui-core";
+import { Avatar, AvatarFallback, cn, Skeleton, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { useList } from "@refinedev/core";
 import { format } from "date-fns";
-import { User } from "lucide-react";
+
 import React from "react";
 
 import { CommunicationDirectionBadge } from "./CommunicationDirectionBadge";
 import { CommunicationTypeIcon } from "./CommunicationTypeIcon";
+const User = lazyIcon("User");
+
 
 interface ConversationViewProps {
   communication: CommunicationResponse;

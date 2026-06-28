@@ -1,12 +1,9 @@
 import { useState, useCallback } from "react";
-import { Copy, Check } from "lucide-react";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-  cn,
-} from "@lumeweb/portal-framework-ui-core";
+
+import { Tabs, TabsContent, TabsList, TabsTrigger, cn, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+const Copy = lazyIcon("Copy");
+const Check = lazyIcon("Check");
+
 
 type Platform = "unix" | "windows";
 type WindowsShell = "powershell" | "cmd";

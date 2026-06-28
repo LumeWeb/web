@@ -1,7 +1,10 @@
 import React from "react";
-import { Home, ChevronRight } from "lucide-react";
+
 import { ROOT_PATH } from "./Breadcrumbs";
-import { cn } from "@lumeweb/portal-framework-ui-core";
+import { cn, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+const Home = lazyIcon("Home");
+const ChevronRight = lazyIcon("ChevronRight");
+
 
 export interface HomeButtonProps {
   currentPath: string;

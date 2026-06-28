@@ -1,21 +1,21 @@
 import type { UppyFile } from "@uppy/core";
 
 import { isFolderBundle } from "@lib/util";
-import { Badge, Button, Progress } from "@lumeweb/portal-framework-ui-core";
-import {
-  File,
-  FileText,
-  Folder,
-  ImageIcon,
-  Music,
-  Video,
-  X,
-} from "lucide-react";
+import { Badge, Button, Progress, lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import React from "react";
 
 import { FileStatus } from "@/types/upload";
 import { getDisplayName, getDisplaySize } from "@/ui/util/file";
 import filesize from "@/ui/util/filesize";
+const File = lazyIcon("File");
+const FileText = lazyIcon("FileText");
+const Folder = lazyIcon("Folder");
+const ImageIcon = lazyIcon("ImageIcon");
+const Music = lazyIcon("Music");
+const Video = lazyIcon("Video");
+const X = lazyIcon("X");
+
 
 interface FileItemProps {
   alwaysShowRemoveButton?: boolean;

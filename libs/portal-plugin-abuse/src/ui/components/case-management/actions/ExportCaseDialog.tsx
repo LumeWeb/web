@@ -1,20 +1,10 @@
-import {
-  Button,
-  Checkbox,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  Label,
-  RadioGroup,
-  RadioGroupItem,
-} from "@lumeweb/portal-framework-ui-core";
+import { Button, Checkbox, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, Label, RadioGroup, RadioGroupItem, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { useNotification } from "@refinedev/core";
-import { Download, Loader2 } from "lucide-react";
+
 import React, { useState } from "react";
+const Download = lazyIcon("Download");
+const Loader2 = lazyIcon("Loader2");
+
 
 interface ExportCaseDialogProps {
   caseId: number;

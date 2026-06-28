@@ -1,22 +1,14 @@
 import React, { useState, useRef } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-  TooltipProvider,
-} from "@lumeweb/portal-framework-ui-core";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Tooltip, TooltipTrigger, TooltipContent, TooltipProvider, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { BaseFilter } from "../BaseFilter";
 import type { BaseFilterComponentProps, SelectOption } from "@/components/data-table/toolbarItems/filters/types";
 import { BaseRecord } from "@refinedev/core";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { ChevronDown } from "lucide-react";
+
 import { Button } from "@lumeweb/portal-framework-ui-core";
 import { cn } from "@lumeweb/portal-framework-ui-core";
+const ChevronDown = lazyIcon("ChevronDown");
+
 // TODO: Reimplement tooltip functionality
 // import { useFilterTooltip } from "../hooks/useFilterTooltip";
 

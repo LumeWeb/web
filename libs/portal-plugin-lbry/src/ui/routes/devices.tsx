@@ -4,11 +4,10 @@ import {
   PageHeader,
   useDialog,
 } from "@lumeweb/portal-framework-ui";
-import { Button } from "@lumeweb/portal-framework-ui-core";
+import { Button, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import { Authenticated, useDelete } from "@refinedev/core";
 import { createColumnHelper } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Edit, Plus, Trash2 } from "lucide-react";
 
 import {
   createDeviceDialogConfig,
@@ -16,6 +15,10 @@ import {
   editDeviceDialogConfig,
 } from "@/ui/dialogs";
 import type { DeviceResponse } from "@/client";
+const Edit = lazyIcon("Edit");
+const Plus = lazyIcon("Plus");
+const Trash2 = lazyIcon("Trash2");
+
 
 const columnHelper = createColumnHelper<DeviceResponse>();
 

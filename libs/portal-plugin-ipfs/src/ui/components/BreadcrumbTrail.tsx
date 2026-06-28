@@ -1,7 +1,10 @@
 import React from "react";
-import { Folder, ChevronRight } from "lucide-react";
-import { cn } from "@lumeweb/portal-framework-ui-core";
+
+import { cn, lazyIcon } from "@lumeweb/portal-framework-ui-core";
 import type { BreadcrumbItem } from "./Breadcrumbs";
+const Folder = lazyIcon("Folder");
+const ChevronRight = lazyIcon("ChevronRight");
+
 
 export interface BreadcrumbTrailProps {
   breadcrumbs: BreadcrumbItem[];
