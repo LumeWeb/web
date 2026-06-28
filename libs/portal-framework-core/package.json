@@ -50,7 +50,8 @@
     "memoizee": "^0.4.17",
     "node-fetch": "^3.3.2",
     "react-error-boundary": "^6.1.2",
-    "tsdown": "catalog:"
+    "tsdown": "catalog:",
+    "@types/react": "catalog:"
   },
   "peerDependencies": {
     "@module-federation/enhanced": "catalog:",
