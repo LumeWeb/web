@@ -1,7 +1,9 @@
 import { cn } from '@/lib/utils';
 import { cva, VariantProps } from 'class-variance-authority';
-import { Loader2 } from 'lucide-react';
+import { lazyIcon } from '@/components/lazy-icons';
 import React from 'react';
+
+const Loader2 = lazyIcon("Loader2");
 
 const spinnerVariants = cva('flex-col items-center justify-center', {
   defaultVariants: {

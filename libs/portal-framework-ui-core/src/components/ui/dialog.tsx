@@ -2,10 +2,13 @@
 "use client";
 
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { X } from "lucide-react";
+import { lazyIcon } from "@/components/lazy-icons";
+
 import * as React from "react";
 
 import { cn } from "../../lib/utils";
+const X = lazyIcon("X");
+
 
 const Dialog: typeof DialogPrimitive.Root = DialogPrimitive.Root;
 

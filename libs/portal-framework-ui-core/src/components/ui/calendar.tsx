@@ -2,7 +2,7 @@
 
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { lazyIcon } from "@/components/lazy-icons";
 import * as React from "react"
 import { DayPicker } from "react-day-picker"
 
@@ -57,6 +57,9 @@ function Calendar({
         Chevron: ({ className, ...props }) => {
           if (props.orientation === "left") {
             return <ChevronLeft className={cn("h-4 w-4", className)} {...props} />;
+const ChevronLeft = lazyIcon("ChevronLeft");
+const ChevronRight = lazyIcon("ChevronRight");
+
           }
           return <ChevronRight className={cn("h-4 w-4", className)} {...props} />;
         },

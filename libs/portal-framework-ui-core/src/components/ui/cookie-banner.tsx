@@ -4,13 +4,15 @@ import type { ConsentCategory } from "@lumeweb/analytics";
 
 import { cn } from "../../lib/utils";
 import { Button } from "@/components/ui/button";
+import type { Sheet as _Sheet } from "@/components/ui/sheet";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet";
+  type SheetContentProps,
+} from "@/components/ui/lazy/sheet";
 import { Switch } from "@/components/ui/switch";
 
 function getPortalUrl(path: string): string {
@@ -43,7 +45,7 @@ const COOKIE_CATEGORIES: CookieCategoryConfig[] = [
   },
 ];
 
-function CookieBanner({ className, ...props }: React.ComponentProps<typeof Sheet>) {
+function CookieBanner({ className, ...props }: React.ComponentProps<typeof _Sheet>) {
   const { status, categories, acceptAll, rejectAll, customize, isConsentExpired } =
     useConsent();
 

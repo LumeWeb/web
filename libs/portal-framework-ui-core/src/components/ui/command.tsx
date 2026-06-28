@@ -1,11 +1,14 @@
 import { type DialogProps } from "@radix-ui/react-dialog";
 import { Command as CommandPrimitive } from "cmdk";
-import { Search } from "lucide-react";
+import { lazyIcon } from "@/components/lazy-icons";
+
 import * as React from "react";
 
 import { cn } from "../../lib/utils";
 // @ts-nocheck
 import { Dialog, DialogContent } from "./dialog";
+const Search = lazyIcon("Search");
+
 
 const Command = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive>,
