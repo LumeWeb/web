@@ -1,8 +1,6 @@
 import {
-  createNamespacedId,
   CapabilityStatus,
   Framework,
-  FRAMEWORK_NS,
   getSdk,
   RefineConfigCapability,
 } from "@lumeweb/portal-framework-core";
@@ -11,8 +9,8 @@ import { AuthProvider } from "@refinedev/core";
 import { createAuthProvider } from "../dataProviders/auth";
 
 export class Capability implements RefineConfigCapability {
-  dependencies = [createNamespacedId(FRAMEWORK_NS, "sdk-auth")];
-  readonly id = createNamespacedId(FRAMEWORK_NS, "refine-config-auth");
+  dependencies = ["core:sdk-auth"];
+  readonly id = "core:refine-config-auth";
   status: CapabilityStatus = "inactive";
   readonly type = "framework:refine-config";
   #authProvider?: AuthProvider;

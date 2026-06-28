@@ -4,7 +4,6 @@ import {
   createRemoteComponentLoader,
   defaultRemoteOptions,
   Framework,
-  FRAMEWORK_NS,
   isNamespacedId,
   NamespacedId,
   NavigationFeature,
@@ -126,7 +125,7 @@ export function generateIdFromRoute(
 }
 
 export class Navigation implements NavigationFeature {
-  id: NamespacedId = createNamespacedId(FRAMEWORK_NS, "navigation");
+  id: NamespacedId = createNamespacedId(CORE_NS, "navigation");
   status = "enabled" as const;
   version = "0.1.0";
 
