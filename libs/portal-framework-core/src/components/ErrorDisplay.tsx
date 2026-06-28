@@ -1,7 +1,10 @@
-import { AlertCircle } from "lucide-react";
+import { lazyIcon } from "@lumeweb/portal-framework-ui-core";
+
 import React from "react";
 
 import type { CategoryError, InitializationResult } from "../types/api";
+const AlertCircle = lazyIcon("AlertCircle");
+
 
 interface ErrorDisplayProps {
   error: Error | InitializationResult;
