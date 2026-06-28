@@ -28,11 +28,10 @@ export const usePortalActions = () => {
   return useStoreWithEqualityFn(
     appStore,
     (state) => ({
-      setIsMetaLoading: (isMetaLoading: boolean) =>
-        appStore.setState({ isMetaLoading }),
-      setMeta: (meta: PortalMeta | undefined) => appStore.setState({ meta }),
-      setPortalUrl: (portalUrl: string) => appStore.setState({ portalUrl }),
-      setSdk: (sdk: any) => appStore.setState({ sdk }),
+      setIsMetaLoading: state.setIsMetaLoading,
+      setMeta: state.setMeta,
+      setPortalUrl: state.setPortalUrl,
+      setSdk: state.setSdk,
     }),
     shallow,
   );

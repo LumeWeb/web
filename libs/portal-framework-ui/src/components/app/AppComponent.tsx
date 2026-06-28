@@ -43,6 +43,7 @@ export function useFrameworkSync() {
   const framework = useFramework();
   const setFramework = useAppStore((state) => state.setFramework);
   const setMeta = useAppStore((state) => state.setMeta);
+  const setPortalUrl = useAppStore((state) => state.setPortalUrl);
 
   useEffect(() => {
     if (!framework?.framework) {
@@ -50,7 +51,8 @@ export function useFrameworkSync() {
     }
     setFramework(framework.framework);
     setMeta(framework.framework.meta ?? undefined);
-  }, [framework?.framework, setFramework, setMeta]);
+    setPortalUrl(framework.framework.portalUrl);
+  }, [framework?.framework, setFramework, setMeta, setPortalUrl]);
 }
 
 // Register all form components at module load time

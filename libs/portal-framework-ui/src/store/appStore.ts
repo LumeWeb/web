@@ -1,6 +1,7 @@
 import {
   CORE_NS,
   createNamespacedId,
+  env,
   type Framework,
   type NamespacedId,
   NavigationFeature,
@@ -285,7 +286,7 @@ export const appStore = createStore<AppActions & AppState>((set, get) => ({
   isMetaLoading: false,
   menuItems: [],
   pluginConfigs: [],
-  portalUrl: "",
+  portalUrl: env.VITE_PORTAL_DOMAIN ?? "",
   removeMenuItem: (key: NamespacedId) =>
     set((state) => {
       return { menuItems: helpers.removeItemFromMenu(state.menuItems, key) };

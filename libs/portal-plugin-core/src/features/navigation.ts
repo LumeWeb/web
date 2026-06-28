@@ -197,7 +197,7 @@ export class Navigation implements NavigationFeature {
     if (!item) {
       const childPath = resolveFullPath(parentPath, route.path ?? "");
       return route.children
-        ?.filter((child) => this.isEligibleForNavProcessing(child))
+        ?.filter((child) => this.shouldIncludeRouteInNavigation(child))
         .flatMap((child) =>
           this.processRouteForNavigation(child, pluginId, childPath, parentId),
         ) ?? [];
@@ -218,7 +218,7 @@ export class Navigation implements NavigationFeature {
       .flatMap(
         (plugin) =>
           plugin.routes
-            ?.filter((route) => this.isEligibleForNavProcessing(route))
+            ?.filter((route) => this.shouldIncludeRouteInNavigation(route))
             .flatMap((route) =>
               this.processRouteForNavigation(route, plugin.id),
             ) ?? [],
