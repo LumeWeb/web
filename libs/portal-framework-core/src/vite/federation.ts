@@ -5,9 +5,9 @@ import { resolve } from "path";
 
 import { getBaseUrl } from "./config";
 import type { ConfigOptions, PluginConfig } from "./types";
+import type { SharedModules } from "./shared-types";
 
-export type SharedValue = string | false | Record<string, unknown>;
-export type SharedModules = Record<string, SharedValue>;
+export type { SharedModules, SharedValue } from "./shared-types";
 
 export function createBaseFederationConfig(
   name: string,
