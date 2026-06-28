@@ -8,10 +8,6 @@ const routes = [
     component: "Index",
     id: createNamespacedId("admin", "root"),
     index: false,
-    navigation: {
-      label: "Home",
-      order: -1,
-    },
     path: "/",
   },
   {

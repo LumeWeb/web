@@ -12,12 +12,14 @@ const brandSchema = z.object({
       github: z.string().optional(),
     })
     .optional(),
+  values: z.string().optional(),
 });
 
 export type BrandConfig = z.infer<typeof brandSchema>;
 
 export const DEFAULT_BRAND: BrandConfig = {
   tagline: "Your data. Your Rules.",
+  values: "Freedom\nPrivacy\nOwnership",
 };
 
 const brandSchemaWithDefault = z.preprocess(

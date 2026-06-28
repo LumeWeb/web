@@ -13,17 +13,17 @@ import { useThemeIdAndSetter } from "@/hooks/useTheme";
 
 // Import Theme from the types file
 import type { Theme } from "@/types/theme";
+import { builtInThemes } from "@/utils/theme";
 
 export const ThemeSwitcher: React.FC = () => {
   // Get setTheme from the correct hook
   const { setTheme } = useThemeIdAndSetter();
 
-  // Get themes list using the Theme type
-  const themes = usePluginMeta<Theme[]>("dashboard", "themes");
-
-  if (!themes) {
-    return null;
-  }
+  // Get themes list using the Theme type, fall back to built-in themes
+  const pluginThemes = usePluginMeta<Theme[]>("dashboard", "themes");
+  const themes = pluginThemes && pluginThemes.length > 0
+    ? pluginThemes
+    : builtInThemes();
 
   return (
     <Popover>

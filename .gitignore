@@ -68,3 +68,4 @@ plugin.config.json
 docs/
 .worktrees/
 apps/*/devtools-output/
+.hermes/
