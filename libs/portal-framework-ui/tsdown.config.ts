@@ -1,21 +1,31 @@
 import { defineConfig } from "tsdown";
-import { createLibraryConfigWithPlugins, entryPatterns } from "@lumeweb/tsdown-config";
-
-import image from "@rollup/plugin-image";
+import {
+  createLibraryConfigWithPlugins,
+  entryPatterns,
+  rolldownImageAssetPlugin,
+} from "@lumeweb/tsdown-config";
 
 export default defineConfig([
   {
-    ...createLibraryConfigWithPlugins(entryPatterns.withoutTests, [image() as any], {
-      deps: { skipNodeModulesBundle: true, neverBundle: [/@refinedev\/.*/] },
-      unbundle: true,
-    }),
+    ...createLibraryConfigWithPlugins(
+      entryPatterns.withoutTests,
+      [rolldownImageAssetPlugin()],
+      {
+        deps: { skipNodeModulesBundle: true, neverBundle: [/@refinedev\/.*/] },
+        unbundle: true,
+      },
+    ),
   },
   {
-    ...createLibraryConfigWithPlugins(["src/images.ts"], [image()], {
-      clean: false,
-      dts: true,
-      format: "esm",
-    }),
+    ...createLibraryConfigWithPlugins(
+      ["src/images.ts"],
+      [rolldownImageAssetPlugin()],
+      {
+        clean: false,
+        dts: true,
+        format: "esm",
+      },
+    ),
     outDir: "dist/esm",
   },
 ]);

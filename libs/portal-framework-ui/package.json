@@ -34,7 +34,6 @@
   },
   "devDependencies": {
     "@lumeweb/tsdown-config": "workspace:*",
-    "@rollup/plugin-image": "^3.0.3",
     "fake-indexeddb": "^6.2.5",
     "tsdown": "catalog:",
     "@types/react": "catalog:"
@@ -69,7 +68,7 @@
     "react-keybind": "^0.10.0",
     "react-router": "catalog:",
     "zod": "catalog:",
-    "zustand": "^5.0.9"
+    "zustand": "catalog:"
   },
   "repository": {
     "type": "git",
