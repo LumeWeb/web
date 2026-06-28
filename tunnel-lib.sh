@@ -32,12 +32,33 @@ tunnel_cleanup() {
     echo
     echo "Shutting down servers and tunnels..."
 
+    local script_pgid
+    script_pgid=$(ps -o pgid= -p $$ 2>/dev/null | tr -d ' ')
+
     for pid in "${TUNNEL_PIDS[@]}"; do
         if ps -p "$pid" > /dev/null 2>&1; then
             echo "Killing process $pid..."
-            kill "$pid" 2>/dev/null
+            # Kill the process group to clean up child processes, but only if
+            # it's not the script's own group (which would kill ourselves)
+            local pgid
+            pgid=$(ps -o pgid= -p "$pid" 2>/dev/null | tr -d ' ')
+            if [ -n "$pgid" ] && [ "$pgid" != "$script_pgid" ]; then
+                kill -- -"$pgid" 2>/dev/null || kill "$pid" 2>/dev/null || true
+            else
+                kill "$pid" 2>/dev/null || true
+            fi
         fi
     done
+
+    # Kill any piko agents (tracked or stale)
+    tunnel_kill_stale_piko
+
+    # Kill any stale vite processes on tunnel ports that survived parent kill
+    if [ $# -gt 0 ]; then
+        tunnel_kill_stale_vite "$@"
+    else
+        tunnel_kill_stale_vite
+    fi
 
     if [ $# -gt 0 ]; then
         for port in "$@"; do
@@ -59,6 +80,55 @@ tunnel_track_pid() {
 tunnel_kill_port() {
     local port="$1"
     lsof -ti tcp:"$port" 2>/dev/null | xargs kill 2>/dev/null
+}
+
+# --- Kill stale piko agent processes ---
+# Finds and kills any running piko agent processes so they don't hold ports
+# or create conflicting tunnels. Called on startup and during cleanup.
+tunnel_kill_stale_piko() {
+    local piko_pids
+    piko_pids=$(pgrep -f "piko agent" 2>/dev/null) || true
+
+    if [ -n "$piko_pids" ]; then
+        echo "Killing stale piko agent processes..."
+        echo "$piko_pids" | while IFS= read -r pid; do
+            if [ -n "$pid" ] && ps -p "$pid" > /dev/null 2>&1; then
+                echo "  Killing piko agent (PID $pid)..."
+                kill "$pid" 2>/dev/null || true
+            fi
+        done
+        sleep 1
+        echo "Stale piko agents cleaned up."
+    fi
+}
+
+# --- Kill stale vite processes on tunnel ports ---
+# Kills vite processes bound to ports this tunnel manages, rather than
+# name-matching every vite process on the host (which would kill unrelated
+# dev servers). Falls back to killing tracked PIDs if no ports provided.
+tunnel_kill_stale_vite() {
+    # If ports are provided, kill by port (scoped)
+    if [ $# -gt 0 ]; then
+        local port
+        for port in "$@"; do
+            local pids
+            pids=$(lsof -ti tcp:"$port" 2>/dev/null) || true
+            if [ -n "$pids" ]; then
+                echo "Killing process on port $port..."
+                echo "$pids" | xargs kill 2>/dev/null || true
+            fi
+        done
+        return
+    fi
+
+    # No ports provided — kill tracked PIDs only
+    local pid
+    for pid in "${TUNNEL_PIDS[@]}"; do
+        if [ -n "$pid" ] && ps -p "$pid" > /dev/null 2>&1; then
+            echo "  Killing tracked process (PID $pid)..."
+            kill "$pid" 2>/dev/null || true
+        fi
+    done
 }
 
 # --- Generate JWT Token for Piko ---
@@ -335,6 +405,8 @@ tunnel_single_app() {
     local server_command=("$@")
 
     tunnel_check_prerequisites false true
+    tunnel_kill_stale_piko
+    tunnel_kill_stale_vite "$port"
     tunnel_check_directory "$app_dir" "$app_name app directory"
     tunnel_start_server "$app_dir" "$port" "$app_name" "${server_command[@]}"
     tunnel_create_piko_tunnel "$tunnel_host" "$port" "$app_name"
@@ -435,6 +507,10 @@ tunnel_multi_app() {
 
     tunnel_check_prerequisites true true
 
+    # Kill any stale piko agents from previous runs before starting new ones
+    tunnel_kill_stale_piko
+    tunnel_kill_stale_vite "$main_port"
+
     # Check for TUNNEL_PLUGINS from root .env (user-specific, gitignored)
     # This takes precedence over the value that may have been set in .env.tunnel
     if [ -n "${TUNNEL_PLUGINS_FROM_ROOT:-}" ]; then
@@ -491,6 +567,9 @@ tunnel_multi_app() {
 
             port_offset=$((port_offset + 1))
             local forwarding_port=$((main_port + port_offset))
+
+            # Kill any stale process on this plugin's port before starting
+            tunnel_kill_stale_vite "$forwarding_port"
 
             tunnel_start_server "$plugin_dir" "$forwarding_port" "'$name'" \
                 VITE_TUNNEL_HOST="$tunnelHost" \

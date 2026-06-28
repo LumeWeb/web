@@ -63,6 +63,7 @@ function createServerPreviewConfig(opts: ConfigOptions) {
       allowedHosts: tunnelHost ? [tunnelHost] : undefined,
       host: true,
       port: opts.devPort,
+      strictPort: true,
     },
     server: {
       cors: true,
@@ -71,6 +72,7 @@ function createServerPreviewConfig(opts: ConfigOptions) {
         ? `${tunnelProtocol}://${tunnelHost}`
         : undefined,
       port: opts.devPort,
+      strictPort: true,
     },
   };
 }
