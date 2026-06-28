@@ -43,15 +43,16 @@ interface FrameworkProviderProps {
   configure: (builder: Builder) => Builder;
 }
 
-const isDev = true;
+const isDev = import.meta.env.DEV;
 
 export function FrameworkProvider({
   appName,
   children,
   configure,
 }: FrameworkProviderProps) {
-  const builderRef = useRef<Builder>();
-  const frameworkRef = useRef<Framework>();
+  const builderRef = useRef<Builder | undefined>(undefined);
+  const frameworkRef = useRef<Framework | undefined>(undefined);
+  const initializingRef = useRef(false);
   const [state, setState] = useState<{
     error: InitializationError | null;
     framework: Framework | null;
@@ -63,6 +64,11 @@ export function FrameworkProvider({
   });
 
   const initializeFrameworkInstance = useCallback(async () => {
+    // Guard against concurrent initialization (React StrictMode double-invokes effects in dev)
+    if (initializingRef.current) {
+      return;
+    }
+
     try {
       // Check if we need to reinitialize
       if (!shouldInitialize(builderRef.current, frameworkRef.current)) {
@@ -78,6 +84,7 @@ export function FrameworkProvider({
         return;
       }
 
+      initializingRef.current = true;
       setState((prev) => ({ ...prev, error: null, isLoading: true }));
 
       const result = await initializeFramework({
@@ -110,7 +117,8 @@ export function FrameworkProvider({
 
       if (isDev && err && typeof err === 'object' && 'errors' in err) {
         console.error("[FrameworkProvider] Individual errors:");
-        for (const [key, error] of Object.entries(err.errors)) {
+        const errors = (err as Record<string, unknown>).errors as Record<string, Error>;
+        for (const [key, error] of Object.entries(errors)) {
           console.error(`  ${key}:`, error);
         }
       }
@@ -129,6 +137,8 @@ export function FrameworkProvider({
       document.dispatchEvent(new CustomEvent('portal:boot:complete', {
         detail: { success: false, error }
       }));
+    } finally {
+      initializingRef.current = false;
     }
   }, [appName, configure]);
 
@@ -244,11 +254,15 @@ export function useFrameworkData<T>(
 
 export function useCapability<T extends BaseCapability>(id: string) {
   const { framework } = useFramework();
-  const fetchCapability = useCallback(() => {
+  const fetchCapability = useCallback(async () => {
     if (!framework) {
       throw new Error("Framework not initialized");
     }
-    return framework.getCapability<T>(id);
+    const capability = await framework.getCapability<T>(id);
+    if (!capability) {
+      throw new Error(`Capability ${id} not found`);
+    }
+    return capability;
   }, [framework, id]);
 
   return useFrameworkData<T>(fetchCapability);
