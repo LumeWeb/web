@@ -2,7 +2,7 @@ class AppLoader {
   #isComplete = false;
   #loadingMessage: HTMLElement = document.querySelector(".loading-message")!;
   #loadingOverlay: HTMLElement = document.querySelector(".loading-overlay")!;
-  #messageInterval: null | number = null;
+  #messageInterval: null | ReturnType<typeof setInterval> = null;
   #messages = [
     "Securing decentralized storage...",
     "Verifying cryptographic keys...",
@@ -25,7 +25,7 @@ class AppLoader {
     do {
       randomIndex = Math.floor(Math.random() * this.#messages.length);
     } while (this.#messages.length > 1 && randomIndex === this.#previousMessageIndex);
-    
+
     this.#previousMessageIndex = randomIndex;
     return randomIndex;
   }
@@ -49,12 +49,21 @@ class AppLoader {
   #init(): void {
     // Start the loading sequence
     this.#startMessageCycling();
-    this.#listenReady();
     this.#listenBootComplete();
+
+    // If React already rendered and dispatched portal:boot:complete
+    // before this script loaded (module federation timing), the event
+    // was missed. Check if #root already has content and handle it.
+    const root = document.getElementById("root");
+    if (root && root.children.length > 0) {
+      this.#handleBootComplete();
+    }
   }
 
   #listenBootComplete(): void {
-    // Listen for the portal boot completion event
+    // Listen for the portal boot completion event.
+    // On both success and error, remove the overlay so the React tree
+    // (which renders ErrorDisplay on failure) becomes visible.
     document.addEventListener('portal:boot:complete', () => {
       this.#handleBootComplete();
     });
@@ -62,45 +71,33 @@ class AppLoader {
 
   #handleBootComplete(): void {
     if (this.#isComplete) return;
-    
+
     this.#isComplete = true;
-    
+
     // Clear the message cycling interval
     if (this.#messageInterval) {
       clearInterval(this.#messageInterval);
       this.#messageInterval = null;
     }
-    
-    // Remove the loading overlay
-    if (this.#loadingOverlay) {
-      this.#loadingOverlay.remove();
-      console.log("App loading complete - framework initialization finished");
-    }
-    
-    // Remove the is-loading class from the html element
-    document.documentElement.classList.remove('is-loading');
-  }
 
-  #listenReady(): void {
-    // Add transitionend listener as a fallback mechanism
+    // Remove is-loading first so the CSS fade-out transition triggers
+    // (opacity: 0 with 0.5s ease-out), then remove from DOM after it ends.
+    document.documentElement.classList.remove('is-loading');
+
     if (this.#loadingOverlay) {
       this.#loadingOverlay.addEventListener("transitionend", (event) => {
-        if (
-          event.propertyName === "opacity" &&
-          this.#loadingOverlay instanceof HTMLElement
-        ) {
-          const computedStyle = getComputedStyle(this.#loadingOverlay);
-          if (computedStyle.opacity === "1") {
-            return;
-          }
-
-          if (!this.#isComplete) {
-            this.#handleBootComplete();
-          }
+        if (event.propertyName === "opacity") {
+          this.#loadingOverlay.remove();
         }
-      });
-    }
+      }, { once: true });
 
+      // Fallback in case transitionend doesn't fire
+      setTimeout(() => {
+        this.#loadingOverlay?.remove();
+      }, 600);
+
+      console.log("App loading complete - framework initialization finished");
+    }
   }
 
   #startMessageCycling(): void {
@@ -109,6 +106,10 @@ class AppLoader {
     this.#cycleMessage(); // Start immediately
   }
 }
-document.addEventListener("DOMContentLoaded", () => {
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => {
+    new AppLoader();
+  });
+} else {
   new AppLoader();
-});
+}

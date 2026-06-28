@@ -6,7 +6,7 @@ import type {
 
 import { createStore, useStore } from "zustand";
 
-interface AppActions {
+export interface AppActions {
   addMenuItem: (item: NavigationItem, parentKey?: NamespacedId) => void;
   addMenuItems: (items: NavigationItem[], parentKey?: NamespacedId) => void;
   removeMenuItem: (key: NamespacedId) => void;
@@ -16,7 +16,7 @@ interface AppActions {
   setRoutes: (routes: RouteDefinition[]) => void;
 }
 
-interface AppState {
+export interface AppState {
   error: Error | null;
   isLoading: boolean;
   menuItems: NavigationItem[];

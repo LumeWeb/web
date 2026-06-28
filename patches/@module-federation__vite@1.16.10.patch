@@ -1,0 +1,92 @@
+diff --git a/lib/index.js b/lib/index.js
+index 74ddba1f07829e418c16f64a5e3c6bf1ae9984b9..5c50403a65a696db4432cf324077518f3575c372 100644
+--- a/lib/index.js
++++ b/lib/index.js
+@@ -1267,6 +1267,13 @@ function generateLazyWorkspaceSingletonExports(namedExports, importSource, cache
+ 	const applyLocalFallback = `exportModule = __mfNormalizeShareModule(__mfLocalShare);
+       __mfModuleCache.share[${escapeGeneratedStringLiteral(cacheKey)}] = exportModule;
+       __mfApplyLazyShareExports(exportModule);`;
++	const asyncLoadCode = `initPromise.then(() =>
++        import(${escapeGeneratedStringLiteral(importSource)}).then((mod) => {
++          exportModule = __mfNormalizeShareModule(mod);
++          __mfModuleCache.share[${escapeGeneratedStringLiteral(cacheKey)}] = exportModule;
++          __mfApplyLazyShareExports(exportModule);
++        })
++      )`;
+ 	const body = `${declarations}
+     const __mfApplyLazyShareExports = (mod) => {
+       ${assignments}
+@@ -1276,13 +1283,7 @@ function generateLazyWorkspaceSingletonExports(namedExports, importSource, cache
+       ${eagerLocalFallback ? applyLocalFallback : `if (import.meta.env.SSR) {
+         ${applyLocalFallback}
+       } else {
+-        initPromise.then(() =>
+-          import(${escapeGeneratedStringLiteral(importSource)}).then((mod) => {
+-            exportModule = __mfNormalizeShareModule(mod);
+-            __mfModuleCache.share[${escapeGeneratedStringLiteral(cacheKey)}] = exportModule;
+-            __mfApplyLazyShareExports(exportModule);
+-          })
+-        );
++        (__mfModuleCache.pendingShareLoads ||= []).push(${asyncLoadCode});
+       }`}
+     } else {
+       __mfApplyLazyShareExports(exportModule);
+@@ -1601,7 +1602,7 @@ function generateSharedCacheSeedItem(pkg, shareItem, importPath) {
+         const mod = await import(${JSON.stringify(importPath)});
+         ${normalizeRuntimeShareCode}
+         const normalizedModule = __mfNormalizeRuntimeShare(mod);
+-        const exportModule = normalizedModule === mod ? {...mod} : normalizedModule;
++        const exportModule = normalizedModule === mod ? mod : normalizedModule;
+         Object.defineProperty(exportModule, "__esModule", {
+           value: true,
+           enumerable: false
+@@ -2221,6 +2222,12 @@ function getFirstHtmlEntryFile(entryFiles) {
+ function stripQueryAndHash(file) {
+ 	return file.split(/[?#]/)[0];
+ }
++function resolveDevHashEntryFileName(fileName) {
++	if (!fileName.includes("[hash")) return fileName;
++	const normalized = fileName.replace(/(?:[._-]?\[hash(?::\d+)?\])/g, "");
++	const baseName = path$1.basename(normalized);
++	return path$1.extname(baseName) ? normalized : `${normalized}.js`;
++}
+ function getBuildInput(config) {
+ 	return config.build?.rollupOptions?.input ?? config.build?.rolldownOptions?.input;
+ }
+@@ -2359,6 +2366,9 @@ const addEntry = ({ entryName, entryPath, fileName, inject = "entry", forceClien
+   await __mfHostInit.__tla;
+   const { initHost } = __mfHostInit;
+   ${preloadBlock}
++  if (__mfModuleCache.pendingShareLoads) {
++    await Promise.all(__mfModuleCache.pendingShareLoads);
++  }
+ })().then(() => ${importExpression(entrySrc)});
+ `;
+ 		return [
+@@ -2444,6 +2454,8 @@ const addEntry = ({ entryName, entryPath, fileName, inject = "entry", forceClien
+ 					next();
+ 					return;
+ 				}
++				const devFileName = resolveDevHashEntryFileName(fileName);
++				if (devFileName !== fileName && req.url?.startsWith((viteConfig.base + devFileName).replace(/^\/?/, "/"))) req.url = req.url.replace(devFileName, fileName);
+ 				if (req.url && req.url.startsWith((viteConfig.base + fileName).replace(/^\/?/, "/"))) req.url = devEntryPath;
+ 				next();
+ 			});
+@@ -3699,13 +3711,13 @@ const Manifest = () => {
+ 		},
+ 		configureServer(server) {
+ 			server.middlewares.use((req, res, next) => {
+-				if (!mfManifestName) {
++				const devRemoteEntryFile = resolveDevRemoteEntryFileName(filename);
++				if (devRemoteEntryFile !== filename && Object.keys(mfOptions.exposes).length > 0 && req.url?.startsWith((viteConfig.base + devRemoteEntryFile).replace(/^\/?/, "/"))) {
++					req.url = req.url.replace(devRemoteEntryFile, filename);
+ 					next();
+ 					return;
+ 				}
+-				const devRemoteEntryFile = resolveDevRemoteEntryFileName(filename);
+-				if (devRemoteEntryFile !== filename && req.url?.startsWith((viteConfig.base + devRemoteEntryFile).replace(/^\/?/, "/"))) {
+-					req.url = req.url.replace(devRemoteEntryFile, filename);
++				if (!mfManifestName) {
+ 					next();
+ 					return;
+ 				}

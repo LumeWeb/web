@@ -36,7 +36,8 @@
     "@lumeweb/tsdown-config": "workspace:*",
     "@rollup/plugin-image": "^3.0.3",
     "fake-indexeddb": "^6.2.5",
-    "tsdown": "catalog:"
+    "tsdown": "catalog:",
+    "@types/react": "catalog:"
   },
   "peerDependencies": {
     "@conform-to/react": "catalog:",

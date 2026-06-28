@@ -13,7 +13,7 @@ catalog:
   '@ipfs-shipyard/pinning-service-client': ^3.0.0
   '@ipld/car': ^5.4.6
   '@module-federation/enhanced': ^2.5.1
-  '@module-federation/vite': 1.16.8
+  '@module-federation/vite': 1.16.10
   '@mswjs/interceptors': ^0.41.9
   oxlint-tsgolint: ^0.23.0
   '@radix-ui/react-dropdown-menu': ^2.1.18
@@ -107,6 +107,7 @@ overrides:
   'react-hook-form': ^7.79.0
 
 patchedDependencies:
+  '@module-federation/vite@1.16.10': patches/@module-federation__vite@1.16.10.patch
   object-inspect: patches/object-inspect.patch
   warn-once: patches/warn-once.patch
   pluralize: patches/pluralize.patch

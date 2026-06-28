@@ -36,7 +36,8 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "vite": "catalog:framework"
+    "vite": "catalog:framework",
+    "@types/react": "catalog:"
   },
   "repository": {
     "type": "git",
