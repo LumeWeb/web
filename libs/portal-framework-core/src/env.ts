@@ -2,6 +2,7 @@ import { createEnv } from "@t3-oss/env-core";
 import { z } from "zod";
 
 const brandSchema = z.object({
+  faviconUrl: z.string().optional(),
   logoUrl: z.string().optional(),
   tagline: z.string().optional(),
   siteUrl: z.string().url().optional(),

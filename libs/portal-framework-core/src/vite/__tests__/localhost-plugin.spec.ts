@@ -4,8 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { localhostAccessPlugin } from "../localhost-plugin";
 
-function callTransformIndexHtml(plugin: ReturnType<typeof localhostAccessPlugin>) {
-  return (plugin.transformIndexHtml as () => HtmlTagDescriptor[])();
+function callTransformIndexHtml(plugin: ReturnType<typeof localhostAccessPlugin>, html = "") {
+  return (plugin.transformIndexHtml as (html: string) => HtmlTagDescriptor[] | { html: string; tags: HtmlTagDescriptor[] })(html);
 }
 
 describe("localhostAccessPlugin", () => {
@@ -110,5 +110,54 @@ describe("localhostAccessPlugin", () => {
     for (const script of result) {
       expect(script.tag).toBe("script");
     }
+  });
+
+  it("replaces favicon href when brand.faviconUrl is set", () => {
+    const html =
+      '<link rel="icon" type="image/svg+xml" href="/favicon.svg" />';
+    vi.stubEnv(
+      "VITE_PORTAL_BRAND",
+      JSON.stringify({ faviconUrl: "/custom-favicon.png" }),
+    );
+    const plugin = localhostAccessPlugin();
+    const result = callTransformIndexHtml(plugin, html);
+
+    expect(result).toHaveProperty("html");
+    expect((result as { html: string }).html).toContain(
+      'href="/custom-favicon.png"',
+    );
+    expect((result as { html: string }).html).not.toContain(
+      "/favicon.svg",
+    );
+  });
+
+  it("replaces both logo and favicon when both are set", () => {
+    const html =
+      '<link rel="icon" type="image/svg+xml" href="/favicon.svg" /><div data-loader-logo></div>';
+    vi.stubEnv(
+      "VITE_PORTAL_BRAND",
+      JSON.stringify({
+        faviconUrl: "/custom-favicon.png",
+        logoUrl: "/logo.png",
+      }),
+    );
+    const plugin = localhostAccessPlugin();
+    const result = callTransformIndexHtml(plugin, html);
+
+    expect(result).toHaveProperty("html");
+    const html2 = (result as { html: string }).html;
+    expect(html2).toContain('href="/custom-favicon.png"');
+    expect(html2).toContain('src="/logo.png"');
+  });
+
+  it("does not modify favicon when brand.faviconUrl is not set", () => {
+    const html =
+      '<link rel="icon" type="image/svg+xml" href="/favicon.svg" />';
+    vi.stubEnv("VITE_PORTAL_BRAND", JSON.stringify({}));
+    const plugin = localhostAccessPlugin();
+    const result = callTransformIndexHtml(plugin, html);
+
+    // No html modifications, only tags returned
+    expect(Array.isArray(result)).toBe(true);
   });
 });
