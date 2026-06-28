@@ -76,6 +76,49 @@ export function createDefaultTheme(): Theme {
 }
 
 /**
+ * Creates a dark system color palette.
+ */
+function createDarkSystemColors(): SystemColors {
+  return {
+    active_ui_element: { hue: 0, lightness: 80, saturation: 0 },
+    background: { hue: 0, lightness: 8, saturation: 0 },
+    borders: { hue: 0, lightness: 20, saturation: 0 },
+    high_contrast_text: { hue: 0, lightness: 95, saturation: 0 },
+    hovered_element_border: { hue: 0, lightness: 40, saturation: 0 },
+    hovered_solid_bg: { hue: 0, lightness: 25, saturation: 0 },
+    hovered_ui_element: { hue: 0, lightness: 18, saturation: 0 },
+    low_contrast_text: { hue: 0, lightness: 65, saturation: 0 },
+    solid_background: { hue: 0, lightness: 15, saturation: 0 },
+    subtle_background: { hue: 0, lightness: 12, saturation: 0 },
+    ui_element_background: { hue: 0, lightness: 15, saturation: 0 },
+    ui_element_border: { hue: 0, lightness: 25, saturation: 0 },
+  };
+}
+
+/**
+ * Built-in fallback themes used when the dashboard plugin
+ * does not provide theme metadata. Ensures the ThemeSwitcher
+ * always has something to show.
+ */
+export function builtInThemes(): Theme[] {
+  return [
+    {
+      background_images: { login: "", register: "", reset_password: "" },
+      id: "light",
+      name: "Light",
+      default: true,
+      system_colors: createDefaultSystemColors(),
+    },
+    {
+      background_images: { login: "", register: "", reset_password: "" },
+      id: "dark",
+      name: "Dark",
+      system_colors: createDarkSystemColors(),
+    },
+  ];
+}
+
+/**
  * Creates a system colors object with all values at zero.
  * Useful for testing and reset operations.
  */

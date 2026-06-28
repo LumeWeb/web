@@ -74,6 +74,12 @@
     --scrollbar-corner-radius: var(--radius);
     --scrollbar-width: 16px;
     --scrollbar-height: 16px;
+
+    /* Sidebar width. Fixed width — labels truncate at deep nesting
+       levels rather than resizing the sidebar. This follows the
+       pattern used by VS Code, shadcn/ui, and Linear. */
+    --sidebar-width: 18rem;            /* 288px expanded */
+    --sidebar-width-collapsed: 4rem;   /* 64px icon-only */
   }
 }
 

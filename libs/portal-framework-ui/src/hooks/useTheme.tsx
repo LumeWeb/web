@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 
 import { useUIStore } from "@/store/uiStore";
-import { getThemeById } from "@/utils/theme";
+import { builtInThemes, getThemeById } from "@/utils/theme";
 
 // Import Theme from the new types file
 import type { Theme } from "../types/theme";
@@ -49,7 +49,10 @@ export const useThemeIdAndSetter = () => {
  */
 export const useTheme = (): Theme | undefined => {
   const { theme: selectedThemeId } = useThemeIdAndSetter();
-  const themes = usePluginMeta<Theme[]>("dashboard", "themes");
+  const pluginThemes = usePluginMeta<Theme[]>("dashboard", "themes");
+  const themes = pluginThemes && pluginThemes.length > 0
+    ? pluginThemes
+    : builtInThemes();
 
   // First, try to use the persisted theme from the store
   if (selectedThemeId && Array.isArray(themes) && themes.length > 0) {
@@ -82,7 +85,10 @@ export const withTheme = <P extends object>(
 ) => {
   return function WithTheme(props: P) {
     const { theme: selectedThemeId } = useThemeIdAndSetter();
-    const themes = usePluginMeta<Theme[]>("dashboard", "themes");
+    const pluginThemes = usePluginMeta<Theme[]>("dashboard", "themes");
+    const themes = pluginThemes && pluginThemes.length > 0
+      ? pluginThemes
+      : builtInThemes();
 
     useEffect(() => {
       if (!themes || !Array.isArray(themes) || themes.length === 0) {

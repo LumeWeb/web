@@ -16,8 +16,9 @@ export function LumeLogo({ className, imageClassName, src }: LumeLogoProps) {
     <Link className={cn("flex items-center space-x-2", className)} to="/">
       <img
         alt="Logo"
-        className={cn("h-10", imageClassName)}
+        className={cn("h-10 object-contain", imageClassName)}
         src={src || logoPng}
+        style={{ maxWidth: "none" }}
       />
     </Link>
   );

@@ -24,9 +24,10 @@ describe("DesktopSidebar", () => {
     expect(screen.getByTestId("mock-lume-logo")).toBeInTheDocument();
     expect(screen.getByTestId("mock-main-navigation")).toBeInTheDocument();
 
-    // Check if the specific text elements are present
-    expect(screen.getByText("Freedom")).toBeInTheDocument();
-    expect(screen.getByText("Privacy")).toBeInTheDocument();
-    expect(screen.getByText("Ownership")).toBeInTheDocument();
+    // Check if the brand values are rendered (default values contain Freedom/Privacy/Ownership)
+    const brandSpan = document.querySelector("[class*='text-foreground/60']");
+    expect(brandSpan?.innerHTML).toContain("Freedom");
+    expect(brandSpan?.innerHTML).toContain("Privacy");
+    expect(brandSpan?.innerHTML).toContain("Ownership");
   });
 });

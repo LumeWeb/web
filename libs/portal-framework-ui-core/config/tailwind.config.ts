@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 
+import containerQueries from "@tailwindcss/container-queries";
 import tailwindcss_scrollbar from "tailwind-scrollbar";
 import tailwindcss_animate from "tailwindcss-animate";
 
@@ -14,7 +15,7 @@ const config = {
     "node_modules/@lumeweb/portal-framework-auth/src/**/*.{js,jsx,ts,tsx}",
   ],
   darkMode: ["class"],
-  plugins: [tailwindcss_animate, tailwindcss_scrollbar],
+  plugins: [tailwindcss_animate, tailwindcss_scrollbar, containerQueries],
   prefix: "",
   safelist: tailwindClassList,
   theme: {

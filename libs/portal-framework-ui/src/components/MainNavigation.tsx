@@ -28,12 +28,10 @@ export const MainNavigation: React.FC<MenuProps> = ({
   const resetKey = typeof onItemClick === "function" ? pathname : undefined;
 
   const renderSection = (group: NavigationGroup, sectionIndex: number) => {
-    const sectionHeader = group.section ?? "Default";
-
-    // For the default section (null), render items without a header
     if (group.section === null) {
       return (
         <NavigationTreeRenderer
+          indent={false}
           isOpen={isOpen}
           key={`section-${sectionIndex}`}
           onItemClick={onItemClick}
@@ -47,11 +45,12 @@ export const MainNavigation: React.FC<MenuProps> = ({
       <li key={`section-${sectionIndex}`}>
         <div className="mb-2 mt-4 flex items-center px-2">
           <h5 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            {sectionHeader}
+            {group.section}
           </h5>
           <div className="ml-2 flex-1 border-t border-border" />
         </div>
         <NavigationTreeRenderer
+          indent={false}
           isOpen={isOpen}
           onItemClick={onItemClick}
           resetKey={resetKey}
@@ -62,9 +61,9 @@ export const MainNavigation: React.FC<MenuProps> = ({
   };
 
   return (
-    <ScrollArea className="[&>div>div[style]]:!block">
-      <nav className="mt-8 flex h-full w-full flex-col">
-        <ul className="flex flex-1 flex-col items-start overflow-y-auto overflow-x-hidden px-2">
+    <ScrollArea className="mt-8 flex-1" type="auto">
+      <nav className="flex flex-col">
+        <ul className="flex flex-col px-2">
           {Object.entries(sections).map(([key, group], index) =>
             renderSection(group, index),
           )}

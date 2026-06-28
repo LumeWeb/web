@@ -5,7 +5,7 @@ import { withTheme } from "@/hooks/useTheme";
 
 import DesktopSidebar from "./DesktopSidebar";
 import { MobileMenu } from "./MobileMenu";
-import { SidebarProvider } from "./SidebarContext";
+import { SidebarProvider, useSidebarContext } from "./SidebarContext";
 import { UserNav } from "./UserNav";
 
 import { usePortalUrl } from "@/hooks/usePortalUrl";
@@ -14,12 +14,20 @@ interface GeneralLayoutProps {
   children?: React.ReactNode;
 }
 
-function GeneralLayoutComponent({ children }: GeneralLayoutProps) {
+function LayoutContent({ children }: GeneralLayoutProps) {
+  const { isCollapsed } = useSidebarContext();
   usePortalUrl();
   return (
-    <SidebarProvider>
+    <>
       <DesktopSidebar />
-      <main className="transition-[margin-left] duration-300 ease-in-out lg:ml-72">
+      <main
+        className="transition-[margin-left] duration-300 ease-in-out"
+        style={{
+          marginLeft: isCollapsed
+            ? "var(--sidebar-width-collapsed)"
+            : "var(--sidebar-width)",
+        }}
+      >
         <div>
           <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 dark:shadow-secondary sticky top-0 z-10 w-full shadow-md backdrop-blur">
             <div className="flex items-center justify-end gap-2 p-8 sm:mx-8">
@@ -31,6 +39,14 @@ function GeneralLayoutComponent({ children }: GeneralLayoutProps) {
           <div className="mx-4 my-8 sm:mx-8">{children}</div>
         </div>
       </main>
+    </>
+  );
+}
+
+function GeneralLayoutComponent({ children }: GeneralLayoutProps) {
+  return (
+    <SidebarProvider>
+      <LayoutContent>{children}</LayoutContent>
     </SidebarProvider>
   );
 }
