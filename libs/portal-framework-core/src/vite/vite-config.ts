@@ -45,7 +45,7 @@ function createBuildConfig(opts: ConfigOptions) {
               }
             : undefined,
         minify: {
-          mangle: opts.minifyMangle ?? true,
+          mangle: false,
         },
         minifyInternalExports: false,
       },
