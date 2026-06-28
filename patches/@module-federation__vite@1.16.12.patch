@@ -1,0 +1,66 @@
+--- a/lib/index.js
++++ b/lib/index.js
+@@ -683,8 +683,12 @@
+           }
+           injectedCssHrefs.add(href);
+ 
++          // Check for any existing stylesheet with the same href, not just
++          // MF-injected ones. This prevents duplicate <link> tags when Vite's
++          // own CSS module injection or MF runtime's createLink has already
++          // created a <link rel="stylesheet"> for the same URL.
+           const existingLink = document.querySelector(
+-            \`link[rel="stylesheet"][data-mf-href="\${href}"]\`
++            \`link[rel="stylesheet"][href="\${href}"]\`
+           );
+           if (existingLink) {
+             return Promise.resolve();
+@@ -694,7 +698,6 @@
+             const link = document.createElement("link");
+             link.rel = "stylesheet";
+             link.href = href;
+-            link.setAttribute("data-mf-href", href);
+             link.onload = () => resolve();
+             link.onerror = () => reject(new Error(\`[Module Federation] Failed to load CSS asset: \${href}\`));
+             document.head.appendChild(link);
+@@ -1334,13 +1337,13 @@
+       ${eagerLocalFallback ? applyLocalFallback : `if (import.meta.env.SSR) {
+         ${applyLocalFallback}
+       } else {
+-        initPromise.then(() =>
++        (__mfModuleCache.pendingShareLoads ||= []).push(initPromise.then(() =>
+           import(${escapeGeneratedStringLiteral(importSource)}).then((mod) => {
+             exportModule = __mfNormalizeShareModule(mod);
+             __mfWriteSharedCache(__mfModuleCache.share, ${cacheDescriptor}, exportModule);
+             __mfApplyLazyShareExports(exportModule);
+           })
+-        );
++        ));
+       }`}
+     } else {
+       __mfApplyLazyShareExports(exportModule);
+@@ -1367,13 +1370,13 @@
+     };
+     let exportModule = __mfReadSharedCache(__mfModuleCache.share, ${cacheDescriptor});
+     if (exportModule === undefined) {
+-      initPromise.then(() => {
++      (__mfModuleCache.pendingShareLoads ||= []).push(initPromise.then(() => {
+         exportModule = __mfReadSharedCache(__mfModuleCache.share, ${cacheDescriptor});
+         if (exportModule === undefined) {
+           throw new Error("[Module Federation] Shared module ${pkg} was imported before federation bootstrap finished.");
+         }
+         __mfApplyHostProvidedExports(exportModule);
+-      });
++      }));
+     } else {
+       __mfApplyHostProvidedExports(exportModule);
+     }
+@@ -2419,6 +2422,9 @@
+   await __mfHostInit.__tla;
+   const { initHost } = __mfHostInit;
+   ${preloadBlock}
++  if (__mfModuleCache.pendingShareLoads) {
++    await Promise.all(__mfModuleCache.pendingShareLoads);
++  }
+ })().then(() => ${importExpression(entrySrc)});
+ `;
+ 		return [
