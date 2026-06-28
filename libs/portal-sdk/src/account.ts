@@ -28,7 +28,7 @@ import {
   ResendVerifyEmailRequest,
   UploadLimitResponse,
   VerifyEmailRequest,
-} from "@/account/generated";
+} from "@/account/generated/accountAPI.schemas";
 import type {
   OperationsListParams,
 } from "@/query-utils";
