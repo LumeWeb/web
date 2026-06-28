@@ -10,6 +10,7 @@ import {
   createNavigationFeature,
   generateIdFromRoute,
   Navigation,
+  resolveFullPath,
 } from "./navigation";
 
 const pluginNs = "plugin1";
@@ -26,6 +27,28 @@ function makePlugin(idValue: string, routes: RouteDefinition[]): Plugin {
     routes,
   };
 }
+
+describe("resolveFullPath", () => {
+  it("joins relative child path to parent path", () => {
+    expect(resolveFullPath("/account", "profile")).toBe("/account/profile");
+  });
+
+  it("keeps absolute child path unchanged", () => {
+    expect(resolveFullPath("/account", "/profile")).toBe("/profile");
+  });
+
+  it("returns child path when parent is empty", () => {
+    expect(resolveFullPath("", "profile")).toBe("profile");
+  });
+
+  it("returns parent path when child is empty", () => {
+    expect(resolveFullPath("/account", "")).toBe("/account");
+  });
+
+  it("normalizes duplicate slashes", () => {
+    expect(resolveFullPath("/account/", "profile")).toBe("/account/profile");
+  });
+});
 
 describe("generateIdFromRoute", () => {
   it("should use existing ID when available", () => {
@@ -82,12 +105,12 @@ describe("generateIdFromRoute", () => {
     expect(result).toBe("plugin1:test-label-more");
   });
 
-  it("should use parent reference when parentId exists", () => {
+  it("should fall back to hash-based ID when no identifiable fields exist", () => {
     const route = {
       parentId: createNamespacedId(pluginNs, "parent"),
     } as RouteDefinition;
     const result = generateIdFromRoute(route, pluginId);
-    expect(result).toBe("plugin1:child");
+    expect(result).toMatch(/^generated:route-[a-z0-9]+$/);
   });
 
   it("should generate hash-based ID as fallback", () => {
@@ -146,6 +169,7 @@ describe("Navigation Feature", () => {
               id: createNamespacedId(pluginNs, "child"),
               path: "child",
               component: "ChildComponent",
+              navigation: { label: "Child" },
             },
           ],
         },
@@ -156,10 +180,11 @@ describe("Navigation Feature", () => {
 
     expect(navigationItems).toEqual([
       { id: "plugin1:parent", label: "Parent", path: "/parent" },
+      { id: "plugin1:child", label: "Child", path: "/parent/child", parentId: "plugin1:parent" },
     ]);
   });
 
-  it("should handle routes with parentId and construct the correct full path", async () => {
+  it("should resolve relative child paths via children array", async () => {
     const mockPlugins: Plugin[] = [
       makePlugin("plugin1:core", [
         {
@@ -167,13 +192,14 @@ describe("Navigation Feature", () => {
           path: "/parent",
           component: "ParentComponent",
           navigation: { label: "Parent" },
-        },
-        {
-          id: createNamespacedId(pluginNs, "child"),
-          path: "child",
-          component: "ChildComponent",
-          parentId: createNamespacedId(pluginNs, "parent"),
-          navigation: { label: "Child" },
+          children: [
+            {
+              id: createNamespacedId(pluginNs, "child"),
+              path: "child",
+              component: "ChildComponent",
+              navigation: { label: "Child" },
+            },
+          ],
         },
       ]),
     ];
@@ -182,7 +208,35 @@ describe("Navigation Feature", () => {
 
     expect(navigationItems).toEqual([
       { id: "plugin1:parent", label: "Parent", path: "/parent" },
-      { id: "plugin1:child", label: "Child", path: "child" },
+      { id: "plugin1:child", label: "Child", path: "/parent/child", parentId: "plugin1:parent" },
+    ]);
+  });
+
+  it("should preserve absolute paths for children via children array", async () => {
+    const mockPlugins: Plugin[] = [
+      makePlugin("plugin1:core", [
+        {
+          id: createNamespacedId(pluginNs, "parent"),
+          path: "/parent",
+          component: "ParentComponent",
+          navigation: { label: "Parent" },
+          children: [
+            {
+              id: createNamespacedId(pluginNs, "child"),
+              path: "/absolute-child",
+              component: "ChildComponent",
+              navigation: { label: "Child" },
+            },
+          ],
+        },
+      ]),
+    ];
+
+    const navigationItems = navigationFeature.buildNavigation(mockPlugins);
+
+    expect(navigationItems).toEqual([
+      { id: "plugin1:parent", label: "Parent", path: "/parent" },
+      { id: "plugin1:child", label: "Child", path: "/absolute-child", parentId: "plugin1:parent" },
     ]);
   });
 
@@ -287,7 +341,7 @@ describe("Navigation Feature", () => {
     ]);
   });
 
-  it("should handle complex menu setups with nested routes, parentIds and index routes", async () => {
+  it("should handle complex menu setups with nested routes and index routes", async () => {
     const mockPlugins: Plugin[] = [
       makePlugin("plugin1:core", [
         {
@@ -372,33 +426,139 @@ describe("Navigation Feature", () => {
         id: "plugin1:dashboard-analytics",
         label: "Analytics",
         parentId: "plugin1:dashboard",
-        path: "analytics",
+        path: "/dashboard/analytics",
       },
       { id: "plugin1:settings", label: "Settings", path: "/settings" },
       {
         id: "plugin1:profile",
         label: "Profile",
         parentId: "plugin1:settings",
-        path: "profile",
+        path: "/settings/profile",
       },
       {
         id: "plugin1:security",
         label: "Security",
         parentId: "plugin1:settings",
-        path: "security",
+        path: "/settings/security",
       },
       { id: "plugin2:admin-root", label: "Admin", path: "/admin" },
       {
         id: "plugin2:users",
         label: "Users",
         parentId: "plugin2:admin-root",
-        path: "users",
+        path: "/admin/users",
       },
       {
         id: "plugin2:user-roles",
         label: "Roles",
         parentId: "plugin2:admin-root",
-        path: "roles",
+        path: "/admin/roles",
+      },
+    ]);
+  });
+
+  it("should handle deeply nested routes (3+ levels) with correct parentId and path", async () => {
+    const mockPlugins: Plugin[] = [
+      makePlugin("plugin1:core", [
+        {
+          id: createNamespacedId(pluginNs, "root"),
+          path: "/root",
+          component: "RootComponent",
+          navigation: { label: "Root" },
+          children: [
+            {
+              id: createNamespacedId(pluginNs, "child"),
+              path: "child",
+              component: "ChildComponent",
+              navigation: { label: "Child" },
+              children: [
+                {
+                  id: createNamespacedId(pluginNs, "grandchild"),
+                  path: "grandchild",
+                  component: "GrandchildComponent",
+                  navigation: { label: "Grandchild" },
+                  children: [
+                    {
+                      id: createNamespacedId(pluginNs, "great-grandchild"),
+                      path: "deep",
+                      component: "DeepComponent",
+                      navigation: { label: "Deep" },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ]),
+    ];
+
+    const navigationItems = navigationFeature.buildNavigation(mockPlugins);
+
+    expect(navigationItems).toEqual([
+      { id: "plugin1:root", label: "Root", path: "/root" },
+      {
+        id: "plugin1:child",
+        label: "Child",
+        parentId: "plugin1:root",
+        path: "/root/child",
+      },
+      {
+        id: "plugin1:grandchild",
+        label: "Grandchild",
+        parentId: "plugin1:child",
+        path: "/root/child/grandchild",
+      },
+      {
+        id: "plugin1:great-grandchild",
+        label: "Deep",
+        parentId: "plugin1:grandchild",
+        path: "/root/child/grandchild/deep",
+      },
+    ]);
+  });
+
+  it("should handle routes where intermediate parents have no navigation (group routes with nav children)", async () => {
+    const mockPlugins: Plugin[] = [
+      makePlugin("plugin1:core", [
+        {
+          id: createNamespacedId(pluginNs, "layout"),
+          path: "/section",
+          component: "LayoutComponent",
+          // No navigation — layout/group route
+          children: [
+            {
+              id: createNamespacedId(pluginNs, "group"),
+              path: "group",
+              component: "GroupComponent",
+              navigation: { label: "Group" },
+              children: [
+                {
+                  id: createNamespacedId(pluginNs, "item"),
+                  path: "item",
+                  component: "ItemComponent",
+                  navigation: { label: "Item" },
+                },
+              ],
+            },
+          ],
+        },
+      ]),
+    ];
+
+    const navigationItems = navigationFeature.buildNavigation(mockPlugins);
+
+    expect(navigationItems).toEqual([
+      {
+        id: "plugin1:group",
+        label: "Group",
+        path: "/section/group",
+      },
+      {
+        id: "plugin1:item",
+        label: "Item",
+        parentId: "plugin1:group",
+        path: "/section/group/item",
       },
     ]);
   });
@@ -435,7 +595,7 @@ describe("Navigation Feature", () => {
     ]);
   });
 
-  it("should build route tree from routes with parent IDs", async () => {
+  it("should build route tree from flat routes", async () => {
     const routes: RouteDefinition[] = [
       {
         id: createNamespacedId(pluginNs, "route1"),
@@ -446,19 +606,16 @@ describe("Navigation Feature", () => {
         id: createNamespacedId(pluginNs, "route2"),
         path: "/route2",
         component: "Component2",
-        parentId: createNamespacedId(pluginNs, "route1"),
       },
       {
         id: createNamespacedId(pluginNs, "route3"),
         path: "/route3",
         component: "Component3",
-        parentId: createNamespacedId(pluginNs, "route1"),
       },
       {
         id: createNamespacedId(pluginNs, "route4"),
         path: "/route4",
         component: "Component4",
-        parentId: createNamespacedId(pluginNs, "route2"),
       },
     ];
 
@@ -485,7 +642,6 @@ describe("Navigation Feature", () => {
         id: createNamespacedId(pluginNs, "route2"),
         path: "/route2",
         component: "Component2",
-        parentId: createNamespacedId(pluginNs, "route1"),
       },
     ];
 

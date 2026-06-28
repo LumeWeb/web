@@ -1,26 +1,15 @@
 import type { PortalMeta } from "@lumeweb/portal-framework-core";
 
 import { renderHook } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
+
+import { appStore } from "@/store/appStore";
 
 import { usePortalMeta } from "./usePortalMeta";
 
-// Mock store state
-let mockState = {
-  meta: undefined as PortalMeta | undefined,
-};
-
-vi.mock("@/store/portalStore", () => ({
-  usePortalStore: vi.fn((selector: any) => selector(mockState)),
-}));
-
 describe("usePortalMeta", () => {
   beforeEach(() => {
-    // Reset mock state before each test
-    mockState = {
-      meta: undefined,
-    };
-    vi.clearAllMocks();
+    appStore.setState({ meta: undefined });
   });
 
   it("should return meta from store", () => {
@@ -31,7 +20,7 @@ describe("usePortalMeta", () => {
     };
 
     // Mock the store to return the mock meta
-    mockState.meta = mockMeta;
+    appStore.setState({ meta: mockMeta as PortalMeta });
 
     const { result } = renderHook(() => usePortalMeta());
     expect(result.current).toEqual(mockMeta);
