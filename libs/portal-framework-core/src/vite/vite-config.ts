@@ -125,7 +125,7 @@ function createBuildConfig(opts: ConfigOptions) {
             : undefined,
         minify: {
           compress: true,
-          mangle: true,
+          mangle: opts.minifyMangle !== false,
         },
       },
     },
