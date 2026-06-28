@@ -1,5 +1,6 @@
 import React from "react";
 
+import { cn } from "@lumeweb/portal-framework-ui-core";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { withTheme } from "@/hooks/useTheme";
 
@@ -21,12 +22,10 @@ function LayoutContent({ children }: GeneralLayoutProps) {
     <>
       <DesktopSidebar />
       <main
-        className="transition-[margin-left] duration-300 ease-in-out"
-        style={{
-          marginLeft: isCollapsed
-            ? "var(--sidebar-width-collapsed)"
-            : "var(--sidebar-width)",
-        }}
+        className={cn(
+          "transition-[margin-left] duration-300 ease-in-out lg:ml-[var(--sidebar-width)]",
+          isCollapsed && "lg:ml-[var(--sidebar-width-collapsed)]",
+        )}
       >
         <div>
           <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 dark:shadow-secondary sticky top-0 z-10 w-full shadow-md backdrop-blur">

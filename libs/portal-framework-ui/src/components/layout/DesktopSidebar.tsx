@@ -51,7 +51,7 @@ function DesktopSidebar() {
         <FlexWidgetArea id={createNamespacedId(CORE_NS, "desktop-sidebar")} />
         <span
           className={cn(
-            "text-foreground/60 mt-4 mb-4 block space-y-1 transition-opacity duration-300",
+            "text-foreground/60 mt-4 mb-4 block space-y-1 whitespace-pre-line transition-opacity duration-300",
             {
               "opacity-0": isCollapsed,
               "opacity-100": !isCollapsed,

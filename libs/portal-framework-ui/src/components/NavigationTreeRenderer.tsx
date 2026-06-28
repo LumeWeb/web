@@ -254,7 +254,8 @@ const FlyoutNavItem: React.FC<{
   isOpen: boolean;
   onItemClick?: () => void;
   depth: number;
-}> = ({ item, isOpen, onItemClick, depth }) => {
+  isCollapsed?: boolean;
+}> = ({ item, isOpen, onItemClick, depth, isCollapsed = false }) => {
   const hasChildren = item.children && item.children.length > 0;
   const location = useLocation();
   const pathname = location.pathname;
@@ -316,7 +317,7 @@ const FlyoutNavItem: React.FC<{
         <LinkableNavItem
           active={active}
           IconComponent={IconComponent}
-          isCollapsed={false}
+          isCollapsed={isCollapsed}
           item={item}
           onItemClick={onItemClick}
         />
@@ -324,7 +325,7 @@ const FlyoutNavItem: React.FC<{
         <NonLinkableNavItem
           active={active}
           IconComponent={IconComponent}
-          isCollapsed={false}
+          isCollapsed={isCollapsed}
           item={item}
           onItemClick={onItemClick}
         />
@@ -556,6 +557,7 @@ const NavigationTreeItem: React.FC<{
               isOpen={isOpen}
               item={node}
               onItemClick={onItemClick}
+              isCollapsed={!isOpen}
             />
           </div>
         </NavTooltip>
