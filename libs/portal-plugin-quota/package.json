@@ -38,10 +38,12 @@
   },
   "devDependencies": {
     "@lumeweb/analytics": "workspace:*",
+    "@lumeweb/tsdown-config": "workspace:*",
     "@mswjs/interceptors": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "msw": "catalog:",
+    "tsdown": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:framework",
     "vitest": "catalog:"

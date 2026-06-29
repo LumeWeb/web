@@ -1,0 +1,39 @@
+{
+  "name": "@lumeweb/portal-plugin-sia",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "lint": "oxlint .",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@lumeweb/advanced-rest-provider": "workspace:*",
+    "@lumeweb/portal-framework-auth": "workspace:*",
+    "@lumeweb/portal-framework-core": "workspace:*",
+    "@lumeweb/portal-framework-ui": "workspace:*",
+    "@lumeweb/portal-framework-ui-core": "workspace:*",
+    "@lumeweb/portal-plugin-quota": "workspace:*",
+    "@lumeweb/portal-sdk": "workspace:*",
+    "@refinedev/core": "catalog:",
+    "@tanstack/react-table": "catalog:",
+    "date-fns": "catalog:",
+    "lucide-react": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-router": "catalog:"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
+  },
+  "devDependencies": {
+    "@lumeweb/tsdown-config": "workspace:*",
+    "happy-dom": "catalog:",
+    "vitest": "catalog:"
+  }
+}
