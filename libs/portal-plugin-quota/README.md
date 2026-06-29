@@ -6,17 +6,17 @@ Dashboard widget plugin that displays storage, upload, and download quota usage 
 
 Registers a `QuotaWidget` in the `dashboard:header` area showing three usage bars:
 
-- **Storage** — bytes used vs limit
-- **Upload** — bytes used vs limit
-- **Download** — bytes used vs limit
+- **Storage**: bytes used vs limit
+- **Upload**: bytes used vs limit
+- **Download**: bytes used vs limit
 
-Each bar changes color based on utilization: default under 70%, warning (yellow) at 70–90%, destructive (red) above 90%. When a quota type has no limit, "Unlimited" is displayed instead of a bar.
+Each bar changes color based on utilization: default under 70%, warning (yellow) at 70-90%, destructive (red) above 90%. When a quota type has no limit, "Unlimited" is displayed instead of a bar.
 
 Data is fetched through Refine's `useCustom` hook hitting the `/account/quota` endpoint via the `account` data provider.
 
 ## Dependencies
 
-- `core:dashboard` — provides the `dashboard:header` widget area and API URL
+- `core:dashboard`: provides the `dashboard:header` widget area and API URL
 
 ## SDK
 

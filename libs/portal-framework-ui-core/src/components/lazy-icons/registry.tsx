@@ -8,7 +8,7 @@ export type IconProps = {
   className?: string;
 };
 
-/** Raw lazy components (no Suspense) — wrapped by iconRegistry which adds Suspense. */
+/** Raw lazy components (no Suspense); wrapped by iconRegistry which adds Suspense. */
 const rawIcons = {
   Activity: lazy(() => import("lucide-react").then(m => ({ default: m.Activity }))),
   AlertCircle: lazy(() => import("lucide-react").then(m => ({ default: m.AlertCircle }))),
@@ -110,6 +110,7 @@ const rawIcons = {
   Terminal: lazy(() => import("lucide-react").then(m => ({ default: m.Terminal }))),
   Trash2: lazy(() => import("lucide-react").then(m => ({ default: m.Trash2 }))),
   Twitter: lazy(() => import("lucide-react").then(m => ({ default: m.Twitter }))),
+  Unplug: lazy(() => import("lucide-react").then(m => ({ default: m.Unplug }))),
   Upload: lazy(() => import("lucide-react").then(m => ({ default: m.Upload }))),
   User: lazy(() => import("lucide-react").then(m => ({ default: m.User }))),
   UserCog: lazy(() => import("lucide-react").then(m => ({ default: m.UserCog }))),

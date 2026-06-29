@@ -1,0 +1,11 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "build:lib": {
+      "dependsOn": [
+        "$TURBO_EXTENDS$",
+        "@lumeweb/tsdown-config#build"
+      ]
+    }
+  }
+}
