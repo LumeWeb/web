@@ -75,6 +75,12 @@ COPY --from=builder /build/apps/docs.pinner.xyz/dist/server/vocs.config.js /app/
 # Vocs config definition module (imported by vocs.config.js)
 COPY --from=builder /build/apps/docs.pinner.xyz/dist/server/assets/ /app/assets/
 
+# Static frontend assets
+# fetchMarkdown: distDir = dirname(import.meta.url)/.. = /app, reads /app/public/
+# serveStatic: config.distDir ("dist") + "public" relative to CWD = /app/server/dist/public/
+COPY --from=builder /build/apps/docs.pinner.xyz/dist/public/ /app/public/
+RUN mkdir -p /app/server/dist && ln -s /app/public /app/server/dist/public
+
 RUN chown -R app:app /app
 
 USER app
