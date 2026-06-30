@@ -16,7 +16,7 @@ export const DATA_PROVIDER_NAME = "sia";
 export class RefineConfig implements RefineConfigCapability {
   readonly id = "sia:refine-config";
   readonly status = "inactive";
-  readonly type = "core:refine-config" as const;
+  readonly type = "framework:refine-config" as const;
   #apiUrl: string;
 
   async destroy() {}
