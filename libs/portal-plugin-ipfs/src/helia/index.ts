@@ -1,4 +1,4 @@
-import { createHeliaHTTP, type Helia } from "@helia/http";
+import { createHelia, type Helia } from "helia";
 import { trustlessGateway } from "@helia/block-brokers";
 import { httpGatewayRouting } from "@helia/routers";
 import { IDBBlockstore } from "blockstore-idb";
@@ -103,7 +103,7 @@ export class HeliaService {
       gateways: [this.config.apiUrl],
     });
 
-    this.helia = await createHeliaHTTP({
+    this.helia = await createHelia({
       blockstore,
       datastore,
       blockBrokers: [gatewayBlockBroker],

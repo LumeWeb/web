@@ -13,7 +13,7 @@ import type { ProgressOptions } from "progress-events";
 
 import { car } from "@helia/car";
 import { GetBlockProgressEvents } from "@helia/interface";
-import { createHeliaHTTP } from "@helia/http";
+import { createHelia } from "helia";
 import { unixfs } from "@helia/unixfs";
 import { asyncIterableReader, createDecoder } from "@ipld/car/decoder";
 import { IDBBlockstore } from "blockstore-idb";
@@ -402,7 +402,7 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
       await Promise.all([this.#blockstore.open(), this.#datastore.open()]);
 
       // Create Helia instance with IndexedDB stores
-      this.#helia = await createHeliaHTTP({
+      this.#helia = await createHelia({
         blockstore: this.#blockstore,
         datastore: this.#datastore,
       });
