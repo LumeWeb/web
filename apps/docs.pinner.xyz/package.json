@@ -29,6 +29,7 @@
     "clsx": "catalog:",
     "tailwindcss": "catalog:websites",
     "tsx": "^4.22.4",
+    "tsdown": "catalog:",
     "typedoc": "^0.28.19"
   },
   "repository": {
