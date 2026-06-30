@@ -8,13 +8,15 @@ const Folder = lazyIcon("Folder");
 
 const routes = [
   {
-    path: "/files",
+    path: "/services/ipfs/files",
     component: "file-manager",
     id: createNamespacedId("ipfs", "file-manager"),
     navigation: {
-      label: "File Manager",
+      label: "Files",
+      description: "Browse and manage IPFS files",
       icon: Folder,
-      order: 1,
+      order: 10,
+      section: "Public Data",
     },
   },
 ] satisfies RouteDefinition[];
