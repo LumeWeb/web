@@ -1,0 +1,2 @@
+import{l as e,r as t}from"./_virtual_mf___mfe_internal__core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.js-DL_da81L.js";var n=t(e,`protocol`);export{n as t};
+//# sourceMappingURL=protocol-As0lHl7L.js.map

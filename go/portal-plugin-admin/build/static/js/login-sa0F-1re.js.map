@@ -1,1 +1,0 @@
-{"version":3,"file":"login-sa0F-1re.js","names":["LoginIndex"],"sources":["../../../src/ui/routes/login.tsx"],"sourcesContent":["import { LoginIndex } from \"@lumeweb/portal-framework-auth\";\nimport \"@lumeweb/portal-framework-ui-core/tailwind-plugin.css\";\n\nexport default LoginIndex;\n"],"mappings":"6FAGA,IAAA,EAAeA"}

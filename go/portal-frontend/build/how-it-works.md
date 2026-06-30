@@ -11,9 +11,9 @@ url: "https://pinner.xyz/how-it-works/"
 
 Understanding how Lume keeps your files private and secure
 
-![about image](/_astro/about-1.BPoWUY4S.png)
+![about image](/_astro/how-it-works-1.BPoWUY4S.png)
 
-![about image](/_astro/about-mobile-1.-rS8X-Gf.png)
+![about image](/_astro/how-it-works-mobile-1.-rS8X-Gf.png)
 
 ### The Interface
 
@@ -21,9 +21,9 @@ Understanding how Lume keeps your files private and secure
 
 Lume provides a simple way to store and manage your files. Upload through our intuitive interface, and we handle encrypting and distributing your data across the network.
 
-![about image](/_astro/about-2.B4_ehDlV.png)
+![about image](/_astro/how-it-works-2.B4_ehDlV.png)
 
-![about image](/_astro/about-mobile-2.ChqCIh8P.png)
+![about image](/_astro/how-it-works-mobile-2.ChqCIh8P.png)
 
 ### The Technology
 
