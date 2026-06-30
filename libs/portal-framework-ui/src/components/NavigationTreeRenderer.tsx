@@ -121,24 +121,33 @@ const NavItemContent: React.FC<BaseNavItemProps> = ({
 );
 
 /**
- * Tooltip wrapper for nav items. Always shows a tooltip — when collapsed
- * (labels hidden) it shows the full label, when expanded it shows the
- * tooltip on hover for any label that might be truncated.
+ * Tooltip wrapper for nav items. When collapsed (labels hidden) it shows
+ * the full label. When expanded, it shows the description on hover if one
+ * is available; otherwise shows the label for potential truncation.
  */
 const NavTooltip: React.FC<{
   label: string;
+  description?: string;
   isCollapsed: boolean;
   children: React.ReactElement;
-}> = ({ label, isCollapsed, children }) => (
-  <TooltipProvider delayDuration={isCollapsed ? 300 : 700}>
-    <Tooltip>
-      <TooltipTrigger asChild>{children}</TooltipTrigger>
-      <TooltipContent side="right" className="font-medium">
-        {label}
-      </TooltipContent>
-    </Tooltip>
-  </TooltipProvider>
-);
+}> = ({ label, description, isCollapsed, children }) => {
+  // When collapsed, always show label. When expanded, only show tooltip
+  // if there's a description (for rich hover text) — label truncation
+  // tooltips are still useful so keep the label as fallback.
+  const content = isCollapsed ? label : (description ?? label);
+  return (
+    <TooltipProvider delayDuration={isCollapsed ? 300 : 700}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="block w-full">{children}</span>
+        </TooltipTrigger>
+        <TooltipContent side="right" className="font-medium">
+          {content}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
 
 const LinkableNavItem: React.FC<BaseNavItemProps> = ({
   active,
@@ -207,7 +216,7 @@ const LeafNavItem: React.FC<{
 
   return (
     <li ref={ref}>
-      <NavTooltip isCollapsed={!isOpen} label={item.label}>
+      <NavTooltip isCollapsed={!isOpen} label={item.label} description={item.description}>
         {item.linkable !== false && Boolean(item.path) ? (
           <LinkableNavItem
             active={active}
@@ -433,37 +442,52 @@ const CollapseMenuRecursive: React.FC<{
       onOpenChange={setIsSectionOpen}
       open={isSectionOpen}
     >
-      <CollapsibleTrigger
-        asChild
-        className="mb-1 [&[data-state=open]>div>div>svg]:rotate-180"
-      >
-        <Button
-          className="h-9 w-full justify-start"
-          variant={active || childActive ? "secondary" : "ghost"}
+      <NavTooltip isCollapsed={!isOpen} label={node.label} description={node.description}>
+        <CollapsibleTrigger
+          asChild
+          className="mb-1 [&[data-state=open]>div>div>svg]:rotate-180"
         >
-          <div className="flex w-full items-center justify-between gap-2">
-            <div className="flex min-w-0 flex-1 items-center">
-              {IconComponent && (
-                <span className="mr-2 shrink-0">
-                  <IconComponent size={18} />
-                </span>
-              )}
-              {headerHref && node.linkable !== false ? (
-                <Link
-                  aria-label={node.label}
-                  onClick={(e) => e.stopPropagation()}
-                  onKeyDown={(e) => {
-                    if (e.key === " ") {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }
-                    if (e.key === "Enter") {
-                      e.stopPropagation();
-                    }
-                  }}
-                  to={headerHref}
-                >
+          <Button
+            className="h-9 w-full justify-start"
+            variant={active || childActive ? "secondary" : "ghost"}
+          >
+            <div className="flex w-full items-center justify-between gap-2">
+              <div className="flex min-w-0 flex-1 items-center">
+                {IconComponent && (
+                  <span className="mr-2 shrink-0">
+                    <IconComponent size={18} />
+                  </span>
+                )}
+                {headerHref && node.linkable !== false ? (
+                  <Link
+                    aria-label={node.label}
+                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                    onKeyDown={(e: React.KeyboardEvent) => {
+                      if (e.key === " ") {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }
+                      if (e.key === "Enter") {
+                        e.stopPropagation();
+                      }
+                    }}
+                    to={headerHref}
+                  >
+                    <span
+                      className={cn(
+                        "truncate",
+                        {
+                          "-translate-x-96 opacity-0": !isOpen,
+                          "translate-x-0 opacity-100": isOpen,
+                        },
+                      )}
+                    >
+                      {node.label}
+                    </span>
+                  </Link>
+                ) : (
                   <span
+                    aria-disabled="true"
                     className={cn(
                       "truncate",
                       {
@@ -474,34 +498,21 @@ const CollapseMenuRecursive: React.FC<{
                   >
                     {node.label}
                   </span>
-                </Link>
-              ) : (
-                <span
-                  aria-disabled="true"
-                  className={cn(
-                    "truncate",
-                    {
-                      "-translate-x-96 opacity-0": !isOpen,
-                      "translate-x-0 opacity-100": isOpen,
-                    },
-                  )}
-                >
-                  {node.label}
-                </span>
-              )}
+                )}
+              </div>
+              <ChevronDown
+                className={cn(
+                  "shrink-0 transition-transform duration-200",
+                  isOpen
+                    ? "translate-x-0 opacity-100"
+                    : "-translate-x-96 opacity-0",
+                )}
+                size={18}
+              />
             </div>
-            <ChevronDown
-              className={cn(
-                "shrink-0 transition-transform duration-200",
-                isOpen
-                  ? "translate-x-0 opacity-100"
-                  : "-translate-x-96 opacity-0",
-              )}
-              size={18}
-            />
-          </div>
-        </Button>
-      </CollapsibleTrigger>
+          </Button>
+        </CollapsibleTrigger>
+      </NavTooltip>
       <CollapsibleContent className="data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down overflow-hidden">
         <NavigationTreeRenderer
           depth={depth + 1}
@@ -540,7 +551,7 @@ const NavigationTreeItem: React.FC<{
   if (useFlyout && !hasChildren) {
     return (
       <li>
-        <NavTooltip isCollapsed={!isOpen} label={node.label}>
+        <NavTooltip isCollapsed={!isOpen} label={node.label} description={node.description}>
           <div>
             <FlyoutNavItem
               depth={depth}
@@ -558,17 +569,13 @@ const NavigationTreeItem: React.FC<{
   if (hasChildren) {
     return (
       <li>
-        <NavTooltip isCollapsed={!isOpen} label={node.label}>
-          <div>
-            <CollapseMenuRecursive
-              depth={depth}
-              isOpen={isOpen}
-              node={node}
-              onItemClick={onItemClick}
-              resetKey={resetKey}
-            />
-          </div>
-        </NavTooltip>
+        <CollapseMenuRecursive
+          depth={depth}
+          isOpen={isOpen}
+          node={node}
+          onItemClick={onItemClick}
+          resetKey={resetKey}
+        />
       </li>
     );
   }

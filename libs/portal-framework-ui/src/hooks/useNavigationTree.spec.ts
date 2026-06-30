@@ -57,9 +57,9 @@ describe("groupBySection", () => {
     ];
     const result = groupBySection(list);
     expect(Object.keys(result)).toEqual([
+      "default",
       "Appearance",
       "Settings",
-      "default",
     ]);
     expect(result["default"]).toHaveLength(1);
     expect(result["Settings"]).toHaveLength(2);
@@ -95,7 +95,7 @@ describe("groupBySection", () => {
       { id: core("c"), label: "C", order: 1 },
     ];
     const result = groupBySection(list);
-    expect(Object.keys(result)).toEqual(["Alpha", "Beta", "default"]);
+    expect(Object.keys(result)).toEqual(["default", "Alpha", "Beta"]);
   });
 });
 
@@ -265,5 +265,74 @@ describe("buildTree — N-level nesting", () => {
 
     const tree = buildTree(flat);
     expect(tree.map((n) => n.id)).toEqual(["b", "c", "a"]);
+  });
+
+  it("cross-plugin parentId children nest under parent and sort by order", () => {
+    // Simulates the real My Account layout: dashboard plugin defines the
+    // parent with inline children; billing plugin adds children via parentId.
+    const navItems = [
+      // Parent with inline children (dashboard plugin)
+      {
+        id: "core:account-layout",
+        label: "My Account",
+        path: "/account",
+        order: 3,
+        section: "Account",
+        children: [
+          { id: "core:profile", label: "Profile", path: "/account", order: 0 },
+          { id: "core:security", label: "Security", path: "/account/security", order: 1 },
+          { id: "core:api-keys", label: "API Keys", path: "/account/api-keys", order: 2 },
+        ],
+      },
+      // Cross-plugin children via parentId (billing plugin)
+      {
+        id: "billing:subscription",
+        label: "Subscription",
+        path: "/account/subscription",
+        parentId: "core:account-layout",
+        order: 3,
+        section: "Account",
+      },
+      {
+        id: "billing:credits",
+        label: "Credits",
+        path: "/account/credits",
+        parentId: "core:account-layout",
+        order: 4,
+        section: "Account",
+      },
+    ] as NavigationItem[];
+
+    const tree = buildTree(navItems);
+    expect(tree).toHaveLength(1);
+    expect(tree[0].id).toBe("core:account-layout");
+    const children = tree[0].children.map((c) => c.id);
+    // Children sorted by order: Profile(0), Security(1), API Keys(2), Subscription(3), Credits(4)
+    expect(children).toEqual([
+      "core:profile",
+      "core:security",
+      "core:api-keys",
+      "billing:subscription",
+      "billing:credits",
+    ]);
+  });
+
+  it("default section sorts first, then named sections by order", () => {
+    // Simulates real nav: Dashboard/Operations (no section) before
+    // ACCOUNT section, before PUBLIC DATA section.
+    const list: TestItem[] = [
+      { id: core("dashboard"), label: "Dashboard", order: 0 },
+      { id: core("operations"), label: "Operations", order: 2 },
+      { id: core("account-layout"), label: "My Account", order: 3, section: "Account" },
+      { id: core("ipfs-files"), label: "Files", order: 10, section: "Public Data" },
+      { id: core("private-data"), label: "Private Data", order: 20, section: "Private Data" },
+    ];
+    const result = groupBySection(list);
+    expect(Object.keys(result)).toEqual([
+      "default",
+      "Account",
+      "Public Data",
+      "Private Data",
+    ]);
   });
 });

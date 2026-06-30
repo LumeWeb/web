@@ -59,8 +59,9 @@ export function groupBySection(
   const sortedKeys = [...sectionMap.keys()].sort((a, b) => {
     const aIsDefault = a === "default";
     const bIsDefault = b === "default";
-    if (aIsDefault && !bIsDefault) return 1;
-    if (!aIsDefault && bIsDefault) return -1;
+    // Default section (no section name) sorts first
+    if (aIsDefault && !bIsDefault) return -1;
+    if (!aIsDefault && bIsDefault) return 1;
     const aOrder = sectionMap.get(a)![0]?.order ?? Infinity;
     const bOrder = sectionMap.get(b)![0]?.order ?? Infinity;
     if (aOrder !== bOrder) return aOrder - bOrder;
