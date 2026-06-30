@@ -3,8 +3,8 @@ import { z } from "zod";
 
 const brandSchema = z.object({
   faviconUrl: z.string().optional(),
+  loadingMessages: z.array(z.string()).optional(),
   logoUrl: z.string().optional(),
-  tagline: z.string().optional(),
   siteUrl: z.string().url().optional(),
   social: z
     .object({
@@ -13,6 +13,7 @@ const brandSchema = z.object({
       github: z.string().optional(),
     })
     .optional(),
+  tagline: z.string().optional(),
   values: z.string().optional(),
 });
 
