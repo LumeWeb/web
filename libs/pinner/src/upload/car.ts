@@ -1,5 +1,5 @@
 import { car } from "@helia/car";
-import { createHeliaHTTP } from "@helia/http";
+import { createHelia } from "helia";
 import { unixfs } from "@helia/unixfs";
 import {
   createBlockstore,
@@ -90,7 +90,7 @@ async function getHelia() {
       base: config.datastoreName,
     });
 
-  helia = await createHeliaHTTP({
+  helia = await createHelia({
     blockstore,
     datastore,
   });
