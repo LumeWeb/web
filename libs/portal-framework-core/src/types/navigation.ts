@@ -23,6 +23,10 @@ export interface NavigationItem {
    */
   disabled?: boolean;
   /**
+   * Optional description shown as a tooltip on hover
+   */
+  description?: string;
+  /**
    * If true, will force this item to appear in navigation even if it's an index route
    */
   forceShowInNavigation?: boolean;
@@ -54,6 +58,12 @@ export interface NavigationItem {
    * Sort order relative to sibling items (lower numbers come first)
    */
   order?: number;
+  /**
+   * Section name for visual grouping in the navigation sidebar.
+   * Items with the same section are grouped together under a header.
+   * Omit for the default (unlabeled) section.
+   */
+  section?: string;
   /**
    * ID of parent navigation item for hierarchical structures
    */
