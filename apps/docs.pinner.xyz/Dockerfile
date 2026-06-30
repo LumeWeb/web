@@ -19,7 +19,7 @@ FROM node:22-slim AS builder
 
 # Install pnpm + Go (for pinner-cli)
 RUN corepack enable && corepack prepare pnpm@latest --activate
-RUN apt-get update && apt-get install -y --no-install-recommends golang-go && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates golang-go && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
 
