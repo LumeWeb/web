@@ -25,6 +25,7 @@ const routes: RouteDefinition[] = [
     navigation: {
       icon: LayoutDashboard,
       label: "Dashboard",
+      description: "Overview of your account and services",
       order: 0,
     },
     path: "/dashboard",
@@ -35,6 +36,7 @@ const routes: RouteDefinition[] = [
     navigation: {
       icon: Activity,
       label: "Operations",
+      description: "Monitor and manage running operations",
       order: 2,
     },
     path: "/operations",
@@ -49,6 +51,8 @@ const routes: RouteDefinition[] = [
           forceShowInNavigation: true,
           icon: User,
           label: "Profile",
+          description: "View and edit your profile information",
+          order: 0,
         },
         path: "",
       },
@@ -58,6 +62,8 @@ const routes: RouteDefinition[] = [
         navigation: {
           icon: Shield,
           label: "Security",
+          description: "Manage passwords, 2FA, and sessions",
+          order: 1,
         },
         path: "security",
       },
@@ -67,6 +73,8 @@ const routes: RouteDefinition[] = [
         navigation: {
           icon: Key,
           label: "API Keys",
+          description: "Create and manage API access keys",
+          order: 2,
         },
         path: "api-keys",
       },
@@ -76,8 +84,10 @@ const routes: RouteDefinition[] = [
     navigation: {
       icon: UserCog,
       label: "My Account",
+      description: "Manage your account settings",
       linkable: false,
       order: 3,
+      section: "Account",
     },
     path: "/account",
   },

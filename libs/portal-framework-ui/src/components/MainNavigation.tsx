@@ -28,16 +28,29 @@ export const MainNavigation: React.FC<MenuProps> = ({
   const resetKey = typeof onItemClick === "function" ? pathname : undefined;
 
   const renderSection = (group: NavigationGroup, sectionIndex: number) => {
-    if (group.section === null) {
+    // Suppress section header when the section is the single item (section name
+    // matches the item's id suffix, e.g. section "Private Data" with id
+    // "core:private-data" — the item IS the section, header would be redundant).
+    const suppressHeader =
+      group.section === null ||
+      (group.items.length === 1 &&
+        group.items[0].id != null &&
+        group.items[0].id.split(":").pop() ===
+          group.section.toLowerCase().replace(/\s/g, "-"));
+    if (suppressHeader) {
       return (
-        <NavigationTreeRenderer
-          indent={false}
-          isOpen={isOpen}
+        <li
+          className={sectionIndex > 0 ? "mt-4" : undefined}
           key={`section-${sectionIndex}`}
-          onItemClick={onItemClick}
-          resetKey={resetKey}
-          tree={group.items}
-        />
+        >
+          <NavigationTreeRenderer
+            indent={false}
+            isOpen={isOpen}
+            onItemClick={onItemClick}
+            resetKey={resetKey}
+            tree={group.items}
+          />
+        </li>
       );
     }
 

@@ -163,11 +163,14 @@ export class Navigation implements NavigationFeature {
     const propMap = {
       badge: CHECK_TYPES.DEFINED,
       children: CHECK_TYPES.DEFINED,
+      description: CHECK_TYPES.UNDEFINED_CHECK,
       disabled: CHECK_TYPES.UNDEFINED_CHECK,
       hidden: CHECK_TYPES.UNDEFINED_CHECK,
       icon: CHECK_TYPES.DEFINED,
       order: CHECK_TYPES.UNDEFINED_CHECK,
       linkable: CHECK_TYPES.UNDEFINED_CHECK,
+      parentId: CHECK_TYPES.UNDEFINED_CHECK,
+      section: CHECK_TYPES.UNDEFINED_CHECK,
       show: CHECK_TYPES.DEFINED
     } as const;
 
@@ -188,8 +191,16 @@ export class Navigation implements NavigationFeature {
     return !!route.navigation && (!(route.index ?? false) || !!route.navigation.forceShowInNavigation);
   }
 
-  private processRouteForNavigation(route: RouteDefinition, pluginId: NamespacedId, parentPath = "", parentId?: NamespacedId): NavigationItem[] {
-    const item = this.createNavigationItem(route, pluginId, parentPath, parentId);
+  private processRouteForNavigation(route: RouteDefinition, pluginId: NamespacedId, parentPath = "", parentId?: NamespacedId, inheritedSection?: string): NavigationItem[] {
+    const shouldInclude = this.shouldIncludeRouteInNavigation(route);
+    const item = shouldInclude ? this.createNavigationItem(route, pluginId, parentPath, parentId) : null;
+
+    // Inherit section from parent if the route doesn't define its own
+    if (item && !item.section && inheritedSection) {
+      item.section = inheritedSection;
+    }
+
+    const effectiveSection = item?.section ?? inheritedSection;
 
     // Route has no navigation itself — but it may have children that do
     // (e.g. a layout route). Process children without creating a nav item
@@ -197,17 +208,15 @@ export class Navigation implements NavigationFeature {
     if (!item) {
       const childPath = resolveFullPath(parentPath, route.path ?? "");
       return route.children
-        ?.filter((child) => this.shouldIncludeRouteInNavigation(child))
-        .flatMap((child) =>
-          this.processRouteForNavigation(child, pluginId, childPath, parentId),
+        ?.flatMap((child) =>
+          this.processRouteForNavigation(child, pluginId, childPath, parentId, effectiveSection),
         ) ?? [];
     }
 
     const childItems =
       route.children
-        ?.filter((child) => this.shouldIncludeRouteInNavigation(child))
-        .flatMap((child) =>
-          this.processRouteForNavigation(child, pluginId, item.path, item.id),
+        ?.flatMap((child) =>
+          this.processRouteForNavigation(child, pluginId, item.path, item.id, effectiveSection),
         ) ?? [];
 
     return [item, ...childItems];
@@ -218,8 +227,7 @@ export class Navigation implements NavigationFeature {
       .flatMap(
         (plugin) =>
           plugin.routes
-            ?.filter((route) => this.shouldIncludeRouteInNavigation(route))
-            .flatMap((route) =>
+            ?.flatMap((route) =>
               this.processRouteForNavigation(route, plugin.id),
             ) ?? [],
       )

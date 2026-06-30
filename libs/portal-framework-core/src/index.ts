@@ -41,7 +41,7 @@ export {
 export { MockFrameworkProvider } from "./testing/MockFrameworkProvider";
 
 // Types
-export type { FeatureStatus, FrameworkFeature } from "./types/api";
+export type { FeatureDependency, FeatureStatus, FrameworkFeature } from "./types/api";
 export type {
   BaseCapability,
   CapabilityStatus,
@@ -50,6 +50,7 @@ export type {
 } from "./types/capabilities";
 export type { NavigationFeature } from "./types/features";
 export type {
+  NavigationBadge,
   NavigationItem,
   NavigationItemIconProps,
   RouteDefinition,

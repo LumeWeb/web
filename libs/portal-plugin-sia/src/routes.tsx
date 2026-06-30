@@ -8,13 +8,15 @@ const HardDrive = lazyIcon("HardDrive");
 
 const routes = [
   {
-    path: "/sia/apps",
+    path: "/services/sia/apps",
     component: "apps",
-    id: createNamespacedId("core", "sia-apps"),
+    id: createNamespacedId("core", "private-data"),
     navigation: {
-      label: "My Apps",
+      label: "Private Data",
+      description: "Secure private storage on Sia",
       icon: HardDrive,
-      order: 5,
+      order: 20,
+      section: "Private Data",
     },
   },
 ] satisfies RouteDefinition[];

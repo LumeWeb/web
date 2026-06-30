@@ -10,23 +10,27 @@ const Monitor = lazyIcon("Monitor");
 
 const routes = [
   {
-    path: "/lbry/devices",
+    path: "/services/lbry/devices",
     component: "devices",
     id: createNamespacedId(CORE_NS, "lbry-devices"),
     navigation: {
       label: "Devices",
+      description: "Manage LBRY streaming devices",
       icon: Monitor,
-      order: 3,
+      order: 11,
+      section: "Public Data",
     },
   },
   {
-    path: "/lbry/streams",
+    path: "/services/lbry/streams",
     component: "streams",
     id: createNamespacedId(CORE_NS, "lbry-streams"),
     navigation: {
       label: "Streams",
+      description: "Browse LBRY content streams",
       icon: Anchor,
-      order: 4,
+      order: 12,
+      section: "Public Data",
     },
   },
 ] satisfies RouteDefinition[];

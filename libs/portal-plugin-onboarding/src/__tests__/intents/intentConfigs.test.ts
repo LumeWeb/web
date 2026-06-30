@@ -22,7 +22,7 @@ describe("PINNING_STEPS", () => {
   });
 
   it("upload step navigates to /files", () => {
-    expect(PINNING_STEPS[2].ctaRoute).toBe("/files");
+    expect(PINNING_STEPS[2].ctaRoute).toBe("/services/ipfs/files");
     expect(PINNING_STEPS[2].ctaLabel).toBe("Upload files");
   });
 });

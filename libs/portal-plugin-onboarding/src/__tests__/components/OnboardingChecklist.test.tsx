@@ -7,7 +7,7 @@ import { OnboardingChecklist } from "@/ui/components/OnboardingChecklist";
 const mockStepsPinning = [
   { id: "cli", isComplete: false, label: "Install CLI", description: "Copy the command below, paste it into your terminal, and run it to install the Pinner CLI", ctaLabel: "Copy install command", ctaRoute: null },
   { id: "subscribe", isComplete: false, label: "Subscribe", description: "Choose a plan to start pinning content to the IPFS network", ctaLabel: "View plans", ctaRoute: "/account/subscription" },
-  { id: "upload", isComplete: false, label: "Upload Content", description: "Pin your first file or directory to IPFS", ctaLabel: "Upload files", ctaRoute: "/files" },
+  { id: "upload", isComplete: false, label: "Upload Content", description: "Pin your first file or directory to IPFS", ctaLabel: "Upload files", ctaRoute: "/services/ipfs/files" },
 ];
 
 const mockStepsHosting = [
@@ -19,7 +19,7 @@ const mockStepsHosting = [
 const mockStepsComplete = [
   { id: "cli", isComplete: true, label: "Install CLI", description: "Copy the command below, paste it into your terminal, and run it to install the Pinner CLI", ctaLabel: "Copy install command", ctaRoute: null },
   { id: "subscribe", isComplete: true, label: "Subscribe", description: "Choose a plan to start pinning content to the IPFS network", ctaLabel: "View plans", ctaRoute: "/account/subscription" },
-  { id: "upload", isComplete: true, label: "Upload Content", description: "Pin your first file or directory to IPFS", ctaLabel: "Upload files", ctaRoute: "/files" },
+  { id: "upload", isComplete: true, label: "Upload Content", description: "Pin your first file or directory to IPFS", ctaLabel: "Upload files", ctaRoute: "/services/ipfs/files" },
 ];
 
 vi.mock("@/hooks", () => ({

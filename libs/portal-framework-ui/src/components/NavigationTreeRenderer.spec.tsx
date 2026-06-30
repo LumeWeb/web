@@ -23,6 +23,10 @@ vi.mock("@lumeweb/portal-framework-ui-core", () => ({
   TooltipContent: () => null,
   TooltipProvider: ({ children }: any) => <>{children}</>,
   TooltipTrigger: ({ children }: any) => <>{children}</>,
+  Popover: ({ children }: any) => <>{children}</>,
+  PopoverContent: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  PopoverTrigger: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  lazyIcon: () => () => null,
   cn: (...args: any[]) => args.filter(Boolean).join(" "),
 }));
 
