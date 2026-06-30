@@ -6,7 +6,6 @@ import { lazyIcon } from "@lumeweb/portal-framework-ui-core";
 const Coins = lazyIcon("Coins");
 const CreditCard = lazyIcon("CreditCard");
 
-
 const routes = [
   {
     component: "account/subscription",
@@ -14,6 +13,10 @@ const routes = [
     navigation: {
       icon: CreditCard,
       label: "Subscription",
+      description: "Manage your subscription plan",
+      parentId: "core:account-layout",
+      order: 3,
+      section: "Account",
     },
     path: "/account/subscription",
   },
@@ -23,8 +26,12 @@ const routes = [
     navigation: {
       icon: Coins,
       label: "Credits",
+      description: "View and purchase credits",
+      parentId: "core:account-layout",
+      order: 4,
+      section: "Account",
     },
-    path: "/credits",
+    path: "/account/credits",
   },
 ] satisfies RouteDefinition[];
 
