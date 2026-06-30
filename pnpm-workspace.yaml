@@ -176,6 +176,8 @@ onlyBuiltDependencies:
   - sharp
   - workerd
 
+minimumReleaseAge: 720
+
 gitChecks: false
 
 publishBranch: develop
