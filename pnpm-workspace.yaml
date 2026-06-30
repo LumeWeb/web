@@ -96,7 +96,7 @@ catalog:
   vite: 8.0.16
 
   vitest: ^4.1.9
-  vocs: ^2.0.15
+  vocs: ^2.2.1
   entities: ^8.0.0
   p-queue: ^9.3.0
   zod: ^4.4.3
