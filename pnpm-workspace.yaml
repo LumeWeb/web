@@ -177,6 +177,7 @@ onlyBuiltDependencies:
   - workerd
 
 minimumReleaseAge: 720
+minimumReleaseAgeStrict: false
 
 gitChecks: false
 
