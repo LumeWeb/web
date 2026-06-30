@@ -23,8 +23,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends golang-go && rm
 
 WORKDIR /build
 
-# Copy workspace manifests first (layer cache)
+# Copy workspace manifests and patches first (layer cache)
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY patches/ patches/
 COPY apps/docs.pinner.xyz/package.json apps/docs.pinner.xyz/
 
 # Install all dependencies
