@@ -29,8 +29,8 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "satori": "^0.26.0",
-    "swiper": "^12.2.0",
-    "swr": "^2.4.1",
+    "swiper": "^14.0.1",
+    "swr": "^2.4.2",
     "tailwind-merge": "catalog:",
     "tailwindcss": "catalog:websites",
     "tailwindcss-animate": "catalog:"

@@ -34,9 +34,9 @@
   },
   "devDependencies": {
     "@lumeweb/tsdown-config": "workspace:*",
+    "@types/react": "catalog:",
     "fake-indexeddb": "^6.2.5",
-    "tsdown": "catalog:",
-    "@types/react": "catalog:"
+    "tsdown": "catalog:"
   },
   "peerDependencies": {
     "@conform-to/react": "catalog:",

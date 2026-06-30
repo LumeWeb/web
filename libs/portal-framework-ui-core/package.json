@@ -31,8 +31,8 @@
   "devDependencies": {
     "@lumeweb/tsdown-config": "workspace:*",
     "@tailwindcss/container-queries": "^0.1.1",
-    "tsdown": "catalog:",
-    "@types/react": "catalog:"
+    "@types/react": "catalog:",
+    "tsdown": "catalog:"
   },
   "peerDependencies": {
     "@lumeweb/analytics": "workspace:*",
