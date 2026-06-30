@@ -62,7 +62,7 @@ describe("useOnboardingStatus", () => {
       expect(result.current.steps[2].id).toBe("upload");
       expect(result.current.steps[2].label).toBe("Upload Content");
       expect(result.current.steps[2].ctaLabel).toBe("Upload files");
-      expect(result.current.steps[2].ctaRoute).toBe("/files");
+      expect(result.current.steps[2].ctaRoute).toBe("/services/ipfs/files");
     });
 
     it("uses hasPins for upload step completion when intent is null", async () => {
@@ -185,7 +185,7 @@ describe("useOnboardingStatus", () => {
       expect(result.current.steps[2].id).toBe("upload");
       expect(result.current.steps[2].label).toBe("Upload Content");
       expect(result.current.steps[2].ctaLabel).toBe("Upload files");
-      expect(result.current.steps[2].ctaRoute).toBe("/files");
+      expect(result.current.steps[2].ctaRoute).toBe("/services/ipfs/files");
     });
 
     it("uses hasPins for upload step completion", async () => {

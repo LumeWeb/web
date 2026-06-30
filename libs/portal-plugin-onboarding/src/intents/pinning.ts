@@ -26,7 +26,7 @@ export const PINNING_STEPS: IntentStepConfig[] = [
     label: "Upload Content",
     description: "Pin your first file or directory to IPFS",
     ctaLabel: "Upload files",
-    ctaRoute: "/files",
+    ctaRoute: "/services/ipfs/files",
     docsUrl: DOCS_URL,
   },
 ];
