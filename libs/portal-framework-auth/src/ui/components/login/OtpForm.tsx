@@ -8,6 +8,7 @@ import React from "react";
 
 import { useBrand } from "@lumeweb/portal-framework-core";
 import { useRedirectIfAuthenticated } from "@/hooks/useRedirectIfAuthenticated";
+import { isExternalRedirect, sanitizeRedirectUrl } from "@/dataProviders/auth";
 import { AuthPage } from "@/ui/components/common/AuthPage";
 import { AuthPageTitle } from "@/ui/components/common/AuthPageTitle";
 
@@ -23,11 +24,23 @@ function OtpForm(): React.JSX.Element {
   const resetPasswordUrl = useResetPasswordUrl();
   const brand = useBrand();
 
-  useRedirectIfAuthenticated("/dashboard", parsed.params?.to, "push");
+  const redirectTo = sanitizeRedirectUrl(parsed.params?.to);
+
+  useRedirectIfAuthenticated("/dashboard", redirectTo, "push");
 
   const otpFormConfig = getOtpForm(
-    (values) => login.mutate({ ...values, redirectTo: parsed.params?.to }),
-    parsed.params?.to,
+    (values) =>
+      login.mutate(
+        { ...values, redirectTo },
+        {
+          onSuccess: (result) => {
+            if (result.success && isExternalRedirect(redirectTo)) {
+              window.location.href = redirectTo;
+            }
+          },
+        },
+      ),
+    redirectTo,
   );
 
   return (

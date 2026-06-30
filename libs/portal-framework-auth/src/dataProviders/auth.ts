@@ -11,7 +11,7 @@ import type {
   CheckResponse,
 } from "@refinedev/core";
 
-import { getApiBaseUrl } from "@lumeweb/portal-framework-core";
+import { env, getApiBaseUrl } from "@lumeweb/portal-framework-core";
 import { createNanoEvents } from "nanoevents";
 
 export const DATA_PROVIDER_NAME = "account";
@@ -127,7 +127,27 @@ const LOGIN_PATH = "/login";
 const OTP_PATH = "/otp";
 const DASHBOARD_PATH = "/dashboard";
 
-// Utility to sanitize redirect URLs - only allow relative paths or specific allowed domains
+// Get the trusted root domain from configured portal domain, falling back to
+// the last two DNS labels only when no portal domain is configured (e.g. dev).
+const getRootDomain = (hostname: string): string => {
+  const portalDomain = env.VITE_PORTAL_DOMAIN;
+  if (portalDomain) return portalDomain;
+  const parts = hostname.split(".");
+  return parts.length > 2 ? parts.slice(-2).join(".") : hostname;
+};
+
+// Check if a URL is on a different origin than the current page
+export const isExternalRedirect = (url: string): boolean => {
+  try {
+    if (url.startsWith("/")) return false;
+    const parsed = new URL(url);
+    return parsed.origin !== window.location.origin;
+  } catch {
+    return false;
+  }
+};
+
+// Utility to sanitize redirect URLs - allow relative paths, localhost, and same-root-domain
 export const sanitizeRedirectUrl = (url: string | undefined): string => {
   if (!url) return DASHBOARD_PATH;
 
@@ -137,11 +157,21 @@ export const sanitizeRedirectUrl = (url: string | undefined): string => {
       return url;
     }
 
-    // If it's an absolute URL, only allow localhost for development
     const parsedUrl = new URL(url);
+
+    // Allow localhost for development
     if (
       parsedUrl.hostname === "localhost" ||
       parsedUrl.hostname === "127.0.0.1"
+    ) {
+      return url;
+    }
+
+    // Allow same-root-domain (e.g. sia.example.com when on account.example.com)
+    const rootDomain = getRootDomain(window.location.hostname);
+    if (
+      parsedUrl.hostname === rootDomain ||
+      parsedUrl.hostname.endsWith(`.${rootDomain}`)
     ) {
       return url;
     }
