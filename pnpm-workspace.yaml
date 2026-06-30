@@ -173,21 +173,15 @@ onlyBuiltDependencies:
   - es5-ext
   - esbuild
   - msw
+  - node-datachannel
   - sharp
+  - vue-demi
   - workerd
 
 minimumReleaseAge: 720
-minimumReleaseAgeStrict: false
+minimumReleaseAgeExclude:
+  - vocs
 
 gitChecks: false
 
 publishBranch: develop
-
-allowBuilds:
-  aws-sdk: set this to true or false
-  es5-ext: set this to true or false
-  esbuild: set this to true or false
-  msw: set this to true or false
-  node-datachannel: set this to true or false
-  sharp: set this to true or false
-  workerd: set this to true or false
