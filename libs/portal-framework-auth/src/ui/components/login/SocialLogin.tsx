@@ -48,8 +48,8 @@ export function SocialLogin() {
     const currentDomain = currentUrl.hostname;
     const currentPort = currentUrl.port;
 
-    // Construct the return URL, including protocol and port if necessary
-    let returnUrl = `${currentProtocol}//${currentDomain}`;
+    // Construct the redirect URL, including protocol and port if necessary
+    let redirectUrl = `${currentProtocol}//${currentDomain}`;
     if (
       currentPort &&
       !(
@@ -57,11 +57,11 @@ export function SocialLogin() {
         (currentProtocol === "https:" && currentPort === "443")
       )
     ) {
-      returnUrl += `:${currentPort}`;
+      redirectUrl += `:${currentPort}`;
     }
-    returnUrl += toPath;
+    redirectUrl += toPath;
 
-    queryParams.set("return", returnUrl);
+    queryParams.set("to", redirectUrl);
     window.location.href = `https://${accountSubdomain}/api/account/auth/sso/${providerId}?${queryParams.toString()}`;
   };
 

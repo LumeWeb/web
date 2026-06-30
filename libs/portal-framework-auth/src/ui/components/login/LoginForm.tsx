@@ -4,7 +4,7 @@ import React from "react";
 import { Link } from "react-router";
 
 import type { AuthFormRequest } from "@/dataProviders/auth";
-
+import { isExternalRedirect, sanitizeRedirectUrl } from "@/dataProviders/auth";
 import { getLoginFormConfig } from "../../forms/login";
 
 export interface LoginParams {
@@ -17,12 +17,23 @@ export const LoginForm = () => {
   const resetPasswordUrl = useResetPasswordUrl();
 
   const onSubmit = async (data: any) => {
-    login({
-      email: data.email,
-      password: data.password,
-      redirectTo: parsed.params?.to,
-      remember: data.remember ?? false,
-    });
+    const redirectTo = sanitizeRedirectUrl(parsed.params?.to);
+
+    login(
+      {
+        email: data.email,
+        password: data.password,
+        redirectTo,
+        remember: data.remember ?? false,
+      },
+      {
+        onSuccess: (result) => {
+          if (result.success && isExternalRedirect(redirectTo)) {
+            window.location.href = redirectTo;
+          }
+        },
+      },
+    );
   };
 
   const formConfig = getLoginFormConfig(onSubmit);
