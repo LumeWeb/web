@@ -113,6 +113,7 @@ describe("isExternalRedirect", () => {
     vi.stubGlobal("location", {
       hostname: "account.example.com",
       href: "https://account.example.com/login",
+      origin: "https://account.example.com",
     });
   });
 
@@ -124,20 +125,32 @@ describe("isExternalRedirect", () => {
     expect(isExternalRedirect("/dashboard")).toBe(false);
   });
 
-  it("should return false for same subdomain", () => {
+  it("should return false for same origin", () => {
     expect(
       isExternalRedirect("https://account.example.com/dashboard"),
     ).toBe(false);
   });
 
-  it("should return false for same-root-domain", () => {
+  it("should return true for same-root-domain but different origin (cross-subdomain)", () => {
     expect(
       isExternalRedirect("https://sia.example.com/auth/connect/123"),
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it("should return true for external domains", () => {
     expect(isExternalRedirect("https://evil.com/dashboard")).toBe(true);
+  });
+
+  it("should return true for different protocol on same host", () => {
+    expect(
+      isExternalRedirect("http://account.example.com/dashboard"),
+    ).toBe(true);
+  });
+
+  it("should return true for different port on same host", () => {
+    expect(
+      isExternalRedirect("https://account.example.com:3000/dashboard"),
+    ).toBe(true);
   });
 
   it("should return false for invalid URLs", () => {

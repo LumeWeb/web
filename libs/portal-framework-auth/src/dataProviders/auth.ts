@@ -141,10 +141,7 @@ export const isExternalRedirect = (url: string): boolean => {
   try {
     if (url.startsWith("/")) return false;
     const parsed = new URL(url);
-    const currentHost = window.location.hostname;
-    if (parsed.hostname === currentHost) return false;
-    const rootDomain = getRootDomain(currentHost);
-    return !parsed.hostname.endsWith(`.${rootDomain}`);
+    return parsed.origin !== window.location.origin;
   } catch {
     return false;
   }
