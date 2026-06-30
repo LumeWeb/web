@@ -91,6 +91,7 @@ interface NavigationItem {
   section?: string;                   // groups items under a visual header
   order?: number;                     // sort order within siblings (ascending)
   icon?: React.FC<NavigationItemIconProps>;
+  description?: string;               // tooltip text shown on hover
   badge?: NavigationBadge;
   children?: NavigationItem[];        // inline children (alternative to parentId)
   hidden?: boolean;                   // hide from sidebar
@@ -108,7 +109,11 @@ interface NavigationItem {
 - `parentId` supports flat collections where items are registered independently (e.g., across plugins)
 - Inline `children[]` supports co-located parent-child definitions in a single route tree
 
+**`description` field**: Optional tooltip text shown on hover when the sidebar is expanded. When collapsed, the tooltip shows the label instead.
+
 **Section is a string, not an enum**: Sections are open-ended. Plugins can invent their own sections ("Public Data", "Account", "Private Data") without coordinating with the framework. The UI layer groups by string equality.
+
+**`forceShowInNavigation` is a filter, not a property**: This field is checked by `shouldIncludeRouteInNavigation()` to decide whether an index route appears in the sidebar at all. It is not copied to the resulting `NavigationItem` — it controls inclusion, not display.
 
 ## RouteDefinition
 
@@ -131,7 +136,7 @@ interface RouteDefinition extends Omit<RouteObject, "children"> {
 
 **`component` is a bare string**: Not a namespaced ID. It's resolved against the plugin's module loader to find the exported component. This decouples route definitions from component packaging.
 
-**`navigation` is partial**: The route's `navigation` field provides sidebar config, but `id`, `path`, and `parentId` on the `NavigationItem` are resolved automatically by the `Navigation` class during route processing. Plugin authors only set display properties (label, icon, order, section, etc.).
+**`navigation` is partial**: The route's `navigation` field provides sidebar config, but `id` and `path` on the `NavigationItem` are resolved automatically by the `Navigation` class during route processing. `parentId` is auto-resolved from the route tree parent's nav item ID when using `children`, but can also be explicitly set on `navigation.parentId` for cross-plugin nesting (e.g., billing routes that nest under a dashboard parent). Plugin authors set display properties (label, icon, order, section, description, etc.) and optionally `parentId` for cross-plugin hierarchy.
 
 **`id` enforcement**: Route IDs must be valid `NamespacedId` values. Bare strings are rejected during plugin registration in `PluginManager.register()`.
 
@@ -166,15 +171,15 @@ NavigationItem[] (flat)
     ▼
 useMenuItems() → useNavigationTree(items)
     │
-    │ groupBySection(): partition by section name (default = no header, sorts last)
+    │ groupBySection(): partition by section name (default sorts first, then named sections by order)
     │ buildTree(): per-section N-level tree (parentId + inline children)
     ▼
 { sections, sectionTrees, tree }
     │
     │ MainNavigation renders:
     │   - Named sections with header + items
-    │   - Single-item sections: no header (suppressed)
-    │   - Default section: no header
+    │   - Default section: no header (rendered first)
+    │   - Single-item sections where item id suffix matches section name: header suppressed
     ▼
 <MainNavigation />
 ```
