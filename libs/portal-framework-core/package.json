@@ -43,6 +43,7 @@
     "@lumeweb/tsdown-config": "workspace:*",
     "@rolldown/plugin-babel": "^0.2.3",
     "@types/express": "^5.0.6",
+    "@types/react": "catalog:",
     "@vitejs/devtools": "^0.3.3",
     "babel-plugin-react-compiler": "^1.0.0",
     "express": "^5.2.1",
@@ -50,8 +51,7 @@
     "memoizee": "^0.4.17",
     "node-fetch": "^3.3.2",
     "react-error-boundary": "^6.1.2",
-    "tsdown": "catalog:",
-    "@types/react": "catalog:"
+    "tsdown": "catalog:"
   },
   "peerDependencies": {
     "@module-federation/enhanced": "catalog:",

@@ -26,7 +26,7 @@
     "lucide-react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "swiper": "^12.2.0",
+    "swiper": "^14.0.1",
     "tailwind-merge": "catalog:",
     "tailwindcss": "catalog:websites",
     "tailwindcss-animate": "catalog:"

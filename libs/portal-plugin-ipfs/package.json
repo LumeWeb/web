@@ -26,7 +26,7 @@
     "@helia/block-brokers": "^5.2.4",
     "@helia/car": "catalog:",
     "@helia/http": "catalog:",
-    "@helia/interface": "^6.2.1",
+    "@helia/interface": "^7.0.0",
     "@helia/remote-pinning": "^3.0.0",
     "@helia/routers": "^5.1.1",
     "@helia/unixfs": "catalog:",
