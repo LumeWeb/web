@@ -14,12 +14,15 @@
 # vocs.config.js is placed one dir above server/ because the
 # config resolver does: path.resolve(import.meta.dirname, "../vocs.config.js")
 
-# ── Stage 1: Build ─────────────────────────────────────────────────────────
+# ── Stage 1a: Build pinner-cli ────────────────────────────────────────────
+FROM golang:1.26 AS pinner-cli
+RUN go install go.lumeweb.com/pinner-cli/cmd/pinner@latest
+
+# ── Stage 1b: Build docs ──────────────────────────────────────────────────
 FROM node:22-slim AS builder
 
-# Install pnpm + Go (for pinner-cli)
+# Install pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates golang-go && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
 
@@ -31,9 +34,8 @@ COPY apps/docs.pinner.xyz/package.json apps/docs.pinner.xyz/
 # Install all dependencies
 RUN pnpm install --frozen-lockfile
 
-# Install pinner-cli (provides `pinner generate-docs json` for CLI ref generation)
-RUN go install go.lumeweb.com/pinner-cli/cmd/pinner@latest
-ENV PATH="/root/go/bin:${PATH}"
+# Copy pinner-cli binary from golang stage
+COPY --from=pinner-cli /go/bin/pinner /usr/local/bin/pinner
 
 # Copy source and build
 COPY apps/docs.pinner.xyz/ apps/docs.pinner.xyz/
