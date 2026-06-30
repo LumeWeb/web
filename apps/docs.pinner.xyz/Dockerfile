@@ -42,12 +42,23 @@ COPY apps/docs.pinner.xyz/ apps/docs.pinner.xyz/
 COPY libs/pinner/src/ libs/pinner/src/
 COPY libs/pinner/tsconfig.json libs/pinner/tsconfig.json
 COPY libs/pinner/tsconfig.typedoc.json libs/pinner/tsconfig.typedoc.json
+COPY tsconfig.base.json tsconfig.base.json
 
-# build script runs generate (TypeDoc + CLI ref) then vocs build
-RUN pnpm --filter @lumeweb/docs.pinner.xyz build
+# Build: inline the build chain to avoid pnpm's runDepsStatusCheck
+# (pnpm v11 re-runs install before every pnpm script invocation, which
+# fails on workspace-level unused patches)
+# pinner binary is already copied from the golang stage, so setup-pinner-cli.sh
+# is a no-op (it exits early when pinner is on PATH)
+WORKDIR /build/apps/docs.pinner.xyz
+RUN mkdir -p reference-sources \
+    && pinner generate-docs json > reference-sources/cli-ref.json \
+    && npx tsx scripts/generate-cli-ref.ts \
+    && npx typedoc \
+    && npx tsx scripts/generate-sdk-ref.ts \
+    && npx vocs build
 
 # Bundle the server with tsdown/Rolldown
-RUN pnpm --filter @lumeweb/docs.pinner.xyz exec tsdown
+RUN npx tsdown
 
 # ── Stage 2: Runtime ──────────────────────────────────────────────────────
 FROM node:22-slim AS runtime
