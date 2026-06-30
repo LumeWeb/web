@@ -9,6 +9,7 @@ const routes = [
     id: createNamespacedId("abuse", "root"),
     navigation: {
       label: "Abuse",
+      description: "Abuse management and moderation",
     },
     path: "/abuse",
     children: [
@@ -31,6 +32,7 @@ const routes = [
         path: "cases",
         navigation: {
           label: "Cases",
+          description: "Review and manage abuse cases",
         },
       },
       {
@@ -48,6 +50,7 @@ const routes = [
         path: "reporters",
         navigation: {
           label: "Reporters",
+          description: "View abuse reporters",
         },
       },
       {
@@ -65,6 +68,7 @@ const routes = [
         path: "subjects",
         navigation: {
           label: "Subjects",
+          description: "View reported subjects",
         },
       },
       {
@@ -82,6 +86,7 @@ const routes = [
         path: "blocklist",
         navigation: {
           label: "Blocklist",
+          description: "Manage blocked entities",
         },
       },
     ],
