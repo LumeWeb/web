@@ -1,20 +1,26 @@
+import { env } from "@lumeweb/portal-framework-core";
+
+const DEFAULT_MESSAGES = [
+  "Securing decentralized storage...",
+  "Verifying cryptographic keys...",
+  "Establishing privacy-first connections...",
+  "Loading distributed network protocols...",
+  "Encrypting user data workspace...",
+  "Initializing zero-knowledge architecture...",
+  "Configuring censorship-resistant services...",
+  "Setting up peer-to-peer infrastructure...",
+  "Preparing blockchain-verified storage...",
+  "Finalizing privacy-preserving setup...",
+];
+
 class AppLoader {
   #isComplete = false;
   #loadingMessage: HTMLElement = document.querySelector(".loading-message")!;
   #loadingOverlay: HTMLElement = document.querySelector(".loading-overlay")!;
   #messageInterval: null | ReturnType<typeof setInterval> = null;
-  #messages = [
-    "Securing decentralized storage...",
-    "Verifying cryptographic keys...",
-    "Establishing privacy-first connections...",
-    "Loading distributed network protocols...",
-    "Encrypting user data workspace...",
-    "Initializing zero-knowledge architecture...",
-    "Configuring censorship-resistant services...",
-    "Setting up peer-to-peer infrastructure...",
-    "Preparing blockchain-verified storage...",
-    "Finalizing privacy-preserving setup...",
-  ];
+  #messages = env.VITE_PORTAL_BRAND?.loadingMessages?.length
+    ? env.VITE_PORTAL_BRAND.loadingMessages
+    : DEFAULT_MESSAGES;
   #previousMessageIndex: number | null = null;
   constructor() {
     this.#init();
