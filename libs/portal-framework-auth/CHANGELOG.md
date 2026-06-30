@@ -1,3 +1,12 @@
+## 0.1.6 (2026-06-30)
+
+### Fixes
+
+#### Fixes
+
+- support cross-subdomain redirects via 'to' param
+- compare origins in isExternalRedirect
+
 ## 0.1.5 (2026-06-30)
 
 ### Fixes
