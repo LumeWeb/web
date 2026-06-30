@@ -18,7 +18,9 @@ class AppLoader {
   #loadingMessage: HTMLElement = document.querySelector(".loading-message")!;
   #loadingOverlay: HTMLElement = document.querySelector(".loading-overlay")!;
   #messageInterval: null | ReturnType<typeof setInterval> = null;
-  #messages = env.VITE_PORTAL_BRAND?.loadingMessages ?? DEFAULT_MESSAGES;
+  #messages = env.VITE_PORTAL_BRAND?.loadingMessages?.length
+    ? env.VITE_PORTAL_BRAND.loadingMessages
+    : DEFAULT_MESSAGES;
   #previousMessageIndex: number | null = null;
   constructor() {
     this.#init();
