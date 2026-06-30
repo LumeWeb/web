@@ -1,3 +1,17 @@
+## 0.1.8 (2026-06-30)
+
+### Features
+
+#### Features
+
+- reorganize routes under /services/ with descriptions and Public Data section
+- reorganize routes under /services/ with descriptions and Public Data section
+
+### Fixes
+
+- migrate from createHeliaHTTP to createHelia for @helia/http v4
+- migrate from createHeliaHTTP to createHelia for @helia/http v4
+
 ## 0.1.7 (2026-06-09)
 
 ### Fixes

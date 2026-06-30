@@ -1,3 +1,11 @@
+## 0.1.5 (2026-06-30)
+
+### Fixes
+
+#### Fixes
+
+- align capability types with core namespace
+
 ## 0.1.4 (2026-06-22)
 
 ### Fixes

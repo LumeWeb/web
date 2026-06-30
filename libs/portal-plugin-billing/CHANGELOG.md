@@ -1,3 +1,15 @@
+## 0.1.7 (2026-06-30)
+
+### Features
+
+#### Features
+
+- add descriptions, Account section, and parentId to routes
+
+### Fixes
+
+- kill stale dev processes and remove hardcoded billing devPort
+
 ## 0.1.6 (2026-06-09)
 
 ### Fixes

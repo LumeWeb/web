@@ -1,3 +1,19 @@
+## 0.1.4 (2026-06-30)
+
+### Features
+
+#### Features
+
+- cascading flyout nav, sidebar auto-resize, tooltips, and theme switcher
+- add lazy loading stubs for heavy UI components
+- add lazy icon registry with React.lazy per icon
+- add Sia storage management plugin
+
+### Fixes
+
+- add @types/react to devDependencies and rename step-control spec to .tsx
+- respect minifyMangle config option and move calendar icon declarations to module scope
+
 ## 0.1.3 (2026-06-22)
 
 ### Fixes

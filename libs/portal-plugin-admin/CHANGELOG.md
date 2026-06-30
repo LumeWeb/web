@@ -1,3 +1,11 @@
+## 0.1.4 (2026-06-30)
+
+### Fixes
+
+#### Fixes
+
+- remove duplicate Home nav label from root route
+
 ## 0.1.3 (2026-06-06)
 
 ### Fixes

@@ -1,3 +1,12 @@
+## 0.1.19 (2026-06-30)
+
+### Fixes
+
+#### Fixes
+
+- migrate from createHeliaHTTP to createHelia for @helia/http v4
+- migrate from createHeliaHTTP to createHelia for @helia/http v4
+
 ## 0.1.18 (2026-06-22)
 
 ### Fixes

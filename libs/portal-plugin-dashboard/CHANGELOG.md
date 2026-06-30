@@ -1,3 +1,15 @@
+## 0.1.5 (2026-06-30)
+
+### Features
+
+#### Features
+
+- add descriptions and Account section to routes
+
+### Fixes
+
+- use hyphenated name in createNamespacedId
+
 ## 0.1.4 (2026-06-09)
 
 ### Features

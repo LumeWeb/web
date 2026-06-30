@@ -1,3 +1,11 @@
+## 0.1.4 (2026-06-30)
+
+### Features
+
+#### Features
+
+- add Sia storage management plugin
+
 ## 0.1.3 (2026-06-06)
 
 ### Fixes

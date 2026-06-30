@@ -1,5 +1,18 @@
 # @lumeweb/portal-dashboard
 
+## 0.3.7 (2026-06-30)
+
+### Features
+
+#### Features
+
+- read loadingMessages from env in loader
+
+### Fixes
+
+- defer to framework ErrorDisplay on boot failure
+- fall back to default messages when loadingMessages is empty
+
 ## 0.3.6 (2026-06-22)
 
 ### Fixes
