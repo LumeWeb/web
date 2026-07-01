@@ -1,3 +1,11 @@
+## 0.1.7 (2026-07-01)
+
+### Fixes
+
+#### Fixes
+
+- set host base to "/" for absolute asset paths
+
 ## 0.1.6 (2026-06-30)
 
 ### Features

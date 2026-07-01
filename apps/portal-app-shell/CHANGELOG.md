@@ -1,5 +1,13 @@
 # @lumeweb/portal-dashboard
 
+## 0.3.8 (2026-07-01)
+
+### Fixes
+
+#### Fixes
+
+- set host base to "/" for absolute asset paths
+
 ## 0.3.7 (2026-06-30)
 
 ### Features
