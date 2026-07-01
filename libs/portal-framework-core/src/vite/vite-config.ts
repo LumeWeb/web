@@ -152,7 +152,7 @@ function createHostConfig(opts: ConfigOptions) {
   ].filter(Boolean);
 
   const config = defineConfig({
-    base: "",
+    base: "/",
     resolve: {
       tsconfigPaths: true,
     },
