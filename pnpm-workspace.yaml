@@ -188,3 +188,15 @@ strictDepBuilds: false
 gitChecks: false
 
 publishBranch: develop
+
+allowBuilds:
+  '@ipshipyard/node-datachannel': true
+  '@parcel/watcher': true
+  aws-sdk: true
+  es5-ext: true
+  esbuild: true
+  msw: true
+  node-datachannel: true
+  sharp: true
+  vue-demi: true
+  workerd: true
