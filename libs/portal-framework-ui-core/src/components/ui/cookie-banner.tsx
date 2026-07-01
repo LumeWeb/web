@@ -17,7 +17,16 @@ import { Switch } from "@/components/ui/switch";
 
 function getPortalUrl(path: string): string {
   const brand = import.meta.env.VITE_PORTAL_BRAND;
-  const siteUrl = typeof brand === "string" ? JSON.parse(brand).siteUrl : brand?.siteUrl;
+  let siteUrl: string | undefined;
+  if (typeof brand === "string") {
+    try {
+      siteUrl = JSON.parse(brand).siteUrl;
+    } catch {
+      /* fall through to relative path */
+    }
+  } else {
+    siteUrl = brand?.siteUrl;
+  }
   if (!siteUrl) return path;
   return `${siteUrl}${path}`;
 }
