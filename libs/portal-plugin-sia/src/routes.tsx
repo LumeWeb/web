@@ -12,11 +12,11 @@ const routes = [
     component: "apps",
     id: createNamespacedId("core", "private-data"),
     navigation: {
-      label: "Private Data",
-      description: "Secure private storage on Sia",
+      label: "Private Cloud Data",
+      description: "Secure private cloud storage on Sia",
       icon: HardDrive,
       order: 20,
-      section: "Private Data",
+      section: "Private Cloud Data",
     },
   },
 ] satisfies RouteDefinition[];
