@@ -56,6 +56,14 @@ vi.mock("@lumeweb/portal-framework-ui-core", () => ({
   Skeleton: ({ className }: any) => (
     <div data-testid="skeleton" className={className} />
   ),
+  lazyIcon: (name: string) => {
+    const icons: Record<string, () => any> = {
+      X: () => <span data-testid="icon-x">X</span>,
+      ChevronRight: () => <span data-testid="icon-chevron">→</span>,
+      Check: () => <span data-testid="icon-check">✓</span>,
+    };
+    return icons[name] ?? (() => null);
+  },
 }));
 
 vi.mock("lucide-react", () => ({
