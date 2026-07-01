@@ -16,9 +16,19 @@ import {
 import { Switch } from "@/components/ui/switch";
 
 function getPortalUrl(path: string): string {
-  const domain = import.meta.env.VITE_PORTAL_DOMAIN;
-  if (!domain) return path;
-  return `https://${domain}${path}`;
+  const brand = import.meta.env.VITE_PORTAL_BRAND;
+  let siteUrl: string | undefined;
+  if (typeof brand === "string") {
+    try {
+      siteUrl = JSON.parse(brand).siteUrl;
+    } catch {
+      /* fall through to relative path */
+    }
+  } else {
+    siteUrl = brand?.siteUrl;
+  }
+  if (!siteUrl) return path;
+  return `${siteUrl}${path}`;
 }
 
 interface CookieCategoryConfig {
