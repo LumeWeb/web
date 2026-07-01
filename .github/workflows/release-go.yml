@@ -62,6 +62,8 @@ jobs:
 
       - name: Release
         id: release
+        env:
+          VITE_PORTAL_BRAND: ${{ vars.VITE_PORTAL_BRAND }}
         run: |
           ARGS=()
           
