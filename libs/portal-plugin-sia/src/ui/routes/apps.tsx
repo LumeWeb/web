@@ -21,7 +21,7 @@ import { lazyIcon } from "@lumeweb/portal-framework-ui-core";
 const HardDrive = lazyIcon("HardDrive");
 const Trash2 = lazyIcon("Trash2");
 const Unplug = lazyIcon("Unplug");
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useQuota } from "@lumeweb/portal-plugin-quota";
 import { disconnectAppDialogConfig } from "@/ui/dialogs/disconnectAppDialog";
@@ -30,6 +30,36 @@ import { usePruneSia } from "@/hooks";
 import type { AppResponse } from "@/types";
 
 const columnHelper = createColumnHelper<AppResponse>();
+
+interface AppLogoProps {
+  logoURL?: string;
+  name: string;
+}
+
+function AppLogo({ logoURL, name }: AppLogoProps) {
+  const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [logoURL]);
+
+  if (!logoURL || imgError) {
+    return (
+      <div className="flex h-8 w-8 items-center justify-center rounded bg-muted">
+        <HardDrive className="h-4 w-4 text-muted-foreground" />
+      </div>
+    );
+  }
+
+  return (
+    <img
+      alt={name}
+      className="h-8 w-8 rounded"
+      onError={() => setImgError(true)}
+      src={logoURL}
+    />
+  );
+}
 
 function getBarColor(percentage: number): string {
   if (percentage > 90) return "bg-destructive";
@@ -41,17 +71,7 @@ const columns = [
   columnHelper.accessor("name", {
     cell: (info) => (
       <div className="flex items-center gap-3">
-        {info.row.original.logoURL ? (
-          <img
-            alt={info.getValue()}
-            className="h-8 w-8 rounded"
-            src={info.row.original.logoURL}
-          />
-        ) : (
-          <div className="flex h-8 w-8 items-center justify-center rounded bg-muted">
-            <HardDrive className="h-4 w-4 text-muted-foreground" />
-          </div>
-        )}
+        <AppLogo logoURL={info.row.original.logoURL} name={info.getValue()} />
         <div>
           <span className="font-medium">{info.getValue()}</span>
           {info.row.original.description && (
