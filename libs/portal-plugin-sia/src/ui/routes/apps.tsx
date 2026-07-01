@@ -172,7 +172,6 @@ export default function Apps() {
   const { openDialog } = useDialog();
   const { mutateAsync: deleteApp } = useDelete();
   const { mutate: prune, isLoading: isPruning } = usePruneSia();
-  const [pruneDone, setPruneDone] = useState(false);
 
   const handleDisconnect = (app: AppResponse) => {
     openDialog(
@@ -181,6 +180,11 @@ export default function Apps() {
           await deleteApp({
             id: app.publicKey,
             resource: "sia/apps",
+            successNotification: () => ({
+              description: `The app "${app.name}" has been disconnected.`,
+              message: "App Disconnected",
+              type: "success",
+            }),
           });
         } catch {
           // Refine mutation error notifications are handled by the data provider
@@ -192,11 +196,7 @@ export default function Apps() {
   const handlePrune = () => {
     openDialog(
       pruneDialogConfig(() => {
-        prune({
-          onSuccess: () => {
-            setPruneDone(true);
-          },
-        });
+        prune();
       }),
     );
   };
@@ -213,10 +213,10 @@ export default function Apps() {
             <Button
               variant="outline"
               onClick={handlePrune}
-              disabled={isPruning || pruneDone}
+              disabled={isPruning}
             >
               <Trash2 className="mr-2 h-4 w-4" />
-              {isPruning ? "Cleaning up..." : pruneDone ? "Cleaned Up" : "Clean Up Storage"}
+              {isPruning ? "Cleaning up..." : "Clean Up Storage"}
             </Button>
           </div>
 
