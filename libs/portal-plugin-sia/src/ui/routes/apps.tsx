@@ -207,7 +207,7 @@ export default function Apps() {
         <div className="space-y-6">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <PageHeader
-              description="Manage apps connected to your private storage and view your storage usage."
+              description="Manage apps connected to your private cloud data and view your storage usage."
               title="My Apps"
             />
             <Button
@@ -235,7 +235,7 @@ export default function Apps() {
               ],
             }}
             columns={columns}
-            emptyStateMessage="No apps are connected to your private storage yet. Apps will appear here when they request access to your storage."
+            emptyStateMessage="No apps are connected to your private cloud data yet. Apps will appear here when they request access to your data."
             pagination={true}
             resource="sia/apps"
             responsive={true}
