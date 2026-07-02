@@ -1,3 +1,11 @@
+## 0.1.7 (2026-07-02)
+
+### Fixes
+
+#### Fixes
+
+- preserve ?to= redirect param across all auth entry points
+
 ## 0.1.6 (2026-06-30)
 
 ### Fixes

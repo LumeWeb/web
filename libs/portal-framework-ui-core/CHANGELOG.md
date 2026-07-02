@@ -1,3 +1,12 @@
+## 0.1.5 (2026-07-02)
+
+### Fixes
+
+#### Fixes
+
+- use brand.siteUrl for ToS/Privacy Policy links in cookie banner
+- wrap JSON.parse in try/catch for invalid VITE_PORTAL_BRAND
+
 ## 0.1.4 (2026-06-30)
 
 ### Features
