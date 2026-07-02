@@ -9,7 +9,7 @@ vi.mock("@lumeweb/portal-framework-core", () => ({
   getApiBaseUrl: () => "https://example.com",
 }));
 
-import { isExternalRedirect, sanitizeRedirectUrl } from "./auth";
+import { createAuthProvider, isExternalRedirect, sanitizeRedirectUrl } from "./auth";
 
 describe("sanitizeRedirectUrl", () => {
   beforeEach(() => {
@@ -155,5 +155,98 @@ describe("isExternalRedirect", () => {
 
   it("should return false for invalid URLs", () => {
     expect(isExternalRedirect("not-a-url")).toBe(false);
+  });
+});
+
+describe("createAuthProvider check() redirect", () => {
+  beforeEach(() => {
+    vi.stubGlobal("location", {
+      hostname: "account.example.com",
+      href: "https://account.example.com/",
+      origin: "https://account.example.com",
+      search: "",
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  function createSdk(pingResult: { data: { token?: string } } | { error: Error }) {
+    return {
+      account: () => ({
+        ping: vi.fn().mockResolvedValue(pingResult),
+      }),
+      setAuthToken: vi.fn(),
+    } as any;
+  }
+
+  it("should redirect to /login without ?to= when no to param present", async () => {
+    vi.stubGlobal("location", {
+      hostname: "account.example.com",
+      href: "https://account.example.com/",
+      origin: "https://account.example.com",
+      search: "",
+    });
+
+    const sdk = createSdk({ error: new Error("unauthorized") });
+    const provider = createAuthProvider(sdk);
+    const result = await provider.check();
+
+    expect(result.authenticated).toBe(false);
+    expect(result.redirectTo).toBe("/login");
+  });
+
+  it("should preserve ?to= cross-subdomain URL when redirecting unauthenticated user", async () => {
+    const toUrl = "https://sia.example.com/auth/connect/abc123";
+    vi.stubGlobal("location", {
+      hostname: "account.example.com",
+      href: `https://account.example.com/?to=${encodeURIComponent(toUrl)}`,
+      origin: "https://account.example.com",
+      search: `?to=${encodeURIComponent(toUrl)}`,
+    });
+
+    const sdk = createSdk({ error: new Error("unauthorized") });
+    const provider = createAuthProvider(sdk);
+    const result = await provider.check();
+
+    expect(result.authenticated).toBe(false);
+    expect(result.redirectTo).toBe(
+      `/login?to=${encodeURIComponent(toUrl)}`,
+    );
+  });
+
+  it("should sanitize external ?to= to /dashboard when redirecting unauthenticated user", async () => {
+    vi.stubGlobal("location", {
+      hostname: "account.example.com",
+      href: "https://account.example.com/?to=https://evil.com/path",
+      origin: "https://account.example.com",
+      search: "?to=https%3A%2F%2Fevil.com%2Fpath",
+    });
+
+    const sdk = createSdk({ error: new Error("unauthorized") });
+    const provider = createAuthProvider(sdk);
+    const result = await provider.check();
+
+    expect(result.authenticated).toBe(false);
+    expect(result.redirectTo).toBe(
+      `/login?to=${encodeURIComponent("/dashboard")}`,
+    );
+  });
+
+  it("should preserve relative ?to= path when redirecting unauthenticated user", async () => {
+    vi.stubGlobal("location", {
+      hostname: "account.example.com",
+      href: "https://account.example.com/?to=/dashboard",
+      origin: "https://account.example.com",
+      search: "?to=/dashboard",
+    });
+
+    const sdk = createSdk({ error: new Error("unauthorized") });
+    const provider = createAuthProvider(sdk);
+    const result = await provider.check();
+
+    expect(result.authenticated).toBe(false);
+    expect(result.redirectTo).toBe(`/login?to=${encodeURIComponent("/dashboard")}`);
   });
 });

@@ -229,10 +229,18 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
 
       if (isErrorResult(response)) {
         emitter.emit("authCheckFailed", { error: response.error });
+        const to =
+          typeof window !== "undefined"
+            ? new URLSearchParams(window.location.search).get("to")
+            : null;
+        const sanitizedTo = to ? sanitizeRedirectUrl(to) : null;
+        const redirectTo = sanitizedTo
+          ? `${LOGIN_PATH}?to=${encodeURIComponent(sanitizedTo)}`
+          : LOGIN_PATH;
         return {
           authenticated: false,
           error: response.error,
-          redirectTo: LOGIN_PATH,
+          redirectTo,
         };
       }
 
