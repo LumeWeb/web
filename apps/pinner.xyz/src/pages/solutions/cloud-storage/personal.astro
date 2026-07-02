@@ -12,6 +12,7 @@ import { ctaCopy } from '@/lib/config';
 
 import UploadFlowSection from "@/components/HowItWorks/UploadFlowSection";
 import DistributionSection from "@/components/HowItWorks/DistributionSection";
+import UseCaseSection from "@/components/UseCaseSection";
 
 const faqs = [
   {
@@ -37,9 +38,9 @@ const faqs = [
 ];
 ---
 
-<Layout title="Private Storage for Your Data: Coming Soon | Pinner" description="Store your files privately with zero-knowledge encryption on the Sia network. Coming soon.">
+<Layout title="Cloud Storage for Your Data: Coming Soon | Pinner" description="Store your files privately with zero-knowledge encryption on the Sia network. Coming soon.">
   <PageHeader
-    title="Private Storage for Your Data"
+    title="Cloud Storage for Your Data"
     description="Store your files privately with zero-knowledge encryption on the Sia network. Your keys, your data. No one can read your files without your key. Not us, not the storage hosts."
     client:load
   />
@@ -69,6 +70,33 @@ const faqs = [
     client:load
   />
 
+  <UseCaseSection
+    heading="What people store privately"
+    subheading="Files that should stay yours alone."
+    variant="gray"
+    cases={[
+      {
+        title: "Client & Project Files",
+        description: "Keep sensitive client documents under your own keys. No vendor can be compelled to hand them over because we can't read them.",
+        cta: "Get Notified",
+        href: "#cloud-storage-page",
+      },
+      {
+        title: "Backups & Off-Site Storage",
+        description: "Store encrypted backups on an independent network. When you delete, the file is gone. No residual copies, no recovery by anyone.",
+        cta: "Get Notified",
+        href: "#cloud-storage-page",
+      },
+      {
+        title: "Private Documents",
+        description: "Store personal files, financial records, and anything private. Encrypted before it leaves your device. Only you hold the key.",
+        cta: "Get Notified",
+        href: "#cloud-storage-page",
+      },
+    ]}
+    client:load
+  />
+
   <section class="py-[60px] md:py-[120px] bg-white">
     <div class="xl:container px-6">
       <h2 class="text-[24px] sm:text-[28px] md:text-[31px] font-medium text-content-text text-center mb-10 md:mb-14">Frequently Asked Questions</h2>
@@ -85,9 +113,9 @@ const faqs = [
     <div class="xl:container px-6 flex flex-col items-center">
       <NewsletterSignup
         source="private_storage_personal"
-        label="Want to know when private storage is available? Get notified."
+        label="Want to know when cloud storage is available? Get notified."
         buttonLabel="Notify me"
-        successMessage="You're on the list. We'll email you when private storage is ready."
+        successMessage="You're on the list. We'll email you when cloud storage is ready."
         theme="light"
         rounded
         client:load

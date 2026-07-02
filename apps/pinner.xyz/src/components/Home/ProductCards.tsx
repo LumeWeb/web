@@ -38,11 +38,11 @@ const cards: CardProps[] = [
     soon: true,
   },
   {
-    title: "Private Storage",
+    title: "Cloud Storage",
     description:
       "Encrypted storage where only you hold the keys. Personal use or build apps on the Sia network.",
     cta: "Store Privately →",
-    href: "/solutions/private-storage",
+    href: "/solutions/cloud-storage",
     soon: true,
   },
 ];
@@ -52,10 +52,10 @@ const ProductCards = () => {
     <Section variant="dark" padding="md">
       <div className="xl:container px-6">
         <h2 className="text-home-text text-2xl lg:text-3xl font-semibold text-center mb-2">
-          Four ways to store
+          One plan. Every feature.
         </h2>
         <p className="text-home-text-muted text-sm text-center mb-10">
-          Simple tiered pricing. Priced upfront, no seats.
+          Storage, hosting, and pinning on one balance. Priced upfront, no feature gates.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {cards.map((card) => (

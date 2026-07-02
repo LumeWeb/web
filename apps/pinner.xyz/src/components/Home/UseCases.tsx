@@ -14,14 +14,14 @@ const useCases: UseCaseCardProps[] = [
     description:
       "Store embeddings, vector databases, and knowledge bases with zero-knowledge encryption. Your data is encrypted before it leaves your device. Even we can't read it.",
     cta: "Store Privately →",
-    href: "/solutions/private-storage",
+    href: "/solutions/cloud-storage",
   },
   {
     title: "Client & Project Files for Agencies",
     description:
       "Keep sensitive client documents under your own keys. No vendor can be compelled to hand them over.",
     cta: "Store Privately →",
-    href: "/solutions/private-storage",
+    href: "/solutions/cloud-storage",
   },
   {
     title: "Static Sites & Developer Workflows",

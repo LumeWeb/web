@@ -56,8 +56,8 @@ export const ctaCopy = {
     subheading: "S3-compatible API, revenue sharing, and the Sia SDK.",
   },
   home: {
-    heading: "Your data, on open standards, with permanence.",
-    subheading: "Pin files, host sites, or store private data. Content-addressed, portable, no platform lock-in.",
+    heading: "Your data is yours.",
+    subheading: "We can't look at it. We can't sell it. Open source; verify the architecture yourself.",
   },
   about: {
     heading: "Your data is yours.",

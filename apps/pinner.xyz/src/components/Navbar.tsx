@@ -29,7 +29,7 @@ const solutions = [
   { label: "Website Hosting", href: "/solutions/website-hosting" },
   { label: "IPFS Pinning", href: "/solutions/ipfs-pinning" },
   { label: "S3 Storage", href: "/solutions/s3-storage" },
-  { label: "Private Storage", href: "/solutions/private-storage" },
+  { label: "Cloud Storage", href: "/solutions/cloud-storage" },
 ];
 
 interface NavProps {

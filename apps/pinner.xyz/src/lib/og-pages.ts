@@ -7,20 +7,24 @@ export interface OGPage extends OGConfig {
 export const OG_PAGES: OGPage[] = [
   {
     slug: "default",
-    headline: "Your data. Your rules.",
-    subtitle: "IPFS pinning - S3-compatible storage - Static hosting",
-    footer: "Card and crypto accepted - Priced upfront",
+    headline: "Storage and hosting where you're in control.",
+    subtitle:
+      "Store files, host websites, and keep your data private by default. One plan, no surprises.",
+    subtitleSize: 24,
+    footer: "Open source - Built on Sia",
   },
   {
     slug: "about",
-    headline: "Infrastructure that respects your data",
-    subtitle: "Open source - Built on Sia network - Priced upfront",
+    headline: "Your data. Your rules.",
+    subtitle:
+      "Independent, open-source storage that respects you.",
+    footer: "Founder-owned. No investors. No exit strategy.",
   },
   {
     slug: "pricing",
-    headline: "Simple, transparent pricing",
+    headline: "One plan. Every feature. No surprises.",
     subtitle:
-      "Storage and bandwidth, priced upfront - Encrypted private storage - Card and crypto accepted",
-    subtitleSize: 20,
+      "Storage and bandwidth, priced upfront. No tiers to climb.",
+    footer: "Card or crypto accepted",
   },
 ];

@@ -8,7 +8,7 @@ import PostHog from "@/components/posthog.astro";
 import UTMCapture from "@/components/UTMCapture";
 import contactsData from "@/data/contacts.json";
 
-const { title, variant = "content", description = "Website hosting, IPFS pinning, and private storage on a peer-to-peer network. Zero-knowledge encryption. Even we can't read your files. Pay with crypto or card.", ogImage: ogImageProp, showNewsletterFooter = true } = Astro.props;
+const { title, variant = "content", description = "Store files, host websites, and keep your data private by default. One plan, no surprises. Open source, built on Sia.", ogImage: ogImageProp, showNewsletterFooter = true } = Astro.props;
 const lastUpdated = getGitLastUpdated();
 const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? "https://pinner.xyz");
 const siteName = "Pinner";

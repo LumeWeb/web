@@ -5,7 +5,7 @@ import PricingPlans from "@/components/pricing";
 const trustBadges = [
   "Priced upfront",
   "Open source",
-  "Encrypted private storage",
+  "Encrypted cloud storage",
   "Crypto & card payments",
 ];
 
