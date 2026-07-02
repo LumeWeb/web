@@ -1,0 +1,1 @@
+import{n as e,t}from"./virtual_mf-REMOTE_ENTRY_ID___mfe_internal__dashboard__remoteEntry-_hash__js-Dsi3lPLp.js";export{t as get,e as init};
