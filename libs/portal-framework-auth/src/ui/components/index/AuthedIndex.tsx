@@ -1,17 +1,21 @@
 import { Loading, withTheme } from "@lumeweb/portal-framework-ui";
 import { Authenticated } from "@refinedev/core";
 import React from "react";
-import { Navigate } from "react-router";
+import { useSearchParams } from "react-router";
 
-function AuthedIndex() {
+import { useRedirectIfAuthenticated } from "@/hooks/useRedirectIfAuthenticated";
+
+const Component: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const to = searchParams.get("to") ?? undefined;
+
+  useRedirectIfAuthenticated("/dashboard", to);
+
   return (
-    <Authenticated
-      key={"index"}
-      loading={<Loading aria-label="Checking login status" />}
-      v3LegacyAuthProviderCompatible>
-      <Navigate replace to="/dashboard" />
+    <Authenticated key="authed" fallback={<Loading />}>
+      <Loading />
     </Authenticated>
   );
-}
+};
 
-export default withTheme(AuthedIndex);
+export default withTheme(Component, "AuthedIndex");
