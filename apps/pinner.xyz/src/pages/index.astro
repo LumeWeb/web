@@ -2,23 +2,14 @@
 import Layout from "@/layouts/Layout.astro";
 import Hero from "@/components/Home/Hero";
 import ProductCards from "@/components/Home/ProductCards";
-import UseCases from "@/components/Home/UseCases";
-import BrandLogos from "@/components/BrandLogos";
 import ProblemAgitation from "@/components/Home/ProblemAgitation";
 import TrustSection from "@/components/Home/TrustSection";
-import Account from "@/components/Home/Account";
 import DifferentiatorsSection from "@/components/DifferentiatorsSection";
-import FAQ from "@/components/Home/FAQ";
-import FoundingOfferBanner from "@/components/FoundingOfferBanner";
-import PaymentMethodsBar from "@/components/PaymentMethodsBar";
-import PricingTable from "@/components/Home/PricingTable";
 import CallToAction from "@/components/CallToAction";
-import NewsletterSignup from "@/components/NewsletterSignup";
-import logos from "@/data/brand-logos";
 import { ctaCopy } from "@/lib/config";
 ---
 
-<Layout title="Website Hosting, IPFS Pinning & Private Storage. Pinner" variant="home" showNewsletterFooter={false}>
+<Layout title="Storage and Hosting Where You're in Control | Pinner" description="Store files, host websites, and keep your data private by default. One plan, no surprises. Open source, built on Sia." variant="home" showNewsletterFooter={false}>
   <Hero client:load />
 
   <ProblemAgitation client:load />
@@ -27,40 +18,7 @@ import { ctaCopy } from "@/lib/config";
 
   <ProductCards client:load />
 
-  <UseCases client:load />
-
-  <BrandLogos
-    logos={logos}
-    logoType="dark"
-    title="Built On"
-    variant="dark"
-    client:load
-  />
-
-  <Account client:load variant="dark" />
-
   <DifferentiatorsSection client:load variant="dark" />
-
-  <FAQ client:load />
-
-  <FoundingOfferBanner variant="home" guarantee="Create a website and if it isn't live in 5 minutes, we'll deploy it for you" client:load />
-
-  <PaymentMethodsBar client:load variant="dark" />
-
-  <PricingTable client:load />
-
-  <section class="py-12 md:py-16 border-t border-border-dark">
-    <div class="xl:container px-6 flex flex-col items-center">
-      <NewsletterSignup
-        source="pricing_home"
-        label="Building on IPFS? Get notified about new features and pricing changes."
-        buttonLabel="Notify me"
-        successMessage="You're on the list. We'll email you when something changes."
-        theme="dark"
-        client:load
-      />
-    </div>
-  </section>
 
   <CallToAction
     variant="dark"

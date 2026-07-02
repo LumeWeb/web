@@ -7,7 +7,7 @@ interface DifferentiatorsSectionProps {
 
 const columns = [
   { label: "Traditional Cloud" },
-  { label: "Private Storage", highlight: true },
+  { label: "Cloud Storage", highlight: true },
   { label: "Public (IPFS)", highlight: true },
 ];
 

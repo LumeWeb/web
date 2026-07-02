@@ -13,6 +13,7 @@ import { config, ctaCopy } from '@/lib/config';
 import EncryptionImage from "@/assets/solutions-website-static-sites.jpg";
 import UploadFlowSection from "@/components/HowItWorks/UploadFlowSection";
 import DistributionSection from "@/components/HowItWorks/DistributionSection";
+import UseCaseSection from "@/components/UseCaseSection";
 
 const faqs = [
   {
@@ -74,6 +75,33 @@ const faqs = [
     client:load
   />
 
+  <UseCaseSection
+    heading="What you can store"
+    subheading="Use the S3 tools you already have, on a network you control."
+    variant="gray"
+    cases={[
+      {
+        title: "Backups & Disaster Recovery",
+        description: "Automated backups to S3-compatible storage on a peer-to-peer network. Use rclone, restic, or any S3 backup tool you already run. Encrypted by default, no surprise bills.",
+        cta: "Start Storing",
+        href: config.registerUrl("storing"),
+      },
+      {
+        title: "Private AI & RAG Pipelines",
+        description: "Store embeddings, vector databases, and knowledge bases through your own gateway. Your data is encrypted locally before it leaves your server. You control the keys.",
+        cta: "Start Storing",
+        href: config.registerUrl("storing"),
+      },
+      {
+        title: "Agency Client Files",
+        description: "Keep sensitive client documents on storage you control. Deploy your own gateway, use your existing S3 tools, and maintain custody of your encryption keys.",
+        cta: "Start Storing",
+        href: config.registerUrl("storing"),
+      },
+    ]}
+    client:load
+  />
+
   <section class="py-[60px] md:py-[120px] bg-white">
     <div class="xl:container px-6">
       <h2 class="text-[24px] sm:text-[28px] md:text-[31px] font-medium text-content-text text-center mb-10 md:mb-14">Frequently Asked Questions</h2>
@@ -96,7 +124,7 @@ const faqs = [
   </section>
 
   <RelatedPages links={[
-    { href: "/solutions/private-storage", label: "Private Storage", description: "Encrypted file storage with zero-knowledge architecture" },
+    { href: "/solutions/cloud-storage", label: "Cloud Storage", description: "Encrypted file storage with zero-knowledge architecture" },
     { href: "/solutions/ipfs-pinning", label: "IPFS Pinning", description: "Pin files to a peer-to-peer network with permanent links" },
     { href: "/how-it-works", label: "How It Works", description: "Understand where your money goes and how storage proofs work" },
   ]} />

@@ -13,6 +13,7 @@ import { config, ctaCopy } from '@/lib/config';
 import UseCasesImage from "@/assets/solutions-ipfs-use-cases.jpg";
 import UploadFlowSection from "@/components/HowItWorks/UploadFlowSection";
 import DistributionSection from "@/components/HowItWorks/DistributionSection";
+import UseCaseSection from "@/components/UseCaseSection";
 
 const faqs = [
   {
@@ -29,7 +30,7 @@ const faqs = [
   },
   {
     question: "What happens if I unpin something?",
-    answer: "If you unpin content, it may eventually be garbage-collected by the network. Other nodes may still have copies if they've pinned it independently. For private storage where deletes are definitive, see our S3-compatible storage option."
+    answer: "If you unpin content, it may eventually be garbage-collected by the network. Other nodes may still have copies if they've pinned it independently. For cloud storage where deletes are definitive, see our S3-compatible storage option."
   },
   {
     question: "Can I pay with crypto?",
@@ -76,13 +77,30 @@ const faqs = [
     client:load
   />
 
-  <AboutSection
-    subtitle="Use Cases"
-    title="From NFT metadata to dApp assets"
-    description="IPFS pinning powers a range of use cases: NFT metadata and asset storage, dApp frontend hosting, scientific data publishing with verifiable hashes, archival content that needs to stay link-stable, and any data that benefits from content addressing. If you need a link that points to the same data forever, IPFS pinning is the answer."
-    theme="white"
-    imageUrl={UseCasesImage}
-    imageAlt="Use cases for IPFS pinning: NFT metadata, dApp assets, scientific data, and archival content"
+  <UseCaseSection
+    heading="What you can do with IPFS pinning"
+    subheading="Permanent, verifiable links for content that needs to stay accessible."
+    variant="white"
+    cases={[
+      {
+        title: "NFT Metadata & Assets",
+        description: "Pin NFT metadata, artwork, and on-chain assets with permanent links. Content stays accessible as long as it's pinned, no dependency on a single marketplace or server.",
+        cta: "Start Pinning",
+        href: config.registerUrl("pinning"),
+      },
+      {
+        title: "Verifiable Public Data",
+        description: "Publish scientific datasets, public records, and archival data with permanent links. Anyone can verify the data hasn't been altered since no single organization controls access.",
+        cta: "Start Pinning",
+        href: config.registerUrl("pinning"),
+      },
+      {
+        title: "dApp Frontends",
+        description: "Host your decentralized application frontend on IPFS. Deploy from the CLI, a zip file, or GitHub Actions. Your users get a permanent link to your interface.",
+        cta: "Host a dApp",
+        href: "/solutions/website-hosting",
+      },
+    ]}
     client:load
   />
 

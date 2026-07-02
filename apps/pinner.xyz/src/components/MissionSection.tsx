@@ -4,7 +4,7 @@ const beliefs = [
   {
     icon: Lock,
     title: "Private files don't need a privacy policy to stay private",
-    description: "Zero-knowledge encryption on private storage. Even we can't read your files",
+    description: "Zero-knowledge encryption on cloud storage. Even we can't read your files",
   },
   {
     icon: Shield,

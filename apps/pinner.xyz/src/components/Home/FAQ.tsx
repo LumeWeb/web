@@ -40,12 +40,12 @@ const faqs = [
       {
         question: "Is my pinned content public?",
         answer:
-          "Yes. IPFS is a public network. Anyone with the content address can retrieve it. For private data, use private storage with zero-knowledge encryption instead.",
+          "Yes. IPFS is a public network. Anyone with the content address can retrieve it. For private data, use cloud storage with zero-knowledge encryption instead.",
       },
     ],
   },
   {
-    group: "Private Storage",
+    group: "Cloud Storage",
     items: [
       {
         question: "Can you read my files?",

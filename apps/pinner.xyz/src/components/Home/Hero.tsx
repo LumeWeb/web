@@ -47,8 +47,13 @@ const Hero = () => {
 
   return (
     <HeroSection
-      headline={<>Your data.<br />Your rules.</>}
-      subheadline={<><span className="block mb-2"><a href="/solutions/ipfs-pinning" className="underline hover:text-white transition-colors">Pin files</a>. <a href="/solutions/website-hosting" className="underline hover:text-white transition-colors">Host sites</a>. <a href="/solutions/private-storage" className="underline hover:text-white transition-colors">Store private data</a>.</span><span className="block mb-2">All on one quota. Zero-knowledge encrypted.</span><span className="block">Pay by card or crypto, no KYC on crypto.</span></>}
+      headline="Storage & hosting where you're in control."
+      subheadline={
+        <>
+          <span className="block mb-2">Your data. Your rules.</span>
+          <span className="block">Store files, host websites, and keep your data private by default. One plan, no surprises.</span>
+        </>
+      }
       primaryButtons={[
         { label: "Start Pinning →", url: config.registerUrl("pinning"), buttonStyle: "btn-light" },
         { label: "Host a Website →", url: config.registerUrl("hosting"), buttonStyle: "btn-light" },
@@ -60,7 +65,6 @@ const Hero = () => {
         target: "_blank"
       }}
       visualContent={visualContent}
-      microcopy="Pay with crypto or card · No ID required for crypto"
       trustLine="Built on Sia · FOSS · Zero-knowledge encryption · No bandwidth tricks, no feature gating"
     />
   );

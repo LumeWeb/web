@@ -14,6 +14,7 @@ import { frameworkList, worksWithFrameworks } from '@/lib/frameworks';
 import StaticSitesImage from "@/assets/solutions-website-static-sites.jpg";
 import UploadFlowSection from "@/components/HowItWorks/UploadFlowSection";
 import DistributionSection from "@/components/HowItWorks/DistributionSection";
+import UseCaseSection from "@/components/UseCaseSection";
 
 const faqs = [
   {
@@ -78,6 +79,33 @@ const faqs = [
     theme="white"
     imageUrl={StaticSitesImage}
     imageAlt="Static site frameworks including Astro, Next.js, Hugo, and others that deploy to Pinner"
+    client:load
+  />
+
+  <UseCaseSection
+    heading="What you can host"
+    subheading="If it builds to static files, it works here."
+    variant="gray"
+    cases={[
+      {
+        title: "Static Sites & Portfolios",
+        description: "Host portfolios, landing pages, and marketing sites with a permanent address. Deploy from the CLI, a zip file, or GitHub Actions. No vendor lock-in, no surprise bills.",
+        cta: "Host a Site",
+        href: config.registerUrl("hosting"),
+      },
+      {
+        title: "Developer Workflows",
+        description: "Deploy from GitHub Actions, CI/CD pipelines, or the CLI. Your build output gets a permanent link that never breaks. Point a custom domain at it for a familiar URL.",
+        cta: "Host a Site",
+        href: config.registerUrl("hosting"),
+      },
+      {
+        title: "dApp Frontends",
+        description: "Host decentralized application frontends on IPFS. Your users get a permanent, content-addressed link to your interface that doesn't depend on a single server.",
+        cta: "Learn About Pinning",
+        href: "/solutions/ipfs-pinning",
+      },
+    ]}
     client:load
   />
 
