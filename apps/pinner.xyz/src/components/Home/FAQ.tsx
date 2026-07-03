@@ -20,7 +20,7 @@ const faqs = [
       {
         question: "Is my site always online?",
         answer:
-          "Your files are stored on the Sia network, where independent providers host your data and only get paid when they prove it's there. The serving layer runs through our gateway. A CDN layer is in progress.",
+          "Your files are stored across multiple independent providers who only get paid when they can prove your data is available. A CDN layer is in progress.",
       },
     ],
   },
@@ -40,7 +40,7 @@ const faqs = [
       {
         question: "Is my pinned content public?",
         answer:
-          "Yes. IPFS is a public network. Anyone with the content address can retrieve it. For private data, use cloud storage with zero-knowledge encryption instead.",
+          "Yes. IPFS is a public network. Anyone with the content address can retrieve it. For private data, use cloud storage with encryption instead.",
       },
     ],
   },
@@ -50,17 +50,17 @@ const faqs = [
       {
         question: "Can you read my files?",
         answer:
-          "No. Zero-knowledge encryption means even we don't have the keys. Only you can decrypt your data.",
+          "No. Zero-knowledge encryption means we don't have the keys. Your files are encrypted before they leave your device. Only you can decrypt them.",
       },
       {
         question: "How is this different from IPFS pinning?",
         answer:
-          "IPFS pinning is public, content-addressed storage. Anyone with the address can see it. Private storage encrypts your data before it leaves your device. No one can read it without your keys: not us, not the storage hosts, not the network.",
+          "IPFS pinning is public storage. Anyone with the address can see it. Private storage encrypts your data before it leaves your device. No one can read it without your keys: not us, not the storage hosts, not the network.",
       },
       {
         question: "Are my deletes really deleted?",
         answer:
-          "Yes. Private storage is not content-addressed. When you delete a file, it's gone. No ghost copies floating on the network, no caches that outlive the delete. Storage hosts are paid to keep data, and they lose income when it's removed.",
+          "Yes. When you delete a file from private storage, it's gone. No ghost copies floating on the network, no caches that outlive the delete. Storage hosts are paid to keep data, and they lose income when it's removed.",
       },
     ],
   },

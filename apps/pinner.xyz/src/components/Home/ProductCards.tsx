@@ -32,7 +32,7 @@ const cards: CardProps[] = [
   {
     title: "S3 Storage",
     description:
-      "S3-compatible object storage backed by the Sia network. Run your own gateway appliance.",
+      "S3-compatible object storage backed by a peer-to-peer network. Run your own gateway appliance.",
     cta: "S3 Compatible →",
     href: "/solutions/s3-storage",
     soon: true,
@@ -40,7 +40,7 @@ const cards: CardProps[] = [
   {
     title: "Cloud Storage",
     description:
-      "Encrypted storage where only you hold the keys. Personal use or build apps on the Sia network.",
+      "Encrypted storage where only you hold the keys. Personal use or build apps on a peer-to-peer network.",
     cta: "Store Privately →",
     href: "/solutions/cloud-storage",
     soon: true,

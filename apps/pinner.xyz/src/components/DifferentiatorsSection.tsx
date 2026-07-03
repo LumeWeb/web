@@ -16,7 +16,7 @@ const rows = [
     factor: "Can we read your data?",
     values: [
       "Yes",
-      "No. Zero-knowledge encryption means we can't read your files",
+      "No. We can't read your files",
       "Yes, but it's public",
     ],
   },

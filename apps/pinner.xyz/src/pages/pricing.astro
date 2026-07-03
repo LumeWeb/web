@@ -9,6 +9,23 @@ import FAQ from "@/components/FAQ";
 import NewsletterSignup from "@/components/NewsletterSignup";
 
 import logos from "@/data/brand-logos";
+import { config } from "@/lib/config";
+import type { BillingPlansResponse } from "@/lib/api";
+
+// Build-time fetch: prices are baked into static HTML for crawlers and AI models.
+// Runtime SWR revalidates against the live API and updates if newer data is available.
+let buildTimePlans: BillingPlansResponse | undefined;
+try {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+  const res = await fetch(`${config.portalApiUrl}/api/billing/plans`, { signal: controller.signal });
+  clearTimeout(timeout);
+  if (res.ok) {
+    buildTimePlans = await res.json() as BillingPlansResponse;
+  }
+} catch {
+  // Build proceeds without fallback; runtime fetch is still primary.
+}
 
 const pricingFaqs = [
   {
@@ -50,7 +67,7 @@ const pricingFaqs = [
     items: [
       {
         question: "What about S3 cloud storage?",
-        answer: "Private storage with zero-knowledge encryption is available for personal use and developer integrations. S3-compatible storage is also available as a separate product. A simpler 1-click setup is in development. Subscribe below to get notified.",
+        answer: "S3-compatible storage is available as a separate product with encryption at rest. Currently for advanced self-hosted setups, with a simpler 1-click deployment in development. See our how it works page for details.",
       },
     ],
   },
@@ -60,14 +77,18 @@ const pricingFaqs = [
 <Layout title="One Plan. Every Feature. No Surprises. | Pinner" ogImage="/images/og/pricing.png" description="Storage and bandwidth, priced upfront. No tiers to climb. Card or crypto accepted.">
   <PageHeader
     title="Simple pricing. No surprises."
-    description="<a href='/solutions/ipfs-pinning' class='underline hover:text-white transition-colors'>IPFS pinning</a> and hosting plans. <a href='/solutions/cloud-storage' class='underline hover:text-white transition-colors'>Private storage</a> for personal use and developer integrations."
+    description="<a href='/solutions/ipfs-pinning' class='underline hover:text-white transition-colors'>IPFS pinning</a> and hosting plans. <a href='/solutions/cloud-storage' class='underline hover:text-white transition-colors'>Cloud storage</a> for personal and business use."
     client:load
   />
 
   <SectionPricing>
     <div class="container">
       <FoundingOfferBanner className="mb-8 md:mb-12" guarantee="Create a website and if it isn't live in 5 minutes, we'll deploy it for you" client:load />
-      <PricingPlans variant="light" client:load />
+      {buildTimePlans ? (
+        <PricingPlans variant="light" fallbackData={buildTimePlans} client:load />
+      ) : (
+        <PricingPlans variant="light" client:load />
+      )}
     </div>
   </SectionPricing>
 
