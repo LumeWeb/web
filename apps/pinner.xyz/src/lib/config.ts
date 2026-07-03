@@ -57,11 +57,11 @@ export const ctaCopy = {
   },
   home: {
     heading: "Your data is yours.",
-    subheading: "We can't look at it. We can't sell it. Open source; verify the architecture yourself.",
+    subheading: "Open source. Open standards. No surprises.",
   },
   about: {
     heading: "Your data is yours.",
-    subheading: "We can't look at it. We can't sell it. Open source; verify the architecture yourself.",
+    subheading: "Open source. Open standards. No surprises.",
   },
   howItWorks: {
     heading: "Your data on a network, not in a data center.",

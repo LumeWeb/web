@@ -7,9 +7,9 @@ interface TrustSectionProps {
 
 const principles = [
 	{
-		title: "We can't read your files",
+		title: "Private by design",
 		description:
-    "Your data is encrypted before it leaves your device. We don't hold the keys. That's not a promise. It's how the system works.",
+    "Your data is encrypted before it leaves your device. We don't hold the keys. No one can train AI models on your data. That's not a policy we could change. It's how the system is built.",
 	},
 	{
 		title: "What you see is what you pay",

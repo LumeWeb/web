@@ -51,7 +51,7 @@ const Hero = () => {
       subheadline={
         <>
           <span className="block mb-2">Your data. Your rules.</span>
-          <span className="block">Store files, host websites, and keep your data private by default. One plan, no surprises.</span>
+          <span className="block">One plan, no surprises. Private by design.</span>
         </>
       }
       primaryButtons={[
@@ -65,7 +65,7 @@ const Hero = () => {
         target: "_blank"
       }}
       visualContent={visualContent}
-      trustLine="Built on Sia · FOSS · Zero-knowledge encryption · No bandwidth tricks, no feature gating"
+      trustLine="Founder-owned · Fully open source · This site is hosted on Pinner"
     />
   );
 };
