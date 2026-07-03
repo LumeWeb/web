@@ -1,18 +1,15 @@
-# Pinner Docs Backend
+# Pinner Docs API (Split Mode)
 # Multi-stage build: tsdown-bundled standalone server (no node_modules at runtime)
-# Static frontend is built separately and deployed to IPFS
+# Static frontend is built separately and deployed to IPFS/CDN.
+# This image only serves the API routes (OG, MCP, feedback).
 #
-# Result: ~40MB runtime image with zero node_modules
-# tsdown bundles all npm deps (hono, vocs, etc.) via Rolldown.
-# Only Node.js built-ins remain external (platform: 'node').
+# Set VOCS_RENDER_STRATEGY=split to activate split-mode behavior.
+# Result: ~30MB runtime image with zero node_modules (no static assets bundled).
 #
 # Layout at runtime:
 #   /app/server/serve-node.mjs  (entry + chunks, ~25MB)
 #   /app/vocs.config.js         (compiled config, 12KB)
 #   /app/assets/                (Vocs config definition, 6MB)
-#
-# vocs.config.js is placed one dir above server/ because the
-# config resolver does: path.resolve(import.meta.dirname, "../vocs.config.js")
 
 # ── Stage 1a: Build pinner-cli ────────────────────────────────────────────
 FROM golang:1.26 AS pinner-cli
@@ -21,7 +18,6 @@ RUN go install go.lumeweb.com/pinner-cli/cmd/pinner@latest
 # ── Stage 1b: Build docs ──────────────────────────────────────────────────
 FROM node:22-slim AS builder
 
-# Install pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /build
@@ -45,10 +41,6 @@ COPY libs/pinner/tsconfig.typedoc.json libs/pinner/tsconfig.typedoc.json
 COPY tsconfig.base.json tsconfig.base.json
 
 # Build: inline the build chain to avoid pnpm's runDepsStatusCheck
-# (pnpm v11 re-runs install before every pnpm script invocation, which
-# fails on workspace-level unused patches)
-# pinner binary is already copied from the golang stage, so setup-pinner-cli.sh
-# is a no-op (it exits early when pinner is on PATH)
 WORKDIR /build/apps/docs.pinner.xyz
 RUN mkdir -p reference-sources \
     && pinner generate-docs json > reference-sources/cli-ref.json \
@@ -63,7 +55,6 @@ RUN npx tsdown
 # ── Stage 2: Runtime ──────────────────────────────────────────────────────
 FROM node:22-slim AS runtime
 
-# Non-root user
 RUN groupadd -r app && useradd -r -g app -d /app -s /sbin/nologin app
 
 # Server bundle + chunks
@@ -75,11 +66,7 @@ COPY --from=builder /build/apps/docs.pinner.xyz/dist/server/vocs.config.js /app/
 # Vocs config definition module (imported by vocs.config.js)
 COPY --from=builder /build/apps/docs.pinner.xyz/dist/server/assets/ /app/assets/
 
-# Static frontend assets
-# fetchMarkdown: distDir = dirname(import.meta.url)/.. = /app, reads /app/public/
-# serveStatic: config.distDir ("dist") + "public" relative to CWD = /app/server/dist/public/
-COPY --from=builder /build/apps/docs.pinner.xyz/dist/public/ /app/public/
-RUN mkdir -p /app/server/dist && ln -s /app/public /app/server/dist/public
+# No static frontend assets in split mode — those are deployed to IPFS/CDN separately
 
 RUN chown -R app:app /app
 
@@ -87,9 +74,10 @@ USER app
 WORKDIR /app/server
 
 ENV HOST=0.0.0.0
-ENV PORT=5173
-ENV VOCS_RENDER_STRATEGY=dynamic
+ENV PORT=3001
+ENV VOCS_RENDER_STRATEGY=split
+ENV NODE_ENV=production
 
-EXPOSE 5173
+EXPOSE 3001
 
 CMD ["node", "serve-node.mjs"]
