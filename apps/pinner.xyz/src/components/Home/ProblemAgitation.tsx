@@ -3,19 +3,19 @@ import Heading from "@/components/Heading";
 
 const frustrations = [
   {
-    title: "Your cloud provider can read your files",
-    description:
-      "Traditional storage encrypts data, but they hold the keys. You're trusting a promise, not an architecture.",
-  },
-  {
-    title: "Deleting data doesn't mean it's deleted",
-    description:
-      "You have no way to verify your data is actually gone. 'We deleted it' is not the same as 'it's gone.'",
-  },
-  {
     title: "The real price is never on the pricing page",
     description:
       "Egress fees, API call charges, support tiers, and lock-in costs add up. You find out after you're committed.",
+  },
+  {
+    title: "Leaving is harder than it should be",
+    description:
+      "Export fees, proprietary formats, and data held hostage. Switching providers shouldn't mean starting over.",
+  },
+  {
+    title: "Your cloud provider can read your files",
+    description:
+      "Traditional storage encrypts data, but they hold the keys. You're trusting a promise, not an architecture.",
   },
 ];
 
