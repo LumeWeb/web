@@ -12,7 +12,7 @@ const Account = ({ variant = "default" }: AccountProps) => {
 			<div className="xl:container px-6">
 				<Heading
 				title="Pin. Host. Store."
-   description="Upload to IPFS. Host websites. Store private data with zero-knowledge encryption. Three products, one platform, one set of credentials."
+   description="Upload to IPFS. Host websites. Store private data with encryption. Three products, one platform, one set of credentials."
 				/>
 
 				<AccountSlider />

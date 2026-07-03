@@ -14,7 +14,7 @@ import s3StorageImg from "@/assets/how-it-works-s3-storage.jpg";
 import selfHostedImg from "@/assets/how-it-works-self-hosted.jpg";
 ---
 
-<Layout title="How Pinner Works. Storage & Hosting" description="Pin files to a peer-to-peer network, host static websites, and store private data with zero-knowledge encryption. Three steps: pin, distribute, access anywhere.">
+<Layout title="How Pinner Works. Storage & Hosting" description="Pin files to a peer-to-peer network, host static websites, and store private data with encryption. Three steps: pin, distribute, access anywhere.">
   <PageHeader
     title="Simple interface, powerful network"
     description="IPFS pinning, website hosting, and cloud storage on a verifiable storage network"
@@ -24,16 +24,14 @@ import selfHostedImg from "@/assets/how-it-works-self-hosted.jpg";
   <ThreeSteps client:load />
 
   <UploadFlowSection
-    title="Pin to IPFS, host to the web"
-    subtitle="The Interface"
-     description="Upload files through our CLI or SDK. We pin them to IPFS. Your content gets a link that stays online as long as it's pinned. Host static websites directly from pinned content. No setup required."
+    title="Verified storage and hosting"
+     description="Upload files through an app, CLI, S3-compatible tools, or API. Your content gets a permanent link that stays online as long as it's stored. Host static websites directly from your stored content."
     client:load
   />
 
   <DistributionSection
     title="A network, not a data center"
-    subtitle="The Technology"
-    description="Your files are distributed across many independent storage providers. No single entity controls your data, and your files stay online even if individual servers go down. Stored on IPFS with reliable addresses, encrypted for private storage. Depending on your storage model."
+    description="Your files are distributed across many independent storage providers. No single entity controls your data, and your files stay online even if individual servers go down. Your files get permanent links that don't change, and private storage is encrypted so even we can't read it."
     theme="gray"
     imagePosition="right"
     buttonText="Learn About Sia →"
@@ -45,18 +43,16 @@ import selfHostedImg from "@/assets/how-it-works-self-hosted.jpg";
 
   <AboutSection
     title="Private storage with S3 compatibility"
-    subtitle="S3 Storage (Advanced)"
-    description="For private data, Pinner offers S3-compatible storage, encrypted at rest with zero-knowledge encryption. Even we can't read your files. Currently available for advanced setups that deploy their own server. A streamlined 1-click setup is in development. Subscribe below to get notified."
+    description="For private data, Pinner offers S3-compatible storage, encrypted at rest. Even we can't read your files. Currently available for advanced setups that deploy their own server. A streamlined 1-click setup is in development. Subscribe below to get notified."
     theme="white"
     imageUrl={s3StorageImg}
-    imageAlt="Diagram showing encrypted files flowing through a padlock to a secured server, illustrating zero-knowledge encryption"
+    imageAlt="Diagram showing encrypted files flowing through a padlock to a secured server, illustrating encryption"
     client:load
   />
 
   <AboutSection
     title="Or manage it yourself"
-    subtitle="Self-Hosted"
-    description="Deploy your own server to handle private data on your terms. Full control over storage limits and billing. For teams who want zero external dependencies. FOSS. Fully open source."
+    description="Deploy your own server to handle private data on your terms. Full control over storage limits and billing. For teams who want zero external dependencies. Fully open source."
     theme="gray"
     imagePosition="right"
     imageUrl={selfHostedImg}

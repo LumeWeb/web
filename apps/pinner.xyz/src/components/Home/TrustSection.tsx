@@ -9,7 +9,7 @@ const principles = [
 	{
 		title: "We can't read your files",
 		description:
-    "Zero-knowledge encryption means even we don't have the keys. That's not a promise. It's the architecture.",
+    "Your data is encrypted before it leaves your device. We don't hold the keys. That's not a promise. It's how the system works.",
 	},
 	{
 		title: "What you see is what you pay",
