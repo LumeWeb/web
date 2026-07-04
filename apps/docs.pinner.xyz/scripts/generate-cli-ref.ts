@@ -30,7 +30,7 @@ interface CLIFlag {
 
 interface CLICommand {
   name: string;
-  category: string;
+  category?: string;
   description?: string;
   usage?: string;
   argsUsage?: string;
@@ -66,6 +66,7 @@ const ROOT = resolve(__dirname, "..");
 
 /** Convert a category name to a URL slug (explicit mapping or kebab-case fallback) */
 function slugForCategory(category: string): string {
+  if (!category || typeof category !== "string") return "misc";
   return CATEGORY_SLUGS[category] ?? category.toLowerCase().replace(/\s+/g, "-");
 }
 
@@ -113,9 +114,14 @@ function deriveCategories(commands: CLICommand[]): string[] {
   const seen = new Set<string>();
   const order: string[] = [];
   for (const cmd of commands) {
-    if (!seen.has(cmd.category)) {
-      seen.add(cmd.category);
-      order.push(cmd.category);
+    const cat = cmd.category;
+    if (!cat) {
+      console.warn(`Warning: command "${cmd.name}" has no category, skipping in index`);
+      continue;
+    }
+    if (!seen.has(cat)) {
+      seen.add(cat);
+      order.push(cat);
     }
   }
   return order;
@@ -377,7 +383,7 @@ function renderCategoryPage(doc: CLIDoc, category: string, cliName: string): str
   if (!commands.length) return "";
 
   const parts: string[] = [];
-  parts.push(...frontmatter(`CLI: ${category}`, `${cliName} CLI commands for ${category.toLowerCase()}.`));
+  parts.push(...frontmatter(`CLI: ${category}`, `${cliName} CLI commands for ${category?.toLowerCase() ?? "misc"}.`));
 
   for (const cmd of commands) {
     parts.push(renderCommand(cmd, 2, "", cliName));
