@@ -13,10 +13,10 @@ const columns = [
 
 const rows = [
   {
-    factor: "Can we read your data?",
+    factor: "Can your data be read?",
     values: [
       "Yes",
-      "No. Encrypted on your device. We don't hold the keys.",
+      "No. Encrypted on your device. No one holds the keys",
       "Yes, but it's public",
     ],
   },
