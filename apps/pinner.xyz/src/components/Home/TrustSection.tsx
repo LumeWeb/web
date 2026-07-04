@@ -9,7 +9,7 @@ const principles = [
 	{
 		title: "Private by design",
 		description:
-    "Your data is encrypted before it leaves your device. We don't hold the keys. No one can train AI models on your data. That's not a policy we could change. It's how the system is built.",
+		"Your data is encrypted before it leaves your device. No one holds the keys. No one can train AI models on your data. That's not a policy. It's how the system is built.",
 	},
 	{
 		title: "What you see is what you pay",
