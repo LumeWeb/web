@@ -66,6 +66,10 @@ export type {
   AbortOptions,
 } from "@/types/pin";
 
+// Auth exports
+export type { AuthManager } from "./auth";
+export { JwtAuthManager } from "./auth";
+
 // API exports
 export { IpnsClient } from "./api/ipns";
 export { WebsitesClient, WebsiteValidationReason, getValidationReason, isValidationReason } from "./api/websites";
