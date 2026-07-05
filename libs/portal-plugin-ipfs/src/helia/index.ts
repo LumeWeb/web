@@ -84,32 +84,46 @@ export class HeliaService {
     // createHeliaLight creates a Helia node without any libp2p networking.
     // withHTTP adds trustless gateway block brokers and HTTP routers only.
     // This is fully stateless — no peer discovery, no dnsaddr, no bootstrap.
-    this.helia = await withHTTP(
-      createHeliaLight({
-        blockstore,
-        datastore,
-      }),
-      {
-        // Use our own gateway as the sole recursive gateway — no external gateways
-        recursiveGateways: [this.config.apiUrl],
-        // No delegated routing — only our gateway
-        delegatedRouters: [],
-        // Attach auth headers and credentials to all gateway requests
-        transformRequestInit: (init?: RequestInit) => {
-          const headers = new Headers(init?.headers);
+    try {
+      this.helia = await withHTTP(
+        createHeliaLight({
+          blockstore,
+          datastore,
+        }),
+        {
+          // Use our own gateway as the sole recursive gateway — no external gateways
+          recursiveGateways: [this.config.apiUrl],
+          // No delegated routing — only our gateway
+          delegatedRouters: [],
+          // Attach auth headers and credentials to all gateway requests
+          transformRequestInit: (init?: RequestInit) => {
+            const headers = new Headers(init?.headers);
 
-          if (this.config.authToken) {
-            headers.set("Authorization", `Bearer ${this.config.authToken}`);
-          }
+            if (this.config.authToken) {
+              headers.set("Authorization", `Bearer ${this.config.authToken}`);
+            }
 
-          return {
-            ...init,
-            headers,
-            credentials: "include",
-          };
+            return {
+              ...init,
+              headers,
+              credentials: "include",
+            };
+          },
         },
-      },
-    ).start();
+      ).start();
+    } catch (error) {
+      try {
+        if (blockstore) await blockstore.close();
+      } catch (e) {
+        console.error("Error closing blockstore:", e);
+      }
+      try {
+        if (datastore) await datastore.close();
+      } catch (e) {
+        console.error("Error closing datastore:", e);
+      }
+      throw new Error(`Failed to start Helia HTTP node: ${error instanceof Error ? error.message : String(error)}`);
+    }
 
     this.unixfs = unixfs(this.helia);
 
