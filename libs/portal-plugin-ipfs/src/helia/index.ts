@@ -84,8 +84,9 @@ export class HeliaService {
     // createHeliaLight creates a Helia node without any libp2p networking.
     // withHTTP adds trustless gateway block brokers and HTTP routers only.
     // This is fully stateless — no peer discovery, no dnsaddr, no bootstrap.
+    let node: ReturnType<typeof withHTTP> | undefined;
     try {
-      this.helia = await withHTTP(
+      node = withHTTP(
         createHeliaLight({
           blockstore,
           datastore,
@@ -110,8 +111,15 @@ export class HeliaService {
             };
           },
         },
-      ).start();
+      );
+      await node.start();
+      this.helia = node;
     } catch (error) {
+      try {
+        await node?.stop?.();
+      } catch (e) {
+        console.error("Error stopping Helia:", e);
+      }
       try {
         if (blockstore) await blockstore.close();
       } catch (e) {
