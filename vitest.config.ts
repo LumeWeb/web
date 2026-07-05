@@ -6,6 +6,9 @@ const __dirname = dirname(__filename);
 
 export default defineConfig({
   test: {
-    projects: [path.join(__dirname, "libs/*/vitest.config.{e2e,unit}.ts")],
+    projects: [
+      path.join(__dirname, "libs/*/vitest.config.{e2e,unit}.ts"),
+      path.join(__dirname, "apps/*/vitest.config.{e2e,unit}.ts"),
+    ],
   },
 });
