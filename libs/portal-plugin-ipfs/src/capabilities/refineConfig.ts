@@ -18,12 +18,12 @@ const DATA_PROVIDER_NAME = "ipfs";
 
 export class Capability implements RefineConfigCapability {
   readonly id = createNamespacedId("ipfs", "refine-config");
-  status;
+  status: "active" | "error" | "inactive" = "active";
   readonly type = "framework:refine-config";
-  version: string;
-  #apiUrl: string;
+  version: string = "0.1.0";
+  #apiUrl!: string;
   #authToken: string | null = null;
-  #emitter: Emitter;
+  #emitter!: Emitter;
   #authUnbind: (() => void) | null = null;
 
   /**
@@ -59,7 +59,7 @@ export class Capability implements RefineConfigCapability {
 
     this.#authUnbind = syncAuthProviderWithDataProvider(
       acctProvider,
-      existing?.authProvider,
+      existing?.authProvider as any,
       {
         onTokenChange: (token) => {
           this.#authToken = token;
@@ -113,7 +113,7 @@ export class Capability implements RefineConfigCapability {
         : apiDomain.hostname;
       this.#apiUrl = `${apiDomain.protocol}//${SUBDOMAIN}.${hostWithPort}`;
     } catch (error) {
-      throw new Error(`Failed to construct API URL: ${error.message}`);
+      throw new Error(`Failed to construct API URL: ${error instanceof Error ? error.message : String(error)}`);
     }
 
     // Initialize the nanoevents emitter

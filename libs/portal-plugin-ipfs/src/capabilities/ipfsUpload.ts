@@ -1,5 +1,4 @@
 import type {
-  Framework,
   UploadCapability,
   UploadConfig,
   UppyPlugin,
@@ -8,6 +7,7 @@ import type {
 import {
   createNamespacedId,
   type NamespacedId,
+  type Framework,
   cleanTrailingSlashes,
   getApiBaseUrl,
 } from "@lumeweb/portal-framework-core";
@@ -18,8 +18,8 @@ export class IpfsUpload implements UploadCapability {
   readonly id = createNamespacedId("ipfs", "upload");
   status: "active" | "error" | "inactive" = "active";
   readonly type = "framework:upload" as const;
-  #tusEndpoint: string;
-  #xhrEndpoint: string;
+  #tusEndpoint!: string;
+  #xhrEndpoint!: string;
 
   async destroy() {}
 
@@ -45,15 +45,15 @@ export class IpfsUpload implements UploadCapability {
   getLargeFileUploadConfig(): UploadConfig {
     return {
       endpoint: this.#tusEndpoint,
-      getResponseData: this.#parseResponseData.bind(this)
-    };
+      getResponseData: this.#parseResponseData.bind(this),
+    } as unknown as UploadConfig;
   }
 
   getSmallFileUploadConfig(): UploadConfig {
     return {
       endpoint: this.#xhrEndpoint,
-      getResponseData: this.#parseResponseData.bind(this)
-    };
+      getResponseData: this.#parseResponseData.bind(this),
+    } as unknown as UploadConfig;
   }
 
   async initialize(framework: Framework) {

@@ -13,7 +13,8 @@ import type { ProgressOptions } from "progress-events";
 
 import { car } from "@helia/car";
 import { GetBlockProgressEvents } from "@helia/interface";
-import { createHelia } from "helia";
+import { createHeliaLight } from "helia";
+import type { AddEvents } from "@helia/unixfs";
 import { unixfs } from "@helia/unixfs";
 import { asyncIterableReader, createDecoder } from "@ipld/car/decoder";
 import { IDBBlockstore } from "blockstore-idb";
@@ -260,7 +261,7 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
         return (f.data as any).webkitRelativePath?.startsWith(rootDir + "/");
       }
       if (isFolderBundle(f)) {
-        return (f.meta as BundleMetadata).bundleName === rootDir;
+        return (f.meta as unknown as BundleMetadata).bundleName === rootDir;
       }
       return false;
     });
@@ -290,12 +291,12 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
 
     if (isFolderBundle(file)) {
       // Bundle directory upload
-      const meta = file.meta as BundleMetadata;
+      const meta = file.meta as unknown as BundleMetadata;
       files = meta.originalFiles || [];
     } else if (isDirectoryFile(file)) {
       // Regular directory upload with webkitRelativePath
       // First check if this file has originalFiles in its metadata (from folder bundles)
-      const meta = file.meta as BundleMetadata;
+      const meta = file.meta as unknown as BundleMetadata;
       if (meta.originalFiles && meta.originalFiles.length > 0) {
         files = meta.originalFiles;
       } else {
@@ -321,14 +322,14 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
 
     const addOptions = {
       // Use protobuf format for all nodes to preserve metadata
-      cidVersion: 1,
+      cidVersion: 1 as const,
       rawLeaves: false,
       signal: abortSignal,
-      onProgress(event) {
+      onProgress(event: AddEvents) {
         if (abortSignal.aborted) {
           throw new Error("File processing aborted");
         }
-        
+
         if (event.type === "unixfs:importer:progress:file:read") {
           tracker.updateDataProgress("fileRead", event.detail.bytesRead);
         } else if (event.type === "unixfs:importer:progress:file:write") {
@@ -341,7 +342,7 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
     };
 
     // Add all files to UnixFS and get the root CID
-    let cid: CID;
+    let cid: CID | undefined;
 
     try {
       for await (const result of fs.addAll(src, addOptions)) {
@@ -363,6 +364,7 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
       throw new Error("Failed to import files to UnixFS");
     }
 
+    const rootCid = cid;
     let carBlocksWritten = 0n;
     const options: AbortOptions & ProgressOptions<GetBlockProgressEvents> = {
       signal: abortSignal,
@@ -386,8 +388,8 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
     };
 
     // Stream to CAR with progress tracking
-    const carStream = c.stream(cid, options);
-    return [asyncGeneratorToReadableStream(carStream), cid];
+    const carStream = c.export(rootCid, options);
+    return [asyncGeneratorToReadableStream(carStream), rootCid];
   }
 
   async #createHelia() {
@@ -401,8 +403,8 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
       if (!this.#datastore) this.#datastore = new IDBDatastore("helia-data");
       await Promise.all([this.#blockstore.open(), this.#datastore.open()]);
 
-      // Create Helia instance with IndexedDB stores
-      this.#helia = await createHelia({
+      // Create Helia instance with IndexedDB stores (no libp2p networking)
+      this.#helia = await createHeliaLight({
         blockstore: this.#blockstore,
         datastore: this.#datastore,
       });
@@ -432,7 +434,7 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
 
     try {
       // Create an async iterable from the file
-      const fileIterable = readableStreamToAsyncIterable(file.data.stream());
+      const fileIterable = readableStreamToAsyncIterable<Uint8Array>((file.data as Blob | undefined)!.stream());
 
       const reader = asyncIterableReader(fileIterable);
       // Attempt to decode the CAR file
@@ -453,9 +455,10 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
   }
 
   #isIPFSFile(file: UppyFile<M, B>) {
+    const plugins = (file as unknown as { plugins?: string[] }).plugins;
     return (
-      file.plugins &&
-      file.plugins.filter((plugin) => /ipfs/.test(plugin)).length > 0
+      plugins &&
+      plugins.filter((plugin: string) => /ipfs/.test(plugin)).length > 0
     );
   }
 
@@ -490,7 +493,7 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
         continue;
       }
 
-      const rootDir = (file.meta as BundleMetadata).bundleName;
+      const rootDir = (file.meta as unknown as BundleMetadata).bundleName;
 
       if (processedDirs.has(rootDir)) {
         continue;
@@ -565,7 +568,7 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
   }
 
   #shouldProcessFile(file: UppyFile<M, B>): boolean {
-    return this.#isIPFSFile(file);
+    return this.#isIPFSFile(file) ?? false;
   }
 
 }

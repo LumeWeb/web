@@ -8,6 +8,7 @@ import HeliaService from "../../helia";
 
 export interface HeliaServiceConfig {
   authToken?: string;
+  apiUrl?: string;
 }
 
 export class FileManagerFeature implements FrameworkFeature {
@@ -17,7 +18,7 @@ export class FileManagerFeature implements FrameworkFeature {
 
   #heliaService: HeliaService | null = null;
   #config: HeliaServiceConfig = {};
-  #apiUrl: string;
+  #apiUrl!: string;
 
   async initialize(framework: Framework): Promise<void> {
     // Get the IPFS RefineConfigCapability to access its API URL
@@ -28,13 +29,18 @@ export class FileManagerFeature implements FrameworkFeature {
     }
 
     // Use the capability's API URL getter
-    this.#apiUrl = refineConfigCapability.getApiUrl();
+    const ipfsConfig = refineConfigCapability as unknown as {
+      getApiUrl(): string;
+      getAuthToken(): string | null;
+      getEmitter(): { on: (event: string, callback: (token: string) => void) => void };
+    };
+    this.#apiUrl = ipfsConfig.getApiUrl();
 
     // Get the current auth token
-    const authToken = refineConfigCapability.getAuthToken();
+    const authToken = ipfsConfig.getAuthToken();
 
     // Listen for auth token changes
-    const emitter = refineConfigCapability.getEmitter();
+    const emitter = ipfsConfig.getEmitter();
     emitter.on("authTokenChanged", (token: string) => {
       if (this.#heliaService) {
         // Update helia service config with new token
