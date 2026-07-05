@@ -1,3 +1,11 @@
+## 0.1.9 (2026-07-05)
+
+### Fixes
+
+#### Fixes
+
+- use loading prop instead of fallback in AuthedIndex
+
 ## 0.1.8 (2026-07-05)
 
 ### Fixes
