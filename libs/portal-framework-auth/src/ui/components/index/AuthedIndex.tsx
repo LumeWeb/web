@@ -12,9 +12,10 @@ const Component: React.FC = () => {
   useRedirectIfAuthenticated("/dashboard", to);
 
   return (
-    <Authenticated key="authed" fallback={<Loading />}>
-      {/* Render nothing once authenticated — useRedirectIfAuthenticated
-          will navigate away. fallback handles the auth-checking state. */}
+    <Authenticated key="authed" loading={<Loading />}>
+      {/* loading shows <Loading /> while auth check is in-flight.
+          No fallback prop — when auth fails, <Authenticated> falls
+          through to redirect using check() redirectTo (preserves ?to=). */}
       {null}
     </Authenticated>
   );
