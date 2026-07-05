@@ -13,9 +13,11 @@ const Component: React.FC = () => {
 
   return (
     <Authenticated key="authed" fallback={<Loading />}>
-      <Loading />
+      {/* Render nothing once authenticated — useRedirectIfAuthenticated
+          will navigate away. fallback handles the auth-checking state. */}
+      {null}
     </Authenticated>
   );
 };
 
-export default withTheme(Component, "AuthedIndex");
+export default withTheme(Component);
