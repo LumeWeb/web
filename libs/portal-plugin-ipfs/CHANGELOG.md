@@ -1,3 +1,13 @@
+## 0.1.9 (2026-07-05)
+
+### Fixes
+
+#### Fixes
+
+- upgrade to Helia v7 for stateless HTTP gateway
+- close blockstore/datastore on withHTTP start failure
+- stop Helia node on start failure to prevent leak
+
 ## 0.1.8 (2026-06-30)
 
 ### Features

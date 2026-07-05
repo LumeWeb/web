@@ -1,3 +1,11 @@
+## 0.1.8 (2026-07-05)
+
+### Fixes
+
+#### Fixes
+
+- render null as AuthedIndex child instead of Loading
+
 ## 0.1.7 (2026-07-02)
 
 ### Fixes

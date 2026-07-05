@@ -1,4 +1,16 @@
 
+## 0.6.6 (2026-07-05)
+
+### Features
+
+#### Features
+
+- add split-mode Dockerfile and update vocs to 2.3.0
+
+### Fixes
+
+- handle missing command categories in CLI ref generator
+
 ## 0.6.5 (2026-06-30)
 
 ### Features

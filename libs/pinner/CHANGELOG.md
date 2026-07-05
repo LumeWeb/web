@@ -1,3 +1,11 @@
+## 0.1.20 (2026-07-05)
+
+### Fixes
+
+#### Fixes
+
+- export AuthManager and JwtAuthManager from SDK entry point
+
 ## 0.1.19 (2026-06-30)
 
 ### Fixes

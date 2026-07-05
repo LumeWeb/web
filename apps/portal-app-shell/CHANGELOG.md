@@ -1,5 +1,13 @@
 # @lumeweb/portal-dashboard
 
+## 0.3.9 (2026-07-05)
+
+### Fixes
+
+#### Fixes
+
+- refactor loader for testability and add unit tests
+
 ## 0.3.8 (2026-07-01)
 
 ### Fixes
