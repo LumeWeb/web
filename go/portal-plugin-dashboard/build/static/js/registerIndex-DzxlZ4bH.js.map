@@ -1,1 +1,0 @@
-{"version":3,"file":"registerIndex-DzxlZ4bH.js","names":[],"sources":["../../../src/ui/routes/registerIndex.tsx"],"sourcesContent":["import { RegisterIndex } from \"@lumeweb/portal-framework-auth\";\n\nexport default RegisterIndex;\n"],"mappings":"sCAEA,IAAA,EAAe"}
