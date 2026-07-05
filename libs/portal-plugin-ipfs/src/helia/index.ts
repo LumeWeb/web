@@ -1,6 +1,5 @@
-import { createHelia, type Helia } from "helia";
-import { trustlessGateway } from "@helia/block-brokers";
-import { httpGatewayRouting } from "@helia/routers";
+import { createHeliaLight, type Helia } from "helia";
+import { withHTTP } from "@helia/http";
 import { IDBBlockstore } from "blockstore-idb";
 import { IDBDatastore } from "datastore-idb";
 import type { UnixFS } from "@helia/unixfs";
@@ -12,6 +11,7 @@ import {
   type Pin,
   type PinResults,
   RemotePinningServiceClient,
+  Status,
 } from "@ipfs-shipyard/pinning-service-client";
 import type { HeliaServiceConfig } from "@/types";
 
@@ -81,34 +81,58 @@ export class HeliaService {
       throw new Error(`Failed to initialize stores: ${error}`);
     }
 
-    // Create trustless gateway block broker with auth headers and credentials
-    const gatewayBlockBroker = trustlessGateway({
-      transformRequestInit: (init?: RequestInit) => {
-        const headers = new Headers(init?.headers);
+    // createHeliaLight creates a Helia node without any libp2p networking.
+    // withHTTP adds trustless gateway block brokers and HTTP routers only.
+    // This is fully stateless — no peer discovery, no dnsaddr, no bootstrap.
+    let node: ReturnType<typeof withHTTP> | undefined;
+    try {
+      node = withHTTP(
+        createHeliaLight({
+          blockstore,
+          datastore,
+        }),
+        {
+          // Use our own gateway as the sole recursive gateway — no external gateways
+          recursiveGateways: [this.config.apiUrl],
+          // No delegated routing — only our gateway
+          delegatedRouters: [],
+          // Attach auth headers and credentials to all gateway requests
+          transformRequestInit: (init?: RequestInit) => {
+            const headers = new Headers(init?.headers);
 
-        if (this.config.authToken) {
-          headers.set("Authorization", `Bearer ${this.config.authToken}`);
-        }
+            if (this.config.authToken) {
+              headers.set("Authorization", `Bearer ${this.config.authToken}`);
+            }
 
-        return {
-          ...init,
-          headers,
-          credentials: 'include',
-        };
-      },
-    });
+            return {
+              ...init,
+              headers,
+              credentials: "include",
+            };
+          },
+        },
+      );
+      await node.start();
+      this.helia = node;
+    } catch (error) {
+      try {
+        await node?.stop?.();
+      } catch (e) {
+        console.error("Error stopping Helia:", e);
+      }
+      try {
+        if (blockstore) await blockstore.close();
+      } catch (e) {
+        console.error("Error closing blockstore:", e);
+      }
+      try {
+        if (datastore) await datastore.close();
+      } catch (e) {
+        console.error("Error closing datastore:", e);
+      }
+      throw new Error(`Failed to start Helia HTTP node: ${error instanceof Error ? error.message : String(error)}`);
+    }
 
-    // Create HTTP gateway router using the IPFS API URL
-    const gatewayRouter = httpGatewayRouting({
-      gateways: [this.config.apiUrl],
-    });
-
-    this.helia = await createHelia({
-      blockstore,
-      datastore,
-      blockBrokers: [gatewayBlockBroker],
-      routers: [gatewayRouter],
-    });
     this.unixfs = unixfs(this.helia);
 
     return this.helia;
@@ -283,7 +307,7 @@ export class HeliaService {
     try {
       const pins = await client.pinsGet({
         cid: [cid],
-        status: ["pinned"],
+        status: [Status.Pinned],
       });
       return pins.results.length > 0;
     } catch (error) {
@@ -314,16 +338,16 @@ export class HeliaService {
 
       // Close blockstore and datastore explicitly
       try {
-        if (blockstore && typeof blockstore.close === "function") {
-          await blockstore.close();
+        if (blockstore) {
+          await (blockstore as { close?: () => Promise<void> }).close?.();
         }
       } catch (error) {
         console.error("Error closing blockstore:", error);
       }
 
       try {
-        if (datastore && typeof datastore.close === "function") {
-          await datastore.close();
+        if (datastore) {
+          await (datastore as { close?: () => Promise<void> }).close?.();
         }
       } catch (error) {
         console.error("Error closing datastore:", error);
