@@ -23,7 +23,7 @@
     "typewriter-effect": "^2.22.0"
   },
   "dependencies": {
-    "@astrojs/rss": "^4.0.18",
+    "@astrojs/rss": "^4.0.19",
     "@fontsource/ibm-plex-sans-devanagari": "catalog:websites",
     "@fontsource/inter": "catalog:websites",
     "@fontsource/jaldi": "catalog:websites",
