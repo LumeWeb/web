@@ -37,6 +37,10 @@ vi.mock("@lumeweb/portal-framework-ui-core", () => ({
   ),
   Skeleton: ({ ...props }: any) => <div data-testid="skeleton" {...props} />,
   Spinner: ({ ...props }: any) => <div data-testid="spinner" {...props} />,
+  lazyIcon: (name: string) => () => <span data-testid={name.charAt(0).toLowerCase() + name.slice(1).replace(/([A-Z])/g, (c: string) => "-" + c.toLowerCase())} />,
+  Collapsible: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  CollapsibleTrigger: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  CollapsibleContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
 const mockPlans: PublicPricingPlanResponse[] = [

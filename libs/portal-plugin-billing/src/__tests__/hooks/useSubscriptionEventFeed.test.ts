@@ -13,6 +13,7 @@ let mockAuthToken = "test-auth-token";
 
 vi.mock("@lumeweb/portal-framework-core", () => ({
   getApiBaseUrl: vi.fn(() => "https://api.example.com"),
+  createNamespacedId: (id: string) => id,
   useCapability: vi.fn(() => ({
     data: {
       getAuthToken: () => mockAuthToken,

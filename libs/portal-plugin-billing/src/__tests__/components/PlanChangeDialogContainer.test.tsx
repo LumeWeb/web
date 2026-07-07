@@ -84,6 +84,7 @@ vi.mock("@lumeweb/portal-framework-ui-core", () => ({
     <button onClick={onClick}>{children}</button>
   ),
   cn: (...args: (string | undefined)[]) => args.filter(Boolean).join(" "),
+  lazyIcon: (name: string) => () => <span data-testid={name.charAt(0).toLowerCase() + name.slice(1).replace(/([A-Z])/g, (c: string) => "-" + c.toLowerCase())} />,
 }));
 
 // Mock child components

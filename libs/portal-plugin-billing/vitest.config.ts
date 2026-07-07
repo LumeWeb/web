@@ -29,7 +29,7 @@ export default defineConfig({
     ],
   },
   optimizeDeps: {
-    include: ["react", "react-dom", "papaparse"],
+    include: ["react", "react-dom", "papaparse", "@lumeweb/portal-framework-ui-core"],
   },
   test: {
     projects: [
@@ -59,6 +59,8 @@ export default defineConfig({
             { find: "@lib", replacement: path.resolve(__dirname, "./src-lib") },
             { find: "@lumeweb/portal-framework-auth", replacement: path.resolve(__dirname, "../portal-framework-auth/dist/esm/index.js") },
             { find: "@lumeweb/analytics", replacement: path.resolve(__dirname, "../analytics/dist/esm/index.js") },
+            { find: "@lumeweb/portal-framework-ui-core", replacement: path.resolve(__dirname, "../portal-framework-ui-core/dist/esm/index.js") },
+            { find: "@lumeweb/portal-framework-core", replacement: path.resolve(__dirname, "../portal-framework-core/dist/esm/index.js") },
             {
               find: "papaparse",
               replacement: papaparsePath,
