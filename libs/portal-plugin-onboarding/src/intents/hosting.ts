@@ -1,11 +1,12 @@
 import type { IntentStepConfig, OnboardingStep } from "../types";
-import { DOCS_URL } from "../constants";
+import { DOCS_HOSTING_URL } from "../constants";
 import { useCliInstalled } from "../hooks/useCliInstalled";
 import { useIsSubscribed } from "../hooks/useIsSubscribed";
 import { useHasWebsites } from "../hooks/useHasWebsites";
-import { CLI_STEP } from "./pinning";
+import { CLI_STEP, DOCS_STEP } from "./pinning";
 
 export const HOSTING_STEPS: IntentStepConfig[] = [
+  { ...DOCS_STEP, docsUrl: DOCS_HOSTING_URL },
   CLI_STEP,
   {
     id: "subscribe",
@@ -20,7 +21,6 @@ export const HOSTING_STEPS: IntentStepConfig[] = [
     description: "Deploy your first website to IPFS",
     ctaLabel: "Create website",
     ctaRoute: "/websites",
-    docsUrl: DOCS_URL,
   },
 ];
 
@@ -33,9 +33,10 @@ export function useHostingSteps(active = true): {
   const { hasWebsites, isBusy: websitesBusy } = useHasWebsites(active);
 
   const steps: OnboardingStep[] = [
-    { ...HOSTING_STEPS[0], isComplete: isInstalled },
-    { ...HOSTING_STEPS[1], isComplete: isSubscribed },
-    { ...HOSTING_STEPS[2], isComplete: hasWebsites },
+    { ...HOSTING_STEPS[0], isComplete: true },
+    { ...HOSTING_STEPS[1], isComplete: isInstalled },
+    { ...HOSTING_STEPS[2], isComplete: isSubscribed },
+    { ...HOSTING_STEPS[3], isComplete: hasWebsites },
   ];
 
   return {

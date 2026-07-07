@@ -48,12 +48,18 @@ export function OnboardingStepCard({
           <div className="mt-2 flex items-center gap-3">
             {step.id === "cli" ? (
               <CliInstallBlock />
+            ) : step.ctaRoute === null && step.docsUrl ? (
+              <a href={step.docsUrl} target="_blank" rel="noopener noreferrer">
+                <Button size="sm" variant="outline">
+                  {ctaLabel}
+                </Button>
+              </a>
             ) : (
               <Button size="sm" variant="outline" onClick={onCtaClick}>
                 {ctaLabel}
               </Button>
             )}
-            {step.docsUrl && (
+            {step.docsUrl && step.ctaRoute !== null && (
               <a
                 href={step.docsUrl}
                 target="_blank"
