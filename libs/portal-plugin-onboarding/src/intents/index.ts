@@ -3,7 +3,7 @@ import type { IntentStepConfig } from "../types";
 import { CLI_STEP, PINNING_STEPS, usePinningSteps } from "./pinning";
 import { HOSTING_STEPS, useHostingSteps } from "./hosting";
 
-export { CLI_STEP } from "./pinning";
+export { CLI_STEP, DOCS_STEP } from "./pinning";
 export { PINNING_STEPS } from "./pinning";
 export { HOSTING_STEPS } from "./hosting";
 export { usePinningSteps } from "./pinning";

@@ -1,5 +1,5 @@
 import type { IntentStepConfig, OnboardingStep } from "../types";
-import { DOCS_URL } from "../constants";
+import { DOCS_PINNING_URL } from "../constants";
 import { useCliInstalled } from "../hooks/useCliInstalled";
 import { useIsSubscribed } from "../hooks/useIsSubscribed";
 import { useHasPins } from "../hooks/useHasPins";
@@ -12,7 +12,17 @@ export const CLI_STEP: IntentStepConfig = {
   ctaRoute: null,
 };
 
+export const DOCS_STEP: IntentStepConfig = {
+  id: "docs",
+  label: "Read the Docs",
+  description: "Learn how to pin content, manage CIDs, and automate your workflow",
+  ctaLabel: "Browse docs",
+  ctaRoute: null,
+  docsUrl: DOCS_PINNING_URL,
+};
+
 export const PINNING_STEPS: IntentStepConfig[] = [
+  DOCS_STEP,
   CLI_STEP,
   {
     id: "subscribe",
@@ -27,7 +37,6 @@ export const PINNING_STEPS: IntentStepConfig[] = [
     description: "Pin your first file or directory to IPFS",
     ctaLabel: "Upload files",
     ctaRoute: "/services/ipfs/files",
-    docsUrl: DOCS_URL,
   },
 ];
 
@@ -40,9 +49,10 @@ export function usePinningSteps(active = true): {
   const { hasPins, isBusy: pinsBusy } = useHasPins(active);
 
   const steps: OnboardingStep[] = [
-    { ...PINNING_STEPS[0], isComplete: isInstalled },
-    { ...PINNING_STEPS[1], isComplete: isSubscribed },
-    { ...PINNING_STEPS[2], isComplete: hasPins },
+    { ...PINNING_STEPS[0], isComplete: true },
+    { ...PINNING_STEPS[1], isComplete: isInstalled },
+    { ...PINNING_STEPS[2], isComplete: isSubscribed },
+    { ...PINNING_STEPS[3], isComplete: hasPins },
   ];
 
   return {
