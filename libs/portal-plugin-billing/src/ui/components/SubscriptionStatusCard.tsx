@@ -3,6 +3,7 @@ import { useManagementCapabilities } from "@/hooks/useManagementCapabilities";
 import { cn } from "@lumeweb/portal-framework-ui-core";
 import { StatusHeader } from "./SubscriptionStatusCard/StatusHeader";
 import { PlanDetails } from "./SubscriptionStatusCard/PlanDetails";
+import { QuotaSummary } from "./SubscriptionStatusCard/QuotaSummary";
 import { PausedStatus } from "./SubscriptionStatusCard/PausedStatus";
 import { CancellationStatus } from "./SubscriptionStatusCard/CancellationStatus";
 
@@ -45,6 +46,8 @@ export function SubscriptionStatusCard({ className }: SubscriptionStatusCardProp
       />
 
       <PlanDetails planInfo={currentPlan} />
+
+      <QuotaSummary />
 
       {subscriptionData.paused_at && (
         <PausedStatus pausedAt={subscriptionData.paused_at} />
