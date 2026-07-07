@@ -9,6 +9,9 @@ import { Capability as RefineConfigCapability } from "./capabilities/refineConfi
 import routes from "./routes";
 import widgets from "./widgetRegistrations";
 
+export { useQuota, QUOTA_QUERY_KEY } from "./hooks/useQuota";
+export type { UseQuotaConfig, UseQuotaReturn } from "./hooks/useQuota";
+
 export default function (): Plugin {
   return {
     capabilities: [new RefineConfigCapability()],

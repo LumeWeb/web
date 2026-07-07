@@ -30,6 +30,7 @@
     "@lumeweb/portal-framework-ui": "workspace:*",
     "@lumeweb/portal-framework-ui-core": "workspace:*",
     "@lumeweb/portal-plugin-dashboard": "workspace:*",
+    "@lumeweb/portal-plugin-quota": "workspace:*",
     "@lumeweb/portal-sdk": "workspace:*",
     "@microsoft/fetch-event-source": "^2.0.1",
     "@refinedev/core": "catalog:",

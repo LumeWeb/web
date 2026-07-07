@@ -1729,6 +1729,9 @@ importers:
       '@lumeweb/portal-plugin-dashboard':
         specifier: workspace:*
         version: link:../portal-plugin-dashboard
+      '@lumeweb/portal-plugin-quota':
+        specifier: workspace:*
+        version: link:../portal-plugin-quota
       '@lumeweb/portal-sdk':
         specifier: workspace:*
         version: link:../portal-sdk

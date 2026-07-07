@@ -1,5 +1,16 @@
 import type { PublicPricingPlanPeriodDTO, PublicPricingPlanResponse } from "@/types/subscription";
-import { cn, Skeleton, Spinner } from "@lumeweb/portal-framework-ui-core";
+import {
+  cn,
+  lazyIcon,
+  Skeleton,
+  Spinner,
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@lumeweb/portal-framework-ui-core";
+import { FeaturesList } from "../PricingTable/FeaturesList";
+
+const ChevronDown = lazyIcon("ChevronDown");
 
 interface PlanListProps {
   currentPeriodId?: number;
@@ -62,6 +73,19 @@ export function PlanList({ currentPeriodId, isLoading, onSelectPeriod, plans, se
               </button>
             ))}
           </div>
+          {plan.features && plan.features.length > 0 && (
+            <Collapsible>
+              <CollapsibleTrigger className="text-primary flex items-center gap-1 text-xs font-medium hover:underline">
+                <ChevronDown className="h-3 w-3" />
+                View details
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="mt-2">
+                  <FeaturesList features={plan.features} />
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          )}
         </div>
       ))}
     </div>
