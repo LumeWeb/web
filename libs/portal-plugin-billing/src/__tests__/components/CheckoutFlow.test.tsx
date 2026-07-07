@@ -104,11 +104,13 @@ vi.mock("@lumeweb/portal-framework-ui-core", () => ({
   Skeleton: ({ ...props }: any) => <div data-testid="skeleton" {...props} />,
   Badge: ({ children, ...props }: any) => <span {...props}>{children}</span>,
   Spinner: () => <div data-testid="spinner">Loading...</div>,
+  lazyIcon: (name: string) => () => <span data-testid={name.charAt(0).toLowerCase() + name.slice(1).replace(/([A-Z])/g, (c: string) => "-" + c.toLowerCase())} />,
 }));
 
 // Mock framework capability
 vi.mock("@lumeweb/portal-framework-core", () => ({
   useCapability: () => ({ data: { getApiUrl: () => "https://api.example.com" } }),
+  createNamespacedId: (id: string) => id,
 }));
 
 function TestPhaseControl() {

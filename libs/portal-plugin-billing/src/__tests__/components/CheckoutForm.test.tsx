@@ -31,6 +31,7 @@ vi.mock("@lumeweb/portal-framework-ui-core", () => ({
   CardTitle: ({ children, ...props }: any) => (
     <div data-testid="card-title" {...props}>{children}</div>
   ),
+  lazyIcon: (name: string) => () => <span data-testid={name.charAt(0).toLowerCase() + name.slice(1).replace(/([A-Z])/g, (c: string) => "-" + c.toLowerCase())} />,
 }));
 
 // Mock FragmentRenderer

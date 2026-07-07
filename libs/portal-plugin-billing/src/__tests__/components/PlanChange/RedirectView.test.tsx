@@ -8,6 +8,7 @@ vi.mock("@lumeweb/portal-framework-ui-core", () => ({
   Button: ({ children, asChild }: { children: React.ReactNode; asChild?: boolean }) => (
     asChild ? children : <button>{children}</button>
   ),
+  lazyIcon: (name: string) => () => <span data-testid={name.charAt(0).toLowerCase() + name.slice(1).replace(/([A-Z])/g, (c: string) => "-" + c.toLowerCase())} />,
 }));
 
 vi.mock("lucide-react", () => ({

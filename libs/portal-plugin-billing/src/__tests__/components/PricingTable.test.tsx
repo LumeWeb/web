@@ -101,6 +101,7 @@ vi.mock("@lumeweb/portal-framework-ui-core", () => ({
     <input type="checkbox" role="switch" checked={checked} onChange={(e: any) => onCheckedChange?.(e.target.checked)} />
   ),
   Skeleton: ({ className }: any) => <div data-testid="skeleton" className={className} />,
+  lazyIcon: (name: string) => () => <span data-testid={name.charAt(0).toLowerCase() + name.slice(1).replace(/([A-Z])/g, (c: string) => "-" + c.toLowerCase())} />,
 }));
 
 vi.mock("@/ui/components/FragmentRenderer", () => ({

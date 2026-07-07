@@ -11,6 +11,7 @@ vi.mock("@lumeweb/portal-framework-ui-core", () => ({
   Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   CardContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   cn: (...args: (string | undefined)[]) => args.filter(Boolean).join(" "),
+  lazyIcon: (name: string) => () => <span data-testid={name.charAt(0).toLowerCase() + name.slice(1).replace(/([A-Z])/g, (c: string) => "-" + c.toLowerCase())} />,
 }));
 
 vi.mock("lucide-react", () => ({
@@ -67,6 +68,6 @@ describe("CheckoutSuccess", () => {
     );
 
     await expect.element(screen.getByText("Subscription Activated!")).toBeInTheDocument();
-    await expect.element(screen.getByTestId("check-icon")).toBeInTheDocument();
+    await expect.element(screen.getByTestId("check-circle")).toBeInTheDocument();
   });
 });
