@@ -29,6 +29,16 @@ export function OnboardingStepCard({
         <div className="flex flex-col">
           <span className="text-sm text-muted-foreground">{step.label}</span>
           <span className="text-xs text-muted-foreground">{step.description}</span>
+          {step.docsUrl && step.ctaRoute === null && (
+            <a
+              href={step.docsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-muted-foreground hover:text-foreground underline"
+            >
+              {ctaLabel}
+            </a>
+          )}
         </div>
       </div>
     );
