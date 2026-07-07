@@ -1,2 +1,0 @@
-var e={".":async()=>{let e=await import(`./index-CHbaXHW4.js`),t={};return Object.assign(t,e),Object.defineProperty(t,"__esModule",{value:!0,enumerable:!1}),t},"./widgets/quota":async()=>{let e=await import(`./quota-Czh3sWIY.js`),t={};return Object.assign(t,e),Object.defineProperty(t,"__esModule",{value:!0,enumerable:!1}),t}};export{e as default};
-//# sourceMappingURL=virtual_mf-exposes-ssr___mfe_internal__core_quota__remoteEntry-_hash__js-Ck5ukBfq.js.map
