@@ -27,4 +27,11 @@ export const OG_PAGES: OGPage[] = [
       "Storage and bandwidth, priced upfront. No tiers to climb.",
     footer: "Card or crypto accepted",
   },
+  {
+    slug: "blog-default",
+    headline: "The Pinner Blog",
+    subtitle:
+      "Technical deep dives, opinions, and updates on decentralized storage.",
+    footer: "Open source - Built on Sia",
+  },
 ];

@@ -1,0 +1,127 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { getCollection } from "astro:content";
+import BgShape from "@/assets/hero-shape.svg";
+import { getAuthor } from "@/data/authors";
+
+const posts = (await getCollection("blog", ({ data }) => {
+  return import.meta.env.PROD ? data.draft !== true : true;
+})).sort(
+  (a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf()
+);
+
+function formatDate(date: Date) {
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+---
+
+<Layout
+  title="Blog"
+  description="Technical deep dives, opinions, and updates from the Pinner team."
+  variant="content"
+  navTheme="light"
+  ogImage="/images/og/blog-default.png"
+  showNewsletterFooter={true}
+>
+  <!-- Hero -->
+  <section class="pt-[155px] md:pt-[230px] pb-[60px] md:pb-[80px] relative overflow-hidden">
+    <img
+      src={BgShape.src}
+      alt=""
+      class="absolute left-0 top-0 max-w-max"
+      aria-hidden="true"
+    />
+    <div class="xl:container px-6 relative z-10">
+      <div class="text-center md:max-w-[810px] mx-auto">
+        <h1 class="text-[38px] md:text-[60px] text-home-text leading-[48px] md:leading-[60px] font-medium">
+          Blog
+        </h1>
+        <p class="mt-6 text-home-text text-[20px] md:text-[25px]">
+          Technical deep dives, opinions, and updates from the Pinner team.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Blog posts -->
+  <section class="bg-content-bg text-content-text py-[60px] md:py-[120px]">
+    <div class="xl:container px-6">
+      <div class="mx-auto max-w-3xl">
+        {posts.length === 0 && (
+          <p class="text-content-text-muted text-lg">No posts yet. Check back soon.</p>
+        )}
+
+        <div class="space-y-12">
+          {posts.map((post) => (
+            <article class="border-b border-content-divider pb-12 last:border-0 last:pb-0">
+              <div class="flex flex-col md:flex-row gap-6">
+                {post.data.heroImage && (
+                  <a href={`/blog/${post.id}/`} class="shrink-0 md:w-64 lg:w-72" aria-label={post.data.title}>
+                    <img
+                      src={post.data.heroImage}
+                      alt=""
+                      class="w-full md:w-64 lg:w-72 h-48 object-cover rounded-lg"
+                    />
+                  </a>
+                )}
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-3 text-sm text-content-text-muted mb-3">
+                    <time datetime={post.data.publishedDate.toISOString()}>
+                      {formatDate(post.data.publishedDate)}
+                    </time>
+                    {post.data.updatedDate && (
+                      <span class="text-content-text-muted">
+                        (updated {formatDate(post.data.updatedDate)})
+                      </span>
+                    )}
+                  </div>
+                  <h2 class="text-2xl md:text-3xl font-semibold tracking-tight text-content-text mb-3">
+                    <a
+                      href={`/blog/${post.id}/`}
+                      class="hover:text-teal-600 transition-colors"
+                    >
+                      {post.data.title}
+                    </a>
+                  </h2>
+                  <p class="text-content-text-muted leading-relaxed mb-4 text-lg">
+                    {post.data.description}
+                  </p>
+                  <div class="flex items-center gap-2 text-sm text-content-text-muted">
+                    {(() => {
+                      const a = getAuthor(post.data.author);
+                      return a.twitter ? (
+                        <a href={a.twitter} target="_blank" rel="noopener noreferrer" class="font-medium text-content-text hover:text-teal-600 transition-colors">
+                          {a.name}
+                        </a>
+                      ) : (
+                        <span class="font-medium text-content-text">{a.name}</span>
+                      );
+                    })()}
+                    {post.data.tags.length > 0 && (
+                      <span class="flex items-center gap-1">
+                        <span>&middot;</span>
+                        {post.data.tags.map((tag, i) => (
+                          <span class="flex items-center gap-1">
+                            {i > 0 && <span>,</span>}
+                            <a
+                              href={`/blog/tags/${tag.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}/`}
+                              class="hover:text-teal-600 transition-colors"
+                            >{tag}</a>
+                          </span>
+                        ))}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
