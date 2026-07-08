@@ -1,3 +1,12 @@
+## 0.1.21 (2026-07-08)
+
+### Fixes
+
+#### Fixes
+
+- replace broken interface-store type imports with local type aliases
+- re-throw non-NotFoundError exceptions in datastore get
+
 ## 0.1.20 (2026-07-05)
 
 ### Fixes
