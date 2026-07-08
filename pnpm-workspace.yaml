@@ -103,6 +103,7 @@ catalog:
   p-queue: ^9.3.1
   zod: ^4.4.3
   zustand: ^5.0.14
+  abort-error: ^1.0.2
 
 catalogs:
   framework:
