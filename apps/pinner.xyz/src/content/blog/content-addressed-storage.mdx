@@ -1,0 +1,111 @@
+---
+title: "What Is Content-Addressed Storage?"
+description: "Content-addressed storage gives you cryptographic proof that data hasn't changed. Here's how it works, how Pinner implements it, and why it matters."
+author: "Derrick"
+publishedDate: 2026-07-08
+draft: false
+pillar: "educational"
+tags: ["storage", "ipfs", "sia", "content-addressing"]
+heroImage: "/images/blog/content-addressed-storage-hero.png"
+---
+
+Content-addressed storage is a method of storing data where the address IS the content itself. Instead of a file sitting at "server.com/files/photo.jpg" with a name you chose, the file gets an identifier derived from its actual bytes, usually a SHA-256 hash encoded as a multihash. Change one byte of the file and the identifier changes completely. This gives you cryptographic proof that data hasn't been modified, without trusting any third party to vouch for it.
+
+Most people don't know what content-addressed storage is. That's fine. Most people don't know what HTTP or TCP is either. They use it every day without needing a name for it.
+
+But if you build things on the internet, you should understand it. Because what it enables (verified content, immutability, verifiable snapshots) is something traditional storage simply cannot do.
+
+## How Is Content-Addressed Storage Different From Regular Storage?
+
+In regular storage, you address data by location. The file lives at a path: a URL, a bucket key, a filesystem path. You trust the server to give you the right file. If someone changes the file on the server, you have no automatic way to know.
+
+Content-addressed storage flips this. The address is derived from the content. The identifier, called a CID (Content Identifier), is a hash of the data itself. You don't trust the server. You verify the hash. If the data matches the CID, it's the right file. If it doesn't, it isn't.
+
+With regular web storage you might have ETags that hint at whether something changed. But tracking whether a whole website has genuinely not been modified is hard because the foundation isn't using DAGs or Merkle trees to expose immutability.
+
+| Feature | Regular Storage (Location-Addressed) | Content-Addressed Storage |
+|---|---|---|
+| Address type | Path/URL (chosen by user) | CID (derived from content hash) |
+| Modification detection | Manual (ETags, timestamps) | Automatic (hash changes = new CID) |
+| Trust model | Trust the server | Verify the hash |
+| Snapshot capability | No native support | Root CID = verifiable snapshot |
+| P2P distribution | Server-dependent | Any peer with the blocks can serve |
+
+## What Is a CID and How Does It Work?
+
+A CID (Content Identifier) is the native identifier used in IPFS. It encodes a content hash, usually SHA-256, in a self-describing multihash format that includes the hash function identifier, digest length, and hash itself. It's the address you use to retrieve content. But unlike a URL, the address IS the verification.
+
+The CID is stored as an upload and pin record. "Pinned" means the network is actively keeping that data available. It's not just cached, it's maintained.
+
+Here's what makes it work: the data behind a CID is organized into a DAG (Directed Acyclic Graph). Think of it as blocks of data connected by their relationships. In IPFS, the underlying data spec is IPLD, which defaults to roughly 256 KB blocks. Each block holds references to its child blocks. For files, links to the rest of the data. For folders, links to direct children.
+
+The block CID is the hash of the entire contents including the relationship links. Change anything in any block and the root CID changes. Like a Merkle tree, the integrity propagates upward.
+
+## How Does Content Addressing Enable Verifiable Website Snapshots?
+
+Holding a root CID is like having a snapshot from archive.org, except it's cryptographically verifiable. The DAG structure means one root identifier represents an entire website's state at a point in time.
+
+For a website, this means you can get a snapshot based on the root CID and hold that DAG. The root hash guarantees the content hasn't changed since you captured it. No server has to vouch for it. The math does.
+
+From a developer perspective, you could track the change history of websites by recording root hashes and downloading every version. It's not theoretical. It's a weekend project if you wanted to build it.
+
+Traditional web storage doesn't expose this. You'd have to build your own tracking layer on top of HTTP, and even then, you can't prove the server didn't serve different content at different times. The immutability has to be baked into the storage foundation.
+
+## How Does Pinner Implement Content-Addressed Storage?
+
+Pinner is built on Sia with an IPFS layer on top. These are separate concerns that work together.
+
+**Sia** handles the storage primitives. It uses Merkle trees at the low level for tracking uploaded sectors. Sia is data-agnostic: it stores IPLD blocks as raw blobs inside Sia's object interface. It doesn't care what the data is. This is why Pinner can theoretically support any kind of data. Sia provides 3x redundancy by default (10 data shards and 20 parity shards, 30 total, any 10 of which can recover the data) using Reed-Solomon erasure encoding, so storage host failures are expected and handled.
+
+**The IPFS/IPLD layer** handles content addressing and distribution. The CID is the native IPFS IPLD CID. Pinner's portal and edge gateway use the standard IPFS boxo framework. Block metadata (CID, size, parent-child relationships, pin status) lives in a SQL database (MySQL or SQLite). The raw block data itself is stored as objects on Sia. When boxo requests a block, the blockstore fetches it from Sia on demand, with an in-memory cache layer for frequently accessed blocks.
+
+| Layer | Responsibility | Technology |
+|---|---|---|
+| Content addressing | CID generation, DAG structure, block linking | IPFS / IPLD |
+| Distribution | Serving blocks, caching, P2P retrieval | boxo framework, edge gateway |
+| Storage | Persistence, redundancy, erasure coding | Sia (3x redundancy, Reed-Solomon) |
+| Database | Pin records, upload metadata | Internal DB |
+
+## What Happens When a Storage Node Goes Offline?
+
+Storage hosts going bad is expected, not exceptional. Sia's default configuration erasure-codes each chunk into 30 encrypted shards (10 data, 20 parity). Any 10 of those 30 can fully recover the data. That means up to 20 hosts can disappear and your files are still intact.
+
+When a host does go offline, it gets interesting. The renter software detects the missing shards and autonomously uploads new ones to healthy hosts. It self-heals. No one has to manually trigger a repair. The system rebalances on its own.
+
+Each shard is encrypted with ChaCha20 before it leaves your machine. No single host can read the data they're storing. They're just holding encrypted fragments with no way to piece them together.
+
+If Pinner's storage infrastructure goes offline entirely, the data won't be available to distribute unless it's in the cache layer. But the data isn't gone. The Sia network still has it, and when connectivity is restored, the blocks are available again through boxo.
+
+The important distinction: the CID always resolves to the same content. The question is whether the blocks are currently reachable. Content addressing guarantees integrity. The storage layer guarantees availability.
+
+## Why Does Any of This Matter?
+
+Content-addressed storage gives you three things traditional storage can't:
+
+1. **Immutability.** A guaranteed snapshot of content that no one can silently modify. The root CID is proof.
+2. **P2P sharing.** A single file ID that, as long as it's pinned, can be downloaded from the P2P network, from Pinner or any peer seeding those blocks.
+3. **Change tracking.** Developers can record root hashes and download every version of a website rather easily. The history is built into the addressing scheme.
+
+The one thing to remember: content-addressed storage means you can pass around a file ID and know, with mathematical certainty, that the data behind it hasn't changed. No "trust us." No server logs to audit. The hash is the proof.
+
+## FAQ
+
+**Is content-addressed storage the same as IPFS?**
+
+No. IPFS is one implementation of content-addressed storage using the IPLD data model. Content addressing is the concept. IPFS is the infrastructure. Other systems implement content addressing differently. Sia uses Merkle trees at its own level for tracking storage sectors.
+
+**Can I access content-addressed data with just the CID?**
+
+Yes, as long as the blocks are pinned and available on the network. The CID is both the address and the verification. You can retrieve the data from any peer that has those blocks, not just the original server.
+
+**What happens if the data changes?**
+
+The CID changes. That's the whole point. Any modification to any block in the DAG produces a new root CID. The old CID still resolves to the old content. Nothing is overwritten. You get a new version with a new identifier.
+
+**Does Sia use CIDs?**
+
+Sia uses Merkle trees at the low level for tracking sectors. In Pinner, the IPLD/CID layer sits on top of Sia. Sia stores the IPLD blocks as raw blobs. It doesn't need to understand what they are. Pinner handles the content-addressing layer.
+
+**Is content-addressed storage slower than regular storage?**
+
+Not necessarily. The content addressing layer adds a hash computation step, but retrieval can actually be faster because data can be fetched from any peer that has it, not just one origin server. In Pinner's case, caching on top of Sia retrieval keeps things fast for common content.

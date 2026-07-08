@@ -8,7 +8,7 @@ import PostHog from "@/components/posthog.astro";
 import UTMCapture from "@/components/UTMCapture";
 import contactsData from "@/data/contacts.json";
 
-const { title, variant = "content", description = "Store files, host websites, and keep your data private by default. One plan, no surprises. Open source.", ogImage: ogImageProp, showNewsletterFooter = true } = Astro.props;
+const { title, variant = "content", description = "Store files, host websites, and keep your data private by default. One plan, no surprises. Open source.", ogImage: ogImageProp, showNewsletterFooter = true, navTheme } = Astro.props;
 const lastUpdated = getGitLastUpdated();
 const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? "https://pinner.xyz");
 const siteName = "Pinner";
@@ -92,14 +92,14 @@ const ogImage = new URL(ogImageProp ?? "/images/og/default.png", canonicalURL.or
       ]
     })} />
   </head>
-  <body class="bg-[#0D1D1C] antialiased overflow-x-hidden">
+  <body class={navTheme === "light" ? "bg-white antialiased overflow-x-hidden" : "bg-[#0D1D1C] antialiased overflow-x-hidden"}>
     <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:text-black focus:px-4 focus:py-2 focus:rounded">Skip to content</a>
     <UTMCapture client:load />
-    <Navbar client:load />
+    <Navbar client:load theme={navTheme ?? (variant === "home" ? "dark" : "light")} />
     <main id="main-content" class={`min-h-[220px] theme-${variant}`}>
       <slot />
     </main>
 
-    <Footer theme={variant === "home" ? "dark" : undefined} lastUpdated={lastUpdated} showNewsletter={showNewsletterFooter} />
+    <Footer theme={navTheme ?? (variant === "home" ? "dark" : undefined)} lastUpdated={lastUpdated} showNewsletter={showNewsletterFooter} />
   </body>
 </html>

@@ -1,0 +1,123 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { getCollection } from "astro:content";
+import { getAuthor } from "@/data/authors";
+
+function deslugifyTag(slug: string) {
+  return slug.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+}
+
+export async function getStaticPaths() {
+  function slugify(tag: string) {
+    return tag.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  }
+
+  const allPosts = await getCollection("blog", ({ data }) => {
+    return import.meta.env.PROD ? data.draft !== true : true;
+  });
+
+  // Get all unique tags and posts for each tag
+  const tagMap = new Map<string, typeof allPosts>();
+  for (const post of allPosts) {
+    for (const tag of post.data.tags) {
+      if (!tagMap.has(tag)) tagMap.set(tag, []);
+      tagMap.get(tag)!.push(post);
+    }
+  }
+
+  return [...tagMap.entries()].map(([tag, posts]) => ({
+    params: { tag: slugify(tag) },
+    props: { tag, posts: posts.sort((a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf()) },
+  }));
+}
+
+const { tag, posts } = Astro.props;
+
+function formatDate(date: Date) {
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+---
+
+<Layout
+  title={`Posts tagged "${tag}" | Blog`}
+  description={`All posts tagged "${tag}" on the Pinner blog.`}
+  variant="content"
+  navTheme="light"
+  ogImage="/images/og/blog-default.png"
+  showNewsletterFooter={true}
+>
+  <section class="bg-content-bg text-content-text pt-36 md:pt-40 pb-[60px] md:pb-[120px]">
+    <div class="xl:container px-6">
+      <div class="mx-auto max-w-3xl">
+        <nav class="mb-6 flex items-center gap-2 text-sm text-content-text-muted">
+          <a href="/blog/" class="text-content-text-muted hover:text-content-text transition-colors">
+            Blog
+          </a>
+          <span>/</span>
+          <a href="/blog/tags/" class="text-content-text-muted hover:text-content-text transition-colors">
+            Tags
+          </a>
+          <span>/</span>
+          <span class="text-content-text truncate max-w-[300px]">{tag}</span>
+        </nav>
+
+        <h1 class="text-3xl md:text-4xl font-semibold tracking-tight text-content-text mb-8">
+          Posts tagged "{tag}"
+        </h1>
+
+        {posts.length === 0 ? (
+          <p class="text-content-text-muted text-lg">No posts found.</p>
+        ) : (
+          <div class="space-y-12">
+            {posts.map((post) => (
+              <article class="border-b border-content-divider pb-12 last:border-0 last:pb-0">
+                <div class="flex flex-col md:flex-row gap-6">
+                  {post.data.heroImage && (
+                    <a href={`/blog/${post.id}/`} class="shrink-0 md:w-64 lg:w-72" aria-label={post.data.title}>
+                      <img
+                        src={post.data.heroImage}
+                        alt=""
+                        class="w-full md:w-64 lg:w-72 h-48 object-cover rounded-lg"
+                      />
+                    </a>
+                  )}
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-3 text-sm text-content-text-muted mb-3">
+                      <time datetime={post.data.publishedDate.toISOString()}>
+                        {formatDate(post.data.publishedDate)}
+                      </time>
+                    </div>
+                    <h2 class="text-2xl md:text-3xl font-semibold tracking-tight text-content-text mb-3">
+                      <a href={`/blog/${post.id}/`} class="hover:text-teal-600 transition-colors">
+                        {post.data.title}
+                      </a>
+                    </h2>
+                    <p class="text-content-text-muted leading-relaxed mb-4 text-lg">
+                      {post.data.description}
+                    </p>
+                    <div class="flex items-center gap-2 text-sm text-content-text-muted">
+                      {(() => {
+                        const a = getAuthor(post.data.author);
+                        return a.twitter ? (
+                          <a href={a.twitter} target="_blank" rel="noopener noreferrer" class="font-medium text-content-text hover:text-teal-600 transition-colors">
+                            {a.name}
+                          </a>
+                        ) : (
+                          <span class="font-medium text-content-text">{a.name}</span>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+</Layout>

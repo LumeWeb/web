@@ -1,0 +1,125 @@
+---
+import "@/styles/globals.css";
+import Layout from "@/layouts/Layout.astro";
+import { getGitLastUpdated } from "@/lib/last-updated";
+import { getAuthor } from "@/data/authors";
+import CallToAction from "@/components/CallToAction";
+
+interface Props {
+  title: string;
+  description: string;
+  author: string;
+  publishedDate: Date;
+  updatedDate?: Date;
+  ogImage?: string;
+  heroImage?: string;
+}
+
+const { title, description, author, publishedDate, updatedDate, ogImage, heroImage } = Astro.props;
+const authorMeta = getAuthor(author);
+const lastUpdated = getGitLastUpdated();
+const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? "https://pinner.xyz");
+
+const formattedPublished = publishedDate.toLocaleDateString("en-US", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
+
+---
+
+<Layout
+  title={title}
+  description={description}
+  variant="content"
+  navTheme="light"
+  ogImage={ogImage ?? "/images/og/blog-default.png"}
+  showNewsletterFooter={true}
+>
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      headline: title,
+      description: description,
+      author: {
+        "@type": "Person",
+        name: authorMeta.name,
+        ...(authorMeta.twitter ? { sameAs: authorMeta.twitter } : {}),
+      },
+      publisher: {
+        "@type": "Organization",
+        name: "Pinner",
+        url: canonicalURL.origin,
+      },
+      datePublished: publishedDate.toISOString(),
+      ...(updatedDate ? { dateModified: updatedDate.toISOString() } : {}),
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": canonicalURL.href,
+      },
+    })}
+  />
+
+  <article class="bg-content-bg text-content-text pt-36 md:pt-40 pb-[60px] md:pb-[120px]">
+    <div class="xl:container px-6">
+      <div class="mx-auto max-w-3xl">
+        <nav class="mb-6 flex items-center gap-2 text-sm text-content-text-muted">
+          <a href="/blog/" class="text-content-text-muted hover:text-content-text transition-colors">
+            Blog
+          </a>
+          <span>/</span>
+          <span class="text-content-text truncate max-w-[300px]">{title}</span>
+        </nav>
+
+        <h1 class="text-3xl md:text-4xl font-semibold tracking-tight text-content-text mb-4">
+          {title}
+        </h1>
+
+        <div class="flex items-center gap-3 text-sm text-content-text-muted mb-8">
+          {authorMeta.twitter ? (
+            <a
+              href={authorMeta.twitter}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="font-medium text-content-text hover:text-teal-600 transition-colors"
+            >
+              {authorMeta.name}
+            </a>
+          ) : (
+            <span class="font-medium text-content-text">{authorMeta.name}</span>
+          )}
+          <span>&middot;</span>
+          <time datetime={publishedDate.toISOString()}>{formattedPublished}</time>
+        </div>
+
+        {heroImage && (
+          <img
+            src={heroImage}
+            alt={title}
+            class="w-full h-[300px] md:h-[400px] object-cover rounded-lg mb-10"
+            loading="eager"
+          />
+        )}
+
+        <div class="prose prose-neutral max-w-none prose-headings:font-semibold prose-headings:tracking-tight prose-a:text-teal-600 prose-a:no-underline prose-strong:text-neutral-900 prose-table:text-sm prose-th:bg-neutral-50 prose-th:font-semibold prose-td:border-neutral-200 prose-td:p-3 prose-th:p-3 prose-li:marker:text-teal-600 prose-hr:border-neutral-200 [&_a:hover]:underline prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3 prose-p:leading-relaxed">
+          <slot />
+        </div>
+
+        <div class="mt-16 pt-8 border-t border-content-divider">
+          <a
+            href="/blog/"
+            class="text-content-text-muted hover:text-content-text transition-colors text-sm"
+          >
+            &larr; Back to blog
+          </a>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <div class="theme-home">
+    <CallToAction client:load variant="dark" />
+  </div>
+</Layout>

@@ -172,7 +172,7 @@ const Nav = ({ theme = "dark" }: NavProps) => {
                       href="/about"
                       className={cn(
                         textColor,
-                        "leading-[50px] border-b",
+                        "leading-[50px] border-b whitespace-nowrap",
                         borderColor,
                         "lg:border-transparent block lg:leading-5 text-[15px] lg:text-lg font-medium transition ease-in-out duration-300 hover:border-b",
                         isDark ? "hover:border-home-text" : "hover:border-content-text"
@@ -186,7 +186,7 @@ const Nav = ({ theme = "dark" }: NavProps) => {
                       href="/how-it-works"
                       className={cn(
                         textColor,
-                        "leading-[50px] border-b",
+                        "leading-[50px] border-b whitespace-nowrap",
                         borderColor,
                         "lg:border-transparent block lg:leading-5 text-[15px] lg:text-lg font-medium transition ease-in-out duration-300 hover:border-b",
                         isDark ? "hover:border-home-text" : "hover:border-content-text"
@@ -195,12 +195,26 @@ const Nav = ({ theme = "dark" }: NavProps) => {
                     </a>
                   </li>
 
+                  <li className="hidden xl:block">
+                    <a
+                      href="/blog"
+                      className={cn(
+                        textColor,
+                        "leading-[50px] border-b whitespace-nowrap",
+                        borderColor,
+                        "lg:border-transparent block lg:leading-5 text-[15px] lg:text-lg font-medium transition ease-in-out duration-300 hover:border-b",
+                        isDark ? "hover:border-home-text" : "hover:border-content-text"
+                      )}>
+                      Blog
+                    </a>
+                  </li>
+
                   <li>
                     <a
                       href="/pricing"
                       className={cn(
                         textColor,
-                        "leading-[50px] border-b",
+                        "leading-[50px] border-b whitespace-nowrap",
                         borderColor,
                         "lg:border-transparent block lg:leading-5 text-[15px] lg:text-lg font-medium transition ease-in-out duration-300 hover:border-b",
                         isDark ? "hover:border-home-text" : "hover:border-content-text"
@@ -256,7 +270,7 @@ const Nav = ({ theme = "dark" }: NavProps) => {
                       rel="noopener noreferrer"
                       className={cn(
                         textColor,
-                        "leading-[50px] border-b",
+                        "leading-[50px] border-b whitespace-nowrap",
                         borderColor,
                         "lg:border-transparent block lg:leading-5 text-[15px] lg:text-lg font-medium transition ease-in-out duration-300 hover:border-b",
                         isDark ? "hover:border-home-text" : "hover:border-content-text"
@@ -269,7 +283,7 @@ const Nav = ({ theme = "dark" }: NavProps) => {
                       href="/contact"
                       className={cn(
                         textColor,
-                        "leading-[50px] border-b",
+                        "leading-[50px] border-b whitespace-nowrap",
                         borderColor,
                         "lg:border-transparent block lg:leading-5 text-[15px] lg:text-lg font-medium transition ease-in-out duration-300 hover:border-b",
                         isDark ? "hover:border-home-text" : "hover:border-content-text"
@@ -349,7 +363,7 @@ const Nav = ({ theme = "dark" }: NavProps) => {
               </nav>
             </div>
 
-            <div className="flex items-center space-x-5 hidden lg:flex">
+            <div className="flex items-center space-x-5 whitespace-nowrap hidden lg:flex">
               <TrackedLink
                  href={appendUTMsToURL(`${config.accountBaseUrl}/login`)}
                 target="_blank"

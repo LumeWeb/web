@@ -1,0 +1,76 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { getCollection } from "astro:content";
+import { getAuthor } from "@/data/authors";
+
+const posts = (await getCollection("blog", ({ data }) => {
+  return import.meta.env.PROD ? data.draft !== true : true;
+})).sort(
+  (a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf()
+);
+
+// Build tag -> post count map
+const tagMap = new Map<string, number>();
+for (const post of posts) {
+  for (const tag of post.data.tags) {
+    tagMap.set(tag, (tagMap.get(tag) ?? 0) + 1);
+  }
+}
+
+const tags = [...tagMap.entries()].sort((a, b) => b[1] - a[1]);
+
+function formatDate(date: Date) {
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+function slugifyTag(tag: string) {
+  return tag.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+---
+
+<Layout
+  title="Blog Tags"
+  description="Browse all tags from the Pinner blog."
+  variant="content"
+  navTheme="light"
+  ogImage="/images/og/blog-default.png"
+  showNewsletterFooter={true}
+>
+  <section class="bg-content-bg text-content-text pt-36 md:pt-40 pb-[60px] md:pb-[120px]">
+    <div class="xl:container px-6">
+      <div class="mx-auto max-w-3xl">
+        <nav class="mb-6 flex items-center gap-2 text-sm text-content-text-muted">
+          <a href="/blog/" class="text-content-text-muted hover:text-content-text transition-colors">
+            Blog
+          </a>
+          <span>/</span>
+          <span class="text-content-text">Tags</span>
+        </nav>
+
+        <h1 class="text-3xl md:text-4xl font-semibold tracking-tight text-content-text mb-8">
+          Tags
+        </h1>
+
+        {tags.length === 0 ? (
+          <p class="text-content-text-muted text-lg">No tags yet.</p>
+        ) : (
+          <div class="flex flex-wrap gap-3">
+            {tags.map(([tag, count]) => (
+              <a
+                href={`/blog/tags/${slugifyTag(tag)}/`}
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-content-divider text-content-text hover:bg-teal-50 hover:border-teal-200 transition-colors"
+              >
+                <span class="font-medium">{tag}</span>
+                <span class="text-xs text-content-text-muted">{count}</span>
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+</Layout>
