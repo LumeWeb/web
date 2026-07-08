@@ -261,14 +261,7 @@ export function createUnstorageDatastore(
 
     async get(key: Key, _?: AbortOptions): Promise<Uint8Array> {
       const storageKey = this.keyToStorageKey(key);
-      try {
-        return await this.base.getItem(storageKey);
-      } catch (error) {
-        if (error instanceof NotFoundError) {
-          throw error;
-        }
-        throw new NotFoundError(`Datastore item not found: ${key.toString()}`);
-      }
+      return this.base.getItem(storageKey);
     }
 
     async *getMany(
