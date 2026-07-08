@@ -9,7 +9,6 @@ import {
   DEFAULT_BLOCKSTORE_BASE,
   DEFAULT_BLOCKSTORE_FS_BASE,
 } from "@/types/constants";
-import type { AbortOptions, AwaitGenerator } from "interface-store";
 
 function isBrowser(): boolean {
   return (

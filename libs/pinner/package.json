@@ -57,6 +57,7 @@
     "@lumeweb/uppy-post-upload": "workspace:*",
     "@uppy/core": "catalog:",
     "@uppy/tus": "catalog:",
+    "abort-error": "catalog:",
     "blockstore-core": "catalog:",
     "blockstore-idb": "catalog:",
     "datastore-idb": "catalog:",
