@@ -1,17 +1,16 @@
 import { BaseBlockstore } from "blockstore-core";
 import type { InputPair, Pair as BlockstorePair } from "interface-blockstore";
-import type {
-  AbortOptions,
-  Await,
-  AwaitGenerator,
-  AwaitIterable,
-} from "interface-store";
+import { NotFoundError } from "interface-store";
+import type { AbortOptions } from "abort-error";
 import { CID } from "multiformats/cid";
 import { createStorage, type Driver, type Storage } from "unstorage";
 import { DEFAULT_BLOCKSTORE_PREFIX } from "@/types/constants";
 import type { Batch, Datastore, KeyQuery, Query } from "interface-datastore";
 import { Key, Pair } from "interface-datastore";
 import { collectAsyncIterable } from "@/utils/stream";
+
+type AwaitIterable<T> = Iterable<T> | AsyncIterable<T>;
+type AwaitGenerator<T> = AsyncGenerator<T>;
 
 
 
@@ -86,7 +85,7 @@ function createUnstorageBase(
     const value = await storage.getItemRaw<Uint8Array>(key);
 
     if (value === null) {
-      throw new Error(`Item not found: ${key}`);
+      throw new NotFoundError(`Item not found: ${key}`);
     }
 
     return value;
@@ -265,7 +264,10 @@ export function createUnstorageDatastore(
       try {
         return await this.base.getItem(storageKey);
       } catch (error) {
-        throw new Error(`Datastore item not found: ${key.toString()}`);
+        if (error instanceof NotFoundError) {
+          throw error;
+        }
+        throw new NotFoundError(`Datastore item not found: ${key.toString()}`);
       }
     }
 

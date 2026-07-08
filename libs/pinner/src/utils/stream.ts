@@ -1,5 +1,6 @@
-import type { AwaitIterable } from "interface-store";
 import { isNodeEnvironment } from "./env";
+
+type AwaitIterable<T> = Iterable<T> | AsyncIterable<T>;
 
 /**
  * Convert a ReadableStream to a Blob.

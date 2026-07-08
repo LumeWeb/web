@@ -130,6 +130,7 @@ overrides:
   'react-is': ^19.2.7
   'immer': ^11.1.11
   'use-sync-external-store': ^1.6.0
+  'abort-error': ^1.0.2
   '@radix-ui/primitive': 1.1.4
   '@radix-ui/rect': 1.1.2
   '@radix-ui/react-arrow': 1.1.10
