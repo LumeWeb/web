@@ -1,3 +1,15 @@
+## 0.1.9 (2026-07-08)
+
+### Features
+
+#### Features
+
+- show quota summary and plan feature details
+
+### Fixes
+
+- fix test mocks for lazyIcon and createNamespacedId exports
+
 ## 0.1.8 (2026-07-08)
 
 ### Features
