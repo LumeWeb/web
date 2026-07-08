@@ -11,7 +11,7 @@ url: "https://pinner.xyz/about/"
 
 [Start Storing →](https://account.pinner.xyz)[See How It Works →](#how-it-works)
 
-![about image](/_astro/how-it-works-1.BPoWUY4S.png)
+![about image](/_astro/about-1.BPoWUY4S.png)
 
 ![about image](/_astro/about-mobile-1.-rS8X-Gf.png)
 
@@ -25,9 +25,9 @@ Lume is a decentralized storage portal that connects you directly to storage pro
 
 [Start Storing →](#)
 
-![about image](/_astro/how-it-works-2.B4_ehDlV.png)
+![about image](/_astro/about-2.B4_ehDlV.png)
 
-![about image](/_astro/about-mobile-2.ChqCIh8P.png)
+![about image](/_astro/how-it-works-mobile-2.ChqCIh8P.png)
 
 ### How It Works
 
