@@ -1,3 +1,11 @@
+## 0.1.23 (2026-07-09)
+
+### Features
+
+#### Features
+
+- support pre-created Libp2p instance
+
 ## 0.1.22 (2026-07-08)
 
 ### Fixes
