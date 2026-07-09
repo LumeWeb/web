@@ -1,6 +1,13 @@
 import { car } from "@helia/car";
-import { createHelia } from "helia";
+import { createHelia, createHeliaLight } from "helia";
+import { withLibp2p } from "@helia/libp2p";
+import { withBitswap } from "@helia/bitswap";
+import { withHTTP } from "@helia/http";
 import { unixfs } from "@helia/unixfs";
+import * as dagCbor from "@ipld/dag-cbor";
+import * as dagJson from "@ipld/dag-json";
+import * as json from "multiformats/codecs/json";
+import { sha512 } from "multiformats/hashes/sha2";
 import {
   createBlockstore,
   createDatastore as createUnstorageDatastore,
@@ -8,6 +15,7 @@ import {
 import type { CID } from "multiformats/cid";
 import { CarReader } from "@ipld/car";
 import type { Datastore } from "interface-datastore";
+import type { Libp2p } from "@libp2p/interface";
 
 import {
   asyncGeneratorToReadableStream,
@@ -62,6 +70,13 @@ export interface CarConfig {
    * @default "pinner-helia-data"
    */
   datastoreName?: string;
+
+  /**
+   * Pre-created Libp2p instance for Helia.
+   * When provided, Helia skips its internal createLibp2p() / libp2pDefaults()
+   * entirely, avoiding unnecessary transports (WebRTC, UPnP, etc.).
+   */
+  libp2p?: Libp2p;
 }
 
 let helia: any = null;
@@ -90,10 +105,31 @@ async function getHelia() {
       base: config.datastoreName,
     });
 
-  helia = await createHelia({
-    blockstore,
-    datastore,
-  });
+  if (config.libp2p) {
+    // When a pre-created Libp2p instance is provided, bypass createHelia()
+    // which calls withLibp2p() without passing the libp2p instance through.
+    // Manually compose the same pipeline: createHeliaLight → withHTTP →
+    // withLibp2p(helia, libp2p) → withBitswap. This skips createLibp2p() /
+    // libp2pDefaults() entirely, so WebRTC and UPnP transports never load.
+    helia = withBitswap(
+      withLibp2p(
+        withHTTP(
+          createHeliaLight({
+            blockstore,
+            datastore,
+            codecs: [dagCbor, dagJson, json],
+            hashers: [sha512],
+          }),
+        ),
+        config.libp2p,
+      ),
+    );
+  } else {
+    helia = await createHelia({
+      blockstore,
+      datastore,
+    });
+  }
 
   return helia;
 }

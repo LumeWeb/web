@@ -15,6 +15,9 @@ catalogs:
     '@conform-to/react':
       specifier: ^1.19.4
       version: 1.19.4
+    '@helia/bitswap':
+      specifier: ^4.0.5
+      version: 4.0.5
     '@helia/car':
       specifier: ^6.0.3
       version: 6.0.3
@@ -24,6 +27,9 @@ catalogs:
     '@helia/interface':
       specifier: ^7.0.3
       version: 7.0.3
+    '@helia/libp2p':
+      specifier: ^1.0.5
+      version: 1.0.5
     '@helia/unixfs':
       specifier: ^8.0.3
       version: 8.0.3
@@ -36,6 +42,15 @@ catalogs:
     '@ipld/car':
       specifier: ^5.4.6
       version: 5.4.6
+    '@ipld/dag-cbor':
+      specifier: ^10.0.1
+      version: 10.0.1
+    '@ipld/dag-json':
+      specifier: ^11.0.0
+      version: 11.0.0
+    '@libp2p/interface':
+      specifier: ^3.2.4
+      version: 3.2.4
     '@module-federation/enhanced':
       specifier: ^2.6.0
       version: 2.6.0
@@ -385,7 +400,7 @@ importers:
         version: 26.1.0
       '@vitejs/plugin-react':
         specifier: ^6.0.3
-        version: 6.0.3(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.0-rc.17)(vite@8.0.16))(babel-plugin-react-compiler@1.0.0)(vite@8.0.16)
+        version: 6.0.3(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.3)(vite@8.0.16))(babel-plugin-react-compiler@1.0.0)(vite@8.0.16)
       '@vitest/browser':
         specifier: ^4.1.9
         version: 4.1.9(msw@2.14.6(@types/node@26.1.0)(typescript@6.0.3))(vite@8.0.16)(vitest@4.1.9)
@@ -919,12 +934,18 @@ importers:
 
   libs/pinner:
     dependencies:
+      '@helia/bitswap':
+        specifier: 'catalog:'
+        version: 4.0.5(react-native@0.81.4(@babel/core@7.29.0)(@types/react@19.2.17)(react@19.2.7))
       '@helia/car':
         specifier: 'catalog:'
         version: 6.0.3
       '@helia/http':
         specifier: 'catalog:'
         version: 4.0.4
+      '@helia/libp2p':
+        specifier: 'catalog:'
+        version: 1.0.5(react-native@0.81.4(@babel/core@7.29.0)(@types/react@19.2.17)(react@19.2.7))
       '@helia/unixfs':
         specifier: 'catalog:'
         version: 8.0.3
@@ -934,6 +955,15 @@ importers:
       '@ipld/car':
         specifier: 'catalog:'
         version: 5.4.6
+      '@ipld/dag-cbor':
+        specifier: 'catalog:'
+        version: 10.0.1
+      '@ipld/dag-json':
+        specifier: 'catalog:'
+        version: 11.0.0
+      '@libp2p/interface':
+        specifier: 'catalog:'
+        version: 3.2.4
       '@lumeweb/portal-sdk':
         specifier: workspace:*
         version: link:../portal-sdk
@@ -4850,9 +4880,6 @@ packages:
   '@libp2p/interface@2.11.0':
     resolution: {integrity: sha512-0MUFKoXWHTQW3oWIgSHApmYMUKWO/Y02+7Hpyp+n3z+geD4Xo2Rku2gYWmxcq+Pyjkz6Q9YjDWz3Yb2SoV2E8Q==}
 
-  '@libp2p/interface@3.2.2':
-    resolution: {integrity: sha512-IU78g6uF8Ls0//4v9VE1rL5Jvy+i6I8LI/DssojFICbaDJSkL59Sn5XRfHrY5OCxTnUnUxnWK7pHz/3+UZcRNQ==}
-
   '@libp2p/interface@3.2.4':
     resolution: {integrity: sha512-o/ZMbsplniVQhz0AW1CinZcfZPEfr7ttu4w7aivrFAs6xDpnJYmN3FTeEgTt93EHs+AEOcIT76V3KMFDZmIEcQ==}
 
@@ -4902,20 +4929,11 @@ packages:
   '@libp2p/multistream-select@7.0.22':
     resolution: {integrity: sha512-KJ1/i6NVAdPjsGFByB7eECW1j/c54nZIfCyDH3/gl4cLX+l1Pnkm2AgLRuk/3D/tNNVjsSJC2VOwJg6Z8NW3ww==}
 
-  '@libp2p/peer-collections@7.0.19':
-    resolution: {integrity: sha512-vUV6kovHqYQQP2oLq7Ph12AfDRDgsSgE+WfF1slRm1xY4AFmDP6EnCEQwPzmxHVbkfP4XiekgLZ48NDRh4/f2Q==}
-
   '@libp2p/peer-collections@7.0.22':
     resolution: {integrity: sha512-46Mq8ly8uqcpnADo0wWqTEuP8tRDyRtxz/CbTwVSZfz6TbRM/nIRlhoxZu8EIrYBqBZAu3F+3EB7hrzJDyUerQ==}
 
   '@libp2p/peer-id@6.0.11':
     resolution: {integrity: sha512-p2Sw8y12gcrmDYGTrbvGQzMhM7ypquCfQX5WdhitI0+ArTSRHHXt7ozdpUWzcq7CNaK5r2q6FIbpz9Yxywg9Hw==}
-
-  '@libp2p/peer-id@6.0.8':
-    resolution: {integrity: sha512-D9fkXL5g+RfSvDVnj/DxVeuGPq5SQrWPWf4VPf+pPkIZVcTOuuR6OUN9XtYfOUxeN3CbsoAlRk0EDXqRA8Zyxg==}
-
-  '@libp2p/peer-id@6.0.9':
-    resolution: {integrity: sha512-MlofyOOpxzZA4tIcOVPjd1FQIa0TA0g+bn+d08vfo9znCjfe6Lh0RBFyLdlICbyogVN6wn7+29SYch78wCuuCQ==}
 
   '@libp2p/peer-record@9.0.10':
     resolution: {integrity: sha512-pbDHpOPzE2vLlyiIAitpKG+aDNcnVmtLCYb1wGeRRAnarZC/vREZGM6JmR8Y79INu7jQ1IwTN1iKMj9jaXdAGg==}
@@ -17185,9 +17203,9 @@ snapshots:
     dependencies:
       '@chainsafe/as-chacha20poly1305': 0.1.0
       '@chainsafe/as-sha256': 1.2.0
-      '@libp2p/crypto': 5.1.18
+      '@libp2p/crypto': 5.1.20
       '@libp2p/interface': 3.2.4
-      '@libp2p/peer-id': 6.0.9
+      '@libp2p/peer-id': 6.0.11
       '@libp2p/utils': 7.2.3
       '@noble/ciphers': 2.2.0
       '@noble/curves': 2.2.0
@@ -18033,7 +18051,7 @@ snapshots:
       '@helia/utils': 2.5.2
       '@libp2p/interface': 3.2.4
       '@libp2p/logger': 6.2.9
-      '@libp2p/peer-collections': 7.0.19
+      '@libp2p/peer-collections': 7.0.22
       '@libp2p/utils': 7.2.3
       '@multiformats/multiaddr': 13.0.3
       any-signal: 4.2.0
@@ -18092,7 +18110,7 @@ snapshots:
       '@helia/interface': 6.2.1
       '@helia/utils': 2.5.2
       '@libp2p/interface': 3.2.4
-      '@libp2p/peer-id': 6.0.8
+      '@libp2p/peer-id': 6.0.11
       '@libp2p/utils': 7.2.3
       '@multiformats/multiaddr': 13.0.3
       '@multiformats/multiaddr-matcher': 3.0.2
@@ -18136,7 +18154,7 @@ snapshots:
   '@helia/delegated-routing-v1-http-api-client@6.0.1':
     dependencies:
       '@libp2p/interface': 3.2.4
-      '@libp2p/peer-id': 6.0.9
+      '@libp2p/peer-id': 6.0.11
       '@multiformats/multiaddr': 13.0.3
       any-signal: 4.2.0
       browser-readablestream-to-it: 2.0.12
@@ -18246,7 +18264,7 @@ snapshots:
   '@helia/remote-pinning@3.0.0(react-native@0.81.4(@babel/core@7.29.0)(@types/react@19.2.17)(react@19.2.7))':
     dependencies:
       '@ipfs-shipyard/pinning-service-client': 3.0.0
-      '@libp2p/interface': 3.2.2
+      '@libp2p/interface': 3.2.4
       '@libp2p/logger': 6.2.6
       '@multiformats/multiaddr': 13.0.1
       delay: 7.0.0
@@ -18265,7 +18283,7 @@ snapshots:
       '@helia/delegated-routing-v1-http-api-client': 6.0.1
       '@helia/interface': 6.2.1
       '@libp2p/interface': 3.2.4
-      '@libp2p/peer-id': 6.0.8
+      '@libp2p/peer-id': 6.0.11
       '@multiformats/uri-to-multiaddr': 10.0.0
       ipns: 10.1.6
       it-first: 3.0.11
@@ -18322,13 +18340,13 @@ snapshots:
       '@ipld/dag-json': 10.2.7
       '@ipld/dag-pb': 4.1.7
       '@libp2p/interface': 3.2.4
-      '@libp2p/keychain': 6.1.1
+      '@libp2p/keychain': 6.1.3
       '@libp2p/utils': 7.2.3
       '@multiformats/dns': 1.0.15
       '@multiformats/multiaddr': 13.0.3
       any-signal: 4.2.0
       blockstore-core: 6.1.3
-      cborg: 5.1.0
+      cborg: 5.1.7
       interface-blockstore: 6.0.2
       interface-datastore: 9.0.3
       interface-store: 7.0.2
@@ -18337,7 +18355,7 @@ snapshots:
       it-foreach: 2.1.7
       it-merge: 3.0.14
       it-to-buffer: 4.0.12
-      libp2p: 3.2.2
+      libp2p: 3.3.4
       mortice: 3.3.1
       multiformats: 13.4.2
       p-defer: 4.0.1
@@ -18676,7 +18694,7 @@ snapshots:
 
   '@ipld/dag-cbor@10.0.1':
     dependencies:
-      cborg: 5.1.0
+      cborg: 5.1.7
       multiformats: 14.0.4
 
   '@ipld/dag-cbor@9.2.6':
@@ -18691,7 +18709,7 @@ snapshots:
 
   '@ipld/dag-json@11.0.0':
     dependencies:
-      cborg: 5.1.0
+      cborg: 5.1.7
       multiformats: 14.0.4
 
   '@ipld/dag-pb@4.1.7':
@@ -18718,11 +18736,11 @@ snapshots:
   '@ipshipyard/libp2p-auto-tls@2.0.1':
     dependencies:
       '@chainsafe/is-ip': 2.1.0
-      '@libp2p/crypto': 5.1.18
+      '@libp2p/crypto': 5.1.20
       '@libp2p/http': 2.0.2
       '@libp2p/interface': 3.2.4
-      '@libp2p/interface-internal': 3.1.4
-      '@libp2p/keychain': 6.1.1
+      '@libp2p/interface-internal': 3.1.7
+      '@libp2p/keychain': 6.1.3
       '@libp2p/utils': 7.2.3
       '@multiformats/multiaddr': 13.0.3
       '@multiformats/multiaddr-matcher': 3.0.2
@@ -19076,8 +19094,8 @@ snapshots:
     dependencies:
       '@libp2p/interface': 3.2.4
       '@libp2p/interface-internal': 3.1.4
-      '@libp2p/peer-collections': 7.0.19
-      '@libp2p/peer-id': 6.0.9
+      '@libp2p/peer-collections': 7.0.22
+      '@libp2p/peer-id': 6.0.11
       '@libp2p/utils': 7.2.3
       '@multiformats/multiaddr': 13.0.3
       any-signal: 4.2.0
@@ -19104,7 +19122,7 @@ snapshots:
     dependencies:
       '@libp2p/interface': 3.2.4
       '@libp2p/interface-internal': 3.1.4
-      '@libp2p/peer-id': 6.0.9
+      '@libp2p/peer-id': 6.0.11
       '@multiformats/multiaddr': 13.0.3
       '@multiformats/multiaddr-matcher': 3.0.2
       main-event: 1.0.4
@@ -19123,8 +19141,8 @@ snapshots:
       '@libp2p/crypto': 5.1.18
       '@libp2p/interface': 3.2.4
       '@libp2p/interface-internal': 3.1.4
-      '@libp2p/peer-collections': 7.0.19
-      '@libp2p/peer-id': 6.0.9
+      '@libp2p/peer-collections': 7.0.22
+      '@libp2p/peer-id': 6.0.11
       '@libp2p/peer-record': 9.0.10
       '@libp2p/utils': 7.2.3
       '@multiformats/multiaddr': 13.0.3
@@ -19164,7 +19182,7 @@ snapshots:
     dependencies:
       '@libp2p/crypto': 5.1.18
       '@libp2p/interface': 3.2.4
-      '@libp2p/keychain': 6.1.1
+      '@libp2p/keychain': 6.1.3
       '@libp2p/logger': 6.2.9
       interface-datastore: 9.0.3
 
@@ -19227,7 +19245,7 @@ snapshots:
 
   '@libp2p/http-peer-id-auth@2.0.1':
     dependencies:
-      '@libp2p/crypto': 5.1.18
+      '@libp2p/crypto': 5.1.20
       '@libp2p/interface': 3.2.4
       '@libp2p/peer-id': 6.0.11
       uint8-varint: 2.0.4
@@ -19254,7 +19272,7 @@ snapshots:
       '@achingbrain/http-parser-js': 0.5.9
       '@libp2p/http-utils': 2.0.2
       '@libp2p/interface': 3.2.4
-      '@libp2p/interface-internal': 3.1.4
+      '@libp2p/interface-internal': 3.1.7
       '@libp2p/utils': 7.2.3
       '@multiformats/multiaddr': 13.0.3
       multiformats: 13.4.2
@@ -19269,7 +19287,7 @@ snapshots:
       '@libp2p/http-utils': 2.0.2
       '@libp2p/http-websocket': 2.0.2
       '@libp2p/interface': 3.2.4
-      '@libp2p/interface-internal': 3.1.4
+      '@libp2p/interface-internal': 3.1.7
       '@multiformats/multiaddr': 13.0.3
       cookie: 1.1.1
       undici: 8.2.0
@@ -19279,7 +19297,7 @@ snapshots:
       '@libp2p/crypto': 5.1.18
       '@libp2p/interface': 3.2.4
       '@libp2p/interface-internal': 3.1.4
-      '@libp2p/peer-id': 6.0.9
+      '@libp2p/peer-id': 6.0.11
       '@libp2p/peer-record': 9.0.10
       '@libp2p/utils': 7.2.3
       '@multiformats/multiaddr': 13.0.3
@@ -19311,7 +19329,7 @@ snapshots:
   '@libp2p/interface-internal@3.1.4':
     dependencies:
       '@libp2p/interface': 3.2.4
-      '@libp2p/peer-collections': 7.0.19
+      '@libp2p/peer-collections': 7.0.22
       '@multiformats/multiaddr': 13.0.3
       progress-events: 1.1.0
 
@@ -19333,15 +19351,6 @@ snapshots:
       progress-events: 1.1.0
       uint8arraylist: 2.4.8
 
-  '@libp2p/interface@3.2.2':
-    dependencies:
-      '@multiformats/dns': 1.0.15
-      '@multiformats/multiaddr': 13.0.3
-      main-event: 1.0.4
-      multiformats: 13.4.2
-      progress-events: 1.1.0
-      uint8arraylist: 2.4.8
-
   '@libp2p/interface@3.2.4':
     dependencies:
       '@multiformats/dns': 1.0.15
@@ -19358,9 +19367,9 @@ snapshots:
       '@libp2p/crypto': 5.1.18
       '@libp2p/interface': 3.2.4
       '@libp2p/interface-internal': 3.1.4
-      '@libp2p/peer-collections': 7.0.19
-      '@libp2p/peer-id': 6.0.9
-      '@libp2p/ping': 3.1.4
+      '@libp2p/peer-collections': 7.0.22
+      '@libp2p/peer-id': 6.0.11
+      '@libp2p/ping': 3.1.7
       '@libp2p/record': 4.0.12
       '@libp2p/utils': 7.2.3
       '@multiformats/multiaddr': 13.0.3
@@ -19472,14 +19481,14 @@ snapshots:
       '@libp2p/interface': 3.2.4
       '@multiformats/multiaddr': 13.0.3
       interface-datastore: 10.0.1
-      multiformats: 14.0.2
+      multiformats: 14.0.4
       weald: 1.1.3
 
   '@libp2p/mdns@12.0.21':
     dependencies:
       '@libp2p/interface': 3.2.4
       '@libp2p/interface-internal': 3.1.4
-      '@libp2p/peer-id': 6.0.9
+      '@libp2p/peer-id': 6.0.11
       '@libp2p/utils': 7.2.3
       '@multiformats/multiaddr': 13.0.3
       '@types/multicast-dns': 7.2.4
@@ -19533,13 +19542,6 @@ snapshots:
       uint8arraylist: 3.0.2
       uint8arrays: 6.1.1
 
-  '@libp2p/peer-collections@7.0.19':
-    dependencies:
-      '@libp2p/interface': 3.2.4
-      '@libp2p/peer-id': 6.0.11
-      '@libp2p/utils': 7.2.3
-      multiformats: 13.4.2
-
   '@libp2p/peer-collections@7.0.22':
     dependencies:
       '@libp2p/interface': 3.2.4
@@ -19554,23 +19556,9 @@ snapshots:
       multiformats: 14.0.4
       uint8arrays: 6.1.1
 
-  '@libp2p/peer-id@6.0.8':
-    dependencies:
-      '@libp2p/crypto': 5.1.18
-      '@libp2p/interface': 3.2.4
-      multiformats: 13.4.2
-      uint8arrays: 5.1.0
-
-  '@libp2p/peer-id@6.0.9':
-    dependencies:
-      '@libp2p/crypto': 5.1.18
-      '@libp2p/interface': 3.2.4
-      multiformats: 13.4.2
-      uint8arrays: 5.1.0
-
   '@libp2p/peer-record@9.0.10':
     dependencies:
-      '@libp2p/crypto': 5.1.18
+      '@libp2p/crypto': 5.1.20
       '@libp2p/interface': 3.2.4
       '@libp2p/peer-id': 6.0.11
       '@multiformats/multiaddr': 13.0.3
@@ -19594,11 +19582,11 @@ snapshots:
 
   '@libp2p/peer-store@12.0.17':
     dependencies:
-      '@libp2p/crypto': 5.1.18
+      '@libp2p/crypto': 5.1.20
       '@libp2p/interface': 3.2.4
-      '@libp2p/peer-collections': 7.0.19
+      '@libp2p/peer-collections': 7.0.22
       '@libp2p/peer-id': 6.0.11
-      '@libp2p/peer-record': 9.0.10
+      '@libp2p/peer-record': 9.0.12
       '@multiformats/multiaddr': 13.0.3
       interface-datastore: 9.0.3
       it-all: 3.0.11
@@ -19683,7 +19671,7 @@ snapshots:
     dependencies:
       '@libp2p/crypto': 5.1.18
       '@libp2p/interface': 3.2.4
-      '@libp2p/peer-id': 6.0.9
+      '@libp2p/peer-id': 6.0.11
       '@libp2p/utils': 7.2.3
       '@peculiar/asn1-schema': 2.7.0
       '@peculiar/asn1-x509': 2.7.0
@@ -19773,8 +19761,8 @@ snapshots:
       '@libp2p/crypto': 5.1.18
       '@libp2p/interface': 3.2.4
       '@libp2p/interface-internal': 3.1.4
-      '@libp2p/keychain': 6.1.1
-      '@libp2p/peer-id': 6.0.9
+      '@libp2p/keychain': 6.1.3
+      '@libp2p/peer-id': 6.0.11
       '@libp2p/utils': 7.2.3
       '@multiformats/multiaddr': 13.0.3
       '@multiformats/multiaddr-matcher': 3.0.2
@@ -20216,7 +20204,7 @@ snapshots:
 
   '@multiformats/murmur3@2.2.5':
     dependencies:
-      multiformats: 14.0.2
+      multiformats: 14.0.4
 
   '@multiformats/uri-to-multiaddr@10.0.0':
     dependencies:
@@ -21992,16 +21980,6 @@ snapshots:
 
   '@rolldown/debug@1.1.4': {}
 
-  '@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.0-rc.17)(vite@8.0.16)':
-    dependencies:
-      '@babel/core': 7.29.0
-      picomatch: 4.0.4
-      rolldown: 1.0.0-rc.17
-    optionalDependencies:
-      '@babel/runtime': 7.29.2
-      vite: 8.0.16(@types/node@26.1.0)(@vitejs/devtools@0.1.22)(esbuild@0.28.1)(jiti@1.21.7)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
-    optional: true
-
   '@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.3)(vite@8.0.16)':
     dependencies:
       '@babel/core': 7.29.0
@@ -22009,7 +21987,7 @@ snapshots:
       rolldown: 1.0.3
     optionalDependencies:
       '@babel/runtime': 7.29.2
-      vite: 8.0.16(@types/node@26.1.0)(@vitejs/devtools@0.1.22)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0)
+      vite: 8.0.16(@types/node@26.1.0)(@vitejs/devtools@0.1.22)(esbuild@0.28.1)(jiti@1.21.7)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
 
   '@rolldown/plugin-node-polyfills@1.0.3': {}
 
@@ -23754,7 +23732,7 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@vitejs/devtools-rolldown@0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.6)(typescript@6.0.3)(vite@8.0.16)(vue@3.5.39(typescript@6.0.3))':
+  '@vitejs/devtools-rolldown@0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@pnpm/logger@1001.0.1)(typescript@6.0.3)(vite@8.0.16)(vue@3.5.39(typescript@6.0.3))':
     dependencies:
       '@floating-ui/dom': 1.7.6
       '@pnpm/read-project-manifest': 1001.2.6(@pnpm/logger@1001.0.1)
@@ -23913,10 +23891,10 @@ snapshots:
       - vite
       - vue
 
-  '@vitejs/devtools@0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.6)(typescript@6.0.3)(vite@8.0.16)':
+  '@vitejs/devtools@0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@pnpm/logger@1001.0.1)(typescript@6.0.3)(vite@8.0.16)':
     dependencies:
       '@vitejs/devtools-kit': 0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(typescript@6.0.3)(vite@8.0.16)
-      '@vitejs/devtools-rolldown': 0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.6)(typescript@6.0.3)(vite@8.0.16)(vue@3.5.39(typescript@6.0.3))
+      '@vitejs/devtools-rolldown': 0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@pnpm/logger@1001.0.1)(typescript@6.0.3)(vite@8.0.16)(vue@3.5.39(typescript@6.0.3))
       birpc: 4.0.0
       cac: 7.0.0
       devframe: 0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(typescript@6.0.3)
@@ -23958,6 +23936,50 @@ snapshots:
     optional: true
 
   '@vitejs/devtools@0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.6)(typescript@6.0.3)(vite@8.0.16)':
+    dependencies:
+      '@vitejs/devtools-kit': 0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(typescript@6.0.3)(vite@8.0.16)
+      '@vitejs/devtools-rolldown': 0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.6)(typescript@6.0.3)(vite@8.0.16)(vue@3.5.39(typescript@6.0.3))
+      birpc: 4.0.0
+      cac: 7.0.0
+      devframe: 0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(typescript@6.0.3)
+      h3: 1.15.11
+      logs-sdk: 0.0.6
+      mlly: 1.8.2
+      obug: 2.1.3
+      pathe: 2.0.3
+      perfect-debounce: 2.1.0
+      tinyexec: 1.2.4
+      vite: 8.0.16(@types/node@26.1.0)(@vitejs/devtools@0.1.22)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0)
+      vue: 3.5.39(typescript@6.0.3)
+      ws: 8.21.0
+    transitivePeerDependencies:
+      - '@azure/app-configuration'
+      - '@azure/cosmos'
+      - '@azure/data-tables'
+      - '@azure/identity'
+      - '@azure/keyvault-secrets'
+      - '@azure/storage-blob'
+      - '@capacitor/preferences'
+      - '@deno/kv'
+      - '@modelcontextprotocol/sdk'
+      - '@netlify/blobs'
+      - '@planetscale/database'
+      - '@pnpm/logger'
+      - '@upstash/redis'
+      - '@vercel/blob'
+      - '@vercel/functions'
+      - '@vercel/kv'
+      - aws4fetch
+      - bufferutil
+      - db0
+      - idb-keyval
+      - ioredis
+      - typescript
+      - uploadthing
+      - utf-8-validate
+    optional: true
+
+  '@vitejs/devtools@0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(@pnpm/logger@1001.0.1)(typescript@6.0.3)(vite@8.0.16)':
     dependencies:
       '@vitejs/devtools-kit': 0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(typescript@6.0.3)(vite@8.0.16)
       '@vitejs/devtools-rolldown': 0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.6)(typescript@6.0.3)(vite@8.0.16)(vue@3.5.39(typescript@6.0.3))
@@ -24065,18 +24087,10 @@ snapshots:
       '@rolldown/plugin-babel': 0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.3)(vite@8.0.16)
       babel-plugin-react-compiler: 1.0.0
 
-  '@vitejs/plugin-react@6.0.3(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.0-rc.17)(vite@8.0.16))(babel-plugin-react-compiler@1.0.0)(vite@8.0.16)':
-    dependencies:
-      '@rolldown/pluginutils': 1.0.1
-      vite: 8.0.16(@types/node@26.1.0)(@vitejs/devtools@0.1.22)(esbuild@0.28.1)(jiti@1.21.7)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
-    optionalDependencies:
-      '@rolldown/plugin-babel': 0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.0-rc.17)(vite@8.0.16)
-      babel-plugin-react-compiler: 1.0.0
-
   '@vitejs/plugin-react@6.0.3(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.3)(vite@8.0.16))(babel-plugin-react-compiler@1.0.0)(vite@8.0.16)':
     dependencies:
       '@rolldown/pluginutils': 1.0.1
-      vite: 8.0.16(@types/node@26.1.0)(@vitejs/devtools@0.1.22)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0)
+      vite: 8.0.16(@types/node@26.1.0)(@vitejs/devtools@0.1.22)(esbuild@0.28.1)(jiti@1.21.7)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
     optionalDependencies:
       '@rolldown/plugin-babel': 0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.3)(vite@8.0.16)
       babel-plugin-react-compiler: 1.0.0
@@ -24103,7 +24117,7 @@ snapshots:
       '@vitest/mocker': 4.1.9(msw@2.14.6(@types/node@26.1.0)(typescript@6.0.3))(vite@8.0.16)
       playwright: 1.61.1
       tinyrainbow: 3.1.0
-      vitest: 4.1.9(@types/node@26.1.0)(@vitest/browser-playwright@4.1.9)(@vitest/coverage-v8@4.1.9)(happy-dom@20.10.6)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.14.6(@types/node@26.1.0)(typescript@6.0.3))(vite@8.0.16)
+      vitest: 4.1.9(@types/node@26.1.0)(@vitest/browser-playwright@4.1.9)(@vitest/coverage-v8@4.1.9)(@vitest/ui@4.1.5)(happy-dom@20.10.6)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.14.6(@types/node@26.1.0)(typescript@6.0.3))(vite@8.0.16)
     transitivePeerDependencies:
       - bufferutil
       - msw
@@ -24119,7 +24133,7 @@ snapshots:
       pngjs: 7.0.0
       sirv: 3.0.2
       tinyrainbow: 3.1.0
-      vitest: 4.1.9(@types/node@26.1.0)(@vitest/browser-playwright@4.1.9)(@vitest/coverage-v8@4.1.9)(happy-dom@20.10.6)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.14.6(@types/node@26.1.0)(typescript@6.0.3))(vite@8.0.16)
+      vitest: 4.1.9(@types/node@26.1.0)(@vitest/browser-playwright@4.1.9)(@vitest/coverage-v8@4.1.9)(@vitest/ui@4.1.5)(happy-dom@20.10.6)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.14.6(@types/node@26.1.0)(typescript@6.0.3))(vite@8.0.16)
       ws: 8.21.0
     transitivePeerDependencies:
       - bufferutil
@@ -24139,7 +24153,7 @@ snapshots:
       obug: 2.1.3
       std-env: 4.1.0
       tinyrainbow: 3.1.0
-      vitest: 4.1.9(@types/node@26.1.0)(@vitest/browser-playwright@4.1.9)(@vitest/coverage-v8@4.1.9)(happy-dom@20.10.6)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.14.6(@types/node@26.1.0)(typescript@6.0.3))(vite@8.0.16)
+      vitest: 4.1.9(@types/node@26.1.0)(@vitest/browser-playwright@4.1.9)(@vitest/coverage-v8@4.1.9)(@vitest/ui@4.1.5)(happy-dom@20.10.6)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.14.6(@types/node@26.1.0)(typescript@6.0.3))(vite@8.0.16)
     optionalDependencies:
       '@vitest/browser': 4.1.9(msw@2.14.6(@types/node@26.1.0)(typescript@6.0.3))(vite@8.0.16)(vitest@4.1.9)
 
@@ -24174,7 +24188,7 @@ snapshots:
       magic-string: 0.30.21
     optionalDependencies:
       msw: 2.14.6(@types/node@26.1.0)(typescript@6.0.3)
-      vite: 8.0.16(@types/node@26.1.0)(@vitejs/devtools@0.1.22)(esbuild@0.28.1)(jiti@1.21.7)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
+      vite: 8.0.16(@types/node@26.1.0)(@vitejs/devtools@0.1.22)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0)
 
   '@vitest/pretty-format@2.0.5':
     dependencies:
@@ -27788,7 +27802,7 @@ snapshots:
       it-batch: 3.0.11
       it-first: 3.0.11
       it-parallel-batch: 3.0.11
-      multiformats: 14.0.2
+      multiformats: 14.0.4
       progress-events: 1.1.0
       rabin-wasm: 0.1.5
       uint8arraylist: 3.0.2
@@ -27807,7 +27821,7 @@ snapshots:
       '@libp2p/crypto': 5.1.18
       '@libp2p/interface': 3.2.4
       '@libp2p/logger': 6.2.9
-      cborg: 5.1.0
+      cborg: 5.1.7
       interface-datastore: 9.0.3
       multiformats: 13.4.2
       protons-runtime: 6.0.1
@@ -28518,8 +28532,8 @@ snapshots:
       '@libp2p/interface-internal': 3.1.4
       '@libp2p/logger': 6.2.9
       '@libp2p/multistream-select': 7.0.17
-      '@libp2p/peer-collections': 7.0.19
-      '@libp2p/peer-id': 6.0.9
+      '@libp2p/peer-collections': 7.0.22
+      '@libp2p/peer-id': 6.0.11
       '@libp2p/peer-store': 12.0.17
       '@libp2p/utils': 7.2.3
       '@multiformats/dns': 1.0.15
@@ -32447,7 +32461,7 @@ snapshots:
       unconfig-core: 7.5.0
       unrun: 0.2.37
     optionalDependencies:
-      '@vitejs/devtools': 0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.6)(typescript@6.0.3)(vite@8.0.16)
+      '@vitejs/devtools': 0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.6)(typescript@6.0.3)(vite@8.0.16)
       publint: 0.3.21
       typescript: 6.0.3
     transitivePeerDependencies:
@@ -32679,7 +32693,7 @@ snapshots:
 
   uint8arrays@6.1.1:
     dependencies:
-      multiformats: 14.0.2
+      multiformats: 14.0.4
 
   ultrahtml@1.6.0: {}
 
@@ -33034,7 +33048,7 @@ snapshots:
       tinyglobby: 0.2.17
     optionalDependencies:
       '@types/node': 26.1.0
-      '@vitejs/devtools': 0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.6)(typescript@6.0.3)(vite@8.0.16)
+      '@vitejs/devtools': 0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@pnpm/logger@1001.0.1)(typescript@6.0.3)(vite@8.0.16)
       esbuild: 0.28.1
       fsevents: 2.3.3
       jiti: 1.21.7
@@ -33053,7 +33067,7 @@ snapshots:
       tinyglobby: 0.2.17
     optionalDependencies:
       '@types/node': 26.1.0
-      '@vitejs/devtools': 0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.6)(typescript@6.0.3)(vite@8.0.16)
+      '@vitejs/devtools': 0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(@pnpm/logger@1001.0.1)(typescript@6.0.3)(vite@8.0.16)
       esbuild: 0.28.1
       fsevents: 2.3.3
       jiti: 2.7.0
