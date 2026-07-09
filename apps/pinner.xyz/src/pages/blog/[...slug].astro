@@ -23,7 +23,7 @@ const { Content } = await render(post);
   author={post.data.author}
   publishedDate={post.data.publishedDate}
   updatedDate={post.data.updatedDate}
-  ogImage={post.data.ogImage}
+  ogImage={post.data.ogImage ?? `/images/og/blog/${post.id}.png`}
   heroImage={post.data.heroImage}
 >
   <Content />

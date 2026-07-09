@@ -7,7 +7,7 @@ const alternatives = await getCollection('alternatives');
 const sorted = alternatives.sort((a, b) => (a.data.featured === b.data.featured ? a.data.name.localeCompare(b.data.name) : a.data.featured ? -1 : 1));
 ---
 
-<Layout title="Compare Pinner Against Other Platforms" description="A simple index of our comparison pages. If you are weighing Pinner against another hosting, storage, or pinning platform, you can start here.">
+<Layout title="Compare Pinner Against Other Platforms" navTheme="dark" description="A simple index of our comparison pages. If you are weighing Pinner against another hosting, storage, or pinning platform, you can start here.">
   <PageHeader
     title="Compare Pinner against other platforms"
     description="A simple index of our comparison pages. If you are weighing Pinner against another hosting, storage, or pinning platform, you can start here."
