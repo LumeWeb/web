@@ -1,6 +1,7 @@
 import { DEFAULT_ENDPOINT, DEFAULT_GATEWAY } from "./types/constants";
 import type { Storage } from "unstorage";
 import type { Datastore } from "interface-datastore";
+import type { Libp2p } from "@libp2p/interface";
 
 export interface PinnerConfig {
   /**
@@ -66,6 +67,13 @@ export interface PinnerConfig {
    * @default 3
    */
   retries?: number;
+
+  /**
+   * Pre-created Libp2p instance for Helia.
+   * When provided, Helia skips its internal createLibp2p() / libp2pDefaults()
+   * entirely, avoiding unnecessary transports (WebRTC, UPnP, etc.).
+   */
+  libp2p?: Libp2p;
 }
 
 export const DEFAULT_CONFIG: Partial<PinnerConfig> = {

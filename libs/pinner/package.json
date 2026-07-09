@@ -47,11 +47,16 @@
     "orval": "orval"
   },
   "dependencies": {
+    "@helia/bitswap": "catalog:",
     "@helia/car": "catalog:",
     "@helia/http": "catalog:",
+    "@helia/libp2p": "catalog:",
     "@helia/unixfs": "catalog:",
     "@ipfs-shipyard/pinning-service-client": "catalog:",
     "@ipld/car": "catalog:",
+    "@ipld/dag-cbor": "catalog:",
+    "@ipld/dag-json": "catalog:",
+    "@libp2p/interface": "catalog:",
     "@lumeweb/portal-sdk": "workspace:*",
     "@lumeweb/query-builder": "workspace:*",
     "@lumeweb/uppy-post-upload": "workspace:*",

@@ -64,6 +64,7 @@ export class UploadManager {
     configureCar({
       datastoreName: config.datastoreName,
       datastore: config.datastore,
+      libp2p: config.libp2p,
     });
   }
 

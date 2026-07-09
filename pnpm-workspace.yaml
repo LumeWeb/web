@@ -6,10 +6,15 @@ catalog:
   '@astrojs/mdx': ^7.0.0
   '@astrojs/react': ^5.0.7
   '@conform-to/react': ^1.19.4
+  '@helia/bitswap': ^4.0.5
   '@helia/car': ^6.0.3
   '@helia/http': ^4.0.4
   '@helia/interface': ^7.0.3
+  '@helia/libp2p': ^1.0.5
   '@helia/unixfs': ^8.0.3
+  '@ipld/dag-cbor': ^10.0.1
+  '@ipld/dag-json': ^11.0.0
+  '@libp2p/interface': ^3.2.4
   'helia': ^7.0.5
   '@hookform/resolvers': 5.2.2
   '@ipfs-shipyard/pinning-service-client': ^3.0.0
