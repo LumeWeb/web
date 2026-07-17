@@ -17,6 +17,7 @@ export default {
     "./dashboard": "./src/ui/routes/dashboard",
     "./index": "./src/ui/routes/index",
     "./loginIndex": "./src/ui/routes/loginIndex",
+    "./appLoginIndex": "./src/ui/routes/appLoginIndex",
     "./loginOtp": "./src/ui/routes/otp",
     "./registerIndex": "./src/ui/routes/registerIndex",
     "./resetPassword/confirm": "./src/ui/routes/resetPassword.confirm",

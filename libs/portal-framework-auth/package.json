@@ -31,7 +31,10 @@
   "devDependencies": {
     "@lumeweb/tsdown-config": "workspace:*",
     "@types/react": "catalog:",
-    "tsdown": "catalog:"
+    "@types/react-dom": "catalog:",
+    "@vitest/browser-playwright": "catalog:",
+    "tsdown": "catalog:",
+    "vitest-browser-react": "catalog:"
   },
   "peerDependencies": {
     "@hookform/resolvers": "catalog:",

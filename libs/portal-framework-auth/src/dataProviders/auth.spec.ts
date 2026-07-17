@@ -37,6 +37,30 @@ describe("sanitizeRedirectUrl", () => {
     it("should allow root path", () => {
       expect(sanitizeRedirectUrl("/")).toBe("/");
     });
+
+    it("should reject protocol-relative URLs (//evil.com)", () => {
+      expect(sanitizeRedirectUrl("//evil.com")).toBe("/dashboard");
+    });
+
+    it("should reject backslash-prefixed relative URLs (/\\evil.com)", () => {
+      expect(sanitizeRedirectUrl("/\\evil.com")).toBe("/dashboard");
+    });
+
+    it("should reject tab-obfuscated protocol-relative URLs (/\\t/evil.com)", () => {
+      expect(sanitizeRedirectUrl("/\t/evil.com")).toBe("/dashboard");
+    });
+
+    it("should reject newline-obfuscated backslash (/\\n/evil.com)", () => {
+      expect(sanitizeRedirectUrl("/\n/evil.com")).toBe("/dashboard");
+    });
+
+    it("should reject CR-obfuscated backslash (/\\r/evil.com)", () => {
+      expect(sanitizeRedirectUrl("/\r/evil.com")).toBe("/dashboard");
+    });
+
+    it("should allow regular relative path with whitespace in query", () => {
+      expect(sanitizeRedirectUrl("/callback?tab=\ta")).toBe("/callback?tab=a");
+    });
   });
 
   describe("localhost", () => {
