@@ -20,7 +20,7 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "vocs": "catalog:",
-    "waku": "1.0.0-beta.0"
+    "waku": "1.0.0-beta.1"
   },
   "devDependencies": {
     "@radix-ui/react-tabs": "catalog:",
