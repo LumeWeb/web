@@ -1,3 +1,11 @@
+## 0.1.10 (2026-07-18)
+
+### Features
+
+#### Features
+
+- add /app-login screen for third-party app OAuth flow
+
 ## 0.1.9 (2026-07-05)
 
 ### Fixes

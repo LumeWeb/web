@@ -1,3 +1,11 @@
+## 0.1.24 (2026-07-18)
+
+### Features
+
+#### Features
+
+- update swagger, client, and upload error handling for canonical ErrorResponse shape
+
 ## 0.1.23 (2026-07-09)
 
 ### Features

@@ -1,3 +1,11 @@
+## 0.1.4 (2026-07-18)
+
+### Features
+
+#### Features
+
+- read error.reason/details from canonical ErrorResponse shape
+
 ## 0.1.3 (2026-06-22)
 
 ### Fixes

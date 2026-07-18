@@ -1,5 +1,13 @@
 # @lumeweb/portal-sdk
 
+## 0.1.10 (2026-07-18)
+
+### Features
+
+#### Features
+
+- regenerate from latest swagger and update ErrorResponse shape
+
 ## 0.1.9 (2026-06-22)
 
 ### Fixes
