@@ -67,11 +67,21 @@ components:
     Component:
       additionalProperties: false
       type: object
+    ErrorDetail:
+      additionalProperties: false
+      properties:
+        details:
+          type: string
+        reason:
+          type: string
+      required:
+      - reason
+      type: object
     ErrorResponse:
       additionalProperties: false
       properties:
         error:
-          type: string
+          $ref: '#/components/schemas/ErrorDetail'
       required:
       - error
       type: object
@@ -393,6 +403,14 @@ components:
       - pin
       - delegates
       type: object
+    PingResponse:
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+      required:
+      - status
+      type: object
     PostUploadResponse:
       additionalProperties: false
       properties:
@@ -518,6 +536,12 @@ components:
         error:
           type: string
         status:
+          enum:
+          - pending
+          - processing
+          - completed
+          - failed
+          - duplicate
           type: string
       required:
       - status
@@ -3222,7 +3246,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-          description: Bad request
+          description: Invalid request body or validation error
         "401":
           content:
             application/json:
@@ -3241,12 +3265,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "410":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Website target content is broken
         "500":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-          description: Internal server error
+          description: Internal server error occurred
       summary: Create website
       tags:
       - Websites
@@ -3388,7 +3418,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-          description: Bad request
+          description: Invalid website ID format
         "401":
           content:
             application/json:
@@ -3406,13 +3436,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-          description: Not found
+          description: Website not found
+        "410":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebsiteResponse'
+          description: Website is broken or deleted
         "500":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-          description: Internal server error
+          description: Internal server error occurred
       summary: Get website
       tags:
       - Websites
@@ -3582,28 +3618,17 @@ paths:
       summary: Get website hosting configuration
       tags:
       - Websites
-  /internal/websites/{domain}:
+  /internal/ping:
     get:
-      description: |-
-        Gets website configuration for gateway content serving.
-
-        Internal endpoint used by the gateway to retrieve website configuration. Requires X-Gateway-Secret header for authentication.
-
-        See also:.*
-      parameters:
-      - description: 'Domain name for the website. Example: example.com'
-        in: path
-        name: domain
-        required: true
-        schema:
-          type: string
+      description: Returns service liveness status. Requires X-Gateway-Secret header
+        for authentication.
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GatewayWebsiteResponse'
-          description: Website configuration
+                $ref: '#/components/schemas/PingResponse'
+          description: Service is alive
         "400":
           content:
             application/json:
@@ -3634,6 +3659,67 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Internal server error
+      summary: Health check
+      tags:
+      - Gateway
+  /internal/websites/{domain}:
+    get:
+      description: |-
+        Gets website configuration for gateway content serving.
+
+        Internal endpoint used by the gateway to retrieve website configuration. Requires X-Gateway-Secret header for authentication.
+
+        See also:.*
+      parameters:
+      - description: 'Domain name for the website. Example: example.com'
+        in: path
+        name: domain
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GatewayWebsiteResponse'
+          description: Website configuration
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid domain format
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Website not found
+        "410":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GatewayWebsiteResponse'
+          description: Website is broken or deleted
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error occurred
       summary: Get website configuration for gateway
       tags:
       - Gateway
@@ -3732,7 +3818,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-          description: Bad request
+          description: Invalid domain format
         "401":
           content:
             application/json:
@@ -3750,13 +3836,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-          description: Not found
+          description: Website not found
+        "410":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GatewayWebsiteStatusResponse'
+          description: Website is broken or deleted
         "500":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-          description: Internal server error
+          description: Internal server error occurred
       summary: Get website status for gateway
       tags:
       - Gateway
@@ -4027,6 +4119,53 @@ paths:
       summary: List pinned content
       tags:
       - Pinning
+    options:
+      description: |-
+        CORS preflight handler for pins endpoints.
+
+        Handles OPTIONS requests for pins endpoints. Most CORS preflight requests are handled by middleware, this serves as a fallback.
+
+        See also:.*
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Success
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Pins OPTIONS
+      tags:
+      - Pinning
     post:
       description: |-
         Pins content to IPFS with optional metadata.
@@ -4198,6 +4337,60 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Internal server error
       summary: Get pin details
+      tags:
+      - Pinning
+    options:
+      description: |-
+        CORS preflight handler for pin detail endpoints.
+
+        Handles OPTIONS requests for pin detail endpoints. Most CORS preflight requests are handled by middleware, this serves as a fallback.
+
+        See also:.*
+      parameters:
+      - description: 'Unique identifier for the pin operation. Example: bafkreiexample'
+        in: path
+        name: requestid
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Success
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Pin detail OPTIONS
       tags:
       - Pinning
     post:
