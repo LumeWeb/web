@@ -56,6 +56,18 @@ describe("handleFetchError", () => {
     expect(error.statusCode).toBe(400);
   });
 
+  it("should handle JSON error response with error.reason (canonical shape)", async () => {
+    const response = new Response(
+      JSON.stringify({ error: { reason: "Unauthorized", details: "Token expired" } }),
+      { status: 401, headers: { "content-type": "application/json" } }
+    );
+
+    const error = await handleFetchError(response);
+    expect(error.message).toBe("Unauthorized");
+    expect(error.statusCode).toBe(401);
+    expect(error.details).toBe("Token expired");
+  });
+
   it("should handle JSON error response with error string", async () => {
     const response = new Response(JSON.stringify({ error: "Not found" }), {
       status: 404,
