@@ -86,12 +86,15 @@ function extractErrorDetails(data: any): {
 
   // Handle standard error format
   if (data?.error) {
-    if (typeof data.error === 'string') {
+    if (typeof data.error === "string") {
       result.message = data.error;
     } else if (data.error?.message) {
       result.message = data.error.message;
       result.details = data.error.details;
       result.fields = normalizeFields(data.error.fields);
+    } else if (data.error?.reason) {
+      result.message = data.error.reason;
+      result.details = data.error.details;
     }
   } 
   // Handle alternative error formats
