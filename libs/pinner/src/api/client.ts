@@ -55,7 +55,11 @@ export abstract class ApiClient {
     if (error instanceof HTTPError) {
       const status = error.response.status;
       const body = await error.response.json().catch(() => ({}));
-      const message = (body as any).error || (body as any).message;
+      const message =
+        (body as any).error?.reason ||
+        (body as any).error?.details ||
+        (body as any).error ||
+        (body as any).message;
 
       if (status === 401 || status === 403) {
         return new AuthenticationError(message || "Authentication failed");

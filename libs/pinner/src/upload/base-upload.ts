@@ -134,7 +134,11 @@ export abstract class BaseUploadHandler {
           typeof errorObj.xhr.response === "string"
             ? JSON.parse(errorObj.xhr.response)
             : errorObj.xhr.response;
-        if (response.error) {
+        if (response.error?.reason) {
+          errorMessage = response.error.reason;
+        } else if (response.error?.details) {
+          errorMessage = response.error.details;
+        } else if (response.error) {
           errorMessage = response.error;
         } else if (response.message) {
           errorMessage = response.message;
