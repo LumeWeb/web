@@ -16,6 +16,8 @@ export const httpClient = (apiBase?: string) =>
               .catch(() => ({}));
             const error: HttpError = {
               message:
+                errorBody.error?.reason ||
+                errorBody.error?.details ||
                 errorBody.message ||
                 "An error occurred while processing the request",
               statusCode: response.status,
