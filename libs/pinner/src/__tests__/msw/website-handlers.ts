@@ -53,7 +53,7 @@ export function createWebsiteHandlers(websiteStore: WebsiteStore, ipnsStore: IPN
 
       if (!key) {
         return HttpResponse.json(
-          { error: "IPNS key not found" },
+          { error: { reason: "IPNS key not found" } },
           { status: 404 },
         );
       }
@@ -73,7 +73,7 @@ export function createWebsiteHandlers(websiteStore: WebsiteStore, ipnsStore: IPN
 
       if (!key) {
         return HttpResponse.json(
-          { error: "IPNS key not found" },
+          { error: { reason: "IPNS key not found" } },
           { status: 404 },
         );
       }
@@ -95,7 +95,7 @@ export function createWebsiteHandlers(websiteStore: WebsiteStore, ipnsStore: IPN
       const key = ipnsStore.findById(body.key_id);
       if (!key) {
         return HttpResponse.json(
-          { error: "IPNS key not found" },
+          { error: { reason: "IPNS key not found" } },
           { status: 404 },
         );
       }
@@ -218,7 +218,7 @@ export function createWebsiteHandlers(websiteStore: WebsiteStore, ipnsStore: IPN
 
       if (!website) {
         return HttpResponse.json(
-          { error: "Website not found" },
+          { error: { reason: "Website not found" } },
           { status: 404 },
         );
       }
@@ -244,7 +244,7 @@ export function createWebsiteHandlers(websiteStore: WebsiteStore, ipnsStore: IPN
       const website = websiteStore.findById(id);
       if (!website) {
         return HttpResponse.json(
-          { error: "Website not found" },
+          { error: { reason: "Website not found" } },
           { status: 404 },
         );
       }
@@ -271,7 +271,7 @@ export function createWebsiteHandlers(websiteStore: WebsiteStore, ipnsStore: IPN
 
       if (!website) {
         return HttpResponse.json(
-          { error: "Website not found" },
+          { error: { reason: "Website not found" } },
           { status: 404 },
         );
       }
@@ -293,7 +293,7 @@ export function createWebsiteHandlers(websiteStore: WebsiteStore, ipnsStore: IPN
 
       if (!website) {
         return HttpResponse.json(
-          { error: "Website not found" },
+          { error: { reason: "Website not found" } },
           { status: 404 },
         );
       }

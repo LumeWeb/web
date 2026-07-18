@@ -14,7 +14,6 @@ export default defineConfig({
       mock: {
         path: "account/generated/mocks",
         generators: [{ type: "msw" }],
-        delay: 0,
         indexMockFiles: true,
       },
     },

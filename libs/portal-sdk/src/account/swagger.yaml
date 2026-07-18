@@ -228,25 +228,21 @@ components:
     Decimal:
       additionalProperties: false
       type: object
-    Error:
+    ErrorDetail:
       additionalProperties: false
       properties:
-        error:
+        details:
           type: string
-        message:
-          type: string
-        namespace:
+        reason:
           type: string
       required:
-      - error
-      - message
-      - namespace
+      - reason
       type: object
     ErrorResponse:
       additionalProperties: false
       properties:
         error:
-          type: string
+          $ref: '#/components/schemas/ErrorDetail'
       required:
       - error
       type: object
@@ -532,6 +528,12 @@ components:
           format: date-time
           type: string
         status:
+          enum:
+          - pending
+          - processing
+          - completed
+          - failed
+          - duplicate
           type: string
         status_display_name:
           type: string
@@ -881,7 +883,7 @@ components:
 info:
   description: API endpoints for managing user accounts, authentication, and API keys.
   title: Account API
-  version: v0.2.7-0.20260418132608-572560c6efd0
+  version: v0.3.1-0.20260708232039-b4aebacb9791
 openapi: 3.0.0
 paths:
   /api/account:
@@ -972,7 +974,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
           description: The login credentials provided are invalid.
         "403":
           content:
@@ -984,13 +986,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
           description: The requested user was not found.
         "500":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
           description: A database operation failed.
       summary: Update profile information
   /api/account/avatar:
@@ -2378,13 +2380,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
           description: The login credentials provided are invalid.
         "403":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
           description: This account is pending deletion.
         "404":
           content:
@@ -2396,7 +2398,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
           description: Login failed due to an internal error.
       summary: Login with email and password
   /api/auth/logout:
@@ -2622,7 +2624,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
           description: The login credentials provided are invalid.
         "403":
           content:
@@ -2640,7 +2642,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
           description: A database operation failed.
       summary: Ping authenticated endpoint
   /api/auth/register:
@@ -2684,13 +2686,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
           description: The email address provided is already in use.
         "500":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
           description: A database operation failed.
       summary: Register a new account
   /api/billing/gateways:
@@ -2844,8 +2846,7 @@ paths:
         schema:
           type: string
       - description: 'Comma-separated list of fields to sort by. Available fields:
-          id, operation, protocol, status, status_message, progress_percent, cid,
-          total_steps, current_step, error'
+          id, operation, protocol, status, status_message'
         in: query
         name: _sort
         schema:
@@ -2966,39 +2967,149 @@ paths:
         name: filters[operation][startswith]
         schema:
           type: string
-      - description: Filter by progress_percent between
+      - description: Filter by protocol contains
         in: query
-        name: filters[progress_percent][between]
+        name: filters[protocol][contains]
         schema:
           type: string
-      - description: Filter by progress_percent eq
+      - description: Filter by protocol endswith
         in: query
-        name: filters[progress_percent][eq]
+        name: filters[protocol][endswith]
         schema:
           type: string
-      - description: Filter by progress_percent gt
+      - description: Filter by protocol eq
         in: query
-        name: filters[progress_percent][gt]
+        name: filters[protocol][eq]
         schema:
           type: string
-      - description: Filter by progress_percent gte
+      - description: Filter by protocol ne
         in: query
-        name: filters[progress_percent][gte]
+        name: filters[protocol][ne]
         schema:
           type: string
-      - description: Filter by progress_percent lt
+      - description: Filter by protocol startswith
         in: query
-        name: filters[progress_percent][lt]
+        name: filters[protocol][startswith]
         schema:
           type: string
-      - description: Filter by progress_percent lte
+      - description: Filter by started_at between
         in: query
-        name: filters[progress_percent][lte]
+        name: filters[started_at][between]
         schema:
           type: string
-      - description: Filter by progress_percent ne
+      - description: Filter by started_at eq
         in: query
-        name: filters[progress_percent][ne]
+        name: filters[started_at][eq]
+        schema:
+          type: string
+      - description: Filter by started_at gt
+        in: query
+        name: filters[started_at][gt]
+        schema:
+          type: string
+      - description: Filter by started_at gte
+        in: query
+        name: filters[started_at][gte]
+        schema:
+          type: string
+      - description: Filter by started_at lt
+        in: query
+        name: filters[started_at][lt]
+        schema:
+          type: string
+      - description: Filter by started_at lte
+        in: query
+        name: filters[started_at][lte]
+        schema:
+          type: string
+      - description: Filter by started_at ne
+        in: query
+        name: filters[started_at][ne]
+        schema:
+          type: string
+      - description: Filter by status contains
+        in: query
+        name: filters[status][contains]
+        schema:
+          type: object
+      - description: Filter by status endswith
+        in: query
+        name: filters[status][endswith]
+        schema:
+          type: object
+      - description: Filter by status eq
+        in: query
+        name: filters[status][eq]
+        schema:
+          type: object
+      - description: Filter by status ne
+        in: query
+        name: filters[status][ne]
+        schema:
+          type: object
+      - description: Filter by status startswith
+        in: query
+        name: filters[status][startswith]
+        schema:
+          type: object
+      - description: Filter by status_message contains
+        in: query
+        name: filters[status_message][contains]
+        schema:
+          type: string
+      - description: Filter by status_message endswith
+        in: query
+        name: filters[status_message][endswith]
+        schema:
+          type: string
+      - description: Filter by status_message eq
+        in: query
+        name: filters[status_message][eq]
+        schema:
+          type: string
+      - description: Filter by status_message ne
+        in: query
+        name: filters[status_message][ne]
+        schema:
+          type: string
+      - description: Filter by status_message startswith
+        in: query
+        name: filters[status_message][startswith]
+        schema:
+          type: string
+      - description: Filter by updated_at between
+        in: query
+        name: filters[updated_at][between]
+        schema:
+          type: string
+      - description: Filter by updated_at eq
+        in: query
+        name: filters[updated_at][eq]
+        schema:
+          type: string
+      - description: Filter by updated_at gt
+        in: query
+        name: filters[updated_at][gt]
+        schema:
+          type: string
+      - description: Filter by updated_at gte
+        in: query
+        name: filters[updated_at][gte]
+        schema:
+          type: string
+      - description: Filter by updated_at lt
+        in: query
+        name: filters[updated_at][lt]
+        schema:
+          type: string
+      - description: Filter by updated_at lte
+        in: query
+        name: filters[updated_at][lte]
+        schema:
+          type: string
+      - description: Filter by updated_at ne
+        in: query
+        name: filters[updated_at][ne]
         schema:
           type: string
       - description: Filter by id eq
@@ -3056,39 +3167,144 @@ paths:
         name: operation_startswith
         schema:
           type: string
-      - description: Filter by progress_percent eq
+      - description: Filter by protocol contains
         in: query
-        name: progress_percent_eq
+        name: protocol_contains
         schema:
           type: string
-      - description: Filter by progress_percent gt
+      - description: Filter by protocol endswith
         in: query
-        name: progress_percent_gt
+        name: protocol_endswith
         schema:
           type: string
-      - description: Filter by progress_percent gte
+      - description: Filter by protocol eq
         in: query
-        name: progress_percent_gte
+        name: protocol_eq
         schema:
           type: string
-      - description: Filter by progress_percent lt
+      - description: Filter by protocol ne
         in: query
-        name: progress_percent_lt
+        name: protocol_ne
         schema:
           type: string
-      - description: Filter by progress_percent lte
+      - description: Filter by protocol startswith
         in: query
-        name: progress_percent_lte
-        schema:
-          type: string
-      - description: Filter by progress_percent ne
-        in: query
-        name: progress_percent_ne
+        name: protocol_startswith
         schema:
           type: string
       - description: Search term for filename or other relevant operation data
         in: query
         name: search
+        schema:
+          type: string
+      - description: Filter by started_at eq
+        in: query
+        name: started_at_eq
+        schema:
+          type: string
+      - description: Filter by started_at gt
+        in: query
+        name: started_at_gt
+        schema:
+          type: string
+      - description: Filter by started_at gte
+        in: query
+        name: started_at_gte
+        schema:
+          type: string
+      - description: Filter by started_at lt
+        in: query
+        name: started_at_lt
+        schema:
+          type: string
+      - description: Filter by started_at lte
+        in: query
+        name: started_at_lte
+        schema:
+          type: string
+      - description: Filter by started_at ne
+        in: query
+        name: started_at_ne
+        schema:
+          type: string
+      - description: Filter by status contains
+        in: query
+        name: status_contains
+        schema:
+          type: object
+      - description: Filter by status endswith
+        in: query
+        name: status_endswith
+        schema:
+          type: object
+      - description: Filter by status eq
+        in: query
+        name: status_eq
+        schema:
+          type: object
+      - description: Filter by status_message contains
+        in: query
+        name: status_message_contains
+        schema:
+          type: string
+      - description: Filter by status_message endswith
+        in: query
+        name: status_message_endswith
+        schema:
+          type: string
+      - description: Filter by status_message eq
+        in: query
+        name: status_message_eq
+        schema:
+          type: string
+      - description: Filter by status_message ne
+        in: query
+        name: status_message_ne
+        schema:
+          type: string
+      - description: Filter by status_message startswith
+        in: query
+        name: status_message_startswith
+        schema:
+          type: string
+      - description: Filter by status ne
+        in: query
+        name: status_ne
+        schema:
+          type: object
+      - description: Filter by status startswith
+        in: query
+        name: status_startswith
+        schema:
+          type: object
+      - description: Filter by updated_at eq
+        in: query
+        name: updated_at_eq
+        schema:
+          type: string
+      - description: Filter by updated_at gt
+        in: query
+        name: updated_at_gt
+        schema:
+          type: string
+      - description: Filter by updated_at gte
+        in: query
+        name: updated_at_gte
+        schema:
+          type: string
+      - description: Filter by updated_at lt
+        in: query
+        name: updated_at_lt
+        schema:
+          type: string
+      - description: Filter by updated_at lte
+        in: query
+        name: updated_at_lte
+        schema:
+          type: string
+      - description: Filter by updated_at ne
+        in: query
+        name: updated_at_ne
         schema:
           type: string
       responses:
