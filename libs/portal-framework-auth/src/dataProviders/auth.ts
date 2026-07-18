@@ -151,10 +151,18 @@ export const isExternalRedirect = (url: string): boolean => {
 export const sanitizeRedirectUrl = (url: string | undefined): string => {
   if (!url) return DASHBOARD_PATH;
 
+  // Strip C0 control characters and whitespace that browsers would strip before redirecting.
+  // eslint-disable-next-line no-control-regex
+  const cleaned = url.replace(/[\t\n\r\x00-\x1F]/g, "");
+
   try {
-    // If it's a relative path, allow it
-    if (url.startsWith("/")) {
-      return url;
+    // If it's a relative path, allow it (block protocol-relative //... and /\...)
+    if (
+      cleaned.startsWith("/") &&
+      !cleaned.startsWith("//") &&
+      !cleaned.startsWith("/\\")
+    ) {
+      return cleaned;
     }
 
     const parsedUrl = new URL(url);

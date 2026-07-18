@@ -102,6 +102,11 @@ const routes: RouteDefinition[] = [
     path: "login",
   },
   {
+    component: "appLoginIndex",
+    id: createNamespacedId(CORE_NS, "app-login"),
+    path: "app-login",
+  },
+  {
     component: "registerIndex",
     id: createNamespacedId(CORE_NS, "register-index"),
     path: "register",

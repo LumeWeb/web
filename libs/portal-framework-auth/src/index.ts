@@ -12,6 +12,7 @@ export {
 } from "./dataProviders/auth";
 import { Capability as RefineConfigCapability } from "./capabilities/refineConfig";
 import { Capability as SdkCapability } from "./capabilities/sdk";
+import AppLoginIndex from "./ui/components/app-login/AppLoginIndex";
 import AuthedIndex from "./ui/components/index/AuthedIndex";
 import LoginIndex from "./ui/components/login/LoginIndex";
 import OtpForm from "./ui/components/login/OtpForm";
@@ -23,6 +24,7 @@ import ResetPasswordReset from "./ui/components/reset-password/ResetPasswordRese
 export { RefineConfigCapability, SdkCapability };
 
 export {
+  AppLoginIndex,
   AuthedIndex,
   LoginIndex,
   OtpForm,
