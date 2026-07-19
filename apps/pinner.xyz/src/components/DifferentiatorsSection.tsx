@@ -7,57 +7,57 @@ interface DifferentiatorsSectionProps {
 
 const columns = [
   { label: "Traditional Cloud" },
-  { label: "Cloud Storage", highlight: true },
-  { label: "Public (IPFS)", highlight: true },
+  { label: "Pinner: Cloud Storage", highlight: true },
+  { label: "Pinner: Public (IPFS)", highlight: true },
 ];
 
 const rows = [
   {
-    factor: "Can your data be read?",
+    factor: "Can the provider read your data?",
     values: [
-      "Yes",
-      "No. Encrypted on your device. No one holds the keys",
-      "Yes, but it's public",
+      "Yes. They hold the keys.",
+      "No. Encrypted on your device.",
+      "Not applicable. Public by design.",
     ],
   },
   {
     factor: "Pricing",
     values: [
       "Complex tiers, hidden fees",
-      "Simple plans, bundled storage",
-      "Simple plans, bundled storage",
+      "Upfront. No surprise line items.",
+      "Upfront. No surprise line items.",
     ],
   },
   {
-    factor: "Ownership",
+    factor: "Can they delete your account?",
     values: [
-      "They can delete your data",
-      "Your data, your rules",
-      "Your data, your rules",
+      "Yes. Terms of service violations, policy changes.",
+      "No. Your keys, your data.",
+      "No. Your keys, your data.",
     ],
   },
   {
-    factor: "Lock-in",
+    factor: "Leaving",
     values: [
       "Export fees, proprietary formats",
-      "Open standards, leave anytime",
-      "Open standards, leave anytime",
+      "Open standards. Leave anytime.",
+      "Open standards. Leave anytime.",
     ],
   },
   {
     factor: "Infrastructure",
     values: [
       "Centralized data centers",
-      "Peer-to-peer storage",
-      "Peer-to-peer storage",
+      "Distributed peer-to-peer network",
+      "Distributed peer-to-peer network",
     ],
   },
   {
-    factor: "Payment options",
+    factor: "Payment",
     values: [
-      "Credit card only, ID required",
-    "Crypto or card. No ID for crypto",
-    "Crypto or card. No ID for crypto",
+      "Credit card and ID required",
+      "Card or crypto. No ID for crypto.",
+      "Card or crypto. No ID for crypto.",
     ],
   },
 ];
