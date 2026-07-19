@@ -1,0 +1,67 @@
+---
+title: MCP Server
+description: How the Pinner MCP server exposes CLI commands as Model Context Protocol tools for AI agents
+---
+
+# MCP Server
+
+The Pinner MCP server (`pinner mcp`) makes every CLI subcommand available to an MCP client over stdio. When an agent calls `pinner_upload`, the request runs in-process inside the same `pinner` binary — no subprocess fork, no shell parsing.
+
+## Progressive disclosure
+
+The CLI has dozens of subcommands. Dumping all of them into a flat tool list would flood the agent's context window and bury the command it actually needs. The server solves this with three meta-tools:
+
+| Meta-tool | Purpose |
+|-----------|---------|
+| `search_tools` | Filter tools by keyword or category (`core`, `admin`, `wizard`) |
+| `describe_tool` | Return the JSON Schema for a specific tool's inputs |
+| `invoke_tool` | Execute a tool with typed arguments |
+
+A typical agent workflow:
+
+1. `search_tools pins` — find pinning-related tools
+2. `describe_tool pinner_pins_add` — learn that `cids` is a required string array
+3. `invoke_tool pinner_pins_add` with `{ "cids": ["bafybeig..."] }`
+
+The discovery surface stays small until the agent asks for more.
+
+## Resources vs. tools
+
+MCP distinguishes between **tools** (actions that change state) and **resources** (read-only data). The Pinner server exposes both:
+
+| Type | Example | Use case |
+|------|---------|----------|
+| Tool | `pinner_pins_add` | Pin a CID |
+| Resource | `pinner://account/status` | Check whether the user is authenticated before deciding to call `pinner_auth` |
+| Resource | `pinner://wizard/{id}/state` | Read the current step of a wizard session without advancing it |
+
+Resources let the agent inspect state before acting. This is especially useful for wizard sessions: each step has its own input schema, and the agent reads the current state to know which fields to send next.
+
+## Wizard sessions
+
+Wizards like `setup` or `websites wizard` are interactive multi-step flows in the CLI. Over MCP they become tracked sessions with a 30-minute TTL and a 100-session cap. The agent advances a session by reading its state resource, then invoking the wizard tool with the next step's inputs. This maps a terminal-driven flow onto MCP's request/response model without losing the step-by-step guidance.
+
+## Prompts
+
+Prompts are pre-configured conversation templates for common workflows:
+
+| Prompt | What it does | Optional pre-fill |
+|--------|-------------|-------------------|
+| `website-onboarding` | Create a hosted website end-to-end | `domain`, `content_source`, `target_type`, `dns_mode` |
+| `setup` | Authenticate and configure the CLI | — |
+
+Pre-fill arguments skip steps the user has already resolved. If the user owns `example.com`, prompt `website-onboarding` with `{"domain": "example.com"}` and the agent proceeds directly to content upload.
+
+## Configuration requirement
+
+The `pinner` binary must be authenticated before starting the MCP server. Run `pinner auth` first or set `PINNER_AUTH_TOKEN`. Without it, every tool invocation returns an authentication error.
+
+```bash
+pinner auth
+pinner mcp
+```
+
+## Reference
+
+- [CLI Reference: System](/reference/cli/system) — auto-generated command flags for `pinner mcp`
+- [Integrate with an MCP Client](/ipfs/how-to/integrate-mcp-client) — concrete client configuration examples
