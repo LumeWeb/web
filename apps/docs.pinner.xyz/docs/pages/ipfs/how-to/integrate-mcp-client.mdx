@@ -1,0 +1,217 @@
+---
+title: Integrate with an MCP Client
+description: Configure Claude Desktop, Cursor, or a custom agent to use the Pinner MCP server
+---
+
+# Integrate with an MCP Client
+
+This guide shows you how to connect the Pinner MCP server to Claude Desktop, Cursor, or a custom agent.
+
+## What you need
+
+- pinner-cli **v0.2.1 or later**: confirm with `pinner --version`
+- A Pinner.xyz account with an active API token or JWT
+- An MCP client that supports stdio transport
+
+## Step 1: Authenticate
+
+```bash
+pinner auth
+```
+
+For headless setups, set the token as an environment variable instead:
+
+```bash
+export PINNER_AUTH_TOKEN="your-jwt-token"
+```
+
+Verify:
+
+```bash
+pinner doctor
+```
+
+You should see `Authentication: Authenticated`.
+
+## Step 2: Test the server
+
+```bash
+pinner mcp --help
+```
+
+Expected output:
+
+```
+NAME:
+   pinner mcp - Serve commands as MCP server on stdio
+
+CATEGORY:
+   System
+```
+
+## Step 3: Add the server to your client
+
+### Claude Desktop
+
+Claude Desktop reads MCP servers from a JSON config file.
+
+**macOS:** `~/Library/Application\ Support/Claude/claude_desktop_config.json`
+**Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+**Linux:** `~/.config/Claude/claude_desktop_config.json`
+
+Or open the file through the app: Settings → Developer → Edit Config.
+
+Add the Pinner server:
+
+```json
+{
+  "mcpServers": {
+    "pinner": {
+      "command": "pinner",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+If you authenticated with `PINNER_AUTH_TOKEN` instead of `pinner auth`, pass it through the `env` field:
+
+```json
+{
+  "mcpServers": {
+    "pinner": {
+      "command": "pinner",
+      "args": ["mcp"],
+      "env": {
+        "PINNER_AUTH_TOKEN": "your-jwt-token"
+      }
+    }
+  }
+}
+```
+
+If `pinner` is not on your PATH in the client's environment, use the full path:
+
+```json
+{
+  "command": "/usr/local/bin/pinner",
+  "args": ["mcp"]
+}
+```
+
+Restart Claude Desktop completely (Cmd+Q on macOS, not just close the window). Ask: "Search for Pinner tools related to pinning." The response should list matching tools.
+
+### Cursor
+
+Cursor supports two config locations. Use the global config for secrets, the project config only when the server needs no auth or the auth comes from the shell environment.
+
+**Global:** `~/.cursor/mcp.json` in your home directory (recommended when the token is passed via `env`)
+**Project:** `.cursor/mcp.json` in your project root
+
+Add the server with `type: "stdio"`. The MCP server inherits the `PINNER_AUTH_TOKEN` from the parent shell — run `export PINNER_AUTH_TOKEN="your-jwt-token"` before starting Cursor, or add it to your shell profile. Do not commit the env block to version control.
+
+```json
+{
+  "mcpServers": {
+    "pinner": {
+      "type": "stdio",
+      "command": "pinner",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+If the shell environment is not an option, keep `.cursor/mcp.json` out of version control (add it to `.gitignore`):
+
+```json
+{
+  "mcpServers": {
+    "pinner": {
+      "type": "stdio",
+      "command": "pinner",
+      "args": ["mcp"],
+      "env": {
+        "PINNER_AUTH_TOKEN": "your-jwt-token"
+      }
+    }
+  }
+}
+```
+
+If `pinner` is not on your PATH, use the absolute path:
+
+```json
+{
+  "type": "stdio",
+  "command": "/usr/local/bin/pinner",
+  "args": ["mcp"]
+}
+```
+
+Save the file, then reload Cursor: Cmd+Shift+P (macOS) or Ctrl+Shift+P (Windows/Linux) → "Reload Window".
+
+After reloading, open the agent panel and ask: "List my pinned content." The response should contain a JSON list of pins.
+
+### Custom agent
+
+Any client that implements the [stdio transport](https://modelcontextprotocol.io/specification/draft/basic/transports/stdio) can connect. The client launches `pinner mcp` as a subprocess, sends JSON-RPC requests over stdin, and reads responses from stdout.
+
+Initialize the session with the standard MCP handshake, then discover tools with the `tools/list` method.
+
+## Step 4: Test a tool invocation
+
+To confirm the integration works end-to-end, test with a read-only call.
+
+Ask:
+
+> "Search for Pinner tools related to listing pins"
+
+Expected response:
+
+```json
+{
+  "tools": [
+    { "name": "pinner_pins_ls", "description": "List pinned content" },
+    { "name": "pinner_list", "description": "List pinned content (see: pinner pins ls)" }
+  ]
+}
+```
+
+Then ask:
+
+> "Describe the pinner_list tool"
+
+Expected response: a JSON Schema showing the available flags (`--limit`, `--status`, `--watch`).
+
+Finally, ask:
+
+> "Run pinner_list with limit 5"
+
+Expected response: up to 5 pinned items in JSON format.
+
+## Step 5: Verify no subprocess overhead
+
+Before the agent calls any tool, count `pinner` processes:
+
+```bash
+pgrep -c pinner
+```
+
+After the agent runs a command, check again. The count should not change — the MCP server handles tool execution in-process.
+
+## Troubleshooting
+
+| Problem | Cause | Fix |
+|---------|-------|-----|
+| `Authentication: Not authenticated` | No auth token set | Run `pinner auth` or set `PINNER_AUTH_TOKEN` |
+| `command not found: pinner` | `pinner` not on PATH in the client's environment | Use the full path: `"command": "/usr/local/bin/pinner"` |
+| Client cannot see Pinner tools | MCP server not connected | Check the client logs for stdio transport errors |
+| Tool invocations hang | Wizard session requires step-by-step advancement | Read `pinner://wizard/{id}/state` resources first (see [MCP Server](/ipfs/concepts/mcp-server)) |
+| JSON parse errors from tools | Agent passed invalid argument types | Use `describe_tool` first to get the correct JSON Schema |
+
+## Next steps
+
+- [MCP Server](/ipfs/concepts/mcp-server) — understand meta-tools, resources, and prompts in depth
+- [CLI Reference: System](/reference/cli/system) — look up the auto-generated flag reference for `pinner mcp`
+- [API Keys](/account/api-tokens) — manage tokens for authentication

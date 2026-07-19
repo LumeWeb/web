@@ -108,6 +108,7 @@ export default defineConfig({
             { text: "Add and Update Metadata", link: "/ipfs/how-to/manage-metadata" },
             { text: "Automate Pinning in CI/CD", link: "/ipfs/how-to/automate-pinning" },
             { text: "Access Your Pinned Content", link: "/ipfs/how-to/access-pinned-content" },
+            { text: "Integrate with an MCP Client", link: "/ipfs/how-to/integrate-mcp-client" },
             { text: "Troubleshoot Upload Failures", link: "/ipfs/how-to/troubleshoot-uploads" },
           ],
         },
@@ -120,6 +121,7 @@ export default defineConfig({
             { text: "CAR Files", link: "/ipfs/concepts/car-files" },
             { text: "Why No Gateway?", link: "/ipfs/concepts/why-no-gateway" },
             { text: "How the SDK Is Organized", link: "/ipfs/concepts/sdk-architecture" },
+            { text: "MCP Server", link: "/ipfs/concepts/mcp-server" },
           ],
         },
         {

@@ -65,7 +65,8 @@ apps/*/build
 plugin.config.json
 
 # Docs
-docs/
+# Only ignore docs/ at repo root, not in apps/ or libs/
+/docs/
 !libs/**/docs/
 .worktrees/
 apps/*/devtools-output/
