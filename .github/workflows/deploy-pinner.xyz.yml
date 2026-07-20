@@ -23,14 +23,18 @@ jobs:
       - name: Setup
         uses: LumeWeb/workflows/.github/actions/setup-all@develop
       - name: Make envfile
-        uses: SpicyPizza/create-envfile@v2.0
+        uses: ./.github/actions/create-envfile
         with:
-          envkey_PUBLIC_PORTAL_API_URL: ${{ vars.PINNER_PORTAL_API_URL }}
-          envkey_PUBLIC_LISTMONK_URL: ${{ vars.PINNER_LISTMONK_URL }}
-          envkey_PUBLIC_LISTMONK_LIST_UUID: ${{ vars.PINNER_LISTMONK_LIST_UUID }}
-          envkey_PUBLIC_POSTHOG_PROJECT_TOKEN: ${{ secrets.PINNER_POSTHOG_PROJECT_TOKEN }}
-          envkey_PUBLIC_POSTHOG_HOST: ${{ vars.PINNER_POSTHOG_HOST }}
           directory: apps/pinner.xyz
+          env-keys: |
+            {
+              "PUBLIC_PORTAL_API_URL": "${{ vars.PINNER_PORTAL_API_URL }}",
+              "PUBLIC_LISTMONK_URL": "${{ vars.PINNER_LISTMONK_URL }}",
+              "PUBLIC_LISTMONK_LIST_UUID": "${{ vars.PINNER_LISTMONK_LIST_UUID }}",
+              "PUBLIC_POSTHOG_PROJECT_TOKEN": "${{ secrets.PINNER_POSTHOG_PROJECT_TOKEN }}",
+              "PUBLIC_POSTHOG_HOST": "${{ vars.PINNER_POSTHOG_HOST }}"
+            }
+          fail-on-empty: "PUBLIC_POSTHOG_PROJECT_TOKEN,PUBLIC_POSTHOG_HOST"
       - name: Build
         run: pnpm build:pinner.xyz
       - name: Write IndexNow key file
