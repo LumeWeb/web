@@ -28,11 +28,11 @@ jobs:
           directory: apps/pinner.xyz
           env-keys: |
             {
-              "PUBLIC_PORTAL_API_URL": "${{ vars.PINNER_PORTAL_API_URL }}",
-              "PUBLIC_LISTMONK_URL": "${{ vars.PINNER_LISTMONK_URL }}",
-              "PUBLIC_LISTMONK_LIST_UUID": "${{ vars.PINNER_LISTMONK_LIST_UUID }}",
+              "PUBLIC_PORTAL_API_URL": "${{ secrets.PINNER_PORTAL_API_URL }}",
+              "PUBLIC_LISTMONK_URL": "${{ secrets.PUBLIC_LISTMONK_URL }}",
+              "PUBLIC_LISTMONK_LIST_UUID": "${{ secrets.PUBLIC_LISTMONK_LIST_UUID }}",
               "PUBLIC_POSTHOG_PROJECT_TOKEN": "${{ secrets.PINNER_POSTHOG_PROJECT_TOKEN }}",
-              "PUBLIC_POSTHOG_HOST": "${{ vars.PINNER_POSTHOG_HOST }}"
+              "PUBLIC_POSTHOG_HOST": "${{ secrets.PINNER_POSTHOG_HOST }}"
             }
           fail-on-empty: "PUBLIC_POSTHOG_PROJECT_TOKEN,PUBLIC_POSTHOG_HOST"
       - name: Build
