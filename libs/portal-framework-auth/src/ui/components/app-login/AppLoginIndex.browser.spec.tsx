@@ -6,12 +6,21 @@ import { MemoryRouter, Route, Routes } from "react-router";
 
 import AppLoginIndex from "./AppLoginIndex";
 
+// --- spies ---
+let capturedOnSuccess: ((result: any) => void) | undefined;
+let capturedOnError: ((err: any) => void) | undefined;
+
+const mockLoginMutate = vi.fn();
+
 vi.mock("@refinedev/core", async () => {
   const actual = await vi.importActual("@refinedev/core");
   return {
     ...actual,
     useLogin: () => ({
-      mutate: vi.fn(),
+      mutate: mockLoginMutate.mockImplementation((vars: any, opts: any) => {
+        capturedOnSuccess = opts?.onSuccess;
+        capturedOnError = opts?.onError;
+      }),
       isPending: false,
     }),
     useParsed: () => ({ params: {} }),
@@ -25,6 +34,11 @@ vi.mock("@/hooks/useRedirectIfAuthenticated", () => ({
 }));
 
 describe("AppLoginIndex", () => {
+  beforeEach(() => {
+    capturedOnSuccess = undefined;
+    capturedOnError = undefined;
+  });
+
   afterEach(() => {
     vi.clearAllMocks();
   });
