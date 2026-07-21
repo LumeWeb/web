@@ -1,3 +1,11 @@
+## 0.1.11 (2026-07-21)
+
+### Fixes
+
+#### Fixes
+
+- handle external redirect on login success
+
 ## 0.1.10 (2026-07-18)
 
 ### Features

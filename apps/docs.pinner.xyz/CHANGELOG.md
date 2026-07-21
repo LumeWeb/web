@@ -1,4 +1,12 @@
 
+## 0.6.7 (2026-07-21)
+
+### Features
+
+#### Features
+
+- add MCP reference docs for pinner-cli v0.2.1
+
 ## 0.6.6 (2026-07-05)
 
 ### Features
