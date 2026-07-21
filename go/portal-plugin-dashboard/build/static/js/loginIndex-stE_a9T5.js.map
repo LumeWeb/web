@@ -1,0 +1,1 @@
+{"version":3,"file":"loginIndex-stE_a9T5.js","names":[],"sources":["../../../src/ui/routes/loginIndex.tsx"],"sourcesContent":["import { LoginIndex } from \"@lumeweb/portal-framework-auth\";\n\nexport default LoginIndex;"],"mappings":"sCAEA,IAAA,EAAe"}

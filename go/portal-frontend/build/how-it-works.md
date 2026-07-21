@@ -23,7 +23,7 @@ Lume provides a simple way to store and manage your files. Upload through our in
 
 ![about image](/_astro/about-2.B4_ehDlV.png)
 
-![about image](/_astro/about-mobile-2.ChqCIh8P.png)
+![about image](/_astro/how-it-works-mobile-2.ChqCIh8P.png)
 
 ### The Technology
 
