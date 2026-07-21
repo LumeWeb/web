@@ -5,6 +5,7 @@ import React, { useCallback, useState } from "react";
 import { useSearchParams } from "react-router";
 
 import type { AuthFormRequest } from "@/dataProviders/auth";
+import { isExternalRedirect } from "@/dataProviders/auth";
 import {
   Button,
   Card,
@@ -76,6 +77,11 @@ function AppLoginIndex() {
           remember: false,
         },
         {
+          onSuccess: (result) => {
+            if (result.success && redirectTo && isExternalRedirect(redirectTo)) {
+              window.location.href = redirectTo;
+            }
+          },
           onError: (err: any) => {
             setError(
               err?.response?.data?.message ||
@@ -90,7 +96,7 @@ function AppLoginIndex() {
   );
 
   const handleCancel = () => {
-    if (redirectTo) {
+    if (redirectTo && isExternalRedirect(redirectTo)) {
       window.location.href = redirectTo;
     } else if (window.history.length > 1) {
       window.history.back();

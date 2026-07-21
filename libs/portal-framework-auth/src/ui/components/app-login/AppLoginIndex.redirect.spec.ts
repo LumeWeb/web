@@ -1,0 +1,139 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
+import { createElement } from "react";
+import { MemoryRouter, Route, Routes } from "react-router";
+import AppLoginIndex from "./AppLoginIndex";
+
+// --- captured callbacks from mocked useLogin ---
+let capturedOnSuccess: ((result: any) => void) | undefined;
+let capturedOnError: ((err: any) => void) | undefined;
+
+const mockLoginMutate = vi.fn();
+
+vi.mock("@refinedev/core", async () => {
+  const actual = await vi.importActual("@refinedev/core");
+  return {
+    ...actual,
+    useLogin: () => ({
+      mutate: mockLoginMutate.mockImplementation((vars: any, opts: any) => {
+        capturedOnSuccess = opts?.onSuccess;
+        capturedOnError = opts?.onError;
+      }),
+      isPending: false,
+    }),
+    useParsed: () => ({ params: {} }),
+    useGetIdentity: () => ({ data: null }),
+    useIsAuthenticated: () => ({ data: { authenticated: false } }),
+  };
+});
+
+vi.mock("@/hooks/useRedirectIfAuthenticated", () => ({
+  useRedirectIfAuthenticated: vi.fn(),
+}));
+
+describe("AppLoginIndex redirect security", () => {
+  let assignSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    capturedOnSuccess = undefined;
+    capturedOnError = undefined;
+    // Set hostname so sia.example.com is considered same-root-domain
+    window.location.hostname = "account.example.com";
+    assignSpy = vi
+      .spyOn(window.location, "href", "set")
+      .mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+    assignSpy.mockRestore();
+    cleanup();
+  });
+
+  const fillAndSubmit = () => {
+    fireEvent.change(screen.getByPlaceholderText("you@example.com"), {
+      target: { value: "test@example.com" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Enter your password"), {
+      target: { value: "password123" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Sign in and continue/ }));
+  };
+
+  const renderWithRouter = (initialEntry: string) => {
+    // Use createElement to avoid JSX syntax in .ts file
+    const appLoginRoute = createElement(
+      Route,
+      { path: "/app-login", element: createElement(AppLoginIndex) }
+    );
+    const routes = createElement(Routes, null, appLoginRoute);
+    const router = createElement(MemoryRouter, { initialEntries: [initialEntry] }, routes);
+    render(router);
+  };
+
+  it("onSuccess navigates to external same-root-domain URL via window.location", async () => {
+    const externalTo = "https://sia.example.com/auth/connect/abc123";
+    renderWithRouter("/app-login?app=TestApp&to=" + encodeURIComponent(externalTo));
+
+    fillAndSubmit();
+
+    await waitFor(() => expect(capturedOnSuccess).toBeDefined());
+    capturedOnSuccess!({ success: true });
+
+    expect(assignSpy).toHaveBeenCalledTimes(1);
+    expect(assignSpy).toHaveBeenCalledWith(externalTo);
+  });
+
+  it("onSuccess does NOT call window.location for internal relative redirect", async () => {
+    renderWithRouter("/app-login?app=TestApp&to=/dashboard");
+
+    fillAndSubmit();
+
+    await waitFor(() => expect(capturedOnSuccess).toBeDefined());
+    capturedOnSuccess!({ success: true });
+
+    expect(assignSpy).not.toHaveBeenCalled();
+  });
+
+  it("onSuccess blocks malicious external redirect", async () => {
+    const evilTo = "https://evil.com/phish";
+    renderWithRouter("/app-login?app=TestApp&to=" + encodeURIComponent(evilTo));
+
+    fillAndSubmit();
+
+    await waitFor(() => expect(capturedOnSuccess).toBeDefined());
+    capturedOnSuccess!({ success: true });
+
+    expect(assignSpy).not.toHaveBeenCalled();
+  });
+
+  it("onSuccess blocks protocol-relative redirect", async () => {
+    const evilTo = "//evil.com/phish";
+    renderWithRouter("/app-login?app=TestApp&to=" + encodeURIComponent(evilTo));
+
+    fillAndSubmit();
+
+    await waitFor(() => expect(capturedOnSuccess).toBeDefined());
+    capturedOnSuccess!({ success: true });
+
+    expect(assignSpy).not.toHaveBeenCalled();
+  });
+
+  it("cancel button navigates to sanitized redirect URL", async () => {
+    const externalTo = "https://sia.example.com/auth/connect/abc123";
+    renderWithRouter("/app-login?app=TestApp&to=" + encodeURIComponent(externalTo));
+
+    fireEvent.click(screen.getByRole("button", { name: /^Cancel and return to/ }));
+
+    expect(assignSpy).toHaveBeenCalledTimes(1);
+    expect(assignSpy).toHaveBeenCalledWith(externalTo);
+  });
+
+  it("cancel button blocks protocol-relative redirect", async () => {
+    renderWithRouter("/app-login?app=TestApp&to=" + encodeURIComponent("//evil.com"));
+
+    fireEvent.click(screen.getByRole("button", { name: /^Cancel and return to/ }));
+
+    expect(assignSpy).not.toHaveBeenCalled();
+  });
+});
