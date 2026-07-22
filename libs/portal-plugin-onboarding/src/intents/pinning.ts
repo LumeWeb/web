@@ -22,8 +22,6 @@ export const DOCS_STEP: IntentStepConfig = {
 };
 
 export const PINNING_STEPS: IntentStepConfig[] = [
-  DOCS_STEP,
-  CLI_STEP,
   {
     id: "subscribe",
     label: "Subscribe",
@@ -31,6 +29,8 @@ export const PINNING_STEPS: IntentStepConfig[] = [
     ctaLabel: "View plans",
     ctaRoute: "/account/subscription",
   },
+  DOCS_STEP,
+  CLI_STEP,
   {
     id: "upload",
     label: "Upload Content",
@@ -49,9 +49,9 @@ export function usePinningSteps(active = true): {
   const { hasPins, isBusy: pinsBusy } = useHasPins(active);
 
   const steps: OnboardingStep[] = [
-    { ...PINNING_STEPS[0], isComplete: true },
-    { ...PINNING_STEPS[1], isComplete: isInstalled },
-    { ...PINNING_STEPS[2], isComplete: isSubscribed },
+    { ...PINNING_STEPS[0], isComplete: isSubscribed },
+    { ...PINNING_STEPS[1], isComplete: true },
+    { ...PINNING_STEPS[2], isComplete: isInstalled },
     { ...PINNING_STEPS[3], isComplete: hasPins },
   ];
 
