@@ -6,8 +6,6 @@ import { useHasWebsites } from "../hooks/useHasWebsites";
 import { CLI_STEP, DOCS_STEP } from "./pinning";
 
 export const HOSTING_STEPS: IntentStepConfig[] = [
-  { ...DOCS_STEP, docsUrl: DOCS_HOSTING_URL },
-  CLI_STEP,
   {
     id: "subscribe",
     label: "Subscribe",
@@ -15,6 +13,8 @@ export const HOSTING_STEPS: IntentStepConfig[] = [
     ctaLabel: "View plans",
     ctaRoute: "/account/subscription",
   },
+  { ...DOCS_STEP, docsUrl: DOCS_HOSTING_URL },
+  CLI_STEP,
   {
     id: "deploy",
     label: "Deploy Website",
@@ -33,9 +33,9 @@ export function useHostingSteps(active = true): {
   const { hasWebsites, isBusy: websitesBusy } = useHasWebsites(active);
 
   const steps: OnboardingStep[] = [
-    { ...HOSTING_STEPS[0], isComplete: true },
-    { ...HOSTING_STEPS[1], isComplete: isInstalled },
-    { ...HOSTING_STEPS[2], isComplete: isSubscribed },
+    { ...HOSTING_STEPS[0], isComplete: isSubscribed },
+    { ...HOSTING_STEPS[1], isComplete: true },
+    { ...HOSTING_STEPS[2], isComplete: isInstalled },
     { ...HOSTING_STEPS[3], isComplete: hasWebsites },
   ];
 
