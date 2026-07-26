@@ -1,5 +1,6 @@
 import { TrackedButton } from "@/components/TrackedButton";
 import { cn } from "@/lib/utils";
+import CLIInstall from "@/components/Home/CLIInstall";
 
 interface HeroButtonProps {
 	label: string;
@@ -19,6 +20,8 @@ interface HeroSectionProps {
 	visualContent?: React.ReactNode;
 	microcopy?: string;
 	trustLine?: string;
+	postTrustLine?: React.ReactNode;
+	showCLIInstall?: boolean;
 	className?: string;
 }
 
@@ -31,6 +34,8 @@ const HeroSection = ({
 	visualContent,
 	microcopy,
 	trustLine,
+	postTrustLine,
+	showCLIInstall = false,
 	className = "",
 }: HeroSectionProps) => {
 	const buttons = primaryButtons ?? (primaryButton ? [primaryButton] : []);
@@ -38,17 +43,17 @@ const HeroSection = ({
 	return (
 		<section className={cn("pt-[160px] md:pt-[120px] lg:pt-[155px]", className)}>
 			<div className="xl:container px-6">
-				<div className="md:columns-2 sm:columns-1 lg:flex lg:h-[600px] xl:min-h-[700px] lg:items-center overflow-hidden lg:justify-between">
-					<div className="mb-[50px] lg:mb-0 pb-[50px]">
+				<div className="md:columns-2 sm:columns-1 lg:flex lg:items-center overflow-hidden lg:justify-between gap-12 pb-16 md:pb-24">
+					<div className="mb-10 lg:mb-0">
 						<div className="text-left max-w-[670px]">
 							<h1 className="text-[28px] md:text-[2.5rem] lg:text-5xl xl:text-6xl 2xl:text-[75px] font-medium mb-7 lg:mb-[50px] text-white leading-tight">
 								{headline}
 							</h1>
 
 							{subheadline && (
-								<p className="text-home-text-muted text-base lg:text-xl mb-5 lg:mb-[60px] max-w-[480px]">
+								<div className="text-home-text-muted text-base lg:text-xl mb-5 lg:mb-[60px] max-w-[520px]">
 									{subheadline}
-								</p>
+								</div>
 							)}
 
 							{(buttons.length > 0 || secondaryButton) && (
@@ -92,7 +97,25 @@ const HeroSection = ({
 								</p>
 							)}
 
-						</div>
+							{(postTrustLine || showCLIInstall) && (
+								<div className="mt-12">
+									{showCLIInstall && (
+										<div className="max-w-[613px]">
+											<div className="flex items-center gap-3 mb-4">
+												<div className="h-px flex-1 bg-white/10"></div>
+												<span className="uppercase tracking-[1.5px] text-[11px] font-medium text-white/35">
+													One-line install
+												</span>
+												<div className="h-px flex-1 bg-white/10"></div>
+											</div>
+											<CLIInstall />
+										</div>
+									)}
+									{postTrustLine}
+								</div>
+							)}
+
+							</div>
 					</div>
 
 					{visualContent && (

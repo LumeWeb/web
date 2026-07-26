@@ -7,12 +7,23 @@ import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import mdAlternate from "astro-md-alternate";
 import llms from "astro-llms-md";
+import astroRedirects from "@lumeweb/astro-redirects";
 
 // https://astro.build/config
 export default defineConfig({
   site: "https://pinner.xyz",
   trailingSlash: "always",
   integrations: [
+    astroRedirects({
+      extra: {
+        "/solutions/website-hosting": "/host",
+        "/solutions/ipfs-pinning": "/pin",
+        "/solutions/cloud-storage": "/host",
+        "/solutions/s3-storage": "/pin",
+        "/solutions/private-storage": "/host",
+      },
+      emitFile: true,
+    }),
     react(),
     sitemap(),
     mdx(),

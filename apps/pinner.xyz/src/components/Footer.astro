@@ -2,6 +2,7 @@
 import NewsletterSignup from "@/components/NewsletterSignup";
 import PaymentMethodsBar from "@/components/PaymentMethodsBar";
 import { getCollection } from "astro:content";
+import { footerProductLinks, footerCommunityLinks, footerLegalLinks } from "@/data/navLinks";
 import contactsData from "@/data/contacts.json";
 
 interface Props {
@@ -31,15 +32,7 @@ const t = {
 const columns = [
   {
     title: "Product",
-    links: [
-      { text: "Website Hosting", url: "/solutions/website-hosting" },
-      { text: "IPFS Pinning", url: "/solutions/ipfs-pinning" },
-      { text: "S3 Storage", url: "/solutions/s3-storage" },
-      { text: "Private Storage", url: "/solutions/private-storage" },
-      { text: "How It Works", url: "/how-it-works" },
-      { text: "Pricing", url: "/pricing" },
-      { text: "Blog", url: "/blog" },
-    ],
+    links: footerProductLinks.map(l => ({ text: l.label, url: l.href, external: l.external })),
   },
   {
     title: "Compare",
@@ -50,22 +43,11 @@ const columns = [
   },
   {
     title: "Community",
-    links: [
-      { text: "Documentation", url: "https://docs.pinner.xyz", external: true },
-      { text: "GitHub", url: contactsData.community.github.url, external: true },
-      { text: "Discord", url: contactsData.community.discord.url, external: true },
-      { text: "Partners", url: "/partners" },
-      { text: "Contact", url: "/contact" },
-    ],
+    links: footerCommunityLinks.map(l => ({ text: l.label, url: l.href, external: l.external })),
   },
   {
     title: "Legal",
-    links: [
-      { text: "Privacy Policy", url: "/privacy-policy" },
-      { text: "Terms of Service", url: "/terms-of-service" },
-      { text: "Law Enforcement Guide", url: "/law-enforcement" },
-      { text: "Transparency Report", url: "/transparency" },
-    ],
+    links: footerLegalLinks.map(l => ({ text: l.label, url: l.href, external: l.external })),
   },
 ];
 ---
@@ -99,15 +81,11 @@ const columns = [
         ))}
       </div>
 
-      <div class="flex flex-col items-center gap-1">
-        <p class={`${t.copyright} text-base md:text-lg font-medium tracking-wide`}>Your data. Your rules.</p>
+      <div class="text-center">
+        <p class={`${t.copyright} text-base md:text-lg font-medium tracking-wide mb-1`}>
+          Your data. Your rules.
+        </p>
         <p class={`${t.copyright} text-sm`}>
-          © 2024–{new Date().getFullYear()} Hammer Technologies LLC
-        </p>
-        <p class={`${t.small} text-xs opacity-50`}>
-          Site last updated: {lastUpdated}
-        </p>
-        <p class={t.small}>
           A{" "}
           <a
             href="https://lumeweb.com"
@@ -119,8 +97,19 @@ const columns = [
           </a>{" "}
           service
         </p>
-        <p class={`${t.small} text-xs opacity-50`}>
+        <p class={`${t.copyright} text-base mt-1`}>
+          © 2024 – {(new Date()).getFullYear()} Hammer Technologies LLC
+        </p>
+        <p class={`${t.small} text-sm mt-2`}>
+          Site last updated: {lastUpdated ?? `${new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(new Date())}`}
+        </p>
+        <p class={`${t.small} text-xs mt-2 opacity-50`}>
           This site is hosted on Pinner. IPNS: <code class="font-mono">k51qzi5uqu5dm5cxud9ascpp15dgw43xcbbo20kixob7u5e83z1kudtlrgiwxe</code>
+        </p>
+        <p class={`${t.small} text-sm mt-1`}>
+          <a href="/privacy-policy" class={`${t.smallLink} transition ease-in-out duration-300`}>Privacy</a>
+          <span class="mx-1">·</span>
+          <a href="/terms-of-service" class={`${t.smallLink} transition ease-in-out duration-300`}>Terms</a>
         </p>
       </div>
     </div>

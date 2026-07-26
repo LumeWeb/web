@@ -72,3 +72,35 @@ export const ctaCopy = {
     subheading: "Revenue sharing, integration support, and custom pricing for Sia and IPFS builders.",
   },
 } as const;
+
+export interface Examples {
+  /** Example CIDv1 used in terminal output across /host, /pin, and /ens */
+  cid: string;
+}
+
+export const examples: Examples = {
+  cid: "bafybeihm24l4qtkiyuhgxz34vgok77s253ogaadktuvm7ywidknwptsokq",
+};
+
+export type OS = "mac" | "linux" | "windows";
+
+export interface CliInstallCommands {
+  mac: string;
+  linux: string;
+  windows: string;
+}
+
+export interface CliInstall {
+  installUrl: string;
+  commands: CliInstallCommands;
+}
+
+/** CLI install commands shown in the hero terminal */
+export const cliInstall: CliInstall = {
+  installUrl: "https://get.pinner.xyz",
+  commands: {
+    mac: "curl -fsSL https://get.pinner.xyz | sh",
+    linux: "curl -fsSL https://get.pinner.xyz | sh",
+    windows: "irm https://get.pinner.xyz | iex",
+  },
+};

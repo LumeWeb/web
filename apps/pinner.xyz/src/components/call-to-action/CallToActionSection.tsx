@@ -1,6 +1,5 @@
 import Section from "@/components/layout/Section";
 import { TrackedButton } from "@/components/TrackedButton";
-import { cn } from "@/lib/utils";
 
 interface ButtonConfig {
 	label: string;
