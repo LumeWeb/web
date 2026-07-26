@@ -35,6 +35,24 @@ const BottomCTA = ({ className }: BottomCTAProps) => {
               trackEvent="bottom_cta_pin_clicked"
             />
           </div>
+
+          <p className="text-home-text-muted/60 text-sm mt-8">
+            Building on Sia? Need volume storage?{" "}
+            <a
+              href="/partners"
+              className="text-home-accent underline hover:opacity-80"
+            >
+              See our partnerships
+            </a>{" "}
+            or{" "}
+            <a
+              href="/contact"
+              className="text-home-accent underline hover:opacity-80"
+            >
+              get in touch
+            </a>
+            .
+          </p>
         </div>
       </div>
     </section>
