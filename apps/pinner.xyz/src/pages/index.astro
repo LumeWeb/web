@@ -1,30 +1,28 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Hero from "@/components/Home/Hero";
-import ProductCards from "@/components/Home/ProductCards";
-import ProblemAgitation from "@/components/Home/ProblemAgitation";
-import TrustSection from "@/components/Home/TrustSection";
-import DifferentiatorsSection from "@/components/DifferentiatorsSection";
-import CallToAction from "@/components/CallToAction";
-import { ctaCopy } from "@/lib/config";
+import BrandLogos from "@/components/BrandLogos";
+import WhyPinner from "@/components/Home/WhyPinner";
+import BottomCTA from "@/components/Home/BottomCTA";
+import logos from "@/data/brand-logos";
 ---
 
-<Layout title="Storage and Hosting Where You're in Control | Pinner" description="Your data. Your rules. One plan, no surprises. Private by design. Open source." variant="home" showNewsletterFooter={false}>
+<Layout
+  title="Storage and Hosting Where You're in Control | Pinner"
+  description="Your data. Your rules. Decentralized hosting and storage that doesn't depend on one company."
+  variant="home"
+  showNewsletterFooter={false}
+>
   <Hero client:load />
-
-  <ProblemAgitation client:load />
-
-  <TrustSection client:load variant="dark" />
-
-  <ProductCards client:load />
-
-  <DifferentiatorsSection client:load variant="dark" />
-
-  <CallToAction
+  <BrandLogos
+    logos={logos}
+    logoType="dark"
+    title="Built On"
     variant="dark"
-    heading={ctaCopy.home.heading}
-    subheading={ctaCopy.home.subheading}
-    intent="pinning"
     client:load
   />
+  <WhyPinner client:load />
+  <!-- SocialProof: render only if real data exists -->
+  <!-- <SocialProof client:load /> -->
+  <BottomCTA client:load />
 </Layout>

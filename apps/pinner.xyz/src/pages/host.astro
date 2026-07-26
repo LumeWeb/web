@@ -1,0 +1,553 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import HostHero from "@/components/Home/HostHero";
+import TerminalStep from "@/components/Home/TerminalStep";
+import UploadFlowDiagramDark from "@/components/HowItWorks/UploadFlowDiagramDark";
+import DistributionDiagramDark from "@/components/HowItWorks/DistributionDiagramDark";
+import ManifestoVisual from "@/components/Home/ManifestoVisual";
+import { TrackedButton } from "@/components/TrackedButton";
+import { config, examples } from "@/lib/config";
+---
+
+<Layout
+  title="Host a Website on Independent Providers | Pinner"
+  description="Host static sites on distributed storage. Your files copied across independent providers, not one company's servers. Harder to take down."
+  variant="home"
+  ogImage="/images/og/host.png"
+  showNewsletterFooter={false}
+>
+  {/* Section 1: Hero */}
+  <HostHero client:load />
+
+  {/* Section 2: Agitation */}
+  <section class="py-20 md:py-28 bg-home-section-dark">
+    <div class="xl:container px-6">
+      <div class="max-w-[800px] mx-auto">
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-12 md:mb-16 text-center">
+          What happens when your host changes their mind
+        </h2>
+
+        <div class="space-y-8">
+          <div class="flex gap-5 items-start">
+            <div class="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-400"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </div>
+            <div>
+              <h3 class="text-white text-lg font-medium mb-2">Account banned</h3>
+              <p class="text-home-text-muted text-base leading-relaxed">
+                Platform terms change. Your account gets flagged. Your site disappears overnight, no warning.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex gap-5 items-start">
+            <div class="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-400"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </div>
+            <div>
+              <h3 class="text-white text-lg font-medium mb-2">DNS pulled</h3>
+              <p class="text-home-text-muted text-base leading-relaxed">
+                Domain registrar or DNS provider suspends your domain. Visitors get 'site not found.' Your content is gone even though your files still exist.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex gap-5 items-start">
+            <div class="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-400"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </div>
+            <div>
+              <h3 class="text-white text-lg font-medium mb-2">Egress surprise</h3>
+              <p class="text-home-text-muted text-base leading-relaxed">
+                Viral traffic hits your static site. Your bandwidth bill explodes. The host throttles you or shuts you down mid-spike.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-home-text-muted text-base text-center mt-10">
+          These aren't edge cases. They happen weekly.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {/* Section 3: How It Works */}
+  <section id="how-it-works" class="py-20 md:py-28 bg-home-section-dark">
+    <div class="xl:container px-6">
+      <div class="lg:flex lg:items-center lg:justify-between gap-16">
+        <div class="lg:w-1/2">
+          <h3 class="text-home-text-muted text-base md:text-lg font-medium mb-4">How it works</h3>
+          <h2 class="text-[28px] md:text-[2.5rem] lg:text-4xl font-medium mb-6 text-white leading-tight">
+            Deploy in minutes. Get a link that doesn't break.
+          </h2>
+          <p class="text-home-text-muted text-base lg:text-xl leading-relaxed mb-8">
+            Build anywhere. Upload with one command. Get a content address
+            that stays the same even if you change hosting providers or switch domains.
+          </p>
+
+          {/* Terminal visual */}
+          <div class="max-w-[520px]">
+            <TerminalStep
+              command="pinner upload ./dist"
+              output={[
+                "Upload complete",
+                `CID ${examples.cid}`,
+                "Size 2.4 MB",
+                "Status Pinned",
+              ]}
+            />
+          </div>
+        </div>
+
+        <div class="lg:w-1/2 mt-12 lg:mt-0">
+          <UploadFlowDiagramDark client:load />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Section 4: What You Get / What You Don't */}
+  <section class="py-20 md:py-28 bg-home-section-dark">
+    <div class="xl:container px-6">
+      <div class="max-w-[1000px] mx-auto">
+        {/* What you get */}
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-12 md:mb-16 text-center">
+          What you get
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 mb-20 md:mb-28">
+          <div class="text-center">
+            <div class="mb-5 flex items-center justify-center w-14 h-14 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 mx-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+            </div>
+            <h3 class="text-lg font-semibold text-white mb-2">Content address</h3>
+            <p class="text-sm text-home-text-muted leading-relaxed max-w-xs mx-auto">
+              A link that always points to the same content, regardless of
+              hosting provider or domain. Change everything: the content
+              ID stays the same as long as it's pinned.
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="mb-5 flex items-center justify-center w-14 h-14 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 mx-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" x2="2" y1="12" y2="12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" x2="6.01" y1="16" y2="16"/><line x1="10" x2="10.01" y1="16" y2="16"/></svg>
+            </div>
+            <h3 class="text-lg font-semibold text-white mb-2">Distributed storage</h3>
+            <p class="text-sm text-home-text-muted leading-relaxed max-w-xs mx-auto">
+              Files copied across the Sia network. No single provider can delete them all.
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="mb-5 flex items-center justify-center w-14 h-14 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 mx-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
+            <h3 class="text-lg font-semibold text-white mb-2">Name support</h3>
+            <p class="text-sm text-home-text-muted leading-relaxed max-w-xs mx-auto">
+              ENS, Handshake, DNSLink, and traditional custom domains. Point your name at your content. We handle the IPFS layer.
+            </p>
+          </div>
+        </div>
+
+        {/* What you don't */}
+        <h2 class="text-xl md:text-2xl lg:text-3xl font-semibold text-home-text-muted/70 mb-10 md:mb-14 text-center">
+          What you don't get
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
+          <div class="text-center">
+            <div class="w-10 h-10 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center mx-auto mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-home-text-muted"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </div>
+            <h3 class="text-home-text-muted text-base font-medium mb-1">No serverless functions</h3>
+            <p class="text-home-text-muted/70 text-sm leading-relaxed max-w-xs mx-auto">
+              Static files only. No edge functions, no SSR, no databases.
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="w-10 h-10 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center mx-auto mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-home-text-muted"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </div>
+            <h3 class="text-home-text-muted text-base font-medium mb-1">No builds on our infra</h3>
+            <p class="text-home-text-muted/70 text-sm leading-relaxed max-w-xs mx-auto">
+              You build elsewhere. We host the output. Bring your own CI/CD.
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="w-10 h-10 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center mx-auto mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-home-text-muted"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </div>
+            <h3 class="text-home-text-muted text-base font-medium mb-1">No backend hosting</h3>
+            <p class="text-home-text-muted/70 text-sm leading-relaxed max-w-xs mx-auto">
+              No Node.js, Python, or PHP runtime. Static files only.
+            </p>
+          </div>
+        </div>
+
+        <p class="text-home-text-muted text-sm mt-10 max-w-lg mx-auto">
+          If you need serverless functions or SSR, use Vercel or Netlify alongside Pinner for static assets with content addresses.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {/* Section 8: How It Stays Online */}
+  <section class="py-20 md:py-28">
+    <div class="xl:container px-6">
+      <div class="lg:flex lg:items-center lg:justify-between gap-16">
+        <div class="lg:w-1/2">
+          <DistributionDiagramDark client:load />
+        </div>
+        <div class="lg:w-1/2 mt-12 lg:mt-0">
+          <h3 class="text-home-text-muted text-base md:text-lg font-medium mb-4">How it stays online</h3>
+          <h2 class="text-[28px] md:text-[2.5rem] lg:text-4xl font-medium mb-6 text-white leading-tight">
+            A network, not a data center
+          </h2>
+          <p class="text-home-text-muted text-base lg:text-xl leading-relaxed mb-6">
+            Your files split into encrypted pieces and stored across independent providers on the Sia network. Hosts only get paid when they prove they're still holding your data. If one goes offline, others keep serving your site as long as your account is active.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Section 6: Manifesto */}
+  <section class="py-20 md:py-28 bg-home-section-dark">
+    <div class="xl:container px-6">
+      <div class="max-w-[1000px] mx-auto">
+        <div class="lg:flex lg:items-center lg:justify-between gap-12">
+          {/* Text */}
+          <div class="lg:w-1/2">
+            <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-8">
+              What we believe
+            </h2>
+            <div class="text-home-text-muted text-base md:text-lg leading-relaxed space-y-5">
+              <p>Your site should be harder to take down than it is to put up.</p>
+              <p>Most hosts ask you to trust one company. We don't think you should have to.</p>
+              <p>Pinner stores your files across independent providers because redundancy isn't a feature, it's the point.</p>
+              <p class="text-white font-medium">
+                We don't promise 100% uptime. We promise architecture that doesn't depend on one provider's good will.
+              </p>
+            </div>
+          </div>
+
+          {/* Visual */}
+          <div class="lg:w-1/2 mt-12 lg:mt-0">
+            <ManifestoVisual client:load />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Section 7: What You Can Host */}
+  <section class="py-20 md:py-28">
+    <div class="xl:container px-6">
+      <div class="max-w-[1000px] mx-auto">
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-12 md:mb-16 text-center">
+          What you can host
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="flex gap-4 items-start p-6 bg-home-card-bg rounded-lg border border-home-text/10">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-orange-400 shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+            <div>
+              <h3 class="text-white font-medium mb-1">Decentralized Names</h3>
+              <p class="text-home-text-muted text-sm leading-relaxed">
+                Your .eth, .hns, DNSLink, or traditional ICANN domain. Point your ENS contenthash, DNSLink TXT record, or any DNS A/AAAA/CNAME record at your content.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex gap-4 items-start p-6 bg-home-card-bg rounded-lg border border-home-text/10">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-orange-400 shrink-0 mt-0.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <div>
+              <h3 class="text-white font-medium mb-1">dApp Frontends</h3>
+              <p class="text-home-text-muted text-sm leading-relaxed">
+                Host decentralized app interfaces. Users get a content address that doesn't depend on a single server or domain.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex gap-4 items-start p-6 bg-home-card-bg rounded-lg border border-home-text/10">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-orange-400 shrink-0 mt-0.5"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
+            <div>
+              <h3 class="text-white font-medium mb-1">Sites That Need to Stay Up</h3>
+              <p class="text-home-text-muted text-sm leading-relaxed">
+                Journalism, activism, legal resources: any site where disappearing isn't an option. Harder to take down than traditional hosting.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex gap-4 items-start p-6 bg-home-card-bg rounded-lg border border-home-text/10">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-orange-400 shrink-0 mt-0.5"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+            <div>
+              <h3 class="text-white font-medium mb-1">Static Sites & Portfolios</h3>
+              <p class="text-home-text-muted text-sm leading-relaxed">
+                Portfolios, marketing sites, documentation. Build anywhere, deploy in minutes.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Section 8: Comparison */}
+  <section class="py-20 md:py-28 bg-home-section-dark">
+    <div class="xl:container px-6">
+      <div class="max-w-[900px] mx-auto">
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-12 md:mb-16 text-center">
+          How we compare
+        </h2>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b-2 border-home-text/10">
+                <th class="text-left py-3 px-4 font-medium text-home-text-muted"></th>
+                <th class="text-center py-3 px-4 font-medium text-white">Pinner</th>
+                <th class="text-center py-3 px-4 font-medium text-home-text-muted">Vercel</th>
+                <th class="text-center py-3 px-4 font-medium text-home-text-muted">Netlify</th>
+                <th class="text-center py-3 px-4 font-medium text-home-text-muted">Pinata</th>
+              </tr>
+            </thead>
+            <tbody class="text-home-text-muted">
+              <tr class="border-b border-home-text/5">
+                <td class="py-4 px-4">Distributed backend</td>
+                <td class="text-center py-4 px-4 text-orange-400 font-medium">Yes</td>
+                <td class="text-center py-4 px-4">No</td>
+                <td class="text-center py-4 px-4">No</td>
+                <td class="text-center py-4 px-4">No</td>
+              </tr>
+              <tr class="border-b border-home-text/5">
+                <td class="py-4 px-4">Content addressing</td>
+                <td class="text-center py-4 px-4 text-orange-400 font-medium">Yes</td>
+                <td class="text-center py-4 px-4">No</td>
+                <td class="text-center py-4 px-4">No</td>
+                <td class="text-center py-4 px-4 text-orange-400 font-medium">Yes</td>
+              </tr>
+              <tr class="border-b border-home-text/5">
+                <td class="py-4 px-4">ENS/DNSLink support</td>
+                <td class="text-center py-4 px-4 text-orange-400 font-medium">Yes</td>
+                <td class="text-center py-4 px-4">No</td>
+                <td class="text-center py-4 px-4">No</td>
+                <td class="text-center py-4 px-4 text-orange-400 font-medium">Yes</td>
+              </tr>
+              <tr class="border-b border-home-text/5">
+                <td class="py-4 px-4">Serverless functions</td>
+                <td class="text-center py-4 px-4">No</td>
+                <td class="text-center py-4 px-4 text-orange-400 font-medium">Yes</td>
+                <td class="text-center py-4 px-4 text-orange-400 font-medium">Yes</td>
+                <td class="text-center py-4 px-4">No</td>
+              </tr>
+              <tr class="border-b border-home-text/5">
+                <td class="py-4 px-4">CI builds</td>
+                <td class="text-center py-4 px-4">No</td>
+                <td class="text-center py-4 px-4 text-orange-400 font-medium">Yes</td>
+                <td class="text-center py-4 px-4 text-orange-400 font-medium">Yes</td>
+                <td class="text-center py-4 px-4">No</td>
+              </tr>
+              <tr class="border-b border-home-text/5">
+                <td class="py-4 px-4">Crypto payments</td>
+                <td class="text-center py-4 px-4 text-orange-400 font-medium">Yes</td>
+                <td class="text-center py-4 px-4">No</td>
+                <td class="text-center py-4 px-4">No</td>
+                <td class="text-center py-4 px-4">Annual only</td>
+              </tr>
+              <tr>
+                <td class="py-4 px-4">Usage-based, no tiers</td>
+                <td class="text-center py-4 px-4 text-orange-400 font-medium">Yes</td>
+                <td class="text-center py-4 px-4">No</td>
+                <td class="text-center py-4 px-4">No</td>
+                <td class="text-center py-4 px-4">No</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Visual comparison summary */}
+        <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-[900px] mx-auto">
+          <div class="bg-home-card-bg rounded-lg border border-home-text/10 p-5 text-center">
+            <div class="mb-3 flex items-center justify-center w-10 h-10 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 mx-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <h3 class="text-white text-sm font-medium mb-1">Pinner</h3>
+            <p class="text-home-text-muted text-xs leading-relaxed">Distributed storage + content addressing</p>
+          </div>
+
+          <div class="bg-home-card-bg rounded-lg border border-home-text/10 p-5 text-center opacity-70">
+            <div class="mb-3 flex items-center justify-center w-10 h-10 rounded-full bg-home-text/5 border border-home-text/10 text-home-text-muted mx-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </div>
+            <h3 class="text-home-text text-sm font-medium mb-1">Vercel / Netlify</h3>
+            <p class="text-home-text-muted text-xs leading-relaxed">Serverless functions, edge compute</p>
+          </div>
+
+          <div class="bg-home-card-bg rounded-lg border border-home-text/10 p-5 text-center opacity-70">
+            <div class="mb-3 flex items-center justify-center w-10 h-10 rounded-full bg-home-text/5 border border-home-text/10 text-home-text-muted mx-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            </div>
+            <h3 class="text-home-text text-sm font-medium mb-1">Pinata</h3>
+            <p class="text-home-text-muted text-xs leading-relaxed">Managed pinning + public gateway</p>
+          </div>
+        </div>
+
+        <div class="mt-8 text-center">
+          <p class="text-home-text-muted text-sm max-w-lg mx-auto mb-4">
+            Pinner is for distributed, content-addressed static hosting. Need serverless? Use Vercel. Need a public IPFS gateway? <a href="/contact" class="text-home-accent underline hover:opacity-80">Contact us</a> about private gateway options.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Section 9: Pricing */}
+  <section class="py-20 md:py-28">
+    <div class="xl:container px-6 text-center">
+      <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-4 lg:mb-6">
+        Simple pricing
+      </h2>
+      <p class="text-home-text-muted text-base md:text-lg mb-8 max-w-md mx-auto">
+        Storage at 10 USD/TB. Bandwidth priced upfront. No per-request fees.
+      </p>
+      <TrackedButton
+        label="See full pricing"
+        url="/pricing"
+        buttonStyle="btn-light"
+        trackEvent="host_pricing_clicked"
+        client:load
+      />
+    </div>
+  </section>
+
+  {/* Section 10: Risk Reversal */}
+  <section class="py-20 md:py-28 bg-home-section-dark">
+    <div class="xl:container px-6">
+      <div class="max-w-[900px] mx-auto">
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-12 md:mb-16 text-center">
+          Risk-free to try
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-10">
+          <div class="text-center">
+            <div class="mb-5 flex items-center justify-center w-14 h-14 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 mx-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
+            <h3 class="text-lg font-semibold text-white mb-2">Cancel anytime</h3>
+            <p class="text-sm text-home-text-muted leading-relaxed max-w-xs mx-auto">
+              No annual contracts. Cancel whenever.
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="mb-5 flex items-center justify-center w-14 h-14 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 mx-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <h3 class="text-lg font-semibold text-white mb-2">We'll make it right</h3>
+            <p class="text-sm text-home-text-muted leading-relaxed max-w-xs mx-auto">
+              Something broken? Email us and we'll sort it out.
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="mb-5 flex items-center justify-center w-14 h-14 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 mx-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+            </div>
+            <h3 class="text-lg font-semibold text-white mb-2">10-minute deploy</h3>
+            <p class="text-sm text-home-text-muted leading-relaxed max-w-xs mx-auto">
+              Install the CLI in under 2 minutes. Upload in seconds. Point your name and see your site live within 10.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Section 11: FAQ */}
+  <section class="py-20 md:py-28">
+    <div class="xl:container px-6">
+      <div class="max-w-[800px] mx-auto">
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-12 md:mb-16 text-center">
+          Frequently asked questions
+        </h2>
+
+        <div class="space-y-4">
+          <div class="bg-home-card-bg rounded-lg p-6 border border-home-text/10">
+            <h3 class="text-white font-medium mb-2">What kinds of sites can I host?</h3>
+            <p class="text-home-text-muted text-sm leading-relaxed">
+              Static sites only. Portfolios, documentation, dApp frontends, and any site built on a static framework. No server-side code or databases.
+            </p>
+          </div>
+
+          <div class="bg-home-card-bg rounded-lg p-6 border border-home-text/10">
+            <h3 class="text-white font-medium mb-2">Can I point my ENS name at a Pinner-hosted site?</h3>
+            <p class="text-home-text-muted text-sm leading-relaxed">
+              Yes. Upload your site with <code class="bg-home-text/10 px-1.5 py-0.5 rounded text-home-text">pinner upload</code>, run <code class="bg-home-text/10 px-1.5 py-0.5 rounded text-home-text">pinner point</code> to get your contenthash, and paste it into your ENS manager. Your site will be accessible at myname.eth.limo.
+            </p>
+          </div>
+
+          <div class="bg-home-card-bg rounded-lg p-6 border border-home-text/10">
+            <h3 class="text-white font-medium mb-2">What about Handshake (HNS)?</h3>
+            <p class="text-home-text-muted text-sm leading-relaxed">
+              Yes. Set a DNSLink TXT record on your HNS domain pointing to your content address. Resolve via any HNS-compatible DNS resolver.
+            </p>
+          </div>
+
+          <div class="bg-home-card-bg rounded-lg p-6 border border-home-text/10">
+            <h3 class="text-white font-medium mb-2">Is my site always online?</h3>
+            <p class="text-home-text-muted text-sm leading-relaxed">
+              We copy your files across the Sia network to independent hosts. If one host goes offline, others keep serving your content as long as your account is active and Pinner is operational.
+            </p>
+          </div>
+
+          <div class="bg-home-card-bg rounded-lg p-6 border border-home-text/10">
+            <h3 class="text-white font-medium mb-2">Can I update my site without changing my ENS record?</h3>
+            <p class="text-home-text-muted text-sm leading-relaxed">
+              Yes. Upload your new build, then run <code class="bg-home-text/10 px-1.5 py-0.5 rounded text-home-text">pinner point</code> again with the new CID. The same ENS contenthash now resolves to the updated content.
+            </p>
+          </div>
+
+          <div class="bg-home-card-bg rounded-lg p-6 border border-home-text/10">
+            <h3 class="text-white font-medium mb-2">How does pricing work?</h3>
+            <p class="text-home-text-muted text-sm leading-relaxed">
+              Pay for storage and bandwidth, priced upfront. No API call charges.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Section 12: Bottom CTA */}
+  <section class="py-20 md:py-32">
+    <div class="xl:container px-6 text-center">
+      <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-4 lg:mb-6">
+        Deploy a site on your terms.
+      </h2>
+      <p class="text-home-text-muted text-base md:text-lg mb-10 max-w-md mx-auto">
+        Your name. Your content. On infrastructure you control.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <TrackedButton
+          label="Get started"
+          url={config.registerUrl("hosting")}
+          buttonStyle="btn-light"
+          trackEvent="host_bottom_cta_clicked"
+          client:load
+        />
+        <TrackedButton
+          label="One-line install"
+          url="https://docs.pinner.xyz/ipfs/cli/getting-started"
+          buttonStyle="outline"
+          trackEvent="host_cli_install_clicked"
+          client:load
+        />
+      </div>
+    </div>
+  </section>
+
+</Layout>

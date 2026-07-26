@@ -1,0 +1,531 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import PinHero from "@/components/Home/PinHero";
+import TerminalStep from "@/components/Home/TerminalStep";
+import UploadFlowDiagramDark from "@/components/HowItWorks/UploadFlowDiagramDark";
+import DistributionDiagramDark from "@/components/HowItWorks/DistributionDiagramDark";
+import ManifestoVisual from "@/components/Home/ManifestoVisual";
+import { TrackedButton } from "@/components/TrackedButton";
+import { config, examples } from "@/lib/config";
+---
+
+<Layout
+  title="Pin to IPFS with Storage Proofs | Pinner"
+  description="IPFS pinning backed by verifiable storage on the Sia network. Upload a file, get a CID. Hosts prove they're holding your data or they don't get paid."
+  variant="home"
+  ogImage="/images/og/pin.png"
+  showNewsletterFooter={false}
+>
+  {/* Section 1: Hero */}
+  <PinHero client:load />
+
+  {/* Section 2: Agitation: When pinning services disappear */}
+  <section class="py-20 md:py-28 bg-home-section-dark">
+    <div class="xl:container px-6">
+      <div class="max-w-[800px] mx-auto">
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-12 md:mb-16 text-center">
+          What happens when your pinning service changes
+        </h2>
+
+        <div class="space-y-8">
+          {/* Fleek */}
+          <div class="flex gap-5 items-start">
+            <div class="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-400"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </div>
+            <div>
+              <h3 class="text-white text-lg font-medium mb-2">Fleek shut down IPFS hosting</h3>
+              <p class="text-home-text-muted text-base leading-relaxed">
+                January 2026. Fleek discontinued their IPFS hosting. Users had to migrate CIDs or lose access.
+              </p>
+            </div>
+          </div>
+
+          {/* NFT.Storage */}
+          <div class="flex gap-5 items-start">
+            <div class="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-400"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            </div>
+            <div>
+              <h3 class="text-white text-lg font-medium mb-2">NFT.Storage Classic ended free pinning</h3>
+              <p class="text-home-text-muted text-base leading-relaxed">
+                June 2024. NFT.Storage Classic stopped accepting new uploads and ended free pinning. Existing data stayed accessible, but users had to migrate to paid partners.
+              </p>
+            </div>
+          </div>
+
+          {/* Can't verify */}
+          <div class="flex gap-5 items-start">
+            <div class="w-10 h-10 rounded-full bg-orange-500/10 border border-orange-500/20 flex items-center justify-center shrink-0 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-orange-400"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <div>
+              <h3 class="text-white text-lg font-medium mb-2">No way to verify storage</h3>
+              <p class="text-home-text-muted text-base leading-relaxed">
+                Your pinning service says they have your data. But there's no cryptographic proof and no way to verify they're actually holding it.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-home-text-muted text-base text-center mt-10">
+          A promise isn't storage. A proof is.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {/* Section 3: How It Works */}
+  <section id="how-it-works" class="py-20 md:py-28 bg-home-page-bg">
+    <div class="xl:container px-6">
+      <div class="lg:flex lg:items-center lg:justify-between gap-16">
+        <div class="lg:w-1/2">
+          <h3 class="text-home-text-muted text-base md:text-lg font-medium mb-4">How it works</h3>
+          <h2 class="text-[28px] md:text-[2.5rem] lg:text-4xl font-medium mb-6 text-white leading-tight">
+            Upload or pin. Get a CID. Done.
+          </h2>
+          <p class="text-home-text-muted text-base lg:text-xl leading-relaxed mb-8">
+            Your file gets content-hashed into a CID. That CID is your content address. Pin it across the Sia network and it stays retrievable as long as your account is active.
+          </p>
+
+          {/* Terminal visual */}
+          <div class="max-w-[520px] space-y-3">
+            <TerminalStep
+              command="pinner upload ./my-file.txt"
+              output={[
+                "Upload complete",
+                `CID ${examples.cid}`,
+                "Size 1.2 MB",
+                "Status Pinned",
+              ]}
+            />
+            <TerminalStep
+              command={`pinner pin ${examples.cid}`}
+              output={[
+                "Pin successful",
+              ]}
+            />
+          </div>
+        </div>
+
+        <div class="lg:w-1/2 mt-12 lg:mt-0">
+          <UploadFlowDiagramDark client:load />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Section 4: Verifiable Network */}
+  <section class="py-20 md:py-28">
+    <div class="xl:container px-6">
+      <div class="lg:flex lg:items-center lg:justify-between gap-16">
+        <div class="lg:w-1/2 order-2 lg:order-1">
+          <DistributionDiagramDark client:load />
+        </div>
+        <div class="lg:w-1/2 order-1 lg:order-2">
+          <h3 class="text-home-text-muted text-base md:text-lg font-medium mb-4">Backed by Sia</h3>
+          <h2 class="text-[28px] md:text-[2.5rem] lg:text-4xl font-medium mb-6 text-white leading-tight">
+            Storage hosts prove they're holding your data
+          </h2>
+          <p class="text-home-text-muted text-base lg:text-xl leading-relaxed">
+            We store your pinned content as erasure-coded fragments across independent Sia hosts. Hosts submit storage proofs to receive payment. No proof, no pay. If hosts go offline, the network repairs from remaining fragments.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Section 5: Manifesto */}
+  <section class="py-20 md:py-28 bg-home-page-bg">
+    <div class="xl:container px-6">
+      <div class="max-w-[800px] mx-auto">
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-12 md:mb-16 text-center">
+          What we believe
+        </h2>
+        <p class="text-home-text-muted text-base md:text-lg text-center mb-10 max-w-lg mx-auto italic">
+          "Pinned content should be provably stored, not promised."
+        </p>
+        <ManifestoVisual
+          client:load
+          pillars={[
+            { id: "provable", label: "Provable", short: "Storage proofs, not promises" },
+            { id: "distributed", label: "Distributed", short: "No single company controls your data" },
+            { id: "verifiable", label: "Verifiable", short: "Cryptographic proof, not trust" },
+          ]}
+        />
+      </div>
+    </div>
+  </section>
+
+  {/* Section 6: What You Can Pin */}
+  <section class="py-20 md:py-28 bg-home-page-bg">
+    <div class="xl:container px-6">
+      <div class="max-w-[1000px] mx-auto">
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-12 md:mb-16 text-center">
+          What you can pin
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* NFT Metadata */}
+          <div class="bg-home-card-bg rounded-lg border border-home-text/10 p-6">
+            <div class="mb-4 flex items-center justify-center w-12 h-12 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 mx-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+            </div>
+            <h3 class="text-white text-lg font-medium mb-2 text-center">NFT Metadata</h3>
+            <p class="text-home-text-muted text-sm leading-relaxed text-center">
+              Pin NFT metadata, artwork, and on-chain assets. CIDs never change. Your smart contract points to the original file. As long as it's pinned.
+            </p>
+          </div>
+
+          {/* Verifiable Public Data */}
+          <div class="bg-home-card-bg rounded-lg border border-home-text/10 p-6">
+            <div class="mb-4 flex items-center justify-center w-12 h-12 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 mx-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            </div>
+            <h3 class="text-white text-lg font-medium mb-2 text-center">Verifiable Public Data</h3>
+            <p class="text-home-text-muted text-sm leading-relaxed text-center">
+              Scientific datasets, public records, archival data. Content-addressed hashes. Auditable, timestamped, tamper-evident.
+            </p>
+          </div>
+
+          {/* dApp Frontends */}
+          <div class="bg-home-card-bg rounded-lg border border-home-text/10 p-6">
+            <div class="mb-4 flex items-center justify-center w-12 h-12 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 mx-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </div>
+            <h3 class="text-white text-lg font-medium mb-2 text-center">dApp Frontends</h3>
+            <p class="text-home-text-muted text-sm leading-relaxed text-center">
+              Host your dApp frontend. Users get a permanent link to your interface. Update by pinning a new CID.
+            </p>
+          </div>
+
+          {/* Gateway-Independent Content */}
+          <div class="bg-home-card-bg rounded-lg border border-home-text/10 p-6">
+            <div class="mb-4 flex items-center justify-center w-12 h-12 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 mx-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </div>
+            <h3 class="text-white text-lg font-medium mb-2 text-center">Gateway-Independent Content</h3>
+            <p class="text-home-text-muted text-sm leading-relaxed text-center">
+              Your CID works on any IPFS gateway. Pinner, Pinata, Cloudflare, your own node. The address is universal.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Section 7: What You Get / What You Don't */}
+  <section class="py-20 md:py-28 bg-home-page-bg">
+    <div class="xl:container px-6">
+      <div class="max-w-[1000px] mx-auto">
+        {/* What you get */}
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-12 md:mb-16 text-center">
+          What you get
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 mb-20 md:mb-28">
+          <div class="text-center">
+            <div class="mb-5 flex items-center justify-center w-14 h-14 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 mx-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg>
+            </div>
+            <h3 class="text-lg font-semibold text-white mb-2">Content address</h3>
+            <p class="text-sm text-home-text-muted leading-relaxed max-w-xs mx-auto">
+              Upload a file, get a CID. The same CID always resolves to the same content. Change providers, change gateways, the address stays the same.
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="mb-5 flex items-center justify-center w-14 h-14 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 mx-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
+            <h3 class="text-lg font-semibold text-white mb-2">Verifiable storage</h3>
+            <p class="text-sm text-home-text-muted leading-relaxed max-w-xs mx-auto">
+              Hosts on the Sia network prove they're holding your data. No proof, no pay.
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="mb-5 flex items-center justify-center w-14 h-14 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 mx-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </div>
+            <h3 class="text-lg font-semibold text-white mb-2">Gateway independence</h3>
+            <p class="text-sm text-home-text-muted leading-relaxed max-w-xs mx-auto">
+              Your CID works anywhere IPFS runs. Not locked to one gateway or one provider.
+            </p>
+          </div>
+        </div>
+
+        {/* What you don't */}
+        <h2 class="text-xl md:text-2xl lg:text-3xl font-semibold text-home-text-muted/70 mb-10 md:mb-14 text-center">
+          What you don't get
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
+          <div class="text-center">
+            <div class="w-10 h-10 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center mx-auto mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-home-text-muted"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </div>
+            <h3 class="text-home-text-muted text-base font-medium mb-1">No web upload interface</h3>
+            <p class="text-home-text-muted/70 text-sm leading-relaxed max-w-xs mx-auto">
+              Pinner is CLI-first. You run commands in your terminal. There is no drag-and-drop or browser upload.
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="w-10 h-10 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center mx-auto mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-home-text-muted"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </div>
+            <h3 class="text-home-text-muted text-base font-medium mb-1">No cross-provider replication</h3>
+            <p class="text-home-text-muted/70 text-sm leading-relaxed max-w-xs mx-auto">
+              We pin to the Sia network. We don't automatically replicate your pins to Pinata, Filebase, or other services.
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="w-10 h-10 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center mx-auto mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-home-text-muted"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </div>
+            <h3 class="text-home-text-muted text-base font-medium mb-1">No guaranteed retrieval speed</h3>
+            <p class="text-home-text-muted/70 text-sm leading-relaxed max-w-xs mx-auto">
+              IPFS gateway speeds vary. Your content stays available, but initial load can be slower than traditional CDN hosting.
+            </p>
+          </div>
+        </div>
+
+        <p class="text-home-text-muted text-sm text-center mt-10 max-w-lg mx-auto">
+          Need dedicated private infrastructure with CDN speed? <a href="/contact" class="text-home-accent underline hover:opacity-80">Contact us</a> about enterprise gateway options.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {/* Section 8: Comparison */}
+  <section class="py-20 md:py-28">
+    <div class="xl:container px-6">
+      <div class="max-w-[900px] mx-auto">
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-12 md:mb-16 text-center">
+          How we compare
+        </h2>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b-2 border-home-text/10">
+                <th class="text-left py-3 px-4 font-medium text-home-text-muted"></th>
+                <th class="text-center py-3 px-4 font-medium text-white">Pinner</th>
+                <th class="text-center py-3 px-4 font-medium text-home-text-muted">Pinata</th>
+                <th class="text-center py-3 px-4 font-medium text-home-text-muted">Filebase</th>
+                <th class="text-center py-3 px-4 font-medium text-home-text-muted">NFT.Storage</th>
+              </tr>
+            </thead>
+            <tbody class="text-home-text-muted">
+              <tr class="border-b border-home-text/5">
+                <td class="py-4 px-4">Backend</td>
+                <td class="text-center py-4 px-4 text-orange-400 font-medium">Sia network</td>
+                <td class="text-center py-4 px-4">Centralized</td>
+                <td class="text-center py-4 px-4">IPFS (S3 API)</td>
+                <td class="text-center py-4 px-4">Filecoin</td>
+              </tr>
+              <tr class="border-b border-home-text/5">
+                <td class="py-4 px-4">Pins remain available</td>
+                <td class="text-center py-4 px-4 text-orange-400 font-medium">Yes</td>
+                <td class="text-center py-4 px-4 text-orange-400 font-medium">Yes</td>
+                <td class="text-center py-4 px-4 text-orange-400 font-medium">Yes</td>
+                <td class="text-center py-4 px-4">Partial*</td>
+              </tr>
+              <tr class="border-b border-home-text/5">
+                <td class="py-4 px-4">Storage proofs</td>
+                <td class="text-center py-4 px-4 text-orange-400 font-medium">Yes (Sia)</td>
+                <td class="text-center py-4 px-4">No</td>
+                <td class="text-center py-4 px-4">No</td>
+                <td class="text-center py-4 px-4">No</td>
+              </tr>
+              <tr class="border-b border-home-text/5">
+                <td class="py-4 px-4">Crypto payments</td>
+                <td class="text-center py-4 px-4 text-orange-400 font-medium">Yes</td>
+                <td class="text-center py-4 px-4">Annual only</td>
+                <td class="text-center py-4 px-4 text-orange-400 font-medium">Yes</td>
+                <td class="text-center py-4 px-4">No</td>
+              </tr>
+              <tr class="border-b border-home-text/5">
+                <td class="py-4 px-4">Self-host gateway</td>
+                <td class="text-center py-4 px-4 text-orange-400 font-medium">Yes</td>
+                <td class="text-center py-4 px-4">No</td>
+                <td class="text-center py-4 px-4 text-orange-400 font-medium">Yes (dedicated)</td>
+                <td class="text-center py-4 px-4">No</td>
+              </tr>
+              <tr>
+                <td class="py-4 px-4">CLI contenthash</td>
+                <td class="text-center py-4 px-4 text-orange-400 font-medium">Yes</td>
+                <td class="text-center py-4 px-4">No</td>
+                <td class="text-center py-4 px-4">No</td>
+                <td class="text-center py-4 px-4">No</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="text-home-text-muted text-xs mt-4 text-center">
+          * NFT.Storage Classic stopped accepting new uploads in June 2024. Existing data is still accessible.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {/* Section 9: Pricing */}
+  <section class="py-20 md:py-28 bg-home-page-bg">
+    <div class="xl:container px-6">
+      <div class="max-w-[600px] mx-auto text-center">
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-4">
+          Simple pricing
+        </h2>
+        <p class="text-home-text-muted text-base md:text-lg mb-8">
+              Storage at 10 USD/TB. Bandwidth priced upfront. No per-request fees.
+        </p>
+        <TrackedButton
+          client:load
+          label="See full pricing"
+          url="/pricing"
+          buttonStyle="outline"
+          trackEvent="pin_pricing_cta_clicked"
+        />
+      </div>
+    </div>
+  </section>
+
+  {/* Section 10: Risk Reversal */}
+  <section class="py-20 md:py-28">
+    <div class="xl:container px-6">
+      <div class="max-w-[1000px] mx-auto">
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-12 md:mb-16 text-center">
+          Risk-free to try
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div class="text-center">
+            <div class="mb-4 flex items-center justify-center w-14 h-14 rounded-full bg-home-text/5 border border-home-text/10 mx-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-home-accent"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </div>
+            <h3 class="text-white text-lg font-medium mb-2">Cancel anytime</h3>
+            <p class="text-home-text-muted text-sm leading-relaxed">
+              No annual contracts. Cancel whenever.
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="mb-4 flex items-center justify-center w-14 h-14 rounded-full bg-home-text/5 border border-home-text/10 mx-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-home-accent"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
+            <h3 class="text-white text-lg font-medium mb-2">We'll make it right</h3>
+            <p class="text-home-text-muted text-sm leading-relaxed">
+              Something broken? Email us and we'll sort it out.
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="mb-4 flex items-center justify-center w-14 h-14 rounded-full bg-home-text/5 border border-home-text/10 mx-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-home-accent"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <h3 class="text-white text-lg font-medium mb-2">Quick setup</h3>
+            <p class="text-home-text-muted text-sm leading-relaxed">
+              Install the CLI in under 2 minutes. Upload and get a CID in seconds.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Section 11: FAQ */}
+  <section class="py-20 md:py-28 bg-home-page-bg">
+    <div class="xl:container px-6">
+      <div class="max-w-[720px] mx-auto">
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-12 text-center">
+          Questions answered
+        </h2>
+
+        <div class="space-y-0">
+          {[
+            {
+              q: "How is this different from regular cloud storage?",
+              a: "Cloud storage gives you a file path. IPFS pinning gives you a content address (CID). The CID is a cryptographic hash of your content. If the content changes, the CID changes. This makes it verifiable and portable across providers.",
+            },
+            {
+              q: "Is my data permanent?",
+              a: "CIDs are permanent hashes; they always point to the same content. But availability requires active pinning. If you stop paying or unpin, your content can become unavailable. We don't claim 'permanent' or 'forever' storage.",
+            },
+            {
+              q: "What happens if I unpin something?",
+              a: "Unpinned content may remain cached on gateways temporarily, but it's no longer guaranteed. For content you need to stay available, keep it pinned and your account active.",
+            },
+            {
+              q: "Can I pay with crypto?",
+              a: "Yes.",
+            },
+            {
+              q: "How does pricing work?",
+              a: "Storage at 10 USD/TB. Bandwidth priced upfront. No API call charges, no per-request fees.",
+            },
+            {
+              q: "I'm using another pinning service. Can I migrate?",
+              a: "Yes. Pin your existing CIDs directly with `pinner pin <cid>`. Your CIDs don't change when you switch providers.",
+            },
+            {
+              q: "How is Sia different from IPFS-native pinning?",
+              a: "Most pinning services store your files on centralized servers and make them available via IPFS. Pinner stores them on the Sia network, a distributed storage protocol with cryptographic storage proofs. Your content is verifiably stored across independent hosts.",
+            },
+            {
+              q: "What if my pinned content goes offline?",
+              a: "Your pins are copied across multiple independent Sia hosts. Individual hosts can go offline, but your content stays available from others as long as your account is active.",
+            },
+            {
+              q: "Can I use Pinner with a CDN?",
+              a: "Yes. Pin your content to get a CID, then use a CDN or gateway for fast delivery. Pinner handles storage and the CDN handles speed.",
+            },
+          ].map((faq, i) => (
+            <div class="border-b border-home-text/10 last:border-0" key={i}>
+              <details class="group">
+                <summary class="w-full text-left py-5 flex items-center justify-between gap-4 cursor-pointer list-none">
+                  <span class="text-home-text text-base font-medium lg:text-lg">{faq.q}</span>
+                  <span class="text-home-text-muted text-xl flex-shrink-0 transition-transform duration-200 group-open:rotate-45">+</span>
+                </summary>
+                <p class="text-home-text-muted text-sm leading-relaxed pb-5 lg:text-base">{faq.a}</p>
+              </details>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Section 12: Bottom CTA */}
+  <section class="py-20 md:py-28">
+    <div class="xl:container px-6">
+      <div class="max-w-2xl mx-auto text-center">
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-4">
+          Your content, pinned and verifiable
+        </h2>
+        <p class="text-home-text-muted text-base md:text-lg mb-10">
+          Get a CID that works on any gateway. Stored across the Sia network.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <TrackedButton
+            client:load
+            label="Install CLI now"
+            url={config.registerUrl("pinning")}
+            buttonStyle="default"
+            trackEvent="pin_bottom_cta_install_clicked"
+          />
+          <TrackedButton
+            client:load
+            label="Read the docs"
+            url="https://docs.pinner.xyz"
+            buttonStyle="outline"
+            trackEvent="pin_bottom_cta_docs_clicked"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>

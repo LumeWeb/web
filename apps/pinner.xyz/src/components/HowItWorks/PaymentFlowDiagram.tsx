@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ComponentType } from "react";
 import {
   Wallet,
   Server,
@@ -207,7 +207,7 @@ interface FlowNode {
   id: string;
   label: string;
   sublabel: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   accent: boolean;
 }
 
