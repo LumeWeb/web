@@ -28,7 +28,7 @@ const EnsHero = () => {
         trackEvent: "ens_hero_secondary_clicked",
       }}
       trustLine="Contenthash output · IPNS updates · Cancel anytime"
-      visualContent={<HostServerGrid />}
+      visualContent={<HostServerGrid domain="my-site.eth" />}
       showCLIInstall
     />
   );

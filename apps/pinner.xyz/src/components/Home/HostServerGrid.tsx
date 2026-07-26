@@ -1,7 +1,7 @@
 import { Globe, Server, Loader2 } from "lucide-react";
 import { useNodeGrid } from "./useNodeGrid";
 
-export default function HostServerGrid() {
+export default function HostServerGrid({ domain = "my-site.com" }: { domain?: string }) {
   const { nodes, loading: browserLoading, packetPaths, activeCount, totalCount } = useNodeGrid();
 
   return (
@@ -35,7 +35,7 @@ export default function HostServerGrid() {
             )}
           </div>
           <div>
-            <p className="text-white text-sm font-medium">my-site.com</p>
+            <p className="text-white text-sm font-medium">{domain}</p>
             <p className="text-home-text-muted text-xs">
               {activeCount} of {totalCount} providers active
             </p>
