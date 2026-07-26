@@ -330,7 +330,6 @@ patchedDependencies:
   object-inspect: 58d41550bac212c6dff14bd065070f98aa763f5cfcdd9bf73f9f83f728e19cd8
   papaparse: 8db42de1f1871890a205b993db193bd7914e8201801637ba4b6247c7604f7c56
   pluralize: 88650615c62a180c406201cd54b23afb592a6a678db498f8b1a730f85ca868d2
-  vocs@2.3.3: 3d4206fc234a9eba5f9fa882314fdfc0b1a811e6ad9e106d0bcf25181c9a993f
   warn-once: 5720ed82c72c077a0bf56dcede206d50538aa93a6bc2c943e8610ea924298b87
 
 importers:
@@ -505,7 +504,7 @@ importers:
         version: 19.2.7(react@19.2.7)
       vocs:
         specifier: 'catalog:'
-        version: 2.3.3(patch_hash=3d4206fc234a9eba5f9fa882314fdfc0b1a811e6ad9e106d0bcf25181c9a993f)(8f10286e51f4d480846d4acb98f4a380)
+        version: 2.3.3(8f10286e51f4d480846d4acb98f4a380)
       waku:
         specifier: 1.0.0-beta.0
         version: 1.0.0-beta.0(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.3)(vite@8.0.16))(@types/node@26.1.0)(@vitejs/devtools@0.1.22)(babel-plugin-react-compiler@1.0.0)(esbuild@0.28.1)(jiti@2.7.0)(react-dom@19.2.7(react@19.2.7))(react-server-dom-webpack@19.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(webpack@5.107.2(esbuild@0.28.1)(postcss@8.5.13)))(react@19.2.7)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
@@ -526,7 +525,7 @@ importers:
         version: 19.2.7(react@19.2.7)
       vocs:
         specifier: 'catalog:'
-        version: 2.3.3(patch_hash=3d4206fc234a9eba5f9fa882314fdfc0b1a811e6ad9e106d0bcf25181c9a993f)(21d88df071ce294bc6d54a5319e7caa4)
+        version: 2.3.3(21d88df071ce294bc6d54a5319e7caa4)
       waku:
         specifier: 1.0.0-beta.0
         version: 1.0.0-beta.0(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.3)(vite@8.0.16))(@types/node@26.1.0)(@vitejs/devtools@0.1.22)(babel-plugin-react-compiler@1.0.0)(esbuild@0.28.1)(jiti@2.7.0)(react-dom@19.2.7(react@19.2.7))(react-server-dom-webpack@19.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(webpack@5.107.2(esbuild@0.28.1)(postcss@8.5.13)))(react@19.2.7)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0)
@@ -33266,7 +33265,7 @@ snapshots:
 
   vlq@1.0.1: {}
 
-  vocs@2.3.3(patch_hash=3d4206fc234a9eba5f9fa882314fdfc0b1a811e6ad9e106d0bcf25181c9a993f)(21d88df071ce294bc6d54a5319e7caa4):
+  vocs@2.3.3(21d88df071ce294bc6d54a5319e7caa4):
     dependencies:
       '@base-ui/react': 1.6.0(@date-fns/tz@1.4.1)(@types/react@19.2.17)(date-fns@4.4.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@codesandbox/sandpack-react': 2.20.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -33384,7 +33383,7 @@ snapshots:
       - vue-template-compiler
       - vue-template-es2015-compiler
 
-  vocs@2.3.3(patch_hash=3d4206fc234a9eba5f9fa882314fdfc0b1a811e6ad9e106d0bcf25181c9a993f)(8f10286e51f4d480846d4acb98f4a380):
+  vocs@2.3.3(8f10286e51f4d480846d4acb98f4a380):
     dependencies:
       '@base-ui/react': 1.6.0(@date-fns/tz@1.4.1)(@types/react@19.2.17)(date-fns@4.4.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@codesandbox/sandpack-react': 2.20.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
