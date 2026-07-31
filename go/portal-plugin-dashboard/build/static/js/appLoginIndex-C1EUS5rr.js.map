@@ -1,0 +1,1 @@
+{"version":3,"file":"appLoginIndex-C1EUS5rr.js","names":[],"sources":["../../../src/ui/routes/appLoginIndex.tsx"],"sourcesContent":["import { AppLoginIndex } from \"@lumeweb/portal-framework-auth\";\n\nexport default AppLoginIndex;\n"],"mappings":"sCAEA,IAAA,EAAe"}

@@ -1,0 +1,1 @@
+{"version":3,"file":"routes-BBfLOwcV.js","names":[],"sources":["../../../src/ui/routes/index.tsx"],"sourcesContent":["import { AuthedIndex as Index } from \"@lumeweb/portal-framework-auth\";\n\nexport default Index;"],"mappings":"sCAEA,IAAA,EAAe"}

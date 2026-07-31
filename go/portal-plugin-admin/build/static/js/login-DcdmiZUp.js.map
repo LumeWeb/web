@@ -1,0 +1,1 @@
+{"version":3,"file":"login-DcdmiZUp.js","names":[],"sources":["../../../src/ui/routes/login.tsx"],"sourcesContent":["import { LoginIndex } from \"@lumeweb/portal-framework-auth\";\n\nexport default LoginIndex;"],"mappings":"sCAEA,IAAA,EAAe"}
