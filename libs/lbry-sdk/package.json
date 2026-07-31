@@ -47,7 +47,7 @@
   },
   "scripts": {
     "build": "tsdown",
-    "build:wasm": "cd wasm/go && tinygo build -o ../../src/wasm/lbry-sdk.wasm -target wasm -no-debug .",
+    "build:wasm": "cd wasm/go && tinygo build -o ../../src/wasm/lbry-sdk.wasm -target wasm -no-debug . && cp \"$(tinygo env TINYGOROOT)/targets/wasm_exec.js\" ../../src/wasm/wasm_exec.js",
     "generate": "cd wasm/go/tools/gencontract && go run . -exports ../../exports -outdir ../../../src/wasm",
     "dev": "tsdown --watch",
     "lint": "oxlint src --max-warnings 0",
