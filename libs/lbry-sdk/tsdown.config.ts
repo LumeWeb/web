@@ -1,6 +1,6 @@
 import { defineConfig } from "tsdown";
 import { createLibraryConfig } from "@lumeweb/tsdown-config";
-import { goWasm } from "./src/rollup-plugin-go-wasm";
+import { goWasm } from "./src/rollup-plugin-go-wasm.ts";
 
 export default defineConfig(
   createLibraryConfig(
