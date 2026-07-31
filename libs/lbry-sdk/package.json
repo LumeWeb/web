@@ -48,7 +48,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "tsdown --config-loader tsx",
+    "build": "tsdown",
     "build:wasm": "cd wasm/go && tinygo build -o ../../src/wasm/lbry-sdk.wasm -target wasm -no-debug .",
     "generate": "cd wasm/go/tools/gencontract && go run . -exports ../../exports -outdir ../../../src/wasm",
     "dev": "tsdown --watch",
