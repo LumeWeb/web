@@ -62,12 +62,15 @@ export class TransactionBuilder extends WasmBase {
     if (!validateFeeRate(opts.feePerByte)) {
       throw new Error(`Invalid fee rate: ${opts.feePerByte}`);
     }
-    // Validate claim outputs: isClaim requires claimType
+    // Validate claim outputs: isClaim requires valid claimType (1-3)
     for (const o of outputs) {
-      if (o.isClaim && (o as any).claimType == null) {
-        throw new Error(
-          `Claim output to ${o.address} is missing claimType (0=none, 1=name, 2=update, 3=support)`
-        );
+      if (o.isClaim) {
+        const ct = (o as any).claimType;
+        if (ct == null || ct < 1 || ct > 3) {
+          throw new Error(
+            `Claim output to ${o.address} has invalid claimType ${ct} (expected 1=name, 2=update, 3=support)`
+          );
+        }
       }
     }
     // Convert bigint amounts to string for WASM JSON serialization

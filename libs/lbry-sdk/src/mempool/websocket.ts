@@ -30,6 +30,7 @@ import type {
   MempoolStatsMessage,
 } from "@/mempool/types";
 import { assertTrustedUrl } from "@/mempool/url-validation";
+import { parseJsonBigInt } from "@/mempool/parse";
 
 /** Max reconnect attempts before giving up. */
 const MAX_RECONNECT_ATTEMPTS = 10;
@@ -83,7 +84,7 @@ export class MempoolWebSocket {
       })
       .onMessage((_i, ev) => {
         try {
-          const msg = JSON.parse(ev.data as string) as WebSocketMessage;
+          const msg = parseJsonBigInt(ev.data as string) as WebSocketMessage;
           this.emit(msg);
         } catch {
           // Ignore unparseable messages

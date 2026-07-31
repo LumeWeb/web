@@ -255,8 +255,8 @@ describe("Security regression tests", () => {
   });
 
   // ── Kody #2: claimType=0 not rejected by falsy check ──
-  describe("Kody #2: claimType=0 not rejected", () => {
-    test("build does not throw 'missing claimType' when claimType=0", () => {
+  describe("Kody #2: claimType range validation (1-3)", () => {
+    test("build throws 'invalid claimType' when claimType=0", () => {
       const mockWasm = createMockWasm();
       const wallet = new LbryWalletManager({ exports: mockWasm } as any);
       const txBuilder = new TransactionBuilder({ exports: mockWasm } as any);
@@ -268,11 +268,44 @@ describe("Security regression tests", () => {
         isClaim: true,
         claimType: 0,
       };
-      // claimType=0 should NOT trigger "missing claimType" error
+      expect(() =>
+        txBuilder.build(handle, [input], [output as any], { feePerByte: 5 })
+      ).toThrow(/invalid claimType/);
+    });
+
+    test("build throws 'invalid claimType' when claimType=4", () => {
+      const mockWasm = createMockWasm();
+      const wallet = new LbryWalletManager({ exports: mockWasm } as any);
+      const txBuilder = new TransactionBuilder({ exports: mockWasm } as any);
+      const { handle } = wallet.create();
+      const input = makeTxInput({ txid: "a".repeat(64), vout: 0, amount: 100000000n });
+      const output = {
+        address: "bCpaaBBEQTFcuKULHGSDa1dpVZpTuK91jQ",
+        amount: 50000000n,
+        isClaim: true,
+        claimType: 4,
+      };
+      expect(() =>
+        txBuilder.build(handle, [input], [output as any], { feePerByte: 5 })
+      ).toThrow(/invalid claimType/);
+    });
+
+    test("build accepts claimType=1 (name)", () => {
+      const mockWasm = createMockWasm();
+      const wallet = new LbryWalletManager({ exports: mockWasm } as any);
+      const txBuilder = new TransactionBuilder({ exports: mockWasm } as any);
+      const { handle } = wallet.create();
+      const input = makeTxInput({ txid: "a".repeat(64), vout: 0, amount: 100000000n });
+      const output = {
+        address: "bCpaaBBEQTFcuKULHGSDa1dpVZpTuK91jQ",
+        amount: 50000000n,
+        isClaim: true,
+        claimType: 1,
+      };
       try {
         txBuilder.build(handle, [input], [output as any], { feePerByte: 5 });
       } catch (e) {
-        expect((e as Error).message).not.toMatch(/missing claimType/);
+        expect((e as Error).message).not.toMatch(/claimType/);
       }
     });
   });
