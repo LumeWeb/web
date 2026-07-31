@@ -4,6 +4,8 @@
   "type": "module",
   "files": [
     "dist",
+    "src/wasm/lbry-sdk.wasm",
+    "src/wasm/wasm_exec.js",
     "package.json"
   ],
   "main": "./dist/esm/index.js",

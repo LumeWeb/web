@@ -3,23 +3,21 @@
   "extends": ["//"],
   "tasks": {
     "generate": {
-      "inputs": [
-        "wasm/go/exports/**/*.go",
-        "wasm/go/tools/gencontract/**/*.go",
-        "wasm/go/tools/gencontract/go.mod"
-      ],
-      "outputs": [
-        "src/wasm/types.generated.ts",
-        "src/wasm/contract.generated.json"
-      ]
+      "inputs": ["wasm/go/tools/gencontract/**", "wasm/go/exports/**"],
+      "outputs": ["src/wasm/contract.generated.json", "src/wasm/types.generated.ts"]
+    },
+    "build:wasm": {
+      "dependsOn": ["generate"],
+      "inputs": ["wasm/go/**/*.go", "wasm/go/go.mod", "wasm/go/go.sum"],
+      "outputs": ["src/wasm/lbry-sdk.wasm"]
     },
     "build": {
-      "dependsOn": ["$TURBO_EXTENDS$", "generate"],
+      "dependsOn": ["generate", "build:wasm", "@lumeweb/tsdown-config#build:config", "^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**"]
     },
     "test": {
-      "dependsOn": ["$TURBO_EXTENDS$", "generate"]
+      "dependsOn": ["generate", "build:wasm", "^build"]
     }
   }
 }
