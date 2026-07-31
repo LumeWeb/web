@@ -308,6 +308,45 @@ describe("Security regression tests", () => {
         expect((e as Error).message).not.toMatch(/claimType/);
       }
     });
+
+    test("build rejects NaN claimType", () => {
+      const mockWasm = createMockWasm();
+      const wallet = new LbryWalletManager({ exports: mockWasm } as any);
+      const txBuilder = new TransactionBuilder({ exports: mockWasm } as any);
+      const { handle } = wallet.create();
+      const input = makeTxInput({ txid: "a".repeat(64), vout: 0, amount: 100000000n });
+      expect(() =>
+        txBuilder.build(handle, [input], [
+          { address: "bCpaaBBEQTFcuKULHGSDa1dpVZpTuK91jQ", amount: 50000000n, isClaim: true, claimType: NaN } as any,
+        ], { feePerByte: 5 })
+      ).toThrow(/invalid claimType/);
+    });
+
+    test("build rejects fractional claimType", () => {
+      const mockWasm = createMockWasm();
+      const wallet = new LbryWalletManager({ exports: mockWasm } as any);
+      const txBuilder = new TransactionBuilder({ exports: mockWasm } as any);
+      const { handle } = wallet.create();
+      const input = makeTxInput({ txid: "a".repeat(64), vout: 0, amount: 100000000n });
+      expect(() =>
+        txBuilder.build(handle, [input], [
+          { address: "bCpaaBBEQTFcuKULHGSDa1dpVZpTuK91jQ", amount: 50000000n, isClaim: true, claimType: 1.5 } as any,
+        ], { feePerByte: 5 })
+      ).toThrow(/invalid claimType/);
+    });
+
+    test("build rejects string claimType", () => {
+      const mockWasm = createMockWasm();
+      const wallet = new LbryWalletManager({ exports: mockWasm } as any);
+      const txBuilder = new TransactionBuilder({ exports: mockWasm } as any);
+      const { handle } = wallet.create();
+      const input = makeTxInput({ txid: "a".repeat(64), vout: 0, amount: 100000000n });
+      expect(() =>
+        txBuilder.build(handle, [input], [
+          { address: "bCpaaBBEQTFcuKULHGSDa1dpVZpTuK91jQ", amount: 50000000n, isClaim: true, claimType: "1" } as any,
+        ], { feePerByte: 5 })
+      ).toThrow(/invalid claimType/);
+    });
   });
 
   // ── Kody #2: isAllowedWasmUrl rejects bare / paths ──

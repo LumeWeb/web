@@ -66,7 +66,7 @@ export class TransactionBuilder extends WasmBase {
     for (const o of outputs) {
       if (o.isClaim) {
         const ct = (o as any).claimType;
-        if (ct == null || ct < 1 || ct > 3) {
+        if (!Number.isInteger(ct) || ct < 1 || ct > 3) {
           throw new Error(
             `Claim output to ${o.address} has invalid claimType ${ct} (expected 1=name, 2=update, 3=support)`
           );
