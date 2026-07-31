@@ -2,12 +2,7 @@
   "name": "@lumeweb/lbry-sdk",
   "version": "0.0.1",
   "type": "module",
-  "files": [
-    "dist",
-    "src/wasm/lbry-sdk.wasm",
-    "src/wasm/wasm_exec.js",
-    "package.json"
-  ],
+  "files": ["dist", "package.json"],
   "main": "./dist/esm/index.js",
   "types": "./dist/esm/index.d.ts",
   "exports": {
