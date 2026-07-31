@@ -9,7 +9,6 @@
  */
 
 import type { SignedTx } from "@/tx/types";
-import { divAmount } from "@/tx/amount";
 
 /** Dust threshold in satoshis — outputs below this are uneconomical */
 export const DUST_THRESHOLD = 546;
@@ -287,7 +286,7 @@ export function buildReview(tx: SignedTx): ReviewResult {
     return { warnings, valid: false };
   }
 
-  if (divAmount(tx.fee, tx.size) < FEE_FLOOR) {
+  if (tx.fee < BigInt(FEE_FLOOR) * BigInt(tx.size)) {
     warnings.push({
       field: "fee",
       message: `Fee rate below floor (${FEE_FLOOR} sat/vB)`,
@@ -295,7 +294,7 @@ export function buildReview(tx: SignedTx): ReviewResult {
     });
   }
 
-  if (tx.fee > 0n && divAmount(tx.fee, tx.size) > FEE_CEILING) {
+  if (tx.fee > 0n && tx.fee > BigInt(FEE_CEILING) * BigInt(tx.size)) {
     warnings.push({
       field: "fee",
       message: `Fee rate above ceiling (${FEE_CEILING} sat/vB)`,

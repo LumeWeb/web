@@ -198,6 +198,6 @@ export interface MempoolStatsMessage extends WebSocketMessage {
   type: "stats";
   count: number;
   vsize: number;
-  total_fee: number;
+  total_fee: bigint;
   fee_histogram: Array<[number, number]>;
 }

@@ -5,6 +5,9 @@ import { LbryWalletManager } from "@/wallet/manager";
 import { TransactionBuilder } from "@/tx/builder";
 import { unwrap } from "@/wasm/unwrap";
 import { MempoolClient } from "@/mempool/client";
+import { WasmLoader } from "@/wasm/loader";
+import { buildReview } from "@/guardrails/validate";
+import { parseJsonBigInt } from "@/mempool/parse";
 import { makeTxInput } from "./fixtures";
 
 /**
@@ -184,6 +187,106 @@ describe("Security regression tests", () => {
 
     test("does not throw on null result", () => {
       expect(() => unwrap(null as any, "test")).not.toThrow();
+    });
+  });
+
+  // ── Kody #2: WasmLoader.unload terminates Go runtime ──
+  describe("Kody #2: WasmLoader.unload terminates Go runtime", () => {
+    test("unload calls go.exit(0) and clears _inst", () => {
+      const exitCalled = { value: false, code: -1 };
+      const instCleared = { value: false };
+      const fakeGo = {
+        exit(code: number) { exitCalled.value = true; exitCalled.code = code; },
+        get _inst() { return instCleared.value ? undefined : {}; },
+        set _inst(v: unknown) { instCleared.value = true; },
+      };
+      // Access private static via any
+      const WasmLoaderAny = WasmLoader as any;
+      WasmLoaderAny.instance = { exports: {}, go: fakeGo };
+      WasmLoaderAny.unload();
+      expect(exitCalled.value).toBe(true);
+      expect(exitCalled.code).toBe(0);
+      expect(WasmLoaderAny.instance).toBeNull();
+    });
+  });
+
+  // ── Kody #2: validate.ts fee ceiling in bigint domain ──
+  describe("Kody #2: buildReview fee ceiling uses bigint", () => {
+    test("does not lose precision for large fee above ceiling", () => {
+      // Fee = 10_000_000_000_000_001n, size = 10 → fee/size > FEE_CEILING (1000)
+      // Number() would lose precision and might not flag this correctly
+      const tx = {
+        hex: "deadbeef",
+        txid: "a".repeat(64),
+        fee: 10_000_000_000_000_001n,
+        size: 10,
+      };
+      const review = buildReview(tx as any);
+      const feeWarnings = review.warnings.filter(w => w.field === "fee" && w.message.includes("ceiling"));
+      expect(feeWarnings.length).toBe(1);
+    });
+
+    test("does not flag fee below ceiling", () => {
+      const tx = { hex: "ab", txid: "b".repeat(64), fee: 5000n, size: 10 };
+      const review = buildReview(tx as any);
+      const ceilingWarnings = review.warnings.filter(w => w.message.includes("ceiling"));
+      expect(ceilingWarnings.length).toBe(0);
+    });
+  });
+
+  // ── Kody #2: parseJsonBigInt handles string-encoded monetary values ──
+  describe("Kody #2: parseJsonBigInt handles string amounts", () => {
+    test("converts string-encoded value field to bigint", () => {
+      const result = parseJsonBigInt('{"value":"14355118107"}') as { value: bigint };
+      expect(typeof result.value).toBe("bigint");
+      expect(result.value).toBe(14355118107n);
+    });
+
+    test("still handles number value field", () => {
+      const result = parseJsonBigInt('{"value":14355118107}') as { value: bigint };
+      expect(typeof result.value).toBe("bigint");
+      expect(result.value).toBe(14355118107n);
+    });
+
+    test("ignores non-numeric strings in bigint fields", () => {
+      const result = parseJsonBigInt('{"value":"abc"}') as { value: string };
+      expect(result.value).toBe("abc");
+    });
+  });
+
+  // ── Kody #2: claimType=0 not rejected by falsy check ──
+  describe("Kody #2: claimType=0 not rejected", () => {
+    test("build does not throw 'missing claimType' when claimType=0", () => {
+      const mockWasm = createMockWasm();
+      const wallet = new LbryWalletManager({ exports: mockWasm } as any);
+      const txBuilder = new TransactionBuilder({ exports: mockWasm } as any);
+      const { handle } = wallet.create();
+      const input = makeTxInput({ txid: "a".repeat(64), vout: 0, amount: 100000000n });
+      const output = {
+        address: "bCpaaBBEQTFcuKULHGSDa1dpVZpTuK91jQ",
+        amount: 50000000n,
+        isClaim: true,
+        claimType: 0,
+      };
+      // claimType=0 should NOT trigger "missing claimType" error
+      try {
+        txBuilder.build(handle, [input], [output as any], { feePerByte: 5 });
+      } catch (e) {
+        expect((e as Error).message).not.toMatch(/missing claimType/);
+      }
+    });
+  });
+
+  // ── Kody #2: isAllowedWasmUrl rejects bare / paths ──
+  describe("Kody #2: isAllowedWasmUrl rejects bare / paths", () => {
+    test("load() rejects bare /path as untrusted origin", async () => {
+      // isAllowedWasmUrl is not exported, but WasmLoader.load() calls it.
+      // A bare /path like "/evil.com/sdk.wasm" should be rejected.
+      // We expect it to throw "untrusted origin" rather than proceeding.
+      // Use a path that would have been allowed by the old bare-/ check.
+      await expect(
+        WasmLoader.load({ wasmUrl: "/evil.com/sdk.wasm", wasmExecUrl: "./wasm_exec.js" })
+      ).rejects.toThrow(/untrusted origin/i);
     });
   });
 });

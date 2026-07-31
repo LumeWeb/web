@@ -62,11 +62,11 @@ export class TransactionBuilder extends WasmBase {
     if (!validateFeeRate(opts.feePerByte)) {
       throw new Error(`Invalid fee rate: ${opts.feePerByte}`);
     }
-    // Validate claim outputs: isClaim requires a non-zero claimType
+    // Validate claim outputs: isClaim requires claimType
     for (const o of outputs) {
-      if (o.isClaim && !o.claimType) {
+      if (o.isClaim && (o as any).claimType == null) {
         throw new Error(
-          `Claim output to ${o.address} is missing claimType (1=name, 2=update, 3=support)`
+          `Claim output to ${o.address} is missing claimType (0=none, 1=name, 2=update, 3=support)`
         );
       }
     }

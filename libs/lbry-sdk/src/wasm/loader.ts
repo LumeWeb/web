@@ -52,10 +52,10 @@ const DEFAULT_EXEC_URL = new URL("wasm_exec.js", DEFAULT_WASM_BASE).href;
  */
 function isAllowedWasmUrl(url: string): boolean {
   try {
-    // Allow relative paths (no protocol/host) — check before URL parsing
-    // so "./lbry-sdk.wasm" or "/wasm/lbry-sdk.wasm" work without throwing
+    // Allow relative paths only (./ or ../) — no protocol/host
     // Reject protocol-relative URLs ("//evil.com/sdk.wasm") which bypass Origin checks
-    if ((url.startsWith("/") && !url.startsWith("//")) || url.startsWith("./") || url.startsWith("../")) {
+    // Reject bare "/path" which could resolve to attacker-controlled host
+    if (url.startsWith("./") || url.startsWith("../")) {
       return true;
     }
     const parsed = new URL(url);
@@ -246,6 +246,12 @@ export class WasmLoader {
    * Subsequent calls to `load()` will re-initialize from scratch.
    */
   static unload(): void {
+    if (this.instance?.go) {
+      try {
+        (this.instance.go as any).exit(0);
+        (this.instance.go as any)._inst = undefined;
+      } catch {}
+    }
     this.instance = null;
     this.loading = null;
     delete (globalThis as Record<string, unknown>).__lbrySDK__;

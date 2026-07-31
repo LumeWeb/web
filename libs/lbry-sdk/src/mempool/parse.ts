@@ -42,7 +42,11 @@ const BIGINT_FIELDS = new Set([
  */
 export function parseJsonBigInt(text: string): unknown {
   return JSON.parse(text, (key, value) => {
-    if (BIGINT_FIELDS.has(key) && typeof value === "number") {
+    if (
+      BIGINT_FIELDS.has(key) &&
+      (typeof value === "number" ||
+        (typeof value === "string" && /^-?\d+$/.test(value)))
+    ) {
       return BigInt(value);
     }
     return value;
