@@ -1,12 +1,12 @@
----
-@lumeweb/lbry-sdk: minor
----
+## 0.0.1 (2026-07-31)
 
-## Features
+### Features
+
+#### Features
 
 - browser-based LBRY wallet SDK with Go-WASM
 
-## Fixes
+### Fixes
 
 - Kody code review — 6 bugs (high/medium)
 - WebSocket bigint parsing + claimType range validation (1-3)
