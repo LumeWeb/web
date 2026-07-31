@@ -1,3 +1,11 @@
+## 0.0.2 (2026-07-31)
+
+### Fixes
+
+#### Fixes
+
+- remove duplicate wasm files from npm package
+
 ## 0.0.1 (2026-07-31)
 
 ### Features
