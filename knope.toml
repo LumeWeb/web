@@ -21,6 +21,10 @@ changelog = "apps/lumeweb.com/CHANGELOG.md"
 versioned_files = ["libs/pinner/package.json"]
 changelog = "libs/pinner/CHANGELOG.md"
 
+[packages."@lumeweb/lbry-sdk"]
+versioned_files = ["libs/lbry-sdk/package.json"]
+changelog = "libs/lbry-sdk/CHANGELOG.md"
+
 [packages."@lumeweb/portal-app-shell"]
 versioned_files = ["apps/portal-app-shell/package.json"]
 changelog = "apps/portal-app-shell/CHANGELOG.md"
