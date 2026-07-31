@@ -37,7 +37,7 @@ export interface WasmLoaderOptions {
 
 const DEFAULT_WASM_BASE =
   typeof import.meta !== "undefined" && import.meta.url
-    ? new URL("./wasm/", import.meta.url).href
+    ? new URL("./", import.meta.url).href
     : "/lbry-sdk/wasm/";
 
 const DEFAULT_WASM_URL = new URL("lbry-sdk.wasm", DEFAULT_WASM_BASE).href;
