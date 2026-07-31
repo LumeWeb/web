@@ -44,6 +44,9 @@ Thumbs.db
 .nx/cache
 libs/*/**/generated
 !libs/portal-sdk/src/account/generated
+libs/*/**/*.generated.*
+libs/portal-sdk/src/**/generated/**
+!libs/portal-sdk/src/account/generated/**
 libs/*/**/pnpm-lock.yaml
 apps/*/**/pnpm-lock.yaml
 apps/*/.astro

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://turborepo.org/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "generate": {
+      "inputs": [
+        "wasm/go/exports/**/*.go",
+        "wasm/go/tools/gencontract/**/*.go",
+        "wasm/go/tools/gencontract/go.mod"
+      ],
+      "outputs": [
+        "src/wasm/types.generated.ts",
+        "src/wasm/contract.generated.json"
+      ]
+    },
+    "build": {
+      "dependsOn": ["$TURBO_EXTENDS$", "generate"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/**"]
+    },
+    "test": {
+      "dependsOn": ["$TURBO_EXTENDS$", "generate"]
+    }
+  }
+}

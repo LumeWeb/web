@@ -1,0 +1,3 @@
+libs/lbry-sdk/src/wasm/*.wasm
+libs/lbry-sdk/src/wasm/wasm_exec.js
+libs/lbry-sdk/src/wasm/wasm/
