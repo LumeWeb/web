@@ -32,8 +32,8 @@ export default defineConfig(
       // Copy WASM binary and wasm_exec.js to dist so the runtime loader
       // can fetch them relative to import.meta.url (dist/esm/wasm/).
       copy: [
-        { from: "src/wasm/lbry-sdk.wasm", to: "dist/esm/wasm" },
-        { from: "src/wasm/wasm_exec.js", to: "dist/esm/wasm" },
+        { from: "src/wasm/lbry-sdk.wasm", to: "dist/esm/wasm/wasm" },
+        { from: "src/wasm/wasm_exec.js", to: "dist/esm/wasm/wasm" },
       ],
     }
   )
