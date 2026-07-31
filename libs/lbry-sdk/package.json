@@ -43,10 +43,6 @@
       "types": "./dist/esm/guardrails/index.d.ts",
       "import": "./dist/esm/guardrails/index.js"
     },
-    "./wasm-exec": {
-      "types": "./dist/esm/wasm/wasm-exec.d.ts",
-      "import": "./dist/esm/wasm/wasm-exec.js"
-    },
     "./package.json": "./package.json"
   },
   "scripts": {
