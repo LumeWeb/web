@@ -37,6 +37,24 @@ jobs:
       - name: Setup JS
         uses: LumeWeb/workflows/.github/actions/setup-js@develop
 
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+
+      - name: Setup TinyGo
+        uses: acifani/setup-tinygo@v2
+        with:
+          tinygo-version: "0.36.0"
+
+      - name: Set TinyGo env
+        run: |
+          echo "TINYGOROOT=$(dirname $(dirname $(which tinygo)))" >> "$GITHUB_ENV"
+          echo "TINYGOPATH=$(which tinygo)" >> "$GITHUB_ENV"
+
+      - name: Generate contract types
+        run: pnpm --filter=@lumeweb/lbry-sdk generate
+
       - name: Build
         run: pnpm build
 
