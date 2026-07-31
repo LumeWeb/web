@@ -1,0 +1,48 @@
+name: LBRY SDK Test
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "libs/lbry-sdk/**"
+      - ".github/workflows/lbry-sdk-test.yml"
+  pull_request:
+    branches: [develop, main]
+    paths:
+      - "libs/lbry-sdk/**"
+      - ".github/workflows/lbry-sdk-test.yml"
+  workflow_dispatch:
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup
+        uses: LumeWeb/workflows/.github/actions/setup-all@develop
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+
+      - name: Generate contract types
+        run: pnpm --filter=@lumeweb/lbry-sdk generate
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+
+      - name: Run tests
+        run: pnpm test --filter=@lumeweb/lbry-sdk
+
+      - name: Run Go unit tests
+        working-directory: libs/lbry-sdk/wasm/go
+        run: |
+          go test ./exports/ -count=1 -v

@@ -1,0 +1,83 @@
+{
+  "name": "@lumeweb/lbry-sdk",
+  "version": "0.1.0",
+  "type": "module",
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "main": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js"
+    },
+    "./wasm": {
+      "types": "./dist/esm/wasm/index.d.ts",
+      "import": "./dist/esm/wasm/index.js"
+    },
+    "./mempool": {
+      "types": "./dist/esm/mempool/index.d.ts",
+      "import": "./dist/esm/mempool/index.js"
+    },
+    "./wallet": {
+      "types": "./dist/esm/wallet/index.d.ts",
+      "import": "./dist/esm/wallet/index.js"
+    },
+    "./tx": {
+      "types": "./dist/esm/tx/index.d.ts",
+      "import": "./dist/esm/tx/index.js"
+    },
+    "./claims": {
+      "types": "./dist/esm/claims/index.d.ts",
+      "import": "./dist/esm/claims/index.js"
+    },
+    "./storage": {
+      "types": "./dist/esm/storage/index.d.ts",
+      "import": "./dist/esm/storage/index.js"
+    },
+    "./guardrails": {
+      "types": "./dist/esm/guardrails/index.d.ts",
+      "import": "./dist/esm/guardrails/index.js"
+    },
+    "./wasm-exec": {
+      "types": "./dist/esm/wasm/wasm-exec.d.ts",
+      "import": "./dist/esm/wasm/wasm-exec.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsdown --config-loader tsx",
+    "build:wasm": "cd wasm/go && tinygo build -o ../../src/wasm/lbry-sdk.wasm -target wasm -no-debug .",
+    "generate": "cd wasm/go/tools/gencontract && go run . -exports ../../exports -outdir ../../../src/wasm",
+    "dev": "tsdown --watch",
+    "lint": "oxlint src --max-warnings 0",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "test:browser": "vitest run --browser",
+    "test:browser:watch": "vitest --browser",
+    "test:browser:ui": "vitest --browser --ui",
+    "test:live": "vitest run --config vitest.live.config.ts"
+  },
+  "dependencies": {
+    "msw": "catalog:",
+    "websocket-ts": "^2.3.0"
+  },
+  "devDependencies": {
+    "@lumeweb/tsdown-config": "workspace:*",
+    "@types/node": "^22.0.0",
+    "@vitest/browser-playwright": "catalog:",
+    "oxlint-tsgolint": "catalog:",
+    "playwright": "catalog:",
+    "rolldown": "^1.0.0",
+    "tsdown": "catalog:",
+    "vitest": "catalog:"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
+  }
+}
