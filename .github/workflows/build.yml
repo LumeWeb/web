@@ -31,6 +31,7 @@ jobs:
         run: |
           echo "TINYGOROOT=$(dirname $(dirname $(which tinygo)))" >> "$GITHUB_ENV"
           echo "TINYGOPATH=$(which tinygo)" >> "$GITHUB_ENV"
+          echo "$(dirname $(which tinygo))" >> "$GITHUB_PATH"
       - name: Generate contract types
         run: pnpm --filter=@lumeweb/lbry-sdk generate
       - name: Install pinner-cli
