@@ -14,9 +14,15 @@ interface Props {
 const { theme = "dark", lastUpdated, showNewsletter = true } = Astro.props;
 
 const alternatives = await getCollection('alternatives');
+const altPriority = ['Filebase', 'Fleek', 'Infura', 'Pinata'];
 const featuredAlts = alternatives
   .filter(a => a.data.featured)
-  .sort((a, b) => a.data.name.localeCompare(b.data.name));
+  .sort((a, b) => {
+    const ai = altPriority.indexOf(a.data.name);
+    const bi = altPriority.indexOf(b.data.name);
+    return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+  })
+  .slice(0, 5);
 
 const isDark = theme === "dark";
 
