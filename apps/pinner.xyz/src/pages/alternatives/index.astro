@@ -4,7 +4,15 @@ import PageHeader from '@/components/PageHeader';
 import { getCollection } from 'astro:content';
 
 const alternatives = await getCollection('alternatives');
-const sorted = alternatives.sort((a, b) => (a.data.featured === b.data.featured ? a.data.name.localeCompare(b.data.name) : a.data.featured ? -1 : 1));
+const altPriority = ['Filebase', 'Fleek', 'Infura', 'Pinata'];
+const sorted = alternatives.sort((a, b) => {
+  const ai = altPriority.indexOf(a.data.name);
+  const bi = altPriority.indexOf(b.data.name);
+  const aRank = (ai === -1 ? 99 : ai);
+  const bRank = (bi === -1 ? 99 : bi);
+  if (aRank !== bRank) return aRank - bRank;
+  return a.data.name.localeCompare(b.data.name);
+});
 ---
 
 <Layout title="Compare Pinner Against Other Platforms" navTheme="dark" description="A simple index of our comparison pages. If you are weighing Pinner against another hosting, storage, or pinning platform, you can start here.">

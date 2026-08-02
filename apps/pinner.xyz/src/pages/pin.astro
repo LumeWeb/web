@@ -59,9 +59,9 @@ import { config, examples } from "@/lib/config";
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-orange-400"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
             </div>
             <div>
-              <h3 class="text-white text-lg font-medium mb-2">No way to verify storage</h3>
+              <h3 class="text-white text-lg font-medium mb-2">No proof they're still holding it</h3>
               <p class="text-home-text-muted text-base leading-relaxed">
-                Your pinning service says they have your data. But there's no cryptographic proof and no way to verify they're actually holding it.
+                Your pinning service says they have your data. CIDs verify content integrity, but they can't tell you whether the provider is still storing and serving your files. You find out when retrieval fails.
               </p>
             </div>
           </div>
@@ -511,10 +511,10 @@ import { config, examples } from "@/lib/config";
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
           <TrackedButton
             client:load
-            label="Install CLI now"
+            label="Start pinning"
             url={config.registerUrl("pinning")}
-            buttonStyle="default"
-            trackEvent="pin_bottom_cta_install_clicked"
+            buttonStyle="btn-light"
+            trackEvent="pin_bottom_cta_start_clicked"
           />
           <TrackedButton
             client:load
