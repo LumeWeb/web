@@ -29,7 +29,7 @@
   "dependencies": {
     "@refinedev/core": "catalog:",
     "autoprefixer": "^10.5.2",
-    "postcss": "8.5.13",
+    "postcss": "8.5.23",
     "qs-esm": "^8.0.1",
     "tailwindcss": "catalog:"
   },
@@ -50,7 +50,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/node": "^26.1.0",
     "@vitejs/plugin-react": "^6.0.3",
-    "@vitest/browser": "^4.1.9",
+    "@vitest/browser": "^4.1.10",
     "@vitest/spy": "^4.1.9",
     "dotenv-cli": "catalog:",
     "error-stack-parser-es": "^2.0.1",
