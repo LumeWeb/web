@@ -84,6 +84,24 @@ describe("AppLoginIndex redirect security", () => {
     expect(assignSpy).toHaveBeenCalledWith(externalTo);
   });
 
+  it("onSuccess navigates to same-origin absolute OAuth URL via window.location, not go()", async () => {
+    // Same-origin absolute URL (account.example.com on account.example.com) — an
+    // API/OAuth endpoint, not a React route. Must be a full navigation.
+    const oauthTo =
+      "https://account.example.com/api/auth/oauth/authorize?response_type=code";
+    renderWithRouter(
+      "/app-login?app=Example+App&to=" + encodeURIComponent(oauthTo),
+    );
+
+    fillAndSubmit();
+
+    await waitFor(() => expect(capturedOnSuccess).toBeDefined());
+    capturedOnSuccess!({ success: true });
+
+    expect(assignSpy).toHaveBeenCalledTimes(1);
+    expect(assignSpy).toHaveBeenCalledWith(oauthTo);
+  });
+
   it("onSuccess does NOT call window.location for internal relative redirect", async () => {
     renderWithRouter("/app-login?app=TestApp&to=/dashboard");
 

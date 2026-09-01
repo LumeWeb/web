@@ -1,7 +1,7 @@
 import { type GoConfig, useGo, useIsAuthenticated } from "@refinedev/core";
 import { useEffect } from "react";
 
-import { isExternalRedirect, sanitizeRedirectUrl } from "@/dataProviders/auth";
+import { isAbsoluteRedirect, sanitizeRedirectUrl } from "@/dataProviders/auth";
 
 /**
  * Redirects to a target path if the user is already authenticated.
@@ -22,7 +22,7 @@ export function useRedirectIfAuthenticated(
   useEffect(() => {
     if (!isAuthLoading && authData?.authenticated) {
       const safeTo = to ? sanitizeRedirectUrl(to) : fallback;
-      if (isExternalRedirect(safeTo)) {
+      if (isAbsoluteRedirect(safeTo)) {
         window.location.href = safeTo;
         return;
       }

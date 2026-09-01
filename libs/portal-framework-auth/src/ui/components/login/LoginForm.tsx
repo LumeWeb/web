@@ -4,7 +4,7 @@ import React from "react";
 import { Link } from "react-router";
 
 import type { AuthFormRequest } from "@/dataProviders/auth";
-import { isExternalRedirect, sanitizeRedirectUrl } from "@/dataProviders/auth";
+import { isAbsoluteRedirect, sanitizeRedirectUrl } from "@/dataProviders/auth";
 import { getLoginFormConfig } from "../../forms/login";
 
 export interface LoginParams {
@@ -28,7 +28,7 @@ export const LoginForm = () => {
       },
       {
         onSuccess: (result) => {
-          if (result.success && isExternalRedirect(redirectTo)) {
+          if (result.success && isAbsoluteRedirect(redirectTo)) {
             window.location.href = redirectTo;
           }
         },
