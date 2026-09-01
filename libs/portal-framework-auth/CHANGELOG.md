@@ -1,3 +1,12 @@
+## 0.1.13 (2026-09-01)
+
+### Fixes
+
+#### Fixes
+
+- keep absolute redirects out of Refine router
+- do not hard-navigate past OTP hop on login success
+
 ## 0.1.12 (2026-09-01)
 
 ### Fixes
