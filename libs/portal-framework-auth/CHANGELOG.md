@@ -1,3 +1,11 @@
+## 0.1.12 (2026-09-01)
+
+### Fixes
+
+#### Fixes
+
+- navigate same-origin absolute redirects via window.location
+
 ## 0.1.11 (2026-07-21)
 
 ### Fixes
