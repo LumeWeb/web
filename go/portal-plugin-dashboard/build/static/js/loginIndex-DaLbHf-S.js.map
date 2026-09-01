@@ -1,1 +1,0 @@
-{"version":3,"file":"loginIndex-DaLbHf-S.js","names":[],"sources":["../../../src/ui/routes/loginIndex.tsx"],"sourcesContent":["import { LoginIndex } from \"@lumeweb/portal-framework-auth\";\n\nexport default LoginIndex;"],"mappings":"sCAEA,IAAA,EAAe"}

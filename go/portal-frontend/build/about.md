@@ -11,9 +11,9 @@ url: "https://pinner.xyz/about/"
 
 [Start Storing →](https://account.pinner.xyz)[See How It Works →](#how-it-works)
 
-![about image](/_astro/about-1.BPoWUY4S.png)
+![about image](/_astro/how-it-works-1.BPoWUY4S.png)
 
-![about image](/_astro/about-mobile-1.-rS8X-Gf.png)
+![about image](/_astro/how-it-works-mobile-1.-rS8X-Gf.png)
 
 ### What is Lume?
 

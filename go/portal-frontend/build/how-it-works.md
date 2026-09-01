@@ -11,9 +11,9 @@ url: "https://pinner.xyz/how-it-works/"
 
 Understanding how Lume keeps your files private and secure
 
-![about image](/_astro/about-1.BPoWUY4S.png)
+![about image](/_astro/how-it-works-1.BPoWUY4S.png)
 
-![about image](/_astro/about-mobile-1.-rS8X-Gf.png)
+![about image](/_astro/how-it-works-mobile-1.-rS8X-Gf.png)
 
 ### The Interface
 
