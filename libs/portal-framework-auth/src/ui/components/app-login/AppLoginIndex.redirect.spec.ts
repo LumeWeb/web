@@ -1,7 +1,19 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  cleanup,
+} from "@testing-library/react";
 import { createElement } from "react";
-import { MemoryRouter, Route, Routes } from "react-router";
+import {
+  createMemoryRouter,
+  MemoryRouter,
+  Route,
+  RouterProvider,
+  Routes,
+} from "react-router";
 import AppLoginIndex from "./AppLoginIndex";
 
 // --- captured callbacks from mocked useLogin ---
@@ -31,22 +43,25 @@ vi.mock("@/hooks/useRedirectIfAuthenticated", () => ({
   useRedirectIfAuthenticated: vi.fn(),
 }));
 
+const oauthTo =
+  "https://account.example.com/api/auth/oauth/authorize?response_type=code";
+
 describe("AppLoginIndex redirect security", () => {
-  let assignSpy: ReturnType<typeof vi.spyOn>;
+  let replaceSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     capturedOnSuccess = undefined;
     capturedOnError = undefined;
     // Set hostname so sia.example.com is considered same-root-domain
     window.location.hostname = "account.example.com";
-    assignSpy = vi
-      .spyOn(window.location, "href", "set")
+    replaceSpy = vi
+      .spyOn(window.location, "replace")
       .mockImplementation(() => {});
   });
 
   afterEach(() => {
     vi.clearAllMocks();
-    assignSpy.mockRestore();
+    replaceSpy.mockRestore();
     cleanup();
   });
 
@@ -57,38 +72,76 @@ describe("AppLoginIndex redirect security", () => {
     fireEvent.change(screen.getByPlaceholderText("Enter your password"), {
       target: { value: "password123" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /Sign in and continue/ }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /Sign in and continue/ }),
+    );
   };
 
   const renderWithRouter = (initialEntry: string) => {
     // Use createElement to avoid JSX syntax in .ts file
-    const appLoginRoute = createElement(
-      Route,
-      { path: "/app-login", element: createElement(AppLoginIndex) }
-    );
+    const appLoginRoute = createElement(Route, {
+      path: "/app-login",
+      element: createElement(AppLoginIndex),
+    });
     const routes = createElement(Routes, null, appLoginRoute);
-    const router = createElement(MemoryRouter, { initialEntries: [initialEntry] }, routes);
+    const router = createElement(
+      MemoryRouter,
+      { initialEntries: [initialEntry] },
+      routes,
+    );
     render(router);
   };
 
-  it("onSuccess navigates to external same-root-domain URL via window.location", async () => {
+  it("strips an absolute to param from the URL so Refine never consumes it", async () => {
+    const router = createMemoryRouter(
+      [{ path: "/app-login", element: createElement(AppLoginIndex) }],
+      {
+        initialEntries: [
+          "/app-login?app=Example+App&to=" + encodeURIComponent(oauthTo),
+        ],
+      },
+    );
+    render(createElement(RouterProvider, { router }));
+
+    await waitFor(() => {
+      expect(router.state.location.search).not.toContain("to=");
+    });
+    // Other params are preserved.
+    expect(router.state.location.search).toContain("app=");
+  });
+
+  it("keeps a relative to param in the URL", async () => {
+    const router = createMemoryRouter(
+      [{ path: "/app-login", element: createElement(AppLoginIndex) }],
+      {
+        initialEntries: ["/app-login?app=Example+App&to=/dashboard"],
+      },
+    );
+    render(createElement(RouterProvider, { router }));
+
+    await waitFor(() => {
+      expect(router.state.location.search).toContain("to=/dashboard");
+    });
+  });
+
+  it("onSuccess navigates to external same-root-domain URL via window.location.replace", async () => {
     const externalTo = "https://sia.example.com/auth/connect/abc123";
-    renderWithRouter("/app-login?app=TestApp&to=" + encodeURIComponent(externalTo));
+    renderWithRouter(
+      "/app-login?app=TestApp&to=" + encodeURIComponent(externalTo),
+    );
 
     fillAndSubmit();
 
     await waitFor(() => expect(capturedOnSuccess).toBeDefined());
     capturedOnSuccess!({ success: true });
 
-    expect(assignSpy).toHaveBeenCalledTimes(1);
-    expect(assignSpy).toHaveBeenCalledWith(externalTo);
+    expect(replaceSpy).toHaveBeenCalledTimes(1);
+    expect(replaceSpy).toHaveBeenCalledWith(externalTo);
   });
 
-  it("onSuccess navigates to same-origin absolute OAuth URL via window.location, not go()", async () => {
+  it("onSuccess navigates to same-origin absolute OAuth URL via window.location.replace, not go()", async () => {
     // Same-origin absolute URL (account.example.com on account.example.com) — an
-    // API/OAuth endpoint, not a React route. Must be a full navigation.
-    const oauthTo =
-      "https://account.example.com/api/auth/oauth/authorize?response_type=code";
+    // API/OAuth endpoint, not a React route. Must be a full browser navigation.
     renderWithRouter(
       "/app-login?app=Example+App&to=" + encodeURIComponent(oauthTo),
     );
@@ -98,8 +151,8 @@ describe("AppLoginIndex redirect security", () => {
     await waitFor(() => expect(capturedOnSuccess).toBeDefined());
     capturedOnSuccess!({ success: true });
 
-    expect(assignSpy).toHaveBeenCalledTimes(1);
-    expect(assignSpy).toHaveBeenCalledWith(oauthTo);
+    expect(replaceSpy).toHaveBeenCalledTimes(1);
+    expect(replaceSpy).toHaveBeenCalledWith(oauthTo);
   });
 
   it("onSuccess does NOT call window.location for internal relative redirect", async () => {
@@ -110,7 +163,7 @@ describe("AppLoginIndex redirect security", () => {
     await waitFor(() => expect(capturedOnSuccess).toBeDefined());
     capturedOnSuccess!({ success: true });
 
-    expect(assignSpy).not.toHaveBeenCalled();
+    expect(replaceSpy).not.toHaveBeenCalled();
   });
 
   it("onSuccess blocks malicious external redirect", async () => {
@@ -122,7 +175,7 @@ describe("AppLoginIndex redirect security", () => {
     await waitFor(() => expect(capturedOnSuccess).toBeDefined());
     capturedOnSuccess!({ success: true });
 
-    expect(assignSpy).not.toHaveBeenCalled();
+    expect(replaceSpy).not.toHaveBeenCalled();
   });
 
   it("onSuccess blocks protocol-relative redirect", async () => {
@@ -134,24 +187,32 @@ describe("AppLoginIndex redirect security", () => {
     await waitFor(() => expect(capturedOnSuccess).toBeDefined());
     capturedOnSuccess!({ success: true });
 
-    expect(assignSpy).not.toHaveBeenCalled();
+    expect(replaceSpy).not.toHaveBeenCalled();
   });
 
-  it("cancel button navigates to sanitized redirect URL", async () => {
+  it("cancel button navigates to sanitized redirect URL via window.location.replace", async () => {
     const externalTo = "https://sia.example.com/auth/connect/abc123";
-    renderWithRouter("/app-login?app=TestApp&to=" + encodeURIComponent(externalTo));
+    renderWithRouter(
+      "/app-login?app=TestApp&to=" + encodeURIComponent(externalTo),
+    );
 
-    fireEvent.click(screen.getByRole("button", { name: /^Cancel and return to/ }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /^Cancel and return to/ }),
+    );
 
-    expect(assignSpy).toHaveBeenCalledTimes(1);
-    expect(assignSpy).toHaveBeenCalledWith(externalTo);
+    expect(replaceSpy).toHaveBeenCalledTimes(1);
+    expect(replaceSpy).toHaveBeenCalledWith(externalTo);
   });
 
   it("cancel button blocks protocol-relative redirect", async () => {
-    renderWithRouter("/app-login?app=TestApp&to=" + encodeURIComponent("//evil.com"));
+    renderWithRouter(
+      "/app-login?app=TestApp&to=" + encodeURIComponent("//evil.com"),
+    );
 
-    fireEvent.click(screen.getByRole("button", { name: /^Cancel and return to/ }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /^Cancel and return to/ }),
+    );
 
-    expect(assignSpy).not.toHaveBeenCalled();
+    expect(replaceSpy).not.toHaveBeenCalled();
   });
 });

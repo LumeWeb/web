@@ -250,3 +250,104 @@ describe("createAuthProvider check() redirect", () => {
     expect(result.redirectTo).toBe(`/login?to=${encodeURIComponent("/dashboard")}`);
   });
 });
+
+describe("createAuthProvider login() redirectTo", () => {
+  beforeEach(() => {
+    vi.stubGlobal("location", {
+      hostname: "account.example.com",
+      href: "https://account.example.com/",
+      origin: "https://account.example.com",
+      search: "",
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  function loginSdk(loginResult: unknown) {
+    return {
+      account: () => ({
+        login: vi.fn().mockResolvedValue(loginResult),
+        validateOtp: vi.fn().mockResolvedValue(loginResult),
+      }),
+      setAuthToken: vi.fn(),
+    } as never;
+  }
+
+  it("should return redirectTo false for same-origin absolute target on password login", async () => {
+    const sdk = loginSdk({ data: { token: "t" }, success: true });
+    const provider = createAuthProvider(sdk);
+
+    const result = await provider.login({
+      email: "a@b.com",
+      password: "pw",
+      redirectTo:
+        "https://account.example.com/api/auth/oauth/authorize?response_type=code",
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.redirectTo).toBe(false);
+  });
+
+  it("should return redirectTo false for cross-subdomain absolute target on password login", async () => {
+    const sdk = loginSdk({ data: { token: "t" }, success: true });
+    const provider = createAuthProvider(sdk);
+
+    const result = await provider.login({
+      email: "a@b.com",
+      password: "pw",
+      redirectTo: "https://sia.example.com/auth/connect/abc123",
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.redirectTo).toBe(false);
+  });
+
+  it("should preserve relative redirectTo on password login", async () => {
+    const sdk = loginSdk({ data: { token: "t" }, success: true });
+    const provider = createAuthProvider(sdk);
+
+    const result = await provider.login({
+      email: "a@b.com",
+      password: "pw",
+      redirectTo: "/dashboard",
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.redirectTo).toBe("/dashboard");
+  });
+
+  it("should return redirectTo false for absolute target on OTP validation", async () => {
+    const sdk = loginSdk({ data: { token: "t" }, success: true });
+    const provider = createAuthProvider(sdk);
+
+    const result = await provider.login({
+      otp: "123456",
+      redirectTo:
+        "https://account.example.com/api/auth/oauth/authorize?response_type=code",
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.redirectTo).toBe(false);
+  });
+
+  it("should keep the OTP hop on a relative otp route when target is absolute", async () => {
+    const sdk = loginSdk({ data: { otp: true }, success: true });
+    const provider = createAuthProvider(sdk);
+
+    const result = await provider.login({
+      email: "a@b.com",
+      password: "pw",
+      redirectTo:
+        "https://account.example.com/api/auth/oauth/authorize?response_type=code",
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.redirectTo).toBe(
+      `/otp?to=${encodeURIComponent(
+        "https://account.example.com/api/auth/oauth/authorize?response_type=code",
+      )}`,
+    );
+  });
+});

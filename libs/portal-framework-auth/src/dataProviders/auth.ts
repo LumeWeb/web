@@ -196,6 +196,17 @@ export const sanitizeRedirectUrl = (url: string | undefined): string => {
   }
 };
 
+// Sanitized redirect target for a login response. Refine treats a falsy
+// `redirectTo` as "do not navigate", which is what we want for absolute
+// targets: they are API/OAuth endpoints that must be reached through a full
+// `window.location` navigation, never through Refine's client router (which
+// would mangle them into a relative path). The action type only allows a
+// string, so `false` needs the cast.
+const redirectTarget = (url: string | undefined): string | undefined => {
+  const sanitized = sanitizeRedirectUrl(url);
+  return isAbsoluteRedirect(sanitized) ? (false as unknown as string) : sanitized;
+};
+
 export interface AuthCheckFailedEvent {
   error: Error;
 }
@@ -383,8 +394,7 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
               }
             }
             return createAuthResponse({
-              redirectTo:
-                sanitizeRedirectUrl(params.redirectTo) ?? DASHBOARD_PATH,
+              redirectTo: redirectTarget(params.redirectTo),
               success: true,
               successNotification: {
                 description: "You have successfully logged in with 2FA.",
@@ -434,8 +444,7 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
             }
           }
           return createAuthResponse({
-            redirectTo:
-              sanitizeRedirectUrl(params.redirectTo) ?? DASHBOARD_PATH,
+            redirectTo: redirectTarget(params.redirectTo),
             success: true,
             successNotification: {
               description: "You have successfully logged in.",
