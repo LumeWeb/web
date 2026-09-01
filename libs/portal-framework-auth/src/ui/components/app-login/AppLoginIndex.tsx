@@ -1,11 +1,11 @@
-import { sanitizeRedirectUrl } from "@/dataProviders/auth";
+import { isAbsoluteRedirect } from "@/dataProviders/auth";
 import { useRedirectIfAuthenticated } from "@/hooks/useRedirectIfAuthenticated";
-import { useLogin, useParsed } from "@refinedev/core";
+import { useSafeRedirectTo } from "@/hooks/useSafeRedirectTo";
+import { useLogin } from "@refinedev/core";
 import React, { useCallback, useState } from "react";
 import { useSearchParams } from "react-router";
 
 import type { AuthFormRequest } from "@/dataProviders/auth";
-import { isAbsoluteRedirect } from "@/dataProviders/auth";
 import {
   Button,
   Card,
@@ -38,20 +38,12 @@ const ShieldIcon = () => (
   </svg>
 );
 
-interface LoginParams {
-  to: string;
-}
-
 function AppLoginIndex() {
   const [searchParams] = useSearchParams();
   const appName = searchParams.get("app") || "an application";
-  const to = searchParams.get("to");
+  const redirectTo = useSafeRedirectTo();
 
-  const parsed = useParsed<LoginParams>();
-  const rawTo = to ?? parsed.params?.to;
-  const redirectTo = rawTo ? sanitizeRedirectUrl(rawTo) : null;
-
-  useRedirectIfAuthenticated("/dashboard", to);
+  useRedirectIfAuthenticated("/dashboard", redirectTo);
 
   const { mutate: login, isPending } = useLogin<AuthFormRequest>();
 
@@ -78,8 +70,16 @@ function AppLoginIndex() {
         },
         {
           onSuccess: (result) => {
-            if (result.success && redirectTo && isAbsoluteRedirect(redirectTo)) {
-              window.location.href = redirectTo;
+            // `login()` returns `redirectTo: false` only when the target is
+            // absolute and there is no further client-route hop (e.g. OTP);
+            // only then do we take over with a full browser navigation.
+            if (
+              result.success &&
+              result.redirectTo === false &&
+              redirectTo &&
+              isAbsoluteRedirect(redirectTo)
+            ) {
+              window.location.replace(redirectTo);
             }
           },
           onError: (err: any) => {
@@ -97,7 +97,7 @@ function AppLoginIndex() {
 
   const handleCancel = () => {
     if (redirectTo && isAbsoluteRedirect(redirectTo)) {
-      window.location.href = redirectTo;
+      window.location.replace(redirectTo);
     } else if (window.history.length > 1) {
       window.history.back();
     }

@@ -1,10 +1,11 @@
 import { SchemaForm, useResetPasswordUrl } from "@lumeweb/portal-framework-ui";
-import { useLogin, useParsed } from "@refinedev/core";
+import { useLogin } from "@refinedev/core";
 import React from "react";
 import { Link } from "react-router";
 
 import type { AuthFormRequest } from "@/dataProviders/auth";
-import { isAbsoluteRedirect, sanitizeRedirectUrl } from "@/dataProviders/auth";
+import { isAbsoluteRedirect } from "@/dataProviders/auth";
+import { useSafeRedirectTo } from "@/hooks/useSafeRedirectTo";
 import { getLoginFormConfig } from "../../forms/login";
 
 export interface LoginParams {
@@ -13,23 +14,29 @@ export interface LoginParams {
 
 export const LoginForm = () => {
   const { mutate: login } = useLogin<AuthFormRequest>();
-  const parsed = useParsed<LoginParams>();
   const resetPasswordUrl = useResetPasswordUrl();
+  const redirectTo = useSafeRedirectTo();
 
   const onSubmit = async (data: any) => {
-    const redirectTo = sanitizeRedirectUrl(parsed.params?.to);
-
     login(
       {
         email: data.email,
         password: data.password,
-        redirectTo,
+        redirectTo: redirectTo ?? "/dashboard",
         remember: data.remember ?? false,
       },
       {
         onSuccess: (result) => {
-          if (result.success && isAbsoluteRedirect(redirectTo)) {
-            window.location.href = redirectTo;
+          // `login()` returns `redirectTo: false` only for absolute targets
+          // with no further client-route hop (e.g. OTP); only then take over
+          // with a full browser navigation.
+          if (
+            result.success &&
+            result.redirectTo === false &&
+            redirectTo &&
+            isAbsoluteRedirect(redirectTo)
+          ) {
+            window.location.replace(redirectTo);
           }
         },
       },

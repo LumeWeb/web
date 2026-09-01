@@ -23,7 +23,7 @@ export function useRedirectIfAuthenticated(
     if (!isAuthLoading && authData?.authenticated) {
       const safeTo = to ? sanitizeRedirectUrl(to) : fallback;
       if (isAbsoluteRedirect(safeTo)) {
-        window.location.href = safeTo;
+        window.location.replace(safeTo);
         return;
       }
       go({ to: safeTo, type });
