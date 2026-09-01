@@ -136,12 +136,16 @@ const getRootDomain = (hostname: string): string => {
   return parts.length > 2 ? parts.slice(-2).join(".") : hostname;
 };
 
-// Check if a URL is on a different origin than the current page
-export const isExternalRedirect = (url: string): boolean => {
+// Check if a URL is an absolute URL (any origin, including same-origin). These
+// must be handled as a full browser navigation (window.location) rather than a
+// Refine `go()` client-route call, because they may point at API/OAuth
+// endpoints (e.g. https://account.example.com/api/auth/oauth/authorize) that
+// are not React routes. Relative paths are excluded.
+export const isAbsoluteRedirect = (url: string): boolean => {
   try {
     if (url.startsWith("/")) return false;
-    const parsed = new URL(url);
-    return parsed.origin !== window.location.origin;
+    new URL(url);
+    return true;
   } catch {
     return false;
   }

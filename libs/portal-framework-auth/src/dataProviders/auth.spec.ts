@@ -9,7 +9,11 @@ vi.mock("@lumeweb/portal-framework-core", () => ({
   getApiBaseUrl: () => "https://example.com",
 }));
 
-import { createAuthProvider, isExternalRedirect, sanitizeRedirectUrl } from "./auth";
+import {
+  createAuthProvider,
+  isAbsoluteRedirect,
+  sanitizeRedirectUrl,
+} from "./auth";
 
 describe("sanitizeRedirectUrl", () => {
   beforeEach(() => {
@@ -132,53 +136,25 @@ describe("sanitizeRedirectUrl", () => {
   });
 });
 
-describe("isExternalRedirect", () => {
-  beforeEach(() => {
-    vi.stubGlobal("location", {
-      hostname: "account.example.com",
-      href: "https://account.example.com/login",
-      origin: "https://account.example.com",
-    });
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
+describe("isAbsoluteRedirect", () => {
   it("should return false for relative paths", () => {
-    expect(isExternalRedirect("/dashboard")).toBe(false);
+    expect(isAbsoluteRedirect("/dashboard")).toBe(false);
   });
 
-  it("should return false for same origin", () => {
+  it("should return true for same-origin absolute URLs", () => {
     expect(
-      isExternalRedirect("https://account.example.com/dashboard"),
-    ).toBe(false);
-  });
-
-  it("should return true for same-root-domain but different origin (cross-subdomain)", () => {
-    expect(
-      isExternalRedirect("https://sia.example.com/auth/connect/123"),
+      isAbsoluteRedirect("https://account.example.com/api/auth/oauth/authorize?response_type=code"),
     ).toBe(true);
   });
 
-  it("should return true for external domains", () => {
-    expect(isExternalRedirect("https://evil.com/dashboard")).toBe(true);
-  });
-
-  it("should return true for different protocol on same host", () => {
-    expect(
-      isExternalRedirect("http://account.example.com/dashboard"),
-    ).toBe(true);
-  });
-
-  it("should return true for different port on same host", () => {
-    expect(
-      isExternalRedirect("https://account.example.com:3000/dashboard"),
-    ).toBe(true);
+  it("should return true for cross-origin absolute URLs", () => {
+    expect(isAbsoluteRedirect("https://sia.example.com/auth/connect/123")).toBe(
+      true,
+    );
   });
 
   it("should return false for invalid URLs", () => {
-    expect(isExternalRedirect("not-a-url")).toBe(false);
+    expect(isAbsoluteRedirect("not-a-url")).toBe(false);
   });
 });
 

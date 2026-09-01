@@ -8,7 +8,7 @@ import React from "react";
 
 import { useBrand } from "@lumeweb/portal-framework-core";
 import { useRedirectIfAuthenticated } from "@/hooks/useRedirectIfAuthenticated";
-import { isExternalRedirect, sanitizeRedirectUrl } from "@/dataProviders/auth";
+import { isAbsoluteRedirect, sanitizeRedirectUrl } from "@/dataProviders/auth";
 import { AuthPage } from "@/ui/components/common/AuthPage";
 import { AuthPageTitle } from "@/ui/components/common/AuthPageTitle";
 
@@ -34,7 +34,7 @@ function OtpForm(): React.JSX.Element {
         { ...values, redirectTo },
         {
           onSuccess: (result) => {
-            if (result.success && isExternalRedirect(redirectTo)) {
+            if (result.success && isAbsoluteRedirect(redirectTo)) {
               window.location.href = redirectTo;
             }
           },
