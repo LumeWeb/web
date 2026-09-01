@@ -25,7 +25,7 @@ Lume is a decentralized storage portal that connects you directly to storage pro
 
 [Start Storing →](#)
 
-![about image](/_astro/about-2.B4_ehDlV.png)
+![about image](/_astro/how-it-works-2.B4_ehDlV.png)
 
 ![about image](/_astro/how-it-works-mobile-2.ChqCIh8P.png)
 

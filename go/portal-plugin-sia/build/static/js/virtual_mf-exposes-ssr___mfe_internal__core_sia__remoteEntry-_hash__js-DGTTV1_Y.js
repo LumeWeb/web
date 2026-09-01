@@ -1,2 +1,0 @@
-var e={".":async()=>{let e=await import(`./index-DRantNAh.js`),t={};return Object.assign(t,e),Object.defineProperty(t,"__esModule",{value:!0,enumerable:!1}),t},"./apps":async()=>{let e=await import(`./apps-BhBdKb9J.js`),t={};return Object.assign(t,e),Object.defineProperty(t,"__esModule",{value:!0,enumerable:!1}),t}};export{e as default};
-//# sourceMappingURL=virtual_mf-exposes-ssr___mfe_internal__core_sia__remoteEntry-_hash__js-DGTTV1_Y.js.map
