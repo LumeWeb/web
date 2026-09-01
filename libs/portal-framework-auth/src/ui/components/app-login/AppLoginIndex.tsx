@@ -70,7 +70,15 @@ function AppLoginIndex() {
         },
         {
           onSuccess: (result) => {
-            if (result.success && redirectTo && isAbsoluteRedirect(redirectTo)) {
+            // `login()` returns `redirectTo: false` only when the target is
+            // absolute and there is no further client-route hop (e.g. OTP);
+            // only then do we take over with a full browser navigation.
+            if (
+              result.success &&
+              result.redirectTo === false &&
+              redirectTo &&
+              isAbsoluteRedirect(redirectTo)
+            ) {
               window.location.replace(redirectTo);
             }
           },

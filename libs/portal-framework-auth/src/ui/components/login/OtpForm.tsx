@@ -34,7 +34,15 @@ function OtpForm(): React.JSX.Element {
         { ...values, redirectTo: redirectTo ?? "/dashboard" },
         {
           onSuccess: (result) => {
-            if (result.success && redirectTo && isAbsoluteRedirect(redirectTo)) {
+            // `login()` returns `redirectTo: false` only for absolute targets
+            // with no further client-route hop; only then take over with a
+            // full browser navigation.
+            if (
+              result.success &&
+              result.redirectTo === false &&
+              redirectTo &&
+              isAbsoluteRedirect(redirectTo)
+            ) {
               window.location.replace(redirectTo);
             }
           },

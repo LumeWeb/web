@@ -27,7 +27,15 @@ export const LoginForm = () => {
       },
       {
         onSuccess: (result) => {
-          if (result.success && redirectTo && isAbsoluteRedirect(redirectTo)) {
+          // `login()` returns `redirectTo: false` only for absolute targets
+          // with no further client-route hop (e.g. OTP); only then take over
+          // with a full browser navigation.
+          if (
+            result.success &&
+            result.redirectTo === false &&
+            redirectTo &&
+            isAbsoluteRedirect(redirectTo)
+          ) {
             window.location.replace(redirectTo);
           }
         },

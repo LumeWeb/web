@@ -133,7 +133,7 @@ describe("AppLoginIndex redirect security", () => {
     fillAndSubmit();
 
     await waitFor(() => expect(capturedOnSuccess).toBeDefined());
-    capturedOnSuccess!({ success: true });
+    capturedOnSuccess!({ success: true, redirectTo: false });
 
     expect(replaceSpy).toHaveBeenCalledTimes(1);
     expect(replaceSpy).toHaveBeenCalledWith(externalTo);
@@ -149,10 +149,29 @@ describe("AppLoginIndex redirect security", () => {
     fillAndSubmit();
 
     await waitFor(() => expect(capturedOnSuccess).toBeDefined());
-    capturedOnSuccess!({ success: true });
+    capturedOnSuccess!({ success: true, redirectTo: false });
 
     expect(replaceSpy).toHaveBeenCalledTimes(1);
     expect(replaceSpy).toHaveBeenCalledWith(oauthTo);
+  });
+
+  it("onSuccess does NOT hard-navigate when the login result is an OTP hop", async () => {
+    // 2FA account: login() returns redirectTo `/otp?to=...` (relative) so
+    // Refine routes to the OTP page; the component must not replace to the
+    // absolute target and skip OTP validation.
+    renderWithRouter(
+      "/app-login?app=Example+App&to=" + encodeURIComponent(oauthTo),
+    );
+
+    fillAndSubmit();
+
+    await waitFor(() => expect(capturedOnSuccess).toBeDefined());
+    capturedOnSuccess!({
+      success: true,
+      redirectTo: `/otp?to=${encodeURIComponent(oauthTo)}`,
+    });
+
+    expect(replaceSpy).not.toHaveBeenCalled();
   });
 
   it("onSuccess does NOT call window.location for internal relative redirect", async () => {
@@ -161,7 +180,7 @@ describe("AppLoginIndex redirect security", () => {
     fillAndSubmit();
 
     await waitFor(() => expect(capturedOnSuccess).toBeDefined());
-    capturedOnSuccess!({ success: true });
+    capturedOnSuccess!({ success: true, redirectTo: false });
 
     expect(replaceSpy).not.toHaveBeenCalled();
   });
@@ -173,7 +192,7 @@ describe("AppLoginIndex redirect security", () => {
     fillAndSubmit();
 
     await waitFor(() => expect(capturedOnSuccess).toBeDefined());
-    capturedOnSuccess!({ success: true });
+    capturedOnSuccess!({ success: true, redirectTo: false });
 
     expect(replaceSpy).not.toHaveBeenCalled();
   });
@@ -185,7 +204,7 @@ describe("AppLoginIndex redirect security", () => {
     fillAndSubmit();
 
     await waitFor(() => expect(capturedOnSuccess).toBeDefined());
-    capturedOnSuccess!({ success: true });
+    capturedOnSuccess!({ success: true, redirectTo: false });
 
     expect(replaceSpy).not.toHaveBeenCalled();
   });
