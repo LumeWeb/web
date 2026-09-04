@@ -1,6 +1,5 @@
 import {
   cleanProtocolString,
-  env,
   getAccountSubdomain,
   getApiBaseUrl,
   useFramework,
@@ -18,11 +17,27 @@ import { usePluginMeta } from "@/hooks/usePluginMeta";
  *
  *   Config({ portalServer }) → portalConfig.domain → `/api/meta` served by
  *   the vite middleware → framework.portalUrl (PortalMeta.domain) →
- *   getApiBaseUrl({ currentUrl: portalUrl, ... }) → API root host, with the
+ *   getApiBaseUrl({ currentUrl: portalUrl }) → API root host, with the
  *   service subdomain from the dashboard plugin meta.
  *
- * Legacy fallback (browser-derived, same as `useAccountSubdomain`) applies
- * only while the portal config or plugin meta has not loaded.
+ * One root host is resolved and the `account.` subdomain is prepended in both
+ * the canonical (config-loaded) and fallback (browser-derived) paths, so the
+ * two can never diverge:
+ *
+ * - When config is loaded, `getApiBaseUrl` resolves the canonical root from
+ *   `portalUrl` (no subdomain stripping needed — it is already the root).
+ * - Before config loads, `getApiBaseUrl` derives the API base from the
+ *   browser location and strips the dashboard subdomain down to the root
+ *   (matching `getAccountSubdomain`'s root-domain logic), then the same
+ *   `account.` prefix applies.
+ *
+ * Passing `preserveSubdomain` is deliberately omitted: `getApiBaseUrl`
+ * already merges its value with `env.VITE_PORTAL_DOMAIN_IS_ROOT` via `||`, so
+ * the hook riding that flag would be a no-op that can never influence the
+ * result. Root-mode and non-root mode behavior flows from the env/default
+ * inside `getApiBaseUrl`. The protocol and port of the resolved base are
+ * preserved (dev localhost keeps `http` and its port for the
+ * `account.localhost:<port>` vhost).
  */
 export function useAccountApiDomain(): string {
   const { framework } = useFramework();
@@ -30,12 +45,11 @@ export function useAccountApiDomain(): string {
 
   const portalUrl = framework?.portalUrl;
 
-  if (portalUrl && subdomain) {
+  if (subdomain) {
     try {
-      const apiUrl = getApiBaseUrl({
-        currentUrl: portalUrl,
-        preserveSubdomain: !env.VITE_PORTAL_DOMAIN_IS_ROOT,
-      });
+      const apiUrl = getApiBaseUrl(
+        portalUrl ? { currentUrl: portalUrl } : {},
+      );
 
       if (apiUrl) {
         // `host` (not `hostname`) carries the port, so a dev API base like
@@ -50,7 +64,7 @@ export function useAccountApiDomain(): string {
           : `${apiDomain.protocol}//${apiDomain.host}`;
       }
     } catch {
-      // Unparseable API URL — degrade to the legacy browser-derived host.
+      // Unparseable/browser-inaccessible API URL — degrade below.
     }
   }
 

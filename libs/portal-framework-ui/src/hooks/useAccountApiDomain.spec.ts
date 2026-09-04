@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   cleanProtocolString as mockedCleanProtocolString,
-  env as mockedEnv,
   getAccountSubdomain as mockedGetAccountSubdomain,
   getApiBaseUrl as mockedGetApiBaseUrl,
   useFramework as mockedUseFramework,
@@ -54,23 +53,25 @@ describe("useAccountApiDomain", () => {
   it("derives the origin from the canonical portal config, not the browser host", () => {
     const { result } = renderHook(() => useAccountApiDomain());
 
+    // No preserveSubdomain flag is passed: getApiBaseUrl merges it with
+    // env.VITE_PORTAL_DOMAIN_IS_ROOT internally, so passing one here would be
+    // a no-op. Root-mode/port behavior flows from getApiBaseUrl's defaults.
     expect(mockedGetApiBaseUrl).toHaveBeenCalledWith({
       currentUrl: CANONICAL_PORTAL_URL,
-      preserveSubdomain: true, // !env.VITE_PORTAL_DOMAIN_IS_ROOT
     });
     expect(result.current).toBe("https://account.tunnel.pinner.xyz");
     expect(mockedGetAccountSubdomain).not.toHaveBeenCalled();
   });
 
-  it("respects VITE_PORTAL_DOMAIN_IS_ROOT in the preserveSubdomain flag", () => {
-    mockedEnv.VITE_PORTAL_DOMAIN_IS_ROOT = true;
+  it("never doubles the subdomain in root-domain mode (prepends account once)", () => {
+    // Emulate getApiBaseUrl in root mode: it preserves the full canonical
+    // host (no stripping) but the hook must still resolve to a single
+    // `account.`-prefixed origin.
+    vi.mocked(mockedGetApiBaseUrl).mockReturnValue(CANONICAL_PORTAL_URL);
 
-    renderHook(() => useAccountApiDomain());
+    const { result } = renderHook(() => useAccountApiDomain());
 
-    expect(mockedGetApiBaseUrl).toHaveBeenCalledWith({
-      currentUrl: CANONICAL_PORTAL_URL,
-      preserveSubdomain: false,
-    });
+    expect(result.current).toBe("https://account.tunnel.pinner.xyz");
   });
 
   it("keeps the protocol from the normalized API base (e.g. localhost http)", () => {
@@ -81,7 +82,7 @@ describe("useAccountApiDomain", () => {
     expect(result.current).toBe("http://account.localhost:8080");
   });
 
-  it("falls back to the browser-derived host when no portal URL is loaded", () => {
+  it("falls back to the browser-derived API base when no portal URL is loaded", () => {
     vi.mocked(mockedUseFramework).mockReturnValue({
       framework: null,
       isLoading: true,
@@ -89,8 +90,12 @@ describe("useAccountApiDomain", () => {
 
     const { result } = renderHook(() => useAccountApiDomain());
 
-    expect(mockedGetAccountSubdomain).toHaveBeenCalledWith("account");
-    expect(result.current).toBe("https://account.from-browser-host.test");
+    // The same `account.`-prefix resolution runs against getApiBaseUrl's
+    // browser-derived base (no currentUrl), matching getAccountSubdomain's
+    // root-domain logic on one shared path instead of a divergent fallback.
+    expect(mockedGetApiBaseUrl).toHaveBeenCalledWith({});
+    expect(mockedGetAccountSubdomain).not.toHaveBeenCalled();
+    expect(result.current).toBe("https://account.tunnel.pinner.xyz");
   });
 
   it("falls back to the browser-derived host when plugin meta is missing", () => {
