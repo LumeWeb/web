@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Account API
  * API endpoints for managing user accounts, authentication, and API keys.
- * OpenAPI spec version: v0.3.1-0.20260708232039-b4aebacb9791
+ * OpenAPI spec version: v0.3.1-0.20260903123759-e95a7bb2aea5
  */
 import type {
   BalanceResponse,
@@ -18,6 +18,8 @@ import type {
   ManagementRequest,
   ManagementResultResponse,
   PostApiAccountBillingWebhooksGatewayTypeBody,
+  PostApiBillingCreditsPurchase200,
+  PostApiBillingCreditsPurchaseParams,
   PublicPricingPlansListResponse,
   SubscriptionStatusResponse,
   UserCreditsListResponse
@@ -50,6 +52,11 @@ export type getApiAccountBillingBalanceResponse404 = {
   status: 404
 }
 
+export type getApiAccountBillingBalanceResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type getApiAccountBillingBalanceResponse500 = {
   data: ErrorResponse
   status: 500
@@ -58,7 +65,7 @@ export type getApiAccountBillingBalanceResponse500 = {
 export type getApiAccountBillingBalanceResponseSuccess = (getApiAccountBillingBalanceResponse200) & {
   headers: Headers;
 };
-export type getApiAccountBillingBalanceResponseError = (getApiAccountBillingBalanceResponse400 | getApiAccountBillingBalanceResponse401 | getApiAccountBillingBalanceResponse403 | getApiAccountBillingBalanceResponse404 | getApiAccountBillingBalanceResponse500) & {
+export type getApiAccountBillingBalanceResponseError = (getApiAccountBillingBalanceResponse400 | getApiAccountBillingBalanceResponse401 | getApiAccountBillingBalanceResponse403 | getApiAccountBillingBalanceResponse404 | getApiAccountBillingBalanceResponse422 | getApiAccountBillingBalanceResponse500) & {
   headers: Headers;
 };
 
@@ -120,6 +127,11 @@ export type postApiAccountBillingCancelResponse404 = {
   status: 404
 }
 
+export type postApiAccountBillingCancelResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAccountBillingCancelResponse500 = {
   data: ErrorResponse
   status: 500
@@ -128,7 +140,7 @@ export type postApiAccountBillingCancelResponse500 = {
 export type postApiAccountBillingCancelResponseSuccess = (postApiAccountBillingCancelResponse200) & {
   headers: Headers;
 };
-export type postApiAccountBillingCancelResponseError = (postApiAccountBillingCancelResponse400 | postApiAccountBillingCancelResponse401 | postApiAccountBillingCancelResponse403 | postApiAccountBillingCancelResponse404 | postApiAccountBillingCancelResponse500) & {
+export type postApiAccountBillingCancelResponseError = (postApiAccountBillingCancelResponse400 | postApiAccountBillingCancelResponse401 | postApiAccountBillingCancelResponse403 | postApiAccountBillingCancelResponse404 | postApiAccountBillingCancelResponse422 | postApiAccountBillingCancelResponse500) & {
   headers: Headers;
 };
 
@@ -190,6 +202,11 @@ export type postApiAccountBillingCancelAbortResponse404 = {
   status: 404
 }
 
+export type postApiAccountBillingCancelAbortResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAccountBillingCancelAbortResponse500 = {
   data: ErrorResponse
   status: 500
@@ -198,7 +215,7 @@ export type postApiAccountBillingCancelAbortResponse500 = {
 export type postApiAccountBillingCancelAbortResponseSuccess = (postApiAccountBillingCancelAbortResponse200) & {
   headers: Headers;
 };
-export type postApiAccountBillingCancelAbortResponseError = (postApiAccountBillingCancelAbortResponse400 | postApiAccountBillingCancelAbortResponse401 | postApiAccountBillingCancelAbortResponse403 | postApiAccountBillingCancelAbortResponse404 | postApiAccountBillingCancelAbortResponse500) & {
+export type postApiAccountBillingCancelAbortResponseError = (postApiAccountBillingCancelAbortResponse400 | postApiAccountBillingCancelAbortResponse401 | postApiAccountBillingCancelAbortResponse403 | postApiAccountBillingCancelAbortResponse404 | postApiAccountBillingCancelAbortResponse422 | postApiAccountBillingCancelAbortResponse500) & {
   headers: Headers;
 };
 
@@ -260,6 +277,11 @@ export type postApiAccountBillingChangePlanResponse404 = {
   status: 404
 }
 
+export type postApiAccountBillingChangePlanResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAccountBillingChangePlanResponse500 = {
   data: ErrorResponse
   status: 500
@@ -268,7 +290,7 @@ export type postApiAccountBillingChangePlanResponse500 = {
 export type postApiAccountBillingChangePlanResponseSuccess = (postApiAccountBillingChangePlanResponse200) & {
   headers: Headers;
 };
-export type postApiAccountBillingChangePlanResponseError = (postApiAccountBillingChangePlanResponse400 | postApiAccountBillingChangePlanResponse401 | postApiAccountBillingChangePlanResponse403 | postApiAccountBillingChangePlanResponse404 | postApiAccountBillingChangePlanResponse500) & {
+export type postApiAccountBillingChangePlanResponseError = (postApiAccountBillingChangePlanResponse400 | postApiAccountBillingChangePlanResponse401 | postApiAccountBillingChangePlanResponse403 | postApiAccountBillingChangePlanResponse404 | postApiAccountBillingChangePlanResponse422 | postApiAccountBillingChangePlanResponse500) & {
   headers: Headers;
 };
 
@@ -330,6 +352,11 @@ export type getApiAccountBillingCheckoutSessionSessionIdStatusResponse404 = {
   status: 404
 }
 
+export type getApiAccountBillingCheckoutSessionSessionIdStatusResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type getApiAccountBillingCheckoutSessionSessionIdStatusResponse500 = {
   data: ErrorResponse
   status: 500
@@ -343,7 +370,7 @@ export type getApiAccountBillingCheckoutSessionSessionIdStatusResponse501 = {
 export type getApiAccountBillingCheckoutSessionSessionIdStatusResponseSuccess = (getApiAccountBillingCheckoutSessionSessionIdStatusResponse200) & {
   headers: Headers;
 };
-export type getApiAccountBillingCheckoutSessionSessionIdStatusResponseError = (getApiAccountBillingCheckoutSessionSessionIdStatusResponse400 | getApiAccountBillingCheckoutSessionSessionIdStatusResponse401 | getApiAccountBillingCheckoutSessionSessionIdStatusResponse403 | getApiAccountBillingCheckoutSessionSessionIdStatusResponse404 | getApiAccountBillingCheckoutSessionSessionIdStatusResponse500 | getApiAccountBillingCheckoutSessionSessionIdStatusResponse501) & {
+export type getApiAccountBillingCheckoutSessionSessionIdStatusResponseError = (getApiAccountBillingCheckoutSessionSessionIdStatusResponse400 | getApiAccountBillingCheckoutSessionSessionIdStatusResponse401 | getApiAccountBillingCheckoutSessionSessionIdStatusResponse403 | getApiAccountBillingCheckoutSessionSessionIdStatusResponse404 | getApiAccountBillingCheckoutSessionSessionIdStatusResponse422 | getApiAccountBillingCheckoutSessionSessionIdStatusResponse500 | getApiAccountBillingCheckoutSessionSessionIdStatusResponse501) & {
   headers: Headers;
 };
 
@@ -419,6 +446,11 @@ export type getApiAccountBillingCheckoutUiPlanIdResponse409 = {
   status: 409
 }
 
+export type getApiAccountBillingCheckoutUiPlanIdResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type getApiAccountBillingCheckoutUiPlanIdResponse500 = {
   data: ErrorResponse
   status: 500
@@ -427,7 +459,7 @@ export type getApiAccountBillingCheckoutUiPlanIdResponse500 = {
 export type getApiAccountBillingCheckoutUiPlanIdResponseSuccess = (getApiAccountBillingCheckoutUiPlanIdResponse200) & {
   headers: Headers;
 };
-export type getApiAccountBillingCheckoutUiPlanIdResponseError = (getApiAccountBillingCheckoutUiPlanIdResponse400 | getApiAccountBillingCheckoutUiPlanIdResponse401 | getApiAccountBillingCheckoutUiPlanIdResponse403 | getApiAccountBillingCheckoutUiPlanIdResponse404 | getApiAccountBillingCheckoutUiPlanIdResponse409 | getApiAccountBillingCheckoutUiPlanIdResponse500) & {
+export type getApiAccountBillingCheckoutUiPlanIdResponseError = (getApiAccountBillingCheckoutUiPlanIdResponse400 | getApiAccountBillingCheckoutUiPlanIdResponse401 | getApiAccountBillingCheckoutUiPlanIdResponse403 | getApiAccountBillingCheckoutUiPlanIdResponse404 | getApiAccountBillingCheckoutUiPlanIdResponse409 | getApiAccountBillingCheckoutUiPlanIdResponse422 | getApiAccountBillingCheckoutUiPlanIdResponse500) & {
   headers: Headers;
 };
 
@@ -498,6 +530,11 @@ export type getApiAccountBillingCreditsResponse404 = {
   status: 404
 }
 
+export type getApiAccountBillingCreditsResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type getApiAccountBillingCreditsResponse500 = {
   data: ErrorResponse
   status: 500
@@ -506,7 +543,7 @@ export type getApiAccountBillingCreditsResponse500 = {
 export type getApiAccountBillingCreditsResponseSuccess = (getApiAccountBillingCreditsResponse200) & {
   headers: Headers;
 };
-export type getApiAccountBillingCreditsResponseError = (getApiAccountBillingCreditsResponse400 | getApiAccountBillingCreditsResponse401 | getApiAccountBillingCreditsResponse403 | getApiAccountBillingCreditsResponse404 | getApiAccountBillingCreditsResponse500) & {
+export type getApiAccountBillingCreditsResponseError = (getApiAccountBillingCreditsResponse400 | getApiAccountBillingCreditsResponse401 | getApiAccountBillingCreditsResponse403 | getApiAccountBillingCreditsResponse404 | getApiAccountBillingCreditsResponse422 | getApiAccountBillingCreditsResponse500) & {
   headers: Headers;
 };
 
@@ -568,6 +605,11 @@ export type postApiAccountBillingCustomerPortalResponse404 = {
   status: 404
 }
 
+export type postApiAccountBillingCustomerPortalResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAccountBillingCustomerPortalResponse500 = {
   data: ErrorResponse
   status: 500
@@ -576,7 +618,7 @@ export type postApiAccountBillingCustomerPortalResponse500 = {
 export type postApiAccountBillingCustomerPortalResponseSuccess = (postApiAccountBillingCustomerPortalResponse200) & {
   headers: Headers;
 };
-export type postApiAccountBillingCustomerPortalResponseError = (postApiAccountBillingCustomerPortalResponse400 | postApiAccountBillingCustomerPortalResponse401 | postApiAccountBillingCustomerPortalResponse403 | postApiAccountBillingCustomerPortalResponse404 | postApiAccountBillingCustomerPortalResponse500) & {
+export type postApiAccountBillingCustomerPortalResponseError = (postApiAccountBillingCustomerPortalResponse400 | postApiAccountBillingCustomerPortalResponse401 | postApiAccountBillingCustomerPortalResponse403 | postApiAccountBillingCustomerPortalResponse404 | postApiAccountBillingCustomerPortalResponse422 | postApiAccountBillingCustomerPortalResponse500) & {
   headers: Headers;
 };
 
@@ -638,6 +680,11 @@ export type postApiAccountBillingManagementResponse404 = {
   status: 404
 }
 
+export type postApiAccountBillingManagementResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAccountBillingManagementResponse500 = {
   data: ErrorResponse
   status: 500
@@ -646,7 +693,7 @@ export type postApiAccountBillingManagementResponse500 = {
 export type postApiAccountBillingManagementResponseSuccess = (postApiAccountBillingManagementResponse200) & {
   headers: Headers;
 };
-export type postApiAccountBillingManagementResponseError = (postApiAccountBillingManagementResponse400 | postApiAccountBillingManagementResponse401 | postApiAccountBillingManagementResponse403 | postApiAccountBillingManagementResponse404 | postApiAccountBillingManagementResponse500) & {
+export type postApiAccountBillingManagementResponseError = (postApiAccountBillingManagementResponse400 | postApiAccountBillingManagementResponse401 | postApiAccountBillingManagementResponse403 | postApiAccountBillingManagementResponse404 | postApiAccountBillingManagementResponse422 | postApiAccountBillingManagementResponse500) & {
   headers: Headers;
 };
 
@@ -708,6 +755,11 @@ export type getApiAccountBillingManagementCapabilitiesResponse404 = {
   status: 404
 }
 
+export type getApiAccountBillingManagementCapabilitiesResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type getApiAccountBillingManagementCapabilitiesResponse500 = {
   data: ErrorResponse
   status: 500
@@ -716,7 +768,7 @@ export type getApiAccountBillingManagementCapabilitiesResponse500 = {
 export type getApiAccountBillingManagementCapabilitiesResponseSuccess = (getApiAccountBillingManagementCapabilitiesResponse200) & {
   headers: Headers;
 };
-export type getApiAccountBillingManagementCapabilitiesResponseError = (getApiAccountBillingManagementCapabilitiesResponse400 | getApiAccountBillingManagementCapabilitiesResponse401 | getApiAccountBillingManagementCapabilitiesResponse403 | getApiAccountBillingManagementCapabilitiesResponse404 | getApiAccountBillingManagementCapabilitiesResponse500) & {
+export type getApiAccountBillingManagementCapabilitiesResponseError = (getApiAccountBillingManagementCapabilitiesResponse400 | getApiAccountBillingManagementCapabilitiesResponse401 | getApiAccountBillingManagementCapabilitiesResponse403 | getApiAccountBillingManagementCapabilitiesResponse404 | getApiAccountBillingManagementCapabilitiesResponse422 | getApiAccountBillingManagementCapabilitiesResponse500) & {
   headers: Headers;
 };
 
@@ -778,6 +830,11 @@ export type postApiAccountBillingPauseResponse404 = {
   status: 404
 }
 
+export type postApiAccountBillingPauseResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAccountBillingPauseResponse500 = {
   data: ErrorResponse
   status: 500
@@ -786,7 +843,7 @@ export type postApiAccountBillingPauseResponse500 = {
 export type postApiAccountBillingPauseResponseSuccess = (postApiAccountBillingPauseResponse200) & {
   headers: Headers;
 };
-export type postApiAccountBillingPauseResponseError = (postApiAccountBillingPauseResponse400 | postApiAccountBillingPauseResponse401 | postApiAccountBillingPauseResponse403 | postApiAccountBillingPauseResponse404 | postApiAccountBillingPauseResponse500) & {
+export type postApiAccountBillingPauseResponseError = (postApiAccountBillingPauseResponse400 | postApiAccountBillingPauseResponse401 | postApiAccountBillingPauseResponse403 | postApiAccountBillingPauseResponse404 | postApiAccountBillingPauseResponse422 | postApiAccountBillingPauseResponse500) & {
   headers: Headers;
 };
 
@@ -848,6 +905,11 @@ export type postApiAccountBillingResumeResponse404 = {
   status: 404
 }
 
+export type postApiAccountBillingResumeResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAccountBillingResumeResponse500 = {
   data: ErrorResponse
   status: 500
@@ -856,7 +918,7 @@ export type postApiAccountBillingResumeResponse500 = {
 export type postApiAccountBillingResumeResponseSuccess = (postApiAccountBillingResumeResponse200) & {
   headers: Headers;
 };
-export type postApiAccountBillingResumeResponseError = (postApiAccountBillingResumeResponse400 | postApiAccountBillingResumeResponse401 | postApiAccountBillingResumeResponse403 | postApiAccountBillingResumeResponse404 | postApiAccountBillingResumeResponse500) & {
+export type postApiAccountBillingResumeResponseError = (postApiAccountBillingResumeResponse400 | postApiAccountBillingResumeResponse401 | postApiAccountBillingResumeResponse403 | postApiAccountBillingResumeResponse404 | postApiAccountBillingResumeResponse422 | postApiAccountBillingResumeResponse500) & {
   headers: Headers;
 };
 
@@ -918,6 +980,11 @@ export type getApiAccountBillingSubscriptionResponse404 = {
   status: 404
 }
 
+export type getApiAccountBillingSubscriptionResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type getApiAccountBillingSubscriptionResponse500 = {
   data: ErrorResponse
   status: 500
@@ -926,7 +993,7 @@ export type getApiAccountBillingSubscriptionResponse500 = {
 export type getApiAccountBillingSubscriptionResponseSuccess = (getApiAccountBillingSubscriptionResponse200) & {
   headers: Headers;
 };
-export type getApiAccountBillingSubscriptionResponseError = (getApiAccountBillingSubscriptionResponse400 | getApiAccountBillingSubscriptionResponse401 | getApiAccountBillingSubscriptionResponse403 | getApiAccountBillingSubscriptionResponse404 | getApiAccountBillingSubscriptionResponse500) & {
+export type getApiAccountBillingSubscriptionResponseError = (getApiAccountBillingSubscriptionResponse400 | getApiAccountBillingSubscriptionResponse401 | getApiAccountBillingSubscriptionResponse403 | getApiAccountBillingSubscriptionResponse404 | getApiAccountBillingSubscriptionResponse422 | getApiAccountBillingSubscriptionResponse500) & {
   headers: Headers;
 };
 
@@ -988,6 +1055,11 @@ export type getApiAccountBillingSubscriptionEventsResponse404 = {
   status: 404
 }
 
+export type getApiAccountBillingSubscriptionEventsResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type getApiAccountBillingSubscriptionEventsResponse500 = {
   data: ErrorResponse
   status: 500
@@ -996,7 +1068,7 @@ export type getApiAccountBillingSubscriptionEventsResponse500 = {
 export type getApiAccountBillingSubscriptionEventsResponseSuccess = (getApiAccountBillingSubscriptionEventsResponse200) & {
   headers: Headers;
 };
-export type getApiAccountBillingSubscriptionEventsResponseError = (getApiAccountBillingSubscriptionEventsResponse400 | getApiAccountBillingSubscriptionEventsResponse401 | getApiAccountBillingSubscriptionEventsResponse403 | getApiAccountBillingSubscriptionEventsResponse404 | getApiAccountBillingSubscriptionEventsResponse500) & {
+export type getApiAccountBillingSubscriptionEventsResponseError = (getApiAccountBillingSubscriptionEventsResponse400 | getApiAccountBillingSubscriptionEventsResponse401 | getApiAccountBillingSubscriptionEventsResponse403 | getApiAccountBillingSubscriptionEventsResponse404 | getApiAccountBillingSubscriptionEventsResponse422 | getApiAccountBillingSubscriptionEventsResponse500) & {
   headers: Headers;
 };
 
@@ -1068,6 +1140,11 @@ export type postApiAccountBillingWebhooksGatewayTypeResponse413 = {
   status: 413
 }
 
+export type postApiAccountBillingWebhooksGatewayTypeResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAccountBillingWebhooksGatewayTypeResponse500 = {
   data: ErrorResponse
   status: 500
@@ -1076,7 +1153,7 @@ export type postApiAccountBillingWebhooksGatewayTypeResponse500 = {
 export type postApiAccountBillingWebhooksGatewayTypeResponseSuccess = (postApiAccountBillingWebhooksGatewayTypeResponse200 | postApiAccountBillingWebhooksGatewayTypeResponse204) & {
   headers: Headers;
 };
-export type postApiAccountBillingWebhooksGatewayTypeResponseError = (postApiAccountBillingWebhooksGatewayTypeResponse400 | postApiAccountBillingWebhooksGatewayTypeResponse401 | postApiAccountBillingWebhooksGatewayTypeResponse403 | postApiAccountBillingWebhooksGatewayTypeResponse404 | postApiAccountBillingWebhooksGatewayTypeResponse413 | postApiAccountBillingWebhooksGatewayTypeResponse500) & {
+export type postApiAccountBillingWebhooksGatewayTypeResponseError = (postApiAccountBillingWebhooksGatewayTypeResponse400 | postApiAccountBillingWebhooksGatewayTypeResponse401 | postApiAccountBillingWebhooksGatewayTypeResponse403 | postApiAccountBillingWebhooksGatewayTypeResponse404 | postApiAccountBillingWebhooksGatewayTypeResponse413 | postApiAccountBillingWebhooksGatewayTypeResponse422 | postApiAccountBillingWebhooksGatewayTypeResponse500) & {
   headers: Headers;
 };
 
@@ -1114,6 +1191,98 @@ export const postApiAccountBillingWebhooksGatewayType = async (gatewayType: stri
 }
 
 
+export type postApiBillingCreditsPurchaseResponse200 = {
+  data: PostApiBillingCreditsPurchase200
+  status: 200
+}
+
+export type postApiBillingCreditsPurchaseResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type postApiBillingCreditsPurchaseResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type postApiBillingCreditsPurchaseResponse402 = {
+  data: void
+  status: 402
+}
+
+export type postApiBillingCreditsPurchaseResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type postApiBillingCreditsPurchaseResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type postApiBillingCreditsPurchaseResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type postApiBillingCreditsPurchaseResponse429 = {
+  data: ErrorResponse
+  status: 429
+}
+
+export type postApiBillingCreditsPurchaseResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type postApiBillingCreditsPurchaseResponseSuccess = (postApiBillingCreditsPurchaseResponse200) & {
+  headers: Headers;
+};
+export type postApiBillingCreditsPurchaseResponseError = (postApiBillingCreditsPurchaseResponse400 | postApiBillingCreditsPurchaseResponse401 | postApiBillingCreditsPurchaseResponse402 | postApiBillingCreditsPurchaseResponse403 | postApiBillingCreditsPurchaseResponse404 | postApiBillingCreditsPurchaseResponse422 | postApiBillingCreditsPurchaseResponse429 | postApiBillingCreditsPurchaseResponse500) & {
+  headers: Headers;
+};
+
+export type postApiBillingCreditsPurchaseResponse = (postApiBillingCreditsPurchaseResponseSuccess | postApiBillingCreditsPurchaseResponseError)
+
+export const getPostApiBillingCreditsPurchaseUrl = (params?: PostApiBillingCreditsPurchaseParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/billing/credits/purchase?${stringifiedParams}` : `/api/billing/credits/purchase`
+}
+
+/**
+ * Initiates or completes an x402 crypto payment for credits. First call returns 402 Payment Required with a challenge. Client pays via ATLOS and then calls again with PAYMENT-SIGNATURE header containing the payload.
+ * @summary Purchase credits via x402
+ */
+export const postApiBillingCreditsPurchase = async (params?: PostApiBillingCreditsPurchaseParams, options?: RequestInit): Promise<postApiBillingCreditsPurchaseResponse> => {
+
+  const res = await fetch(getPostApiBillingCreditsPurchaseUrl(params),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: postApiBillingCreditsPurchaseResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as postApiBillingCreditsPurchaseResponse
+}
+
+
 export type getApiBillingGatewaysResponse200 = {
   data: GatewayListResponse
   status: 200
@@ -1139,6 +1308,11 @@ export type getApiBillingGatewaysResponse404 = {
   status: 404
 }
 
+export type getApiBillingGatewaysResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type getApiBillingGatewaysResponse500 = {
   data: ErrorResponse
   status: 500
@@ -1147,7 +1321,7 @@ export type getApiBillingGatewaysResponse500 = {
 export type getApiBillingGatewaysResponseSuccess = (getApiBillingGatewaysResponse200) & {
   headers: Headers;
 };
-export type getApiBillingGatewaysResponseError = (getApiBillingGatewaysResponse400 | getApiBillingGatewaysResponse401 | getApiBillingGatewaysResponse403 | getApiBillingGatewaysResponse404 | getApiBillingGatewaysResponse500) & {
+export type getApiBillingGatewaysResponseError = (getApiBillingGatewaysResponse400 | getApiBillingGatewaysResponse401 | getApiBillingGatewaysResponse403 | getApiBillingGatewaysResponse404 | getApiBillingGatewaysResponse422 | getApiBillingGatewaysResponse500) & {
   headers: Headers;
 };
 
@@ -1209,6 +1383,11 @@ export type getApiBillingGatewaysIdLogoResponse404 = {
   status: 404
 }
 
+export type getApiBillingGatewaysIdLogoResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type getApiBillingGatewaysIdLogoResponse500 = {
   data: ErrorResponse
   status: 500
@@ -1217,7 +1396,7 @@ export type getApiBillingGatewaysIdLogoResponse500 = {
 export type getApiBillingGatewaysIdLogoResponseSuccess = (getApiBillingGatewaysIdLogoResponse200) & {
   headers: Headers;
 };
-export type getApiBillingGatewaysIdLogoResponseError = (getApiBillingGatewaysIdLogoResponse400 | getApiBillingGatewaysIdLogoResponse401 | getApiBillingGatewaysIdLogoResponse403 | getApiBillingGatewaysIdLogoResponse404 | getApiBillingGatewaysIdLogoResponse500) & {
+export type getApiBillingGatewaysIdLogoResponseError = (getApiBillingGatewaysIdLogoResponse400 | getApiBillingGatewaysIdLogoResponse401 | getApiBillingGatewaysIdLogoResponse403 | getApiBillingGatewaysIdLogoResponse404 | getApiBillingGatewaysIdLogoResponse422 | getApiBillingGatewaysIdLogoResponse500) & {
   headers: Headers;
 };
 
@@ -1279,6 +1458,11 @@ export type getApiBillingPlansResponse404 = {
   status: 404
 }
 
+export type getApiBillingPlansResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type getApiBillingPlansResponse500 = {
   data: ErrorResponse
   status: 500
@@ -1287,7 +1471,7 @@ export type getApiBillingPlansResponse500 = {
 export type getApiBillingPlansResponseSuccess = (getApiBillingPlansResponse200) & {
   headers: Headers;
 };
-export type getApiBillingPlansResponseError = (getApiBillingPlansResponse400 | getApiBillingPlansResponse401 | getApiBillingPlansResponse403 | getApiBillingPlansResponse404 | getApiBillingPlansResponse500) & {
+export type getApiBillingPlansResponseError = (getApiBillingPlansResponse400 | getApiBillingPlansResponse401 | getApiBillingPlansResponse403 | getApiBillingPlansResponse404 | getApiBillingPlansResponse422 | getApiBillingPlansResponse500) & {
   headers: Headers;
 };
 

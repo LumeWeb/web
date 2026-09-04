@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Account API
  * API endpoints for managing user accounts, authentication, and API keys.
- * OpenAPI spec version: v0.3.1-0.20260708232039-b4aebacb9791
+ * OpenAPI spec version: v0.3.1-0.20260903123759-e95a7bb2aea5
  */
 import {
   faker
@@ -23,18 +23,41 @@ import type {
   AccountPermissionsResponse,
   CreateAPIKeyResponse,
   ErrorResponse,
+  KeyIdentityChallengeResponse,
+  KeyIdentityConnectVerifyResponse,
+  KeyIdentityListResponse,
+  KeyIdentityVerifyResponse,
   LoginResponse,
   OTPGenerateResponse,
   OperationDetailResponse,
   OperationFiltersResponseResponse,
   OperationListItemResponse,
   PongResponse,
+  PublicProviderResponse,
   QuotaHistoryResponse,
+  SocialAccountListResponse,
+  SocialConsentResponse,
   UploadLimitResponse
 } from '../../accountAPI.schemas';
 
 
 export const getGetApiAccountResponseMock = (overrideResponse: Partial<Extract<AccountInfoResponse, object>> = {}): AccountInfoResponse => ({avatar: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), created_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', undefined]), email: faker.string.alpha({length: {min: 10, max: 20}}), first_name: faker.string.alpha({length: {min: 10, max: 20}}), id: faker.number.int(), last_name: faker.string.alpha({length: {min: 10, max: 20}}), otp: faker.datatype.boolean(), verified: faker.datatype.boolean(), ...overrideResponse})
+
+export const getGetApiAccountAuthLinksResponseMock = (overrideResponse: Partial<Extract<SocialAccountListResponse, object>> = {}): SocialAccountListResponse => ({data: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({created_at: faker.date.past().toISOString().slice(0, 19) + 'Z', email: faker.string.alpha({length: {min: 10, max: 20}}), provider: faker.string.alpha({length: {min: 10, max: 20}}), provider_user_id: faker.string.alpha({length: {min: 10, max: 20}})})), total: faker.number.int(), ...overrideResponse})
+
+export const getGetApiAccountAuthProvidersResponseMock = (): PublicProviderResponse[] => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({display_name: faker.string.alpha({length: {min: 10, max: 20}}), order_index: faker.number.int(), provider_id: faker.string.alpha({length: {min: 10, max: 20}})})))
+
+export const getDeleteApiAccountAuthSsoProviderResponseMock = (overrideResponse: Partial<Extract<ErrorResponse, object>> = {}): ErrorResponse => ({error: {details: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), reason: faker.string.alpha({length: {min: 10, max: 20}})}, ...overrideResponse})
+
+export const getGetApiAccountAuthSsoProviderResponseMock = (overrideResponse: Partial<Extract<ErrorResponse, object>> = {}): ErrorResponse => ({error: {details: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), reason: faker.string.alpha({length: {min: 10, max: 20}})}, ...overrideResponse})
+
+export const getGetApiAccountAuthSsoProviderCallbackResponseMock = (overrideResponse: Partial<Extract<ErrorResponse, object>> = {}): ErrorResponse => ({error: {details: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), reason: faker.string.alpha({length: {min: 10, max: 20}})}, ...overrideResponse})
+
+export const getPostApiAccountAuthSsoProviderConsentResponseMock = (overrideResponse: Partial<Extract<SocialConsentResponse, object>> = {}): SocialConsentResponse => ({redirect_uri: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
+
+export const getPostApiAccountAuthSsoProviderLinkResponseMock = (overrideResponse: Partial<Extract<ErrorResponse, object>> = {}): ErrorResponse => ({error: {details: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), reason: faker.string.alpha({length: {min: 10, max: 20}})}, ...overrideResponse})
+
+export const getGetApiAccountAuthSsoProviderLogoutResponseMock = (overrideResponse: Partial<Extract<ErrorResponse, object>> = {}): ErrorResponse => ({error: {details: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), reason: faker.string.alpha({length: {min: 10, max: 20}})}, ...overrideResponse})
 
 export const getPostApiAccountAvatarResponseMock = (overrideResponse: Partial<Extract<ErrorResponse, object>> = {}): ErrorResponse => ({error: {details: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), reason: faker.string.alpha({length: {min: 10, max: 20}})}, ...overrideResponse})
 
@@ -47,6 +70,18 @@ export const getGetApiAccountPermissionsResponseMock = (overrideResponse: Partia
 export const getGetApiAccountQuotaHistoryResponseMock = (overrideResponse: Partial<Extract<QuotaHistoryResponse, object>> = {}): QuotaHistoryResponse => ({points: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({bytes: faker.number.int(), date: faker.string.alpha({length: {min: 10, max: 20}})})), user_id: faker.number.int(), ...overrideResponse})
 
 export const getPostApiAuthKeyResponseMock = (overrideResponse: Partial<Extract<LoginResponse, object>> = {}): LoginResponse => ({otp: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), token: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
+
+export const getDeleteApiAuthKeyTypeKeyResponseMock = (overrideResponse: Partial<Extract<ErrorResponse, object>> = {}): ErrorResponse => ({error: {details: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), reason: faker.string.alpha({length: {min: 10, max: 20}})}, ...overrideResponse})
+
+export const getPostApiAuthKeyChallengeResponseMock = (overrideResponse: Partial<Extract<KeyIdentityChallengeResponse, object>> = {}): KeyIdentityChallengeResponse => ({message: faker.string.alpha({length: {min: 10, max: 20}}), nonce: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
+
+export const getPostApiAuthKeyConnectChallengeResponseMock = (overrideResponse: Partial<Extract<KeyIdentityChallengeResponse, object>> = {}): KeyIdentityChallengeResponse => ({message: faker.string.alpha({length: {min: 10, max: 20}}), nonce: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
+
+export const getPostApiAuthKeyConnectVerifyResponseMock = (overrideResponse: Partial<Extract<KeyIdentityConnectVerifyResponse, object>> = {}): KeyIdentityConnectVerifyResponse => ({key: faker.string.alpha({length: {min: 10, max: 20}}), key_type: faker.string.alpha({length: {min: 10, max: 20}}), metadata: faker.helpers.arrayElement([{}, undefined]), ...overrideResponse})
+
+export const getGetApiAuthKeyIdentitiesResponseMock = (overrideResponse: Partial<Extract<KeyIdentityListResponse, object>> = {}): KeyIdentityListResponse => ({identities: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({key: faker.string.alpha({length: {min: 10, max: 20}}), key_type: faker.string.alpha({length: {min: 10, max: 20}}), metadata: faker.helpers.arrayElement([{}, undefined])})), ...overrideResponse})
+
+export const getPostApiAuthKeyVerifyResponseMock = (overrideResponse: Partial<Extract<KeyIdentityVerifyResponse, object>> = {}): KeyIdentityVerifyResponse => ({new_account: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), otp: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), token: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
 
 export const getPostApiAuthLoginResponseMock = (overrideResponse: Partial<Extract<LoginResponse, object>> = {}): LoginResponse => ({otp: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), token: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
 
@@ -94,6 +129,112 @@ export const getPatchApiAccountMockHandler = (overrideResponse?: void | ((info: 
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
+      { status: 200
+      })
+  }, options)
+}
+
+export const getGetApiAccountAuthLinksMockHandler = (overrideResponse?: SocialAccountListResponse | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<SocialAccountListResponse> | SocialAccountListResponse), options?: RequestHandlerOptions) => {
+  return http.get('*/api/account/auth/links', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetApiAccountAuthLinksResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getGetApiAccountAuthProvidersMockHandler = (overrideResponse?: PublicProviderResponse[] | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PublicProviderResponse[]> | PublicProviderResponse[]), options?: RequestHandlerOptions) => {
+  return http.get('*/api/account/auth/providers', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetApiAccountAuthProvidersResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getDeleteApiAccountAuthSsoProviderMockHandler = (overrideResponse?: ErrorResponse | void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<ErrorResponse | void> | ErrorResponse | void), options?: RequestHandlerOptions) => {
+  return http.delete('*/api/account/auth/sso/:provider', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
+
+  const resolvedBody = overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getDeleteApiAccountAuthSsoProviderResponseMock();
+    return resolvedBody === undefined
+      ? new HttpResponse(null, { status: 204 })
+      : HttpResponse.json(resolvedBody, { status: 200 })
+  }, options)
+}
+
+export const getGetApiAccountAuthSsoProviderMockHandler = (overrideResponse?: ErrorResponse | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ErrorResponse> | ErrorResponse), options?: RequestHandlerOptions) => {
+  return http.get('*/api/account/auth/sso/:provider', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetApiAccountAuthSsoProviderResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getGetApiAccountAuthSsoProviderCallbackMockHandler = (overrideResponse?: ErrorResponse | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ErrorResponse> | ErrorResponse), options?: RequestHandlerOptions) => {
+  return http.get('*/api/account/auth/sso/:provider/callback', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetApiAccountAuthSsoProviderCallbackResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getGetApiAccountAuthSsoProviderConsentMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.get('*/api/account/auth/sso/:provider/consent', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 200
+      })
+  }, options)
+}
+
+export const getPostApiAccountAuthSsoProviderConsentMockHandler = (overrideResponse?: SocialConsentResponse | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<SocialConsentResponse> | SocialConsentResponse), options?: RequestHandlerOptions) => {
+  return http.post('*/api/account/auth/sso/:provider/consent', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getPostApiAccountAuthSsoProviderConsentResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getPostApiAccountAuthSsoProviderLinkMockHandler = (overrideResponse?: ErrorResponse | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<ErrorResponse> | ErrorResponse), options?: RequestHandlerOptions) => {
+  return http.post('*/api/account/auth/sso/:provider/link', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getPostApiAccountAuthSsoProviderLinkResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getGetApiAccountAuthSsoProviderLogoutMockHandler = (overrideResponse?: ErrorResponse | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ErrorResponse> | ErrorResponse), options?: RequestHandlerOptions) => {
+  return http.get('*/api/account/auth/sso/:provider/logout', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetApiAccountAuthSsoProviderLogoutResponseMock(),
       { status: 200
       })
   }, options)
@@ -251,6 +392,78 @@ export const getPostApiAuthKeyMockHandler = (overrideResponse?: LoginResponse | 
   }, options)
 }
 
+export const getDeleteApiAuthKeyTypeKeyMockHandler = (overrideResponse?: ErrorResponse | void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<ErrorResponse | void> | ErrorResponse | void), options?: RequestHandlerOptions) => {
+  return http.delete('*/api/auth/key/:type/:key', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
+
+  const resolvedBody = overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getDeleteApiAuthKeyTypeKeyResponseMock();
+    return resolvedBody === undefined
+      ? new HttpResponse(null, { status: 204 })
+      : HttpResponse.json(resolvedBody, { status: 200 })
+  }, options)
+}
+
+export const getPostApiAuthKeyChallengeMockHandler = (overrideResponse?: KeyIdentityChallengeResponse | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<KeyIdentityChallengeResponse> | KeyIdentityChallengeResponse), options?: RequestHandlerOptions) => {
+  return http.post('*/api/auth/key/challenge', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getPostApiAuthKeyChallengeResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getPostApiAuthKeyConnectChallengeMockHandler = (overrideResponse?: KeyIdentityChallengeResponse | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<KeyIdentityChallengeResponse> | KeyIdentityChallengeResponse), options?: RequestHandlerOptions) => {
+  return http.post('*/api/auth/key/connect/challenge', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getPostApiAuthKeyConnectChallengeResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getPostApiAuthKeyConnectVerifyMockHandler = (overrideResponse?: KeyIdentityConnectVerifyResponse | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<KeyIdentityConnectVerifyResponse> | KeyIdentityConnectVerifyResponse), options?: RequestHandlerOptions) => {
+  return http.post('*/api/auth/key/connect/verify', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getPostApiAuthKeyConnectVerifyResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getGetApiAuthKeyIdentitiesMockHandler = (overrideResponse?: KeyIdentityListResponse | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<KeyIdentityListResponse> | KeyIdentityListResponse), options?: RequestHandlerOptions) => {
+  return http.get('*/api/auth/key/identities', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetApiAuthKeyIdentitiesResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getPostApiAuthKeyVerifyMockHandler = (overrideResponse?: KeyIdentityVerifyResponse | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<KeyIdentityVerifyResponse> | KeyIdentityVerifyResponse), options?: RequestHandlerOptions) => {
+  return http.post('*/api/auth/key/verify', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getPostApiAuthKeyVerifyResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
 export const getPostApiAuthLoginMockHandler = (overrideResponse?: LoginResponse | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<LoginResponse> | LoginResponse), options?: RequestHandlerOptions) => {
   return http.post('*/api/auth/login', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
 
@@ -392,6 +605,15 @@ export const getDefaultMock = () => [
   getDeleteApiAccountMockHandler(),
   getGetApiAccountMockHandler(),
   getPatchApiAccountMockHandler(),
+  getGetApiAccountAuthLinksMockHandler(),
+  getGetApiAccountAuthProvidersMockHandler(),
+  getDeleteApiAccountAuthSsoProviderMockHandler(),
+  getGetApiAccountAuthSsoProviderMockHandler(),
+  getGetApiAccountAuthSsoProviderCallbackMockHandler(),
+  getGetApiAccountAuthSsoProviderConsentMockHandler(),
+  getPostApiAccountAuthSsoProviderConsentMockHandler(),
+  getPostApiAccountAuthSsoProviderLinkMockHandler(),
+  getGetApiAccountAuthSsoProviderLogoutMockHandler(),
   getGetApiAccountAvatarMockHandler(),
   getPostApiAccountAvatarMockHandler(),
   getGetApiAccountKeysMockHandler(),
@@ -406,6 +628,12 @@ export const getDefaultMock = () => [
   getPostApiAccountVerifyEmailMockHandler(),
   getPostApiAccountVerifyEmailResendMockHandler(),
   getPostApiAuthKeyMockHandler(),
+  getDeleteApiAuthKeyTypeKeyMockHandler(),
+  getPostApiAuthKeyChallengeMockHandler(),
+  getPostApiAuthKeyConnectChallengeMockHandler(),
+  getPostApiAuthKeyConnectVerifyMockHandler(),
+  getGetApiAuthKeyIdentitiesMockHandler(),
+  getPostApiAuthKeyVerifyMockHandler(),
   getPostApiAuthLoginMockHandler(),
   getPostApiAuthLogoutMockHandler(),
   getPostApiAuthOtpDisableMockHandler(),
