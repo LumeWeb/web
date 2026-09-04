@@ -204,6 +204,16 @@ export class AccountKeyIdentity {
     // folded in below from the parsed body.
     let newAccount = readNewAccount(res.url);
 
+    // Status is checked before the body: a non-2xx terminal must never be
+    // read as a followed-redirect success, even when it carries no JSON
+    // (plain-text/HTML gateway or backend error bodies). The success chain
+    // always terminates 2xx (200 JSON token or 200 auth-complete page), so
+    // this ordering cannot misfile the happy path.
+    if (!res.ok) {
+      const body = await parseRawJsonOrNull<TokenResponse>(res);
+      throw this.keyIdentityError(res.status, body, "Wallet verification failed");
+    }
+
     const body = await parseRawJsonOrNull<TokenResponse>(res);
     if (body === null) {
       // Non-JSON final body (e.g. an HTML auth-complete page): the
@@ -211,10 +221,6 @@ export class AccountKeyIdentity {
       // session — hand the caller to the ping-recovery branch. The flag
       // was read from the chain URL above.
       return { kind: "redirect", newAccount };
-    }
-
-    if (!res.ok) {
-      throw this.keyIdentityError(res.status, body, "Wallet verification failed");
     }
 
     if (body.new_account) {
@@ -277,12 +283,16 @@ export class AccountKeyIdentity {
 
     const res = await fetch(url, { credentials: "include" });
 
+    // Status is checked before the body — same rule as `verify`: a non-2xx
+    // terminal with a non-JSON body is a failure, not a redirect success.
+    if (!res.ok) {
+      const body = await parseRawJsonOrNull<TokenResponse>(res);
+      throw this.keyIdentityError(res.status, body, "Wallet verification failed");
+    }
+
     const body = await parseRawJsonOrNull<TokenResponse>(res);
     if (body === null) {
       return { kind: "redirect", newAccount };
-    }
-    if (!res.ok) {
-      throw this.keyIdentityError(res.status, body, "Wallet verification failed");
     }
     if (body.otp) {
       return { kind: "otp", newAccount };

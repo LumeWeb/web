@@ -409,6 +409,41 @@ describe("AccountApi.keyIdentity", () => {
       expect(err.message).toBe("Wallet verification failed (KeyNotFound).");
     });
 
+    it("non-2xx with a non-JSON body (empty 502) throws — never a redirect outcome", async () => {
+      stubFetchQueue(fetchResponse({ body: "", status: 502 }));
+
+      const err = (await api.keyIdentity
+        .verify(VERIFY_INPUT)
+        .catch((e: unknown) => e)) as KeyIdentityError;
+
+      expect(err.status).toBe(502);
+    });
+
+    it("non-2xx with an HTML body (gateway error page) throws — never a redirect outcome", async () => {
+      stubFetchQueue(
+        fetchResponse({ body: "<h1>Bad Gateway</h1>", status: 502 }),
+      );
+
+      const err = (await api.keyIdentity
+        .verify(VERIFY_INPUT)
+        .catch((e: unknown) => e)) as KeyIdentityError;
+
+      expect(err.status).toBe(502);
+    });
+
+    it("unfollowed 302 with a non-2xx non-JSON auth-complete terminal throws", async () => {
+      stubFetchQueue(
+        fetchResponse({ headers: { location: AUTH_COMPLETE_URL }, status: 302 }),
+        fetchResponse({ body: "<h1>Server Error</h1>", status: 500 }),
+      );
+
+      const err = (await api.keyIdentity
+        .verify(VERIFY_INPUT)
+        .catch((e: unknown) => e)) as KeyIdentityError;
+
+      expect(err.status).toBe(500);
+    });
+
     it("network failures (TypeError) are rethrown, not folded into the redirect branch", async () => {
       vi.stubGlobal(
         "fetch",
