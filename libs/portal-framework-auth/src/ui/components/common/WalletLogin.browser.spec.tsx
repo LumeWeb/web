@@ -26,8 +26,12 @@ vi.mock("@/hooks/useWalletLogin", () => ({
   }),
 }));
 
+// A valid small base64 png so `sanitizeWalletIcon` accepts it on the row.
+const VALID_PNG_URI =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+
 const META_MASK: DetectedWallet = {
-  icon: "data:image/png;base64,metamask-icon",
+  icon: VALID_PNG_URI,
   id: "io.metamask",
   name: "MetaMask",
   network: "ethereum",
@@ -92,12 +96,13 @@ describe("WalletLogin picker", () => {
       .element(page.getByRole("button", { name: "Continue with Phantom" }))
       .toBeInTheDocument();
 
-    // Announced icon URI renders as an img on the row.
+    // Announced icon URI renders as an img on the row (the wallet's own
+    // icon wins for a known id that has no curated SVG mark).
     const metaMaskRow = page
       .getByRole("button", { name: "Continue with MetaMask" })
       .element() as HTMLElement;
     const icon = metaMaskRow.querySelector("img");
-    expect(icon?.getAttribute("src")).toBe("data:image/png;base64,metamask-icon");
+    expect(icon?.getAttribute("src")).toBe(VALID_PNG_URI);
 
     // Solana row without an icon → initial fallback chip instead of img.
     const phantomRow = page
