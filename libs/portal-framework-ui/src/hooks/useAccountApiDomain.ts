@@ -38,12 +38,16 @@ export function useAccountApiDomain(): string {
       });
 
       if (apiUrl) {
+        // `host` (not `hostname`) carries the port, so a dev API base like
+        // `http://localhost:8080` becomes `http://account.localhost:8080` —
+        // the addressed origin must keep the port; the dev stack vhosts the
+        // account service on the same port under the `account.` host.
         const apiDomain = new URL(apiUrl);
         const prefix = cleanProtocolString(subdomain);
 
         return prefix
-          ? `${apiDomain.protocol}//${prefix}.${apiDomain.hostname}`
-          : `${apiDomain.protocol}//${apiDomain.hostname}`;
+          ? `${apiDomain.protocol}//${prefix}.${apiDomain.host}`
+          : `${apiDomain.protocol}//${apiDomain.host}`;
       }
     } catch {
       // Unparseable API URL — degrade to the legacy browser-derived host.

@@ -78,7 +78,7 @@ describe("useAccountApiDomain", () => {
 
     const { result } = renderHook(() => useAccountApiDomain());
 
-    expect(result.current).toBe("http://account.localhost");
+    expect(result.current).toBe("http://account.localhost:8080");
   });
 
   it("falls back to the browser-derived host when no portal URL is loaded", () => {
