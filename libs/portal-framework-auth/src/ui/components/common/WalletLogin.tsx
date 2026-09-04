@@ -11,6 +11,8 @@ import React, { useState } from "react";
 import { useWalletLogin } from "@/hooks/useWalletLogin";
 import { type DetectedWallet, detectWallets } from "@/wallet/detect";
 
+import { WalletLogo } from "./WalletLogo";
+
 const WalletIcon = lazyIcon("Wallet");
 
 const TRIGGER_LABEL = "Continue with wallet";
@@ -118,40 +120,7 @@ export default function WalletLogin() {
   );
 }
 
-/**
- * Leading icon chip: the announced wallet icon (data URI/URL) when available,
- * otherwise the generic wallet glyph — matching AuthProviders' chip sizing.
- */
-function WalletGlyph({
-  icon,
-  name,
-  network,
-}: {
-  icon?: string;
-  name: string;
-  network: DetectedWallet["network"];
-}) {
-  if (icon) {
-    return (
-      <img
-        alt=""
-        aria-hidden="true"
-        className="absolute left-3 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded object-contain top-1/2"
-        src={icon}
-      />
-    );
-  }
-  // Unknown wallets keep a neutral disc with the wallet's initial.
-  return (
-    <span
-      aria-hidden="true"
-      className={`absolute left-3 flex h-7 w-7 items-center justify-center rounded-full text-white ${
-        network === "solana" ? "bg-purple-500" : "bg-gray-500"
-      }`}>
-      {name.charAt(0).toUpperCase()}
-    </span>
-  );
-}
+
 
 /**
  * One labeled group of detected wallets (network header omitted when the
@@ -176,7 +145,7 @@ function WalletGroup({
           key={`${wallet.network}:${wallet.id}`}
           onClick={() => onPick(wallet)}
           variant="outline">
-          <WalletGlyph icon={wallet.icon} name={wallet.name} network={wallet.network} />
+          <WalletLogo wallet={wallet} />
           Continue with {wallet.name}
         </Button>
       ))}
