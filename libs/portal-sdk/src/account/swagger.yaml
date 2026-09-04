@@ -47,6 +47,49 @@ components:
       - name
       - created_at
       type: object
+    ASMetadata:
+      additionalProperties: false
+      properties:
+        authorization_endpoint:
+          type: string
+        client_id_metadata_document_supported:
+          type: boolean
+        code_challenge_methods_supported:
+          items:
+            type: string
+          type: array
+        grant_types_supported:
+          items:
+            type: string
+          type: array
+        issuer:
+          type: string
+        registration_endpoint:
+          type: string
+        response_types_supported:
+          items:
+            type: string
+          type: array
+        scopes_supported:
+          items:
+            type: string
+          type: array
+        token_endpoint:
+          type: string
+        token_endpoint_auth_methods_supported:
+          items:
+            type: string
+          type: array
+      required:
+      - issuer
+      - authorization_endpoint
+      - token_endpoint
+      - response_types_supported
+      - grant_types_supported
+      - token_endpoint_auth_methods_supported
+      - code_challenge_methods_supported
+      - scopes_supported
+      type: object
     AccessModel:
       additionalProperties: false
       properties:
@@ -287,6 +330,121 @@ components:
       - is_active
       - abilities
       type: object
+    JSONRawMessageSchema:
+      type: object
+    KeyIdentityChallengeRequest:
+      additionalProperties: false
+      properties:
+        key:
+          type: string
+        key_type:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/JSONRawMessageSchema'
+      required:
+      - key_type
+      - key
+      type: object
+    KeyIdentityChallengeResponse:
+      additionalProperties: false
+      properties:
+        message:
+          type: string
+        nonce:
+          type: string
+      required:
+      - message
+      - nonce
+      type: object
+    KeyIdentityConnectVerifyRequest:
+      additionalProperties: false
+      properties:
+        key:
+          type: string
+        key_type:
+          type: string
+        message:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/JSONRawMessageSchema'
+        signature:
+          type: string
+      required:
+      - key_type
+      - key
+      - message
+      - signature
+      type: object
+    KeyIdentityConnectVerifyResponse:
+      additionalProperties: false
+      properties:
+        key:
+          type: string
+        key_type:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/JSONRawMessageSchema'
+      required:
+      - key_type
+      - key
+      type: object
+    KeyIdentityItem:
+      additionalProperties: false
+      properties:
+        key:
+          type: string
+        key_type:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/JSONRawMessageSchema'
+      required:
+      - key_type
+      - key
+      type: object
+    KeyIdentityListResponse:
+      additionalProperties: false
+      properties:
+        identities:
+          items:
+            $ref: '#/components/schemas/KeyIdentityItem'
+          type: array
+      required:
+      - identities
+      type: object
+    KeyIdentityVerifyRequest:
+      additionalProperties: false
+      properties:
+        key:
+          type: string
+        key_type:
+          type: string
+        message:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/JSONRawMessageSchema'
+        remember:
+          type: boolean
+        signature:
+          type: string
+      required:
+      - key_type
+      - key
+      - message
+      - signature
+      - remember
+      type: object
+    KeyIdentityVerifyResponse:
+      additionalProperties: false
+      properties:
+        new_account:
+          type: boolean
+        otp:
+          type: boolean
+        token:
+          type: string
+      required:
+      - token
+      type: object
     LoginRequest:
       additionalProperties: false
       properties:
@@ -364,6 +522,101 @@ components:
       - requires_confirmation
       - status
       - can_abort
+      type: object
+    OAuthApproveRequest:
+      additionalProperties: false
+      properties:
+        approve:
+          type: boolean
+      required:
+      - approve
+      type: object
+    OAuthClientResponse:
+      additionalProperties: false
+      properties:
+        client_id:
+          type: string
+        client_name:
+          type: string
+        grant_types:
+          items:
+            type: string
+          type: array
+        redirect_uris:
+          items:
+            type: string
+          type: array
+        response_types:
+          items:
+            type: string
+          type: array
+        token_endpoint_auth_method:
+          type: string
+      required:
+      - client_id
+      - client_name
+      - redirect_uris
+      - grant_types
+      - response_types
+      - token_endpoint_auth_method
+      type: object
+    OAuthRedirectResponse:
+      additionalProperties: false
+      properties:
+        redirect_uri:
+          type: string
+      required:
+      - redirect_uri
+      type: object
+    OAuthRegisterRequest:
+      additionalProperties: false
+      properties:
+        application_type:
+          type: string
+        client_name:
+          type: string
+        grant_types:
+          items:
+            type: string
+          type: array
+        redirect_uris:
+          items:
+            type: string
+          type: array
+        response_types:
+          items:
+            type: string
+          type: array
+        token_endpoint_auth_method:
+          type: string
+      required:
+      - client_name
+      - redirect_uris
+      - application_type
+      - token_endpoint_auth_method
+      - grant_types
+      - response_types
+      type: object
+    OAuthTokenRequest:
+      additionalProperties: false
+      properties:
+        client_id:
+          type: string
+        code:
+          type: string
+        code_verifier:
+          type: string
+        grant_type:
+          type: string
+        redirect_uri:
+          type: string
+        refresh_token:
+          type: string
+        resource:
+          type: string
+      required:
+      - grant_type
+      - client_id
       type: object
     OTPDisableRequest:
       additionalProperties: false
@@ -662,6 +915,20 @@ components:
       - data
       - total
       type: object
+    PublicProviderResponse:
+      additionalProperties: false
+      properties:
+        display_name:
+          type: string
+        order_index:
+          type: integer
+        provider_id:
+          type: string
+      required:
+      - provider_id
+      - display_name
+      - order_index
+      type: object
     QuotaHistoryResponse:
       additionalProperties: false
       properties:
@@ -735,6 +1002,45 @@ components:
       required:
       - email
       type: object
+    SocialAccountListResponse:
+      additionalProperties: false
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/SocialAccountResponse'
+          type: array
+        total:
+          type: integer
+      required:
+      - data
+      - total
+      type: object
+    SocialAccountResponse:
+      additionalProperties: false
+      properties:
+        created_at:
+          format: date-time
+          type: string
+        email:
+          type: string
+        provider:
+          type: string
+        provider_user_id:
+          type: string
+      required:
+      - provider
+      - provider_user_id
+      - email
+      - created_at
+      type: object
+    SocialConsentResponse:
+      additionalProperties: false
+      properties:
+        redirect_uri:
+          type: string
+      required:
+      - redirect_uri
+      type: object
     SubscriptionStatusResponse:
       additionalProperties: false
       properties:
@@ -758,6 +1064,22 @@ components:
           type: string
       required:
       - is_subscribed
+      type: object
+    TokenResponse:
+      additionalProperties: false
+      properties:
+        access_token:
+          type: string
+        expires_in:
+          type: integer
+        refresh_token:
+          type: string
+        token_type:
+          type: string
+      required:
+      - access_token
+      - token_type
+      - expires_in
       type: object
     UUID:
       items:
@@ -877,15 +1199,394 @@ components:
       required:
       - type
       type: object
+    openIDConfig:
+      additionalProperties: false
+      properties:
+        authorization_endpoint:
+          type: string
+        code_challenge_methods_supported:
+          items:
+            type: string
+          type: array
+        grant_types_supported:
+          items:
+            type: string
+          type: array
+        id_token_signing_alg_values_supported:
+          items:
+            type: string
+          type: array
+        issuer:
+          type: string
+        jwks_uri:
+          type: string
+        registration_endpoint:
+          type: string
+        response_types_supported:
+          items:
+            type: string
+          type: array
+        scopes_supported:
+          items:
+            type: string
+          type: array
+        subject_types_supported:
+          items:
+            type: string
+          type: array
+        token_endpoint:
+          type: string
+        token_endpoint_auth_methods_supported:
+          items:
+            type: string
+          type: array
+      required:
+      - issuer
+      - authorization_endpoint
+      - token_endpoint
+      - jwks_uri
+      - response_types_supported
+      - grant_types_supported
+      - subject_types_supported
+      - id_token_signing_alg_values_supported
+      - token_endpoint_auth_methods_supported
+      - code_challenge_methods_supported
+      - scopes_supported
+      type: object
     stringUUIDSchema:
       format: uuid
       type: string
+    webKey:
+      additionalProperties: false
+      properties:
+        alg:
+          type: string
+        crv:
+          type: string
+        kid:
+          type: string
+        kty:
+          type: string
+        use:
+          type: string
+        x:
+          type: string
+      required:
+      - kty
+      type: object
+    webKeySet:
+      additionalProperties: false
+      properties:
+        keys:
+          items:
+            $ref: '#/components/schemas/webKey'
+          type: array
+      required:
+      - keys
+      type: object
 info:
   description: API endpoints for managing user accounts, authentication, and API keys.
   title: Account API
-  version: v0.3.1-0.20260708232039-b4aebacb9791
+  version: v0.3.1-0.20260903123759-e95a7bb2aea5
 openapi: 3.0.0
 paths:
+  /.well-known/jwks.json:
+    get:
+      description: RFC 7517 JSON Web Key Set exposing the portal's Ed25519 identity
+        public key.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/webKeySet'
+          description: JSON Web Key Set
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: JSON Web Key Set
+      tags:
+      - MCP OAuth
+    options:
+      description: RFC 7517 JSON Web Key Set exposing the portal's Ed25519 identity
+        public key.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/webKeySet'
+          description: JSON Web Key Set
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: JSON Web Key Set
+      tags:
+      - MCP OAuth
+  /.well-known/oauth-authorization-server:
+    get:
+      description: RFC 8414 authorization server metadata document used by MCP clients
+        for endpoint discovery.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASMetadata'
+          description: Authorization server metadata
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: OAuth Authorization Server Metadata
+      tags:
+      - MCP OAuth
+    options:
+      description: RFC 8414 authorization server metadata document used by MCP clients
+        for endpoint discovery.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASMetadata'
+          description: Authorization server metadata
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: OAuth Authorization Server Metadata
+      tags:
+      - MCP OAuth
+  /.well-known/openid-configuration:
+    get:
+      description: OpenID Connect Discovery 1.0 document describing the portal's OAuth
+        issuer and JWKS.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/openIDConfig'
+          description: OpenID Connect discovery document
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: OpenID Connect Discovery
+      tags:
+      - MCP OAuth
+    options:
+      description: OpenID Connect Discovery 1.0 document describing the portal's OAuth
+        issuer and JWKS.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/openIDConfig'
+          description: OpenID Connect discovery document
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: OpenID Connect Discovery
+      tags:
+      - MCP OAuth
   /api/account:
     delete:
       description: Initiates the process to delete the authenticated user's account.
@@ -904,6 +1605,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -944,6 +1651,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Account not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -988,6 +1701,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: The requested user was not found.
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -995,6 +1714,413 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: A database operation failed.
       summary: Update profile information
+  /api/account/auth/links:
+    get:
+      description: Returns the social login providers linked to the authenticated
+        user's account.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SocialAccountListResponse'
+          description: Paginated list of linked social accounts
+          headers:
+            X-Total-Count:
+              description: Total number of items
+              schema:
+                type: string
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: List linked social accounts
+  /api/account/auth/providers:
+    get:
+      description: Returns enabled social login providers for the login page. No authentication
+        required.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/PublicProviderResponse'
+                type: array
+          description: Enabled social login providers
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: List available social login providers
+  /api/account/auth/sso/{provider}:
+    delete:
+      description: Unlinks a social login provider from the authenticated user's account.
+      parameters:
+      - description: The social login provider (e.g., google, github)
+        in: path
+        name: provider
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Success
+        "204":
+          description: Provider unlinked
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Unlink social login provider
+    get:
+      description: Redirects the user to the specified social login provider's authentication
+        page.
+      parameters:
+      - description: The social login provider (e.g., google, github)
+        in: path
+        name: provider
+        required: true
+        schema:
+          type: string
+      - description: URL to redirect to after successful authentication
+        in: query
+        name: return
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Success
+        "302":
+          description: Redirecting to social login provider
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Initiate Social Login
+  /api/account/auth/sso/{provider}/callback:
+    get:
+      description: Callback endpoint for social login providers. Completes the authentication
+        process.
+      parameters:
+      - description: The social login provider
+        in: path
+        name: provider
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Success
+        "302":
+          description: Redirecting to auth complete endpoint
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Social Login Callback
+  /api/account/auth/sso/{provider}/consent:
+    get:
+      description: Renders the consent page when a verified social login email matches
+        an existing account. The page asks the user to approve linking the provider
+        identity to that account before any link is created.
+      parameters:
+      - description: The social login provider (e.g., google, github)
+        in: path
+        name: provider
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Consent page (text/html)
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Show social link consent page
+    post:
+      description: Approves or rejects linking the pending provider identity to the
+        existing account. Called by the consent page. Returns the redirect URI to
+        navigate to.
+      parameters:
+      - description: The social login provider (e.g., google, github)
+        in: path
+        name: provider
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              properties:
+                approve:
+                  type: boolean
+              required:
+              - approve
+              type: object
+        description: Approval decision
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SocialConsentResponse'
+          description: Redirect URI
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Approve or reject social link consent
+  /api/account/auth/sso/{provider}/link:
+    post:
+      description: Initiate linking a social login provider to the authenticated user.
+        Redirects to the provider's authentication page.
+      parameters:
+      - description: The social login provider (e.g., google, github)
+        in: path
+        name: provider
+        required: true
+        schema:
+          type: string
+      - description: URL to redirect to after successful linking
+        in: query
+        name: return
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Success
+        "302":
+          description: Redirecting to social login provider
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Link social login provider
+  /api/account/auth/sso/{provider}/logout:
+    get:
+      description: Logs out the user from the social login provider session.
+      parameters:
+      - description: The social login provider
+        in: path
+        name: provider
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Success
+        "307":
+          description: Redirecting to home page
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Social Logout
   /api/account/avatar:
     get:
       description: Retrieves the authenticated user's profile picture
@@ -1013,6 +2139,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1057,6 +2189,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1100,6 +2238,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1144,6 +2288,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: No active subscription found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1188,6 +2338,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: No active subscription or no scheduled cancellation found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1240,6 +2396,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: No active subscription found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1297,6 +2459,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Session not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1371,6 +2539,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: User already has an active subscription
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1416,6 +2590,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1460,6 +2640,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: No subscription found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1511,6 +2697,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: No active subscription found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1555,6 +2747,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: No active subscription found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1599,6 +2797,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: No active subscription found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1643,6 +2847,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: No paused subscription found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1686,6 +2896,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1727,6 +2943,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1794,6 +3016,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Payload too large
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1904,6 +3132,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1939,6 +3173,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1971,6 +3211,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2003,6 +3249,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2048,6 +3300,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2078,6 +3336,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2108,6 +3372,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2156,6 +3426,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2188,6 +3464,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2220,6 +3502,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2260,6 +3548,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2292,6 +3586,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2339,6 +3639,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2346,9 +3652,370 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: A database operation failed.
       summary: Authenticate with API Key
+  /api/auth/key/{type}/{key}:
+    delete:
+      description: Unlinks a key identity from the authenticated user's account.
+      parameters:
+      - description: The base58/hex-encoded public key to disconnect
+        in: path
+        name: key
+        required: true
+        schema:
+          type: string
+      - description: The key identity type (e.g., ethereum, solana)
+        in: path
+        name: type
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Success
+        "204":
+          description: Key identity removed
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid key type or key format
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not authenticated
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Key identity not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Disconnect Key Identity
+  /api/auth/key/challenge:
+    post:
+      description: Issues a cryptographic challenge for proving ownership of a key
+        identity (e.g., SIWE message for Ethereum).
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyIdentityChallengeRequest'
+        description: Challenge request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyIdentityChallengeResponse'
+          description: Challenge issued
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid key type or key format
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Issue Key Identity Challenge
+  /api/auth/key/connect/challenge:
+    post:
+      description: Issues a cryptographic challenge for linking a new key identity
+        to the authenticated user's account.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyIdentityChallengeRequest'
+        description: Challenge request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyIdentityChallengeResponse'
+          description: Challenge issued
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid key type or key format
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not authenticated
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Key already linked to another account
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Issue Key Identity Connect Challenge
+  /api/auth/key/connect/verify:
+    post:
+      description: Verifies a signed challenge and links the key identity to the authenticated
+        user's account.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyIdentityConnectVerifyRequest'
+        description: Verification request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyIdentityConnectVerifyResponse'
+          description: Key identity linked
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid request or verification failed
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not authenticated
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Key already linked to another account
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Verify and Connect Key Identity
+  /api/auth/key/identities:
+    get:
+      description: Lists all key identities linked to the authenticated user's account.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyIdentityListResponse'
+          description: Key identities
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not authenticated
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: List Key Identities
+  /api/auth/key/verify:
+    post:
+      description: Verifies a signed challenge and authenticates the user via key
+        identity login. If the key is not linked to any account, a new anonymous account
+        is provisioned (response/redirect carries new_account).
+      parameters:
+      - description: URL to redirect to after completion
+        in: query
+        name: return
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyIdentityVerifyRequest'
+        description: Verification request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyIdentityVerifyResponse'
+          description: Login successful
+        "302":
+          description: Redirect to auth complete (for non-OTP)
+          headers:
+            Location:
+              description: URL to redirect to
+              schema:
+                type: string
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid request or verification failed
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid key or proof
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Verify Key Identity and Login
   /api/auth/login:
     post:
       description: Authenticates a user using email and password.
+      parameters:
+      - description: URL to redirect to after completion
+        in: query
+        name: return
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -2394,6 +4061,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2431,6 +4104,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2438,6 +4117,312 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Failed to logout
       summary: Logout
+  /api/auth/oauth/authorize:
+    get:
+      description: Renders the OAuth consent page for an authenticated resource owner,
+        or redirects unauthenticated users to the portal login. Submitting the page
+        issues an authorization code.
+      parameters:
+      - description: The registered OAuth client identifier
+        in: query
+        name: client_id
+        schema:
+          type: string
+      - description: PKCE code challenge (RFC 7636)
+        in: query
+        name: code_challenge
+        schema:
+          type: string
+      - description: PKCE challenge method; must be "S256"
+        in: query
+        name: code_challenge_method
+        schema:
+          type: string
+      - description: The client redirect URI
+        in: query
+        name: redirect_uri
+        schema:
+          type: string
+      - description: The MCP server resource being requested (RFC 8707)
+        in: query
+        name: resource
+        schema:
+          type: string
+      - description: Authorization flow response type; must be "code"
+        in: query
+        name: response_type
+        schema:
+          type: string
+      - description: Requested scopes
+        in: query
+        name: scope
+        schema:
+          type: string
+      - description: Opaque state echoed back to the client
+        in: query
+        name: state
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Consent page (text/html)
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Authorize MCP Client
+      tags:
+      - MCP OAuth
+    post:
+      description: Issues an authorization code when the resource owner approves,
+        returning the client redirect URI. Called by the consent page.
+      parameters:
+      - description: The registered OAuth client identifier
+        in: query
+        name: client_id
+        schema:
+          type: string
+      - description: PKCE code challenge (RFC 7636)
+        in: query
+        name: code_challenge
+        schema:
+          type: string
+      - description: PKCE challenge method; must be "S256"
+        in: query
+        name: code_challenge_method
+        schema:
+          type: string
+      - description: The client redirect URI
+        in: query
+        name: redirect_uri
+        schema:
+          type: string
+      - description: The MCP server resource being requested (RFC 8707)
+        in: query
+        name: resource
+        schema:
+          type: string
+      - description: Authorization flow response type; must be "code"
+        in: query
+        name: response_type
+        schema:
+          type: string
+      - description: Requested scopes
+        in: query
+        name: scope
+        schema:
+          type: string
+      - description: Opaque state echoed back to the client
+        in: query
+        name: state
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OAuthApproveRequest'
+        description: Approve or reject the request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuthRedirectResponse'
+          description: Final client redirect URI
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid authorization request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Approve MCP Client Authorization
+      tags:
+      - MCP OAuth
+  /api/auth/oauth/register:
+    post:
+      description: Registers a dynamic public OAuth client (RFC 7591 §3.1) and returns
+        its client_id.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OAuthRegisterRequest'
+        description: Client registration metadata
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Success
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuthClientResponse'
+          description: Registered client
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid client metadata
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Register MCP OAuth Client
+      tags:
+      - MCP OAuth
+  /api/auth/oauth/token:
+    post:
+      description: Exchanges an authorization code for tokens, or rotates a refresh
+        token (RFC 6749 §5). Form-encoded body.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OAuthTokenRequest'
+        description: grant_type of authorization_code or refresh_token plus the relevant
+          fields
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+          description: Token response
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: RFC 6749 §5.2 error response
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: OAuth Token
+      tags:
+      - MCP OAuth
   /api/auth/otp/disable:
     post:
       description: Disables 2FA for the authenticated user.
@@ -2469,6 +4454,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2510,6 +4501,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2520,6 +4517,12 @@ paths:
   /api/auth/otp/validate:
     post:
       description: Validates an OTP code to complete 2FA login.
+      parameters:
+      - description: URL to redirect to after completion
+        in: query
+        name: return
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -2559,6 +4562,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2597,6 +4606,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2638,6 +4653,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2688,6 +4709,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: The email address provided is already in use.
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2695,6 +4722,81 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: A database operation failed.
       summary: Register a new account
+  /api/billing/credits/purchase:
+    post:
+      description: Initiates or completes an x402 crypto payment for credits. First
+        call returns 402 Payment Required with a challenge. Client pays via ATLOS
+        and then calls again with PAYMENT-SIGNATURE header containing the payload.
+      parameters:
+      - description: USD amount to purchase
+        in: query
+        name: amount
+        schema:
+          type: string
+      - description: Wallet address for payment
+        in: query
+        name: wallet
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Credit purchased
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid nonce or payment not confirmed
+        "402":
+          description: Payment required
+          headers:
+            Payment-Required:
+              description: x402 challenge
+              schema:
+                type: string
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "429":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Rate limit exceeded
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Failed to process payment
+      summary: Purchase credits via x402
+      tags:
+      - Billing
   /api/billing/gateways:
     get:
       description: Returns list of available payment gateways with metadata
@@ -2729,6 +4831,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2775,6 +4883,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Gateway logo not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2819,6 +4933,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -3331,6 +5451,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -3367,6 +5493,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -3397,6 +5529,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -3426,6 +5564,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:

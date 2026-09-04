@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Account API
  * API endpoints for managing user accounts, authentication, and API keys.
- * OpenAPI spec version: v0.3.1-0.20260708232039-b4aebacb9791
+ * OpenAPI spec version: v0.3.1-0.20260903123759-e95a7bb2aea5
  */
 export interface APIEndpointInfoResponse {
   method: string;
@@ -25,6 +25,19 @@ export interface APIKeyResponse {
 export interface APIKeyListResponse {
   data: APIKeyResponse[];
   total: number;
+}
+
+export interface ASMetadata {
+  authorization_endpoint: string;
+  client_id_metadata_document_supported?: boolean;
+  code_challenge_methods_supported: string[];
+  grant_types_supported: string[];
+  issuer: string;
+  registration_endpoint?: string;
+  response_types_supported: string[];
+  scopes_supported: string[];
+  token_endpoint: string;
+  token_endpoint_auth_methods_supported: string[];
 }
 
 export interface AccessModelDef {
@@ -133,6 +146,58 @@ export interface GatewayPublicInfo {
 
 export type GatewayListResponse = GatewayPublicInfo[];
 
+export interface JSONRawMessageSchema { [key: string]: unknown }
+
+export interface KeyIdentityChallengeRequest {
+  key: string;
+  key_type: string;
+  metadata?: JSONRawMessageSchema;
+}
+
+export interface KeyIdentityChallengeResponse {
+  message: string;
+  nonce: string;
+}
+
+export interface KeyIdentityConnectVerifyRequest {
+  key: string;
+  key_type: string;
+  message: string;
+  metadata?: JSONRawMessageSchema;
+  signature: string;
+}
+
+export interface KeyIdentityConnectVerifyResponse {
+  key: string;
+  key_type: string;
+  metadata?: JSONRawMessageSchema;
+}
+
+export interface KeyIdentityItem {
+  key: string;
+  key_type: string;
+  metadata?: JSONRawMessageSchema;
+}
+
+export interface KeyIdentityListResponse {
+  identities: KeyIdentityItem[];
+}
+
+export interface KeyIdentityVerifyRequest {
+  key: string;
+  key_type: string;
+  message: string;
+  metadata?: JSONRawMessageSchema;
+  remember: boolean;
+  signature: string;
+}
+
+export interface KeyIdentityVerifyResponse {
+  new_account?: boolean;
+  otp?: boolean;
+  token: string;
+}
+
 export interface LoginRequest {
   email: string;
   password: string;
@@ -168,6 +233,42 @@ export interface ManagementResultResponse {
   requires_confirmation: boolean;
   status: string;
   url?: string;
+}
+
+export interface OAuthApproveRequest {
+  approve: boolean;
+}
+
+export interface OAuthClientResponse {
+  client_id: string;
+  client_name: string;
+  grant_types: string[];
+  redirect_uris: string[];
+  response_types: string[];
+  token_endpoint_auth_method: string;
+}
+
+export interface OAuthRedirectResponse {
+  redirect_uri: string;
+}
+
+export interface OAuthRegisterRequest {
+  application_type: string;
+  client_name: string;
+  grant_types: string[];
+  redirect_uris: string[];
+  response_types: string[];
+  token_endpoint_auth_method: string;
+}
+
+export interface OAuthTokenRequest {
+  client_id: string;
+  code?: string;
+  code_verifier?: string;
+  grant_type: string;
+  redirect_uri?: string;
+  refresh_token?: string;
+  resource?: string;
 }
 
 export interface OTPDisableRequest {
@@ -298,6 +399,12 @@ export interface PublicPricingPlansListResponse {
   total: number;
 }
 
+export interface PublicProviderResponse {
+  display_name: string;
+  order_index: number;
+  provider_id: string;
+}
+
 export interface UsagePoint {
   bytes: number;
   date: string;
@@ -343,6 +450,22 @@ export interface ResendVerifyEmailRequest {
   email: string;
 }
 
+export interface SocialAccountResponse {
+  created_at: string;
+  email: string;
+  provider: string;
+  provider_user_id: string;
+}
+
+export interface SocialAccountListResponse {
+  data: SocialAccountResponse[];
+  total: number;
+}
+
+export interface SocialConsentResponse {
+  redirect_uri: string;
+}
+
 export interface SubscriptionStatusResponse {
   created_at?: string;
   gateway_type?: string;
@@ -351,6 +474,13 @@ export interface SubscriptionStatusResponse {
   pricing_plan_period_id?: number;
   updated_at?: string;
   will_cancel_at?: string;
+}
+
+export interface TokenResponse {
+  access_token: string;
+  expires_in: number;
+  refresh_token?: string;
+  token_type: string;
 }
 
 /**
@@ -397,7 +527,53 @@ export interface VerifyEmailRequest {
   token: string;
 }
 
+export interface OpenIDConfig {
+  authorization_endpoint: string;
+  code_challenge_methods_supported: string[];
+  grant_types_supported: string[];
+  id_token_signing_alg_values_supported: string[];
+  issuer: string;
+  jwks_uri: string;
+  registration_endpoint?: string;
+  response_types_supported: string[];
+  scopes_supported: string[];
+  subject_types_supported: string[];
+  token_endpoint: string;
+  token_endpoint_auth_methods_supported: string[];
+}
+
 export type StringUUIDSchema = string;
+
+export interface WebKey {
+  alg?: string;
+  crv?: string;
+  kid?: string;
+  kty: string;
+  use?: string;
+  x?: string;
+}
+
+export interface WebKeySet {
+  keys: WebKey[];
+}
+
+export type GetApiAccountAuthSsoProviderParams = {
+/**
+ * URL to redirect to after successful authentication
+ */
+return?: string;
+};
+
+export type PostApiAccountAuthSsoProviderConsentBody = {
+  approve: boolean;
+};
+
+export type PostApiAccountAuthSsoProviderLinkParams = {
+/**
+ * URL to redirect to after successful linking
+ */
+return?: string;
+};
 
 export type PostApiAccountAvatarBody = {
   file: Blob;
@@ -503,6 +679,110 @@ export type PostApiAccountVerifyEmailParams = {
  */
 login?: string;
 };
+
+export type PostApiAuthKeyVerifyParams = {
+/**
+ * URL to redirect to after completion
+ */
+return?: string;
+};
+
+export type PostApiAuthLoginParams = {
+/**
+ * URL to redirect to after completion
+ */
+return?: string;
+};
+
+export type GetApiAuthOauthAuthorizeParams = {
+/**
+ * The registered OAuth client identifier
+ */
+client_id?: string;
+/**
+ * PKCE code challenge (RFC 7636)
+ */
+code_challenge?: string;
+/**
+ * PKCE challenge method; must be "S256"
+ */
+code_challenge_method?: string;
+/**
+ * The client redirect URI
+ */
+redirect_uri?: string;
+/**
+ * The MCP server resource being requested (RFC 8707)
+ */
+resource?: string;
+/**
+ * Authorization flow response type; must be "code"
+ */
+response_type?: string;
+/**
+ * Requested scopes
+ */
+scope?: string;
+/**
+ * Opaque state echoed back to the client
+ */
+state?: string;
+};
+
+export type PostApiAuthOauthAuthorizeParams = {
+/**
+ * The registered OAuth client identifier
+ */
+client_id?: string;
+/**
+ * PKCE code challenge (RFC 7636)
+ */
+code_challenge?: string;
+/**
+ * PKCE challenge method; must be "S256"
+ */
+code_challenge_method?: string;
+/**
+ * The client redirect URI
+ */
+redirect_uri?: string;
+/**
+ * The MCP server resource being requested (RFC 8707)
+ */
+resource?: string;
+/**
+ * Authorization flow response type; must be "code"
+ */
+response_type?: string;
+/**
+ * Requested scopes
+ */
+scope?: string;
+/**
+ * Opaque state echoed back to the client
+ */
+state?: string;
+};
+
+export type PostApiAuthOtpValidateParams = {
+/**
+ * URL to redirect to after completion
+ */
+return?: string;
+};
+
+export type PostApiBillingCreditsPurchaseParams = {
+/**
+ * USD amount to purchase
+ */
+amount?: string;
+/**
+ * Wallet address for payment
+ */
+wallet?: string;
+};
+
+export type PostApiBillingCreditsPurchase200 = { [key: string]: unknown };
 
 export type GetApiOperationsParams = {
 /**

@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Account API
  * API endpoints for managing user accounts, authentication, and API keys.
- * OpenAPI spec version: v0.3.1-0.20260708232039-b4aebacb9791
+ * OpenAPI spec version: v0.3.1-0.20260903123759-e95a7bb2aea5
  */
 import type {
   APIKeyCreateRequest,
@@ -12,9 +12,17 @@ import type {
   AccountPermissionsResponse,
   CreateAPIKeyResponse,
   ErrorResponse,
+  GetApiAccountAuthSsoProviderParams,
   GetApiAccountKeysParams,
   GetApiAccountQuotaHistoryParams,
   GetApiOperationsParams,
+  KeyIdentityChallengeRequest,
+  KeyIdentityChallengeResponse,
+  KeyIdentityConnectVerifyRequest,
+  KeyIdentityConnectVerifyResponse,
+  KeyIdentityListResponse,
+  KeyIdentityVerifyRequest,
+  KeyIdentityVerifyResponse,
   LoginRequest,
   LoginResponse,
   OTPDisableRequest,
@@ -27,11 +35,19 @@ import type {
   PasswordResetRequest,
   PasswordResetVerifyRequest,
   PongResponse,
+  PostApiAccountAuthSsoProviderConsentBody,
+  PostApiAccountAuthSsoProviderLinkParams,
   PostApiAccountAvatarBody,
   PostApiAccountVerifyEmailParams,
+  PostApiAuthKeyVerifyParams,
+  PostApiAuthLoginParams,
+  PostApiAuthOtpValidateParams,
+  PublicProviderResponse,
   QuotaHistoryResponse,
   RegisterRequest,
   ResendVerifyEmailRequest,
+  SocialAccountListResponse,
+  SocialConsentResponse,
   StringUUIDSchema,
   UpdateEmailRequest,
   UpdatePasswordRequest,
@@ -57,6 +73,11 @@ export type deleteApiAccountResponse404 = {
   status: 404
 }
 
+export type deleteApiAccountResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type deleteApiAccountResponse500 = {
   data: ErrorResponse
   status: 500
@@ -65,7 +86,7 @@ export type deleteApiAccountResponse500 = {
 export type deleteApiAccountResponseSuccess = (deleteApiAccountResponse200) & {
   headers: Headers;
 };
-export type deleteApiAccountResponseError = (deleteApiAccountResponse400 | deleteApiAccountResponse404 | deleteApiAccountResponse500) & {
+export type deleteApiAccountResponseError = (deleteApiAccountResponse400 | deleteApiAccountResponse404 | deleteApiAccountResponse422 | deleteApiAccountResponse500) & {
   headers: Headers;
 };
 
@@ -127,6 +148,11 @@ export type getApiAccountResponse404 = {
   status: 404
 }
 
+export type getApiAccountResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type getApiAccountResponse500 = {
   data: ErrorResponse
   status: 500
@@ -135,7 +161,7 @@ export type getApiAccountResponse500 = {
 export type getApiAccountResponseSuccess = (getApiAccountResponse200) & {
   headers: Headers;
 };
-export type getApiAccountResponseError = (getApiAccountResponse400 | getApiAccountResponse401 | getApiAccountResponse403 | getApiAccountResponse404 | getApiAccountResponse500) & {
+export type getApiAccountResponseError = (getApiAccountResponse400 | getApiAccountResponse401 | getApiAccountResponse403 | getApiAccountResponse404 | getApiAccountResponse422 | getApiAccountResponse500) & {
   headers: Headers;
 };
 
@@ -197,6 +223,11 @@ export type patchApiAccountResponse404 = {
   status: 404
 }
 
+export type patchApiAccountResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type patchApiAccountResponse500 = {
   data: ErrorResponse
   status: 500
@@ -205,7 +236,7 @@ export type patchApiAccountResponse500 = {
 export type patchApiAccountResponseSuccess = (patchApiAccountResponse200) & {
   headers: Headers;
 };
-export type patchApiAccountResponseError = (patchApiAccountResponse400 | patchApiAccountResponse401 | patchApiAccountResponse403 | patchApiAccountResponse404 | patchApiAccountResponse500) & {
+export type patchApiAccountResponseError = (patchApiAccountResponse400 | patchApiAccountResponse401 | patchApiAccountResponse403 | patchApiAccountResponse404 | patchApiAccountResponse422 | patchApiAccountResponse500) & {
   headers: Headers;
 };
 
@@ -242,6 +273,635 @@ export const patchApiAccount = async (updateProfileRequest: UpdateProfileRequest
 }
 
 
+export type getApiAccountAuthLinksResponse200 = {
+  data: SocialAccountListResponse
+  status: 200
+}
+
+export type getApiAccountAuthLinksResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type getApiAccountAuthLinksResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type getApiAccountAuthLinksResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type getApiAccountAuthLinksResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type getApiAccountAuthLinksResponseSuccess = (getApiAccountAuthLinksResponse200) & {
+  headers: Headers;
+};
+export type getApiAccountAuthLinksResponseError = (getApiAccountAuthLinksResponse400 | getApiAccountAuthLinksResponse404 | getApiAccountAuthLinksResponse422 | getApiAccountAuthLinksResponse500) & {
+  headers: Headers;
+};
+
+export type getApiAccountAuthLinksResponse = (getApiAccountAuthLinksResponseSuccess | getApiAccountAuthLinksResponseError)
+
+export const getGetApiAccountAuthLinksUrl = () => {
+
+
+
+
+  return `/api/account/auth/links`
+}
+
+/**
+ * Returns the social login providers linked to the authenticated user's account.
+ * @summary List linked social accounts
+ */
+export const getApiAccountAuthLinks = async ( options?: RequestInit): Promise<getApiAccountAuthLinksResponse> => {
+
+  const res = await fetch(getGetApiAccountAuthLinksUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getApiAccountAuthLinksResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getApiAccountAuthLinksResponse
+}
+
+
+export type getApiAccountAuthProvidersResponse200 = {
+  data: PublicProviderResponse[]
+  status: 200
+}
+
+export type getApiAccountAuthProvidersResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type getApiAccountAuthProvidersResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type getApiAccountAuthProvidersResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type getApiAccountAuthProvidersResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type getApiAccountAuthProvidersResponseSuccess = (getApiAccountAuthProvidersResponse200) & {
+  headers: Headers;
+};
+export type getApiAccountAuthProvidersResponseError = (getApiAccountAuthProvidersResponse400 | getApiAccountAuthProvidersResponse404 | getApiAccountAuthProvidersResponse422 | getApiAccountAuthProvidersResponse500) & {
+  headers: Headers;
+};
+
+export type getApiAccountAuthProvidersResponse = (getApiAccountAuthProvidersResponseSuccess | getApiAccountAuthProvidersResponseError)
+
+export const getGetApiAccountAuthProvidersUrl = () => {
+
+
+
+
+  return `/api/account/auth/providers`
+}
+
+/**
+ * Returns enabled social login providers for the login page. No authentication required.
+ * @summary List available social login providers
+ */
+export const getApiAccountAuthProviders = async ( options?: RequestInit): Promise<getApiAccountAuthProvidersResponse> => {
+
+  const res = await fetch(getGetApiAccountAuthProvidersUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getApiAccountAuthProvidersResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getApiAccountAuthProvidersResponse
+}
+
+
+export type deleteApiAccountAuthSsoProviderResponse200 = {
+  data: ErrorResponse
+  status: 200
+}
+
+export type deleteApiAccountAuthSsoProviderResponse204 = {
+  data: void
+  status: 204
+}
+
+export type deleteApiAccountAuthSsoProviderResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type deleteApiAccountAuthSsoProviderResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type deleteApiAccountAuthSsoProviderResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type deleteApiAccountAuthSsoProviderResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type deleteApiAccountAuthSsoProviderResponseSuccess = (deleteApiAccountAuthSsoProviderResponse200 | deleteApiAccountAuthSsoProviderResponse204) & {
+  headers: Headers;
+};
+export type deleteApiAccountAuthSsoProviderResponseError = (deleteApiAccountAuthSsoProviderResponse400 | deleteApiAccountAuthSsoProviderResponse404 | deleteApiAccountAuthSsoProviderResponse422 | deleteApiAccountAuthSsoProviderResponse500) & {
+  headers: Headers;
+};
+
+export type deleteApiAccountAuthSsoProviderResponse = (deleteApiAccountAuthSsoProviderResponseSuccess | deleteApiAccountAuthSsoProviderResponseError)
+
+export const getDeleteApiAccountAuthSsoProviderUrl = (provider: string,) => {
+
+
+
+
+  return `/api/account/auth/sso/${provider}`
+}
+
+/**
+ * Unlinks a social login provider from the authenticated user's account.
+ * @summary Unlink social login provider
+ */
+export const deleteApiAccountAuthSsoProvider = async (provider: string, options?: RequestInit): Promise<deleteApiAccountAuthSsoProviderResponse> => {
+
+  const res = await fetch(getDeleteApiAccountAuthSsoProviderUrl(provider),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: deleteApiAccountAuthSsoProviderResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as deleteApiAccountAuthSsoProviderResponse
+}
+
+
+export type getApiAccountAuthSsoProviderResponse200 = {
+  data: ErrorResponse
+  status: 200
+}
+
+export type getApiAccountAuthSsoProviderResponse302 = {
+  data: void
+  status: 302
+}
+
+export type getApiAccountAuthSsoProviderResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type getApiAccountAuthSsoProviderResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type getApiAccountAuthSsoProviderResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type getApiAccountAuthSsoProviderResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type getApiAccountAuthSsoProviderResponseSuccess = (getApiAccountAuthSsoProviderResponse200) & {
+  headers: Headers;
+};
+export type getApiAccountAuthSsoProviderResponseError = (getApiAccountAuthSsoProviderResponse302 | getApiAccountAuthSsoProviderResponse400 | getApiAccountAuthSsoProviderResponse404 | getApiAccountAuthSsoProviderResponse422 | getApiAccountAuthSsoProviderResponse500) & {
+  headers: Headers;
+};
+
+export type getApiAccountAuthSsoProviderResponse = (getApiAccountAuthSsoProviderResponseSuccess | getApiAccountAuthSsoProviderResponseError)
+
+export const getGetApiAccountAuthSsoProviderUrl = (provider: string,
+    params?: GetApiAccountAuthSsoProviderParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/account/auth/sso/${provider}?${stringifiedParams}` : `/api/account/auth/sso/${provider}`
+}
+
+/**
+ * Redirects the user to the specified social login provider's authentication page.
+ * @summary Initiate Social Login
+ */
+export const getApiAccountAuthSsoProvider = async (provider: string,
+    params?: GetApiAccountAuthSsoProviderParams, options?: RequestInit): Promise<getApiAccountAuthSsoProviderResponse> => {
+
+  const res = await fetch(getGetApiAccountAuthSsoProviderUrl(provider,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getApiAccountAuthSsoProviderResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getApiAccountAuthSsoProviderResponse
+}
+
+
+export type getApiAccountAuthSsoProviderCallbackResponse200 = {
+  data: ErrorResponse
+  status: 200
+}
+
+export type getApiAccountAuthSsoProviderCallbackResponse302 = {
+  data: void
+  status: 302
+}
+
+export type getApiAccountAuthSsoProviderCallbackResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type getApiAccountAuthSsoProviderCallbackResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type getApiAccountAuthSsoProviderCallbackResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type getApiAccountAuthSsoProviderCallbackResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type getApiAccountAuthSsoProviderCallbackResponseSuccess = (getApiAccountAuthSsoProviderCallbackResponse200) & {
+  headers: Headers;
+};
+export type getApiAccountAuthSsoProviderCallbackResponseError = (getApiAccountAuthSsoProviderCallbackResponse302 | getApiAccountAuthSsoProviderCallbackResponse400 | getApiAccountAuthSsoProviderCallbackResponse404 | getApiAccountAuthSsoProviderCallbackResponse422 | getApiAccountAuthSsoProviderCallbackResponse500) & {
+  headers: Headers;
+};
+
+export type getApiAccountAuthSsoProviderCallbackResponse = (getApiAccountAuthSsoProviderCallbackResponseSuccess | getApiAccountAuthSsoProviderCallbackResponseError)
+
+export const getGetApiAccountAuthSsoProviderCallbackUrl = (provider: string,) => {
+
+
+
+
+  return `/api/account/auth/sso/${provider}/callback`
+}
+
+/**
+ * Callback endpoint for social login providers. Completes the authentication process.
+ * @summary Social Login Callback
+ */
+export const getApiAccountAuthSsoProviderCallback = async (provider: string, options?: RequestInit): Promise<getApiAccountAuthSsoProviderCallbackResponse> => {
+
+  const res = await fetch(getGetApiAccountAuthSsoProviderCallbackUrl(provider),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getApiAccountAuthSsoProviderCallbackResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getApiAccountAuthSsoProviderCallbackResponse
+}
+
+
+export type getApiAccountAuthSsoProviderConsentResponse200 = {
+  data: void
+  status: 200
+}
+
+export type getApiAccountAuthSsoProviderConsentResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type getApiAccountAuthSsoProviderConsentResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type getApiAccountAuthSsoProviderConsentResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type getApiAccountAuthSsoProviderConsentResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type getApiAccountAuthSsoProviderConsentResponseSuccess = (getApiAccountAuthSsoProviderConsentResponse200) & {
+  headers: Headers;
+};
+export type getApiAccountAuthSsoProviderConsentResponseError = (getApiAccountAuthSsoProviderConsentResponse400 | getApiAccountAuthSsoProviderConsentResponse404 | getApiAccountAuthSsoProviderConsentResponse422 | getApiAccountAuthSsoProviderConsentResponse500) & {
+  headers: Headers;
+};
+
+export type getApiAccountAuthSsoProviderConsentResponse = (getApiAccountAuthSsoProviderConsentResponseSuccess | getApiAccountAuthSsoProviderConsentResponseError)
+
+export const getGetApiAccountAuthSsoProviderConsentUrl = (provider: string,) => {
+
+
+
+
+  return `/api/account/auth/sso/${provider}/consent`
+}
+
+/**
+ * Renders the consent page when a verified social login email matches an existing account. The page asks the user to approve linking the provider identity to that account before any link is created.
+ * @summary Show social link consent page
+ */
+export const getApiAccountAuthSsoProviderConsent = async (provider: string, options?: RequestInit): Promise<getApiAccountAuthSsoProviderConsentResponse> => {
+
+  const res = await fetch(getGetApiAccountAuthSsoProviderConsentUrl(provider),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getApiAccountAuthSsoProviderConsentResponse['data'] = body ? JSON.parse(body) : undefined
+  return { data, status: res.status, headers: res.headers } as getApiAccountAuthSsoProviderConsentResponse
+}
+
+
+export type postApiAccountAuthSsoProviderConsentResponse200 = {
+  data: SocialConsentResponse
+  status: 200
+}
+
+export type postApiAccountAuthSsoProviderConsentResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type postApiAccountAuthSsoProviderConsentResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type postApiAccountAuthSsoProviderConsentResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type postApiAccountAuthSsoProviderConsentResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type postApiAccountAuthSsoProviderConsentResponseSuccess = (postApiAccountAuthSsoProviderConsentResponse200) & {
+  headers: Headers;
+};
+export type postApiAccountAuthSsoProviderConsentResponseError = (postApiAccountAuthSsoProviderConsentResponse400 | postApiAccountAuthSsoProviderConsentResponse404 | postApiAccountAuthSsoProviderConsentResponse422 | postApiAccountAuthSsoProviderConsentResponse500) & {
+  headers: Headers;
+};
+
+export type postApiAccountAuthSsoProviderConsentResponse = (postApiAccountAuthSsoProviderConsentResponseSuccess | postApiAccountAuthSsoProviderConsentResponseError)
+
+export const getPostApiAccountAuthSsoProviderConsentUrl = (provider: string,) => {
+
+
+
+
+  return `/api/account/auth/sso/${provider}/consent`
+}
+
+/**
+ * Approves or rejects linking the pending provider identity to the existing account. Called by the consent page. Returns the redirect URI to navigate to.
+ * @summary Approve or reject social link consent
+ */
+export const postApiAccountAuthSsoProviderConsent = async (provider: string,
+    postApiAccountAuthSsoProviderConsentBody: PostApiAccountAuthSsoProviderConsentBody, options?: RequestInit): Promise<postApiAccountAuthSsoProviderConsentResponse> => {
+
+  const res = await fetch(getPostApiAccountAuthSsoProviderConsentUrl(provider),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(postApiAccountAuthSsoProviderConsentBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: postApiAccountAuthSsoProviderConsentResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as postApiAccountAuthSsoProviderConsentResponse
+}
+
+
+export type postApiAccountAuthSsoProviderLinkResponse200 = {
+  data: ErrorResponse
+  status: 200
+}
+
+export type postApiAccountAuthSsoProviderLinkResponse302 = {
+  data: void
+  status: 302
+}
+
+export type postApiAccountAuthSsoProviderLinkResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type postApiAccountAuthSsoProviderLinkResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type postApiAccountAuthSsoProviderLinkResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type postApiAccountAuthSsoProviderLinkResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type postApiAccountAuthSsoProviderLinkResponseSuccess = (postApiAccountAuthSsoProviderLinkResponse200) & {
+  headers: Headers;
+};
+export type postApiAccountAuthSsoProviderLinkResponseError = (postApiAccountAuthSsoProviderLinkResponse302 | postApiAccountAuthSsoProviderLinkResponse400 | postApiAccountAuthSsoProviderLinkResponse404 | postApiAccountAuthSsoProviderLinkResponse422 | postApiAccountAuthSsoProviderLinkResponse500) & {
+  headers: Headers;
+};
+
+export type postApiAccountAuthSsoProviderLinkResponse = (postApiAccountAuthSsoProviderLinkResponseSuccess | postApiAccountAuthSsoProviderLinkResponseError)
+
+export const getPostApiAccountAuthSsoProviderLinkUrl = (provider: string,
+    params?: PostApiAccountAuthSsoProviderLinkParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/account/auth/sso/${provider}/link?${stringifiedParams}` : `/api/account/auth/sso/${provider}/link`
+}
+
+/**
+ * Initiate linking a social login provider to the authenticated user. Redirects to the provider's authentication page.
+ * @summary Link social login provider
+ */
+export const postApiAccountAuthSsoProviderLink = async (provider: string,
+    params?: PostApiAccountAuthSsoProviderLinkParams, options?: RequestInit): Promise<postApiAccountAuthSsoProviderLinkResponse> => {
+
+  const res = await fetch(getPostApiAccountAuthSsoProviderLinkUrl(provider,params),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: postApiAccountAuthSsoProviderLinkResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as postApiAccountAuthSsoProviderLinkResponse
+}
+
+
+export type getApiAccountAuthSsoProviderLogoutResponse200 = {
+  data: ErrorResponse
+  status: 200
+}
+
+export type getApiAccountAuthSsoProviderLogoutResponse307 = {
+  data: void
+  status: 307
+}
+
+export type getApiAccountAuthSsoProviderLogoutResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type getApiAccountAuthSsoProviderLogoutResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type getApiAccountAuthSsoProviderLogoutResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type getApiAccountAuthSsoProviderLogoutResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type getApiAccountAuthSsoProviderLogoutResponseSuccess = (getApiAccountAuthSsoProviderLogoutResponse200) & {
+  headers: Headers;
+};
+export type getApiAccountAuthSsoProviderLogoutResponseError = (getApiAccountAuthSsoProviderLogoutResponse307 | getApiAccountAuthSsoProviderLogoutResponse400 | getApiAccountAuthSsoProviderLogoutResponse404 | getApiAccountAuthSsoProviderLogoutResponse422 | getApiAccountAuthSsoProviderLogoutResponse500) & {
+  headers: Headers;
+};
+
+export type getApiAccountAuthSsoProviderLogoutResponse = (getApiAccountAuthSsoProviderLogoutResponseSuccess | getApiAccountAuthSsoProviderLogoutResponseError)
+
+export const getGetApiAccountAuthSsoProviderLogoutUrl = (provider: string,) => {
+
+
+
+
+  return `/api/account/auth/sso/${provider}/logout`
+}
+
+/**
+ * Logs out the user from the social login provider session.
+ * @summary Social Logout
+ */
+export const getApiAccountAuthSsoProviderLogout = async (provider: string, options?: RequestInit): Promise<getApiAccountAuthSsoProviderLogoutResponse> => {
+
+  const res = await fetch(getGetApiAccountAuthSsoProviderLogoutUrl(provider),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getApiAccountAuthSsoProviderLogoutResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getApiAccountAuthSsoProviderLogoutResponse
+}
+
+
 export type getApiAccountAvatarResponse200 = {
   data: void
   status: 200
@@ -257,6 +917,11 @@ export type getApiAccountAvatarResponse404 = {
   status: 404
 }
 
+export type getApiAccountAvatarResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type getApiAccountAvatarResponse500 = {
   data: ErrorResponse
   status: 500
@@ -265,7 +930,7 @@ export type getApiAccountAvatarResponse500 = {
 export type getApiAccountAvatarResponseSuccess = (getApiAccountAvatarResponse200) & {
   headers: Headers;
 };
-export type getApiAccountAvatarResponseError = (getApiAccountAvatarResponse400 | getApiAccountAvatarResponse404 | getApiAccountAvatarResponse500) & {
+export type getApiAccountAvatarResponseError = (getApiAccountAvatarResponse400 | getApiAccountAvatarResponse404 | getApiAccountAvatarResponse422 | getApiAccountAvatarResponse500) & {
   headers: Headers;
 };
 
@@ -322,6 +987,11 @@ export type postApiAccountAvatarResponse404 = {
   status: 404
 }
 
+export type postApiAccountAvatarResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAccountAvatarResponse500 = {
   data: ErrorResponse
   status: 500
@@ -330,7 +1000,7 @@ export type postApiAccountAvatarResponse500 = {
 export type postApiAccountAvatarResponseSuccess = (postApiAccountAvatarResponse200 | postApiAccountAvatarResponse204) & {
   headers: Headers;
 };
-export type postApiAccountAvatarResponseError = (postApiAccountAvatarResponse400 | postApiAccountAvatarResponse404 | postApiAccountAvatarResponse500) & {
+export type postApiAccountAvatarResponseError = (postApiAccountAvatarResponse400 | postApiAccountAvatarResponse404 | postApiAccountAvatarResponse422 | postApiAccountAvatarResponse500) & {
   headers: Headers;
 };
 
@@ -384,6 +1054,11 @@ export type getApiAccountKeysResponse404 = {
   status: 404
 }
 
+export type getApiAccountKeysResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type getApiAccountKeysResponse500 = {
   data: ErrorResponse
   status: 500
@@ -392,7 +1067,7 @@ export type getApiAccountKeysResponse500 = {
 export type getApiAccountKeysResponseSuccess = (getApiAccountKeysResponse200) & {
   headers: Headers;
 };
-export type getApiAccountKeysResponseError = (getApiAccountKeysResponse400 | getApiAccountKeysResponse404 | getApiAccountKeysResponse500) & {
+export type getApiAccountKeysResponseError = (getApiAccountKeysResponse400 | getApiAccountKeysResponse404 | getApiAccountKeysResponse422 | getApiAccountKeysResponse500) & {
   headers: Headers;
 };
 
@@ -451,6 +1126,11 @@ export type postApiAccountKeysResponse404 = {
   status: 404
 }
 
+export type postApiAccountKeysResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAccountKeysResponse500 = {
   data: ErrorResponse
   status: 500
@@ -459,7 +1139,7 @@ export type postApiAccountKeysResponse500 = {
 export type postApiAccountKeysResponseSuccess = (postApiAccountKeysResponse200) & {
   headers: Headers;
 };
-export type postApiAccountKeysResponseError = (postApiAccountKeysResponse400 | postApiAccountKeysResponse404 | postApiAccountKeysResponse500) & {
+export type postApiAccountKeysResponseError = (postApiAccountKeysResponse400 | postApiAccountKeysResponse404 | postApiAccountKeysResponse422 | postApiAccountKeysResponse500) & {
   headers: Headers;
 };
 
@@ -511,6 +1191,11 @@ export type deleteApiAccountKeysKeyIDResponse404 = {
   status: 404
 }
 
+export type deleteApiAccountKeysKeyIDResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type deleteApiAccountKeysKeyIDResponse500 = {
   data: ErrorResponse
   status: 500
@@ -519,7 +1204,7 @@ export type deleteApiAccountKeysKeyIDResponse500 = {
 export type deleteApiAccountKeysKeyIDResponseSuccess = (deleteApiAccountKeysKeyIDResponse200) & {
   headers: Headers;
 };
-export type deleteApiAccountKeysKeyIDResponseError = (deleteApiAccountKeysKeyIDResponse400 | deleteApiAccountKeysKeyIDResponse404 | deleteApiAccountKeysKeyIDResponse500) & {
+export type deleteApiAccountKeysKeyIDResponseError = (deleteApiAccountKeysKeyIDResponse400 | deleteApiAccountKeysKeyIDResponse404 | deleteApiAccountKeysKeyIDResponse422 | deleteApiAccountKeysKeyIDResponse500) & {
   headers: Headers;
 };
 
@@ -571,6 +1256,11 @@ export type postApiAccountPasswordResetConfirmResponse404 = {
   status: 404
 }
 
+export type postApiAccountPasswordResetConfirmResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAccountPasswordResetConfirmResponse500 = {
   data: ErrorResponse
   status: 500
@@ -579,7 +1269,7 @@ export type postApiAccountPasswordResetConfirmResponse500 = {
 export type postApiAccountPasswordResetConfirmResponseSuccess = (postApiAccountPasswordResetConfirmResponse200) & {
   headers: Headers;
 };
-export type postApiAccountPasswordResetConfirmResponseError = (postApiAccountPasswordResetConfirmResponse400 | postApiAccountPasswordResetConfirmResponse404 | postApiAccountPasswordResetConfirmResponse500) & {
+export type postApiAccountPasswordResetConfirmResponseError = (postApiAccountPasswordResetConfirmResponse400 | postApiAccountPasswordResetConfirmResponse404 | postApiAccountPasswordResetConfirmResponse422 | postApiAccountPasswordResetConfirmResponse500) & {
   headers: Headers;
 };
 
@@ -641,6 +1331,11 @@ export type postApiAccountPasswordResetRequestResponse404 = {
   status: 404
 }
 
+export type postApiAccountPasswordResetRequestResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAccountPasswordResetRequestResponse500 = {
   data: ErrorResponse
   status: 500
@@ -649,7 +1344,7 @@ export type postApiAccountPasswordResetRequestResponse500 = {
 export type postApiAccountPasswordResetRequestResponseSuccess = (postApiAccountPasswordResetRequestResponse200) & {
   headers: Headers;
 };
-export type postApiAccountPasswordResetRequestResponseError = (postApiAccountPasswordResetRequestResponse400 | postApiAccountPasswordResetRequestResponse401 | postApiAccountPasswordResetRequestResponse403 | postApiAccountPasswordResetRequestResponse404 | postApiAccountPasswordResetRequestResponse500) & {
+export type postApiAccountPasswordResetRequestResponseError = (postApiAccountPasswordResetRequestResponse400 | postApiAccountPasswordResetRequestResponse401 | postApiAccountPasswordResetRequestResponse403 | postApiAccountPasswordResetRequestResponse404 | postApiAccountPasswordResetRequestResponse422 | postApiAccountPasswordResetRequestResponse500) & {
   headers: Headers;
 };
 
@@ -701,6 +1396,11 @@ export type getApiAccountPermissionsResponse404 = {
   status: 404
 }
 
+export type getApiAccountPermissionsResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type getApiAccountPermissionsResponse500 = {
   data: ErrorResponse
   status: 500
@@ -709,7 +1409,7 @@ export type getApiAccountPermissionsResponse500 = {
 export type getApiAccountPermissionsResponseSuccess = (getApiAccountPermissionsResponse200) & {
   headers: Headers;
 };
-export type getApiAccountPermissionsResponseError = (getApiAccountPermissionsResponse400 | getApiAccountPermissionsResponse404 | getApiAccountPermissionsResponse500) & {
+export type getApiAccountPermissionsResponseError = (getApiAccountPermissionsResponse400 | getApiAccountPermissionsResponse404 | getApiAccountPermissionsResponse422 | getApiAccountPermissionsResponse500) & {
   headers: Headers;
 };
 
@@ -761,6 +1461,11 @@ export type getApiAccountQuotaHistoryResponse404 = {
   status: 404
 }
 
+export type getApiAccountQuotaHistoryResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type getApiAccountQuotaHistoryResponse500 = {
   data: ErrorResponse
   status: 500
@@ -769,7 +1474,7 @@ export type getApiAccountQuotaHistoryResponse500 = {
 export type getApiAccountQuotaHistoryResponseSuccess = (getApiAccountQuotaHistoryResponse200) & {
   headers: Headers;
 };
-export type getApiAccountQuotaHistoryResponseError = (getApiAccountQuotaHistoryResponse400 | getApiAccountQuotaHistoryResponse404 | getApiAccountQuotaHistoryResponse500) & {
+export type getApiAccountQuotaHistoryResponseError = (getApiAccountQuotaHistoryResponse400 | getApiAccountQuotaHistoryResponse404 | getApiAccountQuotaHistoryResponse422 | getApiAccountQuotaHistoryResponse500) & {
   headers: Headers;
 };
 
@@ -828,6 +1533,11 @@ export type postApiAccountUpdateEmailResponse404 = {
   status: 404
 }
 
+export type postApiAccountUpdateEmailResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAccountUpdateEmailResponse500 = {
   data: ErrorResponse
   status: 500
@@ -836,7 +1546,7 @@ export type postApiAccountUpdateEmailResponse500 = {
 export type postApiAccountUpdateEmailResponseSuccess = (postApiAccountUpdateEmailResponse200) & {
   headers: Headers;
 };
-export type postApiAccountUpdateEmailResponseError = (postApiAccountUpdateEmailResponse400 | postApiAccountUpdateEmailResponse404 | postApiAccountUpdateEmailResponse500) & {
+export type postApiAccountUpdateEmailResponseError = (postApiAccountUpdateEmailResponse400 | postApiAccountUpdateEmailResponse404 | postApiAccountUpdateEmailResponse422 | postApiAccountUpdateEmailResponse500) & {
   headers: Headers;
 };
 
@@ -888,6 +1598,11 @@ export type postApiAccountUpdatePasswordResponse404 = {
   status: 404
 }
 
+export type postApiAccountUpdatePasswordResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAccountUpdatePasswordResponse500 = {
   data: ErrorResponse
   status: 500
@@ -896,7 +1611,7 @@ export type postApiAccountUpdatePasswordResponse500 = {
 export type postApiAccountUpdatePasswordResponseSuccess = (postApiAccountUpdatePasswordResponse200) & {
   headers: Headers;
 };
-export type postApiAccountUpdatePasswordResponseError = (postApiAccountUpdatePasswordResponse400 | postApiAccountUpdatePasswordResponse404 | postApiAccountUpdatePasswordResponse500) & {
+export type postApiAccountUpdatePasswordResponseError = (postApiAccountUpdatePasswordResponse400 | postApiAccountUpdatePasswordResponse404 | postApiAccountUpdatePasswordResponse422 | postApiAccountUpdatePasswordResponse500) & {
   headers: Headers;
 };
 
@@ -948,6 +1663,11 @@ export type postApiAccountVerifyEmailResponse404 = {
   status: 404
 }
 
+export type postApiAccountVerifyEmailResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAccountVerifyEmailResponse500 = {
   data: ErrorResponse
   status: 500
@@ -956,7 +1676,7 @@ export type postApiAccountVerifyEmailResponse500 = {
 export type postApiAccountVerifyEmailResponseSuccess = (postApiAccountVerifyEmailResponse200) & {
   headers: Headers;
 };
-export type postApiAccountVerifyEmailResponseError = (postApiAccountVerifyEmailResponse400 | postApiAccountVerifyEmailResponse404 | postApiAccountVerifyEmailResponse500) & {
+export type postApiAccountVerifyEmailResponseError = (postApiAccountVerifyEmailResponse400 | postApiAccountVerifyEmailResponse404 | postApiAccountVerifyEmailResponse422 | postApiAccountVerifyEmailResponse500) & {
   headers: Headers;
 };
 
@@ -1016,6 +1736,11 @@ export type postApiAccountVerifyEmailResendResponse404 = {
   status: 404
 }
 
+export type postApiAccountVerifyEmailResendResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAccountVerifyEmailResendResponse500 = {
   data: ErrorResponse
   status: 500
@@ -1024,7 +1749,7 @@ export type postApiAccountVerifyEmailResendResponse500 = {
 export type postApiAccountVerifyEmailResendResponseSuccess = (postApiAccountVerifyEmailResendResponse200) & {
   headers: Headers;
 };
-export type postApiAccountVerifyEmailResendResponseError = (postApiAccountVerifyEmailResendResponse400 | postApiAccountVerifyEmailResendResponse404 | postApiAccountVerifyEmailResendResponse500) & {
+export type postApiAccountVerifyEmailResendResponseError = (postApiAccountVerifyEmailResendResponse400 | postApiAccountVerifyEmailResendResponse404 | postApiAccountVerifyEmailResendResponse422 | postApiAccountVerifyEmailResendResponse500) & {
   headers: Headers;
 };
 
@@ -1086,6 +1811,11 @@ export type postApiAuthKeyResponse404 = {
   status: 404
 }
 
+export type postApiAuthKeyResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAuthKeyResponse500 = {
   data: ErrorResponse
   status: 500
@@ -1094,7 +1824,7 @@ export type postApiAuthKeyResponse500 = {
 export type postApiAuthKeyResponseSuccess = (postApiAuthKeyResponse200) & {
   headers: Headers;
 };
-export type postApiAuthKeyResponseError = (postApiAuthKeyResponse400 | postApiAuthKeyResponse401 | postApiAuthKeyResponse403 | postApiAuthKeyResponse404 | postApiAuthKeyResponse500) & {
+export type postApiAuthKeyResponseError = (postApiAuthKeyResponse400 | postApiAuthKeyResponse401 | postApiAuthKeyResponse403 | postApiAuthKeyResponse404 | postApiAuthKeyResponse422 | postApiAuthKeyResponse500) & {
   headers: Headers;
 };
 
@@ -1131,6 +1861,486 @@ export const postApiAuthKey = async ( options?: RequestInit): Promise<postApiAut
 }
 
 
+export type deleteApiAuthKeyTypeKeyResponse200 = {
+  data: ErrorResponse
+  status: 200
+}
+
+export type deleteApiAuthKeyTypeKeyResponse204 = {
+  data: void
+  status: 204
+}
+
+export type deleteApiAuthKeyTypeKeyResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type deleteApiAuthKeyTypeKeyResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type deleteApiAuthKeyTypeKeyResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type deleteApiAuthKeyTypeKeyResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type deleteApiAuthKeyTypeKeyResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type deleteApiAuthKeyTypeKeyResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type deleteApiAuthKeyTypeKeyResponseSuccess = (deleteApiAuthKeyTypeKeyResponse200 | deleteApiAuthKeyTypeKeyResponse204) & {
+  headers: Headers;
+};
+export type deleteApiAuthKeyTypeKeyResponseError = (deleteApiAuthKeyTypeKeyResponse400 | deleteApiAuthKeyTypeKeyResponse401 | deleteApiAuthKeyTypeKeyResponse403 | deleteApiAuthKeyTypeKeyResponse404 | deleteApiAuthKeyTypeKeyResponse422 | deleteApiAuthKeyTypeKeyResponse500) & {
+  headers: Headers;
+};
+
+export type deleteApiAuthKeyTypeKeyResponse = (deleteApiAuthKeyTypeKeyResponseSuccess | deleteApiAuthKeyTypeKeyResponseError)
+
+export const getDeleteApiAuthKeyTypeKeyUrl = (type: string,
+    key: string,) => {
+
+
+
+
+  return `/api/auth/key/${type}/${key}`
+}
+
+/**
+ * Unlinks a key identity from the authenticated user's account.
+ * @summary Disconnect Key Identity
+ */
+export const deleteApiAuthKeyTypeKey = async (type: string,
+    key: string, options?: RequestInit): Promise<deleteApiAuthKeyTypeKeyResponse> => {
+
+  const res = await fetch(getDeleteApiAuthKeyTypeKeyUrl(type,key),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: deleteApiAuthKeyTypeKeyResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as deleteApiAuthKeyTypeKeyResponse
+}
+
+
+export type postApiAuthKeyChallengeResponse200 = {
+  data: KeyIdentityChallengeResponse
+  status: 200
+}
+
+export type postApiAuthKeyChallengeResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type postApiAuthKeyChallengeResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type postApiAuthKeyChallengeResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type postApiAuthKeyChallengeResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type postApiAuthKeyChallengeResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type postApiAuthKeyChallengeResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type postApiAuthKeyChallengeResponseSuccess = (postApiAuthKeyChallengeResponse200) & {
+  headers: Headers;
+};
+export type postApiAuthKeyChallengeResponseError = (postApiAuthKeyChallengeResponse400 | postApiAuthKeyChallengeResponse401 | postApiAuthKeyChallengeResponse403 | postApiAuthKeyChallengeResponse404 | postApiAuthKeyChallengeResponse422 | postApiAuthKeyChallengeResponse500) & {
+  headers: Headers;
+};
+
+export type postApiAuthKeyChallengeResponse = (postApiAuthKeyChallengeResponseSuccess | postApiAuthKeyChallengeResponseError)
+
+export const getPostApiAuthKeyChallengeUrl = () => {
+
+
+
+
+  return `/api/auth/key/challenge`
+}
+
+/**
+ * Issues a cryptographic challenge for proving ownership of a key identity (e.g., SIWE message for Ethereum).
+ * @summary Issue Key Identity Challenge
+ */
+export const postApiAuthKeyChallenge = async (keyIdentityChallengeRequest: KeyIdentityChallengeRequest, options?: RequestInit): Promise<postApiAuthKeyChallengeResponse> => {
+
+  const res = await fetch(getPostApiAuthKeyChallengeUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(keyIdentityChallengeRequest)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: postApiAuthKeyChallengeResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as postApiAuthKeyChallengeResponse
+}
+
+
+export type postApiAuthKeyConnectChallengeResponse200 = {
+  data: KeyIdentityChallengeResponse
+  status: 200
+}
+
+export type postApiAuthKeyConnectChallengeResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type postApiAuthKeyConnectChallengeResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type postApiAuthKeyConnectChallengeResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type postApiAuthKeyConnectChallengeResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type postApiAuthKeyConnectChallengeResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type postApiAuthKeyConnectChallengeResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type postApiAuthKeyConnectChallengeResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type postApiAuthKeyConnectChallengeResponseSuccess = (postApiAuthKeyConnectChallengeResponse200) & {
+  headers: Headers;
+};
+export type postApiAuthKeyConnectChallengeResponseError = (postApiAuthKeyConnectChallengeResponse400 | postApiAuthKeyConnectChallengeResponse401 | postApiAuthKeyConnectChallengeResponse403 | postApiAuthKeyConnectChallengeResponse404 | postApiAuthKeyConnectChallengeResponse409 | postApiAuthKeyConnectChallengeResponse422 | postApiAuthKeyConnectChallengeResponse500) & {
+  headers: Headers;
+};
+
+export type postApiAuthKeyConnectChallengeResponse = (postApiAuthKeyConnectChallengeResponseSuccess | postApiAuthKeyConnectChallengeResponseError)
+
+export const getPostApiAuthKeyConnectChallengeUrl = () => {
+
+
+
+
+  return `/api/auth/key/connect/challenge`
+}
+
+/**
+ * Issues a cryptographic challenge for linking a new key identity to the authenticated user's account.
+ * @summary Issue Key Identity Connect Challenge
+ */
+export const postApiAuthKeyConnectChallenge = async (keyIdentityChallengeRequest: KeyIdentityChallengeRequest, options?: RequestInit): Promise<postApiAuthKeyConnectChallengeResponse> => {
+
+  const res = await fetch(getPostApiAuthKeyConnectChallengeUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(keyIdentityChallengeRequest)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: postApiAuthKeyConnectChallengeResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as postApiAuthKeyConnectChallengeResponse
+}
+
+
+export type postApiAuthKeyConnectVerifyResponse200 = {
+  data: KeyIdentityConnectVerifyResponse
+  status: 200
+}
+
+export type postApiAuthKeyConnectVerifyResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type postApiAuthKeyConnectVerifyResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type postApiAuthKeyConnectVerifyResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type postApiAuthKeyConnectVerifyResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type postApiAuthKeyConnectVerifyResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type postApiAuthKeyConnectVerifyResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type postApiAuthKeyConnectVerifyResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type postApiAuthKeyConnectVerifyResponseSuccess = (postApiAuthKeyConnectVerifyResponse200) & {
+  headers: Headers;
+};
+export type postApiAuthKeyConnectVerifyResponseError = (postApiAuthKeyConnectVerifyResponse400 | postApiAuthKeyConnectVerifyResponse401 | postApiAuthKeyConnectVerifyResponse403 | postApiAuthKeyConnectVerifyResponse404 | postApiAuthKeyConnectVerifyResponse409 | postApiAuthKeyConnectVerifyResponse422 | postApiAuthKeyConnectVerifyResponse500) & {
+  headers: Headers;
+};
+
+export type postApiAuthKeyConnectVerifyResponse = (postApiAuthKeyConnectVerifyResponseSuccess | postApiAuthKeyConnectVerifyResponseError)
+
+export const getPostApiAuthKeyConnectVerifyUrl = () => {
+
+
+
+
+  return `/api/auth/key/connect/verify`
+}
+
+/**
+ * Verifies a signed challenge and links the key identity to the authenticated user's account.
+ * @summary Verify and Connect Key Identity
+ */
+export const postApiAuthKeyConnectVerify = async (keyIdentityConnectVerifyRequest: KeyIdentityConnectVerifyRequest, options?: RequestInit): Promise<postApiAuthKeyConnectVerifyResponse> => {
+
+  const res = await fetch(getPostApiAuthKeyConnectVerifyUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(keyIdentityConnectVerifyRequest)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: postApiAuthKeyConnectVerifyResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as postApiAuthKeyConnectVerifyResponse
+}
+
+
+export type getApiAuthKeyIdentitiesResponse200 = {
+  data: KeyIdentityListResponse
+  status: 200
+}
+
+export type getApiAuthKeyIdentitiesResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type getApiAuthKeyIdentitiesResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type getApiAuthKeyIdentitiesResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type getApiAuthKeyIdentitiesResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type getApiAuthKeyIdentitiesResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type getApiAuthKeyIdentitiesResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type getApiAuthKeyIdentitiesResponseSuccess = (getApiAuthKeyIdentitiesResponse200) & {
+  headers: Headers;
+};
+export type getApiAuthKeyIdentitiesResponseError = (getApiAuthKeyIdentitiesResponse400 | getApiAuthKeyIdentitiesResponse401 | getApiAuthKeyIdentitiesResponse403 | getApiAuthKeyIdentitiesResponse404 | getApiAuthKeyIdentitiesResponse422 | getApiAuthKeyIdentitiesResponse500) & {
+  headers: Headers;
+};
+
+export type getApiAuthKeyIdentitiesResponse = (getApiAuthKeyIdentitiesResponseSuccess | getApiAuthKeyIdentitiesResponseError)
+
+export const getGetApiAuthKeyIdentitiesUrl = () => {
+
+
+
+
+  return `/api/auth/key/identities`
+}
+
+/**
+ * Lists all key identities linked to the authenticated user's account.
+ * @summary List Key Identities
+ */
+export const getApiAuthKeyIdentities = async ( options?: RequestInit): Promise<getApiAuthKeyIdentitiesResponse> => {
+
+  const res = await fetch(getGetApiAuthKeyIdentitiesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getApiAuthKeyIdentitiesResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getApiAuthKeyIdentitiesResponse
+}
+
+
+export type postApiAuthKeyVerifyResponse200 = {
+  data: KeyIdentityVerifyResponse
+  status: 200
+}
+
+export type postApiAuthKeyVerifyResponse302 = {
+  data: void
+  status: 302
+}
+
+export type postApiAuthKeyVerifyResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type postApiAuthKeyVerifyResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type postApiAuthKeyVerifyResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type postApiAuthKeyVerifyResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type postApiAuthKeyVerifyResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
+export type postApiAuthKeyVerifyResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type postApiAuthKeyVerifyResponseSuccess = (postApiAuthKeyVerifyResponse200) & {
+  headers: Headers;
+};
+export type postApiAuthKeyVerifyResponseError = (postApiAuthKeyVerifyResponse302 | postApiAuthKeyVerifyResponse400 | postApiAuthKeyVerifyResponse401 | postApiAuthKeyVerifyResponse403 | postApiAuthKeyVerifyResponse404 | postApiAuthKeyVerifyResponse422 | postApiAuthKeyVerifyResponse500) & {
+  headers: Headers;
+};
+
+export type postApiAuthKeyVerifyResponse = (postApiAuthKeyVerifyResponseSuccess | postApiAuthKeyVerifyResponseError)
+
+export const getPostApiAuthKeyVerifyUrl = (params?: PostApiAuthKeyVerifyParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/auth/key/verify?${stringifiedParams}` : `/api/auth/key/verify`
+}
+
+/**
+ * Verifies a signed challenge and authenticates the user via key identity login. If the key is not linked to any account, a new anonymous account is provisioned (response/redirect carries new_account).
+ * @summary Verify Key Identity and Login
+ */
+export const postApiAuthKeyVerify = async (keyIdentityVerifyRequest: KeyIdentityVerifyRequest,
+    params?: PostApiAuthKeyVerifyParams, options?: RequestInit): Promise<postApiAuthKeyVerifyResponse> => {
+
+  const res = await fetch(getPostApiAuthKeyVerifyUrl(params),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(keyIdentityVerifyRequest)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: postApiAuthKeyVerifyResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as postApiAuthKeyVerifyResponse
+}
+
+
 export type postApiAuthLoginResponse200 = {
   data: LoginResponse
   status: 200
@@ -1161,6 +2371,11 @@ export type postApiAuthLoginResponse404 = {
   status: 404
 }
 
+export type postApiAuthLoginResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAuthLoginResponse500 = {
   data: ErrorResponse
   status: 500
@@ -1169,27 +2384,35 @@ export type postApiAuthLoginResponse500 = {
 export type postApiAuthLoginResponseSuccess = (postApiAuthLoginResponse200) & {
   headers: Headers;
 };
-export type postApiAuthLoginResponseError = (postApiAuthLoginResponse302 | postApiAuthLoginResponse400 | postApiAuthLoginResponse401 | postApiAuthLoginResponse403 | postApiAuthLoginResponse404 | postApiAuthLoginResponse500) & {
+export type postApiAuthLoginResponseError = (postApiAuthLoginResponse302 | postApiAuthLoginResponse400 | postApiAuthLoginResponse401 | postApiAuthLoginResponse403 | postApiAuthLoginResponse404 | postApiAuthLoginResponse422 | postApiAuthLoginResponse500) & {
   headers: Headers;
 };
 
 export type postApiAuthLoginResponse = (postApiAuthLoginResponseSuccess | postApiAuthLoginResponseError)
 
-export const getPostApiAuthLoginUrl = () => {
+export const getPostApiAuthLoginUrl = (params?: PostApiAuthLoginParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/auth/login`
+  return stringifiedParams.length > 0 ? `/api/auth/login?${stringifiedParams}` : `/api/auth/login`
 }
 
 /**
  * Authenticates a user using email and password.
  * @summary Login with email and password
  */
-export const postApiAuthLogin = async (loginRequest: LoginRequest, options?: RequestInit): Promise<postApiAuthLoginResponse> => {
+export const postApiAuthLogin = async (loginRequest: LoginRequest,
+    params?: PostApiAuthLoginParams, options?: RequestInit): Promise<postApiAuthLoginResponse> => {
 
-  const res = await fetch(getPostApiAuthLoginUrl(),
+  const res = await fetch(getPostApiAuthLoginUrl(params),
   {
     ...options,
     method: 'POST',
@@ -1231,6 +2454,11 @@ export type postApiAuthLogoutResponse404 = {
   status: 404
 }
 
+export type postApiAuthLogoutResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAuthLogoutResponse500 = {
   data: ErrorResponse
   status: 500
@@ -1239,7 +2467,7 @@ export type postApiAuthLogoutResponse500 = {
 export type postApiAuthLogoutResponseSuccess = (postApiAuthLogoutResponse200) & {
   headers: Headers;
 };
-export type postApiAuthLogoutResponseError = (postApiAuthLogoutResponse400 | postApiAuthLogoutResponse401 | postApiAuthLogoutResponse403 | postApiAuthLogoutResponse404 | postApiAuthLogoutResponse500) & {
+export type postApiAuthLogoutResponseError = (postApiAuthLogoutResponse400 | postApiAuthLogoutResponse401 | postApiAuthLogoutResponse403 | postApiAuthLogoutResponse404 | postApiAuthLogoutResponse422 | postApiAuthLogoutResponse500) & {
   headers: Headers;
 };
 
@@ -1296,6 +2524,11 @@ export type postApiAuthOtpDisableResponse404 = {
   status: 404
 }
 
+export type postApiAuthOtpDisableResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAuthOtpDisableResponse500 = {
   data: ErrorResponse
   status: 500
@@ -1304,7 +2537,7 @@ export type postApiAuthOtpDisableResponse500 = {
 export type postApiAuthOtpDisableResponseSuccess = (postApiAuthOtpDisableResponse200 | postApiAuthOtpDisableResponse204) & {
   headers: Headers;
 };
-export type postApiAuthOtpDisableResponseError = (postApiAuthOtpDisableResponse400 | postApiAuthOtpDisableResponse404 | postApiAuthOtpDisableResponse500) & {
+export type postApiAuthOtpDisableResponseError = (postApiAuthOtpDisableResponse400 | postApiAuthOtpDisableResponse404 | postApiAuthOtpDisableResponse422 | postApiAuthOtpDisableResponse500) & {
   headers: Headers;
 };
 
@@ -1366,6 +2599,11 @@ export type postApiAuthOtpGenerateResponse404 = {
   status: 404
 }
 
+export type postApiAuthOtpGenerateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAuthOtpGenerateResponse500 = {
   data: ErrorResponse
   status: 500
@@ -1374,7 +2612,7 @@ export type postApiAuthOtpGenerateResponse500 = {
 export type postApiAuthOtpGenerateResponseSuccess = (postApiAuthOtpGenerateResponse200) & {
   headers: Headers;
 };
-export type postApiAuthOtpGenerateResponseError = (postApiAuthOtpGenerateResponse400 | postApiAuthOtpGenerateResponse401 | postApiAuthOtpGenerateResponse403 | postApiAuthOtpGenerateResponse404 | postApiAuthOtpGenerateResponse500) & {
+export type postApiAuthOtpGenerateResponseError = (postApiAuthOtpGenerateResponse400 | postApiAuthOtpGenerateResponse401 | postApiAuthOtpGenerateResponse403 | postApiAuthOtpGenerateResponse404 | postApiAuthOtpGenerateResponse422 | postApiAuthOtpGenerateResponse500) & {
   headers: Headers;
 };
 
@@ -1436,33 +2674,46 @@ export type postApiAuthOtpValidateResponse404 = {
   status: 404
 }
 
+export type postApiAuthOtpValidateResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAuthOtpValidateResponse500 = {
   data: ErrorResponse
   status: 500
 }
 
 ;
-export type postApiAuthOtpValidateResponseError = (postApiAuthOtpValidateResponse302 | postApiAuthOtpValidateResponse400 | postApiAuthOtpValidateResponse401 | postApiAuthOtpValidateResponse403 | postApiAuthOtpValidateResponse404 | postApiAuthOtpValidateResponse500) & {
+export type postApiAuthOtpValidateResponseError = (postApiAuthOtpValidateResponse302 | postApiAuthOtpValidateResponse400 | postApiAuthOtpValidateResponse401 | postApiAuthOtpValidateResponse403 | postApiAuthOtpValidateResponse404 | postApiAuthOtpValidateResponse422 | postApiAuthOtpValidateResponse500) & {
   headers: Headers;
 };
 
 export type postApiAuthOtpValidateResponse = (postApiAuthOtpValidateResponseError)
 
-export const getPostApiAuthOtpValidateUrl = () => {
+export const getPostApiAuthOtpValidateUrl = (params?: PostApiAuthOtpValidateParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/auth/otp/validate`
+  return stringifiedParams.length > 0 ? `/api/auth/otp/validate?${stringifiedParams}` : `/api/auth/otp/validate`
 }
 
 /**
  * Validates an OTP code to complete 2FA login.
  * @summary Validate OTP code
  */
-export const postApiAuthOtpValidate = async (oTPValidateRequest: OTPValidateRequest, options?: RequestInit): Promise<postApiAuthOtpValidateResponse> => {
+export const postApiAuthOtpValidate = async (oTPValidateRequest: OTPValidateRequest,
+    params?: PostApiAuthOtpValidateParams, options?: RequestInit): Promise<postApiAuthOtpValidateResponse> => {
 
-  const res = await fetch(getPostApiAuthOtpValidateUrl(),
+  const res = await fetch(getPostApiAuthOtpValidateUrl(params),
   {
     ...options,
     method: 'POST',
@@ -1499,6 +2750,11 @@ export type postApiAuthOtpVerifyResponse404 = {
   status: 404
 }
 
+export type postApiAuthOtpVerifyResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAuthOtpVerifyResponse500 = {
   data: ErrorResponse
   status: 500
@@ -1507,7 +2763,7 @@ export type postApiAuthOtpVerifyResponse500 = {
 export type postApiAuthOtpVerifyResponseSuccess = (postApiAuthOtpVerifyResponse200 | postApiAuthOtpVerifyResponse204) & {
   headers: Headers;
 };
-export type postApiAuthOtpVerifyResponseError = (postApiAuthOtpVerifyResponse400 | postApiAuthOtpVerifyResponse404 | postApiAuthOtpVerifyResponse500) & {
+export type postApiAuthOtpVerifyResponseError = (postApiAuthOtpVerifyResponse400 | postApiAuthOtpVerifyResponse404 | postApiAuthOtpVerifyResponse422 | postApiAuthOtpVerifyResponse500) & {
   headers: Headers;
 };
 
@@ -1569,6 +2825,11 @@ export type postApiAuthPingResponse404 = {
   status: 404
 }
 
+export type postApiAuthPingResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAuthPingResponse500 = {
   data: ErrorResponse
   status: 500
@@ -1577,7 +2838,7 @@ export type postApiAuthPingResponse500 = {
 export type postApiAuthPingResponseSuccess = (postApiAuthPingResponse200) & {
   headers: Headers;
 };
-export type postApiAuthPingResponseError = (postApiAuthPingResponse400 | postApiAuthPingResponse401 | postApiAuthPingResponse403 | postApiAuthPingResponse404 | postApiAuthPingResponse500) & {
+export type postApiAuthPingResponseError = (postApiAuthPingResponse400 | postApiAuthPingResponse401 | postApiAuthPingResponse403 | postApiAuthPingResponse404 | postApiAuthPingResponse422 | postApiAuthPingResponse500) & {
   headers: Headers;
 };
 
@@ -1644,6 +2905,11 @@ export type postApiAuthRegisterResponse409 = {
   status: 409
 }
 
+export type postApiAuthRegisterResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type postApiAuthRegisterResponse500 = {
   data: ErrorResponse
   status: 500
@@ -1652,7 +2918,7 @@ export type postApiAuthRegisterResponse500 = {
 export type postApiAuthRegisterResponseSuccess = (postApiAuthRegisterResponse200) & {
   headers: Headers;
 };
-export type postApiAuthRegisterResponseError = (postApiAuthRegisterResponse400 | postApiAuthRegisterResponse401 | postApiAuthRegisterResponse403 | postApiAuthRegisterResponse404 | postApiAuthRegisterResponse409 | postApiAuthRegisterResponse500) & {
+export type postApiAuthRegisterResponseError = (postApiAuthRegisterResponse400 | postApiAuthRegisterResponse401 | postApiAuthRegisterResponse403 | postApiAuthRegisterResponse404 | postApiAuthRegisterResponse409 | postApiAuthRegisterResponse422 | postApiAuthRegisterResponse500) & {
   headers: Headers;
 };
 
@@ -1704,6 +2970,11 @@ export type getApiOperationsResponse404 = {
   status: 404
 }
 
+export type getApiOperationsResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type getApiOperationsResponse500 = {
   data: ErrorResponse
   status: 500
@@ -1712,7 +2983,7 @@ export type getApiOperationsResponse500 = {
 export type getApiOperationsResponseSuccess = (getApiOperationsResponse200) & {
   headers: Headers;
 };
-export type getApiOperationsResponseError = (getApiOperationsResponse400 | getApiOperationsResponse404 | getApiOperationsResponse500) & {
+export type getApiOperationsResponseError = (getApiOperationsResponse400 | getApiOperationsResponse404 | getApiOperationsResponse422 | getApiOperationsResponse500) & {
   headers: Headers;
 };
 
@@ -1771,6 +3042,11 @@ export type getApiOperationsIdResponse404 = {
   status: 404
 }
 
+export type getApiOperationsIdResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type getApiOperationsIdResponse500 = {
   data: ErrorResponse
   status: 500
@@ -1779,7 +3055,7 @@ export type getApiOperationsIdResponse500 = {
 export type getApiOperationsIdResponseSuccess = (getApiOperationsIdResponse200) & {
   headers: Headers;
 };
-export type getApiOperationsIdResponseError = (getApiOperationsIdResponse400 | getApiOperationsIdResponse404 | getApiOperationsIdResponse500) & {
+export type getApiOperationsIdResponseError = (getApiOperationsIdResponse400 | getApiOperationsIdResponse404 | getApiOperationsIdResponse422 | getApiOperationsIdResponse500) & {
   headers: Headers;
 };
 
@@ -1831,6 +3107,11 @@ export type getApiOperationsFiltersResponse404 = {
   status: 404
 }
 
+export type getApiOperationsFiltersResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type getApiOperationsFiltersResponse500 = {
   data: ErrorResponse
   status: 500
@@ -1839,7 +3120,7 @@ export type getApiOperationsFiltersResponse500 = {
 export type getApiOperationsFiltersResponseSuccess = (getApiOperationsFiltersResponse200) & {
   headers: Headers;
 };
-export type getApiOperationsFiltersResponseError = (getApiOperationsFiltersResponse400 | getApiOperationsFiltersResponse404 | getApiOperationsFiltersResponse500) & {
+export type getApiOperationsFiltersResponseError = (getApiOperationsFiltersResponse400 | getApiOperationsFiltersResponse404 | getApiOperationsFiltersResponse422 | getApiOperationsFiltersResponse500) & {
   headers: Headers;
 };
 
@@ -1891,6 +3172,11 @@ export type getApiUploadLimitResponse404 = {
   status: 404
 }
 
+export type getApiUploadLimitResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type getApiUploadLimitResponse500 = {
   data: ErrorResponse
   status: 500
@@ -1899,7 +3185,7 @@ export type getApiUploadLimitResponse500 = {
 export type getApiUploadLimitResponseSuccess = (getApiUploadLimitResponse200) & {
   headers: Headers;
 };
-export type getApiUploadLimitResponseError = (getApiUploadLimitResponse400 | getApiUploadLimitResponse404 | getApiUploadLimitResponse500) & {
+export type getApiUploadLimitResponseError = (getApiUploadLimitResponse400 | getApiUploadLimitResponse404 | getApiUploadLimitResponse422 | getApiUploadLimitResponse500) & {
   headers: Headers;
 };
 
