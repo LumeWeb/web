@@ -1,11 +1,5 @@
 import type { RequestInit } from "@/types";
-import {
-  AccountError,
-  handleFetchError,
-  handleUnknownError,
-  OperationPollingOptions,
-  Result,
-} from "@/types";
+import { handleFetchError, OperationPollingOptions, Result } from "@/types";
 
 import {
   AccountInfoResponse,
@@ -29,11 +23,26 @@ import {
   UploadLimitResponse,
   VerifyEmailRequest,
 } from "@/account/generated/accountAPI.schemas";
-import type {
-  OperationsListParams,
-} from "@/query-utils";
+import type { OperationsListParams } from "@/query-utils";
 import { buildOperationsQueryParams } from "@/query-utils";
 import { delay, parseResponse, poll } from "@/http-utils";
+import {
+  buildApiUrl,
+  buildJsonOptions,
+  toAccountError,
+} from "@/http/request";
+import { AccountKeyIdentity } from "@/account/key-identity";
+
+export {
+  AccountKeyIdentity,
+  KEY_TYPE_ETHEREUM,
+  KEY_TYPE_SOLANA,
+  WALLET_ALREADY_LINKED_MESSAGE,
+} from "@/account/key-identity";
+export type { KeyChallenge, KeyVerifyOutcome } from "@/account/key-identity";
+
+const LOOPBACK_REGEX =
+  /^localhost$|^(?:127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}|\[::1\])$/;
 
 /**
  * Operation status constants
@@ -60,8 +69,16 @@ type SettledState = typeof DEFAULT_SETTLED_STATES[number];
 export { DEFAULT_SETTLED_STATES, OPERATION_STATUS, type SettledState };
 
 export class AccountApi {
+  /**
+   * Key-identity login endpoints (wallet/passkey auth) — namespace object,
+   * see @/account/key-identity.
+   */
+  public readonly keyIdentity: AccountKeyIdentity;
+
   private _jwtToken?: string;
   private readonly apiUrl: string;
+  /** True when constructed against a localhost/loopback API (dev server). */
+  private readonly isLocalDevHost: boolean;
 
   /**
    * Gets the current JWT token
@@ -77,8 +94,18 @@ export class AccountApi {
    */
   constructor(apiUrl: string) {
     const apiUrlParsed = new URL(apiUrl);
+    // Detect localhost/loopback construction before the host rewrite below:
+    // dev servers keep /api/auth/key/* same-origin relative through the /api
+    // proxy, and a rewritten account.<localhost> host does not exist there.
+    this.isLocalDevHost = LOOPBACK_REGEX.test(apiUrlParsed.hostname);
     apiUrlParsed.hostname = `account.${apiUrlParsed.hostname}`;
     this.apiUrl = apiUrlParsed.toString();
+
+    this.keyIdentity = new AccountKeyIdentity({
+      apiUrl: () => this.apiUrl,
+      sameOriginPaths: () => this.isLocalDevHost,
+      token: () => this.jwtToken,
+    });
   }
 
   /**
@@ -486,31 +513,6 @@ export class AccountApi {
   }
 
   /**
-   * Builds fetch options with authorization headers
-   * @param {RequestInit} [init] - Optional initial request options
-   * @returns {RequestInit} The constructed request options
-   * @private
-   */
-  private buildOptions(init: RequestInit = {}): RequestInit {
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
-
-    if (this.jwtToken) {
-      headers.Authorization = `Bearer ${this.jwtToken}`;
-    }
-
-    // Custom headers from init take precedence over defaults
-    Object.assign(headers, init.headers);
-
-    return {
-      ...init,
-      credentials: "include",
-      headers,
-    };
-  }
-
-  /**
    * Makes a JSON request to the API
    * @template T
    * @param {string} input - The API endpoint path or absolute URL
@@ -524,8 +526,8 @@ export class AccountApi {
   ): Promise<Result<T>> {
     try {
       const response = await fetch(
-        new URL(input, this.apiUrl).toString(),
-        this.buildOptions(init),
+        buildApiUrl(input, this.apiUrl),
+        buildJsonOptions(init, this.jwtToken, "include"),
       );
 
       if (!response.ok) {
@@ -541,14 +543,8 @@ export class AccountApi {
         success: true,
       };
     } catch (e) {
-      let error: AccountError;
-      if (e instanceof Response) {
-        error = await handleFetchError(e);
-      } else {
-        error = await handleUnknownError(e);
-      }
       return {
-        error,
+        error: await toAccountError(e),
         success: false,
       };
     }
