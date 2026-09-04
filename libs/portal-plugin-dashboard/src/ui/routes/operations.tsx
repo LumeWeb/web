@@ -13,7 +13,7 @@ import { Badge } from "@lumeweb/portal-framework-ui-core";
 import type { ProtocolCapability } from "@lumeweb/portal-plugin-dashboard";
 import { useCapabilitiesByType } from "@lumeweb/portal-framework-core";
 import { useOperationFilters } from "@/ui/hooks/useOperationFilters";
-import { Authenticated } from "@refinedev/core";
+import { SafeAuthenticated } from "@lumeweb/portal-framework-auth";
 import React, { useMemo, createContext, useContext } from "react";
 
 import { PROTOCOL_CAPABILITY_TYPE } from "@lib/types/capabilities/protocol";
@@ -231,7 +231,7 @@ const OperationsContent = () => {
   });
 
   return (
-    <Authenticated key="operations" v3LegacyAuthProviderCompatible={false}>
+    <SafeAuthenticated key="operations">
       <GeneralLayout>
         <div className="space-y-6">
           <PageHeader
@@ -307,7 +307,7 @@ const OperationsContent = () => {
           />
         </div>
       </GeneralLayout>
-    </Authenticated>
+    </SafeAuthenticated>
   );
 };
 
