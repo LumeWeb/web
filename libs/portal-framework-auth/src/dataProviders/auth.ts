@@ -12,9 +12,46 @@ import type {
 } from "@refinedev/core";
 
 import { env, getApiBaseUrl } from "@lumeweb/portal-framework-core";
+import type { Emitter } from "nanoevents";
 import { createNanoEvents } from "nanoevents";
 
 export const DATA_PROVIDER_NAME = "account";
+
+// The emitter owned by the most recently created auth provider. Flows that
+// complete outside Refine's auth provider (SIWX wallet login) use
+// `emitAuthCheckSuccess`/`storeAuthToken` so the same token-sync listeners
+// wired in portal-framework-core's refineConfig util keep working.
+let activeEmitter: null | Emitter<AuthEvents> = null;
+
+/**
+ * Re-emits `authCheckSuccess` on the active auth provider's nanoevents
+ * emitter. For wallet login: call after storing the token via
+ * `storeAuthToken` (mirrors login's success path).
+ */
+export const emitAuthCheckSuccess = (params: AuthCheckSuccessEvent): void => {
+  activeEmitter?.emit("authCheckSuccess", params);
+};
+
+/**
+ * Stores a login JWT exactly the way the email login success path does:
+ * `sdk.setAuthToken(token)` plus a `localStorage["jwt"]` write when dev
+ * against a localhost API (prod keeps the token in memory only).
+ */
+export const storeAuthToken = (sdk: Sdk, token: string): void => {
+  sdk.setAuthToken(token);
+
+  const baseUrl = getApiBaseUrl();
+  if (!baseUrl) return;
+  try {
+    if (new URL(baseUrl).hostname === "localhost") {
+      if (typeof window !== "undefined") {
+        window.localStorage?.setItem("jwt", token);
+      }
+    }
+  } catch {
+    // Silently ignore URL parse errors
+  }
+};
 
 export interface AuthFormRequest extends LoginRequest {
   redirectTo?: string;
@@ -136,11 +173,23 @@ const getRootDomain = (hostname: string): string => {
   return parts.length > 2 ? parts.slice(-2).join(".") : hostname;
 };
 
-// Check if a URL is an absolute URL (any origin, including same-origin). These
-// must be handled as a full browser navigation (window.location) rather than a
-// Refine `go()` client-route call, because they may point at API/OAuth
-// endpoints (e.g. https://account.example.com/api/auth/oauth/authorize) that
-// are not React routes. Relative paths are excluded.
+// Check if a URL is on a different origin than the current page
+export const isExternalRedirect = (url: string): boolean => {
+  try {
+    if (url.startsWith("/")) return false;
+    const parsed = new URL(url);
+    return parsed.origin !== window.location.origin;
+  } catch {
+    return false;
+  }
+};
+
+// Check if a URL is an absolute URL (any origin, including same-origin).
+// Same-origin absolutes may point at API/OAuth endpoints (e.g.
+// https://account.example.com/api/auth/oauth/authorize) that are not React
+// routes, so they must be reached through a full browser navigation rather
+// than Refine's `go()` client router (which would mangle them into a
+// relative path). Relative paths are excluded.
 export const isAbsoluteRedirect = (url: string): boolean => {
   try {
     if (url.startsWith("/")) return false;
@@ -151,13 +200,19 @@ export const isAbsoluteRedirect = (url: string): boolean => {
   }
 };
 
-// Utility to sanitize redirect URLs - allow relative paths, localhost, and same-root-domain
-export const sanitizeRedirectUrl = (url: string | undefined): string => {
-  if (!url) return DASHBOARD_PATH;
+// Matches any percent-encoded octet — used to detect values that may need a
+// one-shot decode-repair before sanitization (see sanitizeRedirectUrl).
+const PERCENT_ENCODED = /%[0-9a-fA-F]{2}/;
 
+/**
+ * Single sanitization attempt. Returns the sanitized value, the dashboard
+ * fallback for a *valid* but disallowed URL, or null when the value cannot
+ * be parsed as a URL at all (so the caller may attempt a decode-repair).
+ */
+const sanitizeRedirectAttempt = (value: string): string | null => {
   // Strip C0 control characters and whitespace that browsers would strip before redirecting.
   // eslint-disable-next-line no-control-regex
-  const cleaned = url.replace(/[\t\n\r\x00-\x1F]/g, "");
+  const cleaned = value.replace(/[\t\n\r\x00-\x1F]/g, "");
 
   try {
     // If it's a relative path, allow it (block protocol-relative //... and /\...)
@@ -169,14 +224,14 @@ export const sanitizeRedirectUrl = (url: string | undefined): string => {
       return cleaned;
     }
 
-    const parsedUrl = new URL(url);
+    const parsedUrl = new URL(cleaned);
 
     // Allow localhost for development
     if (
       parsedUrl.hostname === "localhost" ||
       parsedUrl.hostname === "127.0.0.1"
     ) {
-      return url;
+      return cleaned;
     }
 
     // Allow same-root-domain (e.g. sia.example.com when on account.example.com)
@@ -185,26 +240,51 @@ export const sanitizeRedirectUrl = (url: string | undefined): string => {
       parsedUrl.hostname === rootDomain ||
       parsedUrl.hostname.endsWith(`.${rootDomain}`)
     ) {
-      return url;
+      return cleaned;
     }
 
     // For any other domain, redirect to dashboard
     return DASHBOARD_PATH;
   } catch {
-    // If URL parsing fails, redirect to dashboard
-    return DASHBOARD_PATH;
+    return null;
   }
 };
 
-// Sanitized redirect target for a login response. Refine treats a falsy
-// `redirectTo` as "do not navigate", which is what we want for absolute
-// targets: they are API/OAuth endpoints that must be reached through a full
-// `window.location` navigation, never through Refine's client router (which
-// would mangle them into a relative path). The action type only allows a
-// string, so `false` needs the cast.
-const redirectTarget = (url: string | undefined): string | undefined => {
-  const sanitized = sanitizeRedirectUrl(url);
-  return isAbsoluteRedirect(sanitized) ? (false as unknown as string) : sanitized;
+/**
+ * Utility to sanitize redirect URLs - allow relative paths, localhost, and
+ * same-root-domain.
+ *
+ * The canonical redirect-encoding contract (read = decode once, write =
+ * encode once) means a well-formed input is already once-decoded, but a
+ * percent-encoded value can still reach this function (e.g. a target whose
+ * own query carries `%xx` sequences, or a double-encoded value produced
+ * upstream). When the value fails `new URL()` and looks percent-encoded, it
+ * is decoded once and retried; if the repaired value also fails, the
+ * rejection is logged via console.warn instead of silently swapping a
+ * plausibly valid target for /dashboard.
+ */
+export const sanitizeRedirectUrl = (url: string | undefined): string => {
+  if (!url) return DASHBOARD_PATH;
+
+  const attempt = sanitizeRedirectAttempt(url);
+  if (attempt !== null) return attempt;
+
+  if (PERCENT_ENCODED.test(url)) {
+    try {
+      const decoded = decodeURIComponent(url);
+      if (decoded !== url) {
+        const repaired = sanitizeRedirectAttempt(decoded);
+        if (repaired !== null) return repaired;
+      }
+    } catch {
+      // Malformed percent-encoding; fall through to the rejection below.
+    }
+    console.warn(
+      `[auth] Rejected unreadable percent-encoded redirect target: "${url}"`,
+    );
+  }
+
+  return DASHBOARD_PATH;
 };
 
 export interface AuthCheckFailedEvent {
@@ -232,6 +312,7 @@ export interface RegisterAttemptEvent {
 
 export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
   const emitter = createNanoEvents<AuthEvents>();
+  activeEmitter = emitter;
   const maybeSetupAuth = () => {
     if (typeof window === "undefined") return;
     try {
@@ -363,6 +444,13 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
       params: AuthFormRequest | OTPFormRequest,
     ): Promise<AuthActionResponse> {
       try {
+        // These endpoints carry no `return` query param: the backend's
+        // ?return= threading answers with page-level redirects only
+        // (302 → /api/auth/complete → 302 → return), and a
+        // fetch(redirect: "follow") carrying it would chase that chain into
+        // the return page's HTML and crash JSON parsing. OTP completes via
+        // the no-return JSON token response; this SPA then navigates itself
+        // via redirectTo below.
         if ("otp" in params) {
           const response = await sdk.account().validateOtp({ otp: params.otp });
 
@@ -394,7 +482,8 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
               }
             }
             return createAuthResponse({
-              redirectTo: redirectTarget(params.redirectTo),
+              redirectTo:
+                sanitizeRedirectUrl(params.redirectTo) ?? DASHBOARD_PATH,
               success: true,
               successNotification: {
                 description: "You have successfully logged in with 2FA.",
@@ -404,6 +493,9 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
           }
         }
 
+        // Same `return` rule as the OTP branch above: fetch must only see
+        // the no-return JSON-token path; page-level ?return= redirects are
+        // for a real browser navigation.
         const { email, password, remember } = params as AuthFormRequest;
         const response = await sdk
           .account()
@@ -444,7 +536,8 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
             }
           }
           return createAuthResponse({
-            redirectTo: redirectTarget(params.redirectTo),
+            redirectTo:
+              sanitizeRedirectUrl(params.redirectTo) ?? DASHBOARD_PATH,
             success: true,
             successNotification: {
               description: "You have successfully logged in.",
@@ -519,9 +612,18 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
           error: processApiError(response.error, REGISTRATION_ERROR_NAME),
         }),
         ...(response.success && {
-          redirectTo: params.redirectTo
-            ? `${LOGIN_PATH}?to=${encodeURIComponent(sanitizeRedirectUrl(params.redirectTo))}`
-            : LOGIN_PATH,
+          redirectTo: (() => {
+            if (!params.redirectTo) return LOGIN_PATH;
+            // Chain preservation: an internal target (e.g.
+            // `/app-login?app=X&to=E1`) is returned directly — the value is
+            // already exactly-once encoded and Refine's built-in useRegister
+            // go()s to the provider redirectTo verbatim. External targets
+            // cannot be reached while unauthenticated, so they keep routing
+            // through /login?to=<single-encoded>.
+            const sanitized = sanitizeRedirectUrl(params.redirectTo);
+            if (!isExternalRedirect(sanitized)) return sanitized;
+            return `${LOGIN_PATH}?to=${encodeURIComponent(sanitized)}`;
+          })(),
           successNotification: {
             description:
               "You have successfully registered. Please check your email to verify your account.",

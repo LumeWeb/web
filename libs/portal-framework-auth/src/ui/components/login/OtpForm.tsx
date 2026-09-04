@@ -3,13 +3,12 @@ import {
   useResetPasswordUrl,
   withTheme,
 } from "@lumeweb/portal-framework-ui";
-import { useLogin } from "@refinedev/core";
 import React from "react";
 
 import { useBrand } from "@lumeweb/portal-framework-core";
 import { useRedirectIfAuthenticated } from "@/hooks/useRedirectIfAuthenticated";
-import { useSafeRedirectTo } from "@/hooks/useSafeRedirectTo";
-import { isAbsoluteRedirect } from "@/dataProviders/auth";
+import { useSafeLogin } from "@/hooks/useSafeLogin";
+import { useSafeRedirectTarget } from "@/hooks/useSafeRedirectTarget";
 import { AuthPage } from "@/ui/components/common/AuthPage";
 import { AuthPageTitle } from "@/ui/components/common/AuthPageTitle";
 
@@ -20,35 +19,24 @@ export interface OtpParams {
 }
 
 function OtpForm(): React.JSX.Element {
-  const login = useLogin();
+  const { redirectTo } = useSafeRedirectTarget();
+  const { mutate: login } = useSafeLogin();
   const resetPasswordUrl = useResetPasswordUrl();
   const brand = useBrand();
-
-  const redirectTo = useSafeRedirectTo();
 
   useRedirectIfAuthenticated("/dashboard", redirectTo, "push");
 
   const otpFormConfig = getOtpForm(
     (values) =>
-      login.mutate(
-        { ...values, redirectTo: redirectTo ?? "/dashboard" },
-        {
-          onSuccess: (result) => {
-            // `login()` returns `redirectTo: false` only for absolute targets
-            // with no further client-route hop; only then take over with a
-            // full browser navigation.
-            if (
-              result.success &&
-              result.redirectTo === false &&
-              redirectTo &&
-              isAbsoluteRedirect(redirectTo)
-            ) {
-              window.location.replace(redirectTo);
-            }
-          },
-        },
-      ),
-    redirectTo ?? "/dashboard",
+      // Destination after OTP validation = auth provider's sanitized
+      // redirectTo (see useSafeLogin). If the provider answers
+      // success + "/otp?to=…" (OTP required), the OTP step is followed — an
+      // external `?to=` can never skip it.
+      login({
+        otp: values.otp,
+        redirectTo: redirectTo ?? undefined,
+      }),
+    redirectTo ?? undefined,
   );
 
   return (
