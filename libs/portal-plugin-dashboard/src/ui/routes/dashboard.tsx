@@ -3,18 +3,18 @@ import {
   GridWidgetArea,
 } from "@lumeweb/portal-framework-core";
 import { GeneralLayout } from "@lumeweb/portal-framework-ui";
-import { Authenticated } from "@refinedev/core";
+import { SafeAuthenticated } from "@lumeweb/portal-framework-auth";
 import React from "react";
 
 const DASHBOARD_HEADER_AREA = createNamespacedId("dashboard", "header");
 
 function Dashboard() {
   return (
-    <Authenticated key="dashboard" v3LegacyAuthProviderCompatible={false}>
+    <SafeAuthenticated key="dashboard">
       <GeneralLayout>
         <GridWidgetArea id={DASHBOARD_HEADER_AREA} />
       </GeneralLayout>
-    </Authenticated>
+    </SafeAuthenticated>
   );
 }
 
