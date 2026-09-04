@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Account API
  * API endpoints for managing user accounts, authentication, and API keys.
- * OpenAPI spec version: v0.3.1-0.20260708232039-b4aebacb9791
+ * OpenAPI spec version: v0.3.1-0.20260903123759-e95a7bb2aea5
  */
 import {
   faker
@@ -25,6 +25,7 @@ import type {
   GatewayListResponse,
   ManagementCapabilitiesResponse,
   ManagementResultResponse,
+  PostApiBillingCreditsPurchase200,
   PublicPricingPlansListResponse,
   SubscriptionStatusResponse,
   UserCreditsListResponse
@@ -62,6 +63,8 @@ export const getPostApiAccountBillingResumeResponseMock = (overrideResponse: Par
 export const getGetApiAccountBillingSubscriptionResponseMock = (overrideResponse: Partial<Extract<SubscriptionStatusResponse, object>> = {}): SubscriptionStatusResponse => ({created_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', undefined]), gateway_type: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), is_subscribed: faker.datatype.boolean(), paused_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', undefined]), pricing_plan_period_id: faker.helpers.arrayElement([faker.number.int(), undefined]), updated_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', undefined]), will_cancel_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', undefined]), ...overrideResponse})
 
 export const getPostApiAccountBillingWebhooksGatewayTypeResponseMock = (overrideResponse: Partial<Extract<ErrorResponse, object>> = {}): ErrorResponse => ({error: {details: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), reason: faker.string.alpha({length: {min: 10, max: 20}})}, ...overrideResponse})
+
+export const getPostApiBillingCreditsPurchaseResponseMock = (): PostApiBillingCreditsPurchase200 => ({})
 
 export const getGetApiBillingGatewaysResponseMock = (): GatewayListResponse => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({abilities: {checkout: faker.datatype.boolean(), customer_portal: faker.datatype.boolean(), session_status: faker.datatype.boolean()}, description: faker.string.alpha({length: {min: 10, max: 20}}), id: faker.string.alpha({length: {min: 10, max: 20}}), is_active: faker.datatype.boolean(), logo_url: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}})})))
 
@@ -246,6 +249,18 @@ export const getPostApiAccountBillingWebhooksGatewayTypeMockHandler = (overrideR
   }, options)
 }
 
+export const getPostApiBillingCreditsPurchaseMockHandler = (overrideResponse?: PostApiBillingCreditsPurchase200 | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<PostApiBillingCreditsPurchase200> | PostApiBillingCreditsPurchase200), options?: RequestHandlerOptions) => {
+  return http.post('*/api/billing/credits/purchase', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getPostApiBillingCreditsPurchaseResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
 export const getGetApiBillingGatewaysMockHandler = (overrideResponse?: GatewayListResponse | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<GatewayListResponse> | GatewayListResponse), options?: RequestHandlerOptions) => {
   return http.get('*/api/billing/gateways', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
 
@@ -295,6 +310,7 @@ export const getBillingMock = () => [
   getGetApiAccountBillingSubscriptionMockHandler(),
   getGetApiAccountBillingSubscriptionEventsMockHandler(),
   getPostApiAccountBillingWebhooksGatewayTypeMockHandler(),
+  getPostApiBillingCreditsPurchaseMockHandler(),
   getGetApiBillingGatewaysMockHandler(),
   getGetApiBillingGatewaysIdLogoMockHandler(),
   getGetApiBillingPlansMockHandler()

@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Account API
  * API endpoints for managing user accounts, authentication, and API keys.
- * OpenAPI spec version: v0.3.1-0.20260708232039-b4aebacb9791
+ * OpenAPI spec version: v0.3.1-0.20260903123759-e95a7bb2aea5
  */
 import type {
   ErrorResponse,
@@ -27,6 +27,11 @@ export type getApiAccountQuotaResponse404 = {
   status: 404
 }
 
+export type getApiAccountQuotaResponse422 = {
+  data: ErrorResponse
+  status: 422
+}
+
 export type getApiAccountQuotaResponse500 = {
   data: ErrorResponse
   status: 500
@@ -35,7 +40,7 @@ export type getApiAccountQuotaResponse500 = {
 export type getApiAccountQuotaResponseSuccess = (getApiAccountQuotaResponse200) & {
   headers: Headers;
 };
-export type getApiAccountQuotaResponseError = (getApiAccountQuotaResponse400 | getApiAccountQuotaResponse404 | getApiAccountQuotaResponse500) & {
+export type getApiAccountQuotaResponseError = (getApiAccountQuotaResponse400 | getApiAccountQuotaResponse404 | getApiAccountQuotaResponse422 | getApiAccountQuotaResponse500) & {
   headers: Headers;
 };
 
