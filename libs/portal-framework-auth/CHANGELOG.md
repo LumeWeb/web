@@ -1,3 +1,16 @@
+## 0.1.14 (2026-09-04)
+
+### Features
+
+#### Features
+
+- redesign auth login ui
+- deterministic wallet logos with validated fallbacks
+
+### Fixes
+
+- keep consent notice with zero social providers
+
 ## 0.1.13 (2026-09-01)
 
 ### Fixes

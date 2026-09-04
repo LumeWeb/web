@@ -1,5 +1,18 @@
 # @lumeweb/portal-sdk
 
+## 0.1.11 (2026-09-04)
+
+### Features
+
+#### Features
+
+- regenerate account sdk from live spec
+- add wallet key-identity client
+
+### Fixes
+
+- check wallet verify status before body
+
 ## 0.1.10 (2026-07-18)
 
 ### Features

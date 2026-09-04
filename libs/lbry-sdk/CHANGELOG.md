@@ -1,3 +1,11 @@
+## 0.0.3 (2026-09-04)
+
+### Features
+
+#### Features
+
+- redesign auth login ui
+
 ## 0.0.2 (2026-07-31)
 
 ### Fixes

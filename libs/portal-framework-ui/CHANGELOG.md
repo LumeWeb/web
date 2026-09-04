@@ -1,3 +1,17 @@
+## 0.1.8 (2026-09-04)
+
+### Features
+
+#### Features
+
+- add account api domain hook
+
+### Fixes
+
+- fit logo link to the logo
+- keep port in account api domain
+- resolve account api domain on one path
+
 ## 0.1.7 (2026-06-30)
 
 ### Features

@@ -1,3 +1,11 @@
+## 0.1.7 (2026-09-04)
+
+### Features
+
+#### Features
+
+- use SafeAuthenticated guard in routes
+
 ## 0.1.6 (2026-07-18)
 
 ### Features
