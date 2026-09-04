@@ -21,7 +21,7 @@ Understanding how Lume keeps your files private and secure
 
 Lume provides a simple way to store and manage your files. Upload through our intuitive interface, and we handle encrypting and distributing your data across the network.
 
-![about image](/_astro/how-it-works-2.B4_ehDlV.png)
+![about image](/_astro/about-2.B4_ehDlV.png)
 
 ![about image](/_astro/how-it-works-mobile-2.ChqCIh8P.png)
 
