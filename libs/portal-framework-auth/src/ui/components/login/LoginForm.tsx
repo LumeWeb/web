@@ -1,11 +1,9 @@
 import { SchemaForm, useResetPasswordUrl } from "@lumeweb/portal-framework-ui";
-import { useLogin } from "@refinedev/core";
 import React from "react";
 import { Link } from "react-router";
 
-import type { AuthFormRequest } from "@/dataProviders/auth";
-import { isAbsoluteRedirect } from "@/dataProviders/auth";
-import { useSafeRedirectTo } from "@/hooks/useSafeRedirectTo";
+import { useSafeLogin } from "@/hooks/useSafeLogin";
+import { useSafeRedirectTarget } from "@/hooks/useSafeRedirectTarget";
 import { getLoginFormConfig } from "../../forms/login";
 
 export interface LoginParams {
@@ -13,34 +11,20 @@ export interface LoginParams {
 }
 
 export const LoginForm = () => {
-  const { mutate: login } = useLogin<AuthFormRequest>();
+  const { mutate: login } = useSafeLogin();
+  const { redirectTo } = useSafeRedirectTarget();
   const resetPasswordUrl = useResetPasswordUrl();
-  const redirectTo = useSafeRedirectTo();
 
   const onSubmit = async (data: any) => {
-    login(
-      {
-        email: data.email,
-        password: data.password,
-        redirectTo: redirectTo ?? "/dashboard",
-        remember: data.remember ?? false,
-      },
-      {
-        onSuccess: (result) => {
-          // `login()` returns `redirectTo: false` only for absolute targets
-          // with no further client-route hop (e.g. OTP); only then take over
-          // with a full browser navigation.
-          if (
-            result.success &&
-            result.redirectTo === false &&
-            redirectTo &&
-            isAbsoluteRedirect(redirectTo)
-          ) {
-            window.location.replace(redirectTo);
-          }
-        },
-      },
-    );
+    // `to` is read exactly once (URLSearchParams) and sanitized here; the
+    // destination after login is decided only by the auth provider's
+    // sanitized redirectTo (see useSafeLogin), never the raw query param.
+    login({
+      email: data.email,
+      password: data.password,
+      redirectTo: redirectTo ?? undefined,
+      remember: data.remember ?? false,
+    });
   };
 
   const formConfig = getLoginFormConfig(onSubmit);
