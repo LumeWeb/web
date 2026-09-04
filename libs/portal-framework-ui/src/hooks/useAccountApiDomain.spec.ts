@@ -63,15 +63,18 @@ describe("useAccountApiDomain", () => {
     expect(mockedGetAccountSubdomain).not.toHaveBeenCalled();
   });
 
-  it("never doubles the subdomain in root-domain mode (prepends account once)", () => {
-    // Emulate getApiBaseUrl in root mode: it preserves the full canonical
-    // host (no stripping) but the hook must still resolve to a single
-    // `account.`-prefixed origin.
-    vi.mocked(mockedGetApiBaseUrl).mockReturnValue(CANONICAL_PORTAL_URL);
+  it("prepends the account subdomain exactly once to the API base", () => {
+    // Base carrying a host subdomain (e.g. root mode preserves the canonical
+    // host, non-root mode already stripped the dashboard subdomain): the hook
+    // must prefix `account.` exactly once. Host stripping is getApiBaseUrl's
+    // by-mode responsibility — the hook never strips, and never doubles.
+    vi.mocked(mockedGetApiBaseUrl).mockReturnValue(
+      "https://app.tunnel.pinner.xyz",
+    );
 
     const { result } = renderHook(() => useAccountApiDomain());
 
-    expect(result.current).toBe("https://account.tunnel.pinner.xyz");
+    expect(result.current).toBe("https://account.app.tunnel.pinner.xyz");
   });
 
   it("keeps the protocol from the normalized API base (e.g. localhost http)", () => {
