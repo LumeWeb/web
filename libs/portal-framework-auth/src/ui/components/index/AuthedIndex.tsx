@@ -1,8 +1,8 @@
 import { Loading, withTheme } from "@lumeweb/portal-framework-ui";
-import { Authenticated } from "@refinedev/core";
 import React from "react";
 import { useSearchParams } from "react-router";
 
+import { SafeAuthenticated } from "@/ui/components/common/SafeAuthenticated";
 import { useRedirectIfAuthenticated } from "@/hooks/useRedirectIfAuthenticated";
 
 const Component: React.FC = () => {
@@ -12,12 +12,14 @@ const Component: React.FC = () => {
   useRedirectIfAuthenticated("/dashboard", to);
 
   return (
-    <Authenticated key="authed" loading={<Loading />}>
+    <SafeAuthenticated key="authed" loading={<Loading />}>
       {/* loading shows <Loading /> while auth check is in-flight.
-          No fallback prop — when auth fails, <Authenticated> falls
-          through to redirect using check() redirectTo (preserves ?to=). */}
+          SafeAuthenticated (appendCurrentPathToQuery=false) means the
+          unauthenticated bounce targets check() redirectTo verbatim —
+          exactly /login?to=<single-encoded E1>, so the `to` query is not
+          appended a second time. */}
       {null}
-    </Authenticated>
+    </SafeAuthenticated>
   );
 };
 

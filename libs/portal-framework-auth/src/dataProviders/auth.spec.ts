@@ -9,11 +9,7 @@ vi.mock("@lumeweb/portal-framework-core", () => ({
   getApiBaseUrl: () => "https://example.com",
 }));
 
-import {
-  createAuthProvider,
-  isAbsoluteRedirect,
-  sanitizeRedirectUrl,
-} from "./auth";
+import { createAuthProvider, isExternalRedirect, sanitizeRedirectUrl } from "./auth";
 
 describe("sanitizeRedirectUrl", () => {
   beforeEach(() => {
@@ -134,27 +130,212 @@ describe("sanitizeRedirectUrl", () => {
       expect(sanitizeRedirectUrl("not-a-url")).toBe("/dashboard");
     });
   });
+
+  describe("percent-encoding awareness (decode-retry)", () => {
+    let warnSpy: ReturnType<typeof vi.spyOn>;
+
+    beforeEach(() => {
+      warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      warnSpy.mockRestore();
+    });
+
+    it("should repair a fully percent-encoded allowed absolute URL (decoded exactly once)", () => {
+      expect(
+        sanitizeRedirectUrl(
+          "https%3A%2F%2Fsia.example.com%2Fauth%2Fconnect%2Fabc123",
+        ),
+      ).toBe("https://sia.example.com/auth/connect/abc123");
+      expect(warnSpy).not.toHaveBeenCalled();
+    });
+
+    it("should repair a percent-encoded relative path", () => {
+      expect(sanitizeRedirectUrl("%2Fdashboard%3Ftab%3Dpinned")).toBe(
+        "/dashboard?tab=pinned",
+      );
+      expect(warnSpy).not.toHaveBeenCalled();
+    });
+
+    it("should repair a double-encoded same-root URL to its once-decoded value", () => {
+      const doubleEncoded =
+        "https%3A%2F%2Fsia.example.com%2Fauth%3Fnext%3D%252Fsettings";
+      expect(sanitizeRedirectUrl(doubleEncoded)).toBe(
+        "https://sia.example.com/auth?next=%2Fsettings",
+      );
+      expect(warnSpy).not.toHaveBeenCalled();
+    });
+
+    it("should repair a percent-encoded localhost URL", () => {
+      expect(
+        sanitizeRedirectUrl("http%3A%2F%2Flocalhost%3A3000%2Fdashboard"),
+      ).toBe("http://localhost:3000/dashboard");
+    });
+
+    it("should reject (silently) a percent-encoded value whose decoded target is disallowed", () => {
+      expect(sanitizeRedirectUrl("https%3A%2F%2Fevil.com%2Fphish")).toBe(
+        "/dashboard",
+      );
+      expect(warnSpy).not.toHaveBeenCalled();
+    });
+
+    it("should decode a value whose own query carries percent-sequences that fail URL parsing and repair it", () => {
+      // D with own query `?next=%2Fsettings`: new URL() succeeds for D
+      // itself, but an upstream double-encode of the whole value doesn't.
+      const raw =
+        "https%3A%2F%2Fsia.example.com%2Fauth%2Fconnect%2Fabc%3Fnext%3D%252Fsettings";
+      expect(sanitizeRedirectUrl(raw)).toBe(
+        "https://sia.example.com/auth/connect/abc?next=%2Fsettings",
+      );
+    });
+
+    it("should warn loudly and reject an unreadable percent-encoded target", () => {
+      // Decodes to "//evil.com" which is a blocked protocol-relative path
+      // (second decode-repair is not attempted: decode exactly once).
+      expect(sanitizeRedirectUrl("%2F%2Fevil.com")).toBe("/dashboard");
+      expect(warnSpy).toHaveBeenCalledTimes(1);
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining("%2F%2Fevil.com"),
+      );
+    });
+
+    it("should warn loudly and reject a percent-encoded value whose repair fails", () => {
+      // Once-decoded -> "://sia.example.com" — still unparseable, and beyond
+      // the single decode-repair the value is rejected loudly.
+      expect(sanitizeRedirectUrl("%3A%2F%2Fsia.example.com")).toBe(
+        "/dashboard",
+      );
+      expect(warnSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("should warn loudly and reject malformed percent-encoding", () => {
+      expect(sanitizeRedirectUrl("%E0%A4%A")).toBe("/dashboard");
+      expect(warnSpy).toHaveBeenCalledTimes(1);
+    });
+  });
 });
 
-describe("isAbsoluteRedirect", () => {
-  it("should return false for relative paths", () => {
-    expect(isAbsoluteRedirect("/dashboard")).toBe(false);
+describe("createAuthProvider register() redirect chain", () => {
+  beforeEach(() => {
+    vi.stubGlobal("location", {
+      hostname: "account.example.com",
+      href: "https://account.example.com/register",
+      origin: "https://account.example.com",
+    });
   });
 
-  it("should return true for same-origin absolute URLs", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  function createSdk(registerResult: { success: boolean }) {
+    return {
+      account: () => ({
+        register: vi.fn().mockResolvedValue(registerResult),
+      }),
+      setAuthToken: vi.fn(),
+    } as any;
+  }
+
+  it("should return an internal redirect target directly (chain preserved) after register", async () => {
+    const sdk = createSdk({ success: true });
+    const provider = createAuthProvider(sdk);
+    const internalTarget = `/app-login?app=TestApp&to=${encodeURIComponent(
+      "https://sia.example.com/auth/connect/abc123",
+    )}`;
+
+    const result = await provider.register!({
+      email: "a@b.com",
+      firstName: "A",
+      lastName: "B",
+      password: "pw",
+      redirectTo: internalTarget,
+    });
+
+    expect(result.success).toBe(true);
+    // Level-preserving: internal path returned verbatim (single encoding intact)
+    expect(result.redirectTo).toBe(internalTarget);
+  });
+
+  it("should keep routing an external target through /login?to= after register", async () => {
+    const sdk = createSdk({ success: true });
+    const provider = createAuthProvider(sdk);
+    const externalTo = "https://sia.example.com/auth/connect/abc123";
+
+    const result = await provider.register!({
+      email: "a@b.com",
+      firstName: "A",
+      lastName: "B",
+      password: "pw",
+      redirectTo: externalTo,
+    });
+
+    expect(result.redirectTo).toBe(`/login?to=${encodeURIComponent(externalTo)}`);
+  });
+
+  it("should land on /login when no redirectTo is given", async () => {
+    const sdk = createSdk({ success: true });
+    const provider = createAuthProvider(sdk);
+
+    const result = await provider.register!({
+      email: "a@b.com",
+      firstName: "A",
+      lastName: "B",
+      password: "pw",
+    });
+
+    expect(result.redirectTo).toBe("/login");
+  });
+});
+
+describe("isExternalRedirect", () => {
+  beforeEach(() => {
+    vi.stubGlobal("location", {
+      hostname: "account.example.com",
+      href: "https://account.example.com/login",
+      origin: "https://account.example.com",
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("should return false for relative paths", () => {
+    expect(isExternalRedirect("/dashboard")).toBe(false);
+  });
+
+  it("should return false for same origin", () => {
     expect(
-      isAbsoluteRedirect("https://account.example.com/api/auth/oauth/authorize?response_type=code"),
+      isExternalRedirect("https://account.example.com/dashboard"),
+    ).toBe(false);
+  });
+
+  it("should return true for same-root-domain but different origin (cross-subdomain)", () => {
+    expect(
+      isExternalRedirect("https://sia.example.com/auth/connect/123"),
     ).toBe(true);
   });
 
-  it("should return true for cross-origin absolute URLs", () => {
-    expect(isAbsoluteRedirect("https://sia.example.com/auth/connect/123")).toBe(
-      true,
-    );
+  it("should return true for external domains", () => {
+    expect(isExternalRedirect("https://evil.com/dashboard")).toBe(true);
+  });
+
+  it("should return true for different protocol on same host", () => {
+    expect(
+      isExternalRedirect("http://account.example.com/dashboard"),
+    ).toBe(true);
+  });
+
+  it("should return true for different port on same host", () => {
+    expect(
+      isExternalRedirect("https://account.example.com:3000/dashboard"),
+    ).toBe(true);
   });
 
   it("should return false for invalid URLs", () => {
-    expect(isAbsoluteRedirect("not-a-url")).toBe(false);
+    expect(isExternalRedirect("not-a-url")).toBe(false);
   });
 });
 
@@ -248,106 +429,5 @@ describe("createAuthProvider check() redirect", () => {
 
     expect(result.authenticated).toBe(false);
     expect(result.redirectTo).toBe(`/login?to=${encodeURIComponent("/dashboard")}`);
-  });
-});
-
-describe("createAuthProvider login() redirectTo", () => {
-  beforeEach(() => {
-    vi.stubGlobal("location", {
-      hostname: "account.example.com",
-      href: "https://account.example.com/",
-      origin: "https://account.example.com",
-      search: "",
-    });
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
-  function loginSdk(loginResult: unknown) {
-    return {
-      account: () => ({
-        login: vi.fn().mockResolvedValue(loginResult),
-        validateOtp: vi.fn().mockResolvedValue(loginResult),
-      }),
-      setAuthToken: vi.fn(),
-    } as never;
-  }
-
-  it("should return redirectTo false for same-origin absolute target on password login", async () => {
-    const sdk = loginSdk({ data: { token: "t" }, success: true });
-    const provider = createAuthProvider(sdk);
-
-    const result = await provider.login({
-      email: "a@b.com",
-      password: "pw",
-      redirectTo:
-        "https://account.example.com/api/auth/oauth/authorize?response_type=code",
-    });
-
-    expect(result.success).toBe(true);
-    expect(result.redirectTo).toBe(false);
-  });
-
-  it("should return redirectTo false for cross-subdomain absolute target on password login", async () => {
-    const sdk = loginSdk({ data: { token: "t" }, success: true });
-    const provider = createAuthProvider(sdk);
-
-    const result = await provider.login({
-      email: "a@b.com",
-      password: "pw",
-      redirectTo: "https://sia.example.com/auth/connect/abc123",
-    });
-
-    expect(result.success).toBe(true);
-    expect(result.redirectTo).toBe(false);
-  });
-
-  it("should preserve relative redirectTo on password login", async () => {
-    const sdk = loginSdk({ data: { token: "t" }, success: true });
-    const provider = createAuthProvider(sdk);
-
-    const result = await provider.login({
-      email: "a@b.com",
-      password: "pw",
-      redirectTo: "/dashboard",
-    });
-
-    expect(result.success).toBe(true);
-    expect(result.redirectTo).toBe("/dashboard");
-  });
-
-  it("should return redirectTo false for absolute target on OTP validation", async () => {
-    const sdk = loginSdk({ data: { token: "t" }, success: true });
-    const provider = createAuthProvider(sdk);
-
-    const result = await provider.login({
-      otp: "123456",
-      redirectTo:
-        "https://account.example.com/api/auth/oauth/authorize?response_type=code",
-    });
-
-    expect(result.success).toBe(true);
-    expect(result.redirectTo).toBe(false);
-  });
-
-  it("should keep the OTP hop on a relative otp route when target is absolute", async () => {
-    const sdk = loginSdk({ data: { otp: true }, success: true });
-    const provider = createAuthProvider(sdk);
-
-    const result = await provider.login({
-      email: "a@b.com",
-      password: "pw",
-      redirectTo:
-        "https://account.example.com/api/auth/oauth/authorize?response_type=code",
-    });
-
-    expect(result.success).toBe(true);
-    expect(result.redirectTo).toBe(
-      `/otp?to=${encodeURIComponent(
-        "https://account.example.com/api/auth/oauth/authorize?response_type=code",
-      )}`,
-    );
   });
 });

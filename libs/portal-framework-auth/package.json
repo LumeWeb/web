@@ -18,15 +18,19 @@
   "scripts": {
     "build": "tsdown",
     "lint": "oxlint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prebuild": "node scripts/sync-social-providers.ts",
+    "pretest": "node scripts/sync-social-providers.ts"
   },
   "dependencies": {
     "@lumeweb/portal-framework-core": "workspace:*",
     "@lumeweb/portal-framework-ui": "workspace:*",
     "@lumeweb/portal-framework-ui-core": "workspace:*",
     "@lumeweb/portal-sdk": "workspace:*",
+    "@wagmi/core": "^3.6.5",
     "js-cookie": "^3.0.8",
-    "nanoevents": "catalog:"
+    "nanoevents": "catalog:",
+    "viem": "^2.56.2"
   },
   "devDependencies": {
     "@lumeweb/tsdown-config": "workspace:*",

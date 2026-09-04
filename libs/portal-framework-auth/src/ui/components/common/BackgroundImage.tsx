@@ -18,6 +18,13 @@ export function BackgroundImage({
   variant = "default",
 }: BackgroundImageProps) {
   const images = {
+    // No dedicated art shipped yet for the app-login family: the app-login
+    // variants deliberately reuse the closest visual kin — `applogin` (the
+    // consent/login face of the app-login card) reuses the login art, and
+    // `appregister` (the create-account face) reuses the register art. When
+    // dedicated art lands, both are one-line swaps in this map.
+    "applogin": lumeBgLoginPng,
+    "appregister": lumeBgRegisterPng,
     "default": lumeBgPng,
     "login": lumeBgLoginPng,
     "register": lumeBgRegisterPng,
