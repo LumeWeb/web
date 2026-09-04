@@ -6,6 +6,7 @@
  */
 
 // Account and Authentication Hooks
+export * from './useAccountApiDomain';
 export * from './useAccountSubdomain';
 export * from './useAccountUrl';
 export * from './useApiUrl';
