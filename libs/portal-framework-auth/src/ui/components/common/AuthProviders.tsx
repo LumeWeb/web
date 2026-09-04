@@ -113,7 +113,10 @@ export function AuthProviders({
   };
 
   if (orderedProviders.length === 0) {
-    return null;
+    // No live providers, but the auth page still offers the wallet/password
+    // paths that bypass a consent checkbox — keep the ToS/Privacy disclosure
+    // on the page rather than dropping it with the empty social slot.
+    return <AuthConsentNotice className="mb-5" />;
   }
 
   return (

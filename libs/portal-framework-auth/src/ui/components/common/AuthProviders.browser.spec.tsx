@@ -40,7 +40,7 @@ vi.mock("@lumeweb/portal-framework-ui", () => ({
 }));
 
 vi.mock("@/ui/components/common/AuthConsentNotice", () => ({
-  AuthConsentNotice: () => null,
+  AuthConsentNotice: () => <button type="button">Consent line</button>,
 }));
 
 function buttonChip(buttonName: string): HTMLElement {
@@ -133,5 +133,19 @@ describe("AuthProviders (labeled provider stack + Sheet overflow)", () => {
     const unknownChip = buttonChip("Continue with Steampunkops");
     expect(unknownChip.className).toContain("bg-gray-500");
     expect(unknownChip.textContent).toBe("S");
+  });
+
+  it("renders the ToS/Privacy notice with zero live providers", async () => {
+    meta.current = [];
+
+    render(<AuthProviders />);
+
+    // The wallet/password paths bypass a consent checkbox, so the disclosure
+    // must survive the empty social slot (no broken provider buttons).
+    await expect.element(page.getByRole("button", { name: /consent line/i })).toBeInTheDocument();
+    // No broken provider buttons alongside the surviving disclosure.
+    expect(
+      page.getByRole("button", { name: /Continue with/ }).query(),
+    ).toBeNull();
   });
 });
