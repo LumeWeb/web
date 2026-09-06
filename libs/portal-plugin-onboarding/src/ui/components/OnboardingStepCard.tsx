@@ -54,11 +54,10 @@ export function OnboardingStepCard({
       <div className="flex-1">
         <span className="text-sm font-medium">{step.label}</span>
         <p className="text-xs text-muted-foreground">{step.description}</p>
-        {isExpanded && (
+        {step.id === "cli" && <CliInstallBlock />}
+        {isExpanded && step.id !== "cli" && (
           <div className="mt-2 flex items-center gap-3">
-            {step.id === "cli" ? (
-              <CliInstallBlock />
-            ) : step.ctaRoute === null && step.docsUrl ? (
+            {step.ctaRoute === null && step.docsUrl ? (
               <a href={step.docsUrl} target="_blank" rel="noopener noreferrer">
                 <Button size="sm" variant="outline">
                   {ctaLabel}
