@@ -99,13 +99,24 @@ themselves.
 
 ### Worker SDK registration
 
-By default the worker builds the SDK from a `HELLO` config (`indexerUrl`, app
-metadata, 32-byte `AppKey` seed), running `Builder.connected(...)` inside the
-worker. Apps that own registration elsewhere can inject a resolved SDK
-instead:
+By default the worker builds the SDK from two handshake steps, running
+`Builder.connected(...)` inside the worker:
+
+1. `HELLO` carries the connection metadata (`indexerUrl`, app metadata). The
+   reply publishes the worker's raw X25519 public key.
+2. The host encrypts the 32-byte `AppKey` seed to that public key
+   (X25519 ECDH + HKDF + AES-GCM) and sends it as an `APP_KEY` ciphertext
+   envelope. The plaintext seed never crosses the postMessage channel and is
+   not retained on the main thread after the envelope is sent — pass it
+   through the `getAppKeySeed` supplier option (or the React `SiaVideo`
+   `getAppKeySeed` prop), never as a stored value.
+
+The worker keeps its X25519 private key and the decrypted seed inside the
+worker isolate; no protocol message extracts either one. Apps that own
+registration elsewhere can inject a resolved SDK instead:
 
 ```js
-const core = new SiaVideoWorkerCore({ createSdk: () => sdk });
+const core = new SiaVideoWorkerCore({ createSdk: (config, seed) => sdk });
 // or via worker messages when using the default factory
 ```
 

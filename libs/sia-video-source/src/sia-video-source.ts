@@ -21,6 +21,7 @@
  * pipeline instead of appending into an orphaned one.
  */
 
+import { type AppKeySeedProvider, encryptToWorker, scrub } from './app-key-handshake.ts';
 import { HTMLVideoElementHost } from '@videojs/media/dom/video-host';
 import { type ErrorLike, MediaError, type MediaPreloadType } from '@videojs/media';
 import { mediaErrorEvent, mediaErrorFromWorkerMessage } from './errors.ts';
@@ -53,6 +54,18 @@ export interface SiaVideoSourceOptions {
    */
   createWorker?: () => Worker;
   /**
+   * Supplies the 32-byte Sia app-key seed for the worker handshake. The host
+   * reads it only once per (re)attach, immediately after the worker's HELLO_OK
+   * publishes its public key, encrypts it into an `APP_KEY` envelope under an
+   * ephemeral X25519 key, and scrubs the returned buffer — the plaintext seed
+   * is never stored in a field of this element, worked into React state, or
+   * written to storage, because the host structurally holds only a *supplier
+   * function*, never the value. The supplier must produce a fresh buffer per
+   * call (the host zeroes are propagated to the returned buffer) and must not
+   * also keep that buffer elsewhere in usable form.
+   */
+  getAppKeySeed?: AppKeySeedProvider;
+  /**
    * Declared content type of the source (the `type` from the v10 source
    * contract), forwarded on every `SOURCE`. The worker uses it only when it
    * matches what it actually appends — a transport type on remuxed input is
@@ -60,8 +73,10 @@ export interface SiaVideoSourceOptions {
    */
   mimeType?: string;
   /**
-   * Connection material for the worker's default SDK factory, sent in the
-   * first `HELLO`. Must be set before the first `attach`; changing it
+   * Connection metadata for the worker's default SDK factory, sent in the
+   * first `HELLO`. The app-key seed itself never travels through this object —
+   * it is delivered separately inside the encrypted `APP_KEY` envelope, sourced
+   * from `getAppKeySeed`. Must be set before the first `attach`; changing it
    * afterwards requires `detach` + `attach` (or `destroy` + a new instance)
    * to take effect.
    */
@@ -122,8 +137,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // Wait for attach; the stored source starts when there is an engine.
   }
   /**
-   * Connection material the worker's default SDK factory needs. Takes effect
-   * on the next (re)attach, whichever comes first.
+   * Connection metadata the worker's default SDK factory needs. Takes effect
+   * on the next (re)attach, whichever comes first. Never holds key material:
+   * the seed travels only via `getAppKeySeed` + the encrypted `APP_KEY` envelope.
    */
   get workerConfig(): undefined | WorkerConfig {
     return this.#workerConfig;
@@ -158,6 +174,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   #worker: null | Worker = null;
 
   #workerConfig: undefined | WorkerConfig;
+
+  // Worker's raw X25519 handshake public key from the newest HELLO_OK. Public
+  // key material only — harmless to retain; the seed this encrypts to is not.
+  #workerPublicKey: null | Uint8Array = null;
 
   constructor(options: SiaVideoSourceOptions = {}) {
     super();
@@ -303,6 +323,31 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     }
   }
 
+  // The plaintext seed exists in this method's scope only: read from the
+  // supplier, encrypted into the envelope, then scrubbed before the promise
+  // chain unwinds. It is never assigned to any field, never cloned into
+  // React state, and never closed over beyond this method — the wire and the
+  // host's retained state hold only the ciphertext.
+  async #encryptAndSendSeed(
+    getAppKeySeed: AppKeySeedProvider,
+    workerPublicKey: Uint8Array,
+  ): Promise<void> {
+    let seed: Uint8Array | undefined;
+    try {
+      seed = await Promise.resolve(getAppKeySeed());
+      const envelope = await encryptToWorker(workerPublicKey, seed);
+      // POSTed directly, outside #send's pending gate: the seed supplier has
+      // been consumed at this point, so a future re-attach re-reads it anyway.
+      this.#post({ envelope, requestId: nextRequestId(), type: 'APP_KEY' });
+    } catch (error) {
+      this.#reportError('network', errorDescription(error));
+    } finally {
+      // The supplier's buffer is consumed either way — release whatever bytes
+      // made it out of the login flow before the reference dies.
+      if (seed) scrub(seed);
+    }
+  }
+
   #flushPending(): void {
     const pending = this.#pending;
     this.#pending = [];
@@ -353,6 +398,12 @@ export class SiaVideoSource extends HTMLVideoElementHost {
           return;
         }
         this.#ready = true;
+        // The worker's handshake public key is not secret — only enough to
+        // address the APP_KEY envelope to this worker instance. It is
+        // re-published with every HELLO_OK, so a re-attach re-handshakes with
+        // the key of the worker actually speaking now.
+        this.#workerPublicKey = message.publicKey;
+        this.#sendAppKeyEnvelope();
         this.#post({ requestId: nextRequestId(), type: 'ATTACH' });
         this.#flushPending();
         return;
@@ -381,6 +432,8 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#send({ requestId: this.#requestId ?? nextRequestId(), type: 'PLAY' });
   };
 
+  // ---- Main-thread MSE fallback (Firefox and friends) ----
+
   #onSeeking = (event: Event) => {
     const target = this.target;
     if (!target || event.target !== target) return;
@@ -390,8 +443,6 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       type: 'SEEK',
     });
   };
-
-  // ---- Main-thread MSE fallback (Firefox and friends) ----
 
   #post(message: MainToWorkerMessage): void {
     if (!this.#worker) return;
@@ -431,6 +482,16 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       return;
     }
     this.#post(message);
+  }
+
+  // Kicks off the encrypted app-key handoff after every HELLO_OK. No-op when
+  // the app injected its own SDK factory (no seed supplier) or the worker has
+  // not yet published a handshake key.
+  #sendAppKeyEnvelope(): void {
+    const getAppKeySeed = this.#options.getAppKeySeed;
+    const workerPublicKey = this.#workerPublicKey;
+    if (!getAppKeySeed || !workerPublicKey) return;
+    void this.#encryptAndSendSeed(getAppKeySeed, workerPublicKey);
   }
 
   #sendSource(): void {

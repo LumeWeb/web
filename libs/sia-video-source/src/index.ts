@@ -9,10 +9,21 @@
  * behind `/react`.
  */
 
+export {
+  type AppKeySeedProvider,
+  decryptAppKeyEnvelope,
+  encryptToWorker,
+  exportWorkerPublicKey,
+  generateWorkerKeyPair,
+  scrub,
+} from './app-key-handshake.ts';
 export { type ContainerKind, sniffContainer } from './container-probe.ts';
 export { DEFAULT_ERROR_MESSAGES, MEDIA_ERROR_CODES, mediaErrorEvent, mediaErrorFromWorkerMessage } from './errors.ts';
 export {
+  type AppKeyEnvelope,
   type BufferWindow,
+  GCM_IV_LENGTH,
+  isAppKeyEnvelope,
   isWorkerToMainMessage,
   type MainToWorkerMessage,
   nextRequestId,
@@ -20,6 +31,7 @@ export {
   type RequestId,
   type SiaVideoMessage,
   type SourceInfo,
+  WORKER_PUBLIC_KEY_LENGTH,
   WORKER_TO_MAIN_TYPES,
   type WorkerConfig,
   type WorkerErrorCode,

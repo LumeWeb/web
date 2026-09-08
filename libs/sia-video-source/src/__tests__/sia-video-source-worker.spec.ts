@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { AppMetadata, Slab } from '@siafoundation/sia-storage';
+import { encryptToWorker } from '../app-key-handshake.ts';
 import { LruChunkCache, type SiaObjectLike } from '../ranged-reader.ts';
 import {
   HEAD_PROBE_LENGTH,
@@ -15,6 +16,7 @@ import {
   isWorkerToMainMessage,
   type MainToWorkerMessage,
   PROTOCOL_VERSION,
+  WORKER_PUBLIC_KEY_LENGTH,
   type WorkerConfig,
   type WorkerToMainMessage,
 } from '../protocol.ts';
@@ -46,6 +48,21 @@ type Posted = WorkerToMainMessage;
 /** A structurally valid browser-shape `AppMetadata` (its `appId` is a string). */
 function appMetadataFor(appId: string): AppMetadata {
   return { appId, callbackUrl: undefined, description: 'test', logoUrl: undefined, name: 'test-app', serviceUrl: 'https://app.example' };
+}
+
+/** Depth-first walk collecting every Uint8Array embedded in a message. */
+function* byteArraysOf(value: unknown): Generator<Uint8Array> {
+  if (value instanceof Uint8Array) {
+    yield value;
+    return;
+  }
+  if (Array.isArray(value)) {
+    for (const item of value) yield* byteArraysOf(item);
+    return;
+  }
+  if (typeof value === 'object' && value !== null) {
+    for (const item of Object.values(value as Record<string, unknown>)) yield* byteArraysOf(item);
+  }
 }
 
 function createDriver(payload: Uint8Array, sdkOptions: FakeSdkOptions = {}): Driver {
@@ -247,12 +264,12 @@ describe('SiaVideoWorkerCore', () => {
       });
       const configA: WorkerConfig = {
         app: appMetadataFor('a'),
-        appKeySeed: new Uint8Array([1, 2, 3]),
+
         indexerUrl: 'https://a.storage',
       };
       const configB: WorkerConfig = {
         app: appMetadataFor('b'),
-        appKeySeed: new Uint8Array([4, 5, 6]),
+
         indexerUrl: 'https://b.storage',
       };
 
@@ -271,70 +288,124 @@ describe('SiaVideoWorkerCore', () => {
       expect(usedConfigs.at(-1)).toBe(undefined);
     });
 
-    it('rebuilds when two same-length DataView seeds carry different bytes', async () => {
-      const usedConfigs: (undefined | WorkerConfig)[] = [];
+    it('builds the SDK from a seed decapsulated out of an APP_KEY envelope', async () => {
+      const messages: Posted[] = [];
+      const seenSeeds: (null | Uint8Array)[] = [];
       const core = new SiaVideoWorkerCore({
-        createSdk: (config) => {
-          usedConfigs.push(config);
+        createSdk: (_config, seed) => {
+          seenSeeds.push(seed);
           return Promise.resolve(fakeSiaSdk(fmp4Payload(64)));
         },
-        post: () => { /* observations are made through usedConfigs */ },
+        post: (m) => messages.push(m),
         supportsWorkerMse: () => false,
       });
-      const config: WorkerConfig = {
-        app: appMetadataFor('a'),
-        appKeySeed: new DataView(new Uint8Array([1, 2, 3]).buffer) as unknown as Uint8Array,
-        indexerUrl: 'https://a.storage',
-      };
-      const rotated: WorkerConfig = {
-        app: appMetadataFor('a'),
-        // Same length, same indexer — yet DataView indexed access yields
-        // undefined, so a naive byte loop would call these configs equal.
-        appKeySeed: new DataView(new Uint8Array([9, 9, 9]).buffer) as unknown as Uint8Array,
-        indexerUrl: 'https://a.storage',
-      };
+      const first = crypto.getRandomValues(new Uint8Array(32));
+      const second = crypto.getRandomValues(new Uint8Array(32));
 
-      await core.handleMessage({ config, requestId: 1, type: 'HELLO' });
-      await core.handleMessage({ preload: 'auto', requestId: 2, src: 'k', type: 'SOURCE' });
-      expect(usedConfigs).toHaveLength(1);
+      await core.handleMessage({ requestId: 1, type: 'HELLO' });
+      // HELLO_OK publishes the worker's raw 32-byte X25519 public half; this
+      // (the host's view) is the only key material the worker ever reveals.
+      const ok = messages.at(-1);
+      expect(ok?.type).toBe('HELLO_OK');
+      const publicKey = (ok as { publicKey: Uint8Array; }).publicKey;
+      expect(publicKey.byteLength).toBe(WORKER_PUBLIC_KEY_LENGTH);
+      expect(typeof (ok as { privateKey?: unknown; }).privateKey).toBe('undefined');
 
-      await core.handleMessage({ config: rotated, requestId: 3, type: 'HELLO' });
-      await core.handleMessage({ preload: 'auto', requestId: 4, src: 'k', type: 'SOURCE' });
+      await core.handleMessage({ envelope: await encryptToWorker(publicKey, first), requestId: 2, type: 'APP_KEY' });
+      await core.handleMessage({ preload: 'auto', requestId: 3, src: 'k', type: 'SOURCE' });
+      expect(seenSeeds).toHaveLength(1);
+      // The injected factory received the plaintext seed bytes — and only the
+      // worker isolate (this code path) ever sees them.
+      expect(Array.from(seenSeeds[0]!)).toEqual(Array.from(first));
 
-      // Treating the DataView seeds as equal would have reused the SDK built
-      // for the stale credentials instead of rebuilding.
-      expect(usedConfigs).toHaveLength(2);
+      await core.handleMessage({ envelope: await encryptToWorker(publicKey, second), requestId: 4, type: 'APP_KEY' });
+      await core.handleMessage({ preload: 'auto', requestId: 5, src: 'k', type: 'SOURCE' });
+      expect(seenSeeds).toHaveLength(2);
+      expect(Array.from(seenSeeds[1]!)).toEqual(Array.from(second));
+
+      // No reply ever carries the plaintext seed (or the private key): the
+      // only posted byte arrays are the public key and CHUNK media bytes.
+      const firstBytes = Array.from(first);
+      const secondBytes = Array.from(second);
+      for (const message of messages) {
+        for (const bytes of byteArraysOf(message)) {
+          expect(Array.from(bytes)).not.toEqual(firstBytes);
+          expect(Array.from(bytes)).not.toEqual(secondBytes);
+        }
+      }
     });
 
-    it('keeps the SDK cached when two Uint8Array seeds match byte for byte', async () => {
-      const usedConfigs: (undefined | WorkerConfig)[] = [];
+    it('rejects a tampered APP_KEY envelope without disturbing the current SDK', async () => {
+      const messages: Posted[] = [];
+      let builds = 0;
       const core = new SiaVideoWorkerCore({
-        createSdk: (config) => {
-          usedConfigs.push(config);
+        createSdk: () => {
+          builds++;
           return Promise.resolve(fakeSiaSdk(fmp4Payload(64)));
         },
-        post: () => { /* observations are made through usedConfigs */ },
+        post: (m) => messages.push(m),
         supportsWorkerMse: () => false,
       });
-      const config: WorkerConfig = {
-        app: appMetadataFor('a'),
-        appKeySeed: new Uint8Array([1, 2, 3]),
-        indexerUrl: 'https://a.storage',
-      };
-      // Byte-identical seed held in a fresh array instance: the configs are
-      // still the same connection, so no SDK rebuild may happen.
-      const sameSeed: WorkerConfig = {
-        app: appMetadataFor('a'),
-        appKeySeed: new Uint8Array([1, 2, 3]),
-        indexerUrl: 'https://a.storage',
-      };
+      const seed = crypto.getRandomValues(new Uint8Array(32));
 
-      await core.handleMessage({ config, requestId: 1, type: 'HELLO' });
-      await core.handleMessage({ preload: 'auto', requestId: 2, src: 'k', type: 'SOURCE' });
-      await core.handleMessage({ config: sameSeed, requestId: 3, type: 'HELLO' });
-      await core.handleMessage({ preload: 'auto', requestId: 4, src: 'k', type: 'SOURCE' });
+      await core.handleMessage({ requestId: 1, type: 'HELLO' });
+      // Encrypt to the key the worker actually published in HELLO_OK.
+      const publicKey = (messages.at(-1) as { publicKey: Uint8Array; }).publicKey;
+      expect(publicKey.byteLength).toBe(WORKER_PUBLIC_KEY_LENGTH);
+      await core.handleMessage({ envelope: await encryptToWorker(publicKey, seed), requestId: 2, type: 'APP_KEY' });
+      await core.handleMessage({ preload: 'auto', requestId: 3, src: 'k', type: 'SOURCE' });
+      expect(builds).toBe(1);
 
-      expect(usedConfigs).toHaveLength(1);
+      // A single flipped ciphertext bit must fail AEAD integrity — and the
+      // rejection must NOT clear the seed or invalidate the cached SDK: garbage
+      // never gets to impersonate a credential change.
+      const tampered = await encryptToWorker(publicKey, seed);
+      tampered.ciphertext[0] ^= 0x01;
+      const errorsBefore = messages.filter((m) => m.type === 'ERROR').length;
+      await core.handleMessage({ envelope: tampered, requestId: 4, type: 'APP_KEY' });
+      // The rejection is a global (requestId null) ERROR naming the handshake,
+      // not a request-scoped SOURCE failure.
+      const errors = messages.filter((m) => m.type === 'ERROR');
+      expect(errors).toHaveLength(errorsBefore + 1);
+      expect(errors.at(-1)).toMatchObject({ kind: 'network', requestId: null, type: 'ERROR' });
+
+      await core.handleMessage({ preload: 'auto', requestId: 5, src: 'k', type: 'SOURCE' });
+      expect(builds).toBe(1);
+      // A later well-formed envelope of a fresh seed still rebuilds: the
+      // rejected one cached nothing, but the honest handshake still works.
+      await core.handleMessage({ envelope: await encryptToWorker(publicKey, crypto.getRandomValues(new Uint8Array(32))), requestId: 6, type: 'APP_KEY' });
+      await core.handleMessage({ preload: 'auto', requestId: 7, src: 'k', type: 'SOURCE' });
+      expect(builds).toBe(2);
+    });
+
+    it('keeps the SDK cached when a re-encrypted envelope holds the same seed', async () => {
+      const messages: Posted[] = [];
+      let builds = 0;
+      const core = new SiaVideoWorkerCore({
+        createSdk: (_config, _seed) => {
+          builds++;
+          return Promise.resolve(fakeSiaSdk(fmp4Payload(64)));
+        },
+        post: (m) => messages.push(m),
+        supportsWorkerMse: () => false,
+      });
+      const seed = crypto.getRandomValues(new Uint8Array(32));
+
+      await core.handleMessage({ requestId: 1, type: 'HELLO' });
+      // Encrypt to the key the worker actually published in HELLO_OK.
+      const publicKey = (messages.at(-1) as { publicKey: Uint8Array; }).publicKey;
+      expect(publicKey.byteLength).toBe(WORKER_PUBLIC_KEY_LENGTH);
+      await core.handleMessage({ envelope: await encryptToWorker(publicKey, seed), requestId: 2, type: 'APP_KEY' });
+      await core.handleMessage({ preload: 'auto', requestId: 3, src: 'k', type: 'SOURCE' });
+
+      // Fresh IV + fresh ephemeral key (byte-identical envelopes are
+      // impossible), but the decapsulated seed is the same → same connection,
+      // so a re-attach's APP_KEY must not force an SDK rebuild.
+      await core.handleMessage({ envelope: await encryptToWorker(publicKey, seed), requestId: 4, type: 'APP_KEY' });
+      await core.handleMessage({ preload: 'auto', requestId: 5, src: 'k', type: 'SOURCE' });
+
+      expect(builds).toBe(1);
+      expect(messages.filter((m) => m.type === 'ERROR')).toHaveLength(0);
     });
 
     it('does not re-cache an SDK whose config changed while creation was pending', async () => {
@@ -356,12 +427,12 @@ describe('SiaVideoWorkerCore', () => {
       });
       const configA: WorkerConfig = {
         app: appMetadataFor('a'),
-        appKeySeed: new Uint8Array([1, 2, 3]),
+
         indexerUrl: 'https://a.storage',
       };
       const configB: WorkerConfig = {
         app: appMetadataFor('b'),
-        appKeySeed: new Uint8Array([4, 5, 6]),
+
         indexerUrl: 'https://b.storage',
       };
 
@@ -390,12 +461,12 @@ describe('SiaVideoWorkerCore', () => {
       const disposed = { count: 0 };
       const configA: WorkerConfig = {
         app: appMetadataFor('a'),
-        appKeySeed: new Uint8Array([1, 2, 3]),
+
         indexerUrl: 'https://a.storage',
       };
       const configB: WorkerConfig = {
         app: appMetadataFor('b'),
-        appKeySeed: new Uint8Array([4, 5, 6]),
+
         indexerUrl: 'https://b.storage',
       };
       const core = new SiaVideoWorkerCore({
@@ -449,12 +520,12 @@ describe('SiaVideoWorkerCore', () => {
       });
       const configA: WorkerConfig = {
         app: appMetadataFor('a'),
-        appKeySeed: new Uint8Array([1, 2, 3]),
+
         indexerUrl: 'https://a.storage',
       };
       const configB: WorkerConfig = {
         app: appMetadataFor('b'),
-        appKeySeed: new Uint8Array([4, 5, 6]),
+
         indexerUrl: 'https://b.storage',
       };
 
@@ -495,7 +566,7 @@ describe('SiaVideoWorkerCore', () => {
       });
       const config: WorkerConfig = {
         app: appMetadataFor('a'),
-        appKeySeed: new Uint8Array([1, 2, 3]),
+
         indexerUrl: 'https://a.storage',
       };
 
@@ -533,7 +604,7 @@ describe('SiaVideoWorkerCore', () => {
       });
       const config: WorkerConfig = {
         app: appMetadataFor('a'),
-        appKeySeed: new Uint8Array([1, 2, 3]),
+
         indexerUrl: 'https://a.storage',
       };
 
@@ -586,12 +657,12 @@ describe('SiaVideoWorkerCore', () => {
       });
       const configA: WorkerConfig = {
         app: appMetadataFor('a'),
-        appKeySeed: new Uint8Array([1, 2, 3]),
+
         indexerUrl: 'https://a.storage',
       };
       const configB: WorkerConfig = {
         app: appMetadataFor('b'),
-        appKeySeed: new Uint8Array([4, 5, 6]),
+
         indexerUrl: 'https://b.storage',
       };
 
@@ -1145,12 +1216,12 @@ describe('SiaVideoWorkerCore', () => {
       });
       const configA: WorkerConfig = {
         app: appMetadataFor('a'),
-        appKeySeed: new Uint8Array([1, 2, 3]),
+
         indexerUrl: 'https://a.storage',
       };
       const configB: WorkerConfig = {
         app: appMetadataFor('b'),
-        appKeySeed: new Uint8Array([4, 5, 6]),
+
         indexerUrl: 'https://b.storage',
       };
 
@@ -1205,12 +1276,12 @@ describe('SiaVideoWorkerCore', () => {
       });
       const configA: WorkerConfig = {
         app: appMetadataFor('a'),
-        appKeySeed: new Uint8Array([1, 2, 3]),
+
         indexerUrl: 'https://a.storage',
       };
       const configB: WorkerConfig = {
         app: appMetadataFor('b'),
-        appKeySeed: new Uint8Array([4, 5, 6]),
+
         indexerUrl: 'https://b.storage',
       };
 

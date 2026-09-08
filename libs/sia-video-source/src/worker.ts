@@ -12,7 +12,18 @@ import { SiaVideoWorkerCore, type SiaVideoWorkerOptions } from './sia-video-sour
 import { isMainToWorkerMessage } from './protocol.ts';
 
 export {
+  type AppKeySeedProvider,
+  decryptAppKeyEnvelope,
+  encryptToWorker,
+  exportWorkerPublicKey,
+  generateWorkerKeyPair,
+  scrub,
+} from './app-key-handshake.ts';
+
+export {
+  type AppKeyEnvelope,
   DEFAULT_FMP4_MIME,
+  isAppKeyEnvelope,
   PROTOCOL_VERSION,
   type SiaVideoMessage,
   type WorkerConfig,

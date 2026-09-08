@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { AppMetadata } from '@siafoundation/sia-storage';
-import type { MainToWorkerMessage, WorkerToMainMessage } from '../protocol.ts';
+import {
+  decryptAppKeyEnvelope,
+  exportWorkerPublicKey,
+  generateWorkerKeyPair,
+} from '../app-key-handshake.ts';
+import { type AppKeyEnvelope, isAppKeyEnvelope, type MainToWorkerMessage, PROTOCOL_VERSION, WORKER_PUBLIC_KEY_LENGTH, type WorkerToMainMessage } from '../protocol.ts';
 import { siaVideoDefaultProps, SiaVideoSource } from '../sia-video-source.ts';
 
 /**
@@ -34,7 +39,7 @@ function appMetadata(): AppMetadata {
 }
 
 function workerConfig(indexerUrl = 'https://sia.storage') {
-  return { app: appMetadata(), appKeySeed: new Uint8Array(32), indexerUrl };
+  return { app: appMetadata(), indexerUrl };
 }
 
 describe('SiaVideoSource (host state machine)', () => {
@@ -59,11 +64,11 @@ describe('SiaVideoSource (host state machine)', () => {
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     host.attach(document.createElement('video'));
 
-    worker.reply({ features: { workerMse: false }, requestId: 1, type: 'HELLO_OK', version: 999 });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: 999 });
     expect(worker.sent.some((m) => m.type === 'ATTACH')).toBe(false);
     expect(host.error?.code).toBe(4);
 
-    worker.reply({ features: { workerMse: false }, requestId: 2, type: 'HELLO_OK', version: 2 });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 2, type: 'HELLO_OK', version: PROTOCOL_VERSION });
     expect(worker.sent.some((m) => m.type === 'ATTACH')).toBe(true);
     host.destroy();
   });
@@ -74,7 +79,7 @@ describe('SiaVideoSource (host state machine)', () => {
     const target = document.createElement('video');
     host.attach(target);
 
-    worker.reply({ features: { workerMse: false }, requestId: 1, type: 'HELLO_OK', version: 2 });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
     expect(worker.sent.some((m) => m.type === 'ATTACH')).toBe(true);
 
     host.src = 'k';
@@ -100,7 +105,7 @@ describe('SiaVideoSource (host state machine)', () => {
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
-    worker.reply({ features: { workerMse: false }, requestId: 1, type: 'HELLO_OK', version: 2 });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
     worker.sent.length = 0;
 
     target.currentTime = 12.5;
@@ -118,7 +123,7 @@ describe('SiaVideoSource (host state machine)', () => {
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
-    worker.reply({ features: { workerMse: false }, requestId: 1, type: 'HELLO_OK', version: 2 });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
 
     host.src = 'k';
     // A superseded load's error must not surface.
@@ -138,7 +143,7 @@ describe('SiaVideoSource (host state machine)', () => {
     let errorEvents = 0;
     host.addEventListener('error', () => errorEvents++);
     host.attach(target);
-    worker.reply({ features: { workerMse: false }, requestId: 1, type: 'HELLO_OK', version: 2 });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
 
     host.src = 'k';
     const loadId = (worker.sent.find((m) => m.type === 'SOURCE') as undefined | { requestId: number; })?.requestId ?? 0;
@@ -189,4 +194,118 @@ describe('SiaVideoSource (host state machine)', () => {
     expect(hellos.at(-1)).toMatchObject({ config: { indexerUrl: 'https://changed.example' } });
     host.destroy();
   });
+
+  it.skipIf(!IN_BROWSER)('sends an APP_KEY envelope after HELLO_OK and never retains or replays the plaintext seed', async () => {
+    const worker = new FakeWorker();
+    // The supplier returns a buffer whose contents stay observable only
+    // through this snapshot; the host is expected to scrub the returned
+    // buffer once the envelope is built.
+    const seed = crypto.getRandomValues(new Uint8Array(32));
+    const expectedSeed = new Uint8Array(seed);
+    const keyPair = generateWorkerKeyPair();
+    const publicKey = exportWorkerPublicKey(keyPair);
+    let supplierCalls = 0;
+    const host = new SiaVideoSource({
+      createWorker: () => worker as unknown as Worker,
+      getAppKeySeed: () => {
+        supplierCalls++;
+        return seed;
+      },
+      workerConfig: workerConfig(),
+    });
+    host.attach(document.createElement('video'));
+
+    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    // The seed→envelope chain is async; let it settle.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // Exactly one APP_KEY was sent, immediately after HELLO_OK.
+    const appKeyMessages = worker.sent.filter((m) => m.type === 'APP_KEY');
+    expect(appKeyMessages).toHaveLength(1);
+    const appKey = appKeyMessages[0] as unknown as { envelope: AppKeyEnvelope; requestId: number; type: 'APP_KEY'; };
+    expect(isAppKeyEnvelope(appKey.envelope)).toBe(true);
+
+    // The envelope decrypts (inside a "worker") to exactly the supplied seed:
+    // a real X25519+AEAD round trip, not a pass-through copy.
+    const decapsulated = await decryptAppKeyEnvelope(keyPair, appKey.envelope);
+    expect(Array.from(decapsulated)).toEqual(Array.from(expectedSeed));
+
+    // No sent message carries the plaintext (or a private-key-sized array
+    // equal to the seed): only ciphertext, IV, ephemeral key, and metadata.
+    for (const message of worker.sent) {
+      for (const bytes of byteArraysOf(message)) {
+        if (bytes.byteLength === expectedSeed.byteLength) {
+          expect(Array.from(bytes)).not.toEqual(Array.from(expectedSeed));
+        }
+      }
+    }
+
+    // The host scrubbed the supplier's buffer after the handoff, and the
+    // supplier was read exactly once for this handshake.
+    expect(seed.every((b) => b === 0)).toBe(true);
+    expect(supplierCalls).toBe(1);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('re-handshakes a fresh envelope on every HELLO_OK without a seed field lingering on the host', async () => {
+    const worker = new FakeWorker();
+    const keyPair = generateWorkerKeyPair();
+    const publicKey = exportWorkerPublicKey(keyPair);
+    // A distinct random seed per call: the supplier is consumed per handshake.
+    const host = new SiaVideoSource({
+      createWorker: () => worker as unknown as Worker,
+      getAppKeySeed: () => crypto.getRandomValues(new Uint8Array(32)),
+      workerConfig: workerConfig(),
+    });
+    host.attach(document.createElement('video'));
+    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    worker.sent.length = 0;
+
+    host.detach();
+    host.attach(document.createElement('video'));
+    worker.reply({ features: { workerMse: false }, publicKey, requestId: 2, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // A second envelope was delivered for the second handshake.
+    const envelopes = worker.sent.filter((m) => m.type === 'APP_KEY');
+    expect(envelopes).toHaveLength(1);
+    const envelope = (envelopes[0] as unknown as { envelope: AppKeyEnvelope; }).envelope;
+    expect(envelope.ephemeralPublicKey.byteLength).toBe(WORKER_PUBLIC_KEY_LENGTH);
+
+    // Nothing retrievable from the host surface speaks of the seed: the
+    // config getter exposes only metadata.
+    expect(host.workerConfig?.indexerUrl).toBe('https://sia.storage');
+    expect('getAppKeySeed' in (host as unknown as { getAppKeySeed?: unknown; })).toBe(false);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('sends no APP_KEY message when no seed supplier is configured', async () => {
+    const worker = new FakeWorker();
+    const keyPair = generateWorkerKeyPair();
+    const publicKey = exportWorkerPublicKey(keyPair);
+    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    host.attach(document.createElement('video'));
+    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // Apps injecting their own SDK factory have no handshake to perform.
+    expect(worker.sent.some((m) => m.type === 'APP_KEY')).toBe(false);
+    host.destroy();
+  });
 });
+
+/** Depth-first walk collecting every Uint8Array embedded in a message. */
+function* byteArraysOf(value: unknown): Generator<Uint8Array> {
+  if (value instanceof Uint8Array) {
+    yield value;
+    return;
+  }
+  if (Array.isArray(value)) {
+    for (const item of value) yield* byteArraysOf(item);
+    return;
+  }
+  if (typeof value === 'object' && value !== null) {
+    for (const item of Object.values(value as Record<string, unknown>)) yield* byteArraysOf(item);
+  }
+}

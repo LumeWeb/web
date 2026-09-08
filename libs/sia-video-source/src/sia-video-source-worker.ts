@@ -28,8 +28,16 @@
 
 import { AppKey, Builder, initSia } from '@siafoundation/sia-storage';
 import muxJs from 'mux.js';
+import {
+  decryptAppKeyEnvelope,
+  exportWorkerPublicKey,
+  generateWorkerKeyPair,
+  scrub,
+  type WorkerKeyPair,
+} from './app-key-handshake.ts';
 import { type ContainerKind, sniffContainer } from './container-probe.ts';
 import {
+  type AppKeyEnvelope,
   DEFAULT_FMP4_MIME,
   PROTOCOL_VERSION,
   type RequestId,
@@ -74,10 +82,12 @@ export interface SiaVideoWorkerOptions {
   cache?: LruChunkCache;
   /**
    * Builds the SDK used to resolve and download pinned objects. Defaults to
-   * the worker-local registration flow driven by the `HELLO` config; apps that
-   * own SDK registration elsewhere inject a resolved `SiaVideoSdk` here.
+   * the worker-local registration flow driven by the `HELLO` config plus the
+   * decrypted `APP_KEY` seed; apps that own SDK registration elsewhere inject
+   * a resolved `SiaVideoSdk` here. The seed argument is the worker's decrypted
+   * copy and stays inside this isolate — it must not be forwarded anywhere.
    */
-  createSdk?: (config: undefined | WorkerConfig) => Promise<SiaVideoSdk>;
+  createSdk?: (config: undefined | WorkerConfig, appKeySeed: null | Uint8Array) => Promise<SiaVideoSdk>;
   /** Overrides message delivery; useful when the caller wires its own channel. */
   post?: PostMessage;
   /** Overrides the worker-MSE capability probe (e.g. for alternative runtimes). */
@@ -102,19 +112,27 @@ export class SiaVideoWorkerCore {
     return this.#mode;
   }
   #appendQueue: Uint8Array[] = [];
+  // Decrypted app-key seed. Worker-isolate only: it is produced solely by
+  // decrypting the APP_KEY envelope, is passed to the injected/default SDK
+  // factory here, and is scrubbed on replace and on destroy. No protocol
+  // message forwards it (or the private key) back to the host.
+  #appKeySeed: null | Uint8Array = null;
   readonly #cache: LruChunkCache;
-
   #chunksSinceProgress = 0;
+
   #config: undefined | WorkerConfig;
   #container: ContainerKind | null = null;
-  readonly #createSdk: (config: undefined | WorkerConfig) => Promise<SiaVideoSdk>;
+  readonly #createSdk: (config: undefined | WorkerConfig, appKeySeed: null | Uint8Array) => Promise<SiaVideoSdk>;
   #deliveredInit = false;
   #destroyed = false;
-
   // Throughput estimate backing time → byte-offset seek math.
   #firstByteAt = 0;
+
   // Memoized in-flight SDK build, so overlapping loads share one instance.
   #inflightSdk: null | Promise<null | SiaVideoSdk> = null;
+  // Memoized static handshake key pair; the private half never leaves this
+  // isolate — it is referenced only by the decrypt path in this module.
+  #keyPair: null | WorkerKeyPair = null;
   // Monotonic per-load epoch; every async step abandons itself if it no longer
   // matches, which is what keeps superseded SOURCE loads from interleaving.
   #loadEpoch = 0;
@@ -163,6 +181,7 @@ export class SiaVideoWorkerCore {
   /** Stops all reads and drops pipeline state; the cache survives a re-attach. */
   destroy(): void {
     this.#destroyed = true;
+    this.#forgetSeed();
     this.#teardownMediaPipeline();
     this.#reader?.stop();
     this.#reader = null;
@@ -184,6 +203,9 @@ export class SiaVideoWorkerCore {
 
     try {
       switch (message.type) {
+        case 'APP_KEY':
+          await this.#acceptAppKey(message.envelope);
+          return;
         case 'ATTACH':
           this.#handleAttach();
           return;
@@ -203,7 +225,7 @@ export class SiaVideoWorkerCore {
           this.#pendingSeekTime = undefined;
           this.#seekParkedSinceAttach = false;
           return;
-        case 'HELLO':
+        case 'HELLO': {
           // HELLO is authoritative on (re)attach: a config that changed — or
           // was cleared entirely — must invalidate the cached SDK so the next
           // SOURCE rebuilds against the fresh credentials/indexer. The active
@@ -225,13 +247,20 @@ export class SiaVideoWorkerCore {
             this.#inflightSdk = null;
             this.#disposeSdk(sdk);
           }
+          // The handshake's static X25519 key pair is created on the first
+          // HELLO and memoized; HELLO_OK publishes only the raw public half.
+          // The host needs it to encapsulate the app-key seed into the
+          // following APP_KEY envelope.
+          const keyPair = this.#ensureKeyPair();
           this.#post({
             features: { workerMse: this.#mode === 'worker' },
+            publicKey: exportWorkerPublicKey(keyPair),
             requestId: message.requestId,
             type: 'HELLO_OK',
             version: PROTOCOL_VERSION,
           });
           return;
+        }
         case 'PLAY':
           // Playback intent may arrive while a source is still probing; the
           // flag survives until the load completes and starts streaming.
@@ -251,6 +280,47 @@ export class SiaVideoWorkerCore {
     }
   }
 
+  // Decrypts the host's APP_KEY envelope and, when the decapsulated seed is
+  // genuinely new, invalidates the connection exactly like a HELLO config
+  // change: the active load is torn down and the cached/in-flight SDK story is
+  // reset so the next SOURCE rebuilds against the fresh credentials. A
+  // re-encrypted envelope holding the SAME seed (fresh IV + ephemeral key, no
+  // way to compare wire bytes) decrypts to the existing seed and keeps the
+  // SDK alive — this is what makes repeat attaches cheap.
+  async #acceptAppKey(envelope: AppKeyEnvelope): Promise<void> {
+    const keyPair = this.#ensureKeyPair();
+    let seed: Uint8Array;
+    try {
+      seed = await decryptAppKeyEnvelope(keyPair, envelope);
+    } catch {
+      // AEAD integrity failure: tampered ciphertext, unrelated ephemeral key,
+      // or foreign protocol context. Report and leave the current (possibly
+      // absent) seed and SDK state untouched — garbage never invalidates.
+      this.#postError('network', null, 'app key handshake failed: envelope rejected');
+      return;
+    }
+
+    if (appKeySeedsEqual(this.#appKeySeed, seed)) {
+      scrub(seed);
+      return;
+    }
+
+    ++this.#loadEpoch;
+    this.#reader?.stop();
+    this.#reader = null;
+    this.#object = null;
+    this.#objectEpoch = 0;
+    this.#teardownMediaPipeline();
+    this.#playRequested = false;
+    this.#pendingSeekTime = undefined;
+    this.#seekParkedSinceAttach = false;
+    this.#replaceSeed(seed);
+    const sdk = this.#sdk;
+    this.#sdk = null;
+    this.#inflightSdk = null;
+    this.#disposeSdk(sdk);
+  }
+
   // Queues bytes for the worker-side SourceBuffer; drained on open/updateend.
   #append(bytes: Uint8Array): void {
     if (this.#mode !== 'worker' || !this.#mediaSource) return;
@@ -264,6 +334,12 @@ export class SiaVideoWorkerCore {
     const elapsed = (performance.now() - this.#firstByteAt) / 1000;
     if (this.#receivedBytes === 0) return 0;
     return this.#receivedBytes / Math.max(elapsed, 1);
+  }
+
+  // True when the current connection still matches the one an SDK build was
+  // started for (config equality + seed byte equality).
+  #connectionIs(config: undefined | WorkerConfig, seed: null | Uint8Array): boolean {
+    return workerConfigsEqual(this.#config, config) && appKeySeedsEqual(this.#appKeySeed, seed);
   }
 
   #consumeChunk(chunk: Uint8Array, position: number, epoch: number): void {
@@ -336,22 +412,36 @@ export class SiaVideoWorkerCore {
     }
   }
 
+  // Memoized static handshake key pair; generated once per worker lifetime.
+  // The private half is raw bytes with no export path on this class and is
+  // only ever a derive* input — there is no code path that serializes it,
+  // posts it, or returns it. Noble X25519 keygen is synchronous.
+  #ensureKeyPair(): WorkerKeyPair {
+    this.#keyPair ??= generateWorkerKeyPair();
+    return this.#keyPair;
+  }
+
   #ensureSdk(): Promise<null | SiaVideoSdk> {
     if (this.#sdk) return Promise.resolve(this.#sdk);
-    // Memoize the in-flight build so overlapping loads for the same config
+    // Memoize the in-flight build so overlapping loads for the same connection
     // share one SDK instead of orphan-building duplicates.
     if (this.#inflightSdk) return this.#inflightSdk;
-    // Snapshot the config this build targets; a HELLO config change that lands
-    // while creation is in flight invalidates the result, and it must not be
-    // cached back over the fresher config.
+    // Snapshot the connection this build targets (config + decapsulated seed);
+    // a HELLO config change or a superseding APP_KEY that lands while creation
+    // is in flight invalidates the result, and it must not be cached back over
+    // the fresher connection. The seed snapshot holds the reference only — the
+    // bytes are scrubbed on replacement, which the equality check (below)
+    // reads as "credentials changed" because freshly generated seeds never
+    // look like the zeroed-out old ones except with vanishing probability.
     const configAtCreate = this.#config;
+    const seedAtCreate = this.#appKeySeed;
     // Identity-guard the memo slot: only the promise stored here clears it, so
     // a stale rejection (or stale success) can never clobber a newer in-flight
-    // build that replaced it after a config change.
-    const inflight = this.#createSdk(configAtCreate).then(
+    // build that replaced it after a connection change.
+    const inflight = this.#createSdk(configAtCreate, seedAtCreate).then(
       (sdk) => {
         if (this.#inflightSdk === inflight) this.#inflightSdk = null;
-        if (this.#destroyed || !workerConfigsEqual(this.#config, configAtCreate)) {
+        if (this.#destroyed || !this.#connectionIs(configAtCreate, seedAtCreate)) {
           // A successfully built SDK that no session will use must still
           // release whatever native resources it grabbed.
           this.#disposeSdk(sdk);
@@ -402,6 +492,11 @@ export class SiaVideoWorkerCore {
     } catch (error) {
       this.#postError('decode', this.#requestId, errorDescription(error));
     }
+  }
+
+  #forgetSeed(): void {
+    if (this.#appKeySeed) scrub(this.#appKeySeed);
+    this.#appKeySeed = null;
   }
 
   #handleAttach(): void {
@@ -681,6 +776,14 @@ export class SiaVideoWorkerCore {
     }
   }
 
+  // Swaps in a freshly decrypted seed and scrubs the previous copy, so the
+  // only plaintext seed in the isolate is the one that is actually current.
+  #replaceSeed(seed: Uint8Array): void {
+    const stale = this.#appKeySeed;
+    this.#appKeySeed = seed;
+    if (stale) scrub(stale);
+  }
+
   #startStreaming(): void {
     if (!this.#object || this.#reader || this.#destroyed) return;
     // Only engage the object current to this load; a stale epoch's object
@@ -847,15 +950,35 @@ export function withDisposal(sdk: SiaVideoSdk): SiaVideoSdk {
   });
 }
 
-async function createDefaultSdk(config: undefined | WorkerConfig): Promise<SiaVideoSdk> {
-  if (!config?.appKeySeed) {
-    throw new Error('No Sia SDK is available: send HELLO config or inject createSdk.');
+/**
+ * Byte equality over two decapsulated seeds (or nulls). Used as half of the
+ * SDK connection identity: an accepted seed must never be compared through a
+ * setter-identity or wire-bytes lens — the wire carries only ciphertext, so
+ * byte equality of the decrypted seeds is the only honest comparison. A
+ * replaced seed's old buffer is scrubbed to zeros, which changes its bytes
+ * and therefore reads as "credentials changed" here.
+ */
+function appKeySeedsEqual(a: null | Uint8Array, b: null | Uint8Array): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  if (a.byteLength !== b.byteLength) return false;
+  for (let i = 0; i < a.byteLength; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+async function createDefaultSdk(config: undefined | WorkerConfig, seed: null | Uint8Array): Promise<SiaVideoSdk> {
+  // The seed only exists after a completed APP_KEY handshake (or has been
+  // injected via a custom createSdk); config alone can never authenticate.
+  if (!config || !(seed instanceof Uint8Array) || seed.byteLength === 0) {
+    throw new Error('No Sia SDK is available: complete the HELLO + APP_KEY handshake or inject createSdk.');
   }
 
   await initSia();
 
   const builder = new Builder(config.indexerUrl, config.app);
-  const appKey = new AppKey(config.appKeySeed);
+  const appKey = new AppKey(seed);
   const sdk = await builder.connected(appKey);
   if (!sdk) throw new Error('The Sia app key is not registered with the indexer.');
   return withDisposal(sdk);
@@ -883,10 +1006,10 @@ function errorDescription(error: unknown): string {
   return String(error).slice(0, 240);
 }
 
+
 function mediaSourceHandleOf(mediaSource: MediaSource): MediaSourceHandle {
   return (mediaSource as unknown as { handle: MediaSourceHandle }).handle;
 }
-
 
 /**
  * MIME used for `SourceBuffer` creation, preferring a caller-declared type.
@@ -943,21 +1066,12 @@ async function readHead(sdk: SiaSdkLike, object: SiaObjectLike): Promise<null | 
 /**
  * True when two HELLO worker configs describe the same connection. The app
  * metadata is descriptive only (it is not part of SDK auth), so identity is
- * the indexer endpoint plus the app-key seed bytes.
+ * the indexer endpoint; the app-key seed half of the connection identity is
+ * compared separately by `appKeySeedsEqual`, because the seed now lives
+ * outside the wire config entirely.
  */
 function workerConfigsEqual(a: undefined | WorkerConfig, b: undefined | WorkerConfig): boolean {
   if (a === b) return true;
   if (!a || !b) return false;
-  if (a.indexerUrl !== b.indexerUrl) return false;
-  // A malformed seed must never throw here; and anything but a real byte
-  // array (e.g. a DataView, whose indexed access yields undefined) must be
-  // treated as a change (forcing a rebuild) rather than compared as equal.
-  const seedA = a.appKeySeed;
-  const seedB = b.appKeySeed;
-  if (!(seedA instanceof Uint8Array) || !(seedB instanceof Uint8Array)) return false;
-  if (seedA.byteLength !== seedB.byteLength) return false;
-  for (let i = 0; i < seedA.byteLength; i++) {
-    if (seedA[i] !== seedB[i]) return false;
-  }
-  return true;
+  return a.indexerUrl === b.indexerUrl;
 }

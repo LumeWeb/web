@@ -6,18 +6,24 @@
  * attached through the player context via `useMediaInstance`, and a ref
  * callback wires the real `<video>` element into it.
  *
- * Media props (`src`, `preload`, `streamType`) and the `sia`/`mimeType`
+ * Media props (`src`, `preload`, `streamType`) and the `sia`/`mimeType`/`getAppKeySeed`
  * config are synced from JSX into the media object during render instead of
  * becoming HTML attributes, exactly what the packaged components' internal
  * prop-syncing hook does. Because the media instance persists across renders,
- * `sia` and `mimeType` are synced on EVERY render — `mimeType` forwards
- * immediately on the next `SOURCE`, while `sia` (indexer URL, app metadata,
- * app key seed) reaches the worker on the next `attach`/re-attach, which is
- * where the host applies worker configuration.
+ * these are synced on EVERY render — `mimeType` forwards immediately on the
+ * next `SOURCE`, while `sia` and `getAppKeySeed` reach the worker on the next
+ * `attach`/re-attach, which is where the host applies worker configuration.
+ *
+ * The app-key seed must never become React state: pass a `getAppKeySeed`
+ * supplier function (a callback that fetches the seed from the SDK login
+ * flow on demand) instead of the seed value itself. The host invokes it once
+ * per handshake and scrubs the returned buffer; nothing in this component,
+ * in the host's fields, or in the postMessage channel stores the plaintext.
  */
 
 import { forwardRef, type ReactNode, type VideoHTMLAttributes } from 'react';
 import { useAttachMedia, useComposedRefs, useMediaInstance } from '@videojs/react';
+import { type AppKeySeedProvider } from '../app-key-handshake.ts';
 import { siaVideoDefaultProps, SiaVideoSource } from '../sia-video-source.ts';
 import type { WorkerConfig } from '../protocol.ts';
 
@@ -25,22 +31,29 @@ export interface SiaVideoProps
   extends Omit<VideoHTMLAttributes<HTMLVideoElement>, keyof typeof siaVideoDefaultProps>,
     Partial<typeof siaVideoDefaultProps> {
   children?: ReactNode;
+  /**
+   * Supplies the 32-byte Sia app-key seed for the encrypted worker handshake.
+   * Pass a supplier, never the value: defining it with `useState(seed)` would
+   * pin the plaintext into the React component tree and defeat the handshake's
+   * containment guarantees.
+   */
+  getAppKeySeed?: AppKeySeedProvider;
   /** Declared content type for the source; forwarded to the worker on every `SOURCE`. */
   mimeType?: string;
-  /** Connection material for the worker's default Sia SDK factory. */
+  /** Connection metadata for the worker's default Sia SDK factory (no seed — see `getAppKeySeed`). */
   sia?: WorkerConfig;
 }
 
 type MediaLike = Record<string, unknown>;
 
 /**
- * `<SiaVideo src={objectKey} sia={{ indexerUrl, app, appKeySeed }} />` — a
+ * `<SiaVideo src={objectKey} sia={{ indexerUrl, app }} getAppKeySeed={() => …} />` — a
  * `<video>` element backed by the Sia engine. Render inside a video.js v10
  * `Player` for the skin/error-dialog features; standalone rendering works
  * too, with bare native media events.
  */
 export const SiaVideo = forwardRef<HTMLVideoElement, SiaVideoProps>(function SiaVideo(
-  { children, sia, ...props },
+  { children, getAppKeySeed, sia, ...props },
   ref,
 ) {
   // The media instance is created lazily and kept for the component's whole
@@ -70,10 +83,13 @@ export const SiaVideo = forwardRef<HTMLVideoElement, SiaVideoProps>(function Sia
     // the same persistent media instance never inherits a stale declared MIME.
     (media as unknown as MediaLike).mimeType = sourceProps.mimeType;
     // Also unconditional: the media instance persists across renders, so an
-    // updated `sia` configuration must land on it even if the setup callback
-    // (which only runs on mount) already ran. The host applies it on the next
-    // (re)attach.
+    // updated `sia` configuration and the seed supplier must land on it even
+    // if the setup callback (which only runs on mount) already ran. The host
+    // applies them on the next (re)attach — the supplier is consumed there,
+    // not here, so the seed itself never lives in this component's render
+    // output, state, or the media instance.
     (media as unknown as MediaLike).workerConfig = sia;
+    (media as unknown as MediaLike).getAppKeySeed = getAppKeySeed;
     for (const [key, value] of Object.entries(siaVideoDefaultProps)) {
       if (sourceProps[key] === undefined && value !== undefined && owning[key] !== value) {
         owning[key] = value;

@@ -26,6 +26,22 @@ export type RequestId = number;
 
 let requestIdCounter = 0;
 
+/**
+ * The ciphertext envelope carried by the `APP_KEY` message: the 32-byte Sia
+ * app-key seed, AES-GCM-encrypted by the host under an HKDF key derived from
+ * a per-handshake ephemeral X25519 public key and the worker's public key
+ * (see `app-key-handshake.ts`). Only ciphertext and ephemeral material ever
+ * cross the wire; the plaintext seed does not.
+ */
+export interface AppKeyEnvelope {
+  /** AEAD output over the seed; authenticated together with `PROTOCOL_AAD`. */
+  readonly ciphertext: Uint8Array;
+  /** Raw 32-byte X25519 public half of the encrypting (sender) key pair. */
+  readonly ephemeralPublicKey: Uint8Array;
+  /** 96-bit AES-GCM nonce, single-use per envelope. */
+  readonly iv: Uint8Array;
+}
+
 /** A buffered media window in seconds, as a TimeRanges pair. */
 export interface BufferWindow {
   readonly end: number;
@@ -49,6 +65,11 @@ export type MainToWorkerMessage =
       readonly src: string;
       readonly type: 'SOURCE';
     }
+  | {
+      readonly envelope: AppKeyEnvelope;
+      readonly requestId: RequestId;
+      readonly type: 'APP_KEY';
+    }
   | { readonly requestId: RequestId; readonly time: number; readonly type: 'SEEK'; }
   | { readonly requestId: RequestId; readonly type: 'ATTACH'; }
   | { readonly requestId: RequestId; readonly type: 'PLAY'; }
@@ -69,15 +90,15 @@ export interface SourceInfo {
 }
 
 /**
- * Connection material handed over in `HELLO` when the default worker-local
- * SDK factory is used. The app keeps registration (Builder/AppKey) on the main
- * thread; the worker only needs the resolved seed and indexer endpoint.
+ * Connection metadata handed over in `HELLO` when the default worker-local SDK
+ * factory is used. The app key seed itself never crosses the wire here: it is
+ * delivered separately inside the encrypted `APP_KEY` envelope, so this
+ * interface structurally cannot carry key material (compile-time no
+ * `appKeySeed` field).
  */
 export interface WorkerConfig {
   /** `Builder`'s `app` parameter, identifying the app to the indexer. */
   app: AppMetadata;
-  /** 32-byte AppKey seed exported from the registered app key. */
-  appKeySeed: Uint8Array;
   indexerUrl: string;
 }
 
@@ -111,6 +132,11 @@ export type WorkerToMainMessage =
     }
   | {
       readonly features: { readonly workerMse: boolean };
+      /**
+       * Raw 32-byte X25519 public key the worker generated for the app-key
+       * handshake; the worker's private counterpart never leaves the isolate.
+       */
+      readonly publicKey: Uint8Array;
       readonly requestId: RequestId;
       readonly type: 'HELLO_OK';
       readonly version: number;
@@ -124,6 +150,8 @@ export function isMainToWorkerMessage(message: unknown): message is MainToWorker
   if (!isTypedMessage(message) || !MAIN_TO_WORKER_TYPES.has(message.type)) return false;
   const typed = message as MainToWorkerMessage;
   switch (typed.type) {
+    case 'APP_KEY':
+      return typeof typed.requestId === 'number' && isAppKeyEnvelope(typed.envelope);
     case 'ATTACH':
     case 'HELLO':
     case 'PLAY':
@@ -155,7 +183,12 @@ export function isWorkerToMainMessage(message: unknown): message is WorkerToMain
     case 'HANDLE':
       return typeof typed.requestId === 'number' && typeof typed.handle !== 'undefined';
     case 'HELLO_OK':
-      return typeof typed.version === 'number' && typeof typed.requestId === 'number';
+      return (
+        typeof typed.version === 'number' &&
+        typeof typed.requestId === 'number' &&
+        typed.publicKey instanceof Uint8Array &&
+        typed.publicKey.byteLength === WORKER_PUBLIC_KEY_LENGTH
+      );
     case 'PROGRESS':
       return typeof typed.requestId === 'number' && typeof typed.received === 'number';
     case 'SOURCE_OK':
@@ -163,6 +196,26 @@ export function isWorkerToMainMessage(message: unknown): message is WorkerToMain
     default:
       return true;
   }
+}
+
+/**
+ * Raw byte length of an X25519 public key on the wire (`HELLO_OK.publicKey`
+ * and `AppKeyEnvelope.ephemeralPublicKey`).
+ */
+export const WORKER_PUBLIC_KEY_LENGTH = 32;
+
+/** Narrows a raw value to the `APP_KEY` ciphertext envelope shape. */
+export function isAppKeyEnvelope(value: unknown): value is AppKeyEnvelope {
+  if (typeof value !== 'object' || value === null) return false;
+  const { ciphertext, ephemeralPublicKey, iv } = value as Partial<AppKeyEnvelope>;
+  return (
+    ciphertext instanceof Uint8Array &&
+    ciphertext.byteLength > 0 &&
+    iv instanceof Uint8Array &&
+    iv.byteLength === GCM_IV_LENGTH &&
+    ephemeralPublicKey instanceof Uint8Array &&
+    ephemeralPublicKey.byteLength === WORKER_PUBLIC_KEY_LENGTH
+  );
 }
 
 function isTypedMessage(message: unknown): message is { type: string; } {
@@ -174,8 +227,16 @@ function isTypedMessage(message: unknown): message is { type: string; } {
   );
 }
 
+/**
+ * 96-bit AES-GCM nonce length; the envelope guard rejects any other size.
+ * Lives here (next to the wire shape both peers validate) rather than only in
+ * the crypto module, so the guard cannot drift from the crypto constants.
+ */
+export const GCM_IV_LENGTH = 12;
+
 /** All `MainToWorkerMessage` discriminator values, shared by the guard. */
 export const MAIN_TO_WORKER_TYPES: ReadonlySet<string> = new Set([
+  'APP_KEY',
   'ATTACH',
   'DESTROY',
   'DETACH',
