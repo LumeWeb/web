@@ -105,6 +105,16 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   get error(): ErrorLike | null {
     return this.#error ?? super.error;
   }
+  /**
+   * Per-render setter form of the `getAppKeySeed` option, so wrappers that
+   * re-apply props on every render (the React media sync) can update the
+   * supplier on a persistent media instance without going through options.
+   * The host reads whatever supplier is current at each (re)attach's
+   * HELLO_OK — only the supplier function is stored, never seed bytes.
+   */
+  set getAppKeySeed(value: AppKeySeedProvider | undefined) {
+    this.#appKeySeedProvider = value;
+  }
   /** Declared content type for the current source; sent with every `SOURCE`. */
   get mimeType(): string | undefined {
     return this.#mimeType;
@@ -148,6 +158,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#workerConfig = value;
   }
   #appendQueue: Uint8Array[] = [];
+
+  // Seed supplier from the `getAppKeySeed` option or the per-render setter.
+  // Holding only the function keeps seed bytes out of host state.
+  #appKeySeedProvider: AppKeySeedProvider | undefined;
+
   #destroyed = false;
 
   #error: MediaError | null = null;
@@ -182,6 +197,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   constructor(options: SiaVideoSourceOptions = {}) {
     super();
     this.#options = options;
+    this.#appKeySeedProvider = options.getAppKeySeed;
     this.#workerConfig = options.workerConfig;
     this.#mimeType = options.mimeType;
   }
@@ -403,7 +419,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // re-published with every HELLO_OK, so a re-attach re-handshakes with
         // the key of the worker actually speaking now.
         this.#workerPublicKey = message.publicKey;
-        if (this.#options.getAppKeySeed && this.#workerPublicKey) {
+        if (this.#appKeySeedProvider && this.#workerPublicKey) {
           // #encryptAndSendSeed only postMessages the APP_KEY envelope after
           // awaiting the seed supplier and the worker-key encryption, so
           // posting ATTACH (and any queued SOURCE) synchronously here would
@@ -413,7 +429,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
           // reject: supplier/encryption failures are already reported as
           // network errors inside #encryptAndSendSeed, so the session still
           // proceeds and SOURCE fails the same way it would without a seed.
-          void this.#encryptAndSendSeed(this.#options.getAppKeySeed, this.#workerPublicKey).then(() => {
+          void this.#encryptAndSendSeed(this.#appKeySeedProvider, this.#workerPublicKey).then(() => {
             this.#post({ requestId: nextRequestId(), type: 'ATTACH' });
             this.#flushPending();
           });

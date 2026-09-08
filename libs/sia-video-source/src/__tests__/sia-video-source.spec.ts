@@ -247,6 +247,43 @@ describe('SiaVideoSource (host state machine)', () => {
     host.destroy();
   });
 
+  it.skipIf(!IN_BROWSER)('picks up a seed supplier assigned through the setter after construction', async () => {
+    const worker = new FakeWorker();
+    const keyPair = generateWorkerKeyPair();
+    const publicKey = exportWorkerPublicKey(keyPair);
+    // React syncs the supplier onto the persistent media instance on every
+    // render — i.e. after construction, through the `getAppKeySeed` setter,
+    // never through the options object.
+    const host = new SiaVideoSource({
+      createWorker: () => worker as unknown as Worker,
+      workerConfig: workerConfig(),
+    });
+    const seed = crypto.getRandomValues(new Uint8Array(32));
+    const expectedSeed = new Uint8Array(seed);
+    let supplierCalls = 0;
+    host.getAppKeySeed = () => {
+      supplierCalls++;
+      return seed;
+    };
+    host.attach(document.createElement('video'));
+    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // The setter-supplied supplier reached the HELLO_OK handler: the APP_KEY
+    // envelope still precedes ATTACH (ordering unchanged for this path)…
+    expect(worker.sent.map((m) => m.type)).toEqual(['HELLO', 'APP_KEY', 'ATTACH']);
+    // …and decrypts to exactly the supplied seed, so the worker's SDK is
+    // built from real seed bytes rather than the null seed that produces a
+    // "No Sia SDK is available" failure at load time.
+    const appKey = worker.sent[1] as unknown as { envelope: AppKeyEnvelope; };
+    expect(isAppKeyEnvelope(appKey.envelope)).toBe(true);
+    expect(Array.from(await decryptAppKeyEnvelope(keyPair, appKey.envelope))).toEqual(Array.from(expectedSeed));
+    // No network-class failure surfaced from the handshake window.
+    expect(host.error).toBeNull();
+    expect(supplierCalls).toBe(1);
+    host.destroy();
+  });
+
   it.skipIf(!IN_BROWSER)('re-handshakes a fresh envelope on every HELLO_OK without a seed field lingering on the host', async () => {
     const worker = new FakeWorker();
     const keyPair = generateWorkerKeyPair();
@@ -274,9 +311,11 @@ describe('SiaVideoSource (host state machine)', () => {
     expect(envelope.ephemeralPublicKey.byteLength).toBe(WORKER_PUBLIC_KEY_LENGTH);
 
     // Nothing retrievable from the host surface speaks of the seed: the
-    // config getter exposes only metadata.
+    // config getter exposes only metadata, and the `getAppKeySeed` setter
+    // has no getter — reading it yields nothing (the host keeps the
+    // supplier function private, never a seed value).
     expect(host.workerConfig?.indexerUrl).toBe('https://sia.storage');
-    expect('getAppKeySeed' in (host as unknown as { getAppKeySeed?: unknown; })).toBe(false);
+    expect((host as unknown as { getAppKeySeed?: unknown; }).getAppKeySeed).toBeUndefined();
     host.destroy();
   });
 
