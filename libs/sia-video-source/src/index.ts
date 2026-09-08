@@ -39,4 +39,5 @@ export {
   type WorkerToMainMessage,
 } from './protocol.ts';
 export { LruChunkCache, objectSize, RangedReader, type ShardProgress, type SiaObjectLike, type SiaSdkLike } from './ranged-reader.ts';
+export { isSiaShareUrl, parseSiaShareUrl, type SiaShareUrl } from './share-url.ts';
 export { siaVideoDefaultProps, SiaVideoSource, type SiaVideoSourceOptions } from './sia-video-source.ts';

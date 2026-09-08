@@ -62,6 +62,13 @@ export type MainToWorkerMessage =
       /** Whether full-stream delivery may start immediately; see `preload` on the native element. */
       readonly preload?: 'auto' | 'metadata' | 'none';
       readonly requestId: RequestId;
+      /**
+       * The object locator: either the hex object key of an object pinned
+       * under the configured indexer account, or a full Sia share URL
+       * (`/objects/<key>/shared#encryption_key=…`, see `share-url.ts`) that
+       * is self-describing. Both travel as this one string — a share URL is
+       * opaque wire content, so no message-shape distinction exists.
+       */
       readonly src: string;
       readonly type: 'SOURCE';
     }

@@ -36,6 +36,7 @@ import {
   type WorkerKeyPair,
 } from './app-key-handshake.ts';
 import { type ContainerKind, sniffContainer } from './container-probe.ts';
+import { isSiaShareUrl, parseSiaShareUrl } from './share-url.ts';
 import {
   type AppKeyEnvelope,
   DEFAULT_FMP4_MIME,
@@ -64,7 +65,12 @@ const PROGRESS_INTERVAL_CHUNKS = 8;
 
 export type PostMessage = (message: WorkerToMainMessage, transfer?: Transferable[]) => void;
 
-/** The Sia SDK surface the worker needs: ranged reads plus object resolution. */
+/**
+ * The Sia SDK surface the worker needs: ranged reads plus object resolution.
+ * `object` covers the pinned-object (directly known object key) path;
+ * `sharedObject` covers the share-URL path and is optional so SDKs built
+ * against WASM versions predating share support can still be injected.
+ */
 export type SiaVideoSdk = {
   /**
    * Optional release hook for SDKs that hold native resources (WASM
@@ -75,6 +81,8 @@ export type SiaVideoSdk = {
    */
   dispose?: () => Promise<void> | void;
   object(key: string): Promise<SiaObjectLike>;
+  /** Resolves a `sia://` share URL (see `share-url.ts`) into a playable object. */
+  sharedObject?(shareUrl: string): Promise<SiaObjectLike>;
 } & SiaSdkLike;
 
 export interface SiaVideoWorkerOptions {
@@ -606,7 +614,7 @@ export class SiaVideoWorkerCore {
 
     let object: SiaObjectLike;
     try {
-      object = await sdk.object(src);
+      object = await this.#resolveObject(sdk, src);
     } catch (error) {
       if (this.#loadEpoch !== epoch) return;
       failed('network', errorDescription(error));
@@ -782,6 +790,21 @@ export class SiaVideoWorkerCore {
     const stale = this.#appKeySeed;
     this.#appKeySeed = seed;
     if (stale) scrub(stale);
+  }
+
+  // Two object-identity routes share one resolve: a `src` that is a Sia share
+  // URL brings its own key and metadata along (the SDK's signed metadata fetch
+  // targets the URL's own indexer host), so no separately-passed identity is
+  // consulted; any other `src` is the object key of an object pinned under the
+  // caller's own indexer account. Validation errors surface as the caller's
+  // network failure either way (`parseSiaShareUrl` throws descriptively).
+  #resolveObject(sdk: SiaVideoSdk, src: string): Promise<SiaObjectLike> {
+    if (!isSiaShareUrl(src)) return sdk.object(src);
+    const share = parseSiaShareUrl(src);
+    if (!sdk.sharedObject) {
+      return Promise.reject(new Error('the injected Sia SDK does not support shared-object URLs'));
+    }
+    return sdk.sharedObject(share.fetchForm);
   }
 
   #startStreaming(): void {

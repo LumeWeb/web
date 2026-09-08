@@ -41,6 +41,10 @@ interface FakeSdkOptions {
   /** When set with `objectError`, only this object key is rejected. */
   objectErrorKey?: string;
   onDownload?: (options: { length?: number; offset?: number; }) => void;
+  /** Rejects `sharedObject()`, simulating a failed signed metadata fetch. */
+  sharedError?: Error;
+  /** Delays `sharedObject()` resolution, simulating an in-flight signed fetch. */
+  sharedObjectDelayMs?: number;
 }
 
 type Posted = WorkerToMainMessage;
@@ -146,6 +150,11 @@ function fakeSiaSdk(payload: Uint8Array, options: FakeSdkOptions = {}): SiaVideo
       if (!options.objectDelayMs) return Promise.resolve(object);
       return new Promise((resolve) => setTimeout(() => resolve(object), options.objectDelayMs));
     }) as unknown as SiaVideoSdk['object'],
+    sharedObject: vi.fn((_shareUrl: string): Promise<SiaObjectLike> => {
+      if (options.sharedError) return Promise.reject(options.sharedError);
+      if (!options.sharedObjectDelayMs) return Promise.resolve(object);
+      return new Promise((resolve) => setTimeout(() => resolve(object), options.sharedObjectDelayMs));
+    }),
   };
 }
 
@@ -1704,6 +1713,200 @@ describe('SiaVideoWorkerCore', () => {
         vi.unstubAllGlobals();
       }
     });
+  });
+});
+
+// ---- share URL sources -------------------------------------------------------
+
+describe('share URL sources', () => {
+  const SHARE_OBJECT_KEY = 'a1b2c3d4e5f60718293a4b5c6d7e8f90112233445566778899aabbccddeeff01';
+  const shareSrc = (): string => `https://indexer.example/objects/${SHARE_OBJECT_KEY}/shared?req=abc#encryption_key=${shareKeyFragment()}`;
+  const shareKeyFragment = (): string => base64UrlEncode(shareKeyBytes());
+  const shareKeyBytes = (): Uint8Array => Uint8Array.from({ length: 32 }, (_, i) => i + 1);
+  /** Padded base64url of the given bytes (mirrors Go base64.URLEncoding). */
+  function base64UrlEncode(bytes: Uint8Array): string {
+    let binary = '';
+    for (const byte of bytes) binary += String.fromCharCode(byte);
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_');
+  }
+
+  function sharingSdkMock(payload: Uint8Array) {
+    const slab = { length: payload.length } as unknown as Slab;
+    const sharedObject: SiaObjectLike = { id: () => 'shared-object', size: () => payload.length, slabs: () => [slab] };
+    const objectFn = vi.fn(() => Promise.resolve(sharedObject));
+    const sharedObjectFn = vi.fn(() => Promise.resolve(sharedObject));
+    return {
+      objectFn,
+      sdk: {
+        download: (_object: SiaObjectLike, downloadOptions?: { length?: number; offset?: number; }) => {
+          const start = downloadOptions?.offset ?? 0;
+          const length = Math.min(downloadOptions?.length ?? payload.length - start, payload.length - start);
+          return new ReadableStream<Uint8Array>({
+            start: (controller) => {
+              if (length > 0) controller.enqueue(payload.slice(start, start + length));
+              controller.close();
+            },
+          });
+        },
+        object: objectFn,
+        sharedObject: sharedObjectFn,
+      } as SiaVideoSdk,
+      sharedObjectFn,
+    };
+  }
+
+  it('resolves a share-URL src through sharedObject and never through object', async () => {
+    const { objectFn, sdk, sharedObjectFn } = sharingSdkMock(fmp4Payload(128));
+    const messages: Posted[] = [];
+    const core = new SiaVideoWorkerCore({
+      createSdk: () => Promise.resolve(sdk),
+      post: (m) => messages.push(m),
+      supportsWorkerMse: () => false,
+    });
+
+    await core.handleMessage({ requestId: 1, type: 'HELLO' });
+    await core.handleMessage({ preload: 'auto', requestId: 2, src: shareSrc(), type: 'SOURCE' });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // The SDK sees the sia://-normalized URL, never the https original.
+    expect(sharedObjectFn).toHaveBeenCalledWith(shareSrc().replace('https://', 'sia://'));
+    expect(objectFn).not.toHaveBeenCalled();
+    expect(messages.some((m) => m.type === 'SOURCE_OK')).toBe(true);
+    // The head is a ranged read over the shared object; its replay is the
+    // first delivered chunk and — for a payload inside the probe window — the
+    // only one before natural completion.
+    const chunks = messages.filter((m) => m.type === 'CHUNK');
+    expect(chunks.length).toBeGreaterThan(0);
+    expect(chunks[0].kind).toBe('init');
+  });
+
+  it('routes a key-based src back through object on the same connection', async () => {
+    const { objectFn, sdk, sharedObjectFn } = sharingSdkMock(fmp4Payload(128));
+    const messages: Posted[] = [];
+    const core = new SiaVideoWorkerCore({
+      createSdk: () => Promise.resolve(sdk),
+      post: (m) => messages.push(m),
+      supportsWorkerMse: () => false,
+    });
+
+    await core.handleMessage({ requestId: 1, type: 'HELLO' });
+    await core.handleMessage({ preload: 'auto', requestId: 2, src: shareSrc(), type: 'SOURCE' });
+    await core.handleMessage({ preload: 'auto', requestId: 3, src: 'object-key', type: 'SOURCE' });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(objectFn).toHaveBeenCalledWith('object-key');
+    expect(sharedObjectFn).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports a malformed share URL as a network error without consulting the SDK', async () => {
+    const { objectFn, sdk, sharedObjectFn } = sharingSdkMock(fmp4Payload(128));
+    const messages: Posted[] = [];
+    const core = new SiaVideoWorkerCore({
+      createSdk: () => Promise.resolve(sdk),
+      post: (m) => messages.push(m),
+      supportsWorkerMse: () => false,
+    });
+
+    await core.handleMessage({ requestId: 1, type: 'HELLO' });
+    // The fragment decodes to two bytes: a key that can never decrypt anything.
+    await core.handleMessage({
+      preload: 'auto',
+      requestId: 2,
+      src: `https://i.example/objects/${SHARE_OBJECT_KEY}/shared?req=abc#encryption_key=AAAA`,
+      type: 'SOURCE',
+    });
+
+    const error = messages.find((m) => m.type === 'ERROR');
+    expect(error).toMatchObject({ kind: 'network', requestId: 2, type: 'ERROR' });
+    expect((error as { context?: string }).context).toContain('32 bytes');
+    expect(sharedObjectFn).not.toHaveBeenCalled();
+    expect(objectFn).not.toHaveBeenCalled();
+    expect(messages.some((m) => m.type === 'SOURCE_OK')).toBe(false);
+  });
+
+  it('reports an SDK without sharedObject support as a network error', async () => {
+    const { sdk, sharedObjectFn } = sharingSdkMock(fmp4Payload(128));
+    // SDKs injected by apps may predate share support: the worker must fail
+    // the load cleanly rather than fall back onto the pinned-object path.
+    delete sdk.sharedObject;
+    const messages: Posted[] = [];
+    const core = new SiaVideoWorkerCore({
+      createSdk: () => Promise.resolve(sdk),
+      post: (m) => messages.push(m),
+      supportsWorkerMse: () => false,
+    });
+
+    await core.handleMessage({ requestId: 1, type: 'HELLO' });
+    await core.handleMessage({ preload: 'auto', requestId: 2, src: shareSrc(), type: 'SOURCE' });
+
+    expect(messages.some((m) => m.type === 'ERROR' && m.kind === 'network')).toBe(true);
+    expect(sharedObjectFn).not.toHaveBeenCalled();
+    expect(messages.some((m) => m.type === 'SOURCE_OK')).toBe(false);
+  });
+
+  it('keeps the APP_KEY handshake and payment connection working alongside a share-URL src', async () => {
+    const { sdk } = sharingSdkMock(fmp4Payload(64));
+    const seenSeeds: (null | Uint8Array)[] = [];
+    const messages: Posted[] = [];
+    const seed = crypto.getRandomValues(new Uint8Array(32));
+    const config: WorkerConfig = { app: appMetadataFor('share-app'), indexerUrl: 'https://indexer.example' };
+    const core = new SiaVideoWorkerCore({
+      createSdk: (_config, appKeySeed) => {
+        seenSeeds.push(appKeySeed);
+        return Promise.resolve(sdk);
+      },
+      post: (m) => messages.push(m),
+      supportsWorkerMse: () => false,
+    });
+
+    await core.handleMessage({ config, requestId: 1, type: 'HELLO' });
+    const publicKey = (messages.at(-1) as { publicKey: Uint8Array; }).publicKey;
+    await core.handleMessage({ envelope: await encryptToWorker(publicKey, seed), requestId: 2, type: 'APP_KEY' });
+    await core.handleMessage({ preload: 'auto', requestId: 3, src: shareSrc(), type: 'SOURCE' });
+
+    // The decrypted seed reached the SDK factory (the payment/account path)
+    // even though the share URL supplied the object's own decryption key.
+    expect(seenSeeds).toHaveLength(1);
+    expect(Array.from(seenSeeds[0]!)).toEqual(Array.from(seed));
+    expect(messages.some((m) => m.type === 'SOURCE_OK')).toBe(true);
+    // And no reply ever echoes the plaintext seed back out of the worker.
+    const seedBytes = Array.from(seed);
+    for (const message of messages) {
+      for (const bytes of byteArraysOf(message)) {
+        expect(Array.from(bytes)).not.toEqual(seedBytes);
+      }
+    }
+  });
+
+  it('memoizes the SDK across share-URL and key-based sources and rebuilds on config change', async () => {
+    const { objectFn, sdk, sharedObjectFn } = sharingSdkMock(fmp4Payload(128));
+    const createdFor: (undefined | WorkerConfig)[] = [];
+    const messages: Posted[] = [];
+    const configA: WorkerConfig = { app: appMetadataFor('a'), indexerUrl: 'https://a.storage' };
+    const configB: WorkerConfig = { app: appMetadataFor('b'), indexerUrl: 'https://b.storage' };
+    const core = new SiaVideoWorkerCore({
+      createSdk: (config) => {
+        createdFor.push(config);
+        return Promise.resolve(sdk);
+      },
+      post: (m) => messages.push(m),
+      supportsWorkerMse: () => false,
+    });
+
+    await core.handleMessage({ config: configA, requestId: 1, type: 'HELLO' });
+    await core.handleMessage({ preload: 'auto', requestId: 2, src: shareSrc(), type: 'SOURCE' });
+    await core.handleMessage({ preload: 'auto', requestId: 3, src: 'object-key', type: 'SOURCE' });
+    await core.handleMessage({ config: configB, requestId: 4, type: 'HELLO' });
+    await core.handleMessage({ preload: 'auto', requestId: 5, src: shareSrc(), type: 'SOURCE' });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // Same connection (regardless of which src form each load used) → one SDK;
+    // a genuine config change still invalidates it. All three loads succeed,
+    // so each of the three SOURCE requests yields exactly one SOURCE_OK.
+    expect(createdFor).toEqual([configA, configB]);
+    expect(messages.filter((m) => m.type === 'SOURCE_OK')).toHaveLength(3);
+    expect(objectFn).toHaveBeenCalledWith('object-key');
+    expect(sharedObjectFn).toHaveBeenCalledTimes(2);
   });
 });
 

@@ -79,6 +79,11 @@ export interface SiaVideoSourceOptions {
    * from `getAppKeySeed`. Must be set before the first `attach`; changing it
    * afterwards requires `detach` + `attach` (or `destroy` + a new instance)
    * to take effect.
+   *
+   * A share-URL `src` still needs it: a share link grants decryption, and the
+   * account/key connection funds the actual host downloads. The signed
+   * metadata fetch itself targets the indexer host embedded in the share URL,
+   * so no separate object identity is required for shared sources.
    */
   workerConfig?: WorkerConfig;
 }
@@ -128,7 +133,13 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   set preload(value: MediaPreloadType) {
     this.#preload = value;
   }
-  /** Object key of the pinned Sia object. Assigning it (re)starts playback. */
+  /**
+   * Object locator — either the hex object key of a Sia object pinned under
+   * the configured indexer account, or a full Sia share URL
+   * (`/objects/<key>/shared#encryption_key=…`, optionally `sia://`-prefixed)
+   * that identifies the object and carries its decryption key. Assigning it
+   * (re)starts playback.
+   */
   get src(): string {
     return this.#src;
   }

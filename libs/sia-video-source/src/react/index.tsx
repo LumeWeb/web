@@ -51,6 +51,11 @@ type MediaLike = Record<string, unknown>;
  * `<video>` element backed by the Sia engine. Render inside a video.js v10
  * `Player` for the skin/error-dialog features; standalone rendering works
  * too, with bare native media events.
+ *
+ * `src` accepts either a hex object key or a full Sia share URL — the latter
+ * identifies the object and carries its decryption key, so no separately
+ * passed object identity is needed; `sia` and `getAppKeySeed` are still
+ * required for the account connection that funds the downloads.
  */
 export const SiaVideo = forwardRef<HTMLVideoElement, SiaVideoProps>(function SiaVideo(
   { children, getAppKeySeed, sia, ...props },
