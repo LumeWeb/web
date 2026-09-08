@@ -29,7 +29,9 @@ export interface SiaShareUrl {
   /**
    * `sia://`-normalized form of the URL. The Sia WASM SDK's `sharedObject`
    * requires the `sia` scheme and converts back to https itself, so callers
-   * hand `fetchForm` to the SDK instead of the original string.
+   * hand `fetchForm` to the SDK instead of the original string. The caller's
+   * bytes are carried verbatim (only the scheme prefix is swapped) because
+   * the URL is pre-signed over them.
    */
   readonly fetchForm: string;
   /**
@@ -52,6 +54,13 @@ const FRAGMENT_PARAM = 'encryption_key';
 const ENCRYPTION_KEY_LENGTH = 32;
 const SIA_SCHEME = 'sia://';
 const SIA_FETCH_PREFIX = 'https://';
+/**
+ * Leading http(s) scheme of a share URL. Matched as a one-shot alternative
+ * instead of relying on the fixed `https://` constant alone: the two schemes
+ * differ in length (8 vs 7 chars), so slicing by a single constant would
+ * mangle the one it doesn't cover.
+ */
+const HTTP_SCHEME = /^https?:\/\//i;
 
 /**
  * True when `src` is shaped like a Sia share URL: an http(s) URL (or `sia://`
@@ -94,10 +103,22 @@ export function parseSiaShareUrl(src: string): SiaShareUrl {
 
   return {
     encryptionKey,
-    fetchForm: `${SIA_SCHEME}${url.host}${url.pathname}${url.search}${url.hash}`,
+    fetchForm: asFetchForm(src),
     indexerUrl: url.origin,
     objectKey,
   };
+}
+
+/**
+ * Byte-preserving `sia://` form of a share URL. The URL is pre-signed over
+ * its exact bytes, so everything — most importantly the signed query — must
+ * travel verbatim: rebuilding it from parsed URL components re-encodes
+ * values (percent-encoding casing) and drops explicit default ports, which
+ * would break the signature at load time. Only the scheme prefix is swapped.
+ */
+function asFetchForm(src: string): string {
+  if (src.startsWith(SIA_SCHEME)) return src;
+  return `${SIA_SCHEME}${src.replace(HTTP_SCHEME, '')}`;
 }
 
 /**

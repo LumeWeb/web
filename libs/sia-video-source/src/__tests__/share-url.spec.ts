@@ -70,6 +70,37 @@ describe('parseSiaShareUrl', () => {
     expect(parsed.indexerUrl).toBe('https://indexer.example');
   });
 
+  it('carries the caller bytes verbatim into the fetch form', () => {
+    // The URL is pre-signed over its exact bytes, so fetchForm must equal the
+    // original string with only the scheme swapped. The WHATWG URL parser
+    // would alter this URL if it were rebuilt from parsed components: it
+    // drops the explicit default port (:443) and uppercases percent-encoding
+    // in the query (%2b -> %2B), either of which breaks the signature.
+    const query = 'ts=2024-01-01T00%2b00%2b00Z&sig=a%2bb';
+    const url = `https://indexer.example:443/objects/${HEX_KEY}/shared?${query}${keyFragment(new Uint8Array(32).fill(9))}`;
+    const parsed = parseSiaShareUrl(url);
+
+    expect(parsed.fetchForm).toBe(`sia://indexer.example:443/objects/${HEX_KEY}/shared?${query}${keyFragment(new Uint8Array(32).fill(9))}`);
+    // Not a component rebuild: the raw and parsed-component forms genuinely
+    // differ for this URL, so equality with the raw form is real coverage.
+    const urlObj = new URL(url);
+    expect(parsed.fetchForm).not.toBe(`${urlObj.host}${urlObj.pathname}${urlObj.search}${urlObj.hash}`);
+  });
+
+  it('swaps the http:// scheme without shifting the remaining bytes', () => {
+    // http:// is one character shorter than https://, so the scheme swap must
+    // slice off the actual prefix, not a fixed-length one.
+    const query = 'ts=2024-01-01T00%2b00%2b00Z&sig=a%2bb';
+    const body = `indexer.example/objects/${HEX_KEY}/shared?${query}${keyFragment(new Uint8Array(32).fill(1))}`;
+    const parsed = parseSiaShareUrl(`http://${body}`);
+    expect(parsed.fetchForm).toBe(`sia://${body}`);
+  });
+
+  it('passes a sia:// share URL through byte-for-byte', () => {
+    const url = siaShareUrl(HEX_KEY, new Uint8Array(32).fill(7));
+    expect(parseSiaShareUrl(url).fetchForm).toBe(url);
+  });
+
   it('treats the sia:// form and its https equivalent as the same share', () => {
     // Both shapes must be built from the SAME key bytes, otherwise the two
     // URLs are genuinely different shares, not scheme variants of one.
