@@ -403,7 +403,26 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // re-published with every HELLO_OK, so a re-attach re-handshakes with
         // the key of the worker actually speaking now.
         this.#workerPublicKey = message.publicKey;
-        this.#sendAppKeyEnvelope();
+        if (this.#options.getAppKeySeed && this.#workerPublicKey) {
+          // #encryptAndSendSeed only postMessages the APP_KEY envelope after
+          // awaiting the seed supplier and the worker-key encryption, so
+          // posting ATTACH (and any queued SOURCE) synchronously here would
+          // reach the FIFO worker before the envelope — the first load would
+          // then fail #ensureSdk with "No Sia SDK is available". Chain the
+          // ATTACH + flush on the envelope post instead. That promise cannot
+          // reject: supplier/encryption failures are already reported as
+          // network errors inside #encryptAndSendSeed, so the session still
+          // proceeds and SOURCE fails the same way it would without a seed.
+          void this.#encryptAndSendSeed(this.#options.getAppKeySeed, this.#workerPublicKey).then(() => {
+            this.#post({ requestId: nextRequestId(), type: 'ATTACH' });
+            this.#flushPending();
+          });
+          return;
+        }
+        // Injected-SDK path: no APP_KEY envelope is ever exchanged, so
+        // ATTACH + the pending flush go straight out — there is nothing to
+        // order them behind, and they must not wait on an async chain that
+        // does not exist for this configuration.
         this.#post({ requestId: nextRequestId(), type: 'ATTACH' });
         this.#flushPending();
         return;
@@ -482,16 +501,6 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       return;
     }
     this.#post(message);
-  }
-
-  // Kicks off the encrypted app-key handoff after every HELLO_OK. No-op when
-  // the app injected its own SDK factory (no seed supplier) or the worker has
-  // not yet published a handshake key.
-  #sendAppKeyEnvelope(): void {
-    const getAppKeySeed = this.#options.getAppKeySeed;
-    const workerPublicKey = this.#workerPublicKey;
-    if (!getAppKeySeed || !workerPublicKey) return;
-    void this.#encryptAndSendSeed(getAppKeySeed, workerPublicKey);
   }
 
   #sendSource(): void {

@@ -280,6 +280,61 @@ describe('SiaVideoSource (host state machine)', () => {
     host.destroy();
   });
 
+  it.skipIf(!IN_BROWSER)('orders APP_KEY before ATTACH and anything queued during the handshake window', async () => {
+    const worker = new FakeWorker();
+    const keyPair = generateWorkerKeyPair();
+    const publicKey = exportWorkerPublicKey(keyPair);
+    let errorEvents = 0;
+    const host = new SiaVideoSource({
+      createWorker: () => worker as unknown as Worker,
+      getAppKeySeed: () => crypto.getRandomValues(new Uint8Array(32)),
+      workerConfig: workerConfig(),
+    });
+    host.addEventListener('error', () => errorEvents++);
+    // The source predates the engine, so it replays on ATTACH_OK rather than
+    // going straight out — that replay must land after the seed envelope.
+    host.src = 'fifo-ordered-object';
+    const target = document.createElement('video');
+    host.attach(target);
+    // Playback intent arriving while HELLO is in flight goes through the
+    // pending gate (SEEK then PLAY); the host must keep holding it until the
+    // APP_KEY envelope is actually on the wire, not merely until HELLO_OK is
+    // handled.
+    target.currentTime = 1;
+    target.dispatchEvent(new Event('seeking'));
+    target.dispatchEvent(new Event('play'));
+    expect(worker.sent.map((m) => m.type)).toEqual(['HELLO']);
+
+    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    // Let the async seed→envelope chain (and whatever is chained behind it)
+    // settle; the old code posted ATTACH + flush synchronously in the
+    // HELLO_OK handler, so this wait is what exposes the ordering.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // The worker consumes the captured postMessage sequence FIFO: APP_KEY
+    // must precede ATTACH and everything the flush released, or the first
+    // load hits the worker-side seed gate and fails with a spurious
+    // "No Sia SDK is available" network error at playback start.
+    const sentTypes = worker.sent.map((m) => m.type);
+    expect(sentTypes).toEqual(['HELLO', 'APP_KEY', 'ATTACH', 'SEEK', 'PLAY']);
+
+    // Playback still proceeds: the ATTACH round trip replays the stored
+    // source and the load acknowledges without any spurious error event.
+    worker.reply({ mode: 'main', requestId: 2, type: 'ATTACH_OK' });
+    const source = worker.sent.find((m) => m.type === 'SOURCE') as
+      | undefined
+      | { preload: string; requestId: number; src: string; type: 'SOURCE'; };
+    expect(source?.src).toBe('fifo-ordered-object');
+    worker.reply({
+      info: { container: 'fmp4', durationSeconds: null, mime: 'video/mp4', mode: 'main' },
+      requestId: source?.requestId ?? 0,
+      type: 'SOURCE_OK',
+    });
+    expect(host.error).toBeNull();
+    expect(errorEvents).toBe(0);
+    host.destroy();
+  });
+
   it.skipIf(!IN_BROWSER)('sends no APP_KEY message when no seed supplier is configured', async () => {
     const worker = new FakeWorker();
     const keyPair = generateWorkerKeyPair();
