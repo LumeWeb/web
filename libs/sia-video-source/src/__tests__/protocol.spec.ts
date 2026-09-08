@@ -8,8 +8,8 @@ import {
 } from '../protocol.ts';
 
 describe('protocol', () => {
-  it('bumps but keeps a single version constant', () => {
-    expect(PROTOCOL_VERSION).toBeGreaterThanOrEqual(1);
+  it('keeps a single version constant at 0 for the unreleased protocol', () => {
+    expect(PROTOCOL_VERSION).toBe(0);
   });
 
   it('allocates monotonically increasing request ids', () => {

@@ -12,8 +12,8 @@
 
 import type { AppMetadata } from '@siafoundation/sia-storage';
 
-/** Monotonic protocol version bumped on breaking message-shape changes. */
-export const PROTOCOL_VERSION = 2;
+/** Wire protocol version; 0 is the initial, unreleased protocol. */
+export const PROTOCOL_VERSION = 0;
 
 /**
  * Codec set produced by the mux.js TS→fMP4 pipeline (H.264 + AAC). Shared by
