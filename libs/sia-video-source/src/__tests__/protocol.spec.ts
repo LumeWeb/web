@@ -59,6 +59,7 @@ describe('protocol', () => {
       { bytes: new Uint8Array(8), kind: 'media', requestId: 1, type: 'CHUNK' },
       { buffered: [{ end: 5, start: 0 }], received: 1024, requestId: 1, type: 'PROGRESS' },
       { kind: 'network', requestId: 1, type: 'ERROR' },
+      { requestId: 1, type: 'ENDED' },
     ];
 
     for (const sample of samples) {
@@ -117,6 +118,17 @@ describe('protocol', () => {
     expect(clone).toEqual(message);
     if (clone.type !== 'APP_KEY') throw new Error('expected APP_KEY');
     expect(clone.envelope.ciphertext).toBeInstanceOf(Uint8Array);
+  });
+
+
+  it('accepts an optional host worker-MSE preference on the HELLO config', () => {
+    const base = { app: { appId: 'x', callbackUrl: '', description: 'test', logoUrl: '', name: 'test', serviceUrl: 'https://app.example' }, indexerUrl: 'https://sia.storage' };
+    // A host may prefer the main-thread fallback; the field rides the same config.
+    expect(isMainToWorkerMessage({ config: { ...base, workerMse: 'main' }, requestId: 4, type: 'HELLO' })).toBe(true);
+    // 'auto' lets the worker feature-detect its own capability.
+    expect(isMainToWorkerMessage({ config: { ...base, workerMse: 'auto' }, requestId: 4, type: 'HELLO' })).toBe(true);
+    // A config without the field stays accepted (default auto).
+    expect(isMainToWorkerMessage({ config: base, requestId: 4, type: 'HELLO' })).toBe(true);
   });
 
   it('carries no plaintext seed field on the wire anywhere', () => {
