@@ -400,3 +400,62 @@ describe('createDefaultWorkerComposition lazy SDK transport (node)', () => {
     expect(disposeB).not.toHaveBeenCalled();
   });
 });
+
+describe('createDefaultWorkerComposition byte source windowing (node)', () => {
+  /** SDK whose downloads are recorded as (offset, length) pairs. */
+  function recordingSdk(payload: Uint8Array, requests: { length: number; offset: number; }[]): SiaByteSourceSdk {
+    const base = fakeSiaSdk(payload).sdk;
+    return {
+      ...base,
+      download: (object, dl) => {
+        requests.push({ length: dl?.length ?? payload.byteLength, offset: dl?.offset ?? 0 });
+        return base.download(object, dl);
+      },
+    };
+  }
+
+  async function loadWithWindows(root: ReturnType<typeof createDefaultWorkerComposition>, requestId = 3): Promise<void> {
+    await root.handleMessage({ config: { ...WORKER_CONFIG, workerMse: 'auto' }, requestId: 1, type: 'HELLO' });
+    await root.handleMessage({ requestId: 2, type: 'ATTACH' });
+    await root.handleMessage({ preload: 'auto', requestId, src: 'pin-key', type: 'SOURCE' });
+    await flush();
+  }
+
+  it.skipIf(!IN_NODE)('threads windowBytes into the byte source so every SDK download stays within the window', async () => {
+    const payload = boundedIndexedFmp4Payload();
+    const requests: { length: number; offset: number; }[] = [];
+    const messages: WorkerToMainMessage[] = [];
+    const root = createDefaultWorkerComposition({
+      capabilities: permissiveCapabilities(),
+      createSdk: () => Promise.resolve(recordingSdk(payload, requests)),
+      post: (message) => messages.push(message),
+      supportsWorkerMse: () => false,
+      windowBytes: 512,
+    });
+    await loadWithWindows(root);
+
+    // The head probe reads 4096 bytes in one request; a wired windowBytes tiles
+    // it into 512-byte windows, so no download may exceed the knob.
+    expect(requests.length).toBeGreaterThan(1);
+    for (const request of requests) {
+      expect(request.length).toBeLessThanOrEqual(512);
+    }
+  });
+
+  it.skipIf(!IN_NODE)('leaves the byte source unwindowed when windowBytes is unset (default path unchanged)', async () => {
+    const payload = boundedIndexedFmp4Payload();
+    const requests: { length: number; offset: number; }[] = [];
+    const messages: WorkerToMainMessage[] = [];
+    const root = createDefaultWorkerComposition({
+      capabilities: permissiveCapabilities(),
+      createSdk: () => Promise.resolve(recordingSdk(payload, requests)),
+      post: (message) => messages.push(message),
+      supportsWorkerMse: () => false,
+    });
+    await loadWithWindows(root);
+
+    // No knob: the 4096-byte head probe is fetched as one whole download,
+    // preserving the original single-download behavior.
+    expect(requests.some((r) => r.length === 4096)).toBe(true);
+  });
+});

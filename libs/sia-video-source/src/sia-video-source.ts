@@ -221,9 +221,12 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
   #pending: MainToWorkerMessage[] = [];
 
-  // Play intent the element expressed (native `play` event). Sticky across
-  // attaches: the worker resets its own playback bookkeeping on every
-  // ATTACH, so the host re-states this intent for each replayed source.
+  // Current user playback intent, tracked from native events: a `play` sets
+  // it, a `pause` clears it. Sticky across attaches only while unbroken — the
+  // worker resets its own playback bookkeeping on every ATTACH, so the host
+  // re-states a surviving intent for each replayed source — but a deliberate
+  // pause supersedes an earlier play, so a re-attach never resumes what the
+  // user stopped.
   #playRequested = false;
 
   #preload: MediaPreloadType = siaVideoDefaultProps.preload;
@@ -271,6 +274,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     target.addEventListener('seeking', this.#onSeeking);
     target.addEventListener('timeupdate', this.#onTimeUpdate);
     target.addEventListener('play', this.#onPlay);
+    target.addEventListener('pause', this.#onPause);
 
     if (this.#worker) {
       this.#post({ config: this.#helloConfig(), requestId: nextRequestId(), type: 'HELLO' });
@@ -320,6 +324,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.target?.removeEventListener('seeking', this.#onSeeking);
     this.target?.removeEventListener('timeupdate', this.#onTimeUpdate);
     this.target?.removeEventListener('play', this.#onPlay);
+    this.target?.removeEventListener('pause', this.#onPause);
     this.#send({ type: 'DETACH' });
     super.detach();
   }
@@ -465,7 +470,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // the probe but never streams, stalling the element at byte 0.
         if (this.#src) {
           const target = this.target as HTMLVideoElement | null;
-          const shouldPlay = this.#playRequested || (target !== null && !target.paused);
+          // Only an unpaused element, or an intent no pause superseded, may
+          // resume: a user who paused before the re-attach stays paused.
+          const shouldPlay = target !== null && (!target.paused || this.#playRequested);
           this.#resetLoadState();
           this.#sendSource();
           if (shouldPlay) {
@@ -565,6 +572,15 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       default:
         return;
     }
+  };
+
+  #onPause = (event: Event) => {
+    const target = this.target;
+    if (!target || event.target !== target) return;
+    // A deliberate pause supersedes earlier play intent: once the user stops,
+    // a re-attach must not resume the stopped playback. The next native `play`
+    // re-asserts the intent, so clearing here loses nothing live.
+    this.#playRequested = false;
   };
 
   #onPlay = (event: Event) => {

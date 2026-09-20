@@ -479,6 +479,71 @@ describe('SiaVideoSource (host state machine)', () => {
     host.destroy();
   });
 
+  it.skipIf(!IN_BROWSER)('does not resume a playback the user deliberately paused before the re-attach', () => {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const target = document.createElement('video');
+    host.src = 'paused-object';
+    host.attach(target);
+    target.dispatchEvent(new Event('play'));
+    // The user stops playback before the re-attach completes. The element is
+    // genuinely paused (synthetic events never change native paused state), so
+    // a re-stated PLAY after ATTACH_OK would be resuming what the user stopped.
+    target.dispatchEvent(new Event('pause'));
+
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    expect(worker.sent.map((m) => m.type)).toEqual(['HELLO', 'ATTACH', 'PLAY']);
+
+    worker.sent.length = 0;
+    worker.reply({ mode: 'main', requestId: 2, type: 'ATTACH_OK' });
+
+    expect(target.paused).toBe(true);
+    // The fresh SOURCE replays the current source, but the user's pause won:
+    // the rebuilt pipeline must not start streaming on its own.
+    expect(worker.sent.map((m) => m.type)).toEqual(['SOURCE']);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('keeps play intent sticky across a re-attach when no pause superseded it', () => {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const target = document.createElement('video');
+    host.src = 'sticky-object';
+    host.attach(target);
+    target.dispatchEvent(new Event('play'));
+
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    worker.sent.length = 0;
+    worker.reply({ mode: 'main', requestId: 2, type: 'ATTACH_OK' });
+
+    // The harness element reports paused (synthetic play is not a real play),
+    // so only the sticky intent can drive the re-stated PLAY — clearing it on
+    // every pause must not erase an intent no pause superseded.
+    const sentTypes = worker.sent.map((m) => m.type);
+    expect(sentTypes.filter((t) => t === 'SOURCE' || t === 'PLAY')).toEqual(['SOURCE', 'PLAY']);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('re-states play intent after a pause→play sequence leads into the re-attach', () => {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const target = document.createElement('video');
+    host.src = 'replay-object';
+    host.attach(target);
+    // The pause predates the play: intent is live again the moment the user
+    // plays after stopping, so the re-stated source must still stream.
+    target.dispatchEvent(new Event('pause'));
+    target.dispatchEvent(new Event('play'));
+
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    worker.sent.length = 0;
+    worker.reply({ mode: 'main', requestId: 2, type: 'ATTACH_OK' });
+
+    const sentTypes = worker.sent.map((m) => m.type);
+    expect(sentTypes.filter((t) => t === 'SOURCE' || t === 'PLAY')).toEqual(['SOURCE', 'PLAY']);
+    host.destroy();
+  });
+
   it.skipIf(!IN_BROWSER)('sends no APP_KEY message when no seed supplier is configured', async () => {
     const worker = new FakeWorker();
     const keyPair = generateWorkerKeyPair();
