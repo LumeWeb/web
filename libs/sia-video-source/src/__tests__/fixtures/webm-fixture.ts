@@ -105,9 +105,9 @@ export const WEBM_ID = {
  */
 export function buildWebm(
   count: number,
-  options: { nonSyncLast?: boolean; padLastClusterBytes?: number; unknownSegmentSize?: boolean } = {},
+  options: { nonSyncLast?: boolean; padEveryClusterBytes?: number; padLastClusterBytes?: number; unknownSegmentSize?: boolean } = {},
 ): Uint8Array {
-  const { nonSyncLast = false, padLastClusterBytes = 0, unknownSegmentSize = false } = options;
+  const { nonSyncLast = false, padEveryClusterBytes = 0, padLastClusterBytes = 0, unknownSegmentSize = false } = options;
   const ebmlHeader = ebmlElement(WEBM_ID.ebml, [
     ...ebmlElement(WEBM_ID.ebmlVersion, uintBytes(1)),
     ...ebmlElement(WEBM_ID.ebmlReadVersion, uintBytes(1)),
@@ -142,8 +142,10 @@ export function buildWebm(
   for (let i = 0; i < count; i += 1) {
     const nonSync = nonSyncLast && i === count - 1;
     // A padded last Cluster makes the object overrun a bounded probe head so
-    // tests can prove index building never buffers the whole object.
-    const pad = i === count - 1 ? padLastClusterBytes : 0;
+    // tests can prove index building never buffers the whole object; padding
+    // every Cluster keeps consecutive headers several windows apart while
+    // staying dense enough that several still share one scan window.
+    const pad = (i === count - 1 ? padLastClusterBytes : 0) + padEveryClusterBytes;
     const bytes = clusterBytes(i * 1_000, nonSync, i + 1, pad);
     clusters.push({ bytes, relOffset: cursor });
     cursor += bytes.length;

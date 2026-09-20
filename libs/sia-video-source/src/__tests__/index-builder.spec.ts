@@ -10,6 +10,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { CuesIndex } from '../container/webm/cues-index.ts';
+import { SCAN_WINDOW_BYTES } from '../container/webm/webm-probe.ts';
 import { SidxIndex } from '../container/index/sidx-index.ts';
 import {
   buildFirstIndex,
@@ -227,6 +228,36 @@ describe('CuesIndexBuilder', () => {
     expect(index).not.toBeNull();
     expect(walkRanges(index!)).toHaveLength(2);
     expect(Math.max(...source.reads.map((read) => read.length))).toBeLessThanOrEqual(INDEX_HEAD_LENGTH);
+  });
+
+  it('coalesces cluster reads into wide scan windows instead of one per element', async () => {
+    // 48 clusters with ~16 KiB of padding each make a ~789 KiB object that
+    // overruns the head and spans ~13 scan windows while keeping consecutive
+    // cluster headers inside one fetched window. Each read on a ranged source
+    // is a fresh network round-trip, so the scan must read once per window
+    // advance (bounded by object bytes / window size), never once per cluster.
+    const count = 48;
+    const bytes = buildWebm(count, { padEveryClusterBytes: 16 * 1024 });
+    expect(bytes.byteLength).toBeGreaterThan(INDEX_HEAD_LENGTH);
+    const source = new RecordingByteSource(bytes);
+    const index = await new CuesIndexBuilder().build(source, webm);
+    expect(index).toBeInstanceOf(CuesIndex);
+    expect(walkRanges(index!)).toHaveLength(count);
+
+    // Deterministic fixture geometry: the scan starts at the Segment body start
+    // and one bounded window per `SCAN_WINDOW_BYTES` of body covers the object,
+    // so the total read count is exactly the bounded head plus that many
+    // windows — a hard upper bound that scales with bytes, not cluster count.
+    const segment = scanEbmlTop(bytes).find((box) => box.id === 0x18538067);
+    expect(segment).toBeDefined();
+    const segmentDataStart = segment!.start + headerLengthAt(bytes, segment!.start);
+    const scanSpan = bytes.byteLength - segmentDataStart;
+    const expectedReads = 1 + Math.ceil(scanSpan / SCAN_WINDOW_BYTES);
+    expect(source.reads.length).toBe(expectedReads);
+    // Every ranged read stays within the bounded caps (head, window, cues).
+    const maxRead = Math.max(...source.reads.map((read) => read.length));
+    expect(maxRead).toBeLessThanOrEqual(INDEX_HEAD_LENGTH);
+    expect(maxRead).toBeLessThan(bytes.byteLength);
   });
 
   it('returns null for a profile it does not support', async () => {

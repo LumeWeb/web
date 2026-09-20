@@ -203,8 +203,8 @@ export function simpleBlockKeyframe(
   return (bytes[flagsOffset] & 0x80) !== 0;
 }
 
-/** Max bytes fetched in one windowed scan read over a Segment body. */
-const SCAN_WINDOW_BYTES = 64 * 1024;
+/** Max bytes fetched in one windowed scan read over a Segment body (documented cap on per-read memory). */
+export const SCAN_WINDOW_BYTES = 64 * 1024;
 
 /** Max bytes fetched to parse a trailing Cues element (CuePoints are small). */
 const CUES_READ_CAP = 256 * 1024;
@@ -285,6 +285,12 @@ async function readBoundedRange(source: ByteSource, offset: number, length: numb
  * bounded windows. Cluster body bytes between elements are skipped (never
  * buffered), so peak memory is the largest single window rather than the
  * object size, while every Cluster's exact extents still get collected.
+ *
+ * The walk advances inside the window it already holds: consecutive element
+ * headers that fall within the fetched bytes parse from the buffer, and a
+ * fresh bounded read happens only when the cursor passes the window. A webm
+ * whose clusters sit close together therefore costs a few wide reads instead
+ * of one RangedReader/SDK round-trip per cluster.
  */
 async function scanSegmentStreaming(
   source: ByteSource,
@@ -296,21 +302,46 @@ async function scanSegmentStreaming(
   const clusters: WebmClusterInfo[] = [];
   const cuedClusterOffsets = new Set<number>();
   let offset = start;
+  let window: null | Uint8Array = null;
+  let windowStart = start;
   while (offset + 1 < source.size) {
-    const window = await readBoundedRange(source, offset, Math.min(SCAN_WINDOW_BYTES, source.size - offset));
-    if (window === null) break;
-    const idVint = readVint(window, 0, 'id');
-    const sizeVint = idVint === null ? null : readVint(window, idVint.length, 'size');
-    if (idVint === null || sizeVint === null) break;
+    // The current buffer no longer reaches `offset` (a cluster body was skipped
+    // past the window's end): fetch the next bounded window there. Consecutive
+    // elements already covered by fetched bytes parse from the buffer without
+    // another round-trip.
+    if (window === null || offset < windowStart || offset >= windowStart + window.byteLength) {
+      const fetched = await readBoundedRange(source, offset, Math.min(SCAN_WINDOW_BYTES, source.size - offset));
+      if (fetched === null) break;
+      window = fetched;
+      windowStart = offset;
+    }
+    const cursor = offset - windowStart;
+    let idVint = readVint(window, cursor, 'id');
+    let sizeVint = idVint === null ? null : readVint(window, cursor + idVint.length, 'size');
+    if (idVint === null || sizeVint === null) {
+      // The element header straddles the buffer's end (its id/size vint starts
+      // inside the window but runs past it): refetch a fresh window at the
+      // element so the header is contiguous. A fresh window at an element
+      // start that still cannot be read as a vint is a truncated/malformed
+      // tail, and the walk stops like the full-buffer walker does.
+      if (windowStart === offset) break;
+      const fetched = await readBoundedRange(source, offset, Math.min(SCAN_WINDOW_BYTES, source.size - offset));
+      if (fetched === null) break;
+      window = fetched;
+      windowStart = offset;
+      idVint = readVint(window, 0, 'id');
+      sizeVint = idVint === null ? null : readVint(window, idVint.length, 'size');
+      if (idVint === null || sizeVint === null) break;
+    }
     const headerLength = idVint.length + sizeVint.length;
     const bodyLength = sizeVint.unknown ? source.size - offset - headerLength : sizeVint.value;
     const dataEnd = offset + headerLength + bodyLength;
 
     if (idVint.value === EBML_ELEMENT_ID.cluster) {
       const windowed: ClusterExtents = {
-        dataOffset: headerLength,
-        end: sizeVint.unknown ? window.length : Math.min(headerLength + bodyLength, window.length),
-        offset: 0,
+        dataOffset: cursor + headerLength,
+        end: sizeVint.unknown ? window.byteLength : Math.min(cursor + headerLength + bodyLength, window.byteLength),
+        offset: cursor,
       };
       const timecodeEl = findChild(window, clusterElement(windowed), EBML_ELEMENT_ID.clusterTimecode, ebmlWalkMode.sniff);
       const timecodeTicks = timecodeEl ? readUint(window, timecodeEl.dataOffset, timecodeEl.dataEnd - timecodeEl.dataOffset) : null;
@@ -323,18 +354,27 @@ async function scanSegmentStreaming(
         timecodeTicks,
       });
     } else if (idVint.value === EBML_ELEMENT_ID.cues) {
-      const cuesBytes = await readBoundedRange(source, offset, Math.min(headerLength + bodyLength, CUES_READ_CAP));
-      if (cuesBytes !== null) {
-        const cuesElement = {
-          dataEnd: Math.min(dataEnd - offset, cuesBytes.byteLength),
-          dataOffset: headerLength,
-          headerLength,
-          id: EBML_ELEMENT_ID.cues,
-          offset: 0,
-          sizeUnknown: sizeVint.unknown,
-        };
-        collectCueOffsets(cuesBytes, cuesElement, segmentDataStart, ebmlWalkMode.sniff, cuedClusterOffsets);
+      // Reuse the buffered window when it already holds the whole Cues extent
+      // (bounded by the cap); only a Cues that runs past the window gets its
+      // own read.
+      const bodyBytes = Math.min(headerLength + bodyLength, CUES_READ_CAP);
+      let cuesBytes = window;
+      let cuesFrom = cursor;
+      if (cursor + bodyBytes > window.byteLength) {
+        const fetched = await readBoundedRange(source, offset, bodyBytes);
+        if (fetched === null) break;
+        cuesBytes = fetched;
+        cuesFrom = 0;
       }
+      const cuesElement = {
+        dataEnd: Math.min(dataEnd - offset, cuesBytes.byteLength),
+        dataOffset: cuesFrom + headerLength,
+        headerLength,
+        id: EBML_ELEMENT_ID.cues,
+        offset: cuesFrom,
+        sizeUnknown: sizeVint.unknown,
+      };
+      collectCueOffsets(cuesBytes, cuesElement, segmentDataStart, ebmlWalkMode.sniff, cuedClusterOffsets);
     }
     if (sizeVint.unknown) break;
     offset = dataEnd;
