@@ -261,7 +261,18 @@ class GenericStreamController implements StreamController {
       // per-byte check; the watchdog aborts the parked read once the deadline
       // passes so the loop unwinds and the session fails.
       watchdog = setInterval(() => {
-        if (this.#clock.now() - lastByteAt <= this.#stallTimeoutMs || epoch !== this.#epoch) return;
+        if (epoch !== this.#epoch) {
+          // A superseded run parked on a stalled transport: release its reader
+          // so the loop unwinds and finally clears this interval. Never a
+          // failure for a stale epoch — the live epoch owns the session.
+          if (watchdog !== null) clearInterval(watchdog);
+          watchdog = null;
+          void reader.cancel().catch(() => {
+            /* stream already closed/errored */
+          });
+          return;
+        }
+        if (this.#clock.now() - lastByteAt <= this.#stallTimeoutMs) return;
         if (watchdog !== null) clearInterval(watchdog);
         watchdog = null;
         timedOut = true;

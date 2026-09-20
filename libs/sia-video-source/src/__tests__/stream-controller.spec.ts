@@ -12,7 +12,7 @@
  * without Sia or a real MediaSource.
  */
 
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ByteRange, ByteSource, ReadOptions } from '../transport/byte-source.ts';
 import type { AppendableProducer, ProducedSegment } from '../container/producer/appendable-producer.ts';
 import type { RandomAccessIndex, RangeRead } from '../media/types.ts';
@@ -309,6 +309,40 @@ describe('StreamController', () => {
     expect(harness.controller.state).toBe('ended');
     expect(harness.producer.pushes.map((push) => push.offset)).toEqual([0, 30, 60]);
   });
+
+  it('clears stale stall watchdogs and cancels their readers across repeated seeks on a stalled transport', async () => {
+    const clock = new ManualClock();
+    const harness = harnessWith({ clock, stallTimeoutMs: 4000 });
+    const source = new TrackedStalledByteSource(new Uint8Array(8));
+    const intervals = trackIntervals();
+
+    harness.controller.start({
+      index: singleTerminalIndex(),
+      producer: harness.producer,
+      sink: harness.sink,
+      source,
+    });
+    await Promise.resolve(); // let the epoch-1 read park on the stalled transport
+
+    expect(intervals.active()).toBe(1);
+
+    // Seek before the deadline so each superseded read stays parked; every
+    // bump leaves one watchdog stale against the same stalled source.
+    harness.controller.seek(1.0);
+    harness.controller.seek(1.0);
+    harness.controller.seek(1.0);
+    await Promise.resolve();
+    expect(intervals.active()).toBe(4); // one live + three stale watchdogs
+
+    await stallTick(); // let each stale watchdog poll once
+
+    // Steady-state: only the live epoch's interval remains, every superseded
+    // reader was cancelled, and no failure was reported.
+    expect(intervals.active()).toBe(1);
+    expect([...source.cancelled].sort((a, b) => a - b)).toEqual([1, 2, 3]);
+    expect(harness.reporter.reports).toEqual([]);
+    expect(harness.controller.state).toBe('playing');
+  });
 });
 
 // ---- fakes ------------------------------------------------------------------
@@ -549,6 +583,42 @@ class ThrowingByteSource implements ByteSource {
   }
 }
 
+/**
+ * Stalled source that records which read streams got cancelled — asserts a
+ * stale watchdog releases its superseded reader without touching the current
+ * read.
+ */
+class TrackedStalledByteSource implements ByteSource {
+  readonly cancelled: number[] = [];
+
+  get size(): number {
+    return this.#bytes.byteLength;
+  }
+
+  readonly #bytes: Uint8Array;
+  #reads = 0;
+
+  constructor(bytes: Uint8Array) {
+    this.#bytes = bytes;
+  }
+
+  cancel(): void {
+    // Test double: no transport work to cancel.
+  }
+
+  read(_range: ByteRange, _options: ReadOptions): ReadableStream<Uint8Array> {
+    const index = ++this.#reads;
+    return new ReadableStream<Uint8Array>({
+      cancel: () => {
+        this.cancelled.push(index);
+      },
+      pull() {
+        // Never enqueues and never closes: the read stays pending forever.
+      },
+    });
+  }
+}
+
 async function flush(): Promise<void> {
   await Promise.resolve();
   await new Promise((resolve) => setTimeout(resolve, 0));
@@ -610,6 +680,30 @@ function threeRangeIndex(): FakeIndex {
     range(30, 30, 2, 4),
     range(60, 30, 4, 6, { terminal: true }),
   ], 6);
+}
+
+/**
+ * Counts live `setInterval` handles so a leaked stall watchdog is observable.
+ * Delegates to the real timers (the watchdog must still poll) and restores the
+ * globals after each test.
+ */
+function trackIntervals(): { active: () => number } {
+  const originalSetInterval = globalThis.setInterval.bind(globalThis);
+  const originalClearInterval = globalThis.clearInterval.bind(globalThis);
+  let active = 0;
+  vi.spyOn(globalThis, 'setInterval').mockImplementation((handler, timeout) => {
+    active += 1;
+    return originalSetInterval(handler, timeout);
+  });
+  vi.spyOn(globalThis, 'clearInterval').mockImplementation((handle) => {
+    active -= 1;
+    return originalClearInterval(handle);
+  });
+  afterEach(() => {
+    vi.mocked(globalThis.setInterval).mockRestore();
+    vi.mocked(globalThis.clearInterval).mockRestore();
+  });
+  return { active: () => active };
 }
 
 function twoRangeIndex(): FakeIndex {
