@@ -3,7 +3,6 @@ import type { RefineProps } from "@refinedev/core";
 import dataProvider from "@lumeweb/advanced-rest-provider";
 import {
   createNamespacedId,
-  type NamespacedId,
   env,
   Framework,
   getApiBaseUrl,
@@ -20,11 +19,18 @@ export class Capability implements RefineConfigCapability {
   readonly id = createNamespacedId("ipfs", "refine-config");
   status: "active" | "error" | "inactive" = "active";
   readonly type = "framework:refine-config";
-  version: string = "0.1.0";
+  version = "0.1.0";
   #apiUrl!: string;
-  #authToken: string | null = null;
-  #emitter!: Emitter;
+  #authToken: null | string = null;
   #authUnbind: (() => void) | null = null;
+  #emitter!: Emitter;
+
+  async destroy() {
+    if (this.#authUnbind) {
+      this.#authUnbind();
+      this.#authUnbind = null;
+    }
+  }
 
   /**
    * Gets the API URL for this capability
@@ -36,22 +42,8 @@ export class Capability implements RefineConfigCapability {
   /**
    * Gets the current auth token
    */
-  getAuthToken(): string | null {
+  getAuthToken(): null | string {
     return this.#authToken;
-  }
-
-  /**
-   * Gets the event emitter for this capability
-   */
-  getEmitter(): Emitter {
-    return this.#emitter;
-  }
-
-  async destroy() {
-    if (this.#authUnbind) {
-      this.#authUnbind();
-      this.#authUnbind = null;
-    }
   }
 
   getConfig(existing?: Partial<RefineProps>) {
@@ -69,31 +61,34 @@ export class Capability implements RefineConfigCapability {
     );
 
     const providers = { [DATA_PROVIDER_NAME]: acctProvider };
+    // The deployed IPFS Plugin API serves all routes under the `/api` prefix
+    // (see libs/pinner/src/api/swagger.yaml), so resource templates keep that
+    // prefix to match the backend contract.
     const resources = [
       {
         meta: {
           dataProviderName: DATA_PROVIDER_NAME,
-          template: "/files",
+          template: "/api/websites",
         },
-        name: "ipfs/files",
+        name: "ipfs/websites",
       },
       {
         meta: {
           dataProviderName: DATA_PROVIDER_NAME,
-          template: "/files/directory",
+          template: "/api/workspaces",
         },
-        name: "ipfs/files/directory",
-      },
-      {
-        meta: {
-          dataProviderName: DATA_PROVIDER_NAME,
-          template: "/files/breadcrumbs",
-        },
-        name: "ipfs/files/breadcrumbs",
+        name: "ipfs/workspaces",
       },
     ];
 
     return mergeRefineConfig(existing, providers, resources);
+  }
+
+  /**
+   * Gets the event emitter for this capability
+   */
+  getEmitter(): Emitter {
+    return this.#emitter;
   }
 
   async initialize(framework: Framework) {
@@ -113,7 +108,7 @@ export class Capability implements RefineConfigCapability {
         : apiDomain.hostname;
       this.#apiUrl = `${apiDomain.protocol}//${SUBDOMAIN}.${hostWithPort}`;
     } catch (error) {
-      throw new Error(`Failed to construct API URL: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(`Failed to construct API URL: ${error instanceof Error ? error.message : String(error)}`, { cause: error });
     }
 
     // Initialize the nanoevents emitter
