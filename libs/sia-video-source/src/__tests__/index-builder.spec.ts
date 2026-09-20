@@ -4,7 +4,8 @@
  * generic bytes (`ByteSource`) and a `ContainerProfile`; the first builder
  * that returns a non-null index wins.
  *
- * The registry covers the sidx builder (`SidxIndexBuilder`) and the WebM
+ * The registry covers the sidx builder (`SidxIndexBuilder`), the moof-walk
+ * builder (`MoofWalkIndexBuilder`) for sidx-less fMP4, and the WebM
  * `CuesIndexBuilder`, tried in registration order.
  */
 
@@ -12,12 +13,14 @@ import { describe, expect, it } from 'vitest';
 import { CuesIndex } from '../container/webm/cues-index.ts';
 import { ebmlWalkMode } from '../container/webm/ebml-reader.ts';
 import { probeWebm, probeWebmStreaming, SCAN_WINDOW_BYTES } from '../container/webm/webm-probe.ts';
+import { MoofWalkIndex } from '../container/index/moof-index.ts';
 import { SidxIndex } from '../container/index/sidx-index.ts';
 import {
   buildFirstIndex,
   createIndexBuilderRegistry,
   CuesIndexBuilder,
   INDEX_HEAD_LENGTH,
+  MoofWalkIndexBuilder,
   SidxIndexBuilder,
 } from '../container/index/index-builder.ts';
 import type { ContainerProfile, IndexBuilder, RandomAccessIndex } from '../container/index/random-access-index.ts';
@@ -26,6 +29,7 @@ import { containerKind, indexGranularity } from '../media/types.ts';
 import type { RangeRead } from '../media/types.ts';
 import type { ByteRange, ByteSource, ReadOptions } from '../transport/byte-source.ts';
 import { MemoryByteSource } from '../transport/memory-byte-source.ts';
+import { buildSidxFmp4, buildSidxLessFmp4 } from './fixtures/moof-fmp4-fixture.ts';
 import { buildWebm, scanEbmlTop } from './fixtures/webm-fixture.ts';
 
 /** ByteSource that records every ranged read's extent — proves bounded reads. */
@@ -186,6 +190,45 @@ describe('SidxIndexBuilder', () => {
   });
 });
 
+describe('MoofWalkIndexBuilder', () => {
+  it('supports only the fmp4 container profile', () => {
+    const builder = new MoofWalkIndexBuilder();
+    expect(builder.supports(fmp4)).toBe(true);
+    for (const container of [containerKind.ts, containerKind.mp4, containerKind.mkv, containerKind.webm, containerKind.unknown] as const) {
+      expect(builder.supports(containerProfileFor(container))).toBe(false);
+    }
+  });
+
+  it('builds a MoofWalkIndex from a sidx-less fragmented source', async () => {
+    const builder = new MoofWalkIndexBuilder();
+    const source = new MemoryByteSource(buildSidxLessFmp4(3));
+    const index = await builder.build(source, fmp4);
+    expect(index).toBeInstanceOf(MoofWalkIndex);
+    expect(index?.granularity).toBe(indexGranularity['exact-byte']);
+    expect(index?.durationSeconds).toBe(10);
+    expect(index?.first?.offset).toBe(0);
+    expect(index?.seek(1.5)?.offset).toBeGreaterThan(0);
+  });
+
+  it('returns null when a top-level sidx exists (manifested fMP4 stays SidxIndex\'s job)', async () => {
+    const builder = new MoofWalkIndexBuilder();
+    const source = new MemoryByteSource(buildSidxFmp4());
+    expect(await builder.build(source, fmp4)).toBeNull();
+  });
+
+  it('returns null for garbage or empty sources', async () => {
+    const builder = new MoofWalkIndexBuilder();
+    expect(await builder.build(new MemoryByteSource(new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7])), fmp4)).toBeNull();
+    expect(await builder.build(new MemoryByteSource(new Uint8Array()), fmp4)).toBeNull();
+  });
+
+  it('returns null for a profile it does not support', async () => {
+    const builder = new MoofWalkIndexBuilder();
+    const source = new MemoryByteSource(buildSidxLessFmp4(2));
+    expect(await builder.build(source, containerProfileFor(containerKind.ts))).toBeNull();
+  });
+});
+
 describe('CuesIndexBuilder', () => {
   const webm: ContainerProfile = containerProfileFor(containerKind.webm);
 
@@ -290,11 +333,13 @@ describe('CuesIndexBuilder', () => {
 });
 
 describe('index builder registry', () => {
-  it('ships an ordered default ladder that leads with the sidx builder', () => {
+  it('ships an ordered default ladder: sidx, moof-walk, then cues', () => {
     const builders = createIndexBuilderRegistry();
     expect(builders.length).toBeGreaterThan(0);
     expect(builders[0]).toBeInstanceOf(SidxIndexBuilder);
     expect(builders[0]?.supports(fmp4)).toBe(true);
+    expect(builders[1]).toBeInstanceOf(MoofWalkIndexBuilder);
+    expect(builders[1]?.supports(fmp4)).toBe(true);
   });
 
   it('builds the first non-null index in registration order', async () => {

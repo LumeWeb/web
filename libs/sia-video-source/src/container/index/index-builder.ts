@@ -7,6 +7,7 @@ import { containerKind } from '../../media/types.ts';
 import type { ByteSource } from '../../transport/byte-source.ts';
 import { CuesIndex } from '../webm/cues-index.ts';
 import { probeWebmStreaming } from '../webm/webm-probe.ts';
+import { MoofWalkIndex } from './moof-index.ts';
 import { SidxIndex } from './sidx-index.ts';
 import type { ContainerProfile, IndexBuilder, RandomAccessIndex } from './random-access-index.ts';
 
@@ -40,6 +41,25 @@ export class CuesIndexBuilder implements IndexBuilder {
 
   supports(profile: ContainerProfile): boolean {
     return profile.container === containerKind.webm;
+  }
+}
+
+/**
+ * Builds a `MoofWalkIndex` for sidx-less fragmented fMP4. `build` reads the
+ * whole object once (bounded by the source's own length) so the walker can
+ * settle the fragment grid. Registered after the sidx builder: manifested
+ * fMP4 stays `SidxIndex`'s job, and this builder returns null when it finds a
+ * top-level `sidx` in the walk.
+ */
+export class MoofWalkIndexBuilder implements IndexBuilder {
+  async build(source: ByteSource, profile: ContainerProfile): Promise<null | RandomAccessIndex> {
+    if (!this.supports(profile)) return null;
+    const bytes = await readFullSource(source);
+    return bytes ? MoofWalkIndex.parse(bytes) : null;
+  }
+
+  supports(profile: ContainerProfile): boolean {
+    return profile.container === containerKind.fmp4;
   }
 }
 
@@ -82,7 +102,12 @@ export async function buildFirstIndex(
 
 /** Ordered best-effort ladder of the index strategies the registry ships. */
 export function createIndexBuilderRegistry(): IndexBuilder[] {
-  return [new SidxIndexBuilder(), new CuesIndexBuilder()];
+  return [new SidxIndexBuilder(), new MoofWalkIndexBuilder(), new CuesIndexBuilder()];
+}
+
+/** Reads a whole source (short at EOF), or null for an empty object. */
+async function readFullSource(source: ByteSource): Promise<null | Uint8Array> {
+  return readHead(source, source.size);
 }
 
 /** Reads the first `length` bytes (short at EOF), or null for an empty object. */
