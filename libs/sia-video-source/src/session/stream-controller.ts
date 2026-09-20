@@ -10,7 +10,8 @@
  * - FLOOR RAP selection through the `RandomAccessIndex`;
  * - bounded lookahead (seconds ahead of the playhead, not whole-file);
  * - back-buffer eviction on `playhead()`;
- * - read completion, stall detection, and fatal-error reporting;
+ * - read completion, stall detection (a silent transport is aborted), and
+ *   fatal-error reporting;
  * - terminal EOS (only the terminal range, once per epoch).
  *
  * The controller depends only on injected interfaces (`RandomAccessIndex`,
@@ -65,7 +66,8 @@ export interface StreamControllerOptions {
   /**
    * Max monotonic-clock milliseconds of silence between bytes before failing
    * as `transport:timeout`; `0` disables the controller-level stall check
-   * (the Sia transport has its own watchdog). Default 0.
+   * (the Sia transport has its own watchdog). A read parked on a silent
+   * transport is aborted once the budget passes. Default 0.
    */
   readonly stallTimeoutMs?: number;
 }
@@ -104,6 +106,9 @@ const SOURCE_REPLACED = 'source-replaced';
 
 /** Default forward-buffer budget (30 s of lookahead). */
 const DEFAULT_LOOKAHEAD_SECONDS = 30;
+
+/** How often the stall watchdog polls the injected clock for a dead read. */
+const STALL_WATCHDOG_POLL_MS = 100;
 
 interface PendingPosition {
   readonly epoch: number;
@@ -247,9 +252,25 @@ class GenericStreamController implements StreamController {
     if (!load) return false;
     const readStartedAt = this.#clock.now();
     let lastByteAt = readStartedAt;
-    const stream = load.source.read({ length: range.length, offset: range.offset }, { epoch } satisfies ReadOptions);
-    const reader = stream.getReader();
+    const reader = load.source.read({ length: range.length, offset: range.offset }, { epoch } satisfies ReadOptions).getReader();
     let ok = true;
+    let timedOut = false;
+    let watchdog: null | ReturnType<typeof setInterval> = null;
+    if (this.#stallTimeoutMs > 0) {
+      // A silently stalled transport parks reader.read() forever, past every
+      // per-byte check; the watchdog aborts the parked read once the deadline
+      // passes so the loop unwinds and the session fails.
+      watchdog = setInterval(() => {
+        if (this.#clock.now() - lastByteAt <= this.#stallTimeoutMs || epoch !== this.#epoch) return;
+        if (watchdog !== null) clearInterval(watchdog);
+        watchdog = null;
+        timedOut = true;
+        this.#fail({ cause: new Error(`no bytes for ${this.#clock.now() - lastByteAt}ms`), code: failureCode.timeout, condition: failureCondition.transport });
+        void reader.cancel().catch(() => {
+          /* stream already closed/errored */
+        });
+      }, STALL_WATCHDOG_POLL_MS);
+    }
     try {
       for (;;) {
         const { done, value } = await reader.read();
@@ -268,7 +289,10 @@ class GenericStreamController implements StreamController {
         load.producer.push(value, range.offset, epoch);
       }
     } catch (error) {
-      if (this.#destroyed || epoch !== this.#epoch || isSupersededOrAbort(error)) {
+      if (timedOut) {
+        // The watchdog aborted the parked read; the session already failed.
+        ok = false;
+      } else if (this.#destroyed || epoch !== this.#epoch || isSupersededOrAbort(error)) {
         // A superseded/cancelled read is a dropped read, never a failure.
         ok = false;
       } else {
@@ -276,6 +300,8 @@ class GenericStreamController implements StreamController {
         ok = false;
       }
     } finally {
+      if (watchdog !== null) clearInterval(watchdog);
+      watchdog = null;
       void reader.cancel().catch(() => {
         /* stream already closed/errored */
       });

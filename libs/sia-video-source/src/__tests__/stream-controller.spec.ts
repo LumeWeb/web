@@ -279,6 +279,36 @@ describe('StreamController', () => {
     expect(harness.controller.state).toBe('failed');
     expect(harness.sink.aborted).toBe(true);
   });
+
+  it('fails as transport:timeout when a read never delivers (silently stalled transport)', async () => {
+    const clock = new ManualClock();
+    const harness = harnessWith({ clock, stallTimeoutMs: 1000 });
+    const source = new StalledByteSource(new Uint8Array(8));
+
+    harness.controller.start({
+      index: singleTerminalIndex(),
+      producer: harness.producer,
+      sink: harness.sink,
+      source,
+    });
+    await Promise.resolve(); // let the first read park on the never-resolving read
+
+    expect(harness.controller.state).toBe('playing');
+    clock.setNow(5000);
+    await stallTick(); // let the watchdog observe the deadline
+
+    expect(harness.reporter.reports).toHaveLength(1);
+    expect(harness.reporter.reports[0]).toMatchObject({ code: 'timeout', condition: 'transport' });
+    expect(harness.controller.state).toBe('failed');
+    expect(harness.sink.aborted).toBe(true);
+    expect(harness.producer.pushes).toEqual([]);
+
+    // The aborted run unwound: a fresh start streams to the end.
+    harness.controller.start(harness.loadBytes(threeRangeIndex(), new Uint8Array(90)));
+    await flush();
+    expect(harness.controller.state).toBe('ended');
+    expect(harness.producer.pushes.map((push) => push.offset)).toEqual([0, 30, 60]);
+  });
 });
 
 // ---- fakes ------------------------------------------------------------------
@@ -475,6 +505,33 @@ class RecordingErrorReporter implements ErrorReporter {
   }
 }
 
+/**
+ * Source whose read never delivers and never reaches EOF — a silently stalled
+ * transport that parks `reader.read()` forever.
+ */
+class StalledByteSource implements ByteSource {
+  get size(): number {
+    return this.#bytes.byteLength;
+  }
+  readonly #bytes: Uint8Array;
+
+  constructor(bytes: Uint8Array) {
+    this.#bytes = bytes;
+  }
+
+  cancel(): void {
+    // Test double: no transport work to cancel.
+  }
+
+  read(_range: ByteRange, _options: ReadOptions): ReadableStream<Uint8Array> {
+    return new ReadableStream<Uint8Array>({
+      pull() {
+        // Never enqueues and never closes: the read stays pending forever.
+      },
+    });
+  }
+}
+
 /** Errors every read with a hard (non-superseded) transport failure. */
 class ThrowingByteSource implements ByteSource {
   readonly size = 8;
@@ -540,6 +597,11 @@ function range(
 
 function singleTerminalIndex(): FakeIndex {
   return new FakeIndex([range(0, 8, 0, 2, { terminal: true })], 2);
+}
+
+/** Lets the controller's stall watchdog poll the deadline at least once. */
+function stallTick(): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, 250));
 }
 
 function threeRangeIndex(): FakeIndex {
