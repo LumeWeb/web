@@ -64,8 +64,262 @@ components:
       required:
       - records
       type: object
+    CertGetResponse:
+      additionalProperties: false
+      properties:
+        cert_pem:
+          type: string
+        domain:
+          type: string
+        namespace:
+          type: string
+        ok:
+          type: boolean
+        owner_name:
+          type: string
+        private_key_pem:
+          type: string
+        tlsa:
+          type: string
+      required:
+      - ok
+      - domain
+      - namespace
+      - private_key_pem
+      - cert_pem
+      - tlsa
+      - owner_name
+      type: object
+    CertPushRequest:
+      additionalProperties: false
+      properties:
+        cert_pem:
+          type: string
+        domain:
+          type: string
+        namespace:
+          type: string
+        private_key_pem:
+          type: string
+      required:
+      - domain
+      - namespace
+      - cert_pem
+      - private_key_pem
+      type: object
+    CertPushResponse:
+      additionalProperties: false
+      properties:
+        ok:
+          type: boolean
+        owner_name:
+          type: string
+        tlsa:
+          type: string
+      required:
+      - ok
+      - tlsa
+      - owner_name
+      type: object
     Component:
       additionalProperties: false
+      type: object
+    DAGBlockNodeResponse:
+      additionalProperties: false
+      properties:
+        children:
+          items:
+            type: string
+          type: array
+        cid:
+          type: string
+        size:
+          type: integer
+      required:
+      - cid
+      - size
+      - children
+      type: object
+    DAGResponse:
+      additionalProperties: false
+      properties:
+        nodes:
+          items:
+            $ref: '#/components/schemas/DAGBlockNodeResponse'
+          type: array
+        root_cid:
+          type: string
+      required:
+      - root_cid
+      - nodes
+      type: object
+    DNSDelegation:
+      additionalProperties: false
+      properties:
+        authoritative_records:
+          items:
+            $ref: '#/components/schemas/DNSDelegationRecord'
+          type: array
+        dnssec:
+          type: string
+        dnssec_error:
+          type: string
+        mode:
+          type: string
+        nameservers:
+          items:
+            type: string
+          type: array
+        parent_records:
+          items:
+            $ref: '#/components/schemas/DNSDelegationRecord'
+          type: array
+      type: object
+    DNSDelegationRecord:
+      additionalProperties: false
+      properties:
+        address:
+          type: string
+        ns:
+          type: string
+        type:
+          type: string
+        value:
+          type: string
+      required:
+      - type
+      type: object
+    DomainDANERepublishResponse:
+      additionalProperties: false
+      properties:
+        delegation:
+          $ref: '#/components/schemas/DNSDelegation'
+        domain:
+          type: string
+        gateway_host:
+          type: string
+        id:
+          type: integer
+        namespace:
+          enum:
+          - icann
+          - hns
+          type: string
+        owner_name:
+          type: string
+        published_to_managed_zone:
+          type: boolean
+        ssl:
+          $ref: '#/components/schemas/SSLStatusInfo'
+        status:
+          enum:
+          - draft
+          - records_generated
+          - waiting_delegation
+          - active
+          - self_hosted
+          - error
+          - onchain_managed
+          type: string
+        tlsa_rdata:
+          type: string
+        zone_name:
+          type: string
+      required:
+      - id
+      - domain
+      - namespace
+      - published_to_managed_zone
+      type: object
+    DomainListResponse:
+      additionalProperties: false
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/DomainResponse'
+          type: array
+        total:
+          type: integer
+      required:
+      - data
+      - total
+      type: object
+    DomainRequest:
+      additionalProperties: false
+      properties:
+        config:
+          type: object
+        dns_hosting_enabled:
+          type: boolean
+        domain:
+          type: string
+        generate:
+          type: boolean
+        label:
+          type: string
+        namespace:
+          type: string
+        platform_domain:
+          type: string
+        platform_namespace:
+          type: string
+      required:
+      - domain
+      - namespace
+      type: object
+    DomainResponse:
+      additionalProperties: false
+      properties:
+        checks:
+          items:
+            $ref: '#/components/schemas/ValidationCheck'
+          type: array
+        delegation:
+          $ref: '#/components/schemas/DNSDelegation'
+        dns_hosting_enabled:
+          type: boolean
+        domain:
+          type: string
+        gateway_host:
+          type: string
+        id:
+          type: integer
+        namespace:
+          enum:
+          - icann
+          - hns
+          type: string
+        owner_name:
+          type: string
+        ssl:
+          $ref: '#/components/schemas/SSLStatusInfo'
+        status:
+          enum:
+          - draft
+          - records_generated
+          - waiting_delegation
+          - active
+          - self_hosted
+          - error
+          - onchain_managed
+          type: string
+        tlsa_rdata:
+          type: string
+        zone_name:
+          type: string
+      required:
+      - id
+      - domain
+      - namespace
+      - dns_hosting_enabled
+      type: object
+    DomainUpdateRequest:
+      additionalProperties: false
+      properties:
+        dns_hosting_enabled:
+          type: boolean
+        primary:
+          type: boolean
       type: object
     ErrorDetail:
       additionalProperties: false
@@ -139,6 +393,11 @@ components:
       additionalProperties: false
       properties:
         domain:
+          type: string
+        namespace:
+          enum:
+          - icann
+          - hns
           type: string
         status:
           type: string
@@ -411,6 +670,66 @@ components:
       required:
       - status
       type: object
+    PlatformAvailabilityResponse:
+      additionalProperties: false
+      properties:
+        label:
+          type: string
+        results:
+          items:
+            $ref: '#/components/schemas/PlatformAvailabilityResult'
+          type: array
+      required:
+      - label
+      - results
+      type: object
+    PlatformAvailabilityResult:
+      additionalProperties: false
+      properties:
+        available:
+          type: boolean
+        namespace:
+          type: string
+        platform_domain:
+          type: string
+      required:
+      - platform_domain
+      - namespace
+      - available
+      type: object
+    PlatformDomainListResponse:
+      additionalProperties: false
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/PlatformDomainResponse'
+          type: array
+        total:
+          type: integer
+      required:
+      - data
+      - total
+      type: object
+    PlatformDomainResponse:
+      additionalProperties: false
+      properties:
+        domain:
+          type: string
+        enabled:
+          type: boolean
+        id:
+          type: integer
+        namespace:
+          type: string
+        zone_id:
+          type: integer
+      required:
+      - id
+      - domain
+      - namespace
+      - zone_id
+      - enabled
+      type: object
     PostUploadResponse:
       additionalProperties: false
       properties:
@@ -419,9 +738,17 @@ components:
       required:
       - CID
       type: object
+    RecordDeleteRequest:
+      additionalProperties: false
+      properties:
+        content:
+          type: string
+      type: object
     RecordIdentifier:
       additionalProperties: false
       properties:
+        content:
+          type: string
         name:
           type: string
         type:
@@ -455,6 +782,8 @@ components:
           type: string
         disabled:
           type: boolean
+        id:
+          type: string
         name:
           type: string
         ttl:
@@ -465,6 +794,7 @@ components:
           type: integer
       required:
       - zone_id
+      - id
       - name
       - type
       - content
@@ -512,6 +842,11 @@ components:
           format: date-time
           type: string
         status:
+          enum:
+          - pending
+          - issuing
+          - ready
+          - failed
           type: string
       required:
       - status
@@ -527,6 +862,23 @@ components:
           type: string
       required:
       - status
+      type: object
+    TLSAUpdateRequest:
+      additionalProperties: false
+      properties:
+        cert_pem:
+          type: string
+        domain:
+          type: string
+        namespace:
+          type: string
+        tlsa:
+          type: string
+      required:
+      - domain
+      - namespace
+      - tlsa
+      - cert_pem
       type: object
     UploadResultResponse:
       additionalProperties: false
@@ -546,6 +898,23 @@ components:
       required:
       - status
       type: object
+    ValidationCheck:
+      additionalProperties: false
+      properties:
+        expected:
+          type: string
+        found:
+          type: string
+        message:
+          type: string
+        name:
+          type: string
+        ok:
+          type: boolean
+      required:
+      - name
+      - ok
+      type: object
     ValidationResponse:
       additionalProperties: false
       properties:
@@ -564,6 +933,49 @@ components:
       - valid
       - message
       - checked_at
+      type: object
+    WebsiteChangeEvent:
+      additionalProperties: false
+      properties:
+        cid:
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        domain:
+          type: string
+        event_type:
+          enum:
+          - published
+          - removed
+          type: string
+        id:
+          type: integer
+        user_id:
+          type: integer
+        website_id:
+          type: integer
+      required:
+      - id
+      - event_type
+      - domain
+      - created_at
+      type: object
+    WebsiteChangesResponse:
+      additionalProperties: false
+      properties:
+        events:
+          items:
+            $ref: '#/components/schemas/WebsiteChangeEvent'
+          type: array
+        high_water_mark:
+          type: integer
+        truncated:
+          type: boolean
+      required:
+      - events
+      - high_water_mark
+      - truncated
       type: object
     WebsiteConfigResponse:
       additionalProperties: false
@@ -585,8 +997,6 @@ components:
           type: string
         dns_hosting_enabled:
           type: boolean
-        dns_zone_id:
-          type: integer
         domain:
           type: string
         expired:
@@ -620,6 +1030,8 @@ components:
           type: string
         validation_token:
           type: string
+        zone_id:
+          type: integer
       required:
       - id
       - domain
@@ -653,12 +1065,21 @@ components:
           type: boolean
         domain:
           type: string
+        generate:
+          type: boolean
+        label:
+          type: string
+        namespace:
+          type: string
+        platform_domain:
+          type: string
+        platform_namespace:
+          type: string
         target_hash:
           type: string
         target_type:
           type: string
       required:
-      - domain
       - target_type
       - target_hash
       type: object
@@ -672,8 +1093,6 @@ components:
           type: string
         dns_hosting_enabled:
           type: boolean
-        dns_zone_id:
-          type: integer
         domain:
           type: string
         expired:
@@ -707,6 +1126,8 @@ components:
           type: string
         validation_token:
           type: string
+        zone_id:
+          type: integer
       required:
       - id
       - domain
@@ -727,6 +1148,8 @@ components:
           type: boolean
         domain:
           type: string
+        namespace:
+          type: string
         target_hash:
           type: string
         target_type:
@@ -735,6 +1158,10 @@ components:
     WebsiteValidateResponse:
       additionalProperties: false
       properties:
+        checks:
+          items:
+            $ref: '#/components/schemas/ValidationCheck'
+          type: array
         domain:
           type: string
         id:
@@ -751,6 +1178,113 @@ components:
       - valid
       - message
       - reason
+      type: object
+    WorkspaceAccessResponse:
+      additionalProperties: false
+      properties:
+        password:
+          type: string
+        username:
+          type: string
+      required:
+      - username
+      - password
+      type: object
+    WorkspaceListResponseResponse:
+      additionalProperties: false
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/WorkspaceResponse'
+          type: array
+        total:
+          type: integer
+      required:
+      - data
+      - total
+      type: object
+    WorkspaceRequest:
+      additionalProperties: false
+      properties:
+        website_id:
+          type: integer
+      type: object
+    WorkspaceResolveResponse:
+      additionalProperties: false
+      properties:
+        created:
+          format: date-time
+          type: string
+        domain:
+          type: string
+        error:
+          type: string
+        id:
+          type: integer
+        label:
+          type: string
+        status:
+          type: string
+        updated:
+          format: date-time
+          type: string
+        website:
+          $ref: '#/components/schemas/WorkspaceResolveWebsite'
+        website_id:
+          type: integer
+      required:
+      - id
+      - label
+      - domain
+      - status
+      - created
+      - updated
+      type: object
+    WorkspaceResolveWebsite:
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        status:
+          type: string
+        target_hash:
+          type: string
+        target_type:
+          type: string
+      required:
+      - id
+      - target_type
+      - target_hash
+      - status
+      type: object
+    WorkspaceResponse:
+      additionalProperties: false
+      properties:
+        created:
+          format: date-time
+          type: string
+        domain:
+          type: string
+        error:
+          type: string
+        id:
+          type: integer
+        label:
+          type: string
+        status:
+          type: string
+        updated:
+          format: date-time
+          type: string
+        website_id:
+          type: integer
+      required:
+      - id
+      - label
+      - domain
+      - status
+      - created
+      - updated
       type: object
     ZoneListResponse:
       additionalProperties: false
@@ -914,6 +1448,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -969,6 +1509,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -976,6 +1522,70 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Internal server error
       summary: Get multiple block details
+      tags:
+      - Content
+  /api/dag/{cid}:
+    get:
+      description: |-
+        Resolves the complete block graph (DAG) for a root CID in a single query.
+
+        Returns all blocks reachable from the root CID, including their sizes and ordered child relationships. Uses a recursive SQL query internally for efficient batch resolution instead of per-block round-trips.
+
+        Only blocks with ready status are included. Blocks appearing in multiple paths are deduplicated.
+
+        See also: GET /block/meta/:cid (single block metadata)
+      parameters:
+      - description: 'Root content identifier (CID) of the DAG to resolve. Example:
+          bafybeieffnocaq7t4w4daagvydl32igft5oziyyaebqr6vx6rb3fwh2ab4'
+        in: path
+        name: cid
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DAGResponse'
+          description: DAG resolved successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Resolve block DAG
       tags:
       - Content
   /api/dns/zones:
@@ -1017,6 +1627,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1042,12 +1658,6 @@ paths:
         description: Zone request
         required: true
       responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Success
         "201":
           content:
             application/json:
@@ -1078,6 +1688,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1104,12 +1720,6 @@ paths:
         schema:
           type: string
       responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Success
         "204":
           description: Zone deleted
         "400":
@@ -1136,6 +1746,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1191,6 +1807,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1253,6 +1875,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1309,6 +1937,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1341,12 +1975,6 @@ paths:
         description: Record request
         required: true
       responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Success
         "201":
           content:
             application/json:
@@ -1377,6 +2005,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1414,13 +2048,15 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordDeleteRequest'
+        description: 'Optional content selector: when set, only the record with this
+          content is deleted; when the body is absent the whole RRSet is deleted,
+          and a present body with empty content is rejected'
       responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Success
         "204":
           description: Record deleted
         "400":
@@ -1447,6 +2083,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1514,6 +2156,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1588,6 +2236,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1651,6 +2305,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1714,6 +2374,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1770,6 +2436,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1826,6 +2498,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1875,6 +2553,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1923,6 +2607,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -1971,6 +2661,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2019,6 +2715,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2067,6 +2769,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2091,12 +2799,6 @@ paths:
         description: IPNS key request
         required: true
       responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Success
         "201":
           content:
             application/json:
@@ -2127,6 +2829,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2152,12 +2860,6 @@ paths:
         schema:
           type: string
       responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Success
         "204":
           description: IPNS key deleted
         "400":
@@ -2184,6 +2886,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2238,6 +2946,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2293,6 +3007,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2348,6 +3068,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2409,6 +3135,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2471,6 +3203,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -2528,6 +3266,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -3172,6 +3916,181 @@ paths:
         Returns paginated list of website configurations with status, domain, and target information. Supports filtering by status and other criteria.
 
         See also:.*
+      parameters:
+      - description: Ending index of the items to return (exclusive). Defaults to
+          10.
+        in: query
+        name: _end
+        schema:
+          type: integer
+      - description: Comma-separated list of sort orders ('asc' or 'desc') corresponding
+          to _sort fields. Defaults to 'asc'.
+        in: query
+        name: _order
+        schema:
+          type: string
+      - description: 'Comma-separated list of fields to sort by. Available fields:
+          target_type, status'
+        in: query
+        name: _sort
+        schema:
+          type: string
+      - description: Starting index of the items to return (0-based). Defaults to
+          0.
+        in: query
+        name: _start
+        schema:
+          type: integer
+      - description: Filter by domain contains
+        in: query
+        name: domain_contains
+        schema:
+          type: string
+      - description: Filter by domain endswith
+        in: query
+        name: domain_endswith
+        schema:
+          type: string
+      - description: Filter by domain eq
+        in: query
+        name: domain_eq
+        schema:
+          type: string
+      - description: Filter by domain ne
+        in: query
+        name: domain_ne
+        schema:
+          type: string
+      - description: Filter by domain startswith
+        in: query
+        name: domain_startswith
+        schema:
+          type: string
+      - description: Filter by domain contains
+        in: query
+        name: filters[domain][contains]
+        schema:
+          type: string
+      - description: Filter by domain endswith
+        in: query
+        name: filters[domain][endswith]
+        schema:
+          type: string
+      - description: Filter by domain eq
+        in: query
+        name: filters[domain][eq]
+        schema:
+          type: string
+      - description: Filter by domain ne
+        in: query
+        name: filters[domain][ne]
+        schema:
+          type: string
+      - description: Filter by domain startswith
+        in: query
+        name: filters[domain][startswith]
+        schema:
+          type: string
+      - description: Filter by status contains
+        in: query
+        name: filters[status][contains]
+        schema:
+          type: string
+      - description: Filter by status endswith
+        in: query
+        name: filters[status][endswith]
+        schema:
+          type: string
+      - description: Filter by status eq
+        in: query
+        name: filters[status][eq]
+        schema:
+          type: string
+      - description: Filter by status ne
+        in: query
+        name: filters[status][ne]
+        schema:
+          type: string
+      - description: Filter by status startswith
+        in: query
+        name: filters[status][startswith]
+        schema:
+          type: string
+      - description: Filter by target_type contains
+        in: query
+        name: filters[target_type][contains]
+        schema:
+          type: string
+      - description: Filter by target_type endswith
+        in: query
+        name: filters[target_type][endswith]
+        schema:
+          type: string
+      - description: Filter by target_type eq
+        in: query
+        name: filters[target_type][eq]
+        schema:
+          type: string
+      - description: Filter by target_type ne
+        in: query
+        name: filters[target_type][ne]
+        schema:
+          type: string
+      - description: Filter by target_type startswith
+        in: query
+        name: filters[target_type][startswith]
+        schema:
+          type: string
+      - description: Filter by status contains
+        in: query
+        name: status_contains
+        schema:
+          type: string
+      - description: Filter by status endswith
+        in: query
+        name: status_endswith
+        schema:
+          type: string
+      - description: Filter by status eq
+        in: query
+        name: status_eq
+        schema:
+          type: string
+      - description: Filter by status ne
+        in: query
+        name: status_ne
+        schema:
+          type: string
+      - description: Filter by status startswith
+        in: query
+        name: status_startswith
+        schema:
+          type: string
+      - description: Filter by target_type contains
+        in: query
+        name: target_type_contains
+        schema:
+          type: string
+      - description: Filter by target_type endswith
+        in: query
+        name: target_type_endswith
+        schema:
+          type: string
+      - description: Filter by target_type eq
+        in: query
+        name: target_type_eq
+        schema:
+          type: string
+      - description: Filter by target_type ne
+        in: query
+        name: target_type_ne
+        schema:
+          type: string
+      - description: Filter by target_type startswith
+        in: query
+        name: target_type_startswith
+        schema:
+          type: string
       responses:
         "200":
           content:
@@ -3179,6 +4098,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/WebsiteItemResponse'
           description: List of websites
+          headers:
+            X-Total-Count:
+              description: Total number of items
+              schema:
+                type: string
         "400":
           content:
             application/json:
@@ -3190,7 +4114,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-          description: Unauthorized
+          description: Authentication required
         "403":
           content:
             application/json:
@@ -3203,12 +4127,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-          description: Internal server error
+          description: Internal server error occurred
       summary: List websites
       tags:
       - Websites
@@ -3229,12 +4159,6 @@ paths:
         description: Website request
         required: true
       responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Success
         "201":
           content:
             application/json:
@@ -3271,6 +4195,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Website target content is broken
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -3326,6 +4256,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Website not found or does not exist
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -3351,12 +4287,6 @@ paths:
         schema:
           type: string
       responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Success
         "204":
           description: Website deleted
         "400":
@@ -3383,6 +4313,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -3443,6 +4379,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/WebsiteResponse'
           description: Website is broken or deleted
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -3485,6 +4427,63 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid website ID or request body
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Website not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid target (CID/IPNS) or DNS hosting value; target CID
+            not pinned (CID_NOT_PINNED) or IPNS key not found (IPNS_KEY_NOT_FOUND)
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error occurred
+      summary: Update website
+      tags:
+      - Websites
+  /api/websites/{id}/domains:
+    get:
+      description: Lists all domains bound to a website.
+      parameters:
+      - description: Website ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DomainListResponse'
+          description: List of domains
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
           description: Bad request
         "401":
           content:
@@ -3504,15 +4503,478 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Internal server error
-      summary: Update website
+      summary: List website domains
       tags:
       - Websites
+      - Domains
+    post:
+      description: Binds a domain to a website under a specific namespace.
+      parameters:
+      - description: Website ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DomainRequest'
+        description: Domain request
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DomainResponse'
+          description: Domain created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Add domain to website
+      tags:
+      - Websites
+      - Domains
+  /api/websites/{id}/domains/{domain_id}:
+    delete:
+      description: Removes a domain binding from a website.
+      parameters:
+      - description: Domain ID
+        in: path
+        name: domain_id
+        required: true
+        schema:
+          type: string
+      - description: Website ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Domain deleted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Remove domain from website
+      tags:
+      - Websites
+      - Domains
+    patch:
+      description: 'Updates a bound domain''s per-domain DNS control: whether the
+        portal manages DNS hosting for this binding (dns_hosting_enabled) and/or whether
+        it is the website''s primary (apex) binding. Omitted fields are left unchanged.'
+      parameters:
+      - description: Domain ID
+        in: path
+        name: domain_id
+        required: true
+        schema:
+          type: string
+      - description: Website ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DomainUpdateRequest'
+        description: Domain update request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DomainResponse'
+          description: Domain updated
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Update domain DNS control
+      tags:
+      - Websites
+      - Domains
+  /api/websites/{id}/domains/{domain_id}/dane/republish:
+    post:
+      description: Forces re-publication of a bound domain's DANE records (the _443._tcp.<domain>
+        TLSA RRset) into the portal-managed authoritative PowerDNS zone. It re-pushes
+        the stored certificate/key through the same path used by the cert webhook,
+        idempotently overwriting the TLSA. Use this when a TLSA was deleted or went
+        missing and cert renewal did not re-trigger a publish. Only DANE-capable namespaces
+        (e.g. HNS) are supported; a domain with no stored certificate returns 409.
+      parameters:
+      - description: Domain ID
+        in: path
+        name: domain_id
+        required: true
+        schema:
+          type: string
+      - description: Website ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DomainDANERepublishResponse'
+          description: Republish result
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Force re-publish of domain DANE records
+      tags:
+      - Websites
+      - Domains
+  /api/websites/{id}/domains/{domain_id}/dns-requirements:
+    get:
+      description: Returns the DNS records a user must publish to complete domain
+        delegation for a bound domain. For HNS this includes the DS/NS/GLUE parent
+        records (publish in the HNS wallet) and authoritative NS/TLSA records; for
+        ICANN it returns the nameservers.
+      parameters:
+      - description: Domain ID
+        in: path
+        name: domain_id
+        required: true
+        schema:
+          type: string
+      - description: Website ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DomainResponse'
+          description: Domain DNS requirements
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Get domain DNS delegation requirements
+      tags:
+      - Websites
+      - Domains
+  /api/websites/{id}/domains/{domain_id}/onchain:
+    post:
+      description: Reclassifies a bound domain as on-chain managed (e.g. a Handshake
+        HIP-5 name whose NS now points at an external contract). Deletes the portal-managed
+        PowerDNS zone and DNSSEC for the binding and switches ownership verification
+        to the TXT token; DANE/SSL state is retained. One-way.
+      parameters:
+      - description: Domain ID
+        in: path
+        name: domain_id
+        required: true
+        schema:
+          type: string
+      - description: Website ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DomainResponse'
+          description: Converted domain
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Reclassify domain as on-chain managed
+      tags:
+      - Websites
+      - Domains
+  /api/websites/{id}/domains/{domain_id}/verify:
+    post:
+      description: Triggers verification of domain delegation.
+      parameters:
+      - description: Domain ID
+        in: path
+        name: domain_id
+        required: true
+        schema:
+          type: string
+      - description: Website ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DomainResponse'
+          description: Verification result
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Verify domain delegation
+      tags:
+      - Websites
+      - Domains
   /api/websites/{id}/validate:
     post:
       description: |-
@@ -3542,7 +5004,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-          description: Bad request
+          description: Invalid website ID format
         "401":
           content:
             application/json:
@@ -3560,13 +5022,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-          description: Not found
+          description: Website not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: 'DNS validation failed: verification TXT record not published
+            or domain does not resolve (DNS_VALIDATION_FAILED)'
         "500":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-          description: Internal server error
+          description: Internal server error occurred
       summary: Validate website DNS
       tags:
       - Websites
@@ -3609,6 +5078,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -3618,6 +5093,826 @@ paths:
       summary: Get website hosting configuration
       tags:
       - Websites
+  /api/websites/platform-domains:
+    get:
+      description: Lists the platform-owned root domains that are enabled and available
+        for users to claim free subdomains under. Returns the standard paginated list
+        shape ({data, total}), ordered by domain. Only enabled roots are returned.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformDomainListResponse'
+          description: List of supported platform domains
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: List supported platform domains
+      tags:
+      - Websites
+      - PlatformDomains
+  /api/websites/platform-domains/availability:
+    get:
+      description: Checks, for a candidate label, whether it is claimable on each
+        enabled platform (free-subdomain) root. Returns one result per root. Auth-required;
+        only probes platform-owned roots, never user-managed zones.
+      parameters:
+      - description: Candidate subdomain label
+        in: query
+        name: label
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformAvailabilityResponse'
+          description: Availability by root
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Check platform subdomain availability
+      tags:
+      - Websites
+      - PlatformDomains
+  /api/workspaces:
+    get:
+      description: Lists workspaces owned by the authenticated user, including unattached
+        workspaces, filtered, sorted, and paginated. Returns the standard paginated
+        list shape ({data, total}).
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceListResponseResponse'
+          description: Workspaces
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: List workspaces
+      tags:
+      - Workspaces
+    post:
+      description: Creates a workspace owned by the authenticated user. Optionally
+        pass website_id to attach it to a website the user owns (the publish link);
+        omit it to create an unattached workspace that needs no Website record or
+        domain. Building in a workspace is separate from publishing.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceRequest'
+        description: Workspace request
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceResponse'
+          description: Created workspace
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Create workspace
+      tags:
+      - Workspaces
+  /api/workspaces/{id}:
+    delete:
+      description: Marks a workspace deleting, revokes its portal API key, deletes
+        the application (and storage) before the database, treats provider 404 as
+        already deleted, and soft-deletes the workspace.
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceResponse'
+          description: Deleted workspace
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Workspace not found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Workspace is already being deleted
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Delete workspace
+      tags:
+      - Workspaces
+    get:
+      description: Returns a workspace owned by the authenticated user.
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceResponse'
+          description: Workspace
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Get workspace
+      tags:
+      - Workspaces
+  /api/workspaces/{id}/access:
+    get:
+      description: Returns the owner's proxy Basic Auth credentials. Pass ?rotate=true
+        to rotate them. Only the proxy credential is returned; the portal API key
+        and database password are never exposed.
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - description: Rotate the proxy credential before returning
+        in: query
+        name: rotate
+        schema:
+          type: boolean
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceAccessResponse'
+          description: Access credentials
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Get workspace access credentials
+      tags:
+      - Workspaces
+  /api/workspaces/{id}/attach:
+    post:
+      description: Links an existing unattached workspace (owned by the user) to a
+        website the user owns. Verifies ownership of both and prevents duplicate attachment.
+        Only records the publish link; it never changes the workspace authoring hostname.
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceRequest'
+        description: Workspace request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceResponse'
+          description: Attached workspace
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Attach workspace to website
+      tags:
+      - Workspaces
+  /api/workspaces/{id}/resume:
+    post:
+      description: Starts a suspended workspace's application (and, per configuration,
+        its dedicated database), refreshes the runtime environment, waits for readiness,
+        and marks it ready.
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceResponse'
+          description: Ready workspace
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Resume workspace
+      tags:
+      - Workspaces
+  /api/workspaces/{id}/suspend:
+    post:
+      description: Stops a ready workspace's application (and, per configuration,
+        its dedicated database) and marks it suspended. The database and storage are
+        preserved by default.
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceResponse'
+          description: Suspended workspace
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Suspend workspace
+      tags:
+      - Workspaces
+  /api/workspaces/resolve:
+    get:
+      description: Lets a runtime container resolve its own workspace identity from
+        the Coolify-injected COOLIFY_RESOURCE_UUID (the application/resource UUID)
+        plus its workspace PORTAL_API_KEY. The API-key owner must match the workspace
+        owner and the resource UUID must match the workspace's application_resource_id;
+        a mismatch returns not-found. Returns workspace data plus the optional Website
+        publish relationship, never exposing secrets.
+      parameters:
+      - description: The Coolify-injected application/resource UUID
+        in: query
+        name: resource_uuid
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceResolveResponse'
+          description: Resolved workspace
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthenticated or invalid API key
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Workspace not found for this resource UUID/API key
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Missing resource_uuid
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Resolve a workspace's runtime identity
+      tags:
+      - Workspaces
+  /internal/dns/cert:
+    post:
+      description: Internal endpoint for Caddy to push a cert and receive computed
+        TLSA.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CertPushRequest'
+        description: Cert push request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertPushResponse'
+          description: TLSA computed
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Push certificate and receive TLSA
+      tags:
+      - Gateway
+      - DNS
+  /internal/dns/cert/{domain}:
+    get:
+      description: Internal endpoint for Caddy to fetch the stored DANE key/cert.
+        Returns 404 if none exists yet.
+      parameters:
+      - description: Domain to fetch
+        in: path
+        name: domain
+        required: true
+        schema:
+          type: string
+      - description: 'Namespace: hns or icann'
+        in: query
+        name: namespace
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertGetResponse'
+          description: Existing DANE key and cert
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Fetch existing DANE certificate and key
+      tags:
+      - Gateway
+      - DNS
+  /internal/dns/tlsa:
+    post:
+      description: Internal endpoint for Caddy to push computed TLSA records.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TLSAUpdateRequest'
+        description: TLSA update request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertPushResponse'
+          description: TLSA updated
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Update TLSA record
+      tags:
+      - Gateway
+      - DNS
   /internal/ping:
     get:
       description: Returns service liveness status. Requires X-Gateway-Secret header
@@ -3653,6 +5948,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -3714,6 +6015,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/GatewayWebsiteResponse'
           description: Website is broken or deleted
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -3843,6 +6150,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/GatewayWebsiteStatusResponse'
           description: Website is broken or deleted
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -3850,6 +6163,116 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Internal server error occurred
       summary: Get website status for gateway
+      tags:
+      - Gateway
+  /internal/websites/changes:
+    get:
+      description: |-
+        Returns durable website lifecycle changes (published, removed) after the
+        supplied cursor, in ascending durable-ID order, together with the current
+        replay high-water mark. The gateway calls this after an SSE reconnect to
+        discover domains it missed during the gap without relying on visitor traffic.
+        Requires X-Gateway-Secret header for authentication.
+      parameters:
+      - description: Durable event cursor to resume after. Returns all events with
+          id > after. Omit to start from the beginning of the retained window.
+        in: query
+        name: after
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebsiteChangesResponse'
+          description: Reconciled changes
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid after cursor
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error occurred
+      summary: Reconcile website changes
+      tags:
+      - Gateway
+  /internal/websites/events:
+    get:
+      description: |-
+        Server-Sent Events endpoint for gateway-to-portal communication.
+        Streams website lifecycle events (published, removed) in real time.
+        Supports Last-Event-ID replay of durable events after a reconnect.
+        Requires X-Gateway-Secret header for authentication.
+      responses:
+        "200":
+          description: SSE event stream
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Stream website events via SSE
       tags:
       - Gateway
   /ipfs/{cid}:
@@ -3898,6 +6321,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -3952,6 +6381,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -4006,6 +6441,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -4110,6 +6551,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -4157,6 +6604,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -4183,12 +6636,6 @@ paths:
         description: Pin object
         required: true
       responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Success
         "202":
           content:
             application/json:
@@ -4219,6 +6666,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -4244,12 +6697,6 @@ paths:
         schema:
           type: string
       responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Success
         "202":
           description: Successful response
         "400":
@@ -4276,6 +6723,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -4330,6 +6783,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -4384,6 +6843,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -4415,12 +6880,6 @@ paths:
         description: Pin object
         required: true
       responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Success
         "202":
           content:
             application/json:
@@ -4451,6 +6910,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -4506,6 +6971,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:
@@ -4561,6 +7032,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation failed
         "500":
           content:
             application/json:

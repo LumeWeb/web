@@ -14,3 +14,6 @@ export { createUploadHandlers, resetUploadState } from "./upload-handlers";
 export { WebsiteStore, IPNSStore } from "./website-store";
 export type { IPNSKey, Website, SSLStatusEntry } from "./website-store";
 export { createWebsiteHandlers, resetWebsitesIPNSState } from "./website-handlers";
+export { WorkspaceStore } from "./workspace-store";
+export type { Workspace, WorkspaceAccess } from "./workspace-store";
+export { createWorkspaceHandlers, resetWorkspaceState } from "./workspace-handlers";
