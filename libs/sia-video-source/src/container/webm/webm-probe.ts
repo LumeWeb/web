@@ -18,6 +18,7 @@ import {
   readVint,
 } from './ebml.ts';
 import type { EbmlElement, EbmlWalkMode } from './ebml-reader.ts';
+import type { ByteSource } from '../../transport/byte-source.ts';
 import { containerKind } from '../../media/types.ts';
 import { ebmlWalkMode, findChild, findChildren, readEbmlElements, walkChildren } from './ebml-reader.ts';
 
@@ -27,6 +28,8 @@ export interface WebmClusterInfo {
   readonly dataOffset: number;
   /** Absolute end of the Cluster element's data (exclusive). */
   readonly end: number;
+  /** Keyframe evidence from the first video SimpleBlock, or null when absent. */
+  readonly keyframe: boolean | null;
   /** Absolute start of the Cluster element's id. */
   readonly offset: number;
   /** Timecode in seconds (Timecode × TimecodeScale / 1e9). */
@@ -65,8 +68,11 @@ const DEFAULT_TIMECODE_SCALE = 1_000_000;
 /** Nanoseconds per second (cluster Timecode × scale → seconds). */
 const NANOS_PER_SECOND = 1_000_000_000;
 
+/** The Cluster byte extents the walkers need (not timing/keyframe facts). */
+export type ClusterExtents = Pick<WebmClusterInfo, 'dataOffset' | 'end' | 'offset'>;
+
 /** Reconstructs the EbmlElement view of a probed Cluster (exact extents). */
-export function clusterElement(cluster: WebmClusterInfo): EbmlElement {
+export function clusterElement(cluster: ClusterExtents): EbmlElement {
   return {
     dataEnd: cluster.end,
     dataOffset: cluster.dataOffset,
@@ -84,7 +90,7 @@ export function clusterElement(cluster: WebmClusterInfo): EbmlElement {
  */
 export function firstBlockKeyframe(
   bytes: Uint8Array,
-  cluster: WebmClusterInfo,
+  cluster: ClusterExtents,
   trackNumber: null | number,
 ): boolean | null {
   for (const child of walkChildren(bytes, clusterElement(cluster), ebmlWalkMode.strict)) {
@@ -97,8 +103,10 @@ export function firstBlockKeyframe(
 
 /**
  * Probes `bytes` into a `WebmProbeResult`, or null when the bytes are not a
- * parseable WebM object (no EBML header, a non-`webm` DocType — MKV is
- * deferred — or no Segment/Cluster to anchor the index).
+ * parseable WebM object (no EBML header or a non-`webm` DocType — MKV is
+ * deferred). A strict (whole-object) walk additionally requires a Cluster to
+ * anchor the index; a sniff of a bounded head does not, so a head that ends
+ * before the first Cluster still yields its Info/Tracks codecs.
  */
 export function probeWebm(bytes: Uint8Array, mode: EbmlWalkMode = ebmlWalkMode.strict): null | WebmProbeResult {
   const top = readEbmlElements(bytes, 0, bytes.length, mode);
@@ -155,28 +163,24 @@ export function probeWebm(bytes: Uint8Array, mode: EbmlWalkMode = ebmlWalkMode.s
     if (cluster.id !== EBML_ELEMENT_ID.cluster) continue;
     const timecodeEl = findChild(bytes, cluster, EBML_ELEMENT_ID.clusterTimecode, mode);
     const timecodeTicks = timecodeEl ? readUint(bytes, timecodeEl.dataOffset, timecodeEl.dataEnd - timecodeEl.dataOffset) : null;
-    clusters.push({
+    const info = {
       dataOffset: cluster.dataOffset,
       end: cluster.dataEnd,
       offset: cluster.offset,
       timecodeSeconds: (timecodeTicks ?? 0) * (timecodeScale / NANOS_PER_SECOND),
       timecodeTicks,
-    });
+    };
+    clusters.push({ ...info, keyframe: firstBlockKeyframe(bytes, info, videoTrackNumber) });
   }
-  if (clusters.length === 0) return null;
+  // Only a strict full-object walk must anchor on a Cluster (the index needs
+  // byte extents). A sniff of a bounded head never does: the codec path reads
+  // only Segment + Info/Tracks, which can fit entirely before the first
+  // Cluster starts, so it must not be refused for lacking one.
+  if (mode === ebmlWalkMode.strict && clusters.length === 0) return null;
 
   const cuedClusterOffsets = new Set<number>();
   const cues = segmentChildren.find((element) => element.id === EBML_ELEMENT_ID.cues) ?? null;
-  if (cues) {
-    for (const cuePoint of findChildren(bytes, cues, EBML_ELEMENT_ID.cuePoint, mode)) {
-      const positions = findChildren(bytes, cuePoint, EBML_ELEMENT_ID.cueTrackPositions, mode);
-      for (const position of positions) {
-        const rel = findChild(bytes, position, EBML_ELEMENT_ID.cueClusterPosition, mode);
-        const relValue = rel ? readUint(bytes, rel.dataOffset, rel.dataEnd - rel.dataOffset) : null;
-        if (relValue !== null) cuedClusterOffsets.add(segmentDataStart + relValue);
-      }
-    }
-  }
+  if (cues) collectCueOffsets(bytes, cues, segmentDataStart, mode, cuedClusterOffsets);
 
   return { clusters, cuedClusterOffsets, durationSeconds, segmentDataStart, timecodeScale, tracks, videoTrackNumber };
 }
@@ -197,4 +201,143 @@ export function simpleBlockKeyframe(
   const flagsOffset = block.dataOffset + track.length + 2; // + 2-byte signed timecode
   if (flagsOffset >= block.dataEnd) return null;
   return (bytes[flagsOffset] & 0x80) !== 0;
+}
+
+/** Max bytes fetched in one windowed scan read over a Segment body. */
+const SCAN_WINDOW_BYTES = 64 * 1024;
+
+/** Max bytes fetched to parse a trailing Cues element (CuePoints are small). */
+const CUES_READ_CAP = 256 * 1024;
+
+/**
+ * Probes a webm whose object exceeds the bounded head: the head supplies the
+ * Segment/Info/Tracks facts and the remainder is streamed in bounded windows.
+ * Same `WebmProbeResult` shape as `probeWebm`, for the index builder that
+ * must not buffer a whole object just to extract cluster offsets.
+ */
+export async function probeWebmStreaming(source: ByteSource, head: Uint8Array): Promise<null | WebmProbeResult> {
+  const base = probeWebm(head, ebmlWalkMode.sniff);
+  if (base === null) return null;
+  const scanned = await scanSegmentStreaming(source, base.segmentDataStart, base.videoTrackNumber, base.timecodeScale, base.segmentDataStart);
+  if (scanned.clusters.length === 0) return null;
+  return {
+    clusters: scanned.clusters,
+    cuedClusterOffsets: scanned.cuedClusterOffsets,
+    durationSeconds: base.durationSeconds,
+    segmentDataStart: base.segmentDataStart,
+    timecodeScale: base.timecodeScale,
+    tracks: base.tracks,
+    videoTrackNumber: base.videoTrackNumber,
+  };
+}
+
+/**
+ * Adds every CueClusterPosition (made absolute against the Segment body start)
+ * to `out`. Shared by the full-buffer probe and the windowed scan.
+ */
+function collectCueOffsets(
+  bytes: Uint8Array,
+  cues: EbmlElement,
+  segmentDataStart: number,
+  mode: EbmlWalkMode,
+  out: Set<number>,
+): void {
+  for (const cuePoint of findChildren(bytes, cues, EBML_ELEMENT_ID.cuePoint, mode)) {
+    for (const position of findChildren(bytes, cuePoint, EBML_ELEMENT_ID.cueTrackPositions, mode)) {
+      const rel = findChild(bytes, position, EBML_ELEMENT_ID.cueClusterPosition, mode);
+      const relValue = rel ? readUint(bytes, rel.dataOffset, rel.dataEnd - rel.dataOffset) : null;
+      if (relValue !== null) out.add(segmentDataStart + relValue);
+    }
+  }
+}
+
+/** Reads `[offset, offset + length)` as one bounded buffer (short at EOF). */
+async function readBoundedRange(source: ByteSource, offset: number, length: number): Promise<null | Uint8Array> {
+  if (length <= 0) return null;
+  const reader = source.read({ length, offset }, { epoch: 0 }).getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      total += value.byteLength;
+      if (total >= length) break;
+    }
+  } finally {
+    void reader.cancel().catch(() => {/* empty */});
+  }
+  if (total === 0) return null;
+
+  const out = new Uint8Array(total);
+  let at = 0;
+  for (const chunk of chunks) {
+    const n = Math.min(chunk.byteLength, total - at);
+    out.set(chunk.subarray(0, n), at);
+    at += n;
+  }
+  return out;
+}
+
+/**
+ * Streams a bounded-head webm's Segment body from byte `start` to EOF in
+ * bounded windows. Cluster body bytes between elements are skipped (never
+ * buffered), so peak memory is the largest single window rather than the
+ * object size, while every Cluster's exact extents still get collected.
+ */
+async function scanSegmentStreaming(
+  source: ByteSource,
+  start: number,
+  videoTrackNumber: null | number,
+  timecodeScale: number,
+  segmentDataStart: number,
+): Promise<{ clusters: WebmClusterInfo[]; cuedClusterOffsets: Set<number>; }> {
+  const clusters: WebmClusterInfo[] = [];
+  const cuedClusterOffsets = new Set<number>();
+  let offset = start;
+  while (offset + 1 < source.size) {
+    const window = await readBoundedRange(source, offset, Math.min(SCAN_WINDOW_BYTES, source.size - offset));
+    if (window === null) break;
+    const idVint = readVint(window, 0, 'id');
+    const sizeVint = idVint === null ? null : readVint(window, idVint.length, 'size');
+    if (idVint === null || sizeVint === null) break;
+    const headerLength = idVint.length + sizeVint.length;
+    const bodyLength = sizeVint.unknown ? source.size - offset - headerLength : sizeVint.value;
+    const dataEnd = offset + headerLength + bodyLength;
+
+    if (idVint.value === EBML_ELEMENT_ID.cluster) {
+      const windowed: ClusterExtents = {
+        dataOffset: headerLength,
+        end: sizeVint.unknown ? window.length : Math.min(headerLength + bodyLength, window.length),
+        offset: 0,
+      };
+      const timecodeEl = findChild(window, clusterElement(windowed), EBML_ELEMENT_ID.clusterTimecode, ebmlWalkMode.sniff);
+      const timecodeTicks = timecodeEl ? readUint(window, timecodeEl.dataOffset, timecodeEl.dataEnd - timecodeEl.dataOffset) : null;
+      clusters.push({
+        dataOffset: offset + headerLength,
+        end: dataEnd,
+        keyframe: firstBlockKeyframe(window, windowed, videoTrackNumber),
+        offset,
+        timecodeSeconds: (timecodeTicks ?? 0) * (timecodeScale / NANOS_PER_SECOND),
+        timecodeTicks,
+      });
+    } else if (idVint.value === EBML_ELEMENT_ID.cues) {
+      const cuesBytes = await readBoundedRange(source, offset, Math.min(headerLength + bodyLength, CUES_READ_CAP));
+      if (cuesBytes !== null) {
+        const cuesElement = {
+          dataEnd: Math.min(dataEnd - offset, cuesBytes.byteLength),
+          dataOffset: headerLength,
+          headerLength,
+          id: EBML_ELEMENT_ID.cues,
+          offset: 0,
+          sizeUnknown: sizeVint.unknown,
+        };
+        collectCueOffsets(cuesBytes, cuesElement, segmentDataStart, ebmlWalkMode.sniff, cuedClusterOffsets);
+      }
+    }
+    if (sizeVint.unknown) break;
+    offset = dataEnd;
+  }
+  return { clusters, cuedClusterOffsets };
 }

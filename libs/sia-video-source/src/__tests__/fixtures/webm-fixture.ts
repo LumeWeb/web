@@ -96,14 +96,18 @@ export const WEBM_ID = {
   tracks: [0x16, 0x54, 0xae, 0x6b],
   trackType: [0x83],
   video: [0xe0],
+  voidElement: [0xec],
 } as const;
 
 /**
  * Builds a deterministic WebM object: EBML header + Segment(Info, Tracks,
  * `count` keyframe-leading Clusters at 0s/1s/…, Cues at the tail).
  */
-export function buildWebm(count: number, options: { nonSyncLast?: boolean; unknownSegmentSize?: boolean } = {}): Uint8Array {
-  const { nonSyncLast = false, unknownSegmentSize = false } = options;
+export function buildWebm(
+  count: number,
+  options: { nonSyncLast?: boolean; padLastClusterBytes?: number; unknownSegmentSize?: boolean } = {},
+): Uint8Array {
+  const { nonSyncLast = false, padLastClusterBytes = 0, unknownSegmentSize = false } = options;
   const ebmlHeader = ebmlElement(WEBM_ID.ebml, [
     ...ebmlElement(WEBM_ID.ebmlVersion, uintBytes(1)),
     ...ebmlElement(WEBM_ID.ebmlReadVersion, uintBytes(1)),
@@ -137,7 +141,10 @@ export function buildWebm(count: number, options: { nonSyncLast?: boolean; unkno
   let cursor = 0;
   for (let i = 0; i < count; i += 1) {
     const nonSync = nonSyncLast && i === count - 1;
-    const bytes = clusterBytes(i * 1_000, nonSync, i + 1);
+    // A padded last Cluster makes the object overrun a bounded probe head so
+    // tests can prove index building never buffers the whole object.
+    const pad = i === count - 1 ? padLastClusterBytes : 0;
+    const bytes = clusterBytes(i * 1_000, nonSync, i + 1, pad);
     clusters.push({ bytes, relOffset: cursor });
     cursor += bytes.length;
   }
@@ -155,11 +162,13 @@ export function buildWebm(count: number, options: { nonSyncLast?: boolean; unkno
 }
 
 /** One Cluster with a video (track 1, keyframe) + audio (track 2) SimpleBlock. */
-export function clusterBytes(timecodeTicks: number, nonSync: boolean, marker: number): number[] {
+export function clusterBytes(timecodeTicks: number, nonSync: boolean, marker: number, padBytes = 0): number[] {
+  const voidPad = padBytes > 0 ? ebmlElement(WEBM_ID.voidElement, Array<number>(padBytes).fill(0)) : [];
   return ebmlElement(WEBM_ID.cluster, [
     ...ebmlElement(WEBM_ID.clusterTimecode, uintBytes(timecodeTicks)),
     ...ebmlElement(WEBM_ID.simpleBlock, simpleBlock(1, 0, !nonSync, [0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, marker])),
     ...ebmlElement(WEBM_ID.simpleBlock, simpleBlock(2, 0, true, [0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, marker])),
+    ...voidPad,
   ]);
 }
 

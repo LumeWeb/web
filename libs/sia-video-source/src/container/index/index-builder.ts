@@ -6,6 +6,7 @@
 import { containerKind } from '../../media/types.ts';
 import type { ByteSource } from '../../transport/byte-source.ts';
 import { CuesIndex } from '../webm/cues-index.ts';
+import { probeWebmStreaming } from '../webm/webm-probe.ts';
 import { SidxIndex } from './sidx-index.ts';
 import type { ContainerProfile, IndexBuilder, RandomAccessIndex } from './random-access-index.ts';
 
@@ -13,16 +14,28 @@ import type { ContainerProfile, IndexBuilder, RandomAccessIndex } from './random
 export const INDEX_HEAD_LENGTH = 256 * 1024;
 
 /**
- * Builds a `CuesIndex` for native WebM. `build` reads the whole object once
- * (bounded by the source's own length) to walk the Segment's Clusters + Cues
- * into an exact-byte index. Registered after the fMP4 builders because it
- * only ever supports `webm` profiles.
+ * Builds a `CuesIndex` for native WebM. Cluster byte offsets live throughout
+ * the object (never in a bounded head), so `build` reads the head first and
+ * streams any excess in bounded windows; it never buffers the whole object.
+ * Registered after the fMP4 builders because it only ever supports `webm`
+ * profiles.
  */
 export class CuesIndexBuilder implements IndexBuilder {
+  readonly #headLength: number;
+
+  constructor(headLength = INDEX_HEAD_LENGTH) {
+    this.#headLength = headLength;
+  }
+
   async build(source: ByteSource, profile: ContainerProfile): Promise<null | RandomAccessIndex> {
     if (!this.supports(profile)) return null;
-    const bytes = await readFullSource(source);
-    return bytes ? CuesIndex.build(bytes) : null;
+    const head = await readHead(source, this.#headLength);
+    if (head === null) return null;
+    // The whole object fit in the head: the strict full-buffer walk suffices.
+    if (source.size <= head.byteLength) return CuesIndex.build(head);
+    // Otherwise cluster offsets must be streamed from bounded windows.
+    const probe = await probeWebmStreaming(source, head);
+    return probe === null ? null : CuesIndex.fromProbe(probe);
   }
 
   supports(profile: ContainerProfile): boolean {
@@ -70,11 +83,6 @@ export async function buildFirstIndex(
 /** Ordered best-effort ladder of the index strategies the registry ships. */
 export function createIndexBuilderRegistry(): IndexBuilder[] {
   return [new SidxIndexBuilder(), new CuesIndexBuilder()];
-}
-
-/** Reads a whole source (short at EOF), or null for an empty object. */
-async function readFullSource(source: ByteSource): Promise<null | Uint8Array> {
-  return readHead(source, source.size);
 }
 
 /** Reads the first `length` bytes (short at EOF), or null for an empty object. */

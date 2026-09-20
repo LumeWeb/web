@@ -29,7 +29,8 @@
 import { indexGranularity } from '../../media/types.ts';
 import type { IndexGranularity, RandomAccessIndex, RangeRead } from '../index/random-access-index.ts';
 import { ebmlWalkMode } from './ebml-reader.ts';
-import { firstBlockKeyframe, probeWebm } from './webm-probe.ts';
+import { probeWebm } from './webm-probe.ts';
+import type { WebmProbeResult } from './webm-probe.ts';
 
 /** One range: an exact, time-anchored, RAP-aware Cluster window. */
 interface CuesRange {
@@ -61,7 +62,15 @@ export class CuesIndex implements RandomAccessIndex {
    */
   static build(bytes: Uint8Array): CuesIndex | null {
     const probe = probeWebm(bytes, ebmlWalkMode.strict);
-    if (probe === null || probe.clusters.length === 0) return null;
+    return probe === null ? null : CuesIndex.fromProbe(probe);
+  }
+
+  /**
+   * Turns probed facts (full-buffer or windowed-streamed) into a `CuesIndex`.
+   * Returns null when the object carried no Cluster to anchor the index.
+   */
+  static fromProbe(probe: WebmProbeResult): CuesIndex | null {
+    if (probe.clusters.length === 0) return null;
 
     const ranges: CuesRange[] = [];
     for (let index = 0; index < probe.clusters.length; index += 1) {
@@ -73,8 +82,7 @@ export class CuesIndex implements RandomAccessIndex {
       // muxer still wrote a CuePoint for it. Absent block evidence, a cued
       // cluster is assumed RAP; an uncued, block-less cluster falls back to
       // optimistic-true so a floor-seek still has somewhere to land.
-      const blockKeyframe = firstBlockKeyframe(bytes, cluster, probe.videoTrackNumber);
-      const rap = blockKeyframe ?? probe.cuedClusterOffsets.has(cluster.offset);
+      const rap = cluster.keyframe ?? probe.cuedClusterOffsets.has(cluster.offset);
       // First range carries the init (byte 0 → first cluster end); later
       // ranges start at the Cluster id so a bounded read spans exactly that
       // cluster (its Timecode + SimpleBlocks, self-contained per WebM).
