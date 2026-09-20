@@ -94,7 +94,12 @@ function sniffIsoBmff(bytes: Uint8Array): ContainerKind {
       if (type === 'moof') return containerKind.fmp4;
       if (type === 'moov') sawMoov = true;
       const largesizeNext = offset + low;
-      if (largesizeNext > bytes.length) return containerKind.unknown;
+      if (largesizeNext > bytes.length) {
+        // Mirrors the 32-bit rule: only a partial top-level `sidx` is
+        // inconclusive; a truncated `moov` still marks progressive MP4.
+        if (type === 'sidx') return containerKind.unknown;
+        return sawMoov ? containerKind.mp4 : containerKind.unknown;
+      }
       offset = largesizeNext;
       continue;
     }
@@ -105,13 +110,15 @@ function sniffIsoBmff(bytes: Uint8Array): ContainerKind {
     if (type === 'moov') sawMoov = true;
     if (type === 'mdat') return containerKind.mp4;
 
-    // A box whose declared extent runs past the head we have is *truncated*,
-    // not progressive: a partial top-level `sidx` (or any other box) in front
-    // of a `moof` cannot tell us whether media follows as moof or mdat. Only a
-    // fully-walked chain (or an explicit `mdat` header) justifies the
-    // progressive-MP4 verdict.
+    // A box whose declared extent runs past the head we have is truncated. A
+    // partial top-level `sidx` cannot tell whether media follows as moof or
+    // mdat, while a truncated `moov` still marks progressive MP4 — moov often
+    // exceeds the head probe on large files.
     const next = offset + size;
-    if (next > bytes.length) return containerKind.unknown;
+    if (next > bytes.length) {
+      if (type === 'sidx') return containerKind.unknown;
+      return sawMoov ? containerKind.mp4 : containerKind.unknown;
+    }
     offset = next;
   }
 

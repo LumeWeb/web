@@ -74,6 +74,23 @@ describe('sniffContainer', () => {
     expect(sniffContainer(bytes)).toBe(containerKind.mp4);
   });
 
+  it('keeps progressive MP4 when a moov larger than the head probe is truncated', () => {
+    // Regression: a declared moov size past the 4 KiB head probe cuts the walk
+    // mid-moov. A truncated moov still marks progressive MP4 — large files
+    // routinely carry multi-KiB moov boxes.
+    const full = concat(ftyp(), box('moov', new Uint8Array(4200)));
+    const truncatedHead = full.subarray(0, 4096);
+    expect(sniffContainer(truncatedHead)).toBe(containerKind.mp4);
+  });
+
+  it('stays unknown when a truncated non-sidx box ends the walk before any moov', () => {
+    // Only a partial top-level `sidx` is inconclusive by itself; a truncated
+    // non-sidx box with no moov before it reads as unknown, never progressive.
+    const full = concat(ftyp(), box('free', new Uint8Array(4200)));
+    const truncatedHead = full.subarray(0, 4096);
+    expect(sniffContainer(truncatedHead)).toBe(containerKind.unknown);
+  });
+
   it('detects MPEG-TS by the 0x47 sync byte at packet strides', () => {
     const bytes = tsPackets(4);
     expect(sniffContainer(bytes)).toBe(containerKind.ts);
