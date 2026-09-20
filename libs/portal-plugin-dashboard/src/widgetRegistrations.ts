@@ -1,6 +1,5 @@
 import { Identity } from "@lumeweb/portal-framework-core";
 import {
-  CORE_NS,
   createNamespacedId,
   type WidgetAreaDefinition,
   type WidgetRegistration,
@@ -105,17 +104,6 @@ export const widgetRegistrations: WidgetRegistration[] = [
     areaId: createNamespacedId("dashboard", "security"),
     componentName: "widgets/account/2fa",
     id: createNamespacedId("dashboard", "2fa"),
-    position: {
-      size: {
-        height: 2,
-        width: 6,
-      },
-    },
-  },
-  {
-    areaId: createNamespacedId(CORE_NS, "desktop-sidebar"),
-    componentName: "widgets/upload/button",
-    id: createNamespacedId("dashboard", "upload-button"),
     position: {
       size: {
         height: 2,
