@@ -34,6 +34,12 @@ export type { WebsiteRequest } from "./api/generated/schemas/websiteRequest";
 export type { WebsiteResponse } from "./api/generated/schemas/websiteResponse";
 export type { WebsiteItem } from "./api/generated/schemas/websiteItem";
 export type { WebsiteUpdateRequest } from "./api/generated/schemas/websiteUpdateRequest";
+export type { WorkspaceResponse } from "./api/generated/schemas/workspaceResponse";
+export type { WorkspaceRequest } from "./api/generated/schemas/workspaceRequest";
+export type { WorkspaceListResponseResponse } from "./api/generated/schemas/workspaceListResponseResponse";
+export type { WorkspaceAccessResponse } from "./api/generated/schemas/workspaceAccessResponse";
+export type { WorkspaceResolveResponse } from "./api/generated/schemas/workspaceResolveResponse";
+export type { WorkspaceResolveWebsite } from "./api/generated/schemas/workspaceResolveWebsite";
 export type { WebsiteConfigResponse } from "./api/generated/schemas/websiteConfigResponse";
 export type { SSLStatusInfo } from "./api/generated/schemas/sSLStatusInfo";
 export type { WebsiteValidateResponse } from "./api/generated/schemas/websiteValidateResponse";
@@ -74,6 +80,8 @@ export { JwtAuthManager } from "./auth";
 export { IpnsClient } from "./api/ipns";
 export { WebsitesClient, WebsiteValidationReason, getValidationReason, isValidationReason } from "./api/websites";
 export type { WebsiteValidationReasonValue, WebsitesClientOptions, WatchOptions, SSLWatcher, SSLCallbacks, SSLError } from "./api/websites";
+export { WorkspacesClient, WorkspaceStatus } from "./api/workspaces";
+export type { WorkspacesClientOptions, WorkspaceStatusValue, WorkspaceWatchOptions, WorkspaceWatcher, WorkspaceCallbacks, WorkspaceEvents, WorkspaceWatchError } from "./api/workspaces";
 export type { IpnsClientOptions } from "./api/ipns";
 
 // Error exports

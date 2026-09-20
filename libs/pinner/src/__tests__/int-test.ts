@@ -11,6 +11,9 @@ import {
   IPNSStore,
   createWebsiteHandlers,
   resetWebsitesIPNSState,
+  WorkspaceStore,
+  createWorkspaceHandlers,
+  resetWorkspaceState,
 } from "./msw";
 
 const pinStore = new PinStore();
@@ -18,15 +21,18 @@ const tusStore = new TusStore();
 const operationStore = new OperationStore();
 const websiteStore = new WebsiteStore();
 const ipnsStore = new IPNSStore();
+const workspaceStore = new WorkspaceStore();
 
 await pinStore.initializeDefaults();
 await websiteStore.initializeDefaults();
 await ipnsStore.initializeDefaults();
+await workspaceStore.initializeDefaults();
 
 const allHandlers = [
   ...createPinHandlers(pinStore),
   ...createUploadHandlers(tusStore, operationStore),
   ...createWebsiteHandlers(websiteStore, ipnsStore),
+  ...createWorkspaceHandlers(workspaceStore),
 ];
 
 export const test = await createIntTest({
@@ -36,6 +42,7 @@ export const test = await createIntTest({
     resetPinServiceState(pinStore);
     resetUploadState(tusStore, operationStore);
     resetWebsitesIPNSState(websiteStore, ipnsStore);
+    resetWorkspaceState(workspaceStore);
   },
   enableLogging: true,
 });
