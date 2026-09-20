@@ -197,9 +197,43 @@ describe.runIf(IN_NODE)('CuesIndex against the committed webm-cues.bin fixture',
     expect(ranges[1].offset).toBeGreaterThan(0);
   });
 });
-/**
- * Node section parsing the committed real ffmpeg fixture
- * (browser-decodable-webm-vp8-vorbis.webm, an 8-byte-Segment-size WebM with a
- * two-video-keyframe + audio-only-tail cluster layout) is restored when that
- * fixture and webm-browser-fixture land with the decodable-media contract.
- */
+
+describe.runIf(IN_NODE)('CuesIndex against the real ffmpeg browser fixture (8-byte Segment size)', () => {
+  it('parses the 111772-byte WebM into an exact-byte cued index', async () => {
+    // The browser MSE suite resolves the same bytes browser-safe (base64) from
+    // the sibling webm-browser-fixture module; this node section reads the
+    // committed .webm from disk (node:fs) so the index is built against the
+    // exact bytes the generator reproduced and verified.
+    const { readFileSync } = await import('node:fs');
+    const { join } = await import('node:path');
+    const bytes = new Uint8Array(
+      readFileSync(join(process.cwd(), 'src', '__fixtures__', 'media', 'browser-decodable-webm-vp8-vorbis.webm')),
+    );
+    const index = CuesIndex.build(bytes);
+    expect(index).not.toBeNull();
+    expect(index!.granularity).toBe('exact-byte');
+    const ranges = walkRanges(index!);
+    expect(ranges.length).toBeGreaterThanOrEqual(2);
+    expect(ranges[0].offset).toBe(0);
+    expect(ranges[0].terminal).toBe(false);
+    expect(ranges[0].startSeconds).toBe(0);
+    // First range carries the init up to the first cluster's end; the next
+    // range starts exactly there (bounded Cluster windows, not whole-object).
+    expect(ranges[1].offset).toBe(ranges[0].length);
+    expect(ranges[1].offset).toBeGreaterThan(0);
+    // The two real video-keyframe clusters are honest RAPs.
+    expect(ranges[0].rap).toBe(true);
+    expect(ranges[1].rap).toBe(true);
+    // ffmpeg's final cluster is an audio-only tail (two Vorbis SimpleBlocks,
+    // no video keyframe, not referenced by Cues) -> the index must report
+    // rap:false ("bad news wins") while still terminating the load.
+    expect(ranges[ranges.length - 1].terminal).toBe(true);
+    expect(ranges[ranges.length - 1].rap).toBe(false);
+    // Info/Duration is in Segment Ticks (2003 @ 1e6 ns/tick): the reader must
+    // scale it, not report bare 2003 s.
+    expect(index!.durationSeconds).not.toBeNull();
+    expect(index!.durationSeconds!).toBeGreaterThan(1.9);
+    expect(index!.durationSeconds!).toBeLessThan(2.2);
+    expect(ranges[ranges.length - 1].endSeconds).toBeCloseTo(2.003, 1);
+  });
+});
