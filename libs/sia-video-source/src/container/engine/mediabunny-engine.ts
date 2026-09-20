@@ -55,7 +55,8 @@ export async function analyzeMp4Head(head: Uint8Array): Promise<Mp4HeadParse | n
     });
     try {
       const tracks = await input.getTracks();
-      const mapped: MediaTrack[] = [];
+      const mapped: Omit<MediaTrack, 'trackId'>[] = [];
+      const reportedIds: unknown[] = [];
       for (const track of tracks) {
         const kind = KIND_BY_MEDIABUNNY_TYPE[track.type];
         if (!kind) continue; // subtitle/data tracks are out of the first release
@@ -66,13 +67,16 @@ export async function analyzeMp4Head(head: Uint8Array): Promise<Mp4HeadParse | n
           codec,
           kind,
           timescale: typeof timescale === 'number' ? timescale : null,
-          // Minimal fixtures report a degenerate id of 0; mediaTrackId falls
-          // back to the 1-based ordinal so identities stay stable and positive.
-          trackId: mediaTrackId(track.id, mapped.length + 1),
         });
+        // Minimal fixtures report a degenerate id of 0, so ids are resolved as
+        // a whole list afterwards: a fallback ordinal must never equal a valid
+        // sibling id (or two tracks would share one identity).
+        reportedIds.push(track.id);
       }
+      const trackIds = resolveTrackIds(reportedIds);
+      const resolved: MediaTrack[] = mapped.map((track, index) => ({ ...track, trackId: trackIds[index] }));
       const durationSeconds = await input.getDurationFromMetadata().catch(() => null);
-      return { durationSeconds: durationSeconds ?? null, tracks: mapped };
+      return { durationSeconds: durationSeconds ?? null, tracks: resolved };
     } finally {
       input.dispose();
     }
@@ -89,4 +93,28 @@ export async function analyzeMp4Head(head: Uint8Array): Promise<Mp4HeadParse | n
  */
 export function mediaTrackId(reported: unknown, ordinal: number): number {
   return typeof reported === 'number' && Number.isInteger(reported) && reported > 0 ? reported : ordinal;
+}
+
+/**
+ * Maps a whole reported-id list into distinct positive ids. Each reported id
+ * keeps its value when it is a positive integer; degenerate (non-positive or
+ * absent) ids fall back to their 1-based ordinal within the mapped list. A
+ * value that collides with an earlier assignment — a valid positive id that
+ * equals another track's ordinal fallback, or a duplicated valid id — is
+ * remapped to the first free positive ordinal, preserving iteration order.
+ * Distinct ids keep source-buffer wiring unambiguous even when a container
+ * reports duplicate or zero track ids.
+ */
+export function resolveTrackIds(reported: readonly unknown[]): number[] {
+  const used = new Set<number>();
+  return reported.map((id, index) => {
+    let resolved = mediaTrackId(id, index + 1);
+    if (used.has(resolved)) {
+      let candidate = 1;
+      while (used.has(candidate)) candidate += 1;
+      resolved = candidate;
+    }
+    used.add(resolved);
+    return resolved;
+  });
 }

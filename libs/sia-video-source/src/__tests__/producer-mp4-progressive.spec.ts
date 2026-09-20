@@ -186,6 +186,50 @@ describe('ProgressiveMp4Producer (accumulate → refragment shell)', () => {
     expect(producer.isPending()).toBe(false);
   });
 
+  it('a superseded run never clears bytes being pushed for the newer epoch (seek mid-refragment)', async () => {
+    // Epoch-1 refragment stays in flight until released, so a reset(2) + push
+    // can land while the superseded job is still awaiting the fragment engine.
+    const deferred: { resolve: (value: FragmentedMp4Output) => void } = { resolve: () => undefined };
+    const received: { bytes: Uint8Array[] } = { bytes: [] };
+    const producer = new ProgressiveMp4Producer({
+      fragment: (bytes) => {
+        received.bytes.push(bytes);
+        if (received.bytes.length === 1) {
+          return new Promise<FragmentedMp4Output>((resolve) => {
+            deferred.resolve = resolve;
+          });
+        }
+        return Promise.resolve({ init: INIT, media: [MEDIA_A] });
+      },
+      outputMime: FMP4_MIME,
+    });
+    const segments: { bytes: Uint8Array; kind: string; terminal?: boolean }[] = [];
+    producer.onSegment((segment) => segments.push(segment));
+    producer.push(new Uint8Array([1]), 0, 1);
+    producer.flush(1);
+    // Seek supersedes epoch-1 while its refragment is in flight, then epoch-2
+    // starts pushing its own object.
+    producer.reset(2);
+    producer.push(new Uint8Array([2, 2]), 0, 2);
+    // Epoch-1's in-flight job settles now; its teardown must not wipe the
+    // epoch-2 bytes still sitting in the shared accumulator.
+    deferred.resolve({ init: INIT, media: [MEDIA_A] });
+    await settle();
+    expect(received.bytes).toHaveLength(1);
+    expect(Array.from(received.bytes[0])).toEqual([1]);
+    // Epoch-2 still refragments its own complete object.
+    producer.flush(2);
+    await settle();
+    expect(received.bytes).toHaveLength(2);
+    expect(Array.from(received.bytes[1])).toEqual([2, 2]);
+    // Only the epoch-2 object reaches listeners.
+    expect(segments).toEqual([
+      { bytes: INIT, kind: 'init' },
+      { bytes: MEDIA_A, kind: 'media', terminal: true },
+    ]);
+    expect(producer.isPending()).toBe(false);
+  });
+
   it('reports a fragment failure once through onError and stays inert afterwards', async () => {
     const producer = new ProgressiveMp4Producer({
       fragment: fakeFragment({ bytes: [] }, { init: INIT, media: [] }, new Error('engine down')),

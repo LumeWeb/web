@@ -140,6 +140,12 @@ export class ProgressiveMp4Producer implements AppendableProducer {
 
   async #run(epoch: number): Promise<void> {
     const bytes = this.#snapshotBytes();
+    // The accumulation is consumed here and the shared accumulator is emptied
+    // at run START, not in a finally: bytes pushed before this run belong to
+    // this snapshot, and a superseded run must never clear bytes a NEWER epoch
+    // is still pushing (its finally would wipe a reset()'s fresh pushes).
+    this.#accumulated = [];
+    this.#accumulatedBytes = 0;
     try {
       const output = await this.#fragment(bytes);
       // A seek/supersede landed while the engine was working: drop the result.
@@ -150,8 +156,6 @@ export class ProgressiveMp4Producer implements AppendableProducer {
       this.reportError(error);
     } finally {
       if (this.#jobStartedAtEpoch === epoch) this.#jobStartedAtEpoch = null;
-      this.#accumulated = [];
-      this.#accumulatedBytes = 0;
     }
   }
 

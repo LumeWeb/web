@@ -23,11 +23,12 @@ import {
   type Mp4RuntimeProbeResult,
   probeProgressiveMp4,
 } from '../container/engine/mp4-runtime-probe.ts';
-import { analyzeMp4Head, mediaTrackId } from '../container/engine/mediabunny-engine.ts';
+import { analyzeMp4Head, mediaTrackId, resolveTrackIds } from '../container/engine/mediabunny-engine.ts';
 import {
   MEDIABUNNY_MP4_SHA256,
   mediabunnyMp4FixtureBytes,
 } from './fixtures/mediabunny-mp4-fixture.ts';
+import { progressiveMp4Fixture } from './fixtures/progressive-mp4-fixture.ts';
 
 const IN_NODE = typeof document === 'undefined';
 
@@ -98,6 +99,34 @@ describe.runIf(IN_NODE)('Mediabunny MP4 engine (node)', () => {
     expect(mediaTrackId(0, 1)).toBe(1);
     expect(mediaTrackId(-1, 2)).toBe(2);
     expect(mediaTrackId(7, 3)).toBe(7);
+  });
+
+  it('maps reported ids to distinct positive ids, remapping collisions deterministically', () => {
+    // Degenerate video id 0 falls back to ordinal 1, but a valid sibling audio
+    // id 1 keeps 1 — the audio must move, never collide.
+    expect(resolveTrackIds([0, 1])).toEqual([1, 2]);
+    expect(resolveTrackIds([1, 0])).toEqual([1, 2]);
+    // All-valid ids pass through untouched, preserving iteration order.
+    expect(resolveTrackIds([1, 2])).toEqual([1, 2]);
+    expect(resolveTrackIds([3, 7])).toEqual([3, 7]);
+    // All-degenerate ids resolve to stable ordinals.
+    expect(resolveTrackIds([0, 0])).toEqual([1, 2]);
+    expect(resolveTrackIds([-1, 0, -3])).toEqual([1, 2, 3]);
+    // A valid id duplicating an earlier id is also remapped, not emitted twice.
+    expect(resolveTrackIds([7, 7])).toEqual([7, 1]);
+  });
+
+  it('analyzeMp4Head assigns distinct ids when a degenerate video id collides with a valid audio id', async () => {
+    // Real container: video tkhd id 0 (degenerate) + audio tkhd id 1 (valid).
+    // Mapping must not let audio collapse onto video's ordinal-1 fallback.
+    const bytes = progressiveMp4Fixture({ audioTrackId: 1, videoTrackId: 0 });
+    const parsed = await analyzeMp4Head(bytes);
+    expect(parsed).not.toBeNull();
+    const video = parsed?.tracks.find((t) => t.kind === 'video');
+    const audio = parsed?.tracks.find((t) => t.kind === 'audio');
+    expect(video?.trackId).toBe(1);
+    expect(audio?.trackId).toBe(2);
+    expect(new Set(parsed?.tracks.map((t) => t.trackId)).size).toBe(2);
   });
 });
 

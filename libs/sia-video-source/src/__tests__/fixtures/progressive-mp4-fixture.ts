@@ -25,6 +25,8 @@
 export interface ProgressiveMp4FixtureOptions {
   /** mp4a frame payload override (defaults to the real BBB AAC-LC frame). */
   readonly audioFrame?: Uint8Array;
+  /** Audio `tkhd` track id (defaults to 2, a distinct positive id). */
+  readonly audioTrackId?: number;
   /** Seconds of media; drives sample counts at 30fps / 44.1kHz 1024-frame audio. */
   readonly seconds?: number;
   /** RAP anchors every N video samples (default 15 = 0.5 s at 30 fps). */
@@ -35,6 +37,8 @@ export interface ProgressiveMp4FixtureOptions {
   readonly videoDeltaFrame?: Uint8Array;
   /** avc1 IDR slice payload for RAP anchors (defaults to the real BBB keyframe AU). */
   readonly videoRapFrame?: Uint8Array;
+  /** Video `tkhd` track id (defaults to 1, a distinct positive id). */
+  readonly videoTrackId?: number;
 }
 
 const REAL_AVC1_AVCC_HEX = '000000356176634301640032ffe1001b67640032ac7284405005bb0110000003001000000303c0f183184601000768e843874b22c0';
@@ -111,8 +115,10 @@ export function progressiveMp4Fixture(options: ProgressiveMp4FixtureOptions = {}
   const VIDEO_DURATION_PER_SAMPLE = Math.round(VIDEO_TIMESCALE / 30); // 3000 @ 30fps
   const AUDIO_TIMESCALE = 44_100;
   const AUDIO_DURATION_PER_SAMPLE = 1024;
-  const video = sampleTrack('video', 1, videoSizes, VIDEO_DURATION_PER_SAMPLE, VIDEO_TIMESCALE, [...syncSet].sort((a, b) => a - b));
-  const audio = sampleTrack('audio', 2, audioSizes, AUDIO_DURATION_PER_SAMPLE, AUDIO_TIMESCALE);
+  const videoTrackId = options.videoTrackId ?? 1;
+  const audioTrackId = options.audioTrackId ?? 2;
+  const video = sampleTrack('video', videoTrackId, videoSizes, VIDEO_DURATION_PER_SAMPLE, VIDEO_TIMESCALE, [...syncSet].sort((a, b) => a - b));
+  const audio = sampleTrack('audio', audioTrackId, audioSizes, AUDIO_DURATION_PER_SAMPLE, AUDIO_TIMESCALE);
   const totalVideoBytes = videoSizes.reduce((sum, size) => sum + size, 0);
   const moov = isoBox('moov', concat(authMvhd(seconds), video.trak, audio.trak));
   const head = concat(ftypBox(), moov);
