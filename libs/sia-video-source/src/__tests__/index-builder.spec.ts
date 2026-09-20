@@ -4,7 +4,8 @@
  * generic bytes (`ByteSource`) and a `ContainerProfile`; the first builder
  * that returns a non-null index wins.
  *
- * The registry covers the sidx builder (`SidxIndexBuilder`) and the WebM
+ * The registry covers the sidx builder (`SidxIndexBuilder`), the moof-walk
+ * builder (`MoofWalkIndexBuilder`) for sidx-less fMP4, and the WebM
  * `CuesIndexBuilder`, tried in registration order.
  */
 
@@ -12,12 +13,14 @@ import { describe, expect, it } from 'vitest';
 import { CuesIndex } from '../container/webm/cues-index.ts';
 import { ebmlWalkMode } from '../container/webm/ebml-reader.ts';
 import { probeWebm, probeWebmStreaming, SCAN_WINDOW_BYTES } from '../container/webm/webm-probe.ts';
+import { MoofWalkIndex } from '../container/index/moof-index.ts';
 import { SidxIndex } from '../container/index/sidx-index.ts';
 import {
   buildFirstIndex,
   createIndexBuilderRegistry,
   CuesIndexBuilder,
   INDEX_HEAD_LENGTH,
+  MoofWalkIndexBuilder,
   SidxIndexBuilder,
 } from '../container/index/index-builder.ts';
 import type { ContainerProfile, IndexBuilder, RandomAccessIndex } from '../container/index/random-access-index.ts';
@@ -26,6 +29,7 @@ import { containerKind, indexGranularity } from '../media/types.ts';
 import type { RangeRead } from '../media/types.ts';
 import type { ByteRange, ByteSource, ReadOptions } from '../transport/byte-source.ts';
 import { MemoryByteSource } from '../transport/memory-byte-source.ts';
+import { buildSidxFmp4, buildSidxLessFmp4, scanTopLevel } from './fixtures/moof-fmp4-fixture.ts';
 import { buildWebm, scanEbmlTop } from './fixtures/webm-fixture.ts';
 
 /** ByteSource that records every ranged read's extent — proves bounded reads. */
@@ -186,6 +190,119 @@ describe('SidxIndexBuilder', () => {
   });
 });
 
+describe('MoofWalkIndexBuilder', () => {
+  it('supports only the fmp4 container profile', () => {
+    const builder = new MoofWalkIndexBuilder();
+    expect(builder.supports(fmp4)).toBe(true);
+    for (const container of [containerKind.ts, containerKind.mp4, containerKind.mkv, containerKind.webm, containerKind.unknown] as const) {
+      expect(builder.supports(containerProfileFor(container))).toBe(false);
+    }
+  });
+
+  it('builds a MoofWalkIndex from a sidx-less fragmented source', async () => {
+    const builder = new MoofWalkIndexBuilder();
+    const source = new MemoryByteSource(buildSidxLessFmp4(3));
+    const index = await builder.build(source, fmp4);
+    expect(index).toBeInstanceOf(MoofWalkIndex);
+    expect(index?.granularity).toBe(indexGranularity['exact-byte']);
+    expect(index?.durationSeconds).toBe(10);
+    expect(index?.first?.offset).toBe(0);
+    expect(index?.seek(1.5)?.offset).toBeGreaterThan(0);
+  });
+
+  it('returns null when a top-level sidx exists (manifested fMP4 stays SidxIndex\'s job)', async () => {
+    const builder = new MoofWalkIndexBuilder();
+    const source = new MemoryByteSource(buildSidxFmp4());
+    expect(await builder.build(source, fmp4)).toBeNull();
+  });
+
+  it('streams a moof walk for sidx-less fMP4 overrunning the head without a whole-object read', async () => {
+    const count = 12;
+    const bytes = buildSidxLessFmp4(count, { mdatPadBytes: 256 * 1024 });
+    expect(bytes.byteLength).toBeGreaterThan(INDEX_HEAD_LENGTH);
+    const source = new RecordingByteSource(bytes);
+    const index = await new MoofWalkIndexBuilder().build(source, fmp4);
+    expect(index).toBeInstanceOf(MoofWalkIndex);
+
+    // The streamed walk is byte-identical to the full-buffer walk's output.
+    const full = MoofWalkIndex.parse(bytes);
+    expect(full).not.toBeNull();
+    expect(walkRanges(index!)).toEqual(walkRanges(full!));
+
+    // No single ranged read buffers the whole object: the largest read is the
+    // bounded head, and fragment evidence comes from per-moof windows.
+    const maxRead = Math.max(...source.reads.map((read) => read.length));
+    expect(maxRead).toBeLessThanOrEqual(INDEX_HEAD_LENGTH);
+    expect(maxRead).toBeLessThan(bytes.byteLength);
+
+    // Reads scale with the fragment count (head + per-box headers + moof
+    // bodies), never with the object's media bytes: a small constant ceiling.
+    expect(source.reads.length).toBeLessThanOrEqual(1 + count * 4);
+    // mdat payloads are skipped by declared size, so the bytes fetched stay a
+    // small fraction of the object instead of the whole thing.
+    const totalFetched = source.reads.reduce((sum, read) => sum + read.length, 0);
+    expect(totalFetched).toBeLessThan(bytes.byteLength / 8);
+  });
+
+  it('walks moofs larger than the read cap whole instead of truncating them', async () => {
+    // A trun with 24k per-sample entries (12 B each) puts every moof far past
+    // the once-moof read cap; the full-buffer parse settles the whole sample
+    // tables, so the streamed walk must read each sized moof extent in full
+    // (never truncate) to land on the same byte-exact index.
+    const count = 2;
+    const bytes = buildSidxLessFmp4(count, { sampleCount: 24_000 });
+    expect(bytes.byteLength).toBeGreaterThan(INDEX_HEAD_LENGTH);
+    const source = new RecordingByteSource(bytes);
+    const streamed = await new MoofWalkIndexBuilder().build(source, fmp4);
+    const full = MoofWalkIndex.parse(bytes);
+    expect(full).not.toBeNull();
+    // The truncation symptom: a capped read leaves the out-of-cap trailing
+    // sample tables outside the window, so the walk bails null.
+    expect(streamed).toBeInstanceOf(MoofWalkIndex);
+    if (streamed) {
+      // The streamed walk is byte-identical to the full-buffer walk's output.
+      expect(walkRanges(streamed)).toEqual(walkRanges(full!));
+    }
+
+    // The fix reads each declared moof extent in full, exactly once.
+    const moofs = scanTopLevel(bytes).filter((box) => box.type === 'moof');
+    const maxMoof = Math.max(...moofs.map((box) => box.end - box.start));
+    for (const moof of moofs) {
+      expect(source.reads.some((read) => read.offset === moof.start && read.length === moof.end - moof.start)).toBe(true);
+    }
+    // Reads stay bounded by the moof extents (plus the head), never an mdat
+    // payload window or a whole-object buffer.
+    expect(Math.max(...source.reads.map((read) => read.length))).toBe(Math.max(INDEX_HEAD_LENGTH, maxMoof));
+
+    // mdat payloads are skipped by declared size: the only post-head mdat
+    // bytes fetched are the 8-byte tail of a box-header fetch at each mdat
+    // start.
+    const mdats = scanTopLevel(bytes).filter((box) => box.type === 'mdat');
+    let fetchedMdatBody = 0;
+    for (const read of source.reads.slice(1)) {
+      const readEnd = read.offset + read.length;
+      for (const mdat of mdats) {
+        const overlapStart = Math.max(read.offset, mdat.start + 8);
+        const overlapEnd = Math.min(readEnd, mdat.end);
+        if (overlapEnd > overlapStart) fetchedMdatBody += overlapEnd - overlapStart;
+      }
+    }
+    expect(fetchedMdatBody).toBeLessThanOrEqual(8 * mdats.length);
+  });
+
+  it('returns null for garbage or empty sources', async () => {
+    const builder = new MoofWalkIndexBuilder();
+    expect(await builder.build(new MemoryByteSource(new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7])), fmp4)).toBeNull();
+    expect(await builder.build(new MemoryByteSource(new Uint8Array()), fmp4)).toBeNull();
+  });
+
+  it('returns null for a profile it does not support', async () => {
+    const builder = new MoofWalkIndexBuilder();
+    const source = new MemoryByteSource(buildSidxLessFmp4(2));
+    expect(await builder.build(source, containerProfileFor(containerKind.ts))).toBeNull();
+  });
+});
+
 describe('CuesIndexBuilder', () => {
   const webm: ContainerProfile = containerProfileFor(containerKind.webm);
 
@@ -290,11 +407,13 @@ describe('CuesIndexBuilder', () => {
 });
 
 describe('index builder registry', () => {
-  it('ships an ordered default ladder that leads with the sidx builder', () => {
+  it('ships an ordered default ladder: sidx, moof-walk, then cues', () => {
     const builders = createIndexBuilderRegistry();
     expect(builders.length).toBeGreaterThan(0);
     expect(builders[0]).toBeInstanceOf(SidxIndexBuilder);
     expect(builders[0]?.supports(fmp4)).toBe(true);
+    expect(builders[1]).toBeInstanceOf(MoofWalkIndexBuilder);
+    expect(builders[1]?.supports(fmp4)).toBe(true);
   });
 
   it('builds the first non-null index in registration order', async () => {

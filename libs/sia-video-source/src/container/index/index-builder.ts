@@ -7,6 +7,7 @@ import { containerKind } from '../../media/types.ts';
 import type { ByteSource } from '../../transport/byte-source.ts';
 import { CuesIndex } from '../webm/cues-index.ts';
 import { probeWebmStreaming } from '../webm/webm-probe.ts';
+import { MoofWalkIndex, scanMoofStreaming } from './moof-index.ts';
 import { SidxIndex } from './sidx-index.ts';
 import type { ContainerProfile, IndexBuilder, RandomAccessIndex } from './random-access-index.ts';
 
@@ -40,6 +41,34 @@ export class CuesIndexBuilder implements IndexBuilder {
 
   supports(profile: ContainerProfile): boolean {
     return profile.container === containerKind.webm;
+  }
+}
+
+/**
+ * Builds a `MoofWalkIndex` for sidx-less fragmented fMP4. `build` reads the
+ * bounded head; an object that overruns it is walked in windows that read each
+ * moof's sample tables but skip `mdat` payloads by declared size, so neither a
+ * whole-object buffer nor a full-object read happens before playback.
+ * Registered after the sidx builder: manifested fMP4 stays `SidxIndex`'s job,
+ * and this builder returns null when it finds a top-level `sidx` in the walk.
+ */
+export class MoofWalkIndexBuilder implements IndexBuilder {
+  readonly #headLength: number;
+
+  constructor(headLength = INDEX_HEAD_LENGTH) {
+    this.#headLength = headLength;
+  }
+
+  async build(source: ByteSource, profile: ContainerProfile): Promise<null | RandomAccessIndex> {
+    if (!this.supports(profile)) return null;
+    const head = await readHead(source, this.#headLength);
+    if (head === null) return null;
+    if (source.size <= head.byteLength) return MoofWalkIndex.parse(head);
+    return scanMoofStreaming(source, head);
+  }
+
+  supports(profile: ContainerProfile): boolean {
+    return profile.container === containerKind.fmp4;
   }
 }
 
@@ -82,7 +111,7 @@ export async function buildFirstIndex(
 
 /** Ordered best-effort ladder of the index strategies the registry ships. */
 export function createIndexBuilderRegistry(): IndexBuilder[] {
-  return [new SidxIndexBuilder(), new CuesIndexBuilder()];
+  return [new SidxIndexBuilder(), new MoofWalkIndexBuilder(), new CuesIndexBuilder()];
 }
 
 /** Reads the first `length` bytes (short at EOF), or null for an empty object. */
