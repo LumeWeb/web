@@ -11,6 +11,19 @@ function box(type: string, payload: Uint8Array = new Uint8Array(8)): Uint8Array 
   return bytes;
 }
 
+function box64(type: string, low: number, payload: Uint8Array = new Uint8Array(8)): Uint8Array {
+  // 64-bit largesize box: a size field of 1 defers to an 8-byte size whose
+  // low word is `low`; the high word stays 0 like the sniff requires.
+  const bytes = new Uint8Array(16 + payload.byteLength);
+  const view = new DataView(bytes.buffer);
+  view.setUint32(0, 1);
+  for (let i = 0; i < 4; i++) bytes[4 + i] = type.charCodeAt(i);
+  view.setUint32(8, 0);
+  view.setUint32(12, low);
+  bytes.set(payload, 16);
+  return bytes;
+}
+
 function concat(...parts: Uint8Array[]): Uint8Array {
   const bytes = new Uint8Array(parts.reduce((total, part) => total + part.byteLength, 0));
   let offset = 0;
@@ -97,6 +110,19 @@ describe('sniffContainer', () => {
     const full = concat(ftyp(), box('moov'), box('free', new Uint8Array(4200)));
     const truncatedHead = full.subarray(0, 4096);
     expect(sniffContainer(truncatedHead)).toBe(containerKind.unknown);
+  });
+
+  it('keeps progressive MP4 when a 64-bit largesize mdat runs past the head probe', () => {
+    // A progressive file whose mdat uses the 64-bit largesize form and is cut
+    // at the head must read as progressive MP4, matching the 32-bit mdat path.
+    const full = concat(ftyp(), box('moov'), box64('mdat', 0x7fffffff, new Uint8Array(0x2000)));
+    const truncatedHead = full.subarray(0, 4096);
+    expect(sniffContainer(truncatedHead)).toBe(containerKind.mp4);
+  });
+
+  it('detects progressive MP4 for an intact 64-bit largesize mdat', () => {
+    const bytes = concat(ftyp(), box('moov'), box64('mdat', 24, new Uint8Array(8)));
+    expect(sniffContainer(bytes)).toBe(containerKind.mp4);
   });
 
   it('detects MPEG-TS by the 0x47 sync byte at packet strides', () => {

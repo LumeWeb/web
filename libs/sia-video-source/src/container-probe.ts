@@ -92,6 +92,7 @@ function sniffIsoBmff(bytes: Uint8Array): ContainerKind {
       const low = readUint32Be(bytes, offset + 12);
       if (readUint32Be(bytes, offset + 8) !== 0 || low < 8) return sawMoov ? containerKind.mp4 : containerKind.unknown;
       if (type === 'moof') return containerKind.fmp4;
+      if (type === 'mdat') return containerKind.mp4;
       if (type === 'moov') sawMoov = true;
       const largesizeNext = offset + low;
       if (largesizeNext > bytes.length) {
