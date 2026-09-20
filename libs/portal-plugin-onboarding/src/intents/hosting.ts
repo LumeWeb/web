@@ -2,7 +2,7 @@ import type { IntentStepConfig, OnboardingStep } from "../types";
 import { DOCS_HOSTING_URL } from "../constants";
 import { useCliInstalled } from "../hooks/useCliInstalled";
 import { useIsSubscribed } from "../hooks/useIsSubscribed";
-import { useHasWebsites } from "../hooks/useHasWebsites";
+import { useHasWorkspaces } from "../hooks/useHasWorkspaces";
 import { CLI_STEP, DOCS_STEP } from "./pinning";
 
 export const HOSTING_STEPS: IntentStepConfig[] = [
@@ -18,9 +18,9 @@ export const HOSTING_STEPS: IntentStepConfig[] = [
   {
     id: "deploy",
     label: "Deploy Website",
-    description: "Deploy your first website to IPFS",
-    ctaLabel: "Create website",
-    ctaRoute: "/websites",
+    description: "Create a Workspace to build and publish your website",
+    ctaLabel: "Create site",
+    ctaRoute: "/sites/new",
   },
 ];
 
@@ -30,17 +30,23 @@ export function useHostingSteps(active = true): {
 } {
   const { isInstalled, isBusy: cliBusy } = useCliInstalled(active);
   const { isSubscribed, isBusy: subscribeBusy } = useIsSubscribed(active);
-  const { hasWebsites, isBusy: websitesBusy } = useHasWebsites(active);
+  const { hasWorkspace, isBusy: workspacesBusy } = useHasWorkspaces(active);
 
   const steps: OnboardingStep[] = [
     { ...HOSTING_STEPS[0], isComplete: isSubscribed },
     { ...HOSTING_STEPS[1], isComplete: true },
     { ...HOSTING_STEPS[2], isComplete: isInstalled },
-    { ...HOSTING_STEPS[3], isComplete: hasWebsites },
+    {
+      ...HOSTING_STEPS[3],
+      isComplete: hasWorkspace,
+      // When a Workspace already exists, direct users to the unified Sites
+      // list; otherwise guide them straight into first-class creation.
+      ...(hasWorkspace ? { ctaRoute: "/sites" } : { ctaRoute: "/sites/new" }),
+    },
   ];
 
   return {
     steps,
-    isBusy: active && (cliBusy || subscribeBusy || websitesBusy),
+    isBusy: active && (cliBusy || subscribeBusy || workspacesBusy),
   };
 }

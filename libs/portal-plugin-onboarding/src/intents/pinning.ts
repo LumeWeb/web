@@ -2,7 +2,6 @@ import type { IntentStepConfig, OnboardingStep } from "../types";
 import { DOCS_PINNING_URL } from "../constants";
 import { useCliInstalled } from "../hooks/useCliInstalled";
 import { useIsSubscribed } from "../hooks/useIsSubscribed";
-import { useHasPins } from "../hooks/useHasPins";
 
 export const CLI_STEP: IntentStepConfig = {
   id: "cli",
@@ -31,13 +30,6 @@ export const PINNING_STEPS: IntentStepConfig[] = [
   },
   DOCS_STEP,
   CLI_STEP,
-  {
-    id: "upload",
-    label: "Upload Content",
-    description: "Pin your first file or directory to IPFS",
-    ctaLabel: "Upload files",
-    ctaRoute: "/services/ipfs/files",
-  },
 ];
 
 export function usePinningSteps(active = true): {
@@ -46,17 +38,15 @@ export function usePinningSteps(active = true): {
 } {
   const { isInstalled, isBusy: cliBusy } = useCliInstalled(active);
   const { isSubscribed, isBusy: subscribeBusy } = useIsSubscribed(active);
-  const { hasPins, isBusy: pinsBusy } = useHasPins(active);
 
   const steps: OnboardingStep[] = [
     { ...PINNING_STEPS[0], isComplete: isSubscribed },
     { ...PINNING_STEPS[1], isComplete: true },
     { ...PINNING_STEPS[2], isComplete: isInstalled },
-    { ...PINNING_STEPS[3], isComplete: hasPins },
   ];
 
   return {
     steps,
-    isBusy: active && (cliBusy || subscribeBusy || pinsBusy),
+    isBusy: active && (cliBusy || subscribeBusy),
   };
 }

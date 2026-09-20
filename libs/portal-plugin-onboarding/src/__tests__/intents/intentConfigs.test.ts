@@ -5,12 +5,11 @@ import { INTENT_STEP_CONFIGS, DEFAULT_INTENT } from "@/intents/index";
 import { OnboardingIntent } from "@/types";
 
 describe("PINNING_STEPS", () => {
-  it("has 4 steps: subscribe, docs, cli, upload", () => {
-    expect(PINNING_STEPS).toHaveLength(4);
+  it("has 3 steps: subscribe, docs, cli", () => {
+    expect(PINNING_STEPS).toHaveLength(3);
     expect(PINNING_STEPS[0].id).toBe("subscribe");
     expect(PINNING_STEPS[1].id).toBe("docs");
     expect(PINNING_STEPS[2].id).toBe("cli");
-    expect(PINNING_STEPS[3].id).toBe("upload");
   });
 
   it("subscribe step navigates to /account/subscription", () => {
@@ -26,11 +25,6 @@ describe("PINNING_STEPS", () => {
   it("cli step has null ctaRoute (clipboard copy)", () => {
     expect(PINNING_STEPS[2].ctaRoute).toBeNull();
     expect(PINNING_STEPS[2].ctaLabel).toBe("Copy install command");
-  });
-
-  it("upload step navigates to /files", () => {
-    expect(PINNING_STEPS[3].ctaRoute).toBe("/services/ipfs/files");
-    expect(PINNING_STEPS[3].ctaLabel).toBe("Upload files");
   });
 });
 
@@ -58,9 +52,9 @@ describe("HOSTING_STEPS", () => {
     expect(HOSTING_STEPS[2].ctaLabel).toBe("Copy install command");
   });
 
-  it("deploy step navigates to /websites", () => {
-    expect(HOSTING_STEPS[3].ctaRoute).toBe("/websites");
-    expect(HOSTING_STEPS[3].ctaLabel).toBe("Create website");
+  it("deploy step navigates to /sites/new (Workspace creation)", () => {
+    expect(HOSTING_STEPS[3].ctaRoute).toBe("/sites/new");
+    expect(HOSTING_STEPS[3].ctaLabel).toBe("Create site");
   });
 });
 

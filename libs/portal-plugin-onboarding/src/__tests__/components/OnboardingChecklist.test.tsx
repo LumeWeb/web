@@ -8,21 +8,19 @@ const mockStepsPinning = [
   { id: "docs", isComplete: true, label: "Read the Docs", description: "Learn how to pin content, manage CIDs, and automate your workflow", ctaLabel: "Browse docs", ctaRoute: null, docsUrl: "https://docs.pinner.xyz/ipfs/quickstart" },
   { id: "cli", isComplete: false, label: "Install CLI", description: "Copy the command below, paste it into your terminal, and run it to install the Pinner CLI", ctaLabel: "Copy install command", ctaRoute: null },
   { id: "subscribe", isComplete: false, label: "Subscribe", description: "Choose a plan to start pinning content to the IPFS network", ctaLabel: "View plans", ctaRoute: "/account/subscription" },
-  { id: "upload", isComplete: false, label: "Upload Content", description: "Pin your first file or directory to IPFS", ctaLabel: "Upload files", ctaRoute: "/services/ipfs/files" },
 ];
 
 const mockStepsHosting = [
   { id: "docs", isComplete: true, label: "Read the Docs", description: "Learn how to deploy websites and manage domains", ctaLabel: "Browse docs", ctaRoute: null, docsUrl: "https://docs.pinner.xyz/web/quickstart" },
   { id: "cli", isComplete: false, label: "Install CLI", description: "Copy the command below, paste it into your terminal, and run it to install the Pinner CLI", ctaLabel: "Copy install command", ctaRoute: null },
   { id: "subscribe", isComplete: false, label: "Subscribe", description: "Choose a plan to start hosting websites on IPFS", ctaLabel: "View plans", ctaRoute: "/account/subscription" },
-  { id: "deploy", isComplete: false, label: "Deploy Website", description: "Deploy your first website to IPFS", ctaLabel: "Create website", ctaRoute: "/websites" },
+  { id: "deploy", isComplete: false, label: "Deploy Website", description: "Create a Workspace to build and publish your website", ctaLabel: "Create site", ctaRoute: "/sites/new" },
 ];
 
 const mockStepsComplete = [
   { id: "docs", isComplete: true, label: "Read the Docs", description: "Learn how to pin content, manage CIDs, and automate your workflow", ctaLabel: "Browse docs", ctaRoute: null, docsUrl: "https://docs.pinner.xyz/ipfs/quickstart" },
   { id: "cli", isComplete: true, label: "Install CLI", description: "Copy the command below, paste it into your terminal, and run it to install the Pinner CLI", ctaLabel: "Copy install command", ctaRoute: null },
   { id: "subscribe", isComplete: true, label: "Subscribe", description: "Choose a plan to start pinning content to the IPFS network", ctaLabel: "View plans", ctaRoute: "/account/subscription" },
-  { id: "upload", isComplete: true, label: "Upload Content", description: "Pin your first file or directory to IPFS", ctaLabel: "Upload files", ctaRoute: "/services/ipfs/files" },
 ];
 
 vi.mock("@/hooks", () => ({
@@ -148,7 +146,7 @@ describe("OnboardingChecklist", () => {
     await expect.element(page.getByText("Unable to load onboarding status")).toBeVisible();
   });
 
-  it("shows full checklist with 4 steps for pinning intent", async () => {
+  it("shows full checklist with 3 steps for pinning intent", async () => {
     mockUseOnboardingStatus.mockReturnValue({
       steps: mockStepsPinning,
       completedCount: 0,
@@ -160,8 +158,8 @@ describe("OnboardingChecklist", () => {
     render(<OnboardingChecklist />);
     await expect.element(page.getByTestId("step-cli")).toBeVisible();
     await expect.element(page.getByTestId("step-subscribe")).toBeVisible();
-    await expect.element(page.getByTestId("step-upload")).toBeVisible();
-    await expect.element(page.getByText("0 of 4")).toBeVisible();
+    await expect.element(page.getByTestId("step-docs")).toBeVisible();
+    await expect.element(page.getByText("0 of 3")).toBeVisible();
   });
 
   it("shows 4 steps for hosting intent", async () => {
@@ -211,7 +209,7 @@ describe("OnboardingChecklist", () => {
     expect(stored.dismissed).toBe(true);
   });
 
-  it("shows 'Upload files' CTA for pinning intent", async () => {
+  it("shows 'View plans' CTA for pinning intent", async () => {
     mockUseOnboardingStatus.mockReturnValue({
       steps: mockStepsPinning,
       completedCount: 0,
@@ -221,10 +219,10 @@ describe("OnboardingChecklist", () => {
     });
 
     render(<OnboardingChecklist />);
-    await expect.element(page.getByTestId("step-upload")).toHaveTextContent("Upload files");
+    await expect.element(page.getByTestId("step-subscribe")).toHaveTextContent("View plans");
   });
 
-  it("shows 'Create website' CTA for hosting intent", async () => {
+  it("shows 'Create site' CTA for hosting intent", async () => {
     mockUseOnboardingStatus.mockReturnValue({
       steps: mockStepsHosting,
       completedCount: 0,
@@ -234,10 +232,10 @@ describe("OnboardingChecklist", () => {
     });
 
     render(<OnboardingChecklist />);
-    await expect.element(page.getByTestId("step-deploy")).toHaveTextContent("Create website");
+    await expect.element(page.getByTestId("step-deploy")).toHaveTextContent("Create site");
   });
 
-  it("shows 'Upload files' CTA when intent is null (default)", async () => {
+  it("shows 'View plans' CTA when intent is null (default)", async () => {
     mockUseOnboardingStatus.mockReturnValue({
       steps: mockStepsPinning,
       completedCount: 0,
@@ -247,6 +245,6 @@ describe("OnboardingChecklist", () => {
     });
 
     render(<OnboardingChecklist />);
-    await expect.element(page.getByTestId("step-upload")).toHaveTextContent("Upload files");
+    await expect.element(page.getByTestId("step-subscribe")).toHaveTextContent("View plans");
   });
 });
