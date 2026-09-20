@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { sniffContainer } from '../container-probe.ts';
+import { containerKind } from '../media/types.ts';
 
 function box(type: string, payload: Uint8Array = new Uint8Array(8)): Uint8Array {
   const bytes = new Uint8Array(8 + payload.byteLength);
@@ -7,6 +8,19 @@ function box(type: string, payload: Uint8Array = new Uint8Array(8)): Uint8Array 
   view.setUint32(0, bytes.byteLength);
   for (let i = 0; i < 4; i++) bytes[4 + i] = type.charCodeAt(i);
   bytes.set(payload, 8);
+  return bytes;
+}
+
+function box64(type: string, low: number, payload: Uint8Array = new Uint8Array(8)): Uint8Array {
+  // 64-bit largesize box: a size field of 1 defers to an 8-byte size whose
+  // low word is `low`; the high word stays 0 like the sniff requires.
+  const bytes = new Uint8Array(16 + payload.byteLength);
+  const view = new DataView(bytes.buffer);
+  view.setUint32(0, 1);
+  for (let i = 0; i < 4; i++) bytes[4 + i] = type.charCodeAt(i);
+  view.setUint32(8, 0);
+  view.setUint32(12, low);
+  bytes.set(payload, 16);
   return bytes;
 }
 
@@ -39,6 +53,18 @@ function ftyp(brand = 'isom'): Uint8Array {
   return box('ftyp', payload);
 }
 
+/**
+ * Indexed finite-VOD fMP4: ftyp + moov + a large top-level `sidx` whose
+ * declared size carries the first `moof` past byte 4096, then `moof`+`mdat`.
+ * Layout: ftyp(24) moov(40) sidx(4196 @ 64 → ends 4260) moof(16) mdat(16).
+ */
+function indexedFmp4Bytes(): Uint8Array {
+  const ftypBox = ftyp();
+  const moovBox = box('moov', new Uint8Array(32));
+  const sidxBox = box('sidx', new Uint8Array(4188));
+  return concat(ftypBox, moovBox, sidxBox, box('moof'), box('mdat'));
+}
+
 function tsPackets(count: number): Uint8Array {
   const bytes = new Uint8Array(188 * count);
   for (let i = 0; i < count; i++) bytes[i * 188] = 0x47;
@@ -48,37 +74,88 @@ function tsPackets(count: number): Uint8Array {
 describe('sniffContainer', () => {
   it('detects fragmented MP4 (ftyp followed by moof)', () => {
     const bytes = concat(ftyp(), box('moof'), box('mdat'));
-    expect(sniffContainer(bytes)).toBe('fmp4');
+    expect(sniffContainer(bytes)).toBe(containerKind.fmp4);
   });
 
   it('keeps calling a file fragmented when moof comes after moov', () => {
     const bytes = concat(ftyp(), box('moov'), box('moof'), box('mdat'));
-    expect(sniffContainer(bytes)).toBe('fmp4');
+    expect(sniffContainer(bytes)).toBe(containerKind.fmp4);
   });
 
   it('detects progressive MP4 (ftyp + moov before media data)', () => {
     const bytes = concat(ftyp(), box('moov'), box('mdat'));
-    expect(sniffContainer(bytes)).toBe('mp4');
+    expect(sniffContainer(bytes)).toBe(containerKind.mp4);
+  });
+
+  it('keeps progressive MP4 when a moov larger than the head probe is truncated', () => {
+    // Regression: a declared moov size past the 4 KiB head probe cuts the walk
+    // mid-moov. A truncated moov still marks progressive MP4 — large files
+    // routinely carry multi-KiB moov boxes.
+    const full = concat(ftyp(), box('moov', new Uint8Array(4200)));
+    const truncatedHead = full.subarray(0, 4096);
+    expect(sniffContainer(truncatedHead)).toBe(containerKind.mp4);
+  });
+
+  it('stays unknown when a truncated non-sidx box ends the walk before any moov', () => {
+    // Only a partial top-level `sidx` is inconclusive by itself; a truncated
+    // non-sidx box with no moov before it reads as unknown, never progressive.
+    const full = concat(ftyp(), box('free', new Uint8Array(4200)));
+    const truncatedHead = full.subarray(0, 4096);
+    expect(sniffContainer(truncatedHead)).toBe(containerKind.unknown);
+  });
+
+  it('stays unknown when a truncated box follows an intact moov', () => {
+    // A partial `free` after moov carries no media evidence: moof segments may
+    // still follow past the probe, so the verdict cannot lean progressive.
+    const full = concat(ftyp(), box('moov'), box('free', new Uint8Array(4200)));
+    const truncatedHead = full.subarray(0, 4096);
+    expect(sniffContainer(truncatedHead)).toBe(containerKind.unknown);
+  });
+
+  it('keeps progressive MP4 when a 64-bit largesize mdat runs past the head probe', () => {
+    // A progressive file whose mdat uses the 64-bit largesize form and is cut
+    // at the head must read as progressive MP4, matching the 32-bit mdat path.
+    const full = concat(ftyp(), box('moov'), box64('mdat', 0x7fffffff, new Uint8Array(0x2000)));
+    const truncatedHead = full.subarray(0, 4096);
+    expect(sniffContainer(truncatedHead)).toBe(containerKind.mp4);
+  });
+
+  it('detects progressive MP4 for an intact 64-bit largesize mdat', () => {
+    const bytes = concat(ftyp(), box('moov'), box64('mdat', 24, new Uint8Array(8)));
+    expect(sniffContainer(bytes)).toBe(containerKind.mp4);
   });
 
   it('detects MPEG-TS by the 0x47 sync byte at packet strides', () => {
     const bytes = tsPackets(4);
-    expect(sniffContainer(bytes)).toBe('ts');
+    expect(sniffContainer(bytes)).toBe(containerKind.ts);
   });
 
   it('rejects a coincidental 0x47 that does not stride like TS packets', () => {
     const bytes = new Uint8Array(188 * 2);
     bytes[0] = 0x47; // only the first packet is synced
-    expect(sniffContainer(bytes)).toBe('unknown');
+    expect(sniffContainer(bytes)).toBe(containerKind.unknown);
   });
 
   it('detects WebM and Matroska from the EBML signature', () => {
-    expect(sniffContainer(ebml('webm'))).toBe('webm');
-    expect(sniffContainer(ebml('matroska'))).toBe('mkv');
+    expect(sniffContainer(ebml('webm'))).toBe(containerKind.webm);
+    expect(sniffContainer(ebml('matroska'))).toBe(containerKind.mkv);
   });
 
   it('classifies short and text input as unknown', () => {
-    expect(sniffContainer(new Uint8Array(4))).toBe('unknown');
-    expect(sniffContainer(new TextEncoder().encode('<html>definitely not video</html>'))).toBe('unknown');
+    expect(sniffContainer(new Uint8Array(4))).toBe(containerKind.unknown);
+    expect(sniffContainer(new TextEncoder().encode('<html>definitely not video</html>'))).toBe(containerKind.unknown);
+  });
+
+  it('does not misread a truncated top-level sidx as progressive MP4', () => {
+    const full = indexedFmp4Bytes();
+    // The 4 KiB head probe cuts inside the top-level `sidx` (its declared size
+    // runs past byte 4096 and the first moof lies beyond the probe): the walk
+    // cannot decide between progressive and fragmented, so it must be
+    // inconclusive — never a definitive "progressive MP4" verdict.
+    const truncatedHead = full.subarray(0, 4096);
+    expect(sniffContainer(truncatedHead)).toBe(containerKind.unknown);
+    // Once the head is large enough to reach the moof the same bytes classify
+    // as fragmented MP4.
+    expect(sniffContainer(full)).toBe(containerKind.fmp4);
   });
 });

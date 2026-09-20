@@ -7,7 +7,9 @@
  * failing after megabytes of ranged I/O.
  */
 
-export type ContainerKind = 'fmp4' | 'mkv' | 'mp4' | 'ts' | 'unknown' | 'webm';
+import { containerKind, type ContainerKind } from './media/types.ts';
+
+export type { ContainerKind };
 
 const EBML_SIGNATURE = [0x1a, 0x45, 0xdf, 0xa3] as const;
 const TS_PACKET_LENGTH = 188;
@@ -21,13 +23,13 @@ const MAX_ISO_BOX_SCAN = 1 << 16;
  *   below.
  */
 export function sniffContainer(bytes: Uint8Array): ContainerKind {
-  if (bytes.length < 8) return 'unknown';
+  if (bytes.length < 8) return containerKind.unknown;
 
   if (readAscii(bytes, 4, 4) === 'ftyp') return sniffIsoBmff(bytes);
-  if (isMpegTs(bytes)) return 'ts';
+  if (isMpegTs(bytes)) return containerKind.ts;
   if (isEbml(bytes)) return sniffEbmlDocType(bytes);
 
-  return 'unknown';
+  return containerKind.unknown;
 }
 
 function isEbml(bytes: Uint8Array): boolean {
@@ -65,7 +67,7 @@ function readUint32Be(bytes: Uint8Array, offset: number): number {
 
 function sniffEbmlDocType(bytes: Uint8Array): 'mkv' | 'webm' {
   const documentType = new TextDecoder().decode(bytes.subarray(0, Math.min(bytes.length, 256)));
-  return documentType.includes('webm') && !documentType.includes('matroska') ? 'webm' : 'mkv';
+  return documentType.includes('webm') && !documentType.includes('matroska') ? containerKind.webm : containerKind.mkv;
 }
 
 /**
@@ -88,21 +90,38 @@ function sniffIsoBmff(bytes: Uint8Array): ContainerKind {
       // as "rest of file". None of the sniffing depends on exact extents past
       // this point.
       const low = readUint32Be(bytes, offset + 12);
-      if (readUint32Be(bytes, offset + 8) !== 0 || low < 8) return sawMoov ? 'mp4' : 'unknown';
-      if (type === 'moof') return 'fmp4';
+      if (readUint32Be(bytes, offset + 8) !== 0 || low < 8) return sawMoov ? containerKind.mp4 : containerKind.unknown;
+      if (type === 'moof') return containerKind.fmp4;
+      if (type === 'mdat') return containerKind.mp4;
       if (type === 'moov') sawMoov = true;
-      offset += low;
+      const largesizeNext = offset + low;
+      if (largesizeNext > bytes.length) {
+        // Mirrors the 32-bit rule: only a truncated `moov` still marks
+        // progressive; partial `sidx` or metadata boxes stay inconclusive.
+        if (type === 'sidx') return containerKind.unknown;
+        return sawMoov && type === 'moov' ? containerKind.mp4 : containerKind.unknown;
+      }
+      offset = largesizeNext;
       continue;
     }
 
-    if (size < 8) return sawMoov ? 'mp4' : 'unknown';
+    if (size < 8) return sawMoov ? containerKind.mp4 : containerKind.unknown;
 
-    if (type === 'moof') return 'fmp4';
+    if (type === 'moof') return containerKind.fmp4;
     if (type === 'moov') sawMoov = true;
-    if (type === 'mdat') return 'mp4';
+    if (type === 'mdat') return containerKind.mp4;
 
-    offset += size;
+    // A box whose declared extent runs past the head we have is truncated.
+    // Only the `moov` itself still marks progressive — moov often exceeds the
+    // head probe; a partial `sidx` or post-moov metadata box gives no media
+    // evidence and stays inconclusive.
+    const next = offset + size;
+    if (next > bytes.length) {
+      if (type === 'sidx') return containerKind.unknown;
+      return sawMoov && type === 'moov' ? containerKind.mp4 : containerKind.unknown;
+    }
+    offset = next;
   }
 
-  return sawMoov ? 'mp4' : 'unknown';
+  return sawMoov ? containerKind.mp4 : containerKind.unknown;
 }

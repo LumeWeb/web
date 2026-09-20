@@ -11,6 +11,7 @@
  */
 
 import type { AppMetadata } from '@siafoundation/sia-storage';
+import type { IndexGranularity, PlaybackMode, TrackSummary } from './media/types.ts';
 
 /** Wire protocol version; 0 is the initial, unreleased protocol. */
 export const PROTOCOL_VERSION = 0;
@@ -77,6 +78,8 @@ export type MainToWorkerMessage =
       readonly requestId: RequestId;
       readonly type: 'APP_KEY';
     }
+  /** Current media playhead; drives bounded finite-VOD scheduling and eviction. */
+  | { readonly requestId: RequestId; readonly time: number; readonly type: 'PLAYHEAD'; }
   | { readonly requestId: RequestId; readonly time: number; readonly type: 'SEEK'; }
   | { readonly requestId: RequestId; readonly type: 'ATTACH'; }
   | { readonly requestId: RequestId; readonly type: 'PLAY'; }
@@ -85,15 +88,29 @@ export type MainToWorkerMessage =
 
 export type SiaVideoMessage = MainToWorkerMessage | WorkerToMainMessage;
 
-/** What the worker knows about the accepted source after probing. */
+/**
+ * What the worker knows about the accepted source after probing.
+ *
+ * The capability fields — `playback`, `indexGranularity`, `tracks` — are
+ * optional extras: every worker built against the current protocol populates
+ * them, but a host that predates them can ignore the extra JSON fields. The
+ * wire guard accepts any `info` object for `SOURCE_OK`, so future fields keep
+ * landing without a version bump.
+ */
 export interface SourceInfo {
   readonly container: string;
   /** Media duration in seconds when it can vouch for one, else `null`. */
   readonly durationSeconds: null | number;
+  /** How precisely this object can answer time→byte seeks right now. */
+  readonly indexGranularity?: IndexGranularity;
   /** MSE-ready MIME type the worker will append with (or hands the host for fallback appends). */
   readonly mime: string;
   /** MSE construction site for this play session. */
   readonly mode: WorkerMode;
+  /** Container/codec-decided playback mode the worker will actually use. */
+  readonly playback?: PlaybackMode;
+  /** Track codecs in track order, for UI/debug; empty when unknown. */
+  readonly tracks?: readonly TrackSummary[];
 }
 
 /**
@@ -107,16 +124,54 @@ export interface WorkerConfig {
   /** `Builder`'s `app` parameter, identifying the app to the indexer. */
   app: AppMetadata;
   indexerUrl: string;
+  /**
+   * Host-side worker-MSE preference carried on `HELLO` (absent = `'auto'`).
+   * `'main'` forces the main-thread MSE fallback (CHUNK posting) even on
+   * runtimes that can construct MSE in a dedicated worker; `'auto'` lets the
+   * worker select from its own runtime capability check. Workers that predate
+   * the field ignore it; `workerConfigsEqual` ignores it (it is a mode
+   * preference, not connection identity).
+   */
+  workerMse?: WorkerMsePreference;
 }
 
 /** Failure kinds the worker reports; see `errors.ts` for the MediaError mapping. */
-export type WorkerErrorCode = 'decode' | 'network' | 'unsupported';
+export const workerErrorCode = {
+  decode: 'decode',
+  network: 'network',
+  unsupported: 'unsupported',
+} as const;
+
+export type WorkerErrorCode = (typeof workerErrorCode)[keyof typeof workerErrorCode];
 
 /** Identifies how the player element is being fed an MSE source. */
-export type WorkerMode = 'main' | 'worker';
+export const workerMode = {
+  main: 'main',
+  worker: 'worker',
+} as const;
+
+export type WorkerMode = (typeof workerMode)[keyof typeof workerMode];
+
+/** Host preference for which MSE construction site a session may use. */
+export const workerMsePreference = {
+  auto: 'auto',
+  main: 'main',
+} as const;
+
+export type WorkerMsePreference = (typeof workerMsePreference)[keyof typeof workerMsePreference];
 
 /** Worker → main. */
 export type WorkerToMainMessage =
+  | {
+      /**
+       * End-of-stream: the object's bytes have been fully delivered and the
+       * worker has nothing left to append. In main mode the host responds by
+       * calling `MediaSource.endOfStream()` once its append queue drains; in
+       * worker mode the worker ends its own MediaSource and never posts this.
+       */
+      readonly requestId: RequestId;
+      readonly type: 'ENDED';
+    }
   | {
       readonly buffered: readonly BufferWindow[];
       /** Total bytes delivered to the decoder pipeline so far. */
@@ -163,6 +218,7 @@ export function isMainToWorkerMessage(message: unknown): message is MainToWorker
     case 'HELLO':
     case 'PLAY':
       return typeof typed.requestId === 'number';
+    case 'PLAYHEAD':
     case 'SEEK':
       return typeof typed.requestId === 'number' && Number.isFinite(typed.time);
     case 'SOURCE':
@@ -185,6 +241,8 @@ export function isWorkerToMainMessage(message: unknown): message is WorkerToMain
       return typeof typed.requestId === 'number' && typeof typed.mode === 'string';
     case 'CHUNK':
       return typeof typed.requestId === 'number' && typed.bytes instanceof Uint8Array;
+    case 'ENDED':
+      return typeof typed.requestId === 'number';
     case 'ERROR':
       return typeof typed.kind === 'string';
     case 'HANDLE':
@@ -249,6 +307,7 @@ export const MAIN_TO_WORKER_TYPES: ReadonlySet<string> = new Set([
   'DETACH',
   'HELLO',
   'PLAY',
+  'PLAYHEAD',
   'SEEK',
   'SOURCE',
 ]);
@@ -265,6 +324,7 @@ export function nextRequestId(): RequestId {
 export const WORKER_TO_MAIN_TYPES: ReadonlySet<string> = new Set([
   'ATTACH_OK',
   'CHUNK',
+  'ENDED',
   'ERROR',
   'HANDLE',
   'HELLO_OK',

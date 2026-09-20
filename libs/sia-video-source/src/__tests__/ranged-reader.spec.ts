@@ -57,6 +57,25 @@ async function settle(): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, 0));
 }
 
+/**
+ * SDK whose downloads never deliver a byte and never reach EOF — models a
+ * read stalled by exhausted WebTransport sessions ("Too many pending
+ * WebTransport sessions (64)"). `cancel` settles so an abort can unwind.
+ */
+function stalledSdk(): SiaSdkLike {
+  return {
+    download: () =>
+      new ReadableStream<Uint8Array>({
+        cancel() {
+          /* swallow: lets the watchdog's abort resolve */
+        },
+        pull() {
+          return new Promise<undefined>(() => { /* deliberately never settles */ });
+        },
+      }),
+  };
+}
+
 describe('RangedReader', () => {
   it('delivers the whole payload from offset 0', async () => {
     const delivered: Delivered[] = [];
@@ -136,5 +155,31 @@ describe('RangedReader', () => {
     expect(delivered[afterFirstRead].position).toBe(CHUNK_SIZE);
     expect(join(delivered.slice(afterFirstRead))).toEqual(PAYLOAD.slice(CHUNK_SIZE));
     expect(downloads.count).toBe(1);
+  });
+
+  it('surfaces an error within the stall timeout when a read stalls instead of hanging', async () => {
+    // A stream that never yields (WebTransport sessions exhausted) must be
+    // aborted after `stallTimeoutMs` and reported through `onError`, and the
+    // reader must release its in-flight state so a retry can proceed.
+    const errors: unknown[] = [];
+    const reader = new RangedReader({
+      chunkSize: CHUNK_SIZE,
+      object: fakeObject(PAYLOAD.length),
+      onChunk: () => {
+        throw new Error('a stalled read must never deliver a chunk');
+      },
+      onError: (error) => errors.push(error),
+      sdk: stalledSdk(),
+      stallTimeoutMs: 20,
+    });
+    const startedAt = Date.now();
+
+    reader.start();
+    await new Promise((resolve) => setTimeout(resolve, 150));
+
+    expect(errors).toHaveLength(1);
+    expect(reader.active).toBe(false);
+    // The stall was aborted promptly — the read must not hang the caller.
+    expect(Date.now() - startedAt).toBeLessThan(2000);
   });
 });
