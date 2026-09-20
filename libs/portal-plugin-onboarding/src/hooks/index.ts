@@ -1,5 +1,4 @@
 export { useCliInstalled } from './useCliInstalled';
+export { useHasWorkspaces } from './useHasWorkspaces';
 export { useIsSubscribed } from './useIsSubscribed';
-export { useHasPins } from './useHasPins';
-export { useHasWebsites } from './useHasWebsites';
 export { useOnboardingStatus } from './useOnboardingStatus';
