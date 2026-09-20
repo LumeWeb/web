@@ -1,1 +1,1 @@
-export * from "./hooks/usePinsCount";
+export type { PinResultsResponse, PinStatusResponse } from "./types";

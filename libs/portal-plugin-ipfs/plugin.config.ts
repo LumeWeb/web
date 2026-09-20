@@ -9,7 +9,9 @@ export default {
   dir: __dirname,
   exposes: {
     ".": "./src/index",
-    "./file-manager": "./src/ui/routes/file-manager",
+    "./sites": "./src/ui/routes/sites",
+    "./sites/new": "./src/ui/routes/sites.new",
+    "./sites/workspace": "./src/ui/routes/sites.workspace",
   },
   name: "core:ipfs",
 } satisfies PluginConfig;
