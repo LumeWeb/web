@@ -64,6 +64,7 @@ const ELEMENT_IDS = {
   segment: [0x18, 0x53, 0x80, 0x67],
   trackEntry: [0xae],
   trackNumber: [0xd7],
+  tracks: [0x16, 0x54, 0xae, 0x6b],
   trackType: [0x83],
 };
 
@@ -111,13 +112,21 @@ describe.skipIf(!IS_NODE)("browser-decodable webm generator: validate() on struc
     const { buildCluster, validate } = await import(
       /* @vite-ignore */ "../../__fixtures__/media/generate-browser-decodable-webm-fixture.mjs"
     );
+    // The TrackEntries ride inside a real Tracks wrapper so the video track
+    // resolves and validate() actually reaches the cued-cluster keyframe
+    // block guarded against a missing Cues element — bare entries would keep
+    // tracks undefined and the test would pass for the wrong reason.
+    const tracks = withPayload(ELEMENT_IDS.tracks, new Uint8Array([
+      ...trackEntry(1, 1, "V_VP8"),
+      ...trackEntry(2, 2, "A_VORBIS"),
+    ]));
     const verdict = validate(segmentWebm([
       buildCluster([]).bytes,
       buildCluster([]).bytes,
-      trackEntry(1, 1, "V_VP8"),
-      trackEntry(2, 2, "A_VORBIS"),
+      tracks,
     ]));
     expect(verdict.ok).toBe(false);
     expect(verdict.reason).toContain("Segment missing a Cues element");
+    expect(verdict.reason).not.toContain("no video TrackEntry");
   });
 });
