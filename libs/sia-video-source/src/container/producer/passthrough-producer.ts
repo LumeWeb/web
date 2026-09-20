@@ -9,13 +9,15 @@
  * initialization from the load's first window.
  */
 import { producerMode, type ProducerMode, segmentKind, type SegmentKind } from '../../media/types.ts';
+import { DEFAULT_FMP4_MIME } from '../../protocol.ts';
 import type { AppendableProducer, ProducedSegment } from './appendable-producer.ts';
 
 export interface PassthroughProducerOptions {
   /**
    * Codec-qualified MIME the passed-through bytes actually are. Defaults to
-   * the generic ISO BMFF type; the composition root supplies the codec-qualified
-   * string derived from the object's init segment.
+   * the pipeline's known H.264+AAC fMP4 type because SourceBuffer creation
+   * rejects a bare container MIME; the composition root supplies the exact
+   * string derived from the object's init segment when it differs.
    */
   outputMime?: string;
 }
@@ -31,7 +33,7 @@ export class PassthroughProducer implements AppendableProducer {
   readonly #onSegment = new Set<(segment: ProducedSegment) => void>();
 
   constructor(options: PassthroughProducerOptions = {}) {
-    this.outputMime = options.outputMime ?? 'video/mp4';
+    this.outputMime = options.outputMime ?? DEFAULT_FMP4_MIME;
   }
 
   flush(epoch: number): void {

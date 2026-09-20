@@ -32,6 +32,7 @@ export class TsToFmp4Producer implements AppendableProducer {
 
   #epoch = 0;
   #failed = false;
+  #initEmitted = false;
   readonly #onError = new Set<(error: unknown) => void>();
   readonly #onSegment = new Set<(segment: ProducedSegment) => void>();
   #transmuxer: null | Transmuxer = null;
@@ -89,6 +90,9 @@ export class TsToFmp4Producer implements AppendableProducer {
   reset(epoch: number): void {
     if (epoch < this.#epoch) return;
     this.#epoch = epoch;
+    // A fresh transmuxer re-emits init on its first data event, so the flag
+    // must follow the transmuxer, not the producer lifetime.
+    this.#initEmitted = false;
     this.#transmuxer = null;
   }
 
@@ -107,7 +111,10 @@ export class TsToFmp4Producer implements AppendableProducer {
   #onTransmuxerData(event: unknown): void {
     if (this.#failed) return;
     const data = event as { data?: Uint8Array; initSegment?: Uint8Array };
-    if (data.initSegment?.byteLength) {
+    // mux.js re-attaches the init segment to every data event; only the first
+    // one per transmuxer instance may reach the SourceBuffer.
+    if (data.initSegment?.byteLength && !this.#initEmitted) {
+      this.#initEmitted = true;
       for (const listener of this.#onSegment) listener({ bytes: data.initSegment, kind: segmentKind.init });
     }
     if (data.data?.byteLength) {

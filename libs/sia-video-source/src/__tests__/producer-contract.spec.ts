@@ -13,11 +13,45 @@
  * real TS fixture is out of scope here, and the remux output is covered
  * separately through mux.js.
  */
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { AppendableProducer, ProducedSegment } from '../container/producer/appendable-producer.ts';
 import { PassthroughProducer } from '../container/producer/passthrough-producer.ts';
 import { TsToFmp4Producer } from '../container/producer/ts-to-fmp4-producer.ts';
 import { DEFAULT_FMP4_MIME } from '../protocol.ts';
+
+// mux.js's mp4 Transmuxer regenerates `initSegment` from the current track
+// configuration and attaches it to every `data` event it flushes (see
+// CoalesceStream.prototype.flush in mux.js 7.1.0), so the producer must
+// deduplicate init emission per transmuxer instance. The fake reproduces that
+// re-attachment so the contract is exercised deterministically, without a real
+// TS fixture.
+const muxJsHost = vi.hoisted(() => {
+  class FakeTransmuxer {
+    readonly #dataListeners = new Set<(event: unknown) => void>();
+    flush(): void {
+      const event = { data: new Uint8Array(4), initSegment: new Uint8Array(8) };
+      for (const listener of this.#dataListeners) listener(event);
+    }
+    off(event: string, listener: (event?: unknown) => void): void {
+      if (event === 'data') this.#dataListeners.delete(listener);
+    }
+    on(event: string, listener: (event?: unknown) => void): void {
+      if (event === 'data') this.#dataListeners.add(listener);
+    }
+    push(chunk: Uint8Array): void {
+      void chunk;
+    }
+  }
+  return { FakeTransmuxer };
+});
+
+// Node's CJS-mock interop requires a `default` export; the browser build reads
+// `mp4` straight off the namespace. Handing both keeps the same mock valid in
+// the two vitest environments the suite runs under.
+vi.mock('mux.js', () => ({
+  default: { mp4: { Transmuxer: muxJsHost.FakeTransmuxer } },
+  mp4: { Transmuxer: muxJsHost.FakeTransmuxer },
+}));
 
 const bytes = (marker: number, length = 16) => new Uint8Array(length).fill(marker);
 
@@ -127,10 +161,13 @@ describe('AppendableProducer contract', () => {
       expect(seen).toEqual([1]);
     });
 
-    it('defaults to passthrough mode and a generic MP4 output MIME, overridable', () => {
+    it('defaults to passthrough mode and a codec-qualified fMP4 output MIME, overridable', () => {
       const defaults = new PassthroughProducer();
       expect(defaults.mode).toBe('passthrough');
-      expect(defaults.outputMime).toBe('video/mp4');
+      // A bare container type would be rejected by Chromium's addSourceBuffer;
+      // the default must carry the codec parameter set the pipeline knows.
+      expect(defaults.outputMime).toBe(DEFAULT_FMP4_MIME);
+      expect(defaults.outputMime).toContain('codecs=');
 
       const qualified = new PassthroughProducer({ outputMime: 'video/mp4; codecs="avc1.640028"' });
       expect(qualified.outputMime).toBe('video/mp4; codecs="avc1.640028"');
@@ -142,6 +179,32 @@ describe('AppendableProducer contract', () => {
       const producer = new TsToFmp4Producer();
       expect(producer.mode).toBe('normalized');
       expect(producer.outputMime).toBe(DEFAULT_FMP4_MIME);
+    });
+
+    it('emits the init segment exactly once across multiple data events', () => {
+      const producer = new TsToFmp4Producer();
+      const { segments } = collect(producer);
+
+      producer.push(bytes(1), 0, 0);
+      producer.push(bytes(2), 16, 0);
+      producer.push(bytes(3), 32, 0);
+
+      expect(segments.map((s) => s.kind)).toEqual(['init', 'media', 'media', 'media']);
+      expect(segments.filter((s) => s.kind === 'init')).toHaveLength(1);
+    });
+
+    it('re-emits init once after a reset builds a fresh transmuxer', () => {
+      const producer = new TsToFmp4Producer();
+      const { segments } = collect(producer);
+
+      producer.push(bytes(1), 0, 0);
+      producer.reset(1);
+      producer.push(bytes(4), 64, 1);
+      producer.push(bytes(5), 80, 1);
+
+      // First instance emits one init; the post-reset instance emits exactly
+      // one more, not one per data event.
+      expect(segments.filter((s) => s.kind === 'init')).toHaveLength(2);
     });
 
     it('flush is idempotent and never throws on non-TS garbage', () => {
