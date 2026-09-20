@@ -26,7 +26,16 @@ import { MoofWalkIndex } from '../container/index/moof-index.ts';
 import { indexGranularity, type RangeRead } from '../media/types.ts';
 import { MemoryByteSource } from '../transport/memory-byte-source.ts';
 import type { ByteRange, ByteSource, ReadOptions } from '../transport/byte-source.ts';
-import { buildSidxFmp4, buildSidxLessFmp4, scanTopLevel } from './fixtures/moof-fmp4-fixture.ts';
+import {
+  ascii4,
+  box,
+  buildSidxFmp4,
+  buildSidxLessFmp4,
+  moofFixture,
+  moovFixture,
+  scanTopLevel,
+  u32be,
+} from './fixtures/moof-fmp4-fixture.ts';
 
 /** ByteSource wrapper that records every ranged read (offset/length). */
 class RecordingByteSource implements ByteSource {
@@ -83,6 +92,63 @@ function threeFragmentLayout(bytes: Uint8Array): { mdatEnds: number[]; moofStart
 }
 
 const THREE_FRAGMENTS = buildSidxLessFmp4(3);
+
+/**
+ * One sidx-less fragment whose `trun` body is exactly `trunBody`. The trun
+ * version/flags/count live in the caller's bytes so a crafted sample_count can
+ * be asserted against the box's physical capacity.
+ */
+function singleFragmentWithTrun(trunBody: number[]): Uint8Array {
+  const tfhd = box('tfhd', [0, 2, 0, 0, ...u32be(1)]); // 0x020000: default-base-is-moof, video track 1
+  const tfdt = box('tfdt', [0, 0, 0, 0, ...u32be(0)]);
+  const trun = box('trun', trunBody);
+  const traf = box('traf', [...tfhd, ...tfdt, ...trun]);
+  const moof = moofFixture(0, traf);
+  return new Uint8Array([
+    ...box('ftyp', [...ascii4('isom'), ...u32be(0)]),
+    ...moovFixture(),
+    ...moof,
+    ...box('mdat', [0, 0, 0, 0]),
+  ]);
+}
+
+describe('MoofWalkIndex bounds trun sample tables against the box capacity', () => {
+  it('bails on a trun whose sample_count wildly exceeds its body (0xFFFFFFFF)', () => {
+    // flags 0x000100 (per-sample durations): 2×4 B of duration entries cannot
+    // hold count = 0xFFFFFFFF samples, so the walk must refuse the fragment
+    // instead of iterating ~4 billion times synchronously.
+    const trunFlags = [0, 0x00, 0x01, 0x00]; // version 0, flags 0x000100
+    const bytes = singleFragmentWithTrun([...trunFlags, ...u32be(0xFFFFFFFF), ...u32be(1000), ...u32be(1000)]);
+    expect(MoofWalkIndex.parse(bytes)).toBeNull();
+  });
+
+  it('bails on a trun whose sample_count slightly exceeds its body capacity', () => {
+    // 3 duration entries (12 B) hold at most 3 samples; count 4 overruns it.
+    const trunFlags = [0, 0x00, 0x01, 0x00]; // version 0, flags 0x000100
+    const bytes = singleFragmentWithTrun([...trunFlags, ...u32be(4), ...u32be(1000), ...u32be(1000), ...u32be(1000)]);
+    expect(MoofWalkIndex.parse(bytes)).toBeNull();
+  });
+
+  it('parses a trun whose sample_count exactly fills its body capacity', () => {
+    // 3 duration entries (12 B) hold exactly 3 samples — a legitimate full box.
+    const trunFlags = [0, 0x00, 0x01, 0x00]; // version 0, flags 0x000100
+    const bytes = singleFragmentWithTrun([...trunFlags, ...u32be(3), ...u32be(1000), ...u32be(1000), ...u32be(1000)]);
+    const index = MoofWalkIndex.parse(bytes);
+    expect(index).not.toBeNull();
+    expect(index!.first?.startSeconds).toBe(0);
+    expect(index!.first?.rap).toBe(true);
+  });
+
+  it('finishes (no unbounded loop) when a trun declares no per-sample fields', () => {
+    // flags 0x000005 (data-offset + first-sample-flags): the sample table is
+    // empty so a hostile count cannot drive a per-sample loop even though the
+    // box carries no per-sample bytes to bound against.
+    const bytes = singleFragmentWithTrun([
+      0, 0x00, 0x00, 0x05, ...u32be(0xFFFFFFFF), ...u32be(0), ...u32be(0x02000000),
+    ]);
+    expect(MoofWalkIndex.parse(bytes)).not.toBeNull();
+  });
+});
 
 describe('MoofWalkIndex', () => {
   it('walks sidx-less fMP4 into an exact-byte RandomAccessIndex with init-first ranges', () => {

@@ -45,15 +45,33 @@ export function buildSidxFmp4(): Uint8Array {
 
 /**
  * Builds a deterministic sidx-less fMP4: ftyp + moov + `count` (moof mdat)
- * pairs. Fragment i starts at (i-1) s; mdat bodies grow by 40 B per fragment.
+ * pairs. Fragment i starts at (i-1) s; mdat bodies grow by 40 B per fragment
+ * (`mdatPadBytes` pads every mdat so tests can build objects that overrun the
+ * bounded index head without changing the fragment grid).
  */
-export function buildSidxLessFmp4(count: number, options: { firstSampleNonSync?: boolean; viaTfhdDefault?: boolean } = {}): Uint8Array {
-  const bytes: number[] = [...box('ftyp', [...ascii4('isom'), ...u32be(0)]), ...moovFixture()];
+export function buildSidxLessFmp4(
+  count: number,
+  options: { firstSampleNonSync?: boolean; mdatPadBytes?: number; viaTfhdDefault?: boolean } = {},
+): Uint8Array {
+  const { mdatPadBytes = 0 } = options;
+  // moovFixture/moofFixture are already complete boxes (header + body); only
+  // ftyp and the (possibly large, padded) mdat bodies need box headers here.
+  const parts: Uint8Array[] = [
+    new Uint8Array([...u32be(8 + 8), ...ascii4('ftyp'), ...ascii4('isom'), ...u32be(0)]),
+    new Uint8Array(moovFixture()),
+  ];
   for (let i = 1; i <= count; i += 1) {
-    bytes.push(...moofFixture((i - 1) * 30_000, trafFixture((i - 1) * 30_000, options)));
-    bytes.push(...box('mdat', new Array<number>(i * 40).fill(0)));
+    parts.push(new Uint8Array(moofFixture((i - 1) * 30_000, trafFixture((i - 1) * 30_000, options))));
+    parts.push(boxU8('mdat', new Uint8Array(i * 40 + mdatPadBytes)));
   }
-  return new Uint8Array(bytes);
+  const total = parts.reduce((sum, part) => sum + part.byteLength, 0);
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  for (const part of parts) {
+    bytes.set(part, offset);
+    offset += part.byteLength;
+  }
+  return bytes;
 }
 
 /** One `moof` wrapping a pre-built `traf` (the tfdt lives inside the traf). */
@@ -136,6 +154,19 @@ export function u32be(...values: number[]): number[] {
   for (const value of values) {
     out.push((value >>> 24) & 255, (value >>> 16) & 255, (value >>> 8) & 255, value & 255);
   }
+  return out;
+}
+
+/** One `size(4) type(4) body` ISO-BMFF box as a flat Uint8Array (padding bodies avoid arg-spread). */
+function boxU8(type: string, body: Uint8Array): Uint8Array {
+  const size = body.byteLength + 8;
+  const out = new Uint8Array(size);
+  out[0] = (size >>> 24) & 255;
+  out[1] = (size >>> 16) & 255;
+  out[2] = (size >>> 8) & 255;
+  out[3] = size & 255;
+  out.set(ascii4(type), 4);
+  out.set(body, 8);
   return out;
 }
 

@@ -27,6 +27,7 @@
  */
 import type { IndexGranularity, RandomAccessIndex, RangeRead } from './random-access-index.ts';
 import { indexGranularity } from '../../media/types.ts';
+import type { ByteSource } from '../../transport/byte-source.ts';
 
 /** A parsed ISO-BMFF box with absolute byte extents. */
 interface Box {
@@ -37,6 +38,13 @@ interface Box {
   /** Body start (past the size/type header). */
   readonly start: number;
   readonly type: string;
+}
+
+/** One parsed moof's fragment facts: time anchor, sync evidence, media span. */
+interface MoofFacts {
+  readonly durationSeconds: null | number;
+  readonly rap: boolean;
+  readonly startSeconds: number;
 }
 
 /** One walked fragment: an exact, time-anchored, RAP-aware byte range. */
@@ -98,44 +106,10 @@ export class MoofWalkIndex implements RandomAccessIndex {
     if (moofs.length === 0) return null;
     const mdats = boxes.filter((box) => box.type === 'mdat');
     const moov = moovInfo(bytes, boxes.find((box) => box.type === 'moov') ?? null);
-
-    const fragments: MoofFragment[] = [];
-    let mdatIndex = 0;
-    for (let i = 0; i < moofs.length; i += 1) {
-      const moof = moofs[i];
-      // Associate the first mdat that begins at/after this moof with it.
-      while (mdatIndex < mdats.length && mdats[mdatIndex].start < moof.end) mdatIndex += 1;
-      const mdat = mdats[mdatIndex] ?? null;
-      if (mdat === null) return null; // a fragment with no media is not walkable
-      mdatIndex += 1;
-      const parsed = parseMoof(bytes, moof, moov);
-      if (parsed === null) return null;
-      // First range carries the init (byte 0 → first mdat end); later ranges
-      // start at the moof's full box header so a bounded read covers the whole
-      // moof→mdat pair (mfhd + traf included for a self-contained fragment).
-      const offset = i === 0 ? 0 : moof.at;
-      const last = i === moofs.length - 1;
-      // The terminal range's end is the init's mvhd duration when it vouches
-      // for one, else the fragment's own start + media span (ffmpeg
-      // `empty_moov` writes mvhd duration 0 and leaves the real length in the
-      // fragments), else the chrono-last start.
-      const fragmentEnd = parsed.durationSeconds === null ? null : parsed.startSeconds + parsed.durationSeconds;
-      fragments.push({
-        endSeconds: last ? (moov.durationSeconds ?? fragmentEnd ?? parsed.startSeconds) : 0,
-        length: mdat.end - offset,
-        offset,
-        rap: parsed.rap,
-        startSeconds: parsed.startSeconds,
-        terminal: last,
-      });
-    }
-    // Non-terminal endSeconds come from the next fragment's start (the exact
-    // after-index grid); sew them now that all starts are known.
-    for (let i = 0; i < fragments.length - 1; i += 1) {
-      fragments[i] = { ...fragments[i], endSeconds: fragments[i + 1].startSeconds };
-    }
-    const overall = fragments.length > 0 ? (moov.durationSeconds ?? fragments[fragments.length - 1].endSeconds) : null;
-    return fragments.length > 0 ? new MoofWalkIndex(fragments, overall) : null;
+    const facts = moofs.map((moof) => parseMoof(bytes, moof, moov));
+    if (facts.some((fact) => fact === null)) return null;
+    const fragments = assembleFragments(moofs, mdats, facts as MoofFacts[], moov);
+    return fragments === null ? null : assembledIndex(fragments, moov);
   }
 
   next(from: RangeRead): null | RangeRead {
@@ -155,6 +129,83 @@ export class MoofWalkIndex implements RandomAccessIndex {
     const chosen = selected ?? this.#fragments[0];
     return this.#ranges[this.#fragments.indexOf(chosen)] ?? null;
   }
+}
+
+/** Builds the index from assembled fragments, or null when none survived. */
+function assembledIndex(fragments: MoofFragment[], moov: MoovInfo): MoofWalkIndex | null {
+  const overall = fragments.length > 0 ? (moov.durationSeconds ?? fragments[fragments.length - 1].endSeconds) : null;
+  return fragments.length > 0 ? new MoofWalkIndex(fragments, overall) : null;
+}
+
+/**
+ * Turns per-moof facts (full-buffer or windowed) plus the top-level moof/mdat
+ * grid into the exact-byte fragment list. `facts` parallels `moofs`
+ * (file order). Returns null when a fragment has no media or a fact is
+ * missing.
+ */
+function assembleFragments(
+  moofs: readonly Box[],
+  mdats: readonly Box[],
+  facts: readonly MoofFacts[],
+  moov: MoovInfo,
+): MoofFragment[] | null {
+  if (facts.length !== moofs.length) return null;
+  const fragments: MoofFragment[] = [];
+  let mdatIndex = 0;
+  for (let i = 0; i < moofs.length; i += 1) {
+    const moof = moofs[i];
+    // Associate the first mdat that begins at/after this moof with it.
+    while (mdatIndex < mdats.length && mdats[mdatIndex].start < moof.end) mdatIndex += 1;
+    const mdat = mdats[mdatIndex] ?? null;
+    if (mdat === null) return null; // a fragment with no media is not walkable
+    mdatIndex += 1;
+    const parsed = facts[i] ?? null;
+    if (parsed === null) return null;
+    // First range carries the init (byte 0 → first mdat end); later ranges
+    // start at the moof's full box header so a bounded read covers the whole
+    // moof→mdat pair (mfhd + traf included for a self-contained fragment).
+    const offset = i === 0 ? 0 : moof.at;
+    const last = i === moofs.length - 1;
+    // The terminal range's end is the init's mvhd duration when it vouches
+    // for one, else the fragment's own start + media span (ffmpeg
+    // `empty_moov` writes mvhd duration 0 and leaves the real length in the
+    // fragments), else the chrono-last start.
+    const fragmentEnd = parsed.durationSeconds === null ? null : parsed.startSeconds + parsed.durationSeconds;
+    fragments.push({
+      endSeconds: last ? (moov.durationSeconds ?? fragmentEnd ?? parsed.startSeconds) : 0,
+      length: mdat.end - offset,
+      offset,
+      rap: parsed.rap,
+      startSeconds: parsed.startSeconds,
+      terminal: last,
+    });
+  }
+  // Non-terminal endSeconds come from the next fragment's start (the exact
+  // after-index grid); sew them now that all starts are known.
+  for (let i = 0; i < fragments.length - 1; i += 1) {
+    fragments[i] = { ...fragments[i], endSeconds: fragments[i + 1].startSeconds };
+  }
+  return fragments;
+}
+
+/**
+ * Bounds a `trun`'s declared sample_count against the bytes its per-sample
+ * table physically holds. Returns the count when the box can hold it, else
+ * null for a malformed box whose count cannot be satisfied — a hostile count
+ * like 0xFFFFFFFF must never drive the per-sample loops below. A trun with no
+ * per-sample fields consumes zero bytes per sample (every sample takes the
+ * tfhd defaults), so no table-capacity check applies there.
+ */
+function boundedTrunCount(bytes: Uint8Array, trun: Box): null | number {
+  const flags = readFlags(bytes, trun.start + 1);
+  const count = u32(bytes, trun.start + 4);
+  const entrySize = trunEntrySize(flags);
+  if (count <= 0 || entrySize === 0) return count;
+  let tableStart = trun.start + 8; // past version/flags + sample_count
+  if (flags & 0x1) tableStart += 4; // data-offset
+  if (flags & 0x4) tableStart += 4; // first-sample-flags
+  const capacity = trun.end - tableStart;
+  return count > Math.floor(capacity / entrySize) ? null : count;
 }
 
 /** Walks the child boxes inside one box (its `start` is the body start). */
@@ -204,11 +255,7 @@ function moovInfo(bytes: Uint8Array, moov: Box | null): MoovInfo {
 }
 
 /** One moof → time + sync verdict + fragment duration, using the video/anchor track's timescale. */
-function parseMoof(
-  bytes: Uint8Array,
-  moof: Box,
-  moov: MoovInfo,
-): null | { durationSeconds: null | number; rap: boolean; startSeconds: number } {
+function parseMoof(bytes: Uint8Array, moof: Box, moov: MoovInfo): MoofFacts | null {
   const trafs = childBoxes(bytes, moof).filter((box) => box.type === 'traf');
   if (trafs.length === 0) return null;
   // Prefer the moov-declared video track (it anchors the RAP grid); fall back
@@ -224,6 +271,10 @@ function parseMoof(
   const timescale = trackTimescale(moov, tfhdInfo.trackId);
   if (timescale <= 0) return null;
   const trun = childBoxes(bytes, traf).find((t) => t.type === 'trun');
+  // A trun whose declared sample_count cannot fit its per-sample table is
+  // malformed (a hostile count like 0xFFFFFFFF must never drive the loops
+  // below); refuse the fragment instead of iterating unboundedly.
+  if (trun && boundedTrunCount(bytes, trun) === null) return null;
   const firstSampleFlags = trun ? trunFirstSampleFlags(bytes, trun, tfhdInfo.defaultSampleFlags) : tfhdInfo.defaultSampleFlags;
   // Fragment media span in track time units: summed trun sample durations when
   // present, else tfhd default-sample-duration × sample count, else null.
@@ -328,11 +379,16 @@ function trackTimescale(moov: MoovInfo, trackId: number): number {
  */
 function trunDurationUnits(bytes: Uint8Array, trun: Box, tfhdDefaultDuration: null | number): null | number {
   const flags = readFlags(bytes, trun.start + 1);
-  const count = u32(bytes, trun.start + 4);
+  const count = boundedTrunCount(bytes, trun) ?? 0;
   if (count === 0) return 0;
   let pos = trun.start + 8;
   if (flags & 0x1) pos += 4; // data-offset
   if (flags & 0x4) pos += 4; // first-sample-flags
+  // No per-sample fields means the loop has nothing to walk (all samples take
+  // the tfhd defaults); skipping it keeps a hostile count from burning CPU.
+  if (trunEntrySize(flags) === 0) {
+    return tfhdDefaultDuration === null ? null : tfhdDefaultDuration * count;
+  }
   let sum = 0;
   let haveDurations = false;
   for (let i = 0; i < count; i += 1) {
@@ -349,17 +405,30 @@ function trunDurationUnits(bytes: Uint8Array, trun: Box, tfhdDefaultDuration: nu
   return tfhdDefaultDuration === null ? null : tfhdDefaultDuration * count;
 }
 
+/** Per-sample bytes one `trun` entry occupies, from the trun flags (ISO 14496-12). */
+function trunEntrySize(flags: number): number {
+  return (
+    (flags & 0x100 ? 4 : 0) + // sample-duration
+    (flags & 0x200 ? 4 : 0) + // sample-size
+    (flags & 0x400 ? 4 : 0) + // sample-flags
+    (flags & 0x800 ? 4 : 0) // sample-composition-time-offset
+  );
+}
+
 /**
  * Extracts the first sample's 32-bit flags from a `trun` (or the tfhd
  * default when trun carries none). Handles the optional-field flag order.
  */
 function trunFirstSampleFlags(bytes: Uint8Array, trun: Box, tfhdDefaultFlags: null | number): null | number {
   const flags = readFlags(bytes, trun.start + 1);
-  const count = u32(bytes, trun.start + 4);
+  const count = boundedTrunCount(bytes, trun) ?? 0;
   if (count <= 0) return tfhdDefaultFlags;
   let pos = trun.start + 8;
   if (flags & 0x1) pos += 4; // data-offset
   if (flags & 0x4) return u32(bytes, pos); // first-sample-flags
+  // No per-sample flags field means there is no per-sample evidence to walk;
+  // skip the loop so a hostile count cannot burn CPU.
+  if (trunEntrySize(flags) === 0) return tfhdDefaultFlags;
   let first: null | number = null;
   for (let i = 0; i < count; i += 1) {
     if (flags & 0x100) pos += 4; // sample-duration
@@ -412,4 +481,126 @@ function walkBoxes(bytes: Uint8Array, bodyStart: number, bodyEnd: number): Box[]
     offset += size;
   }
   return result;
+}
+
+/** Cap on a single moof box body read (moofs hold only sample tables, not media). */
+const MOOF_READ_CAP = 256 * 1024;
+
+/**
+ * Streams a sidx-less fMP4 whose object exceeds the bounded head into a
+ * `MoofWalkIndex`. The head supplies the init (moov/mvhd/trak) facts; the
+ * remaining top-level boxes are walked in bounded windows that read each
+ * moof's extent but skip `mdat` payloads by declared size, so index building
+ * never buffers the whole object and playback can start from the head-length
+ * read. Returns null under the same conditions as `MoofWalkIndex.parse`.
+ */
+export async function scanMoofStreaming(source: ByteSource, head: Uint8Array): Promise<MoofWalkIndex | null> {
+  const headBoxes = topLevelBoxes(head);
+  if (headBoxes.some((box) => box.type === 'sidx')) return null;
+  const moov = moovInfo(head, headBoxes.find((box) => box.type === 'moov') ?? null);
+  const boxes = await walkTopLevelBoxes(source, head);
+  const moofs = boxes.filter((box) => box.type === 'moof');
+  if (moofs.length === 0) return null;
+  const mdats = boxes.filter((box) => box.type === 'mdat');
+  const facts: MoofFacts[] = [];
+  for (const moof of moofs) {
+    const fact = await moofFactsBounded(source, head, moof, moov);
+    if (fact === null) return null;
+    facts.push(fact);
+  }
+  const fragments = assembleFragments(moofs, mdats, facts, moov);
+  return fragments === null ? null : assembledIndex(fragments, moov);
+}
+
+/** Parses one moof from its own bounded read (or the head when it fits). */
+async function moofFactsBounded(source: ByteSource, head: Uint8Array, moof: Box, moov: MoovInfo): Promise<MoofFacts | null> {
+  // A moof fully inside the head parses from the head window with no extra
+  // read; one beyond it is fetched whole (bounded by MOOF_READ_CAP) and parsed
+  // with box offsets relative to that window.
+  if (moof.end <= head.byteLength) {
+    return parseMoof(head, moof, moov);
+  }
+  const moofLength = moof.end - moof.at;
+  const body = await readBoundedRange(source, moof.at, Math.min(moofLength, MOOF_READ_CAP));
+  if (body === null) return null;
+  const windowed: Box = { at: 0, end: body.byteLength, start: moof.start - moof.at, type: moof.type };
+  return parseMoof(body, windowed, moov);
+}
+
+/** Reads `[offset, offset + length)` as one bounded buffer (short at EOF). */
+async function readBoundedRange(source: ByteSource, offset: number, length: number): Promise<null | Uint8Array> {
+  if (length <= 0) return null;
+  const reader = source.read({ length, offset }, { epoch: 0 }).getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      total += value.byteLength;
+      if (total >= length) break;
+    }
+  } finally {
+    void reader.cancel().catch(() => { /* empty */ });
+  }
+  if (total === 0) return null;
+
+  const out = new Uint8Array(total);
+  let at = 0;
+  for (const chunk of chunks) {
+    const n = Math.min(chunk.byteLength, total - at);
+    out.set(chunk.subarray(0, n), at);
+    at += n;
+  }
+  return out;
+}
+
+/**
+ * Walks the top-level boxes of a source that overruns the bounded head. Only
+ * the head is held as a window; every later box header is fetched whole (up to
+ * 16 B) and every box body is skipped by its declared size, so `mdat` payload
+ * bytes are never fetched and the walk never buffers the object. Break rules
+ * mirror `walkBoxes` so the returned grid is byte-identical to the full-buffer
+ * walk's.
+ */
+async function walkTopLevelBoxes(source: ByteSource, head: Uint8Array): Promise<Box[]> {
+  const boxes: Box[] = [];
+  let offset = 0;
+  let window: null | Uint8Array = head;
+  let windowStart = 0;
+  while (offset + 8 <= source.size) {
+    // The cursor left the buffered range (a box body was skipped past its end,
+    // or the walk moved past the head): fetch the next header-sized window.
+    if (window === null || offset < windowStart || offset >= windowStart + window.byteLength) {
+      window = await readBoundedRange(source, offset, Math.min(16, source.size - offset));
+      if (window === null) break;
+      windowStart = offset;
+    }
+    const cursor = offset - windowStart;
+    const size = u32(window, cursor);
+    const type = fourCc(window, cursor + 4);
+    if (size === 1) {
+      // A 64-bit largesize header is 16 B: refetch when the current window
+      // holds only the first 8 B (a header straddling the head's end), and
+      // treat a window that cannot even hold 16 B as a truncated tail.
+      if (cursor + 16 > window.byteLength) {
+        if (offset + 16 > source.size) break;
+        const fetched = await readBoundedRange(source, offset, Math.min(16, source.size - offset));
+        if (fetched === null) break;
+        window = fetched;
+        windowStart = offset;
+      }
+      const hi = u32(window, offset - windowStart + 8);
+      const lo = u32(window, offset - windowStart + 12);
+      if (hi !== 0 || lo < 8 || offset + lo > source.size) break;
+      boxes.push({ at: offset, end: offset + lo, start: offset + 8, type });
+      offset += lo;
+      continue;
+    }
+    if (size < 8 || offset + size > source.size) break;
+    boxes.push({ at: offset, end: offset + size, start: offset + 8, type });
+    offset += size; // the body (an mdat payload) is skipped, never fetched
+  }
+  return boxes;
 }

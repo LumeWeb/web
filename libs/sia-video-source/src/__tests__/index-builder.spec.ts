@@ -216,6 +216,34 @@ describe('MoofWalkIndexBuilder', () => {
     expect(await builder.build(source, fmp4)).toBeNull();
   });
 
+  it('streams a moof walk for sidx-less fMP4 overrunning the head without a whole-object read', async () => {
+    const count = 12;
+    const bytes = buildSidxLessFmp4(count, { mdatPadBytes: 256 * 1024 });
+    expect(bytes.byteLength).toBeGreaterThan(INDEX_HEAD_LENGTH);
+    const source = new RecordingByteSource(bytes);
+    const index = await new MoofWalkIndexBuilder().build(source, fmp4);
+    expect(index).toBeInstanceOf(MoofWalkIndex);
+
+    // The streamed walk is byte-identical to the full-buffer walk's output.
+    const full = MoofWalkIndex.parse(bytes);
+    expect(full).not.toBeNull();
+    expect(walkRanges(index!)).toEqual(walkRanges(full!));
+
+    // No single ranged read buffers the whole object: the largest read is the
+    // bounded head, and fragment evidence comes from per-moof windows.
+    const maxRead = Math.max(...source.reads.map((read) => read.length));
+    expect(maxRead).toBeLessThanOrEqual(INDEX_HEAD_LENGTH);
+    expect(maxRead).toBeLessThan(bytes.byteLength);
+
+    // Reads scale with the fragment count (head + per-box headers + moof
+    // bodies), never with the object's media bytes: a small constant ceiling.
+    expect(source.reads.length).toBeLessThanOrEqual(1 + count * 4);
+    // mdat payloads are skipped by declared size, so the bytes fetched stay a
+    // small fraction of the object instead of the whole thing.
+    const totalFetched = source.reads.reduce((sum, read) => sum + read.length, 0);
+    expect(totalFetched).toBeLessThan(bytes.byteLength / 8);
+  });
+
   it('returns null for garbage or empty sources', async () => {
     const builder = new MoofWalkIndexBuilder();
     expect(await builder.build(new MemoryByteSource(new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7])), fmp4)).toBeNull();
