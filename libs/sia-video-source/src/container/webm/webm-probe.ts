@@ -367,7 +367,7 @@ async function scanSegmentStreaming(
         cuesFrom = 0;
       }
       const cuesElement = {
-        dataEnd: Math.min(dataEnd - offset, cuesBytes.byteLength),
+        dataEnd: Math.min(cuesFrom + headerLength + bodyLength, cuesBytes.byteLength),
         dataOffset: cuesFrom + headerLength,
         headerLength,
         id: EBML_ELEMENT_ID.cues,

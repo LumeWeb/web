@@ -10,7 +10,8 @@
 
 import { describe, expect, it } from 'vitest';
 import { CuesIndex } from '../container/webm/cues-index.ts';
-import { SCAN_WINDOW_BYTES } from '../container/webm/webm-probe.ts';
+import { ebmlWalkMode } from '../container/webm/ebml-reader.ts';
+import { probeWebm, probeWebmStreaming, SCAN_WINDOW_BYTES } from '../container/webm/webm-probe.ts';
 import { SidxIndex } from '../container/index/sidx-index.ts';
 import {
   buildFirstIndex,
@@ -219,6 +220,27 @@ describe('CuesIndexBuilder', () => {
     const maxRead = Math.max(...source.reads.map((read) => read.length));
     expect(maxRead).toBeLessThanOrEqual(INDEX_HEAD_LENGTH);
     expect(maxRead).toBeLessThan(bytes.byteLength);
+  });
+
+  it('keeps every CuePoint when the Cues element starts mid-scan-window', async () => {
+    // 25 clusters (the first 24 padded, the last small) make a ~985 KiB
+    // object whose trailing Cues begins inside a reused scan window at a
+    // nonzero cursor (the small final cluster's tail). The Cues' dataEnd must
+    // be buffer-relative or the walk truncates the Cues tail and silently
+    // drops the final CuePoints, so the streamed offsets must equal the
+    // full-buffer walk's on the same bytes.
+    const count = 25;
+    const bytes = buildWebm(count, { padClustersBeforeLastBytes: 40 * 1024 });
+    expect(bytes.byteLength).toBeGreaterThan(INDEX_HEAD_LENGTH);
+    const source = new RecordingByteSource(bytes);
+    const streamed = await probeWebmStreaming(source, bytes.slice(0, INDEX_HEAD_LENGTH));
+    const full = probeWebm(bytes, ebmlWalkMode.strict);
+    expect(full).not.toBeNull();
+    expect(streamed).not.toBeNull();
+    expect(streamed!.cuedClusterOffsets.size).toBe(count);
+    expect([...streamed!.cuedClusterOffsets].sort((a, b) => a - b)).toEqual(
+      [...full!.cuedClusterOffsets].sort((a, b) => a - b),
+    );
   });
 
   it('builds from a small object that fits entirely within the head', async () => {
