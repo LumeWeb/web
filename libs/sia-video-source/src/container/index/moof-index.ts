@@ -131,6 +131,33 @@ export class MoofWalkIndex implements RandomAccessIndex {
   }
 }
 
+/**
+ * Streams a sidx-less fMP4 whose object exceeds the bounded head into a
+ * `MoofWalkIndex`. The head supplies the init (moov/mvhd/trak) facts; the
+ * remaining top-level boxes are walked in bounded windows that read each
+ * moof's extent but skip `mdat` payloads by declared size, so index building
+ * never buffers the whole object and playback can start from the head-length
+ * read. Returns null under the same conditions as `MoofWalkIndex.parse`.
+ */
+export async function scanMoofStreaming(source: ByteSource, head: Uint8Array): Promise<MoofWalkIndex | null> {
+  const headBoxes = topLevelBoxes(head);
+  if (headBoxes.some((box) => box.type === 'sidx')) return null;
+  const moov = moovInfo(head, headBoxes.find((box) => box.type === 'moov') ?? null);
+  const boxes = await walkTopLevelBoxes(source, head);
+  const moofs = boxes.filter((box) => box.type === 'moof');
+  if (moofs.length === 0) return null;
+  const mdats = boxes.filter((box) => box.type === 'mdat');
+  const facts: MoofFacts[] = [];
+  for (const moof of moofs) {
+    const fact = await moofFactsBounded(source, head, moof, moov);
+    if (fact === null) return null;
+    facts.push(fact);
+  }
+  const fragments = assembleFragments(moofs, mdats, facts, moov);
+  return fragments === null ? null : assembledIndex(fragments, moov);
+}
+
+
 /** Builds the index from assembled fragments, or null when none survived. */
 function assembledIndex(fragments: MoofFragment[], moov: MoovInfo): MoofWalkIndex | null {
   const overall = fragments.length > 0 ? (moov.durationSeconds ?? fragments[fragments.length - 1].endSeconds) : null;
@@ -229,6 +256,25 @@ function isRap(firstSampleFlags: null | number): boolean {
   // so the caller can refuse an undecodable fresh range.
   if (firstSampleFlags === null) return true;
   return (firstSampleFlags & 0x00010000) === 0;
+}
+
+/**
+ * Parses one moof from its own bounded read (or the head when it fits). A moof
+ * fully inside the head parses from the head window with no extra read; one
+ * beyond it is read for its WHOLE declared extent — moofs carry only sample
+ * tables, never media payloads, so any moof size is a legitimate bounded read.
+ * The extent is validated by the same declaration that walks it: `moof.end`
+ * cannot lie past the source, and `readBoundedRange` returns null for a
+ * malformed/truncating extent, so an oversized moof never gets silently cut.
+ */
+async function moofFactsBounded(source: ByteSource, head: Uint8Array, moof: Box, moov: MoovInfo): Promise<MoofFacts | null> {
+  if (moof.end <= head.byteLength) {
+    return parseMoof(head, moof, moov);
+  }
+  const body = await readBoundedRange(source, moof.at, moof.end - moof.at);
+  if (body === null) return null;
+  const windowed: Box = { at: 0, end: body.byteLength, start: moof.start - moof.at, type: moof.type };
+  return parseMoof(body, windowed, moov);
 }
 
 /** Parses moov's mvhd duration/timescale and the per-track mdhd timescales. */
@@ -343,6 +389,35 @@ function parseTrak(bytes: Uint8Array, trak: Box): null | TrackInfo {
   }
   if (id === null || timescale === null || timescale <= 0) return null;
   return { handler, id, timescale };
+}
+
+/** Reads `[offset, offset + length)` as one bounded buffer (short at EOF). */
+async function readBoundedRange(source: ByteSource, offset: number, length: number): Promise<null | Uint8Array> {
+  if (length <= 0) return null;
+  const reader = source.read({ length, offset }, { epoch: 0 }).getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      total += value.byteLength;
+      if (total >= length) break;
+    }
+  } finally {
+    void reader.cancel().catch(() => { /* empty */ });
+  }
+  if (total === 0) return null;
+
+  const out = new Uint8Array(total);
+  let at = 0;
+  for (const chunk of chunks) {
+    const n = Math.min(chunk.byteLength, total - at);
+    out.set(chunk.subarray(0, n), at);
+    at += n;
+  }
+  return out;
 }
 
 function readFlags(bytes: Uint8Array, offset: number): number {
@@ -483,78 +558,6 @@ function walkBoxes(bytes: Uint8Array, bodyStart: number, bodyEnd: number): Box[]
   return result;
 }
 
-/** Cap on a single moof box body read (moofs hold only sample tables, not media). */
-const MOOF_READ_CAP = 256 * 1024;
-
-/**
- * Streams a sidx-less fMP4 whose object exceeds the bounded head into a
- * `MoofWalkIndex`. The head supplies the init (moov/mvhd/trak) facts; the
- * remaining top-level boxes are walked in bounded windows that read each
- * moof's extent but skip `mdat` payloads by declared size, so index building
- * never buffers the whole object and playback can start from the head-length
- * read. Returns null under the same conditions as `MoofWalkIndex.parse`.
- */
-export async function scanMoofStreaming(source: ByteSource, head: Uint8Array): Promise<MoofWalkIndex | null> {
-  const headBoxes = topLevelBoxes(head);
-  if (headBoxes.some((box) => box.type === 'sidx')) return null;
-  const moov = moovInfo(head, headBoxes.find((box) => box.type === 'moov') ?? null);
-  const boxes = await walkTopLevelBoxes(source, head);
-  const moofs = boxes.filter((box) => box.type === 'moof');
-  if (moofs.length === 0) return null;
-  const mdats = boxes.filter((box) => box.type === 'mdat');
-  const facts: MoofFacts[] = [];
-  for (const moof of moofs) {
-    const fact = await moofFactsBounded(source, head, moof, moov);
-    if (fact === null) return null;
-    facts.push(fact);
-  }
-  const fragments = assembleFragments(moofs, mdats, facts, moov);
-  return fragments === null ? null : assembledIndex(fragments, moov);
-}
-
-/** Parses one moof from its own bounded read (or the head when it fits). */
-async function moofFactsBounded(source: ByteSource, head: Uint8Array, moof: Box, moov: MoovInfo): Promise<MoofFacts | null> {
-  // A moof fully inside the head parses from the head window with no extra
-  // read; one beyond it is fetched whole (bounded by MOOF_READ_CAP) and parsed
-  // with box offsets relative to that window.
-  if (moof.end <= head.byteLength) {
-    return parseMoof(head, moof, moov);
-  }
-  const moofLength = moof.end - moof.at;
-  const body = await readBoundedRange(source, moof.at, Math.min(moofLength, MOOF_READ_CAP));
-  if (body === null) return null;
-  const windowed: Box = { at: 0, end: body.byteLength, start: moof.start - moof.at, type: moof.type };
-  return parseMoof(body, windowed, moov);
-}
-
-/** Reads `[offset, offset + length)` as one bounded buffer (short at EOF). */
-async function readBoundedRange(source: ByteSource, offset: number, length: number): Promise<null | Uint8Array> {
-  if (length <= 0) return null;
-  const reader = source.read({ length, offset }, { epoch: 0 }).getReader();
-  const chunks: Uint8Array[] = [];
-  let total = 0;
-  try {
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
-      total += value.byteLength;
-      if (total >= length) break;
-    }
-  } finally {
-    void reader.cancel().catch(() => { /* empty */ });
-  }
-  if (total === 0) return null;
-
-  const out = new Uint8Array(total);
-  let at = 0;
-  for (const chunk of chunks) {
-    const n = Math.min(chunk.byteLength, total - at);
-    out.set(chunk.subarray(0, n), at);
-    at += n;
-  }
-  return out;
-}
 
 /**
  * Walks the top-level boxes of a source that overruns the bounded head. Only

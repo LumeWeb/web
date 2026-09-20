@@ -47,11 +47,13 @@ export function buildSidxFmp4(): Uint8Array {
  * Builds a deterministic sidx-less fMP4: ftyp + moov + `count` (moof mdat)
  * pairs. Fragment i starts at (i-1) s; mdat bodies grow by 40 B per fragment
  * (`mdatPadBytes` pads every mdat so tests can build objects that overrun the
- * bounded index head without changing the fragment grid).
+ * bounded index head without changing the fragment grid; `sampleCount` makes
+ * each moof's trun carry that many per-sample entries so a fragment can exceed
+ * the streaming walk's once-moof read cap).
  */
 export function buildSidxLessFmp4(
   count: number,
-  options: { firstSampleNonSync?: boolean; mdatPadBytes?: number; viaTfhdDefault?: boolean } = {},
+  options: { firstSampleNonSync?: boolean; mdatPadBytes?: number; sampleCount?: number; viaTfhdDefault?: boolean } = {},
 ): Uint8Array {
   const { mdatPadBytes = 0 } = options;
   // moovFixture/moofFixture are already complete boxes (header + body); only
@@ -123,21 +125,25 @@ export function syncSampleFlags(): number {
 /**
  * Minimal `traf` for one fragment. `viaTfhdDefault` carries the first-sample
  * sync verdict in `tfhd`'s default-sample-flags instead of `trun`'s
- * first-sample-flags, exercising both sync-evidence paths.
+ * first-sample-flags, exercising both sync-evidence paths. `sampleCount` > 1
+ * grows the trun's per-sample table (12 B/sample) so one moof can exceed the
+ * streaming walk's moof read cap; every sample keeps the same flags/duration.
  */
 export function trafFixture(
   baseMediaDecodeTime: number,
-  options: { firstSampleNonSync?: boolean; viaTfhdDefault?: boolean } = {},
+  options: { firstSampleNonSync?: boolean; sampleCount?: number; viaTfhdDefault?: boolean } = {},
 ): number[] {
-  const { firstSampleNonSync = false, viaTfhdDefault = false } = options;
+  const { firstSampleNonSync = false, sampleCount = 1, viaTfhdDefault = false } = options;
   const sampleFlags = firstSampleNonSync ? nonSyncSampleFlags() : syncSampleFlags();
   // tfhd flags: 0x020000 (default-base-is-moof); +0x20 when carrying default-sample-flags.
   const tfhdFlags = 0x020000 | (viaTfhdDefault ? 0x000020 : 0);
   const tfhd = box('tfhd', [0, (tfhdFlags >>> 16) & 255, (tfhdFlags >>> 8) & 255, tfhdFlags & 255, ...u32be(1), ...(viaTfhdDefault ? u32be(sampleFlags) : [])]);
   const tfdt = box('tfdt', [0, 0, 0, 0, ...u32be(baseMediaDecodeTime)]);
-  const trun = viaTfhdDefault
-    ? box('trun', [0, 0, 0, 0, ...u32be(1)])
-    : box('trun', [0, 0, 0, 4, ...u32be(1), ...u32be(sampleFlags)]);
+  const trun = sampleCount > 1 && !viaTfhdDefault
+    ? bigTrun(sampleCount, sampleFlags)
+    : viaTfhdDefault
+      ? box('trun', [0, 0, 0, 0, ...u32be(sampleCount)])
+      : box('trun', [0, 0, 0, 4, ...u32be(sampleCount), ...u32be(sampleFlags)]);
   return box('traf', [...tfhd, ...tfdt, ...trun]);
 }
 
@@ -155,6 +161,23 @@ export function u32be(...values: number[]): number[] {
     out.push((value >>> 24) & 255, (value >>> 16) & 255, (value >>> 8) & 255, value & 255);
   }
   return out;
+}
+
+/**
+ * One `trun` whose per-sample table holds `sampleCount` entries (12 B each:
+ * duration + size + flags, flags 0x000700). The first entry's flags carry the
+ * fragment's sync evidence, so the parser's per-sample path drives RAP exactly
+ * as the single-sample fixture does.
+ */
+function bigTrun(sampleCount: number, sampleFlags: number): number[] {
+  const flags = 0x000100 | 0x000200 | 0x000400; // per-sample duration + size + flags
+  const body: number[] = [0, (flags >>> 16) & 255, (flags >>> 8) & 255, flags & 255, ...u32be(sampleCount)];
+  for (let i = 0; i < sampleCount; i += 1) {
+    body.push(...u32be(1000)); // sample-duration (track time units)
+    body.push(...u32be(100)); // sample-size
+    body.push(...u32be(sampleFlags)); // sample-flags (sync evidence)
+  }
+  return box('trun', body);
 }
 
 /** One `size(4) type(4) body` ISO-BMFF box as a flat Uint8Array (padding bodies avoid arg-spread). */

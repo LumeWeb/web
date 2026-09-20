@@ -29,7 +29,7 @@ import { containerKind, indexGranularity } from '../media/types.ts';
 import type { RangeRead } from '../media/types.ts';
 import type { ByteRange, ByteSource, ReadOptions } from '../transport/byte-source.ts';
 import { MemoryByteSource } from '../transport/memory-byte-source.ts';
-import { buildSidxFmp4, buildSidxLessFmp4 } from './fixtures/moof-fmp4-fixture.ts';
+import { buildSidxFmp4, buildSidxLessFmp4, scanTopLevel } from './fixtures/moof-fmp4-fixture.ts';
 import { buildWebm, scanEbmlTop } from './fixtures/webm-fixture.ts';
 
 /** ByteSource that records every ranged read's extent — proves bounded reads. */
@@ -242,6 +242,52 @@ describe('MoofWalkIndexBuilder', () => {
     // small fraction of the object instead of the whole thing.
     const totalFetched = source.reads.reduce((sum, read) => sum + read.length, 0);
     expect(totalFetched).toBeLessThan(bytes.byteLength / 8);
+  });
+
+  it('walks moofs larger than the read cap whole instead of truncating them', async () => {
+    // A trun with 24k per-sample entries (12 B each) puts every moof far past
+    // the once-moof read cap; the full-buffer parse settles the whole sample
+    // tables, so the streamed walk must read each sized moof extent in full
+    // (never truncate) to land on the same byte-exact index.
+    const count = 2;
+    const bytes = buildSidxLessFmp4(count, { sampleCount: 24_000 });
+    expect(bytes.byteLength).toBeGreaterThan(INDEX_HEAD_LENGTH);
+    const source = new RecordingByteSource(bytes);
+    const streamed = await new MoofWalkIndexBuilder().build(source, fmp4);
+    const full = MoofWalkIndex.parse(bytes);
+    expect(full).not.toBeNull();
+    // The truncation symptom: a capped read leaves the out-of-cap trailing
+    // sample tables outside the window, so the walk bails null.
+    expect(streamed).toBeInstanceOf(MoofWalkIndex);
+    if (streamed) {
+      // The streamed walk is byte-identical to the full-buffer walk's output.
+      expect(walkRanges(streamed)).toEqual(walkRanges(full!));
+    }
+
+    // The fix reads each declared moof extent in full, exactly once.
+    const moofs = scanTopLevel(bytes).filter((box) => box.type === 'moof');
+    const maxMoof = Math.max(...moofs.map((box) => box.end - box.start));
+    for (const moof of moofs) {
+      expect(source.reads.some((read) => read.offset === moof.start && read.length === moof.end - moof.start)).toBe(true);
+    }
+    // Reads stay bounded by the moof extents (plus the head), never an mdat
+    // payload window or a whole-object buffer.
+    expect(Math.max(...source.reads.map((read) => read.length))).toBe(Math.max(INDEX_HEAD_LENGTH, maxMoof));
+
+    // mdat payloads are skipped by declared size: the only post-head mdat
+    // bytes fetched are the 8-byte tail of a box-header fetch at each mdat
+    // start.
+    const mdats = scanTopLevel(bytes).filter((box) => box.type === 'mdat');
+    let fetchedMdatBody = 0;
+    for (const read of source.reads.slice(1)) {
+      const readEnd = read.offset + read.length;
+      for (const mdat of mdats) {
+        const overlapStart = Math.max(read.offset, mdat.start + 8);
+        const overlapEnd = Math.min(readEnd, mdat.end);
+        if (overlapEnd > overlapStart) fetchedMdatBody += overlapEnd - overlapStart;
+      }
+    }
+    expect(fetchedMdatBody).toBeLessThanOrEqual(8 * mdats.length);
   });
 
   it('returns null for garbage or empty sources', async () => {
