@@ -25,6 +25,7 @@ import { type AppKeySeedProvider, encryptToWorker, scrub } from './app-key-hands
 import { HTMLVideoElementHost } from '@videojs/media/dom/video-host';
 import { type ErrorLike, MediaError, type MediaPreloadType } from '@videojs/media';
 import { mediaErrorEvent, mediaErrorFromWorkerMessage } from './errors.ts';
+import { MseAppendPipe } from './mse-pipe.ts';
 import {
   DEFAULT_FMP4_MIME,
   isWorkerToMainMessage,
@@ -33,11 +34,16 @@ import {
   PROTOCOL_VERSION,
   type RequestId,
   type WorkerConfig,
+  workerErrorCode,
   type WorkerErrorCode,
+  workerMode,
   type WorkerMode,
+  type WorkerMsePreference,
 } from './protocol.ts';
 
 /** Default props mirrored by the React wrapper's prop-syncing hook. */
+const FINITE_VOD_BACK_BUFFER_SECONDS = 30;
+
 export const siaVideoDefaultProps = {
   preload: 'metadata',
   src: '',
@@ -86,6 +92,16 @@ export interface SiaVideoSourceOptions {
    * so no separate object identity is required for shared sources.
    */
   workerConfig?: WorkerConfig;
+  /**
+   * Host-side worker-MSE preference, forwarded on every `HELLO` so the worker
+   * selects the main-thread fallback (`'main'`) or runtime feature-detection
+   * (`'auto'`) for this session. `'main'` keeps CHUNK posting even on
+   * runtimes that can construct MSE in a dedicated worker — useful for
+   * policy, diagnostics, or Firefox parity — while the worker still decides
+   * authoritatively and `ATTACH_OK.mode` is always honored. Defaults to
+   * `'auto'` (the field is simply not forwarded).
+   */
+  workerMse?: WorkerMsePreference;
 }
 
 /**
@@ -168,24 +184,50 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   set workerConfig(value: undefined | WorkerConfig) {
     this.#workerConfig = value;
   }
-  #appendQueue: Uint8Array[] = [];
+  /**
+   * Worker-MSE preference for the session, forwarded on every `HELLO` (when
+   * explicitly set). Takes effect on the next (re)attach, whichever comes
+   * first; the worker always remains the authoritative mode decision via
+   * `ATTACH_OK`/`HELLO_OK`.
+   */
+  get workerMse(): undefined | WorkerMsePreference {
+    return this.#workerMse;
+  }
+  set workerMse(value: undefined | WorkerMsePreference) {
+    this.#workerMse = value;
+  }
+  // Shared MSE append pipe (main-thread fallback only). Centralizes the
+  // append-queue serialization, back-buffer eviction and end-of-stream deferral
+  // that used to live inline in this class, so the main-thread MSE path and
+  // the worker-side MSE pipeline exercise one pipe implementation. Created at
+  // `SOURCE_OK`(main) pipeline setup and aborted
+  // on teardown/load reset; `null` in worker mode.
+  #appendPipe: MseAppendPipe | null = null;
 
   // Seed supplier from the `getAppKeySeed` option or the per-render setter.
   // Holding only the function keeps seed bytes out of host state.
   #appKeySeedProvider: AppKeySeedProvider | undefined;
 
   #destroyed = false;
-
   #error: MediaError | null = null;
   // Main-thread MSE fallback state (Firefox and other `main`-mode sessions).
   #mediaSource: MediaSource | null = null;
   #mimeType: string | undefined;
   #mode: null | WorkerMode = null;
+
   #objectUrl: null | string = null;
 
   readonly #options: SiaVideoSourceOptions;
 
   #pending: MainToWorkerMessage[] = [];
+
+  // Current user playback intent, tracked from native events: a `play` sets
+  // it, a `pause` clears it. Sticky across attaches only while unbroken — the
+  // worker resets its own playback bookkeeping on every ATTACH, so the host
+  // re-states a surviving intent for each replayed source — but a deliberate
+  // pause supersedes an earlier play, so a re-attach never resumes what the
+  // user stopped.
+  #playRequested = false;
 
   #preload: MediaPreloadType = siaVideoDefaultProps.preload;
 
@@ -201,6 +243,8 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
   #workerConfig: undefined | WorkerConfig;
 
+  #workerMse: undefined | WorkerMsePreference;
+
   // Worker's raw X25519 handshake public key from the newest HELLO_OK. Public
   // key material only — harmless to retain; the seed this encrypts to is not.
   #workerPublicKey: null | Uint8Array = null;
@@ -211,6 +255,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#appKeySeedProvider = options.getAppKeySeed;
     this.#workerConfig = options.workerConfig;
     this.#mimeType = options.mimeType;
+    this.#workerMse = options.workerMse;
   }
 
   /**
@@ -227,10 +272,12 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     if (this.#destroyed) return;
     super.attach(target);
     target.addEventListener('seeking', this.#onSeeking);
+    target.addEventListener('timeupdate', this.#onTimeUpdate);
     target.addEventListener('play', this.#onPlay);
+    target.addEventListener('pause', this.#onPause);
 
     if (this.#worker) {
-      this.#post({ config: this.#workerConfig, requestId: nextRequestId(), type: 'HELLO' });
+      this.#post({ config: this.#helloConfig(), requestId: nextRequestId(), type: 'HELLO' });
       return;
     }
 
@@ -238,14 +285,14 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       this.#worker = (this.#options.createWorker ?? defaultCreateWorker)();
     } catch (error) {
       this.#worker = null;
-      this.#reportError('network', errorDescription(error));
+      this.#reportError(workerErrorCode.network, errorDescription(error));
       return;
     }
 
     this.#worker.addEventListener('message', this.#onMessage);
     // HELLO negotiates readiness itself, so it must not go through the
-    // pending-message gate — that gate only opens on HELLO_OK.
-    this.#post({ config: this.#workerConfig, requestId: nextRequestId(), type: 'HELLO' });
+    // pending-message buffer — that buffer only drains on HELLO_OK.
+    this.#post({ config: this.#helloConfig(), requestId: nextRequestId(), type: 'HELLO' });
   }
 
   /**
@@ -275,7 +322,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
   detach(): void {
     this.target?.removeEventListener('seeking', this.#onSeeking);
+    this.target?.removeEventListener('timeupdate', this.#onTimeUpdate);
     this.target?.removeEventListener('play', this.#onPlay);
+    this.target?.removeEventListener('pause', this.#onPause);
     this.#send({ type: 'DETACH' });
     super.detach();
   }
@@ -289,28 +338,44 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     void super.load();
   }
 
-  #addMainSourceBuffer(mediaSource: MediaSource, mime: string): void {
+  #addMainSourceBuffer(mediaSource: MediaSource, mime: string, durationSeconds: null | number): void {
     if (mediaSource.readyState !== 'open') return;
     try {
+      if (durationSeconds !== null) mediaSource.duration = durationSeconds;
       const sourceBuffer = mediaSource.addSourceBuffer(mime);
-      sourceBuffer.addEventListener('updateend', () => this.#drainMainAppendQueue());
+      // The pipe waits on `updateend` internally; the kick here (and on the
+      // event) only re-runs the pump for state the option getters observe —
+      // above all the SourceBuffer appearing after bytes were already queued.
+      sourceBuffer.addEventListener('updateend', () => this.#appendPipe?.kick());
       this.#sourceBuffer = sourceBuffer;
-      this.#drainMainAppendQueue();
+      this.#appendPipe?.kick();
     } catch (error) {
-      this.#reportError('decode', errorDescription(error));
+      this.#reportError(workerErrorCode.decode, errorDescription(error));
     }
   }
 
   #appendChunk(bytes: Uint8Array): void {
-    if (!this.#mode || this.#mode !== 'main') {
+    if (!this.#mode || this.#mode !== workerMode.main) {
       this.dispatchEvent(new Event('progress'));
       return;
     }
-    this.#appendQueue.push(bytes);
-    this.#drainMainAppendQueue();
+    this.#appendPipe?.append(bytes);
   }
 
-  #beginMainThreadMse(mime: string): void {
+  #beginMainThreadMse(mime: string, durationSeconds: null | number): void {
+    // Each load's main-thread pipeline owns one shared append pipe. The
+    // getters read the live host state so the pipe serializes appends into
+    // whatever SourceBuffer the (possibly still-opening) MediaSource yields,
+    // and it reports fatal append failures through the same load error path
+    // the inline queue used to. Sia-specific layers feeding it bytes —
+    // CHUNK delivery, the object-URL plumbing — are unchanged.
+    this.#appendPipe = new MseAppendPipe({
+      backBufferSeconds: FINITE_VOD_BACK_BUFFER_SECONDS,
+      getMediaSource: () => this.#mediaSource,
+      getPlayheadSeconds: () => this.target?.currentTime ?? 0,
+      getSourceBuffer: () => this.#sourceBuffer,
+      onError: (error) => this.#reportError(workerErrorCode.decode, errorDescription(error)),
+    });
     const target = this.target;
     if (!target || this.#mediaSource) return;
 
@@ -319,7 +384,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // decode error. Bare container MIMEs are not decisive (see the worker's
     // mirror comment), so they fall through to the concrete attempt.
     if (typeof MediaSource !== 'undefined' && mime.includes('codecs=') && !MediaSource.isTypeSupported(mime)) {
-      this.#reportError('unsupported', `MIME: ${mime}`);
+      this.#reportError(workerErrorCode.unsupported, `MIME: ${mime}`);
       return;
     }
 
@@ -327,9 +392,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#mediaSource = mediaSource;
 
     if (mediaSource.readyState === 'open') {
-      this.#addMainSourceBuffer(mediaSource, mime);
+      this.#addMainSourceBuffer(mediaSource, mime, durationSeconds);
     } else {
-      mediaSource.addEventListener('sourceopen', () => this.#addMainSourceBuffer(mediaSource, mime), {
+      mediaSource.addEventListener('sourceopen', () => this.#addMainSourceBuffer(mediaSource, mime, durationSeconds), {
         once: true,
       });
     }
@@ -339,22 +404,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     target.src = objectUrl;
   }
 
-  #drainMainAppendQueue(): void {
-    const sourceBuffer = this.#sourceBuffer;
-    if (!sourceBuffer || sourceBuffer.updating || this.#appendQueue.length === 0) return;
-    const bytes = this.#appendQueue.shift()!;
-    try {
-      sourceBuffer.appendBuffer(bytes as unknown as BufferSource);
-    } catch (error) {
-      this.#reportError('decode', errorDescription(error));
-    }
-  }
-
   // The plaintext seed exists in this method's scope only: read from the
   // supplier, encrypted into the envelope, then scrubbed before the promise
   // chain unwinds. It is never assigned to any field, never cloned into
   // React state, and never closed over beyond this method — the wire and the
-  // host's retained state hold only the ciphertext.
+  // host's state hold only the ciphertext.
   async #encryptAndSendSeed(
     getAppKeySeed: AppKeySeedProvider,
     workerPublicKey: Uint8Array,
@@ -363,11 +417,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     try {
       seed = await Promise.resolve(getAppKeySeed());
       const envelope = await encryptToWorker(workerPublicKey, seed);
-      // POSTed directly, outside #send's pending gate: the seed supplier has
+      // POSTed directly, outside #send's pending buffer: the seed supplier has
       // been consumed at this point, so a future re-attach re-reads it anyway.
       this.#post({ envelope, requestId: nextRequestId(), type: 'APP_KEY' });
     } catch (error) {
-      this.#reportError('network', errorDescription(error));
+      this.#reportError(workerErrorCode.network, errorDescription(error));
     } finally {
       // The supplier's buffer is consumed either way — release whatever bytes
       // made it out of the login flow before the reference dies.
@@ -375,10 +429,28 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     }
   }
 
+  #evictMainBuffer(): void {
+    // Fire-and-forget: the pipe serializes the removal through `flushBuffer`
+    // and runs it on a quiesced SourceBuffer (see `mse-pipe.ts`).
+    void this.#appendPipe?.evictBackBuffer();
+  }
+
   #flushPending(): void {
     const pending = this.#pending;
     this.#pending = [];
     for (const message of pending) this.#post(message);
+  }
+
+  // HELLO config: the connection metadata plus the host's worker-MSE
+  // preference. The preference is only forwarded when the app explicitly set
+  // it (default `'auto'` leaves the wire payload byte-identical to before),
+  // and only alongside a workerConfig it can ride on — the worker still owns
+  // the authoritative mode decision and the main-thread fallback is always
+  // honored via ATTACH_OK.
+  #helloConfig(): undefined | WorkerConfig {
+    const config = this.#workerConfig;
+    if (!config || this.#workerMse === undefined) return config;
+    return { ...config, workerMse: this.#workerMse };
   }
 
   #onMessage = (event: MessageEvent) => {
@@ -391,14 +463,43 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         this.#mode = message.mode;
         // Every attach generation plays the current source from scratch: the
         // fresh SOURCE rebuilds worker-side or host-side MSE cleanly, no
-        // matter what a previous detach tore down.
+        // matter what a previous detach tore down. The worker's attach path
+        // resets its own play/seek bookkeeping, so the play intent the user
+        // expressed before (or while) the source was queued must be re-stated
+        // for the replayed load — otherwise a deferred-family preload starts
+        // the probe but never streams, stalling the element at byte 0.
         if (this.#src) {
+          const target = this.target as HTMLVideoElement | null;
+          // Only an unpaused element, or an intent no pause superseded, may
+          // resume: a user who paused before the re-attach stays paused.
+          const shouldPlay = target !== null && (!target.paused || this.#playRequested);
           this.#resetLoadState();
           this.#sendSource();
+          if (shouldPlay) {
+            // Aimed at the fresh SOURCE's request id, so the worker honors it
+            // when that load completes (SEEK/PLAY are already request-scoped;
+            // this one must be too or a later load could mis-read it).
+            this.#send({ requestId: this.#requestId ?? nextRequestId(), type: 'PLAY' });
+          }
         }
         return;
       case 'CHUNK':
         if (message.requestId === this.#requestId) this.#appendChunk(message.bytes);
+        return;
+      case 'ENDED':
+        // Only the current load may end this MediaSource; a late ENDED from a
+        // superseded load must die with its request. The worker itself ends
+        // worker-mode MediaSources, so only the main-thread fallback acts here.
+        // And a load that already errored is never ended as if it were clean —
+        // endOfStream on a failed pipeline would mask the failure. `#error` is
+        // cleared at every load boundary, so its presence here means *this*
+        // load reported an error.
+        if (message.requestId !== this.#requestId) return;
+        if (this.#mode !== workerMode.main) return;
+        if (this.#error) return;
+        // The pipe deals endOfStream only after the append queue drains and
+        // the SourceBuffer quiesces (see `mse-pipe.ts`).
+        this.#appendPipe?.requestEndOfStream();
         return;
       case 'ERROR':
         // After a clear (`src = ''`) there is no active load, so a late
@@ -421,7 +522,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // A worker speaking a different protocol version is incompatible, no
         // matter how much of the message flow happens to match.
         if (message.version !== PROTOCOL_VERSION) {
-          this.#reportError('unsupported', `worker protocol ${message.version}`);
+          this.#reportError(workerErrorCode.unsupported, `worker protocol ${message.version}`);
           return;
         }
         this.#ready = true;
@@ -461,8 +562,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // of a superseded SOURCE would downgrade the request id and let stale
         // chunks into the current append pipeline.
         if (message.requestId !== this.#requestId) return;
-        if (message.info.mode === 'main') {
-          this.#beginMainThreadMse(message.info.mime || DEFAULT_FMP4_MIME);
+        if (message.info.mode === workerMode.main) {
+          this.#beginMainThreadMse(
+            message.info.mime || DEFAULT_FMP4_MIME,
+            message.info.durationSeconds,
+          );
         }
         return;
       default:
@@ -470,9 +574,21 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     }
   };
 
+  #onPause = (event: Event) => {
+    const target = this.target;
+    if (!target || event.target !== target) return;
+    // A deliberate pause supersedes earlier play intent: once the user stops,
+    // a re-attach must not resume the stopped playback. The next native `play`
+    // re-asserts the intent, so clearing here loses nothing live.
+    this.#playRequested = false;
+  };
+
   #onPlay = (event: Event) => {
     const target = this.target;
     if (!target || event.target !== target) return;
+    // Play intent is sticky: an attach that rebuilds the pipeline must not
+    // lose it (the worker resets its own playback bookkeeping on ATTACH).
+    this.#playRequested = true;
     // Deferred playback start (preload 'metadata'/'none'): first play (or a
     // user seek) triggers streaming.
     this.#send({ requestId: this.#requestId ?? nextRequestId(), type: 'PLAY' });
@@ -483,10 +599,26 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   #onSeeking = (event: Event) => {
     const target = this.target;
     if (!target || event.target !== target) return;
+    // A seek supersedes the current position: drop chunks still queued for it
+    // and (once quiesced) reset the SourceBuffer's segment parser so the
+    // worker's fresh fragment parses clean instead of continuing the tail the
+    // seek cut off mid-fragment (Chromium's RunSegmentParserLoop failure).
+    this.#appendPipe?.reset();
     this.#send({
       requestId: this.#requestId ?? nextRequestId(),
       time: target.currentTime,
       type: 'SEEK',
+    });
+  };
+
+  #onTimeUpdate = (event: Event) => {
+    const target = this.target;
+    if (!target || event.target !== target) return;
+    this.#evictMainBuffer();
+    this.#send({
+      requestId: this.#requestId ?? nextRequestId(),
+      time: target.currentTime,
+      type: 'PLAYHEAD',
     });
   };
 
@@ -498,6 +630,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
   #reportError(kind: WorkerErrorCode, context?: string): void {
     if (this.#destroyed) return;
+    // An errored pipeline is never ended: the pipe refuses end-of-stream once
+    // it has failed, and the ENDED handler refuses on `#error` — either way a
+    // failure is never masked by a clean end. `#error` is cleared at every
+    // load boundary, so its presence here means *this* load reported an error.
     const error = mediaErrorFromWorkerMessage({ context, kind });
     this.#error = error;
     this.dispatchEvent(mediaErrorEvent(error));
@@ -507,17 +643,23 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // announces the load boundary with the native `emptied` event.
   #resetLoadState(): void {
     this.#error = null;
+    // A new/explicit load has no playback intent yet: the element's next
+    // native `play` re-asserts it. (The ATTACH_OK path re-captures intent
+    // before this reset, so a rebuilt pipeline still resumes.)
+    this.#playRequested = false;
     this.#requestId = null;
 
     // Main-thread fallback state belongs to the old load; a fresh SOURCE_OK
-    // rebuilds it.
+    // rebuilds it. The old load's pipe is permanently stopped and nulled —
+    // nothing queued may drain into the next load's SourceBuffer.
     if (this.#objectUrl) {
       URL.revokeObjectURL(this.#objectUrl);
       this.#objectUrl = null;
     }
+    this.#appendPipe?.abort();
+    this.#appendPipe = null;
     this.#mediaSource = null;
     this.#sourceBuffer = null;
-    this.#appendQueue = [];
     this.dispatchEvent(new Event('emptied'));
   }
 
@@ -543,13 +685,16 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   }
 
   #teardownMainThreadMse(): void {
+    // Permanently stop the shared pipe: the whole MediaSource is being
+    // discarded, so nothing further may append, evict, or end through it.
+    this.#appendPipe?.abort();
+    this.#appendPipe = null;
     if (this.#objectUrl) {
       URL.revokeObjectURL(this.#objectUrl);
       this.#objectUrl = null;
     }
     this.#mediaSource = null;
     this.#sourceBuffer = null;
-    this.#appendQueue = [];
   }
 }
 

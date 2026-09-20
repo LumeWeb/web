@@ -1,11 +1,12 @@
-import { describe, expect, it } from 'vitest';
 import type { AppMetadata } from '@siafoundation/sia-storage';
+import { describe, expect, it, vi } from 'vitest';
 import {
   decryptAppKeyEnvelope,
   exportWorkerPublicKey,
   generateWorkerKeyPair,
 } from '../app-key-handshake.ts';
-import { type AppKeyEnvelope, isAppKeyEnvelope, type MainToWorkerMessage, PROTOCOL_VERSION, WORKER_PUBLIC_KEY_LENGTH, type WorkerToMainMessage } from '../protocol.ts';
+import { MseAppendPipe } from '../mse-pipe.ts';
+import { type AppKeyEnvelope, DEFAULT_FMP4_MIME, isAppKeyEnvelope, type MainToWorkerMessage, PROTOCOL_VERSION, WORKER_PUBLIC_KEY_LENGTH, type WorkerToMainMessage } from '../protocol.ts';
 import { siaVideoDefaultProps, SiaVideoSource } from '../sia-video-source.ts';
 
 /**
@@ -115,6 +116,10 @@ describe('SiaVideoSource (host state machine)', () => {
 
     target.dispatchEvent(new Event('play'));
     expect(worker.sent.at(-1)).toMatchObject({ type: 'PLAY' });
+
+    target.currentTime = 13;
+    target.dispatchEvent(new Event('timeupdate'));
+    expect(worker.sent.at(-1)).toMatchObject({ time: 13, type: 'PLAYHEAD' });
     host.destroy();
   });
 
@@ -192,6 +197,68 @@ describe('SiaVideoSource (host state machine)', () => {
     const hellos = worker.sent.filter((m) => m.type === 'HELLO');
     expect(hellos.length).toBe(2);
     expect(hellos.at(-1)).toMatchObject({ config: { indexerUrl: 'https://changed.example' } });
+    host.destroy();
+  });
+
+
+  it.skipIf(!IN_BROWSER)('forwards an explicit worker-MSE preference on HELLO and omits it by default', () => {
+    const worker = new FakeWorker();
+
+    const forced = new SiaVideoSource({
+      createWorker: () => worker as unknown as Worker,
+      workerConfig: workerConfig(),
+      workerMse: 'main',
+    });
+    forced.attach(document.createElement('video'));
+    const forcedHello = worker.sent.find((m) => m.type === 'HELLO') as { config?: { workerMse?: string }; type: 'HELLO'; };
+    expect(forcedHello.config).toMatchObject({ workerMse: 'main' });
+    forced.destroy();
+
+    // Default auto (or unset) leaves the wire byte-identical: no workerMse.
+    const auto = new SiaVideoSource({ createWorker: () => worker as unknown as Worker, workerConfig: workerConfig() });
+    auto.attach(document.createElement('video'));
+    const autoHello = worker.sent.filter((m) => m.type === 'HELLO').at(-1) as { config?: Record<string, unknown>; type: 'HELLO'; };
+    expect(autoHello.config).not.toHaveProperty('workerMse');
+    auto.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('selects worker mode end-to-end: HANDLE is attached as the element srcObject', () => {
+    // A real MediaSourceHandle like the worker would transfer: the DOM
+    // srcObject setter brand-checks the value, so a plain stub cannot stand in.
+    // Runtimes without MediaSourceHandle (Firefox) exercise the message-level
+    // flow but cannot attach a handle — the srcObject assertion is scoped to
+    // runtimes that can (Chromium/Edge/Safari).
+    const mediaSource = new MediaSource();
+    const handle = (mediaSource as unknown as { handle?: MediaSourceHandle }).handle;
+    const canAttach = handle !== undefined;
+
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const target = document.createElement('video');
+    host.attach(target);
+
+    worker.reply({ features: { workerMse: true }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    worker.reply({ mode: 'worker', requestId: 2, type: 'ATTACH_OK' });
+
+    host.src = 'k';
+    const source = worker.sent.find((m) => m.type === 'SOURCE') as
+      | undefined
+      | { preload: string; requestId: number; src: string; type: 'SOURCE'; };
+    if (!source) throw new Error('SOURCE was not sent');
+    worker.reply({
+      info: { container: 'fmp4', durationSeconds: null, mime: 'video/mp4', mode: 'worker' },
+      requestId: source.requestId,
+      type: 'SOURCE_OK',
+    });
+
+    // Worker mode: produced media never leaves the worker — the host only
+    // attaches the transferred MediaSourceHandle to the element.
+    if (canAttach) {
+      worker.reply({ handle, requestId: source.requestId, type: 'HANDLE' });
+      expect((target as unknown as { srcObject: unknown }).srcObject).toBe(handle);
+      // No main-thread object URL is created in worker mode.
+      expect(target.src.startsWith('blob:')).toBe(false);
+    }
     host.destroy();
   });
 
@@ -336,7 +403,7 @@ describe('SiaVideoSource (host state machine)', () => {
     const target = document.createElement('video');
     host.attach(target);
     // Playback intent arriving while HELLO is in flight goes through the
-    // pending gate (SEEK then PLAY); the host must keep holding it until the
+    // pending queue (SEEK then PLAY); the host must keep holding it until the
     // APP_KEY envelope is actually on the wire, not merely until HELLO_OK is
     // handled.
     target.currentTime = 1;
@@ -352,7 +419,7 @@ describe('SiaVideoSource (host state machine)', () => {
 
     // The worker consumes the captured postMessage sequence FIFO: APP_KEY
     // must precede ATTACH and everything the flush released, or the first
-    // load hits the worker-side seed gate and fails with a spurious
+    // load hits the worker-side seed requirement and fails with a spurious
     // "No Sia SDK is available" network error at playback start.
     const sentTypes = worker.sent.map((m) => m.type);
     expect(sentTypes).toEqual(['HELLO', 'APP_KEY', 'ATTACH', 'SEEK', 'PLAY']);
@@ -374,6 +441,109 @@ describe('SiaVideoSource (host state machine)', () => {
     host.destroy();
   });
 
+  it.skipIf(!IN_BROWSER)('re-states play intent for the replayed source after ATTACH_OK', () => {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const target = document.createElement('video');
+    // The source predates the engine, so it replays on ATTACH_OK rather than
+    // going straight out. The user's play() races the handshake and is queued
+    // behind the attach, then flushed once the attach completes — the FIFO the
+    // worker sees is HELLO, ATTACH, PLAY, so its attach-reset of play
+    // bookkeeping lands after the PLAY was already consumed.
+    host.src = 'replay-play-object';
+    host.attach(target);
+    target.dispatchEvent(new Event('play'));
+
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    // No seed supplier → ATTACH goes out synchronously and the queued PLAY is
+    // flushed behind it, mirroring the live player's first-load ordering.
+    expect(worker.sent.map((m) => m.type)).toEqual(['HELLO', 'ATTACH', 'PLAY']);
+
+    worker.sent.length = 0;
+    worker.reply({ mode: 'main', requestId: 2, type: 'ATTACH_OK' });
+
+    // The fresh SOURCE alone would start deferred (preload defaults to
+    // 'metadata') and the pipeline would stall at byte 0 forever — nothing
+    // re-states the user's play after the attach rebuilt the pipeline. The
+    // host must re-send PLAY aimed at the replayed source's load so the
+    // worker begins streaming once its probe completes.
+    const sentTypes = worker.sent.map((m) => m.type);
+    expect(sentTypes.filter((t) => t === 'SOURCE' || t === 'PLAY')).toEqual(['SOURCE', 'PLAY']);
+
+    const source = worker.sent.find((m) => m.type === 'SOURCE');
+    const play = worker.sent.find((m) => m.type === 'PLAY');
+    expect(source?.src).toBe('replay-play-object');
+    // The re-stated PLAY names the load it belongs to, matching the replayed
+    // SOURCE's request id, so the worker honors it when that load completes.
+    expect(play?.requestId).toBe(source?.requestId);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('does not resume a playback the user deliberately paused before the re-attach', () => {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const target = document.createElement('video');
+    host.src = 'paused-object';
+    host.attach(target);
+    target.dispatchEvent(new Event('play'));
+    // The user stops playback before the re-attach completes. The element is
+    // genuinely paused (synthetic events never change native paused state), so
+    // a re-stated PLAY after ATTACH_OK would be resuming what the user stopped.
+    target.dispatchEvent(new Event('pause'));
+
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    expect(worker.sent.map((m) => m.type)).toEqual(['HELLO', 'ATTACH', 'PLAY']);
+
+    worker.sent.length = 0;
+    worker.reply({ mode: 'main', requestId: 2, type: 'ATTACH_OK' });
+
+    expect(target.paused).toBe(true);
+    // The fresh SOURCE replays the current source, but the user's pause won:
+    // the rebuilt pipeline must not start streaming on its own.
+    expect(worker.sent.map((m) => m.type)).toEqual(['SOURCE']);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('keeps play intent sticky across a re-attach when no pause superseded it', () => {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const target = document.createElement('video');
+    host.src = 'sticky-object';
+    host.attach(target);
+    target.dispatchEvent(new Event('play'));
+
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    worker.sent.length = 0;
+    worker.reply({ mode: 'main', requestId: 2, type: 'ATTACH_OK' });
+
+    // The harness element reports paused (synthetic play is not a real play),
+    // so only the sticky intent can drive the re-stated PLAY — clearing it on
+    // every pause must not erase an intent no pause superseded.
+    const sentTypes = worker.sent.map((m) => m.type);
+    expect(sentTypes.filter((t) => t === 'SOURCE' || t === 'PLAY')).toEqual(['SOURCE', 'PLAY']);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('re-states play intent after a pause→play sequence leads into the re-attach', () => {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const target = document.createElement('video');
+    host.src = 'replay-object';
+    host.attach(target);
+    // The pause predates the play: intent is live again the moment the user
+    // plays after stopping, so the re-stated source must still stream.
+    target.dispatchEvent(new Event('pause'));
+    target.dispatchEvent(new Event('play'));
+
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    worker.sent.length = 0;
+    worker.reply({ mode: 'main', requestId: 2, type: 'ATTACH_OK' });
+
+    const sentTypes = worker.sent.map((m) => m.type);
+    expect(sentTypes.filter((t) => t === 'SOURCE' || t === 'PLAY')).toEqual(['SOURCE', 'PLAY']);
+    host.destroy();
+  });
+
   it.skipIf(!IN_BROWSER)('sends no APP_KEY message when no seed supplier is configured', async () => {
     const worker = new FakeWorker();
     const keyPair = generateWorkerKeyPair();
@@ -385,6 +555,255 @@ describe('SiaVideoSource (host state machine)', () => {
 
     // Apps injecting their own SDK factory have no handshake to perform.
     expect(worker.sent.some((m) => m.type === 'APP_KEY')).toBe(false);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('calls MediaSource.endOfStream after ENDED once appends drain (main mode)', async () => {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const target = document.createElement('video');
+    host.attach(target);
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    // The host only acts on main-mode CHUNK/ENDED once the mode is known, so
+    // complete the ATTACH round trip before the load starts.
+    worker.reply({ mode: 'main', requestId: 2, type: 'ATTACH_OK' });
+
+    host.src = 'k';
+    const source = worker.sent.find((m) => m.type === 'SOURCE') as
+      | undefined
+      | { requestId: number; type: 'SOURCE'; };
+    if (!source) throw new Error('SOURCE was not sent');
+    worker.reply({
+      info: { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main' },
+      requestId: source.requestId,
+      type: 'SOURCE_OK',
+    });
+    // Let sourceopen + addSourceBuffer settle, then deliver one init chunk and
+    // the end-of-stream signal. The host must defer endOfStream until the
+    // main-thread append queue drains (updateend), then end the MediaSource.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const endSpy = vi.spyOn(MediaSource.prototype, 'endOfStream');
+    worker.reply({
+      bytes: new Uint8Array([0, 0, 0, 32, 0x66, 0x74, 0x79, 0x70, 0x69, 0x73, 0x6f, 0x6d]),
+      kind: 'init',
+      requestId: source.requestId,
+      type: 'CHUNK',
+    });
+    worker.reply({ requestId: source.requestId, type: 'ENDED' });
+
+    const deadline = Date.now() + 3000;
+    while (Date.now() < deadline && endSpy.mock.calls.length === 0) {
+      await new Promise((resolve) => setTimeout(resolve, 25));
+    }
+    expect(endSpy.mock.calls.length).toBeGreaterThan(0);
+    endSpy.mockRestore();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('ignores a stale ENDED from a superseded request', async () => {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    host.attach(document.createElement('video'));
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+
+    host.src = 'k';
+    const source = worker.sent.find((m) => m.type === 'SOURCE') as
+      | undefined
+      | { requestId: number; type: 'SOURCE'; };
+    if (!source) throw new Error('SOURCE was not sent');
+    worker.reply({
+      info: { container: 'fmp4', durationSeconds: null, mime: 'video/mp4', mode: 'main' },
+      requestId: source.requestId,
+      type: 'SOURCE_OK',
+    });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const endSpy = vi.spyOn(MediaSource.prototype, 'endOfStream');
+    worker.reply({ requestId: 999, type: 'ENDED' });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(endSpy.mock.calls.length).toBe(0);
+    endSpy.mockRestore();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('does not end main-thread MSE after its load reports an error', async () => {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    host.attach(document.createElement('video'));
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    worker.reply({ mode: 'main', requestId: 2, type: 'ATTACH_OK' });
+
+    host.src = 'k';
+    const source = worker.sent.find((m) => m.type === 'SOURCE') as
+      | undefined
+      | { requestId: number; type: 'SOURCE'; };
+    if (!source) throw new Error('SOURCE was not sent');
+    worker.reply({
+      info: { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main' },
+      requestId: source.requestId,
+      type: 'SOURCE_OK',
+    });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const endSpy = vi.spyOn(MediaSource.prototype, 'endOfStream');
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: source.requestId, type: 'ERROR' });
+    worker.reply({ requestId: source.requestId, type: 'ENDED' });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    expect(endSpy).not.toHaveBeenCalled();
+    endSpy.mockRestore();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('aborts the SourceBuffer parser on repeated forward/back seeks (main-thread MSE fallback)', async () => {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const target = document.createElement('video');
+    host.attach(target);
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    worker.reply({ mode: 'main', requestId: 2, type: 'ATTACH_OK' });
+
+    host.src = 'seek-object';
+    const source = worker.sent.find((m) => m.type === 'SOURCE') as
+      | undefined
+      | { requestId: number; type: 'SOURCE'; };
+    if (!source) throw new Error('SOURCE was not sent');
+    worker.reply({
+      info: { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main' },
+      requestId: source.requestId,
+      type: 'SOURCE_OK',
+    });
+    // Let sourceopen + addSourceBuffer settle so the shared pipe holds a real
+    // SourceBuffer and the seek reset can abort its segment parser.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const abortSpy = vi.spyOn(SourceBuffer.prototype, 'abort');
+
+    // Forward seek: the host resets the pipe for the new position and the
+    // quiesced SourceBuffer's segment parser is aborted so the worker's fresh
+    // fragment starts a new segment (the main-thread regression from the
+    // ac55a7b0 parser-reset change).
+    target.currentTime = 45;
+    target.dispatchEvent(new Event('seeking'));
+    expect(worker.sent.at(-1)).toMatchObject({ time: 45, type: 'SEEK' });
+    await settle(4);
+    expect(abortSpy).toHaveBeenCalledTimes(1);
+
+    // Backward seek: another reset, another parser abort, same buffer reused.
+    target.currentTime = 10;
+    target.dispatchEvent(new Event('seeking'));
+    expect(worker.sent.at(-1)).toMatchObject({ time: 10, type: 'SEEK' });
+    await settle(4);
+    expect(abortSpy).toHaveBeenCalledTimes(2);
+
+    // Forward again: rapid repeated seeks each reset the shared pipe exactly
+    // once — never re-entering, and never tearing the pipeline down.
+    target.currentTime = 30;
+    target.dispatchEvent(new Event('seeking'));
+    expect(worker.sent.at(-1)).toMatchObject({ time: 30, type: 'SEEK' });
+    await settle(4);
+    expect(abortSpy).toHaveBeenCalledTimes(3);
+
+    abortSpy.mockRestore();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('surfaces a fatal SourceBuffer append failure once and never endOfStreams the failed pipeline', async () => {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const target = document.createElement('video');
+    host.attach(target);
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    worker.reply({ mode: 'main', requestId: 2, type: 'ATTACH_OK' });
+
+    host.src = 'k';
+    const source = worker.sent.find((m) => m.type === 'SOURCE') as
+      | undefined
+      | { requestId: number; type: 'SOURCE'; };
+    if (!source) throw new Error('SOURCE was not sent');
+    worker.reply({
+      info: { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main' },
+      requestId: source.requestId,
+      type: 'SOURCE_OK',
+    });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const endSpy = vi.spyOn(MediaSource.prototype, 'endOfStream');
+    // A synchronous non-quota append rejection is the pipe's fatal path; the
+    // prototype spy routes it through the real SPF appendSegment call, so both
+    // browsers surface it through the source buffer the host owns.
+    const appendSpy = vi.spyOn(SourceBuffer.prototype, 'appendBuffer').mockImplementationOnce(() => {
+      throw new DOMException('decode garbage', 'InvalidStateError');
+    });
+    let errorEvents = 0;
+    host.addEventListener('error', () => errorEvents++);
+
+    worker.reply({
+      bytes: new Uint8Array([0, 0, 0, 32, 0x66, 0x74, 0x79, 0x70, 0x69, 0x73, 0x6f, 0x6d]),
+      kind: 'init',
+      requestId: source.requestId,
+      type: 'CHUNK',
+    });
+    await settle(8);
+    expect(appendSpy).toHaveBeenCalledTimes(1);
+    expect(host.error).not.toBeNull();
+    expect(errorEvents).toBeGreaterThanOrEqual(1);
+
+    // The failed pipe drops every later append...
+    worker.reply({
+      bytes: new Uint8Array([0, 0, 0, 32, 0x66, 0x74, 0x79, 0x70, 0x69, 0x73, 0x6f, 0x6d]),
+      kind: 'init',
+      requestId: source.requestId,
+      type: 'CHUNK',
+    });
+    // ...and a late ENDED must not endOfStream a failed pipeline — the
+    // main-thread fallback never masks a failure with a clean end.
+    worker.reply({ requestId: source.requestId, type: 'ENDED' });
+    await settle(8);
+
+    expect(endSpy).not.toHaveBeenCalled();
+    appendSpy.mockRestore();
+    endSpy.mockRestore();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('trims the back buffer through the shared pipe on playhead advance (bounded buffering)', async () => {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const target = document.createElement('video');
+    host.attach(target);
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    worker.reply({ mode: 'main', requestId: 2, type: 'ATTACH_OK' });
+
+    host.src = 'k';
+    const source = worker.sent.find((m) => m.type === 'SOURCE') as
+      | undefined
+      | { requestId: number; type: 'SOURCE'; };
+    if (!source) throw new Error('SOURCE was not sent');
+    worker.reply({
+      info: { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main' },
+      requestId: source.requestId,
+      type: 'SOURCE_OK',
+    });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    // Bounded-buffering contract: every native timeupdate routes into the
+    // shared pipe's eviction path, which derives the removal range from the
+    // live playhead (covered end-to-end against a real SourceBuffer by the
+    // pipe spec; here the host wiring is what's under test).
+    const evictSpy = vi.spyOn(MseAppendPipe.prototype, 'evictBackBuffer');
+
+    target.currentTime = 60;
+    target.dispatchEvent(new Event('timeupdate'));
+    expect(evictSpy).toHaveBeenCalledTimes(1);
+    expect(worker.sent.at(-1)).toMatchObject({ time: 60, type: 'PLAYHEAD' });
+
+    target.currentTime = 61;
+    target.dispatchEvent(new Event('timeupdate'));
+    expect(evictSpy).toHaveBeenCalledTimes(2);
+
+    evictSpy.mockRestore();
     host.destroy();
   });
 });
@@ -402,4 +821,16 @@ function* byteArraysOf(value: unknown): Generator<Uint8Array> {
   if (typeof value === 'object' && value !== null) {
     for (const item of Object.values(value as Record<string, unknown>)) yield* byteArraysOf(item);
   }
+}
+
+/** Lets queued microtasks/timers from pipe pumps and appends flush out. */
+function settle(rounds = 8): Promise<void> {
+  return new Promise((resolve) => {
+    const tick = (left: number) =>
+      setTimeout(() => {
+        if (left <= 0) resolve();
+        else tick(left - 1);
+      }, 0);
+    tick(rounds);
+  });
 }

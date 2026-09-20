@@ -44,6 +44,14 @@ export interface SiaByteSourceFactoryOptions {
   chunkSize?: number;
   /** Forwarded to every `Sdk.download` call. */
   downloadOptions?: { maxBufferedChunks?: number };
+  /**
+   * Max bytes per SDK download, forwarded to every `RangedReader` the source
+   * builds so a range is fetched as sequential bounded windows instead of one
+   * wide `Sdk.download` — bounding the per-download fan-out that exhausts
+   * Chromium's ~64 pending WebTransport session cap. Unset preserves the
+   * single-download behavior.
+   */
+  windowBytes?: number;
 }
 
 export interface SiaByteSourceOptions {
@@ -59,6 +67,12 @@ export interface SiaByteSourceOptions {
   object: SiaObjectLike;
   /** Sia SDK (or fake) that serves ranged downloads. */
   sdk: SiaSdkLike;
+  /**
+   * Max bytes per SDK download; falls back for every read that does not
+   * carry its own `ReadOptions.windowBytes`. See
+   * `SiaByteSourceFactoryOptions.windowBytes`.
+   */
+  windowBytes?: number;
 }
 
 /**
@@ -197,7 +211,9 @@ export class SiaByteSource implements ByteSource {
           },
           sdk,
           stallTimeoutMs: options.stallTimeoutMs,
-          windowBytes: options.windowBytes,
+          // A per-read windowBytes wins; otherwise the factory-level knob
+          // (the documentable default for every read the source builds) applies.
+          windowBytes: options.windowBytes ?? this.#options.windowBytes,
         });
         readerRef = reader;
         reader.start(start, end - start);
