@@ -36,3 +36,6 @@ export declare function simpleBlockKeyframe(
   block: { dataEnd: number; dataOffset: number },
   trackNumber: null | number,
 ): boolean | null;
+
+/** Runs the full structural contract over candidate bytes, problems joined in `reason`. */
+export declare function validate(bytes: Uint8Array): { ok: boolean; reason: string; sha: string };

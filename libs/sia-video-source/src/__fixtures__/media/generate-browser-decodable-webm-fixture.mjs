@@ -358,7 +358,10 @@ function validate(bytes) {
       if (codecIds.length < 2) problems.push(`expected ≥2 tracks, got ${codecIds.length}`);
       if (!codecIds.includes('V_VP8') || !codecIds.includes('A_VORBIS')) problems.push(`expected V_VP8 + A_VORBIS tracks, got ${codecIds.join(',')}`);
     }
-    const videoNumber = videoTrackNumber(bytes, tracks);
+    // A missing Tracks/Cues element is a contract violation, not a crash:
+    // the video-track lookup and the cued-cluster keyframe check both stay
+    // silent here and let the recorded problems above speak.
+    const videoNumber = tracks === undefined ? null : videoTrackNumber(bytes, tracks);
     if (videoNumber === null) problems.push('no video TrackEntry (TrackType 1) to keyframe-check against');
     // Keyframe evidence: every cluster the Cues index names must carry a
     // SimpleBlock of the VIDEO track whose keyframe bit is set — the cued
@@ -366,7 +369,7 @@ function validate(bytes) {
     // bit without meaning anything for video random access (and this
     // muxer's clusters open on audio blocks), so the first block of any
     // track is never accepted as evidence.
-    if (videoNumber !== null) {
+    if (videoNumber !== null && cues) {
       const nonRap = [];
       const unmatched = [];
       for (const position of cueClusterPositions(bytes, cues)) {
@@ -386,7 +389,7 @@ function validate(bytes) {
 
 // Exported for the generator's regression spec (src/__tests__/fixtures/
 // generator-webm-fixture.spec.ts); the script stays a plain CLI otherwise.
-export { buildCluster, buildSimpleBlock, firstVideoBlockKeyframe, simpleBlockKeyframe };
+export { buildCluster, buildSimpleBlock, firstVideoBlockKeyframe, simpleBlockKeyframe, validate };
 
 /** Track number of the TrackEntry whose TrackType is 1 (video), or null. */
 function videoTrackNumber(bytes, tracks) {
