@@ -10,7 +10,7 @@
  * (V_VP8 + A_VORBIS), ≥2 Clusters whose timecodes are keyframe-aligned
  * (libvpx `-g 30` at 30 fps = one keyframe per second, with
  * `-cluster_time_limit 1000` forcing a Cluster boundary every second so each
- * Cluster starts on a RAP) and a Cues element naming those Clusters — the
+ * Cluster carries a video RAP) and a Cues element naming those Clusters — the
  * exact-byte grid the `CuesIndex` browser tests seek on. Lockable by sha256.
  *
  * This script is the reproduction + verification contract:
@@ -21,13 +21,14 @@
  *   node generate-browser-decodable-webm-fixture.mjs --emit-bytes-ts   # re-emit the browser-safe base64 module
  *
  * A candidate that fails the structural contract (DocType `webm`, ≥2 Clusters,
- * ≥1 Cues with ≥2 CuePoints, keyframe-aligned cluster starts, complete
- * elements, stable sha256) is rejected — never fabricated.
+ * ≥1 Cues with ≥2 CuePoints, every cued Cluster carrying a video keyframe
+ * SimpleBlock, complete elements, stable sha256) is rejected — never
+ * fabricated.
  */
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
 const OUT = dirname(fileURLToPath(import.meta.url));
@@ -66,6 +67,26 @@ const ID_SIMPLEBLOCK = 0xa3;
 const ID_TRACKS = 0x1654ae6b;
 const ID_TRACKENTRY = 0xae;
 const ID_CODECID = 0x86;
+const ID_TRACKNUMBER = 0xd7;
+const ID_TRACKTYPE = 0x83;
+const ID_CUETRACKPOSITIONS = 0xb7;
+const ID_CUECLUSTERPOSITION = 0xf1;
+
+/** Assembles a Cluster of SimpleBlocks; returns the raw bytes plus the cluster element as `elements()` parses it. */
+function buildCluster(blocks) {
+  const payload = [];
+  for (const block of blocks) payload.push(...block);
+  const bytes = new Uint8Array([0x1f, 0x43, 0xb6, 0x75, 0x80 | payload.length, ...payload]);
+  const [cluster] = elements(bytes, 0, bytes.length);
+  return { bytes, cluster };
+}
+
+/** Builds one SimpleBlock: id, size vint, track vint, 2-byte timecode, flags, payload filler. */
+function buildSimpleBlock(trackNumber, timecode, flags, dataBytes = 4) {
+  const body = [0x80 | (trackNumber & 0x7f), (timecode >> 8) & 0xff, timecode & 0xff, flags & 0xff];
+  for (let i = 0; i < dataBytes; i += 1) body.push(0xab);
+  return new Uint8Array([ID_SIMPLEBLOCK, 0x80 | body.length, ...body]);
+}
 
 function checkMode() {
   if (!existsSync(FIXTURE)) {
@@ -83,6 +104,27 @@ function childMap(bytes, element) {
     if (!map.has(child.id)) map.set(child.id, child);
   }
   return map;
+}
+
+/** Segment-relative Cluster start named by each CuePoint, in Cues order. */
+function cueClusterPositions(bytes, cues) {
+  const positions = [];
+  for (const cuePoint of elements(bytes, cues.dataOffset, cues.dataEnd)) {
+    if (cuePoint.id !== ID_CUEPOINT) continue;
+    for (const trackPositions of elements(bytes, cuePoint.dataOffset, cuePoint.dataEnd)) {
+      if (trackPositions.id !== ID_CUETRACKPOSITIONS) continue;
+      const position = childMap(bytes, trackPositions).get(ID_CUECLUSTERPOSITION);
+      if (position) positions.push(elementInteger(bytes, position));
+    }
+  }
+  return positions;
+}
+
+/** Unsigned integer carried by an element's payload (TrackNumber/TrackType). */
+function elementInteger(bytes, element) {
+  let value = 0;
+  for (let o = element.dataOffset; o < element.dataEnd && o < bytes.length; o += 1) value = value * 256 + (bytes[o] ?? 0);
+  return value;
 }
 
 /** Walks sibling elements in `[start, end)`; stops at the first overrun. */
@@ -141,15 +183,18 @@ function emitBytesTsMode() {
   return emitBytesTs(bytes, verdict.sha);
 }
 
-/** Keyframe flag of the first SimpleBlock in a Cluster, or null when absent. */
-function firstVideoBlockKeyframe(bytes, cluster) {
+/**
+ * Keyframe flag of the first SimpleBlock belonging to `trackNumber` inside a
+ * Cluster, or null when the cluster carries no such block — mirrors the
+ * production reader `firstBlockKeyframe` in webm-probe.ts, so a keyframe bit
+ * on an audio block can never vouch for the cluster's video random-access
+ * start.
+ */
+function firstVideoBlockKeyframe(bytes, cluster, trackNumber) {
   for (const child of elements(bytes, cluster.dataOffset, cluster.dataEnd)) {
     if (child.id !== ID_SIMPLEBLOCK) continue;
-    const track = idVint(bytes, child.dataOffset);
-    if (!track) return null;
-    const flagsOffset = child.dataOffset + track.length + 2; // + 2-byte signed timecode
-    if (flagsOffset >= child.dataEnd) return null;
-    return (bytes[flagsOffset] & 0x80) !== 0;
+    const flag = simpleBlockKeyframe(bytes, child, trackNumber);
+    if (flag !== null) return flag;
   }
   return null;
 }
@@ -211,11 +256,42 @@ function printContract() {
 `);
 }
 
+/**
+ * Reads a value vint at `offset` with its length marker stripped — the
+ * SimpleBlock track-number encoding (a size vint per EBML framing, unlike the
+ * id vints whose raw bytes are kept).
+ */
+function readValueVint(bytes, offset) {
+  const length = vintLengthAt(bytes, offset);
+  if (length === 0) return null;
+  let value = 0;
+  for (let i = 0; i < length; i += 1) {
+    const b = bytes[offset + i] ?? 0;
+    value = value * 256 + (i === 0 ? b & (0xff >> length) : b);
+  }
+  return { length, value };
+}
+
 function report(label, verdict) {
   console.log(`${label}: ${verdict.ok ? 'OK' : 'CONTRACT VIOLATION'}`);
   if (!verdict.ok) console.log(`  reason: ${verdict.reason}`);
   console.log(`  sha256 ${verdict.sha}`);
   return verdict.ok;
+}
+
+/**
+ * Inspects one SimpleBlock: track number (value vint), 2-byte signed timecode,
+ * then a flags byte whose 0x80 bit marks a keyframe. Returns null for a block
+ * of a different track or a truncated header — mirrors the production reader
+ * `simpleBlockKeyframe` in webm-probe.ts.
+ */
+function simpleBlockKeyframe(bytes, block, trackNumber) {
+  const track = readValueVint(bytes, block.dataOffset);
+  if (!track) return null;
+  if (trackNumber !== null && track.value !== trackNumber) return null;
+  const flagsOffset = block.dataOffset + track.length + 2; // + 2-byte signed timecode
+  if (flagsOffset >= block.dataEnd) return null;
+  return (bytes[flagsOffset] & 0x80) !== 0;
 }
 
 /**
@@ -282,15 +358,47 @@ function validate(bytes) {
       if (codecIds.length < 2) problems.push(`expected ≥2 tracks, got ${codecIds.length}`);
       if (!codecIds.includes('V_VP8') || !codecIds.includes('A_VORBIS')) problems.push(`expected V_VP8 + A_VORBIS tracks, got ${codecIds.join(',')}`);
     }
-    // Keyframe evidence: every cluster starts with a video keyframe SimpleBlock.
-    const nonRap = [];
-    clusters.forEach((cluster, index) => {
-      const flag = firstVideoBlockKeyframe(bytes, cluster);
-      if (flag === false) nonRap.push(index);
-    });
-    if (nonRap.length > 0) problems.push(`clusters ${nonRap.join(',')} do not start with a keyframe`);
+    const videoNumber = videoTrackNumber(bytes, tracks);
+    if (videoNumber === null) problems.push('no video TrackEntry (TrackType 1) to keyframe-check against');
+    // Keyframe evidence: every cluster the Cues index names must carry a
+    // SimpleBlock of the VIDEO track whose keyframe bit is set — the cued
+    // grid is what seeks resolve through. An audio block can carry the 0x80
+    // bit without meaning anything for video random access (and this
+    // muxer's clusters open on audio blocks), so the first block of any
+    // track is never accepted as evidence.
+    if (videoNumber !== null) {
+      const nonRap = [];
+      const unmatched = [];
+      for (const position of cueClusterPositions(bytes, cues)) {
+        const index = clusters.findIndex((cluster) => cluster.start - segment.dataOffset === position);
+        if (index === -1) {
+          unmatched.push(position);
+          continue;
+        }
+        if (firstVideoBlockKeyframe(bytes, clusters[index], videoNumber) !== true) nonRap.push(index);
+      }
+      if (unmatched.length > 0) problems.push(`CueClusterPositions ${unmatched.join(',')} match no Cluster`);
+      if (nonRap.length > 0) problems.push(`cued clusters ${nonRap.join(',')} carry no video keyframe SimpleBlock`);
+    }
   }
   return { ok: problems.length === 0, reason: problems.join('; ') || 'ok', sha };
+}
+
+// Exported for the generator's regression spec (src/__tests__/fixtures/
+// generator-webm-fixture.spec.ts); the script stays a plain CLI otherwise.
+export { buildCluster, buildSimpleBlock, firstVideoBlockKeyframe, simpleBlockKeyframe };
+
+/** Track number of the TrackEntry whose TrackType is 1 (video), or null. */
+function videoTrackNumber(bytes, tracks) {
+  for (const entry of elements(bytes, tracks.dataOffset, tracks.dataEnd)) {
+    if (entry.id !== ID_TRACKENTRY) continue;
+    const children = childMap(bytes, entry);
+    const type = children.get(ID_TRACKTYPE);
+    const number = children.get(ID_TRACKNUMBER);
+    if (!type || !number) continue;
+    if (elementInteger(bytes, type) === 1) return elementInteger(bytes, number);
+  }
+  return null;
 }
 
 function vintLengthAt(bytes, offset) {
@@ -299,14 +407,18 @@ function vintLengthAt(bytes, offset) {
   return 0;
 }
 
-const MODE = process.argv[2] ?? '';
-if (MODE === '--check') {
-  process.exit(checkMode() ? 0 : 1);
+// Test imports must not run the CLI dispatch; only real CLI invocations do.
+const RUN_AS_CLI = process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (RUN_AS_CLI) {
+  const MODE = process.argv[2] ?? '';
+  if (MODE === '--check') {
+    process.exit(checkMode() ? 0 : 1);
+  }
+  if (MODE === '--emit-bytes-ts') {
+    process.exit(emitBytesTsMode() ? 0 : 1);
+  }
+  if (MODE === '--generate') {
+    process.exit(generateMode() ? 0 : 1);
+  }
+  printContract();
 }
-if (MODE === '--emit-bytes-ts') {
-  process.exit(emitBytesTsMode() ? 0 : 1);
-}
-if (MODE === '--generate') {
-  process.exit(generateMode() ? 0 : 1);
-}
-printContract();
