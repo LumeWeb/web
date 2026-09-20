@@ -91,6 +91,14 @@ describe('sniffContainer', () => {
     expect(sniffContainer(truncatedHead)).toBe(containerKind.unknown);
   });
 
+  it('stays unknown when a truncated box follows an intact moov', () => {
+    // A partial `free` after moov carries no media evidence: moof segments may
+    // still follow past the probe, so the verdict cannot lean progressive.
+    const full = concat(ftyp(), box('moov'), box('free', new Uint8Array(4200)));
+    const truncatedHead = full.subarray(0, 4096);
+    expect(sniffContainer(truncatedHead)).toBe(containerKind.unknown);
+  });
+
   it('detects MPEG-TS by the 0x47 sync byte at packet strides', () => {
     const bytes = tsPackets(4);
     expect(sniffContainer(bytes)).toBe(containerKind.ts);
