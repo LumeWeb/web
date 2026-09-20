@@ -1,9 +1,10 @@
 import { test as it } from "../../__tests__/int-test";
-import { describe, expect, beforeEach } from "vitest";
+import { describe, expect, beforeEach, vi } from "vitest";
 import {
   WorkspacesClient,
   WorkspaceStatus,
 } from "../workspaces";
+import type { WorkspaceResponse } from "../generated/schemas/index";
 import type { PinnerConfig } from "@/config";
 import {
   AuthenticationError,
@@ -179,6 +180,124 @@ describe("WorkspacesClient", () => {
 
       expect(rotated.username).toBe(before.username);
       expect(rotated.password).not.toBe(before.password);
+    });
+  });
+
+  describe("watch", () => {
+    const setWorkspaceStatus = (id: number, status: string): void => {
+      const current = workspaceStore.get(id);
+      if (!current) {
+        throw new Error(`Workspace ${id} not found in store`);
+      }
+      workspaceStore.set(id, { ...current, status });
+    };
+
+    it("should emit ready and stop only when the workspace is ready", async ({ worker }) => {
+      worker.use(...workspaceHandlers);
+      const client = new WorkspacesClient(mockConfig, mockAuth);
+
+      // Workspace 1 is READY by default in the store.
+      const getSpy = vi.spyOn(client, "getWorkspace");
+      const statuses: WorkspaceResponse[] = [];
+      const ready = vi.fn();
+      const error = vi.fn();
+
+      await client.watchWorkspace(1, { interval: 10, timeout: 100 }).start({
+        onStatus: (status) => statuses.push(status),
+        onReady: ready,
+        onError: error,
+      });
+
+      expect(statuses[statuses.length - 1]?.status).toBe(WorkspaceStatus.READY);
+      expect(ready).toHaveBeenCalledTimes(1);
+      expect(ready).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 1, status: WorkspaceStatus.READY }),
+      );
+      expect(error).not.toHaveBeenCalled();
+      // Reaching a terminal state stops polling after the first check.
+      expect(getSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("should not emit ready when provisioning fails (FAILED terminal state)", async ({ worker }) => {
+      worker.use(...workspaceHandlers);
+      const client = new WorkspacesClient(mockConfig, mockAuth);
+
+      // Workspace 2 starts as PROVISIONING; simulate failed provisioning.
+      setWorkspaceStatus(2, WorkspaceStatus.FAILED);
+
+      const getSpy = vi.spyOn(client, "getWorkspace");
+      const statuses: WorkspaceResponse[] = [];
+      const ready = vi.fn();
+      const error = vi.fn();
+
+      await client.watchWorkspace(2, { interval: 10, timeout: 100 }).start({
+        onStatus: (status) => statuses.push(status),
+        onReady: ready,
+        onError: error,
+      });
+
+      expect(statuses[statuses.length - 1]?.status).toBe(WorkspaceStatus.FAILED);
+      expect(ready).not.toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+      // The failed terminal state stops polling without waiting for more checks.
+      expect(getSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("should stop without ready or error for suspended and deleting terminal states", async ({ worker }) => {
+      worker.use(...workspaceHandlers);
+      const client = new WorkspacesClient(mockConfig, mockAuth);
+
+      for (const status of [
+        WorkspaceStatus.SUSPENDED,
+        WorkspaceStatus.DELETING,
+      ]) {
+        setWorkspaceStatus(1, status);
+
+        const statuses: WorkspaceResponse[] = [];
+        const ready = vi.fn();
+        const error = vi.fn();
+
+        await client.watchWorkspace(1, { interval: 10, timeout: 100 }).start({
+          onStatus: (value) => statuses.push(value),
+          onReady: ready,
+          onError: error,
+        });
+
+        expect(statuses[statuses.length - 1]?.status).toBe(status);
+        expect(ready, `${status} should not emit ready`).not.toHaveBeenCalled();
+        expect(error, `${status} should not emit error`).not.toHaveBeenCalled();
+      }
+    });
+
+    it("should stop without ready when a provisioning workspace transitions to failed", async ({ worker }) => {
+      worker.use(...workspaceHandlers);
+      const client = new WorkspacesClient(mockConfig, mockAuth);
+
+      // Workspace 2 starts PROVISIONING (non-terminal), so polling continues.
+      const statuses: WorkspaceResponse[] = [];
+      const ready = vi.fn();
+      const error = vi.fn();
+
+      const watcher = client.watchWorkspace(2, { interval: 20, timeout: 1000 });
+      try {
+        await watcher.start({
+          onStatus: (status) => statuses.push(status),
+          onReady: ready,
+          onError: error,
+        });
+
+        expect(statuses[0]?.status).toBe(WorkspaceStatus.PROVISIONING);
+
+        // Provisioning fails before the next poll observes it.
+        setWorkspaceStatus(2, WorkspaceStatus.FAILED);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        expect(statuses[statuses.length - 1]?.status).toBe(WorkspaceStatus.FAILED);
+        expect(ready).not.toHaveBeenCalled();
+        expect(error).not.toHaveBeenCalled();
+      } finally {
+        watcher.stop();
+      }
     });
   });
 });

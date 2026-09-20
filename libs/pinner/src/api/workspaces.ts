@@ -172,6 +172,10 @@ export class WorkspacesClient extends ApiClient {
    * Watch a workspace's lifecycle status until it reaches a terminal state
    * (`ready`, `failed`, `suspended`, or `deleting`), errors, or times out.
    * Used to drive the provisioning/polling UX.
+   *
+   * The `ready` event is emitted (and polling stops) only when the workspace
+   * reaches `ready`; other terminal states (`failed`, `suspended`,
+   * `deleting`, ...) stop polling without emitting `ready` or `error`.
    * @param id Workspace ID
    * @param options Watch interval, timeout, and terminal states to stop on
    */
@@ -292,7 +296,14 @@ class WorkspaceWatcherImpl implements WorkspaceWatcher {
         this.emitter.emit("status", workspace);
 
         if (this.options.terminalStates.includes(workspace.status)) {
-          this.emitter.emit("ready", workspace);
+          // `ready` is emitted (and polling stops) only when the workspace
+          // actually reaches `ready`. Other terminal states (failed,
+          // suspended, deleting, ...) stop polling without emitting `ready`
+          // or `error` — the `error` event is reserved for transport
+          // failures and timeouts (see WorkspaceWatchError).
+          if (workspace.status === WorkspaceStatus.READY) {
+            this.emitter.emit("ready", workspace);
+          }
           this.stop();
         }
       } catch (err) {
