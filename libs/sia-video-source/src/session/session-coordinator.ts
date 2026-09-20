@@ -437,12 +437,22 @@ export class WorkerComposition implements SessionCoordinator {
     this.#abandonLoad();
     this.#requestId = requestId;
 
+    // A genuine load failure kills the intent parked on this attempt: a seek
+    // or play that targeted a failed object must not auto-start a later,
+    // unrelated SOURCE. Superseded (stale-epoch) returns skip this, so a seek
+    // parked during a replaced probe survives to the replacement load.
+    const failed = (kind: WorkerErrorCode, context: string): void => {
+      this.#playRequested = false;
+      this.#pendingSeekTime = undefined;
+      this.#postError(kind, requestId, context);
+    };
+
     let source: ByteSource;
     try {
       source = await this.#createSource(src);
     } catch (error) {
       if (this.#destroyed || epoch !== this.#loadEpoch) return;
-      this.#postError(workerErrorCode.network, requestId, describeError(error));
+      failed(workerErrorCode.network, describeError(error));
       return;
     }
     if (this.#destroyed || epoch !== this.#loadEpoch) {
@@ -459,12 +469,12 @@ export class WorkerComposition implements SessionCoordinator {
     } catch (error) {
       if (this.#destroyed || epoch !== this.#loadEpoch) return;
       if (isSupersededOrAbort(error)) return;
-      this.#postError(workerErrorCode.network, requestId, describeError(error));
+      failed(workerErrorCode.network, describeError(error));
       return;
     }
     if (this.#destroyed || epoch !== this.#loadEpoch) return;
     if (head.byteLength === 0) {
-      this.#postError(workerErrorCode.network, requestId, 'object is empty or unreadable');
+      failed(workerErrorCode.network, 'object is empty or unreadable');
       source.cancel();
       return;
     }
@@ -475,9 +485,9 @@ export class WorkerComposition implements SessionCoordinator {
     } catch (error) {
       if (this.#destroyed || epoch !== this.#loadEpoch) return;
       if (error instanceof ProducerUnavailableError) {
-        this.#postError(workerErrorCode.unsupported, requestId, producerFailureContext(error));
+        failed(workerErrorCode.unsupported, producerFailureContext(error));
       } else {
-        this.#postError(workerErrorCode.network, requestId, describeError(error));
+        failed(workerErrorCode.network, describeError(error));
       }
       source.cancel();
       return;
@@ -525,9 +535,23 @@ export class WorkerComposition implements SessionCoordinator {
       type: 'SOURCE_OK',
     });
 
-    if (preload === 'auto' || this.#playRequested || this.#pendingSeekTime !== undefined) {
+    // The parked seek this load carried is consumed when the load resolves:
+    // it repositions streaming to its floor, and clearing it here keeps the
+    // intent scoped to THIS load (a later, unrelated SOURCE must not
+    // auto-start from a stale flag). A deferred resolve keeps it parked so a
+    // later seek/play intent still finds it — though once the session exists
+    // a live seek routes through the session path, not the park flags.
+    const parkedSeek = this.#pendingSeekTime;
+    if (preload === 'auto' || this.#playRequested || parkedSeek !== undefined) {
       this.#playRequested = false;
+      this.#pendingSeekTime = undefined;
       this.#startStreaming();
+      // start() binds the session's controller synchronously; seek() bumps the
+      // run epoch so the byte-0 start is superseded before it can deliver a
+      // stale first range, restarting playback from the parked seek's floor.
+      if (parkedSeek !== undefined) {
+        this.#session?.controller?.seek(parkedSeek);
+      }
     }
   }
 

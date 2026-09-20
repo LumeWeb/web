@@ -396,6 +396,89 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
     expect(driver.errors()).toEqual([]);
   });
 
+  it('applies a SEEK parked during the probe to the requested floor once the load resolves (preload auto)', async () => {
+    // Hold the SOURCE resolution so the SEEK lands while no session exists yet.
+    let resolveSource: (source: ByteSource) => void = () => undefined;
+    const sourcePromise = new Promise<ByteSource>((resolve) => {
+      resolveSource = resolve;
+    });
+    const driver = makeDriver({ createSource: () => sourcePromise });
+
+    const pending = driver.say({ preload: 'auto', requestId: 2, src: 'fmp4', type: 'SOURCE' });
+    void driver.say({ requestId: 3, time: 35, type: 'SEEK' }); // floor → segment 1 (0x22)
+    await flush();
+    // Still probing: no session yet, so the SEEK is parked, not applied.
+    expect(posted(driver, 'SOURCE_OK')).toEqual([]);
+
+    resolveSource(new MemoryByteSource(boundedIndexedFmp4Payload()));
+    await pending;
+    await flush();
+
+    expect(posted(driver, 'SOURCE_OK')).toHaveLength(1);
+    const delivered = concatBytes(posted(driver, 'CHUNK').map((chunk) => chunk.bytes));
+    // The parked seek repositions streaming to the 0x22 segment: the 0x11
+    // first segment is never delivered.
+    expect(containsInOrder(delivered, segmentMarker(0x22))).toBe(true);
+    expect(containsInOrder(delivered, segmentMarker(0x33))).toBe(true);
+    expect(containsInOrder(delivered, segmentMarker(0x11))).toBe(false);
+    expect(posted(driver, 'ENDED')).toHaveLength(1);
+    expect(driver.errors()).toEqual([]);
+  });
+
+  it('clears a parked SEEK when the load it targeted fails, so a later unrelated preload-none SOURCE does not auto-start', async () => {
+    let resolveStalled: (source: ByteSource) => void = () => undefined;
+    const stalledPromise = new Promise<ByteSource>((resolve) => {
+      resolveStalled = resolve;
+    });
+    const driver = makeDriver({
+      createSource: (src) =>
+        src === 'stalled' ? stalledPromise : Promise.resolve(new MemoryByteSource(boundedIndexedFmp4Payload())),
+    });
+
+    // SOURCE A never resolves its object; the SEEK parked here targets it and
+    // must die with the failed load — never light up a later unrelated source.
+    void driver.say({ preload: 'none', requestId: 1, src: 'stalled', type: 'SOURCE' });
+    void driver.say({ requestId: 2, time: 35, type: 'SEEK' });
+    await flush();
+
+    // A resolves to an unclassifiable object → unsupported ERROR; nothing streams.
+    resolveStalled(new MemoryByteSource(unknownHead()));
+    await flush();
+    expect(driver.errors()).toEqual([expect.objectContaining({ kind: 'unsupported', requestId: 1 })]);
+    expect(posted(driver, 'CHUNK')).toEqual([]);
+
+    // SOURCE B (preload 'none') resolves with no new intent → still deferred.
+    await driver.say({ preload: 'none', requestId: 3, src: 'fmp4', type: 'SOURCE' });
+    await flush();
+    expect(posted(driver, 'SOURCE_OK')).toHaveLength(1);
+    expect(posted(driver, 'CHUNK')).toEqual([]);
+    expect(posted(driver, 'ENDED')).toEqual([]);
+    expect(driver.errors()).toHaveLength(1);
+  });
+
+  it('a PLAY arriving after a parked SEEK still starts streaming from the parked floor (preload none)', async () => {
+    let resolveSource: (source: ByteSource) => void = () => undefined;
+    const sourcePromise = new Promise<ByteSource>((resolve) => {
+      resolveSource = resolve;
+    });
+    const driver = makeDriver({ createSource: () => sourcePromise });
+
+    void driver.say({ preload: 'none', requestId: 2, src: 'fmp4', type: 'SOURCE' });
+    void driver.say({ requestId: 3, time: 35, type: 'SEEK' });
+    void driver.say({ requestId: 3, type: 'PLAY' });
+    await flush();
+
+    resolveSource(new MemoryByteSource(boundedIndexedFmp4Payload()));
+    await flush();
+
+    expect(posted(driver, 'SOURCE_OK')).toHaveLength(1);
+    const delivered = concatBytes(posted(driver, 'CHUNK').map((chunk) => chunk.bytes));
+    expect(containsInOrder(delivered, segmentMarker(0x22))).toBe(true);
+    expect(containsInOrder(delivered, segmentMarker(0x11))).toBe(false);
+    expect(posted(driver, 'ENDED')).toHaveLength(1);
+    expect(driver.errors()).toEqual([]);
+  });
+
   it('SEEK while playing re-pumps from the seek floor (stale first-range bytes dropped)', async () => {
     // Read order: [0]=probe, [1]=index build, [2]=stream range0. Park [2] so
     // the initial stream read is still in flight when the SEEK lands.
