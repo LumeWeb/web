@@ -1,3 +1,11 @@
+## 0.1.10 (2026-09-21)
+
+### Features
+
+#### Features
+
+- add workspace sites ui
+
 ## 0.1.9 (2026-07-05)
 
 ### Fixes

@@ -1,3 +1,15 @@
+## 0.1.25 (2026-09-21)
+
+### Features
+
+#### Features
+
+- add workspace api client
+
+### Fixes
+
+- emit ready only for ready status
+
 ## 0.1.24 (2026-07-18)
 
 ### Features
