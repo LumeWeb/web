@@ -7,23 +7,24 @@
  * builds), so container-specific append branches never need to live in the
  * controller.
  *
- * The adapter adds only the contract's epoch scoping on top of the pipe:
- * epoch-tagged `resetParser`/`requestEndOfStream` calls from a superseded
- * load are dropped before they touch the pipe, so one load's teardown can
- * never reset or end the next source's SourceBuffer. `append` is epoch-free
- * per the contract — stale ordering is already dropped by the epoch-aware
- * producer that fed the bytes and by the pipe's own reset.
+ * The adapter adds only the contract's load-generation scoping on top of the
+ * pipe: load-generation-tagged `resetParser`/`requestEndOfStream` calls from
+ * a superseded load are dropped before they touch the pipe, so one load's
+ * teardown can never reset or end the next source's SourceBuffer. `append`
+ * carries no generation — stale ordering is already dropped by the
+ * generation-aware media playback that fed the bytes and by the pipe's own
+ * reset.
  */
-import type { ProducedSegment } from '../container/producer/appendable-producer.ts';
 import { MseAppendPipe } from '../mse-pipe.ts';
-import type { AppendSink } from './append-sink.ts';
+import type { AppendSink, AppendUnit } from './append-sink.ts';
 
 export interface MseAdapterOptions {
   /**
-   * The load epoch the controller starts from. Later `resetParser(epoch)`
-   * calls raise it; stale (older) epoch-tagged calls are ignored.
+   * The load generation the controller starts from. Later
+   * `resetParser(loadGeneration, ...)` calls raise it; stale (older)
+   * load-generation-tagged calls are ignored.
    */
-  initialEpoch?: number;
+  initialLoadGeneration?: number;
   /** The composition root's existing `MseAppendPipe` for this MediaSource. */
   pipe: MseAppendPipe;
 }
@@ -33,8 +34,7 @@ export interface MseAdapterOptions {
  * per-load `MseAppendPipe` to, mirroring the pipe the worker already builds.
  * The getters read the worker's live state so the pipe serializes appends
  * into whatever SourceBuffer the (possibly still-opening) MediaSource yields,
- * and `onError` reports fatal append failures onto the load's request id the
- * same way the inline queue used to.
+ * and `onError` reports fatal append failures onto the load's request id.
  */
 export interface WorkerMseSinkFactoryDeps {
   /** Seconds of media kept buffered behind the playhead before eviction. */
@@ -50,30 +50,28 @@ export interface WorkerMseSinkFactoryDeps {
 }
 
 export class MseAdapter implements AppendSink {
-  #epoch: number;
+  #loadGeneration: number;
   readonly #pipe: MseAppendPipe;
 
   constructor(options: MseAdapterOptions) {
-    this.#epoch = options.initialEpoch ?? 0;
+    this.#loadGeneration = options.initialLoadGeneration ?? 0;
     this.#pipe = options.pipe;
   }
 
   abort(_reason?: unknown): void {
-    // The pipe's own epoch/teardown state dominates; `reason` is informational
+    // The pipe's own load-generation/teardown state dominates; `reason` is informational
     // at the seam (the pipe stops permanently regardless).
     this.#pipe.abort();
   }
 
-  append(segment: ProducedSegment): void {
-    this.#pipe.append(segment.bytes);
-    // A producer-declared terminal media segment means "this is the last
-    // fragment — end the stream once it drains". This is the only EOS path for
-    // producers that emit asynchronously (the mediabunny refragmenter), whose
-    // media can arrive after the stream controller's terminal-range read. The
-    // pipe's EOS deferral already waits for the append queue to drain and the
-    // MediaSource to be open, so re-requesting here is idempotent with a
-    // controller-side request for synchronous producers.
-    if (segment.terminal === true) this.#pipe.requestEndOfStream();
+  append(unit: AppendUnit): void {
+    // A producer-declared terminal media unit ends the stream once it drains —
+    // the only EOS signal for asynchronous producers whose media arrives after
+    // the stream controller's terminal-range read. From the next series branch
+    // the conversion-completion path covers this and the field goes away; the
+    // pipe's EOS deferral makes the re-request idempotent.
+    this.#pipe.append(unit.bytes);
+    if (unit.terminal === true) this.#pipe.requestEndOfStream();
   }
 
   async evictBackBuffer(_playheadSeconds: number): Promise<boolean> {
@@ -82,22 +80,23 @@ export class MseAdapter implements AppendSink {
     return this.#pipe.evictBackBuffer();
   }
 
-  requestEndOfStream(epoch: number): void {
-    if (epoch < this.#epoch) return;
+  requestEndOfStream(loadGeneration: number): void {
+    if (loadGeneration < this.#loadGeneration) return;
     this.#pipe.requestEndOfStream();
   }
 
-  resetParser(epoch: number): void {
-    if (epoch < this.#epoch) return;
-    this.#epoch = Math.max(this.#epoch, epoch);
-    this.#pipe.reset();
+  resetParser(loadGeneration: number, targetTimeSeconds?: number): void {
+    if (loadGeneration < this.#loadGeneration) return;
+    this.#loadGeneration = Math.max(this.#loadGeneration, loadGeneration);
+    this.#pipe.reset(targetTimeSeconds);
   }
 }
 
 /**
  * Worker-mode MSE `sinkFactory` seam: builds one fresh `AppendSink` per call —
  * a `MseAdapter` over a fresh `MseAppendPipe` for the worker MediaSource — so
- * every load owns its own append queue/epoch while sharing the live worker MSE
+ * every load owns its own append queue/load generation while sharing the live
+ * worker MSE
  * state behind the injected getters. This is the production composition-root
  * binding the coordinator's `sinkFactory` seam defers to.
  */

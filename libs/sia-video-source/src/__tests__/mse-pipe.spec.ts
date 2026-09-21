@@ -4,8 +4,8 @@
  * (`appendSegment` / `flushBuffer`).
  *
  * The pipe centralizes the append-queue serialization, back-buffer eviction,
- * stale-epoch cancellation, fatal-error suppression and end-of-stream deferral
- * that used to be duplicated between the worker-side MSE pipeline (mode
+ * stale-load-generation cancellation, fatal-error suppression and
+ * end-of-stream deferral shared by the worker-side MSE pipeline (mode
  * 'worker') and the main-thread MSE fallback path (`sia-video-source.ts`,
  * mode 'main').
  *
@@ -56,6 +56,8 @@ class FakeSourceBuffer extends EventTarget {
   holdNextAppend = false;
   ranges: [number, number][] = [];
   removed: [number, number][] = [];
+  /** Chronological record of every assigned `timestampOffset`, in order. */
+  timestampOffsets: number[] = [];
   updating = false;
   get buffered(): unknown {
     return {
@@ -64,6 +66,15 @@ class FakeSourceBuffer extends EventTarget {
       start: (index: number) => this.ranges[index][0],
     };
   }
+  get timestampOffset(): number {
+    return this.#timestampOffset;
+  }
+  set timestampOffset(value: number) {
+    this.#timestampOffset = value;
+    this.timestampOffsets.push(value);
+    this.eventLog.push(`timestampOffset:${value}`);
+  }
+  #timestampOffset = 0;
 
   private heldCommit: (() => void) | null = null;
 
@@ -271,8 +282,8 @@ describe('MseAppendPipe', () => {
     });
   });
 
-  describe('stale seek / epoch cancellation', () => {
-    it('drops queued appends when the epoch is reset (new source/load)', async () => {
+  describe('stale seek / load-generation cancellation', () => {
+    it('drops queued appends when the load generation is reset (new source/load)', async () => {
       const { fakeSourceBuffer, pipe } = createHarness();
 
       // Hold the first append in flight so the reset lands mid-load, with the
@@ -288,17 +299,18 @@ describe('MseAppendPipe', () => {
       expect(fakeSourceBuffer.updating).toBe(true);
       expect(fakeSourceBuffer.appended).toEqual([]);
 
-      // A superseded load resets the epoch: everything still queued dies with it.
+      // A superseded load resets the load generation: everything still queued
+      // dies with it.
       pipe.reset();
       fakeSourceBuffer.releaseHeldAppend();
 
       await settle();
 
       // The in-flight head may settle, but nothing queued behind it (2, 3) may
-      // start after the reset bumped the epoch.
+      // start after the reset bumped the load generation.
       expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([1]);
 
-      // A fresh epoch reuses the pipe cleanly.
+      // A fresh load generation reuses the pipe cleanly.
       pipe.append(bytes(9));
       await settle();
       expect(fakeSourceBuffer.appended[fakeSourceBuffer.appended.length - 1][0]).toBe(9);
@@ -394,6 +406,97 @@ describe('MseAppendPipe', () => {
       await settle();
 
       expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([1]);
+    });
+  });
+
+  describe('seek timestamp re-anchor', () => {
+    it('re-anchors the SourceBuffer to the seek target after abort and before the fresh append', async () => {
+      const { fakeSourceBuffer, pipe } = createHarness();
+
+      // The superseded position's fragment settles fully first.
+      pipe.append(bytes(1));
+      await settle();
+      expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([1]);
+
+      // A seek re-anchors at 45 s: queued tail dies, the parser reset is armed,
+      // and the new position's offset is parked for when the buffer quiesces.
+      pipe.reset(45);
+      pipe.append(bytes(9));
+      await settle();
+
+      expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([1, 9]);
+      // Parser abort then timestamp re-anchor, both strictly before the fresh
+      // fragment; the offset is applied exactly once.
+      expect(fakeSourceBuffer.timestampOffsets).toEqual([45]);
+      const abortIndex = fakeSourceBuffer.eventLog.indexOf('abort');
+      const offsetIndex = fakeSourceBuffer.eventLog.indexOf('timestampOffset:45');
+      const freshIndex = fakeSourceBuffer.eventLog.lastIndexOf('append:9');
+      expect(abortIndex).toBeGreaterThan(0);
+      expect(offsetIndex).toBeGreaterThan(abortIndex);
+      expect(offsetIndex).toBeLessThan(freshIndex);
+    });
+
+    it('re-anchors from behind a settling in-flight append', async () => {
+      const { fakeSourceBuffer, pipe } = createHarness();
+
+      fakeSourceBuffer.holdNextAppend = true;
+      pipe.append(bytes(1));
+      pipe.append(bytes(2));
+      await settle(1);
+      expect(fakeSourceBuffer.updating).toBe(true);
+
+      // The seek lands while the superseded head is mid-append; the tail (2)
+      // dies with the reset and the parser reset + re-anchor wait for the
+      // in-flight update to settle.
+      pipe.reset(60);
+      fakeSourceBuffer.releaseHeldAppend();
+      await settle();
+      expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([1]);
+
+      pipe.append(bytes(9));
+      await settle();
+
+      expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([1, 9]);
+      expect(fakeSourceBuffer.abortCalls).toBe(1);
+      expect(fakeSourceBuffer.timestampOffsets).toEqual([60]);
+      const abortIndex = fakeSourceBuffer.eventLog.indexOf('abort');
+      const offsetIndex = fakeSourceBuffer.eventLog.indexOf('timestampOffset:60');
+      const freshIndex = fakeSourceBuffer.eventLog.lastIndexOf('append:9');
+      expect(offsetIndex).toBeGreaterThan(abortIndex);
+      expect(offsetIndex).toBeLessThan(freshIndex);
+    });
+
+    it('leaves the timestamp offset unchanged for a target-less reset', async () => {
+      const { fakeSourceBuffer, pipe } = createHarness();
+
+      pipe.append(bytes(1));
+      pipe.reset();
+      pipe.append(bytes(2));
+      await settle();
+
+      expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([2]);
+      expect(fakeSourceBuffer.abortCalls).toBe(1);
+      expect(fakeSourceBuffer.timestampOffsets).toEqual([]);
+    });
+
+    it('applies only the newest reset target', async () => {
+      const { fakeSourceBuffer, pipe } = createHarness();
+
+      fakeSourceBuffer.holdNextAppend = true;
+      pipe.append(bytes(1));
+      await settle(1);
+
+      pipe.reset(45);
+      pipe.reset(90);
+      fakeSourceBuffer.releaseHeldAppend();
+      await settle();
+
+      pipe.append(bytes(9));
+      await settle();
+
+      expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([1, 9]);
+      expect(fakeSourceBuffer.timestampOffsets).toEqual([90]);
+      expect(fakeSourceBuffer.abortCalls).toBe(1);
     });
   });
 

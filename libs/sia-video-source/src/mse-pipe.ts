@@ -4,18 +4,18 @@
  * One instance serializes every SourceBuffer mutation for a MediaSource
  * pipeline through the public `@videojs/spf/dom` primitives (`appendSegment`
  * to hand it bytes one `updateend`-quiesced append at a time, `flushBuffer`
- * to trim the back-buffer). It owns the bookkeeping that used to be
- * duplicated between the worker-side MSE pipeline (mode 'worker') and the
- * main-thread MSE fallback (`SiaVideoSource`, mode 'main'):
+ * to trim the back-buffer). It owns the bookkeeping shared by the worker-side
+ * MSE pipeline (mode 'worker') and the main-thread MSE fallback
+ * (`SiaVideoSource`, mode 'main'):
  *
  * - append-queue FIFO serialization (one append in flight, driven by the
  *   SourceBuffer's async `updateend` / `error` contract),
  * - back-buffer eviction behind the playhead (`backBufferSeconds`), retried
  *   after a `QuotaExceededError` so the failing head is re-appended once
  *   memory is freed,
- * - stale-epoch cancellation (`reset()`): appends queued for a superseded
- *   load die with their epoch so a torn-down pipeline can never append into
- *   the next source's buffer,
+ * - stale-load-generation cancellation (`reset()`): appends queued for a
+ *   superseded load die with their load generation, so a torn-down pipeline
+ *   can never append into the next source's buffer,
  * - fatal-error suppression (`abort()` / one-shot `onError`): a SourceBuffer
  *   `error` event or a synchronous non-quota throw is reported exactly once
  *   and every later append is dropped,
@@ -23,10 +23,10 @@
  *   fires only after the queue drains, the SourceBuffer quiesces, and the
  *   source is still `open` — never on a failed pipeline.
  *
- * Sia-specific layers (WASM transport, app-key handshake, sidx indexing,
- * remux) live outside this module; the worker and host feed it plain bytes
- * and read fatal failures from `onError`, mapping them onto their own
- * `ERROR` messaging.
+ * Sia-specific layers (WASM transport, app-key handshake, mediabunny remux)
+ * live outside this module; the worker and host feed it plain bytes and read
+ * fatal failures from `onError`, mapping them onto their own `ERROR`
+ * messaging.
  */
 import { appendSegment, flushBuffer } from '@videojs/spf/dom';
 
@@ -52,20 +52,25 @@ export interface MseAppendPipeOptions {
 
 export class MseAppendPipe {
   #eosRequested = false;
-  // Monotonic load epoch; `reset()`/`abort()` bump it so an in-flight pump
-  // abandons work that a superseded load queued.
-  #epoch = 0;
   #errorReported = false;
   // Single-flight eviction so rapid playhead updates coalesce onto one removal.
   #evicting: null | Promise<boolean> = null;
   #failed = false;
   #kickQueued = false;
+  // Monotonic load generation; `reset()`/`abort()` bump it so an in-flight pump
+  // abandons work that a superseded load queued.
+  #loadGeneration = 0;
   readonly #options: MseAppendPipeOptions;
   // Armed by `reset()` (a seek superseding an in-flight position): once the
   // SourceBuffer quiesces, its segment parser is aborted so the next append
   // starts a fresh fragment instead of continuing the truncated one that the
   // seek cut off (Chromium's RunSegmentParserLoop append failure).
   #parserResetPending = false;
+  // Re-anchor target parked by a seek's `reset(target)` until the owed parser
+  // reset runs: the trimmed conversion rebases its output timestamps to zero,
+  // so the buffer must be told the sought position (`timestampOffset`) before
+  // its fresh init/media lands. Null when no seek target is owed.
+  #pendingTargetOffset: null | number = null;
   #pumping = false;
   #queue: Uint8Array[] = [];
   // Permanent stop (`abort()`), used on teardown: nothing further appends or ends.
@@ -81,7 +86,7 @@ export class MseAppendPipe {
    */
   abort(): void {
     this.#stopped = true;
-    this.#epoch += 1;
+    this.#loadGeneration += 1;
     this.#queue.length = 0;
     this.#eosRequested = false;
   }
@@ -131,17 +136,25 @@ export class MseAppendPipe {
 
   /**
    * Drops state belonging to a superseded position (a seek, or the end of a
-   * load). Queued appends and a parked end-of-stream die with the old epoch,
+   * load). Queued appends and a parked end-of-stream die with the old load generation,
    * and once the in-flight append quiesces the SourceBuffer's segment parser
    * is reset (`abort`) so the next queued fragment parses fresh — a fragment
    * whose head the seek cut off mid-`mdat` would otherwise swallow the new
-   * position's `moof` and fail Chromium's segment parser loop. The pipe stays
-   * live for the same MediaSource / SourceBuffer; `abort()` is for teardown.
+   * position's `moof` and fail Chromium's segment parser loop. When a seek
+   * target is given, the parser reset also re-anchors the SourceBuffer's
+   * `timestampOffset` to it so the trimmed conversion's zero-based output
+   * lands at the sought position. The pipe stays live for the same MediaSource
+   * / SourceBuffer; `abort()` is for teardown.
    */
-  reset(): void {
-    this.#epoch += 1;
+  reset(targetTimeSeconds?: number): void {
+    this.#loadGeneration += 1;
     this.#queue.length = 0;
     this.#eosRequested = false;
+    // Park the seek's re-anchor target for the owed parser reset. Each reset
+    // stores its own value, so a newer reset supersedes an older parked target
+    // and a target-less reset (a load start) parks nothing — the buffer's
+    // current offset is left untouched until a seek target actually lands.
+    this.#pendingTargetOffset = targetTimeSeconds ?? null;
     this.#parserResetPending = true;
     this.#kick();
   }
@@ -155,6 +168,26 @@ export class MseAppendPipe {
       sourceBuffer.abort();
     } catch {
       // Best-effort parser reset; nothing further to recover.
+    }
+  }
+
+  // The parser reset a seek owes, plus its re-anchor: abort the SourceBuffer
+  // FIRST (so the fresh fragment starts a clean segment), then, when a seek
+  // target was parked, set `timestampOffset` to it — all before anything is
+  // dequeued. Both places a reset can complete (before a dequeue, or behind a
+  // settling in-flight append) call this one helper so the order can never
+  // drift. The timestamp assignment is best-effort like the parser reset.
+  #applyParserReset(sourceBuffer: SourceBuffer): void {
+    this.#parserResetPending = false;
+    this.#abortParser(sourceBuffer);
+    const target = this.#pendingTargetOffset;
+    this.#pendingTargetOffset = null;
+    if (target !== null) {
+      try {
+        sourceBuffer.timestampOffset = target;
+      } catch {
+        // Best-effort re-anchor; nothing further to recover.
+      }
     }
   }
 
@@ -220,7 +253,7 @@ export class MseAppendPipe {
     this.#pumping = true;
     try {
       while (!this.#stopped && !this.#failed) {
-        const epoch = this.#epoch;
+        const loadGeneration = this.#loadGeneration;
         const sourceBuffer = this.#options.getSourceBuffer();
         // No SourceBuffer yet: park until the owner creates one and kicks.
         if (!sourceBuffer) return;
@@ -239,10 +272,10 @@ export class MseAppendPipe {
         }
         // A seek asked for a parser reset; do it as soon as the buffer
         // quiesces, even if nothing new is queued yet, so the next fragment
-        // parses fresh rather than continuing the superseded position.
+        // parses fresh rather than continuing the superseded position (and,
+        // with a parked target, the buffer is re-anchored to the seek target).
         if (this.#parserResetPending && !sourceBuffer.updating) {
-          this.#parserResetPending = false;
-          this.#abortParser(sourceBuffer);
+          this.#applyParserReset(sourceBuffer);
           continue;
         }
         if (this.#queue.length === 0) break;
@@ -256,13 +289,13 @@ export class MseAppendPipe {
         try {
           await appendSegment(sourceBuffer, bytes.buffer);
         } catch (error) {
-          if (this.#stopped || this.#epoch !== epoch) return;
+          if (this.#stopped || this.#loadGeneration !== loadGeneration) return;
           if (isQuotaExceeded(error)) {
             // Free the back-buffer window, then retry the SAME head (it was
             // never dequeued). If nothing could be freed the pipeline cannot
             // recover — report once and stop instead of looping forever.
             const evicted = await this.evictBackBuffer();
-            if (this.#stopped || this.#epoch !== epoch) return;
+            if (this.#stopped || this.#loadGeneration !== loadGeneration) return;
             if (!evicted) {
               this.#fail(error);
               return;
@@ -274,12 +307,12 @@ export class MseAppendPipe {
         }
         // The in-flight append was the superseded position's: once it settles
         // the parser is reset so the next append (a fresh fragment) starts
-        // clean instead of continuing the truncated one.
+        // clean instead of continuing the truncated one — same helper as the
+        // no-queue path, so the re-anchor ordering cannot drift.
         if (this.#parserResetPending && !sourceBuffer.updating) {
-          this.#parserResetPending = false;
-          this.#abortParser(sourceBuffer);
+          this.#applyParserReset(sourceBuffer);
         }
-        if (this.#stopped || this.#epoch !== epoch) return;
+        if (this.#stopped || this.#loadGeneration !== loadGeneration) return;
         this.#queue.shift();
       }
       this.#maybeEndOfStream();

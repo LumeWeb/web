@@ -1,15 +1,15 @@
 /**
- * TDD contract for the append-sink seam: the stream controller has ONE sink
- * surface regardless of worker vs main-thread MSE role. `MseAdapter` is the
- * thin façade over the existing, already-tested `MseAppendPipe` (whose
- * SPF-backed internals are unchanged); this spec drives it through the same
- * fake SourceBuffer async `updateend` / `error` model the pipe spec uses.
+ * The append-sink seam: the stream controller has ONE sink surface regardless
+ * of worker vs main-thread MSE role. `MseAdapter` is the thin façade over the
+ * existing, already-tested `MseAppendPipe` (whose SPF-backed internals are
+ * unchanged); this spec drives it through the same fake SourceBuffer async
+ * `updateend` / `error` model the pipe spec uses.
  *
  * Covered behaviors: append, resetParser (stale-ignored), back-buffer
  * eviction, requestEndOfStream (stale-ignored), abort.
  */
 import { describe, expect, it } from 'vitest';
-import type { ProducedSegment } from '../container/producer/appendable-producer.ts';
+import type { AppendUnit } from '../sink/append-sink.ts';
 import { MseAppendPipe } from '../mse-pipe.ts';
 import { MseAdapter } from '../sink/mse-adapter.ts';
 
@@ -38,6 +38,8 @@ class FakeSourceBuffer extends EventTarget {
   eventLog: string[] = [];
   ranges: [number, number][] = [];
   removed: [number, number][] = [];
+  /** Chronological record of every assigned `timestampOffset`, in order. */
+  timestampOffsets: number[] = [];
   updating = false;
   get buffered(): unknown {
     return {
@@ -46,6 +48,15 @@ class FakeSourceBuffer extends EventTarget {
       start: (index: number) => this.ranges[index][0],
     };
   }
+  get timestampOffset(): number {
+    return this.#timestampOffset;
+  }
+  set timestampOffset(value: number) {
+    this.#timestampOffset = value;
+    this.timestampOffsets.push(value);
+    this.eventLog.push(`timestampOffset:${value}`);
+  }
+  #timestampOffset = 0;
 
   abort(): void {
     this.abortCalls += 1;
@@ -125,7 +136,7 @@ function settle(rounds = 20): Promise<void> {
   });
 }
 
-const segment = (marker: number, kind: 'init' | 'media' = 'media'): ProducedSegment => ({
+const unit = (marker: number, kind: 'init' | 'media' = 'media'): AppendUnit => ({
   bytes: new Uint8Array(16).fill(marker),
   kind,
 });
@@ -134,8 +145,8 @@ describe('MseAdapter (AppendSink)', () => {
   it('append forwards produced bytes to the SourceBuffer in FIFO order', async () => {
     const { adapter, fakeSourceBuffer } = createHarness();
 
-    adapter.append(segment(1));
-    adapter.append(segment(2));
+    adapter.append(unit(1));
+    adapter.append(unit(2));
     expect(fakeSourceBuffer.appended).toEqual([]);
 
     await settle();
@@ -144,12 +155,12 @@ describe('MseAdapter (AppendSink)', () => {
     expect(fakeSourceBuffer.appended.map((a) => a.byteLength)).toEqual([16, 16]);
   });
 
-  it('resetParser(epoch) drops queued appends and resets the parser on quiesce', async () => {
+  it('resetParser(loadGeneration) drops queued appends and resets the parser on quiesce', async () => {
     const { adapter, fakeSourceBuffer } = createHarness();
 
-    adapter.append(segment(1));
+    adapter.append(unit(1));
     adapter.resetParser(1);
-    adapter.append(segment(2));
+    adapter.append(unit(2));
 
     await settle();
 
@@ -159,15 +170,15 @@ describe('MseAdapter (AppendSink)', () => {
     expect(fakeSourceBuffer.eventLog).toContain('abort');
   });
 
-  it('resetParser ignores a stale (older) epoch', async () => {
+  it('resetParser ignores a stale (older) load generation', async () => {
     const { adapter, fakeSourceBuffer } = createHarness();
 
-    // A legit reset advances the adapter epoch to 5 (its parser abort on the
+    // A legit reset advances the adapter load generation to 5 (its parser abort on the
     // empty queue is expected). A stale reset must NOT clear the queued
     // appends — forwarding one would drop them via pipe.reset().
     adapter.resetParser(5);
-    adapter.append(segment(1));
-    adapter.append(segment(2));
+    adapter.append(unit(1));
+    adapter.append(unit(2));
     adapter.resetParser(1); // stale: must leave the queue intact
 
     await settle();
@@ -175,10 +186,38 @@ describe('MseAdapter (AppendSink)', () => {
     expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([1, 2]);
   });
 
-  it('requestEndOfStream(epoch) fires endOfStream once the queue drains', async () => {
+  it('resetParser forwards the seek target so the pipe re-anchors the SourceBuffer', async () => {
+    const { adapter, fakeSourceBuffer } = createHarness();
+
+    adapter.append(unit(1));
+    await settle();
+
+    adapter.resetParser(2, 37);
+    adapter.append(unit(2));
+    await settle();
+
+    expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([1, 2]);
+    // The target crosses the adapter and reaches the pipe's re-anchor.
+    expect(fakeSourceBuffer.timestampOffsets).toEqual([37]);
+  });
+
+  it('resetParser ignores a stale generation even when it carries a target', async () => {
+    const { adapter, fakeSourceBuffer } = createHarness();
+
+    adapter.resetParser(3, 15);
+    adapter.append(unit(1));
+    adapter.resetParser(1, 45); // stale: must not bump the generation or re-anchor again
+
+    await settle();
+
+    expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([1]);
+    expect(fakeSourceBuffer.timestampOffsets).toEqual([15]);
+  });
+
+  it('requestEndOfStream(loadGeneration) fires endOfStream once the queue drains', async () => {
     const { adapter, fakeMediaSource } = createHarness();
 
-    adapter.append(segment(1));
+    adapter.append(unit(1));
     adapter.requestEndOfStream(0);
     expect(fakeMediaSource.endOfStreamCalls).toBe(0);
 
@@ -187,7 +226,7 @@ describe('MseAdapter (AppendSink)', () => {
     expect(fakeMediaSource.endOfStreamCalls).toBe(1);
   });
 
-  it('requestEndOfStream ignores a stale (older) epoch', async () => {
+  it('requestEndOfStream ignores a stale (older) load generation', async () => {
     const { adapter, fakeMediaSource } = createHarness();
 
     adapter.resetParser(3);
@@ -200,27 +239,40 @@ describe('MseAdapter (AppendSink)', () => {
     expect(fakeMediaSource.endOfStreamCalls).toBe(1);
   });
 
-  it('a producer-declared terminal media segment requests endOfStream once it drains', async () => {
-    // The async mediabunny producer emits its final fragment with
-    // `terminal: true` after the controller already flushed; the adapter must
-    // turn that into EOS (this is the async producer's only EOS path).
+  it('append(terminal: true) requests endOfStream once the queue drains', async () => {
+    const { adapter, fakeMediaSource, fakeSourceBuffer } = createHarness();
+
+    adapter.append({ ...unit(1), terminal: true });
+    expect(fakeMediaSource.endOfStreamCalls).toBe(0);
+
+    await settle();
+
+    // The terminal unit still appends normally, and its EOS request fires only
+    // after the queued append drains (never while the queue is still busy).
+    expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([1]);
+    expect(fakeMediaSource.endOfStreamCalls).toBe(1);
+  });
+
+  it('append(terminal: true) EOS is idempotent when EOS was already requested', async () => {
     const { adapter, fakeMediaSource } = createHarness();
 
-    adapter.append({ bytes: new Uint8Array(16).fill(9), kind: 'media', terminal: true });
-    expect(fakeMediaSource.endOfStreamCalls).toBe(0);
+    adapter.append({ ...unit(1), terminal: true });
+    adapter.requestEndOfStream(0); // re-request before the queue drains
 
     await settle();
 
     expect(fakeMediaSource.endOfStreamCalls).toBe(1);
   });
 
-  it('a non-terminal media segment never requests endOfStream', async () => {
-    const { adapter, fakeMediaSource } = createHarness();
+  it('append(terminal: true) leaves non-terminal units alone', async () => {
+    const { adapter, fakeMediaSource, fakeSourceBuffer } = createHarness();
 
-    adapter.append(segment(1));
-    adapter.append(segment(2));
+    adapter.append(unit(1));
+    adapter.append(unit(2));
+
     await settle();
 
+    expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([1, 2]);
     expect(fakeMediaSource.endOfStreamCalls).toBe(0);
   });
 
@@ -242,7 +294,7 @@ describe('MseAdapter (AppendSink)', () => {
     const { adapter, fakeMediaSource, fakeSourceBuffer } = createHarness();
 
     adapter.abort(new Error('teardown'));
-    adapter.append(segment(1));
+    adapter.append(unit(1));
     adapter.requestEndOfStream(0);
 
     await settle();
