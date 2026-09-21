@@ -130,22 +130,35 @@ export async function createDefaultSdk(
 
   await initSia();
 
+  // Both credentials present (ADR 0006 app key + ADR 0008 sharing key): create
+  // BOTH SDKs and route by source kind — pinned object keys resolve through
+  // the app-key SDK, share URLs through the sharing-key SDK. The sharing SDK
+  // connects first so a failed sharing connection throws exactly as on the
+  // sharing-only path: share URLs must never silently degrade to app-key
+  // resolution when the sharing key is unregistered.
+  if (hasSharing && hasAppKey) {
+    const sharedSdk = await connectSharedSdk(config, sharingSeed);
+    try {
+      return createDualSourceSdk(await connectAppKeySdk(config, appKeySeed), sharedSdk);
+    } catch (error) {
+      // The app-key SDK failed after the sharing SDK connected: release the
+      // sharing SDK so no orphaned native resources survive the failed
+      // connection, then surface the app-key registration error.
+      void Promise.resolve(sharedSdk.dispose?.());
+      throw error;
+    }
+  }
+
   // Keyless path (ADR 0008): a sharing-key seed grants read-only access to the
   // objects attached to the key — no app key, no builder, no SSO/approval. The
   // WASM `SharedSdk.connect` expects the seed as a hex string (browser build;
   // Node would take a Buffer), so the decrypted bytes are hex-encoded here,
   // inside this isolate, right at the call site — the plaintext never travels.
   if (hasSharing) {
-    const sharedSdk = await SharedSdk.connect(config.indexerUrl, bytesToHex(sharingSeed));
-    if (!sharedSdk) throw new Error('The Sia sharing key is not registered with the indexer.');
-    return toSiaVideoSdk(sharedSdk);
+    return connectSharedSdk(config, sharingSeed);
   }
 
-  const builder = new Builder(config.indexerUrl, config.app);
-  const appKey = new AppKey(appKeySeed!);
-  const sdk = await builder.connected(appKey);
-  if (!sdk) throw new Error('The Sia app key is not registered with the indexer.');
-  return withDisposal(sdk);
+  return connectAppKeySdk(config, appKeySeed!);
 }
 
 export function defaultPost(message: WorkerToMainMessage, transfer?: Transferable[]): void {
@@ -227,6 +240,80 @@ function bytesToHex(bytes: Uint8Array): string {
   let hex = '';
   for (const byte of bytes) hex += byte.toString(16).padStart(2, '0');
   return hex;
+}
+
+/**
+ * Builds the app-key SDK (ADR 0006): `Builder.connected` over the registered
+ * app key, wrapped in `withDisposal` so the WASM object's lifecycle hook is
+ * released exactly once by the worker's disposal contract. Throws when the app
+ * key is not registered with the indexer.
+ */
+async function connectAppKeySdk(config: WorkerConfig, appKeySeed: Uint8Array): Promise<SiaVideoSdk> {
+  const builder = new Builder(config.indexerUrl, config.app);
+  const appKey = new AppKey(appKeySeed);
+  const sdk = await builder.connected(appKey);
+  if (!sdk) throw new Error('The Sia app key is not registered with the indexer.');
+  return withDisposal(sdk);
+}
+
+/**
+ * Builds the keyless SDK (ADR 0008): `SharedSdk.connect(indexerUrl, hex(seed))`
+ * wrapped in the `SiaVideoSdk` adapter (share URLs route through
+ * `SharedSdk.object(objectKey)`). Throws when the sharing key is not
+ * registered with the indexer.
+ */
+async function connectSharedSdk(config: WorkerConfig, sharingSeed: Uint8Array): Promise<SiaVideoSdk> {
+  const sharedSdk = await SharedSdk.connect(config.indexerUrl, bytesToHex(sharingSeed));
+  if (!sharedSdk) throw new Error('The Sia sharing key is not registered with the indexer.');
+  return toSiaVideoSdk(sharedSdk);
+}
+
+/**
+ * Routing adapter for a connection authenticated by BOTH credentials: resolve
+ * each source kind through the credential that can read it — plain object keys
+ * via the app-key SDK's `object(key)`, share URLs via the keyless SharedSdk's
+ * `object(parseSiaShareUrl(url).objectKey)` (the shared key, not the app key,
+ * decrypts and funds shared-object downloads). Downloads follow the resolver:
+ * a WeakMap remembers which SDK produced each resolved object, so
+ * `download(object, options)` reaches the right payer/decryption without the
+ * caller tracking it (defaults to the app-key SDK for injected objects).
+ *
+ * Disposal mirrors `withDisposal`'s release-once latch: both `dispose` and
+ * `[Symbol.dispose]` route through one shared latch that releases BOTH
+ * underlying SDKs exactly once, no matter how a teardown path invokes it.
+ */
+function createDualSourceSdk(appSdk: SiaVideoSdk, sharedSdk: SiaVideoSdk): SiaVideoSdk {
+  const ownerOf = new WeakMap<object, SiaVideoSdk>();
+  let released = false;
+
+  const surface: SiaVideoSdk & { readonly [Symbol.dispose]: () => void } = {
+    dispose: (): void => {
+      release();
+    },
+    download: (object, options) => (ownerOf.get(object) ?? appSdk).download(object, options),
+    object: (key) => tagged(appSdk, appSdk.object(key)),
+    objectFromShareUrl: (shareUrl) => tagged(sharedSdk, sharedSdk.object(parseSiaShareUrl(shareUrl).objectKey)),
+    [Symbol.dispose]: () => {
+      release();
+    },
+  };
+  return surface;
+
+  function tagged(sdk: SiaVideoSdk, resolved: Promise<SiaObjectLike> | SiaObjectLike): Promise<SiaObjectLike> {
+    // Promise.resolve keeps a synchronous object resolution (tests/fakes) and
+    // the real async `Sdk.object` both working.
+    return Promise.resolve(resolved).then((object) => {
+      ownerOf.set(object, sdk);
+      return object;
+    });
+  }
+
+  function release(): void {
+    if (released) return;
+    released = true;
+    void Promise.resolve(appSdk.dispose?.());
+    void Promise.resolve(sharedSdk.dispose?.());
+  }
 }
 
 /**

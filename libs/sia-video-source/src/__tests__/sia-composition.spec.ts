@@ -610,6 +610,64 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
     expect(disposeB).not.toHaveBeenCalled();
   });
 
+  it('rebuilds + disposes the memoized SDK when a HELLO presence flag scrubs a seed on an identical config', async () => {
+    const payload = new Uint8Array(2048).fill(1);
+    const sdkA = fakeSiaSdk(payload).sdk;
+    const sdkB = fakeSiaSdk(payload).sdk;
+    const disposeA = vi.fn();
+    const disposeB = vi.fn();
+    const built: { seed: null | Uint8Array; sharingSeed: null | Uint8Array; }[] = [];
+    const createSdk = vi.fn(
+      (
+        _config: undefined | WorkerConfig,
+        seed: null | Uint8Array,
+        sharingSeed: null | Uint8Array,
+      ) => {
+        built.push({ seed, sharingSeed });
+        const tag = sharingSeed === null ? 'B' : 'A';
+        return Promise.resolve({
+          ...(tag === 'A' ? sdkA : sdkB),
+          dispose: tag === 'A' ? disposeA : disposeB,
+        } as SiaByteSourceSdk);
+      },
+    );
+    const messages: WorkerToMainMessage[] = [];
+    const coordinator = createSiaWorkerComposition({
+      capabilities: permissiveCapabilities(),
+      createSdk,
+      loadPipeline: new FakeLoadPipeline([readyLoadResult(), readyLoadResult()]),
+      post: (message) => messages.push(message),
+      supportsWorkerMse: () => false,
+    });
+
+    // Session 1: HELLO declares BOTH seed providers present; both seeds land
+    // in their slots and the first SOURCE builds one SDK keyed on both.
+    await coordinator.handleMessage({ appSeed: true, config: WORKER_CONFIG, requestId: 1, sharingSeed: true, type: MainToWorkerMessageType.HELLO });
+    const helloOk = messages.find((m) => m.type === WorkerToMainMessageType.HELLO_OK);
+    const helloPublic = helloOk?.type === WorkerToMainMessageType.HELLO_OK ? helloOk.publicKey : new Uint8Array(32);
+    const appSeed = new Uint8Array(32).fill(0x1a);
+    const sharingSeed = new Uint8Array(32).fill(0x1b);
+    await coordinator.handleMessage({ envelope: await encryptToWorker(helloPublic, appSeed), requestId: 2, type: MainToWorkerMessageType.APP_KEY });
+    await coordinator.handleMessage({ envelope: await encryptToWorker(helloPublic, sharingSeed, 'sharing'), requestId: 3, type: MainToWorkerMessageType.APP_KEY });
+    await coordinator.handleMessage({ preload: 'auto', requestId: 4, src: 'fmp4', type: MainToWorkerMessageType.SOURCE });
+    await flush();
+    expect(built).toHaveLength(1);
+    expect(built[0]).toEqual({ seed: appSeed, sharingSeed });
+
+    // Session 2: the host removed getSharingKeySeed but re-attaches the SAME
+    // config — HELLO declares sharingSeed: false, so the sharing slot is
+    // scrubbed even though workerConfigsEqual stays true. The memo gate now
+    // sees sharingSeed null and the next SOURCE rebuilds + disposes SDK A.
+    await coordinator.handleMessage({ appSeed: true, config: WORKER_CONFIG, requestId: 5, sharingSeed: false, type: MainToWorkerMessageType.HELLO });
+    await coordinator.handleMessage({ preload: 'auto', requestId: 6, src: 'fmp4', type: MainToWorkerMessageType.SOURCE });
+    await flush();
+
+    expect(built).toHaveLength(2);
+    expect(built[1]).toEqual({ seed: appSeed, sharingSeed: null });
+    expect(disposeA).toHaveBeenCalledTimes(1);
+    expect(disposeB).not.toHaveBeenCalled();
+  });
+
   it('passes a decrypted sharing seed to createSdk when the APP_KEY envelope is keyed sharing', async () => {
     const { sdk } = fakeSiaSdk(new Uint8Array(2048).fill(1));
     const built: { config: undefined | WorkerConfig; seed: null | Uint8Array; sharingSeed: null | Uint8Array; }[] = [];

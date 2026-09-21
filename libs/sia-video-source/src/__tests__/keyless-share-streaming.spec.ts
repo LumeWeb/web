@@ -35,19 +35,24 @@ import { shareSrc } from './fixtures/fmp4-fixture.ts';
 
 /** Recorded side effects of the mocked sia-storage seam, captured per test. */
 const mocks = vi.hoisted(() => ({
+  appFreeCalls: 0,
   appKeyCtorSeeds: [] as Uint8Array[],
   appSdkObjectCalls: [] as string[],
   appSdkShareFormCalls: [] as string[],
   builderConnectedCalls: [] as unknown[],
   builderCtorCalls: [] as unknown[],
   sharedConnectCalls: [] as [string, string][],
+  sharedConnectResultOverride: undefined as null | undefined,
+  sharedFreeCalls: 0,
   sharedObjectCalls: [] as string[],
 }));
 
 // A node-runnable fake `@siafoundation/sia-storage` (the real WASM SDK stays
 // out of these tests). `SharedSdk.connect` records its (indexerUrl, hex-seed)
 // arguments; `SharedSdk.object(id)` records the id `createSdk` routes share
-// URLs through; `Builder.connected` + `AppKey` mirror the app-key path. All
+// URLs through; `Builder.connected` + `AppKey` mirror the app-key path; the
+// `free` hooks count how many times each WASM object is released (the real
+// SDK aliases [Symbol.dispose] to free(), and `withDisposal` latches it). All
 // recorded through `vi.hoisted` so assertions read fresh per test.
 vi.mock('@siafoundation/sia-storage', () => {
   const fakeObject = () => ({ id: () => 'obj', size: () => 24, slabs: () => [] });
@@ -55,11 +60,15 @@ vi.mock('@siafoundation/sia-storage', () => {
     static connect = vi.fn((indexerUrl: string, seed: string) => {
       mocks.sharedConnectCalls.push([indexerUrl, seed]);
       // Non-promise returns are awaited by callers; no `async` needed because
-      // nothing here awaits (keeps oxlint require-await quiet).
+      // nothing here awaits (keeps oxlint require-await quiet). A test override
+      // lets a caller simulate an indexer that does not know the sharing key.
+      if (mocks.sharedConnectResultOverride === null) return null;
       return new SharedSdk();
     });
     download = () => new ReadableStream<Uint8Array>({ start: (controller) => controller.close() });
-    free = () => undefined;
+    free = () => {
+      mocks.sharedFreeCalls += 1;
+    };
     object = (id: string) => {
       mocks.sharedObjectCalls.push(id);
       return fakeObject();
@@ -70,7 +79,9 @@ vi.mock('@siafoundation/sia-storage', () => {
       mocks.builderConnectedCalls.push(appKey);
       return {
         download: () => new ReadableStream<Uint8Array>({ start: (controller) => controller.close() }),
-        free: () => undefined,
+        free: () => {
+          mocks.appFreeCalls += 1;
+        },
         object: (key: string) => {
           mocks.appSdkObjectCalls.push(key);
           return fakeObject();
@@ -113,10 +124,13 @@ function bytesToHex(bytes: Uint8Array): string {
 }
 
 function resetMocks(): void {
+  mocks.appFreeCalls = 0;
   mocks.appKeyCtorSeeds.length = 0;
   mocks.builderConnectedCalls.length = 0;
   mocks.builderCtorCalls.length = 0;
   mocks.sharedConnectCalls.length = 0;
+  mocks.sharedConnectResultOverride = undefined;
+  mocks.sharedFreeCalls = 0;
   mocks.sharedObjectCalls.length = 0;
   mocks.appSdkObjectCalls.length = 0;
   mocks.appSdkShareFormCalls.length = 0;
@@ -240,6 +254,51 @@ describe('createDefaultSdk (worker SDK resolution)', () => {
     await sdk.object('pinned-key');
     expect(mocks.sharedObjectCalls).toEqual(['pinned-key']);
     expect(mocks.appSdkObjectCalls).toEqual([]);
+  });
+
+  it('routes pinned keys via the app SDK and share URLs via the SharedSdk when both seeds are present', async () => {
+    const appKeySeed = new Uint8Array(32).fill(0x51);
+    const sharingSeed = new Uint8Array(32).fill(0x52);
+    const sdk = await createDefaultSdk(WORKER_CONFIG, appKeySeed, sharingSeed);
+
+    // Both credential SDKs are created: SharedSdk.connect gets the indexer URL
+    // + hex sharing seed, and the app-key Builder/AppKey registration runs.
+    expect(mocks.sharedConnectCalls).toEqual([[WORKER_CONFIG.indexerUrl, bytesToHex(sharingSeed)]]);
+    expect(mocks.builderCtorCalls).toHaveLength(1);
+    expect(mocks.appKeyCtorSeeds).toHaveLength(1);
+
+    // A plain pinned object key resolves through the APP-key SDK's object(),
+    // never the sharing path (previously it fell through SharedSdk.object and
+    // failed for objects not attached to the sharing key).
+    await sdk.object('pinned-key');
+    expect(mocks.appSdkObjectCalls).toEqual(['pinned-key']);
+    expect(mocks.sharedObjectCalls).toEqual([]);
+
+    // A share URL still resolves through the keyless SharedSdk, by objectKey.
+    const src = shareSrc();
+    const parsed = parseSiaShareUrl(src);
+    await sdk.objectFromShareUrl?.(parsed.fetchForm);
+    expect(mocks.sharedObjectCalls).toEqual([parsed.objectKey]);
+    expect(mocks.appSdkShareFormCalls).toEqual([]);
+
+    // Disposal releases BOTH SDKs exactly once, and once only across the
+    // dispose() and [Symbol.dispose] entry points (the release-once latch).
+    await sdk.dispose?.();
+    const surface = sdk as unknown as Record<string | symbol, unknown>;
+    void (surface[Symbol.dispose] as () => void)();
+    expect(mocks.appFreeCalls).toBe(1);
+    expect(mocks.sharedFreeCalls).toBe(1);
+  });
+
+  it('throws the sharing-key error when SharedSdk.connect fails even with an app key present', async () => {
+    // Force SharedSdk.connect to return null (indexer does not know the key).
+    mocks.sharedConnectResultOverride = null;
+    await expect(
+      createDefaultSdk(WORKER_CONFIG, new Uint8Array(32).fill(0x61), new Uint8Array(32).fill(0x62)),
+    ).rejects.toThrow('The Sia sharing key is not registered with the indexer.');
+    // Share URLs must never silently degrade to app-key resolution: the
+    // app-key Builder path is not reached when the sharing connect fails.
+    expect(mocks.builderCtorCalls).toEqual([]);
   });
 
   it('keeps the app-key path untouched when only an app key seed is present', async () => {

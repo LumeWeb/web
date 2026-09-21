@@ -75,7 +75,19 @@ lands in, never the seed bytes. `encryptToWorker(publicKey, seed, keyType?)`
 and the `isAppKeyEnvelope`/`isMainToWorkerMessage` guards learn the field,
 with the default `'app'` keeping the wire byte-identical to ADR 0006 for
 existing apps. The worker handshake stores the two credentials in **separate
-slots**; a HELLO config change or `dispose` scrubs **both**.
+slots**; a HELLO config change, a HELLO presence flag declaring a slot absent,
+or `dispose` scrubs the affected slot(s).
+
+The `HELLO` message gains the same additive treatment as the envelope tag: two
+optional **presence booleans**, `appSeed?: boolean` and `sharingSeed?:
+boolean`, declaring whether the host will supply each credential over a
+subsequent `APP_KEY`. This is **metadata only, never the seeds themselves**.
+Its purpose is scrubbing: a host that *removes* `getSharingKeySeed` (or
+`getAppKeySeed`) but re-attaches with an **identical** `WorkerConfig` must not
+leave the worker holding a stale — possibly revoked — seed slot (the worker
+cannot otherwise tell "provider removed" from "envelope not yet arrived"). A
+`false` flag scrubs that slot; `true` keeps it; an absent flag (an old-protocol
+host) makes no claim. `PROTOCOL_VERSION` stays `0` (additive optional fields).
 
 ### 3. Sharing-key seed discipline
 
@@ -98,33 +110,50 @@ to be handed out — while the app key is a **full-account** credential. The
 same envelope hygiene is cheap and keeps both out of the main-thread runtime
 surface, but the *blast radius* of a leaked sharing seed is bounded to the
 attached objects for the key's lifetime, versus total account control for the
-app-key seed.
+app-key seed. The same revocation-facing reasoning drives the HELLO presence
+flags: a sharing seed the host stops supplying (key revoked/expired by the
+owner) must be scrubbed worker-side promptly — the worker should not keep a
+live `SharedSdk` attached to a credential the host no longer vouches for —
+even when the connection metadata otherwise re-attached unchanged. Both seeds
+therefore carry the same "scrub when the provider disappears" hygiene, keeping
+the blast radius of a dropping provider effectively nil.
 
 ### 4. Worker resolution order
 
 `createDefaultSdk` builds the connection SDK by credential, and the byte-source
 seam stays source-agnostic (it only ever calls `object` / `objectFromShareUrl`):
 
-1. **Share-URL `src` + sharing seed present** → `SharedSdk.connect(
-   config.indexerUrl, hex(seed))`. `SharedSdk` resolves objects by **id**
-   (`object(id)`), not by URL, so share-URL routing goes through
-   `parseSiaShareUrl(src).objectKey` — the same 64-hex id the signed URL's path
-   carries. `createDefaultSdk` wraps the `SharedSdk` in an adapter whose
-   `objectFromShareUrl(fetchForm)` delegates to `SharedSdk.object(objectKey)`,
-   and whose `download` is pass-through (same `DownloadOptions`/`PinnedObject`
-   as the app-key SDK, so `RangedReader` needs no change).
-2. **Share-URL `src` + app-key SDK only** → `sdk.objectFromShareUrl(share.fetchForm)`
-   (the renamed `Sdk.sharedObject`), the ADR 0007 path, unchanged.
-3. **Non-share `src`** → `sdk.object(key)`.
+1. **Both seeds present** → create **both** SDKs and return a routing adapter
+   that resolves by source kind: a plain `src` object key → the app-key
+   `Sdk.object(key)` (the object is pinned under the app account), and a
+   share-URL `src` → `SharedSdk.object(parseSiaShareUrl(src).objectKey)` (the
+   object is attached to the sharing key; the sharing key decrypts and the
+   owner pays). `SharedSdk.connect` is attempted first, so an unregistered
+   sharing key throws exactly as it does on the sharing-only path — share URLs
+   never silently degrade to app-key resolution. Download routing follows the
+   resolver (each resolved object remembers which SDK it came from), and the
+   adapter's disposal releases **both** SDKs exactly once through one
+   release-once latch.
+2. **Sharing seed only** → `SharedSdk.connect(config.indexerUrl, hex(seed))`,
+   wrapped in an adapter whose `objectFromShareUrl(fetchForm)` delegates to
+   `SharedSdk.object(objectKey)` — id-based, never URL-based.
+3. **App-key seed only** → `Builder.connected(...)`; a share-URL `src` resolves
+   through `sdk.objectFromShareUrl(share.fetchForm)` (the renamed
+   `Sdk.sharedObject`), the ADR 0007 path, unchanged; a non-share `src`
+   resolves through `sdk.object(key)`.
 4. **Nothing fits** (no seed at all) → the descriptive
    "No Sia SDK is available: complete the HELLO + APP_KEY handshake or inject
    createSdk." error, as today.
 
-The sharing seed takes precedence for a connection when both credentials are
-supplied; App-key playback remains the unchanged fallback. Both secrets are
-covered by the same connection memoization/scrub semantics in
-`createLazySiaByteSourceFactory` (config + app-key seed + sharing seed all gate
-the memoized SDK).
+The both-seeds routing replaces an earlier "sharing seed takes precedence"
+rule that resolved *every* `src` through the `SharedSdk` — which silently broke
+plain pinned-key `src` values (objects not attached to the sharing key). With
+the routing adapter each source kind reaches the credential that can read it.
+Both secrets are covered by the same connection memoization/scrub semantics in
+`createLazySiaByteSourceFactory` (config + app-key seed + sharing seed **value**
+all gate the memoized SDK), so a seed slot scrubbed by a HELLO presence flag
+invalidates the memo key and the next `SOURCE` rebuilds (and disposes) the
+previous SDK.
 
 ### 5. Public surface
 
@@ -153,12 +182,14 @@ the memoized SDK).
 **Harder**
 
 - Two credentials now live in the worker handshake; each must be scrubbed on
-  replacement/dispose independently, and the memoization gate for the SDK
-  must compare both (a stale sharing seed must never cache a newer
-  connection).
-- `SharedSdk` connects per-connection, so a config change that flips between
-  app-key and sharing-key mode rebuilds (and disposes) the previous SDK — the
-  same cost the app-key path already pays.
+  replacement/dispose independently (a HELLO presence flag declaring a slot
+  absent included), and the memoization gate for the SDK must compare both
+  *values* (a stale sharing seed must never cache a newer connection, and a
+  scrubbed slot must invalidate the memo so the next load rebuilds).
+- With both seeds present, two SDKs are held per connection; the routing
+  adapter releases both exactly once on dispose, and a config change that
+  flips credential modes rebuilds (and disposes) the previous SDK set — the
+  same cost the single-credential paths already pay.
 - The seed hand-off is duplicated: whatever a caller does to obtain the
   sharing seed (fetch from a key-exchange service, parse from email, etc.)
   inherits the ADR 0006 supplier discipline — supplier function, never stored

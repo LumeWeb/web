@@ -68,6 +68,23 @@ import {
   streamState,
 } from './stream-controller.ts';
 
+/**
+ * HELLO seed-presence declarations (additive, optional wire metadata): which
+ * credential slots this connection's host will supply over `APP_KEY`. Booleans
+ * only — presence metadata, never the seeds themselves (those still travel
+ * exclusively inside the encrypted `APP_KEY` envelopes). A slot the host
+ * declares absent (`false`) scrubs any seed still held for it, even when the
+ * re-attached `WorkerConfig` is identical — otherwise the worker could not
+ * distinguish "provider removed" from "envelope not yet arrived". An absent
+ * flag means no claim (an old-protocol host) and changes nothing.
+ */
+export interface HelloSeedPresence {
+  /** App-key seed slot declaration (`false` scrubs a held app-key seed). */
+  readonly app?: boolean;
+  /** Sharing-key seed slot declaration (`false` scrubs a held sharing seed). */
+  readonly sharing?: boolean;
+}
+
 /** Outbound protocol channel (same shape as the worker's `PostMessage`). */
 export type PostMessage = (message: WorkerToMainMessage, transfer?: Transferable[]) => void;
 
@@ -152,9 +169,14 @@ export interface SessionHandshake {
    * Returns the worker's static public half for `HELLO_OK`. When a HELLO
    * `WorkerConfig` is supplied and differs from the active one, both held
    * seeds are dropped (a config change invalidates the connection), so
-   * `seed`/`sharingSeed` only ever describe the active connection.
+   * `seed`/`sharingSeed` only ever describe the active connection. The
+   * optional `presence` flags (additive wire metadata) additionally scrub a
+   * held seed whose slot the host declares absent (`false`) — a host may
+   * remove a seed provider while re-attaching an identical config, and the
+   * worker must not keep a stale (possibly revoked) credential. Absent flags
+   * (an old-protocol HELLO) scrub nothing beyond the config-change rule.
    */
-  hello(requestId: RequestId, config?: WorkerConfig): { readonly publicKey: Uint8Array };
+  hello(requestId: RequestId, config?: WorkerConfig, presence?: HelloSeedPresence): { readonly publicKey: Uint8Array };
   /** Decrypted app-key seed of the active connection, or null until one is validated. */
   readonly seed?: null | Uint8Array;
   /** Decrypted sharing-key seed of the active connection, or null until one is validated. */
@@ -275,7 +297,10 @@ export class WorkerComposition implements SessionCoordinator {
           this.#pendingSeekTime = undefined;
           return;
         case MainToWorkerMessageType.HELLO: {
-          const { publicKey } = this.#handshake.hello(message.requestId, message.config);
+          const { publicKey } = this.#handshake.hello(message.requestId, message.config, {
+            app: message.appSeed,
+            sharing: message.sharingSeed,
+          });
           // A host `workerMse: 'main'` preference overrides the runtime
           // capability check for this session (auto keeps runtime feature-detection). HELLO
           // arrives before ATTACH, so HELLO_OK's `features.workerMse` and the
@@ -593,7 +618,8 @@ export function createSessionCoordinator(deps: SessionCoordinatorDeps): SessionC
  * `sharingSeed`, routed by the envelope's `keyType` tag) so a composition
  * root can bind them lazily to the Sia transport on the first `SOURCE` — each
  * seed is kept while the connection is active and scrubbed on replacement
- * (config change, superseding `APP_KEY`) or on `dispose`.
+ * (config change, superseding `APP_KEY`, a HELLO presence flag declaring the
+ * slot absent) or on `dispose`.
  */
 export function createSessionHandshake(): SessionHandshake {
   let config: undefined | WorkerConfig;
@@ -645,7 +671,11 @@ export function createSessionHandshake(): SessionHandshake {
       config = undefined;
     },
 
-    hello(_requestId: RequestId, nextConfig?: WorkerConfig): { readonly publicKey: Uint8Array } {
+    hello(
+      _requestId: RequestId,
+      nextConfig?: WorkerConfig,
+      presence?: HelloSeedPresence,
+    ): { readonly publicKey: Uint8Array } {
       // A HELLO config that changed — or was cleared entirely — invalidates the
       // connection: drop both held seeds so the next APP_KEY starts fresh.
       if (!workerConfigsEqual(config, nextConfig)) {
@@ -654,6 +684,20 @@ export function createSessionHandshake(): SessionHandshake {
         if (sharingSeed) scrub(sharingSeed);
         sharingSeed = null;
         config = nextConfig;
+      }
+      // HELLO seed-presence declarations (additive wire metadata; old-protocol
+      // hosts omit them): a slot the host declares absent (`false`) scrubs any
+      // seed still held for it, independently of the other slot, even when the
+      // config re-attached unchanged — this is how the worker tells "provider
+      // removed" from "envelope not yet arrived". A declared-present (`true`)
+      // slot keeps current behavior; an absent flag makes no claim.
+      if (presence?.app === false) {
+        if (seed) scrub(seed);
+        seed = null;
+      }
+      if (presence?.sharing === false) {
+        if (sharingSeed) scrub(sharingSeed);
+        sharingSeed = null;
       }
       keyPair ??= generateWorkerKeyPair();
       return { publicKey: exportWorkerPublicKey(keyPair) };

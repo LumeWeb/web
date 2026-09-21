@@ -84,9 +84,13 @@ export interface SiaVideoSourceOptions {
    * When present, the worker's default SDK factory connects via
    * `SharedSdk.connect(indexerUrl, seed)` and routes share-URL sources
    * through `SharedSdk.object(objectKey)`, so a share link streams without an
-   * app key or any SSO/approval. A share-URL `src` still works with only
-   * `getAppKeySeed` (fallback to `Sdk.objectFromShareUrl`); a sharing seed
-   * takes precedence when both are supplied.
+   * app key or any SSO/approval. When both `getSharingKeySeed` and
+   * `getAppKeySeed` are supplied, the worker creates BOTH SDKs and routes by
+   * source kind — pinned object keys resolve through the app-key SDK, share
+   * URLs through the sharing-key SDK. A share-URL `src` still works with only
+   * `getAppKeySeed` (fallback to `Sdk.objectFromShareUrl`). Each `HELLO`
+   * declares which providers exist (`appSeed`/`sharingSeed` presence
+   * metadata), so the worker scrubs a seed slot whose provider was removed.
    */
   getSharingKeySeed?: AppKeySeedProvider;
   /**
@@ -308,7 +312,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     target.addEventListener('pause', this.#onPause);
 
     if (this.#worker) {
-      this.#post({ config: this.#helloConfig(), requestId: nextRequestId(), type: MainToWorkerMessageType.HELLO });
+      this.#post(this.#helloMessage());
       return;
     }
 
@@ -323,7 +327,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#worker.addEventListener('message', this.#onMessage);
     // HELLO negotiates readiness itself, so it must not go through the
     // pending-message buffer — that buffer only drains on HELLO_OK.
-    this.#post({ config: this.#helloConfig(), requestId: nextRequestId(), type: MainToWorkerMessageType.HELLO });
+    this.#post(this.#helloMessage());
   }
 
   /**
@@ -496,6 +500,22 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     const config = this.#workerConfig;
     if (!config || this.#workerMse === undefined) return config;
     return { ...config, workerMse: this.#workerMse };
+  }
+
+  // The HELLO wire message: connection config plus additive seed-presence
+  // flags declaring which seed providers exist this attach (`appSeed` /
+  // `sharingSeed` — booleans only, never the seeds themselves, which still
+  // travel exclusively inside encrypted APP_KEY envelopes). A provider the
+  // app removed between attaches is declared `false`, so the worker scrubs a
+  // seed slot it previously held even though the config re-attached unchanged.
+  #helloMessage(): MainToWorkerMessage {
+    return {
+      appSeed: this.#appKeySeedProvider !== undefined,
+      config: this.#helloConfig(),
+      requestId: nextRequestId(),
+      sharingSeed: this.#sharingKeySeedProvider !== undefined,
+      type: MainToWorkerMessageType.HELLO,
+    };
   }
 
   #onMessage = (event: MessageEvent) => {

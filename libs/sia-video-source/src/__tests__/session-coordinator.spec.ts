@@ -15,6 +15,7 @@ import {
   type MainToWorkerMessage,
   MainToWorkerMessageType,
   PROTOCOL_VERSION,
+  type WorkerConfig,
   workerErrorCode,
   type WorkerToMainMessage,
   WorkerToMainMessageType,
@@ -22,6 +23,7 @@ import {
 import type { LoadPipeline, LoadRequest } from '../session/load-pipeline.ts';
 import {
   createSessionCoordinator,
+  createSessionHandshake,
   type SessionCoordinator,
   type SessionCoordinatorDeps,
   type SinkFactoryContext,
@@ -587,5 +589,105 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
     const errors = driver.message(WorkerToMainMessageType.ERROR);
     expect(errors.length).toBeGreaterThan(0);
     expect(errors[0].kind).toBe(workerErrorCode.network);
+  });
+});
+
+// ---- Fix 1: HELLO seed-presence flags scrub stale credentials --------------
+
+describe('createSessionHandshake HELLO seed-presence flags', () => {
+  const CONFIG: WorkerConfig = {
+    app: {
+      appId: 'app',
+      callbackUrl: '',
+      description: '',
+      logoUrl: '',
+      name: 'app',
+      serviceUrl: 'https://app.example',
+    },
+    indexerUrl: 'https://indexer.example',
+  };
+
+  // Every test reuses one handshake so hello() mints the SAME memoized worker
+  // key pair — a fresh crypto-random pair per call would mint envelopes the
+  // handshake's own acceptAppKey could not decrypt.
+  it('scrubs a sharing seed the host declares absent while re-attaching an identical config', async () => {
+    const handshake = createSessionHandshake();
+    const { publicKey } = handshake.hello(1, CONFIG);
+
+    const appSeed = new Uint8Array(32).fill(81);
+    const sharingSeed = new Uint8Array(32).fill(82);
+    await handshake.acceptAppKey(await encryptToWorker(publicKey, appSeed));
+    await handshake.acceptAppKey(await encryptToWorker(publicKey, sharingSeed, 'sharing'));
+    expect(handshake.seed).toEqual(appSeed);
+    expect(handshake.sharingSeed).toEqual(sharingSeed);
+
+    // The host removed getSharingKeySeed but re-attached the SAME config:
+    // HELLO declares the sharing slot absent (workerConfigsEqual stays true),
+    // so the sharing seed — previously "stuck" while the config never changed
+    // — is scrubbed. The app slot, declared present, is untouched.
+    handshake.hello(2, CONFIG, { app: true, sharing: false });
+    expect(handshake.seed).toEqual(appSeed);
+    expect(handshake.sharingSeed).toBeNull();
+  });
+
+  it('scrubs a declared-absent app seed independently of the sharing slot', async () => {
+    const handshake = createSessionHandshake();
+    const { publicKey } = handshake.hello(1, CONFIG, { app: true, sharing: true });
+
+    const appSeed = new Uint8Array(32).fill(91);
+    const sharingSeed = new Uint8Array(32).fill(92);
+    await handshake.acceptAppKey(await encryptToWorker(publicKey, appSeed));
+    await handshake.acceptAppKey(await encryptToWorker(publicKey, sharingSeed, 'sharing'));
+
+    handshake.hello(2, CONFIG, { app: false, sharing: true });
+    expect(handshake.seed).toBeNull();
+    expect(handshake.sharingSeed).toEqual(sharingSeed);
+  });
+
+  it('keeps a declared-present seed on re-Hello (sync-back never scrubs)', async () => {
+    const handshake = createSessionHandshake();
+    const { publicKey } = handshake.hello(1, CONFIG, { app: true, sharing: true });
+
+    const sharingSeed = new Uint8Array(32).fill(0x63);
+    await handshake.acceptAppKey(await encryptToWorker(publicKey, sharingSeed, 'sharing'));
+    expect(handshake.sharingSeed).toEqual(sharingSeed);
+
+    // The host re-declares the sharing slot present on the same config: the
+    // held seed survives (no "envelope not yet arrived" ambiguity).
+    handshake.hello(2, CONFIG, { app: true, sharing: true });
+    expect(handshake.sharingSeed).toEqual(sharingSeed);
+  });
+
+  it('keeps both seeds when HELLO carries no presence flags (old-protocol backward compat)', async () => {
+    const handshake = createSessionHandshake();
+    const { publicKey } = handshake.hello(1, CONFIG);
+
+    const appSeed = new Uint8Array(32).fill(0x71);
+    const sharingSeed = new Uint8Array(32).fill(0x72);
+    await handshake.acceptAppKey(await encryptToWorker(publicKey, appSeed));
+    await handshake.acceptAppKey(await encryptToWorker(publicKey, sharingSeed, 'sharing'));
+
+    // An old host re-attaches with no appSeed/sharingSeed fields: no claim is
+    // made, so nothing is scrubbed beyond the (unchanged) config rule.
+    handshake.hello(2, CONFIG);
+    expect(handshake.seed).toEqual(appSeed);
+    expect(handshake.sharingSeed).toEqual(sharingSeed);
+  });
+
+  it('routes HELLO presence flags through the coordinator into the handshake', async () => {
+    const driver = makeDriver();
+    await driver.say({
+      appSeed: true,
+      config: CONFIG,
+      requestId: 1,
+      sharingSeed: false,
+      type: MainToWorkerMessageType.HELLO,
+    });
+    await settle();
+
+    // The flags are accepted wire fields on the default handshake path and the
+    // session still negotiates normally (HELLO_OK is posted, no ERROR).
+    expect(driver.message(WorkerToMainMessageType.ERROR)).toEqual([]);
+    expect(driver.message(WorkerToMainMessageType.HELLO_OK)[0]).toMatchObject({ requestId: 1 });
   });
 });

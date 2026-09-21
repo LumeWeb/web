@@ -154,6 +154,19 @@ describe('protocol', () => {
     expect(isMainToWorkerMessage({ config: base, requestId: 4, type: MainToWorkerMessageType.HELLO })).toBe(true);
   });
 
+  it('accepts additive HELLO seed-presence flags and rejects non-boolean values', () => {
+    const base = { app: { appId: 'x', callbackUrl: '', description: 'test', logoUrl: '', name: 'test', serviceUrl: 'https://app.example' }, indexerUrl: 'https://sia.storage' };
+    // Presence metadata (booleans declaring which seed providers exist) rides
+    // the HELLO message alongside the config; absent = old-protocol no claim.
+    expect(isMainToWorkerMessage({ appSeed: true, config: base, requestId: 4, sharingSeed: false, type: MainToWorkerMessageType.HELLO })).toBe(true);
+    expect(isMainToWorkerMessage({ appSeed: false, config: base, requestId: 4, type: MainToWorkerMessageType.HELLO })).toBe(true);
+    expect(isMainToWorkerMessage({ config: base, requestId: 4, sharingSeed: true, type: MainToWorkerMessageType.HELLO })).toBe(true);
+    expect(isMainToWorkerMessage({ config: base, requestId: 4, type: MainToWorkerMessageType.HELLO })).toBe(true);
+    // A non-boolean flag is a malformed HELLO — rejected, never a silent default.
+    expect(isMainToWorkerMessage({ appSeed: 'yes', config: base, requestId: 4, type: MainToWorkerMessageType.HELLO })).toBe(false);
+    expect(isMainToWorkerMessage({ config: base, requestId: 4, sharingSeed: 1, type: MainToWorkerMessageType.HELLO })).toBe(false);
+  });
+
   it('carries no plaintext seed field on the wire anywhere', () => {
     // Compile- and runtime-level assertion of the contract: the HELLO config
     // structurally cannot carry either seed (the properties are absent), and

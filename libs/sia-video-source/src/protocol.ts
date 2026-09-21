@@ -92,9 +92,22 @@ export interface BufferWindow {
 /** Main → worker. */
 export type MainToWorkerMessage =
   | {
+      /**
+       * Declares whether this HELLO's host will supply an app-key seed over a
+       * subsequent `APP_KEY` message (`true`), definitively will not (`false`),
+       * or makes no claim (absent — an old-protocol host). **Presence metadata
+       * only — never the seed itself**, which still travels exclusively inside
+       * the encrypted `APP_KEY` envelope. A `false` flag lets the worker scrub
+       * a held seed slot whose provider the host dropped while re-attaching an
+       * otherwise identical `config` (the worker otherwise cannot tell
+       * "provider removed" from "envelope not yet arrived").
+       */
+      readonly appSeed?: boolean;
       /** Required with the default worker SDK factory; ignored when the app injected its own. */
       readonly config?: WorkerConfig;
       readonly requestId: RequestId;
+      /** Mirror of `appSeed` for the sharing-key seed slot (`APP_KEY` tagged `keyType: 'sharing'`). */
+      readonly sharingSeed?: boolean;
       readonly type: MainToWorkerMessageType.HELLO;
     }
   | {
@@ -254,9 +267,16 @@ export function isMainToWorkerMessage(message: unknown): message is MainToWorker
     case MainToWorkerMessageType.APP_KEY:
       return typeof typed.requestId === 'number' && isAppKeyEnvelope(typed.envelope);
     case MainToWorkerMessageType.ATTACH:
-    case MainToWorkerMessageType.HELLO:
     case MainToWorkerMessageType.PLAY:
       return typeof typed.requestId === 'number';
+    case MainToWorkerMessageType.HELLO:
+      // The additive seed-presence flags are optional booleans (wire metadata;
+      // a non-boolean value is a malformed HELLO, never a silent default).
+      return (
+        typeof typed.requestId === 'number' &&
+        (typeof typed.appSeed === 'undefined' || typeof typed.appSeed === 'boolean') &&
+        (typeof typed.sharingSeed === 'undefined' || typeof typed.sharingSeed === 'boolean')
+      );
     case MainToWorkerMessageType.PLAYHEAD:
     case MainToWorkerMessageType.SEEK:
       return typeof typed.requestId === 'number' && Number.isFinite(typed.time);
