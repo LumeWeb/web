@@ -65,9 +65,13 @@ export class MseAdapter implements AppendSink {
   }
 
   append(unit: AppendUnit): void {
-    // End-of-stream is requested by conversion completion, never by a byte
-    // unit; the pipe's EOS deferral already waits for the queue to drain.
+    // A producer-declared terminal media unit ends the stream once it drains —
+    // the only EOS signal for asynchronous producers whose media arrives after
+    // the stream controller's terminal-range read. From the next series branch
+    // the conversion-completion path covers this and the field goes away; the
+    // pipe's EOS deferral makes the re-request idempotent.
     this.#pipe.append(unit.bytes);
+    if (unit.terminal === true) this.#pipe.requestEndOfStream();
   }
 
   async evictBackBuffer(_playheadSeconds: number): Promise<boolean> {
