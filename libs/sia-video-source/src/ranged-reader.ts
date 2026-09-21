@@ -63,6 +63,12 @@ export interface SiaObjectLike {
  * lazy dual-seed adapter connects an untagged download's app-key route on
  * demand, see `worker-runtime.ts`), so callers await the result before
  * reading — a plain `ReadableStream` passes through unchanged.
+ *
+ * Once resolved, the caller owns the stream until it is read to EOF or
+ * cancelled. That survive-the-async-resolution adopt-or-cancel rule covers
+ * superseded runs too: a download that has not resolved when a seek/stop lands
+ * is raced, and if it resolves stale the reader cancels it instead of dropping
+ * the still-open stream (and its WebTransport sessions).
  */
 export interface SiaSdkLike {
   download(
@@ -336,10 +342,16 @@ export class RangedReader {
           ...this.#options.downloadOptions,
         });
         const stream = resolved instanceof Promise ? await resolved : resolved;
-        // A seek that landed while an async (connect-on-demand) download was in
-        // flight already started the replacement run; only the current load
-        // generation may adopt this stream.
-        if (this.#loadGeneration !== loadGeneration) return;
+        // A stale async (connect-on-demand) download that resolves after a seek
+        // landed would otherwise be dropped still open, leaking its
+        // WebTransport sessions (the SDK holds them until EOF or cancel);
+        // adopt-or-cancel: cancel it. The cancel is fire-and-forget so a
+        // stalled WASM cancel never blocks this run's unwinding and permit
+        // release.
+        if (this.#loadGeneration !== loadGeneration) {
+          void stream.cancel().catch(() => { /* empty */ });
+          return;
+        }
         this.#stream = stream;
         const reader = stream.getReader();
         this.#reader = reader;
@@ -388,7 +400,10 @@ export class RangedReader {
  * The underlying Sia SDK opens one or more WebTransport sessions the moment
  * `download()` is called (one per slab/renter touched by the requested range,
  * bounded only by the download's `maxBufferedChunks`) and holds them until the
- * returned stream is read to EOF or cancelled. Chromium caps *pending*
+ * returned stream is read to EOF or cancelled — or, for a stale async download
+ * that resolves after its run was superseded, until `RangedReader` cancels it
+ * (adopt-or-cancel), so a dropped-open stream can never leak its sessions.
+ * Chromium caps *pending*
  * sessions at 64: too many simultaneous downloads — as when mediabunny issues
  * an overlapping batch of independent reads — exhaust that budget and later
  * reads stall forever with `Too many pending WebTransport sessions (64)`. This
