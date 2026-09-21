@@ -141,9 +141,9 @@ function asParseable(src: string): null | URL {
 
 /**
  * Standard-alphabet base64 decoder, accepting the padded and unpadded
- * base64url forms the real producers emit. `atob` alone cannot be used
- * directly: it only understands the standard alphabet, and share URLs carry
- * the URL-safe alphabet.
+ * base64url forms real Sia share-URL generators emit. `atob` alone cannot be
+ * used directly: it only understands the standard alphabet, and share URLs
+ * carry the URL-safe alphabet.
  */
 function decodeBase64Url(value: string): Uint8Array {
   let base64 = value.replace(/-/g, '+').replace(/_/g, '/');
