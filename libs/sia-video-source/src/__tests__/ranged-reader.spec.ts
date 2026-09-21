@@ -112,6 +112,40 @@ function newReader(payload: Uint8Array, delivered: Delivered[], cache?: LruChunk
   });
 }
 
+/**
+ * SDK whose pull-based downloads deliver `CHUNK_SIZE` slices but never
+ * self-close: after the requested range is enqueued the pull stays silent, so
+ * the stream is still logically open when `#run` exits (exact-length
+ * completion or a chunk-error throw). `cancel()` records the download's
+ * offset, making the stream's deterministic abort observable at the source
+ * level — the wasm side (Download → AbortOnDropHandle) is dropped only when
+ * the stream is cancelled, which is exactly what `#run`'s teardown must do.
+ */
+function openPullSdk(payload: Uint8Array): { cancelFiredOffsets: number[]; sdk: SiaSdkLike } {
+  const cancelFiredOffsets: number[] = [];
+  const sdk: SiaSdkLike = {
+    download: (_object, options) => {
+      const offset = options?.offset ?? 0;
+      const end = Math.min(offset + (options?.length ?? payload.length - offset), payload.length);
+      let next = offset;
+      return new ReadableStream<Uint8Array>({
+        cancel() {
+          cancelFiredOffsets.push(offset);
+        },
+        pull(controller) {
+          // desiredSize is null once the stream is closed — a pull racing the
+          // teardown cancel must not enqueue into a closed controller.
+          if (next >= end || controller.desiredSize === null) return;
+          const slice = payload.slice(next, Math.min(next + CHUNK_SIZE, end));
+          next += slice.byteLength;
+          controller.enqueue(slice);
+        },
+      });
+    },
+  };
+  return { cancelFiredOffsets, sdk };
+}
+
 async function settle(): Promise<void> {
   await Promise.resolve();
   await new Promise((resolve) => setTimeout(resolve, 0));
@@ -320,6 +354,80 @@ describe('RangedReader', () => {
     expect(reader.active).toBe(false);
     // The stall was aborted promptly — the read must not hang the caller.
     expect(Date.now() - startedAt).toBeLessThan(2000);
+  });
+});
+
+// The adopt-or-cancel invariant now covers every exit path of `#run`'s
+// teardown, not just the stale-async guard: when a run still owns the stream
+// it cancels before clearing, so a stream that is still logically open when
+// the run exits — exact-length completion (pull source never self-closed) or
+// a chunk-error throw (wasm-bindgen slab-recovery tasks ahead of the read
+// head) — is aborted deterministically instead of being dropped to a
+// nondeterministic GC.
+describe('RangedReader — deterministic stream cancel on teardown', () => {
+  it('cancels the still-open stream and reports exactly once when onChunk throws', async () => {
+    const errors: unknown[] = [];
+    const budget = new ReadBudget(1);
+    const unhandled = trackUnhandledRejections();
+    try {
+      const sdk = openPullSdk(PAYLOAD);
+      const reader = new RangedReader({
+        budget,
+        chunkSize: CHUNK_SIZE,
+        object: fakeObject(PAYLOAD.length),
+        onChunk: (_bytes, position) => {
+          if (position >= CHUNK_SIZE) throw new Error('consumer aborted playback');
+        },
+        onError: (error) => errors.push(error),
+        sdk: sdk.sdk,
+      });
+
+      reader.start();
+      await settle();
+      await settle();
+
+      // The throw surfaced exactly once through the existing error contract.
+      expect(errors).toHaveLength(1);
+      expect((errors[0] as Error).message).toBe('consumer aborted playback');
+      // The still-open stream (pull source never closed) was deterministically
+      // cancelled at the source — the wasm Download dropped, aborting any
+      // leftover slab recovery ahead of the read head.
+      expect(sdk.cancelFiredOffsets).toEqual([0]);
+      // The fire-and-forget cancel did not delay the budget permit release.
+      expect(budget.inFlight).toBe(0);
+      expect(reader.active).toBe(false);
+      expect(unhandled.count()).toBe(0);
+    } finally {
+      unhandled.dispose();
+    }
+  });
+
+  it('cancels a stream left open after exact-length completion (no clobber)', async () => {
+    const delivered: Delivered[] = [];
+    const budget = new ReadBudget(1);
+    const sdk = openPullSdk(PAYLOAD);
+    const reader = new RangedReader({
+      budget,
+      chunkSize: CHUNK_SIZE,
+      object: fakeObject(PAYLOAD.length),
+      onChunk: (bytes, position) => delivered.push({ bytes, position }),
+      sdk: sdk.sdk,
+    });
+
+    reader.start();
+    await settle();
+    await settle();
+    await settle();
+
+    // The full range was delivered exactly; `#run` exited on position === end
+    // without the pull source ever self-closing, so the stream is still open.
+    expect(join(delivered)).toEqual(PAYLOAD);
+    expect(reader.position).toBe(PAYLOAD.length);
+    expect(reader.active).toBe(false);
+    // Even though the read is byte-exact, the open stream is now cancelled
+    // (once) rather than dropped — pinning the all-exit-paths invariant.
+    expect(sdk.cancelFiredOffsets).toEqual([0]);
+    expect(budget.inFlight).toBe(0);
   });
 });
 

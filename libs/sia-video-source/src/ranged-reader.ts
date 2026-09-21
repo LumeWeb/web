@@ -65,10 +65,12 @@ export interface SiaObjectLike {
  * reading — a plain `ReadableStream` passes through unchanged.
  *
  * Once resolved, the caller owns the stream until it is read to EOF or
- * cancelled. That survive-the-async-resolution adopt-or-cancel rule covers
- * superseded runs too: a download that has not resolved when a seek/stop lands
- * is raced, and if it resolves stale the reader cancels it instead of dropping
- * the still-open stream (and its WebTransport sessions).
+ * cancelled, and adopting also means releasing on exit: the reader cancels any
+ * stream it stops owning instead of dropping it open (adopt-or-cancel). That
+ * rule holds on every exit path — superseded/stale runs, `stop()`, the stall
+ * watchdog, exact-length completion, and a chunk-error throw — so the SDK's
+ * WebTransport sessions (held until EOF or cancel) are always released
+ * deterministically, never left to a nondeterministic GC.
  */
 export interface SiaSdkLike {
   download(
@@ -378,9 +380,16 @@ export class RangedReader {
         if (release) release();
         // A cancelled run can settle after its replacement already assigned
         // fresh `#reader`/`#stream` references — only the current load generation may
-        // clear them, or the replacement's reader would be orphaned and later
-        // seeks would find no active reader.
+        // touch them, or the replacement's reader would be orphaned and later
+        // seeks would find no active reader. While this run still owns the
+        // refs, cancel before clearing so a stream is never dropped open: on a
+        // throw the wasm-bindgen slab-recovery tasks ahead of the read head
+        // keep running until a nondeterministic GC, and on exact-length
+        // completion the pull source may never have self-closed. cancel() is
+        // the only deterministic abort — it is fire-and-forget (never delays
+        // the permit release above) and a no-op on an already-closed stream.
         if (this.#loadGeneration === loadGeneration) {
+          void this.#reader?.cancel().catch(() => { /* empty */ });
           this.#reader = null;
           this.#stream = null;
         }
