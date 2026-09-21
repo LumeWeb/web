@@ -17,7 +17,7 @@ script:
 node src/__fixtures__/media/generate.mjs
 ```
 
-The browser-decodable media (`*.mp4`, `*.webm`) is produced separately by the
+The browser-decodable media (`*.mp4`) is produced separately by the
 pinned ffmpeg recipes in the `generate-browser-decodable-*.mjs` scripts (see
 below) — those are real encodes and are intentionally *not* built by
 `generate.mjs`.
@@ -31,17 +31,15 @@ below) — those are real encodes and are intentionally *not* built by
 | `progressive-mp4-front.bin` | 996 | `9e437ce49edc6a2b45938aba1c3773a1f859bed6e0fd6cebfce9cd0b9cfe870f` | MP4 | progressive MP4 with `moov` first (`stbl`-shaped skeleton, zero samples) |
 | `progressive-mp4-tail.bin` | 1068 | `f411ee99134c20b6c3b2aca2cfb694d9d1cbfed2ddba4e53debb8cc6749f18f8` | MP4 | progressive MP4 with `moov` at the **tail** — the head walk stops at `mdat` |
 | `mediabunny-mp4.bin` | 2260 | `cee389f56f7c2d7056436523dc99a77cbd64e54a3e712c355168622304be10e0` | MP4 | real-moov progressive MP4 (front `moov`) with one `avc1.640032` video track and one `mp4a.40.2` audio track |
-| `webm-cues.bin` | 268 | `8cd2281c82f6597d8253b64be8ce09d3a916ed020f619ef734e199bcd368504f` | WebM | EBML DocType `webm`, one video track, two Clusters (`ts=0`, `ts=3000`) and a Cues element whose `CueClusterPosition` values point at the real Cluster offsets |
 | `ts.bin` | 752 | `9b1e0e3fe526e44f5fd6fd0787b8b997fe1ed1648721b477eed1a1f7e1db47cd` | TS | 188-byte MPEG-TS with PAT + PMT (H.264 PID 0x100, AAC PID 0x101) + one video PES and one audio PES |
 
 ## Scope of the structural fixtures
 
 These fixtures carry the top-level box / element **layout** real files have —
-valid sizes, real `sidx` math, real WebM Cue positions — so the container
-probe, classifier, and existing index parsers run against tracked bytes. They
-do **not** contain decodable AVC/VP8/AAC bitstreams (there is no deterministic
-encoder feeding `generate.mjs`), so they are the structural substrate, not the
-decode-acceptance feed.
+valid sizes, real `sidx` math — so the container probe and classifier run
+against tracked bytes. They do **not** contain decodable AVC/AAC bitstreams
+(there is no deterministic encoder feeding `generate.mjs`), so they are the
+structural substrate, not the decode-acceptance feed.
 
 Deviations from fully-valid media, by fixture:
 
@@ -50,8 +48,6 @@ Deviations from fully-valid media, by fixture:
   `0x11/0x22/0x33`.
 - `progressive-mp4-*.bin` — one `trak` with zero-sample `stsd/stts/stsc/stsz/stco`
   skeleton; `mdat` is a repeating `0xab` filler.
-- `webm-cues.bin` — SimpleBlock frame bytes are repeating filler (no VP8
-  keyframe); single video TrackEntry.
 - `mediabunny-mp4.bin` — real sample tables (`stts`/`stsc`/`stsz`/`stco`) with
   a real `avcC` and a minimal AAC `esds`; the `mdat` bytes are filler (no
   decodable frames), which is all a structural info parse needs.
@@ -69,7 +65,6 @@ this directory, each with a pinned sha256 that the suite's contract holds.
 |---|---|---|---|---|
 | `browser-decodable-avc-aac.mp4` | 102940 | `d8d8db6b4b73d1c96c3d8eba636f441d68e83ff820ddc84dde5be8aea388f55a` | `generate-browser-decodable-fixture.mjs` | `browser-decodable-fixture.ts` + `browser-decodable-fixture-contract.spec.ts` |
 | `browser-decodable-frag-avc-aac.mp4` | 114917 | `24e79f7d5aff821abc91ec972a53101b2e6066ad01cca0e702c7e2c616aec00c` | `generate-browser-decodable-frag-fixture.mjs` | generator `--check` |
-| `browser-decodable-webm-vp8-vorbis.webm` | 111772 | `95acf5cc5b72f7f5df810b9cafbcacdd2ee60dbdf33f339da01715da02ffa7e2` | `generate-browser-decodable-webm-fixture.mjs` | `webm-browser-fixture.ts` |
 
 - `browser-decodable-avc-aac.mp4` — 2 s, 320x240@30 x264 High@5.0
   (`avc1.640032`) + AAC-LC 44.1 kHz stereo (`mp4a.40.2`) progressive MP4,
@@ -81,9 +76,6 @@ this directory, each with a pinned sha256 that the suite's contract holds.
 - `browser-decodable-frag-avc-aac.mp4` — same AVC/AAC encode, fragmented MP4
   with **no** top-level `sidx`: `ftyp, moov, (moof mdat)×n`, every video
   fragment RAP-aligned (`-bf 0 -g 15` + `frag_keyframe+empty_moov`).
-- `browser-decodable-webm-vp8-vorbis.webm` — VP8 + Vorbis WebM with ≥2
-  keyframe-aligned Clusters and a Cues element; its browser-safe base64 twin
-  lives in `src/__tests__/fixtures/webm-browser-fixture-bytes.ts`.
 
 Reproduction + verification (deterministic on a pinned toolchain; ffmpeg never
 fabricates — a candidate that fails its structural contract is rejected):
@@ -96,7 +88,7 @@ node generate-browser-decodable-fixture.mjs --generate --emit-bytes-ts  # …and
 ```
 
 The same `--check` / `--generate` / `--emit-bytes-ts` modes exist for the frag
-and webm generators.
+generator.
 
 Why the base64 twins exist: the browser MSE suites run under Vitest browser
 mode where `node:fs`/`node:url` aren't available, so the exact committed bytes

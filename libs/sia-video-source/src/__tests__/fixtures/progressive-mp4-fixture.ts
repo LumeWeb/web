@@ -1,14 +1,14 @@
 /**
- * Deterministic progressive-MP4 fixture for the mediabunny producer: a
- * moov-first progressive MP4 with DISTINCT track ids (video `tkhd` id 1, audio
- * id 2), real avc1/mp4a sample entries (real BBB AVC decoder config + the BBB
- * AAC ES descriptor), real sample tables, a video `stss` RAP grid, and REAL
- * MSE-parseable sample payloads.
+ * Deterministic progressive-MP4 fixture: a moov-first progressive MP4 with
+ * DISTINCT track ids (video `tkhd` id 1, audio id 2), real avc1/mp4a sample
+ * entries (real BBB AVC decoder config + the BBB AAC ES descriptor), real
+ * sample tables, a video `stss` RAP grid, and REAL MSE-parseable sample
+ * payloads.
  *
  * Real files always carry unique track ids (a duplicate id makes track
- * identity ambiguous for demuxers and for the producer's fragmented output);
- * this builder is the de-duplicated, multi-second shape the producer and its
- * appendability tests need, and these bytes carry the same real structure.
+ * identity ambiguous for demuxers and for refragmented output); this builder
+ * is the de-duplicated, multi-second shape that stays valid when refragmented,
+ * and these bytes carry the same real structure.
  *
  * The sample payloads are byte-exact AVC/AAC packets extracted from a real BBB
  * progressive file — the IDR slice that anchors each RAP, a small P-slice for
@@ -18,9 +18,8 @@
  * length-prefixed AVC NALs and the AAC frame headers during append, so opaque
  * filler (`0xab`) makes a SourceBuffer fire a fatal `error` event. Repeating
  * real frames keeps the fixture self-contained (no encoder, no external
- * tooling) while staying container-and-demux valid; mediabunny's packet-copy
- * mux can
- * refragment them without decoding.
+ * tooling) while staying container-and-demux valid; mediabunny can refragment
+ * them without decoding.
  */
 export interface ProgressiveMp4FixtureOptions {
   /** mp4a frame payload override (defaults to the real BBB AAC-LC frame). */
@@ -120,12 +119,21 @@ export function progressiveMp4Fixture(options: ProgressiveMp4FixtureOptions = {}
   const video = sampleTrack('video', videoTrackId, videoSizes, VIDEO_DURATION_PER_SAMPLE, VIDEO_TIMESCALE, [...syncSet].sort((a, b) => a - b));
   const audio = sampleTrack('audio', audioTrackId, audioSizes, AUDIO_DURATION_PER_SAMPLE, AUDIO_TIMESCALE);
   const totalVideoBytes = videoSizes.reduce((sum, size) => sum + size, 0);
-  const moov = isoBox('moov', concat(authMvhd(seconds), video.trak, audio.trak));
-  const head = concat(ftypBox(), moov);
+  // moov body order is mvhd, video trak, audio trak.
+  const moovParts: readonly Uint8Array[] = [
+    authMvhd(seconds),
+    video.trak,
+    audio.trak,
+  ];
+  const moov = isoBox('moov', concat(...moovParts));
+  const ftyp = ftypBox();
+  const head = concat(ftyp, moov);
   const mdatBody = concat(...videoPayloads, ...audioPayloads);
   const mdat = isoBox('mdat', mdatBody);
+  // stco chunk offsets point into the mdat payload, right after head
+  // (ftyp + moov) in the moov-first layout.
   const mdatPayload = head.byteLength + 8;
-  const ftypLength = ftypBox().byteLength;
+  const ftypLength = ftyp.byteLength;
   const videoTrakStart = ftypLength + 8 + authMvhd(seconds).byteLength;
   const audioTrakStart = videoTrakStart + video.trak.byteLength;
   patchStcoEntry(head, videoTrakStart + video.stcoEntryOffsetInTrak, mdatPayload);

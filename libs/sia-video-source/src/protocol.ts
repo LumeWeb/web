@@ -2,8 +2,8 @@
  * Wire protocol between the main thread (`SiaVideoSource`) and the dedicated
  * Sia video worker.
  *
- * The worker resolves the pinned object, streams bytes, probes the container,
- * remuxes to fragmented MP4 when needed, and (where the browser supports it)
+ * The worker resolves the pinned object, streams bytes, converts them with
+ * the media library to fragmented MP4, and (where the browser supports it)
  * owns MSE itself. Every main→worker message that can fail or finish carries a
  * `requestId`; the worker echoes it on the corresponding reply, `CHUNK`,
  * `PROGRESS`, and `ERROR` messages, so a superseded load can be told apart
@@ -11,15 +11,15 @@
  */
 
 import type { AppMetadata } from '@siafoundation/sia-storage';
-import type { IndexGranularity, PlaybackMode, TrackSummary } from './media/legacy-types.ts';
+import type { PlaybackTrack } from './media/types.ts';
 
 /** Wire protocol version; 0 is the initial, unreleased protocol. */
 export const PROTOCOL_VERSION = 0;
 
 /**
- * Codec set produced by the mux.js TS→fMP4 pipeline (H.264 + AAC). Shared by
- * the worker (which appends with it) and the host (whose main-thread MSE
- * fallback needs the same MIME), so the wire contract cannot drift apart.
+ * Fallback MSE MIME the host applies when an accepted source does not carry
+ * its own `info.mime` (`SOURCE_OK`). The worker's mediabunny conversion
+ * always produces H.264 + AAC CMAF, so the fallback matches that output.
  */
 export const DEFAULT_FMP4_MIME = 'video/mp4; codecs="avc1.640028,mp4a.40.2"';
 
@@ -78,7 +78,7 @@ export type MainToWorkerMessage =
       readonly requestId: RequestId;
       readonly type: 'APP_KEY';
     }
-  /** Current media playhead; drives bounded finite-VOD scheduling and eviction. */
+  /** Current media playhead; drives buffered-timeline scheduling and back-buffer eviction. */
   | { readonly requestId: RequestId; readonly time: number; readonly type: 'PLAYHEAD'; }
   | { readonly requestId: RequestId; readonly time: number; readonly type: 'SEEK'; }
   | { readonly requestId: RequestId; readonly type: 'ATTACH'; }
@@ -89,28 +89,22 @@ export type MainToWorkerMessage =
 export type SiaVideoMessage = MainToWorkerMessage | WorkerToMainMessage;
 
 /**
- * What the worker knows about the accepted source after probing.
- *
- * The capability fields — `playback`, `indexGranularity`, `tracks` — are
- * optional extras: every worker built against the current protocol populates
- * them, but a host that predates them can ignore the extra JSON fields. The
- * wire guard accepts any `info` object for `SOURCE_OK`, so future fields keep
- * landing without a version bump.
+ * What the worker vouches for about an accepted source: the container family,
+ * the duration when it can name one (else null), the MSE-ready MIME it will
+ * append with, the MSE construction site for this session, and the discovered
+ * track codecs in track order. The wire guard accepts any `info` object for
+ * `SOURCE_OK`, so future fields keep landing without a version bump.
  */
 export interface SourceInfo {
   readonly container: string;
   /** Media duration in seconds when it can vouch for one, else `null`. */
   readonly durationSeconds: null | number;
-  /** How precisely this object can answer time→byte seeks right now. */
-  readonly indexGranularity?: IndexGranularity;
   /** MSE-ready MIME type the worker will append with (or hands the host for fallback appends). */
   readonly mime: string;
   /** MSE construction site for this play session. */
   readonly mode: WorkerMode;
-  /** Container/codec-decided playback mode the worker will actually use. */
-  readonly playback?: PlaybackMode;
   /** Track codecs in track order, for UI/debug; empty when unknown. */
-  readonly tracks?: readonly TrackSummary[];
+  readonly tracks: readonly PlaybackTrack[];
 }
 
 /**

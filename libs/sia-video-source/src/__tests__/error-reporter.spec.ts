@@ -1,5 +1,5 @@
 /**
- * TDD contract for the `ErrorReporter` seam: the injected fatal-failure path
+ * The `ErrorReporter` seam: the injected fatal-failure path
  * StreamController / SessionCoordinator use to surface a structured
  * `PlaybackFailure` as the host's protocol ERROR.
  *
@@ -53,7 +53,7 @@ describe('ErrorReporter contract', () => {
     expect(workerErrorForFailure({ code: failureCode.quota, condition: failureCondition.mse })).toMatchObject({ kind: workerErrorCode.decode });
   });
 
-  it('drops cancelled failures: stale epochs must never surface', () => {
+  it('drops cancelled failures: stale load generations must never surface', () => {
     expect(workerErrorForFailure({ code: failureCode.superseded, condition: failureCondition.cancelled })).toBeNull();
     expect(workerErrorForFailure({ code: failureCode.destroyed, condition: failureCondition.cancelled })).toBeNull();
   });

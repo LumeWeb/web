@@ -6,8 +6,8 @@ import { isSiaShareUrl, parseSiaShareUrl } from '../share-url.ts';
 const HEX_KEY = 'a1b2c3d4e5f60718293a4b5c6d7e8f90112233445566778899aabbccddeeff01';
 
 /**
- * Encodes to the padded base64url form both real producers emit (Go
- * `base64.URLEncoding`, Rust `URL_SAFE` keep the `=` padding).
+ * Encodes to the padded base64url form both real Sia share-URL generators
+ * emit (Go `base64.URLEncoding`, Rust `URL_SAFE` keep the `=` padding).
  */
 function base64UrlEncode(bytes: Uint8Array): string {
   let binary = '';

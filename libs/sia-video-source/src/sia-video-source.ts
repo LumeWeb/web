@@ -7,12 +7,12 @@
  * load (announced with an `emptied` event).
  *
  * The playback engine is a dedicated worker (`@lumeweb/sia-video-source/worker`)
- * that owns byte fetching, container probing, remuxing, and — where the
- * browser allows it (Chromium, Safari 18+) — `MediaSource` itself, transferring
- * its `MediaSourceHandle` so this host only has to set `video.srcObject`.
- * Where MSE cannot run in a worker (Firefox), the worker transfers parsed
- * fMP4 bytes as `CHUNK` messages and the host appends them into its own
- * main-thread `MediaSource` via an object URL.
+ * that owns byte fetching, converts the media with mediabunny to fragmented
+ * MP4, and — where the browser allows it (Chromium, Safari 18+) — `MediaSource`
+ * itself, transferring its `MediaSourceHandle` so this host only has to set
+ * `video.srcObject`. Where MSE cannot run in a worker (Firefox), the worker
+ * transfers the converted fMP4 bytes as `CHUNK` messages and the host appends
+ * them into its own main-thread `MediaSource` via an object URL.
  *
  * Lifecycle: `attach` is idempotent across element swaps (React StrictMode
  * remounts included). Every `ATTACH_OK` is followed by a fresh `SOURCE` for
@@ -42,7 +42,7 @@ import {
 } from './protocol.ts';
 
 /** Default props mirrored by the React wrapper's prop-syncing hook. */
-const FINITE_VOD_BACK_BUFFER_SECONDS = 30;
+const MSE_BACK_BUFFER_SECONDS = 30;
 
 export const siaVideoDefaultProps = {
   preload: 'metadata',
@@ -198,10 +198,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   }
   // Shared MSE append pipe (main-thread fallback only). Centralizes the
   // append-queue serialization, back-buffer eviction and end-of-stream deferral
-  // that used to live inline in this class, so the main-thread MSE path and
-  // the worker-side MSE pipeline exercise one pipe implementation. Created at
-  // `SOURCE_OK`(main) pipeline setup and aborted
-  // on teardown/load reset; `null` in worker mode.
+  // so the main-thread MSE path and the worker-side MSE pipeline exercise one
+  // pipe implementation. Created at `SOURCE_OK`(main) pipeline setup and
+  // aborted on teardown/load reset; `null` in worker mode.
   #appendPipe: MseAppendPipe | null = null;
 
   // Seed supplier from the `getAppKeySeed` option or the per-render setter.
@@ -366,11 +365,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // Each load's main-thread pipeline owns one shared append pipe. The
     // getters read the live host state so the pipe serializes appends into
     // whatever SourceBuffer the (possibly still-opening) MediaSource yields,
-    // and it reports fatal append failures through the same load error path
-    // the inline queue used to. Sia-specific layers feeding it bytes —
-    // CHUNK delivery, the object-URL plumbing — are unchanged.
+    // and it reports fatal append failures through the load's error path.
+    // Sia-specific layers feeding it bytes — CHUNK delivery, the object-URL
+    // plumbing — are unchanged.
     this.#appendPipe = new MseAppendPipe({
-      backBufferSeconds: FINITE_VOD_BACK_BUFFER_SECONDS,
+      backBufferSeconds: MSE_BACK_BUFFER_SECONDS,
       getMediaSource: () => this.#mediaSource,
       getPlayheadSeconds: () => this.target?.currentTime ?? 0,
       getSourceBuffer: () => this.#sourceBuffer,
@@ -467,7 +466,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // resets its own play/seek bookkeeping, so the play intent the user
         // expressed before (or while) the source was queued must be re-stated
         // for the replayed load — otherwise a deferred-family preload starts
-        // the probe but never streams, stalling the element at byte 0.
+        // the load but never streams, stalling the element at byte 0.
         if (this.#src) {
           const target = this.target as HTMLVideoElement | null;
           // Only an unpaused element, or an intent no pause superseded, may
@@ -503,7 +502,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         return;
       case 'ERROR':
         // After a clear (`src = ''`) there is no active load, so a late
-        // request-scoped ERROR (an abandoned probe still failing) must die
+        // request-scoped ERROR (an abandoned load still failing) must die
         // with its request instead of surfacing on the emptied element. Only
         // errors matching the active load — or inherently global ones (no
         // request id) — stand.
@@ -603,7 +602,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // and (once quiesced) reset the SourceBuffer's segment parser so the
     // worker's fresh fragment parses clean instead of continuing the tail the
     // seek cut off mid-fragment (Chromium's RunSegmentParserLoop failure).
-    this.#appendPipe?.reset();
+    // The reset carries the target so the main-owned buffer is re-anchored to
+    // the sought position (the trimmed output's timestamps rebase to zero).
+    this.#appendPipe?.reset(target.currentTime);
     this.#send({
       requestId: this.#requestId ?? nextRequestId(),
       time: target.currentTime,

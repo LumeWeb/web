@@ -55,7 +55,7 @@ describe('protocol', () => {
       { features: { workerMse: true }, publicKey: new Uint8Array(WORKER_PUBLIC_KEY_LENGTH), requestId: 1, type: 'HELLO_OK', version: 1 },
       { mode: 'worker', requestId: 1, type: 'ATTACH_OK' },
       { handle: null as unknown as MediaSourceHandle, requestId: 1, type: 'HANDLE' },
-      { info: { container: 'fmp4', durationSeconds: null, mime: 'video/mp4', mode: 'worker' }, requestId: 1, type: 'SOURCE_OK' },
+      { info: { container: 'fmp4', durationSeconds: null, mime: 'video/mp4', mode: 'worker', tracks: [] }, requestId: 1, type: 'SOURCE_OK' },
       { bytes: new Uint8Array(8), kind: 'media', requestId: 1, type: 'CHUNK' },
       { buffered: [{ end: 5, start: 0 }], received: 1024, requestId: 1, type: 'PROGRESS' },
       { kind: 'network', requestId: 1, type: 'ERROR' },
@@ -133,7 +133,7 @@ describe('protocol', () => {
 
   it('carries no plaintext seed field on the wire anywhere', () => {
     // Compile- and runtime-level assertion of the contract: the HELLO config
-    // structurally cannot carry the seed (property was removed), and the
+    // structurally cannot carry the seed (the property is absent), and the
     // APP_KEY discriminator rides a ciphertext envelope, not a raw key value.
     const config: WorkerConfig = { app: { appId: 'x', callbackUrl: '', description: 'test', logoUrl: '', name: 'test', serviceUrl: 'https://app.example' }, indexerUrl: 'https://sia.storage' };
     expect(config).not.toHaveProperty('appKeySeed');

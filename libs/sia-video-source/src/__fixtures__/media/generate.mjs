@@ -309,62 +309,6 @@ function str4(text) {
 /** Real H.264 decoder configuration extracted from the demo BBB fixture (High L4.2). */
 const REAL_AVC1_AVCC_HEX = '000000356176634301640032ffe1001b67640032ac7284405005bb0110000003001000000303c0f183184601000768e843874b22c0';
 
-// ---- EBML (WebM) shared pieces -----------------------------------------------
-
-const EBML = [0x1a, 0x45, 0xdf, 0xa3];
-const SEGMENT = [0x18, 0x53, 0x80, 0x67];
-const INFO = [0x15, 0x49, 0xa9, 0x66];
-const TIMESTAMP_SCALE = [0x2a, 0xd7, 0xb1];
-const DURATION = [0x44, 0x89];
-const MUXING_APP = [0x4d, 0x80];
-const WRITING_APP = [0x57, 0x41];
-const TRACKS = [0x16, 0x54, 0xae, 0x6b];
-const TRACK_ENTRY = [0xae];
-const TRACK_NUMBER = [0xd7];
-const TRACK_UID = [0x73, 0xc5];
-const TRACK_TYPE = [0x83];
-const CODEC_ID = [0x86];
-const VIDEO = [0xe0];
-const PIXEL_WIDTH = [0xb0];
-const PIXEL_HEIGHT = [0xba];
-const CLUSTER = [0x1f, 0x43, 0xb6, 0x75];
-const TIMESTAMP = [0xe7];
-const SIMPLE_BLOCK = [0xa3];
-const CUES = [0x1c, 0x53, 0xbb, 0x6b];
-const CUE_POINT = [0xbb];
-const CUE_TIME = [0xb3];
-const CUE_TRACK_POSITIONS = [0xb7];
-const CUE_TRACK = [0xf7];
-const CUE_CLUSTER_POSITION = [0xf1];
-
-function ebml(id, body) {
-  return new Uint8Array([...id, ...vintSize(body.length), ...body]);
-}
-
-function ebmlFloat(id, value) {
-  const buffer = new ArrayBuffer(8);
-  new DataView(buffer).setFloat64(0, value, false);
-  return ebml(id, Array.from(new Uint8Array(buffer)));
-}
-
-function ebmlStr(id, text) {
-  return ebml(id, Array.from(text, (char) => char.charCodeAt(0)));
-}
-
-function ebmlUInt(id, value) {
-  const bytes = [];
-  let rest = value;
-  do {
-    bytes.unshift(rest & 0xff);
-    rest = Math.floor(rest / 256);
-  } while (rest > 0);
-  // EBML unsigned integers are vint-encoded, so a lone byte with the high bit
-  // set would be read as a compressed vint (value >> 7). Pad with a leading
-  // zero so e.g. 129 (0x81) stays 129 instead of collapsing to 1.
-  if (bytes.length === 1 && (bytes[0] & 0x80) !== 0) bytes.unshift(0);
-  return ebml(id, bytes);
-}
-
 /** Builds one 188-byte TS packet with the given PID / PUSI / continuity / payload. */
 function tsPacket({ continuity, payload, pid, pusi }) {
   const packet = new Uint8Array(188).fill(0xff);
@@ -450,94 +394,6 @@ function tsStream() {
   );
 }
 
-/** Encodes an EBML element size as a variable-length integer (<= 4 bytes). */
-function vintSize(value) {
-  if (value < 0x80) return [0x80 | value];
-  if (value < 0x4000) return [0x40 | (value >> 8), value & 0xff];
-  if (value < 0x200000) return [0x20 | (value >> 16), (value >> 8) & 0xff, value & 0xff];
-  if (value < 0x10000000) return [0x10 | (value >> 24), (value >> 16) & 0xff, (value >> 8) & 0xff, value & 0xff];
-  throw new Error(`EBML size too large: ${value}`);
-}
-
-/** One Cluster: a Timestamp plus a single keyframe SimpleBlock on track 1. */
-function webmCluster(timestampMs, frameMarker) {
-  const frame = new Uint8Array(16).fill(frameMarker);
-  const simpleBlock = ebml(SIMPLE_BLOCK, [0x81, 0x00, 0x00, 0x80, ...frame]); // track 1, rel 0, keyframe
-  return ebml(CLUSTER, [...ebmlUInt(TIMESTAMP, timestampMs), ...simpleBlock]);
-}
-
-/**
- * Cues with one CuePoint per Cluster. CueClusterPosition is the offset of the
- * Cluster's first byte relative to the start of the Segment data, which the
- * builder computes while assembling the Segment children in order.
- */
-function webmCues(points) {
-  const cuePoint = (time, position) =>
-    ebml(CUE_POINT, concat(ebmlUInt(CUE_TIME, time), ebml(CUE_TRACK_POSITIONS, concat(ebmlUInt(CUE_TRACK, 1), ebmlUInt(CUE_CLUSTER_POSITION, position)))));
-  return ebml(CUES, concat(...points.map(([time, position]) => cuePoint(time, position))));
-}
-
-function webmHeader() {
-  return ebml(EBML, [
-    ...ebmlUInt([0x42, 0x86], 1), // EBMLVersion
-    ...ebmlUInt([0x42, 0xf7], 1), // EBMLReadVersion
-    ...ebmlUInt([0x42, 0xf2], 4), // EBMLMaxIDLength
-    ...ebmlUInt([0x42, 0xf3], 8), // EBMLMaxSizeLength
-    ...ebmlStr([0x42, 0x82], 'webm'), // DocType
-    ...ebmlUInt([0x42, 0x87], 4), // DocTypeVersion
-    ...ebmlUInt([0x42, 0x85], 2), // DocTypeReadVersion
-  ]);
-}
-
-function webmInfo() {
-  return ebml(INFO, [
-    ...ebmlUInt(TIMESTAMP_SCALE, 1_000_000), // 1 ms ticks
-    ...ebmlFloat(DURATION, 6.0), // 6 s
-    ...ebmlStr(MUXING_APP, 'sia-video-source fixture generator'),
-    ...ebmlStr(WRITING_APP, 'sia-video-source fixture generator'),
-  ]);
-}
-
-// ---- MPEG-TS -----------------------------------------------------------------
-
-function webmTracks() {
-  const videoEntry = ebml(TRACK_ENTRY, [
-    ...ebmlUInt(TRACK_NUMBER, 1),
-    ...ebmlUInt(TRACK_UID, 1),
-    ...ebmlUInt(TRACK_TYPE, 1), // video
-    ...ebmlStr(CODEC_ID, 'V_VP8'),
-    ...ebml(VIDEO, [
-      ...ebmlUInt(PIXEL_WIDTH, 640),
-      ...ebmlUInt(PIXEL_HEIGHT, 360),
-    ]),
-  ]);
-  return ebml(TRACKS, videoEntry);
-}
-
-function webmWithCues() {
-  const header = webmHeader();
-  const info = webmInfo();
-  const tracks = webmTracks();
-
-  const children = [...info, ...tracks];
-  const clusterPositions = [];
-  let contentLength = children.length;
-  const cluster1 = webmCluster(0, 0x11);
-  clusterPositions.push(contentLength);
-  contentLength += cluster1.length;
-  const cluster2 = webmCluster(3000, 0x22);
-  clusterPositions.push(contentLength);
-  contentLength += cluster2.length;
-
-  const cues = webmCues([
-    [0, clusterPositions[0]],
-    [3000, clusterPositions[1]],
-  ]);
-
-  const segment = ebml(SEGMENT, concat(info, tracks, cluster1, cluster2, cues));
-  return concat(header, segment);
-}
-
 // ---- emit ---------------------------------------------------------------------
 
 const FIXTURES = {
@@ -547,7 +403,6 @@ const FIXTURES = {
   'progressive-mp4-front.bin': progressiveFront,
   'progressive-mp4-tail.bin': progressiveTail,
   'ts.bin': tsStream,
-  'webm-cues.bin': webmWithCues,
 };
 
 const manifest = [];

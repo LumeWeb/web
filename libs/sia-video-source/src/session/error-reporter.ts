@@ -63,7 +63,7 @@ export const failureCode = {
 export interface ErrorReporter {
   /**
    * Reports a fatal failure. Adapters MUST drop `condition: 'cancelled'` failures
-   * (stale epochs must never surface as host errors).
+   * (stale load generations must never surface as host errors).
    */
   report(failure: PlaybackFailure): void;
 }

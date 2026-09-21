@@ -2608,9 +2608,6 @@ importers:
       mediabunny:
         specifier: 1.58.0
         version: 1.58.0
-      mux.js:
-        specifier: ^7.1.0
-        version: 7.1.0
     devDependencies:
       '@lumeweb/tsdown-config':
         specifier: workspace:*
@@ -13209,11 +13206,6 @@ packages:
 
   mux-embed@5.18.1:
     resolution: {integrity: sha512-ePsHjiEKY+FgrSBiMmaF+LOtTQSSBWv/1zqpREQFN96JE93xlsArT/MEi30yKOE06MgjOlL70YI750molu3y7g==}
-
-  mux.js@7.1.0:
-    resolution: {integrity: sha512-NTxawK/BBELJrYsZThEulyUMDVlLizKdxyAsMuzoCD1eFj97BVaA8D/CvKsKu6FOLYkFojN5CbM9h++ZTZtknA==}
-    engines: {node: '>=8', npm: '>=5'}
-    hasBin: true
 
   mz@2.7.0:
     resolution: {integrity: sha512-z81GNO7nnYMEhrGh9LeymoE4+Yr0Wn5McHIZMK5cfQCl+NDX08sCZgUc9/6MHni9IWuFLm1Z3HTCXu2z9fN62Q==}
@@ -29744,11 +29736,6 @@ snapshots:
   mute-stream@3.0.0: {}
 
   mux-embed@5.18.1: {}
-
-  mux.js@7.1.0:
-    dependencies:
-      '@babel/runtime': 7.29.2
-      global: 4.4.0
 
   mz@2.7.0:
     dependencies:

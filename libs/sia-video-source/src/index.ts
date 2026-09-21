@@ -1,8 +1,9 @@
 /**
  * `@lumeweb/sia-video-source` — a video.js v10 custom media element that plays
  * video stored on the Sia network: a dedicated worker fetches ranged bytes
- * through the Sia WASM SDK, probes/remuxes them to fragmented MP4, and feeds
- * MSE (inside the worker where supported, on the main thread otherwise).
+ * through the Sia WASM SDK, converts them with mediabunny to fragmented MP4,
+ * and feeds MSE (inside the worker where supported, on the main thread
+ * otherwise).
  *
  * Main-thread entry: the `SiaVideoSource` host element and the shared wire
  * types. The worker entry lives behind the `/worker` subpath; a React wrapper
@@ -23,78 +24,22 @@ export {
   capabilityVerdictForCodec,
   type CodecId,
 } from './capabilities/codec-verdict.ts';
-export {
-  classifyContainer,
-  type ContainerClassifier,
-  containerProfileFor,
-  type ContainerSniff,
-  createContainerClassifier,
-} from './capabilities/container-classifier.ts';
-export { type ContainerKind, sniffContainer } from './container-probe.ts';
-export {
-  buildFirstIndex,
-  createIndexBuilderRegistry,
-  INDEX_HEAD_LENGTH,
-  MoofWalkIndexBuilder,
-  SidxIndexBuilder,
-} from './container/index/index-builder.ts';
-export { MoofWalkIndex } from './container/index/moof-index.ts';
-export {
-  type ContainerProfile,
-  type IndexBuilder,
-  type IndexSourceKind,
-  type ProducerFamily,
-} from './container/index/random-access-index.ts';
-export { SidxIndex } from './container/index/sidx-index.ts';
-export {
-  type AppendableProducer,
-  type ProducedSegment,
-} from './container/producer/appendable-producer.ts';
-export {
-  PassthroughProducer,
-  type PassthroughProducerOptions,
-} from './container/producer/passthrough-producer.ts';
-export {
-  createProducerFactory,
-  fmp4MimeForCodecs,
-  PassthroughProducerStrategy,
-  type ProducerContext,
-  type ProducerFactory,
-  ProducerFactoryRegistry,
-  type ProducerRejection,
-  type ProducerSelection,
-  type ProducerStrategy,
-  ProducerUnavailableError,
-  type ProducerUnavailableErrorOptions,
-  type ProducerVerdict,
-  TsToFmp4ProducerStrategy,
-} from './container/producer/producer-factory.ts';
-export { ProgressiveMp4ProducerStrategy } from './container/producer/progressive-mp4-producer-strategy.ts';
-export {
-  type Mp4FragmentFn,
-  ProgressiveMp4Producer,
-  type ProgressiveMp4ProducerOptions,
-} from './container/producer/progressive-mp4-producer.ts';
-export {
-  TsToFmp4Producer,
-  type TsToFmp4ProducerOptions,
-} from './container/producer/ts-to-fmp4-producer.ts';
 export { DEFAULT_ERROR_MESSAGES, MEDIA_ERROR_CODES, mediaErrorEvent, mediaErrorFromWorkerMessage } from './errors.ts';
 export {
-  type CodecDescriptor,
-  type IndexGranularity,
+  type CancelledMediaLoad,
+  inspectMediaLibrary,
+  type InspectMediaLibraryOptions,
+  type MediaLoadResult,
+  type MediaPlayback,
+  type ReadyMediaLoad,
+  type UnsupportedMediaLoad,
+  type UnsupportedReason,
+} from './media/library-load.ts';
+export {
+  type ContainerKind,
   type MediaKind,
-  type MediaRange,
-  type MediaSegment,
-  type PlaybackMode,
-  type Presentation,
-  type ProducerMode,
-  type RandomAccessIndex,
-  type RangeRead,
-  type SegmentMeta,
-  type SourceCapabilities,
-  type TrackSummary,
-} from './media/legacy-types.ts';
+  type PlaybackTrack,
+} from './media/types.ts';
 export {
   type AppKeyEnvelope,
   type BufferWindow,
@@ -147,13 +92,8 @@ export {
   type SiaWorkerCompositionDeps,
 } from './session/sia-composition.ts';
 export {
-  codecDescriptorsFromRfc6381,
-  indexGranularityFor,
-  sourceCapabilitiesFor,
   type SourceCapabilityFacts,
   sourceInfoFor,
-  tracksFromCodecs,
-  TS_REMUX_CODECS,
 } from './session/source-capabilities.ts';
 export {
   createStreamController,
@@ -181,6 +121,7 @@ export {
   type ByteSource,
   ByteSourceSupersededError,
   emptyByteStream,
+  LoadGenerationState,
   type ReadOptions,
   supersededStream,
   toSupersededError,

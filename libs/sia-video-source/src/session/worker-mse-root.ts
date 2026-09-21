@@ -8,7 +8,7 @@
  * - `createSink(context)` (the coordinator's `sinkFactory`) tears down the
  *   previous pipeline, opens a brand-new worker MediaSource, posts `HANDLE`
  *   carrying its handle in the transfer list, and returns a `MseAdapter`
- *   (one `AppendSink` per load, each with its own append queue/epoch).
+ *   (one `AppendSink` per load, each with its own append queue/load generation).
  * - `ensureSourceBuffer()` defers the SourceBuffer to the async `sourceopen`
  *   event (a worker MediaSource only opens once the host attaches the handle
  *   to a `<video>` element), setting the media duration and MIME, and kicks
@@ -168,10 +168,10 @@ export function createWorkerMseRoot(options: WorkerMseRootOptions): WorkerMseRoo
       const handle = mediaSourceHandleOf(current);
       options.post({ handle, requestId: context.requestId, type: 'HANDLE' }, [handle]);
 
-      // One MseAdapter (fresh MseAppendPipe) per load; the epoch scoping on
-      // resetParser/requestEndOfStream is exactly the `createWorkerMseSinkFactory`
-      // contract, with the pipe reference kept so the root can kick it when
-      // the SourceBuffer appears.
+      // One MseAdapter (fresh MseAppendPipe) per load; the load-generation
+      // scoping on resetParser/requestEndOfStream is exactly the
+      // `createWorkerMseSinkFactory` contract, with the pipe reference kept so
+      // the root can kick it when the SourceBuffer appears.
       const created = new MseAppendPipe(deps);
       pipe = created;
       ensureSourceBuffer();

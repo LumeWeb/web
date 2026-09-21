@@ -13,7 +13,7 @@ import { createSiaWorkerComposition, createWorkerMseRoot } from './session/sia-c
 import {
   createDefaultSdk,
   defaultPost,
-  FINITE_VOD_BACK_BUFFER_SECONDS,
+  MSE_BACK_BUFFER_SECONDS,
   type SiaVideoWorkerOptions,
   type WorkerCompositionHost,
 } from './worker-runtime.ts';
@@ -38,7 +38,6 @@ export {
 } from './protocol.ts';
 
 export {
-  HEAD_PROBE_LENGTH,
   type PostMessage,
   type SiaVideoSdk,
   type SiaVideoWorkerOptions,
@@ -73,7 +72,7 @@ export interface WorkerScopeRuntime {
 export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = {}): WorkerCompositionHost {
   const post = options.post ?? defaultPost;
   const workerMseRoot = createWorkerMseRoot({
-    backBufferSeconds: FINITE_VOD_BACK_BUFFER_SECONDS,
+    backBufferSeconds: MSE_BACK_BUFFER_SECONDS,
     createMediaSource: options.createMediaSource,
     onError: (requestId, error) => {
       if (requestId === null) return;
@@ -92,8 +91,8 @@ export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = 
     byteSource: options.cache ? { cache: options.cache } : undefined,
     capabilities: options.capabilities,
     createSdk: options.createSdk ?? createDefaultSdk,
+    loadPipeline: options.loadPipeline,
     post,
-    stallTimeoutMs: options.stallTimeoutMs,
     supportsWorkerMse: options.supportsWorkerMse,
     workerMseRoot,
   });
