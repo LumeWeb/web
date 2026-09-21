@@ -41,12 +41,14 @@ import { shareSrc } from './fixtures/fmp4-fixture.ts';
 const mocks = vi.hoisted(() => ({
   appFreeCalls: 0,
   appKeyCtorSeeds: [] as Uint8Array[],
+  appSdkDownloadCalls: 0,
   appSdkObjectCalls: [] as string[],
   appSdkShareFormCalls: [] as string[],
   builderConnectedCalls: [] as unknown[],
   builderCtorCalls: [] as unknown[],
   sharedConnectCalls: [] as [string, string][],
   sharedConnectResultOverride: undefined as null | undefined,
+  sharedDownloadCalls: 0,
   sharedFreeCalls: 0,
   sharedObjectCalls: [] as string[],
 }));
@@ -69,7 +71,10 @@ vi.mock('@siafoundation/sia-storage', () => {
       if (mocks.sharedConnectResultOverride === null) return null;
       return new SharedSdk();
     });
-    download = () => new ReadableStream<Uint8Array>({ start: (controller) => controller.close() });
+    download = () => {
+      mocks.sharedDownloadCalls += 1;
+      return new ReadableStream<Uint8Array>({ start: (controller) => controller.close() });
+    };
     free = () => {
       mocks.sharedFreeCalls += 1;
     };
@@ -82,7 +87,10 @@ vi.mock('@siafoundation/sia-storage', () => {
     connected = vi.fn((appKey: unknown) => {
       mocks.builderConnectedCalls.push(appKey);
       return {
-        download: () => new ReadableStream<Uint8Array>({ start: (controller) => controller.close() }),
+        download: () => {
+          mocks.appSdkDownloadCalls += 1;
+          return new ReadableStream<Uint8Array>({ start: (controller) => controller.close() });
+        },
         free: () => {
           mocks.appFreeCalls += 1;
         },
@@ -130,14 +138,16 @@ function bytesToHex(bytes: Uint8Array): string {
 function resetMocks(): void {
   mocks.appFreeCalls = 0;
   mocks.appKeyCtorSeeds.length = 0;
+  mocks.appSdkDownloadCalls = 0;
+  mocks.appSdkObjectCalls.length = 0;
+  mocks.appSdkShareFormCalls.length = 0;
   mocks.builderConnectedCalls.length = 0;
   mocks.builderCtorCalls.length = 0;
   mocks.sharedConnectCalls.length = 0;
   mocks.sharedConnectResultOverride = undefined;
+  mocks.sharedDownloadCalls = 0;
   mocks.sharedFreeCalls = 0;
   mocks.sharedObjectCalls.length = 0;
-  mocks.appSdkObjectCalls.length = 0;
-  mocks.appSdkShareFormCalls.length = 0;
 }
 
 function workerKeyWithPublicKey(): { keyPair: WorkerKeyPair; publicKey: Uint8Array; } {
@@ -340,6 +350,36 @@ describe('createDefaultSdk (worker SDK resolution)', () => {
     expect(mocks.appSdkObjectCalls).toEqual([]);
   });
 
+  it('connects the app-key route on demand for an untagged download instead of falling through to the shared SDK', async () => {
+    const appKeySeed = new Uint8Array(32).fill(0x71);
+    const sharingSeed = new Uint8Array(32).fill(0x72);
+    const sdk = await createDefaultSdk(WORKER_CONFIG, appKeySeed, sharingSeed);
+
+    // Resolve a share URL first so ONLY the shared route has connected: the
+    // app-key Builder route has not been touched yet.
+    const src = shareSrc();
+    const parsed = parseSiaShareUrl(src);
+    await sdk.objectFromShareUrl?.(parsed.fetchForm);
+    expect(mocks.builderCtorCalls).toEqual([]);
+    expect(mocks.builderConnectedCalls).toEqual([]);
+
+    // An UNTAGGED object (never resolved through either route) must download
+    // through the app-key SDK — the eager dual adapter's default — so the lazy
+    // dual adapter connects the app-key route on demand rather than handing a
+    // pinned object to the shared SDK, which cannot read it.
+    const untagged = { id: () => 'untagged', size: () => 8, slabs: () => [] };
+    const stream = await sdk.download(untagged, { length: 8, offset: 0 });
+    const reader = stream.getReader();
+    const { done } = await reader.read();
+    expect(done).toBe(true);
+
+    // The app-key route connected exactly once (on demand) and its SDK served
+    // the untagged download; the shared SDK never saw the object.
+    expect(mocks.builderConnectedCalls).toHaveLength(1);
+    expect(mocks.appSdkDownloadCalls).toBe(1);
+    expect(mocks.sharedDownloadCalls).toBe(0);
+  });
+
   it('dispose releases only the SDKs actually created and never connects the untouched route', async () => {
     const sdk = await createDefaultSdk(WORKER_CONFIG, new Uint8Array(32).fill(0x51), new Uint8Array(32).fill(0x52));
 
@@ -445,7 +485,7 @@ describe('createDefaultSdk (worker SDK resolution)', () => {
     expect(typeof surface.download).toBe('function');
 
     const object = await sdk.object('shared-key');
-    const stream = sdk.download(object, { length: 8, offset: 0 });
+    const stream = await sdk.download(object, { length: 8, offset: 0 });
     const reader = stream.getReader();
     const { done } = await reader.read();
     expect(done).toBe(true);

@@ -277,7 +277,8 @@ async function connectSharedSdk(config: WorkerConfig, sharingSeed: Uint8Array): 
  * connects its SDK on FIRST use. What stays intact vs. an eager dual connect:
  * the per-route WeakMap (each resolved object remembers which SDK produced it,
  * so `download` reaches the right payer/decryption without the caller tracking
- * it; untagged objects default to the app-key SDK once a route has connected),
+ * it; untagged objects default to the app-key SDK, whose route is connected on
+ * demand rather than falling through to the shared SDK),
  * the identical `SiaVideoSdk` surface, and the release-once dispose latch.
  *
  * Why lazy: a dual-seed app that plays only one source kind pays zero
@@ -322,12 +323,14 @@ function createDualSourceSdk(
     download: (object, options) => {
       const owner = ownerOf.get(object);
       if (owner) return owner.download(object, options);
-      // Untagged object (not resolved through this surface): default to the
-      // app-key SDK — the same fallback the eager dual adapter used. Lazily
-      // created means the fallback exists only once a route has connected;
-      // resolving a source before downloading always happens first in the
-      // byte-source flow, so a connected route is guaranteed by then.
-      return (connectedAppKey ?? connectedShared ?? throwUnresolvedObject()).download(object, options);
+      // Untagged object (not resolved through this surface): the eager dual
+      // adapter defaulted untagged downloads to the app-key SDK, and only the
+      // app key can fund/decrypt pinned objects. Under lazy routing the app SDK
+      // may not be connected yet — connect it now (the memoized in-flight
+      // promise makes a concurrent untagged download share one connect) rather
+      // than falling through to the shared SDK, which cannot read pinned
+      // objects.
+      return connectAppKeyRoute().then((sdk) => sdk.download(object, options));
     },
     object: (key) => connectAppKeyRoute().then((sdk) => tagged(sdk, sdk.object(key))),
     objectFromShareUrl: (shareUrl) =>
@@ -378,10 +381,6 @@ function createDualSourceSdk(
       ownerOf.set(object, sdk);
       return object;
     });
-  }
-
-  function throwUnresolvedObject(): never {
-    throw new Error('Cannot download an object this dual-source SDK did not resolve; resolve a source first.');
   }
 
   function release(): Promise<void> {

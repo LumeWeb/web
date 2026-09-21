@@ -57,7 +57,13 @@ export interface SiaObjectLike {
   slabs(): Slab[];
 }
 
-/** The slice of the Sia SDK the reader depends on. */
+/**
+ * The slice of the Sia SDK the reader depends on. `download` may resolve
+ * either synchronously (the app-key and keyless SDKs) or as a promise (the
+ * lazy dual-seed adapter connects an untagged download's app-key route on
+ * demand, see `worker-runtime.ts`), so callers await the result before
+ * reading — a plain `ReadableStream` passes through unchanged.
+ */
 export interface SiaSdkLike {
   download(
     object: SiaObjectLike,
@@ -67,7 +73,7 @@ export interface SiaSdkLike {
       offset?: number;
       onShardDownloaded?: (progress: ShardProgress) => void;
     }
-  ): ReadableStream<Uint8Array>;
+  ): Promise<ReadableStream<Uint8Array>> | ReadableStream<Uint8Array>;
 }
 
 /**
@@ -320,11 +326,20 @@ export class RangedReader {
 
         // One SDK download serves the whole remaining [start, end) range with
         // exact offset/length; the reader never tiles a read across requests.
-        const stream = sdk.download(object, {
+        // A lazy dual-seed SDK may resolve an untagged download through a
+        // connect-on-demand route (see worker-runtime.ts), which yields a
+        // promise; a settled stream is used synchronously so `active` reflects
+        // the in-flight read without an extra microtask.
+        const resolved = sdk.download(object, {
           length: end - start,
           offset: start,
           ...this.#options.downloadOptions,
         });
+        const stream = resolved instanceof Promise ? await resolved : resolved;
+        // A seek that landed while an async (connect-on-demand) download was in
+        // flight already started the replacement run; only the current load
+        // generation may adopt this stream.
+        if (this.#loadGeneration !== loadGeneration) return;
         this.#stream = stream;
         const reader = stream.getReader();
         this.#reader = reader;
