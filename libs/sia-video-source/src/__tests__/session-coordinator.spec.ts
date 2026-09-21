@@ -13,13 +13,17 @@ import type { PlaybackCapabilities } from '../capabilities/browser-capabilities.
 import type { MediaLoadResult, MediaPlayback } from '../media/library-load.ts';
 import {
   type MainToWorkerMessage,
+  MainToWorkerMessageType,
   PROTOCOL_VERSION,
+  type WorkerConfig,
   workerErrorCode,
   type WorkerToMainMessage,
+  WorkerToMainMessageType,
 } from '../protocol.ts';
 import type { LoadPipeline, LoadRequest } from '../session/load-pipeline.ts';
 import {
   createSessionCoordinator,
+  createSessionHandshake,
   type SessionCoordinator,
   type SessionCoordinatorDeps,
   type SinkFactoryContext,
@@ -234,16 +238,16 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
   it('answers HELLO and ATTACH, then SOURCE_OK carries exactly the ready-result facts', async () => {
     const driver = makeDriver();
     driver.pipeline.results.push(readyLoad());
-    await driver.say({ requestId: 1, type: 'HELLO' });
-    await driver.say({ requestId: 2, type: 'ATTACH' });
+    await driver.say({ requestId: 1, type: MainToWorkerMessageType.HELLO });
+    await driver.say({ requestId: 2, type: MainToWorkerMessageType.ATTACH });
 
-    expect(driver.message('HELLO_OK')[0]).toMatchObject({ features: { workerMse: false }, version: PROTOCOL_VERSION });
-    expect(driver.message('ATTACH_OK')[0]).toMatchObject({ mode: 'main', requestId: 2 });
+    expect(driver.message(WorkerToMainMessageType.HELLO_OK)[0]).toMatchObject({ features: { workerMse: false }, version: PROTOCOL_VERSION });
+    expect(driver.message(WorkerToMainMessageType.ATTACH_OK)[0]).toMatchObject({ mode: 'main', requestId: 2 });
 
-    await driver.say({ preload: 'auto', requestId: 3, src: 'playable', type: 'SOURCE' });
-    await waitForMessage(driver, 'SOURCE_OK');
+    await driver.say({ preload: 'auto', requestId: 3, src: 'playable', type: MainToWorkerMessageType.SOURCE });
+    await waitForMessage(driver, WorkerToMainMessageType.SOURCE_OK);
 
-    const ok = driver.message('SOURCE_OK');
+    const ok = driver.message(WorkerToMainMessageType.SOURCE_OK);
     expect(ok).toHaveLength(1);
     expect(ok[0].requestId).toBe(3);
     expect(ok[0].info).toEqual({
@@ -264,25 +268,25 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
     const driver = makeDriver();
     const playback = new FakePlayback();
     driver.pipeline.results.push(readyLoad(playback));
-    await driver.say({ preload: 'auto', requestId: 4, src: 'playable', type: 'SOURCE' });
-    await waitForMessage(driver, 'SOURCE_OK');
+    await driver.say({ preload: 'auto', requestId: 4, src: 'playable', type: MainToWorkerMessageType.SOURCE });
+    await waitForMessage(driver, WorkerToMainMessageType.SOURCE_OK);
 
     expect(playback.started).toBe(1);
     playback.emit('init');
-    expect(driver.message('CHUNK')).toHaveLength(1);
-    expect(driver.message('CHUNK')[0]).toMatchObject({ kind: 'init', requestId: 4 });
+    expect(driver.message(WorkerToMainMessageType.CHUNK)).toHaveLength(1);
+    expect(driver.message(WorkerToMainMessageType.CHUNK)[0]).toMatchObject({ kind: 'init', requestId: 4 });
 
     playback.complete();
     playback.complete();
-    expect(driver.message('ENDED')).toHaveLength(1);
-    expect(driver.message('ENDED')[0].requestId).toBe(4);
+    expect(driver.message(WorkerToMainMessageType.ENDED)).toHaveLength(1);
+    expect(driver.message(WorkerToMainMessageType.ENDED)[0].requestId).toBe(4);
   });
 
   it('passes the load generation and one abort signal into the pipeline, aborting on teardown', async () => {
     const driver = makeDriver();
     driver.pipeline.results.push(readyLoad());
-    await driver.say({ preload: 'auto', requestId: 5, src: 'playable', type: 'SOURCE' });
-    await waitForMessage(driver, 'SOURCE_OK');
+    await driver.say({ preload: 'auto', requestId: 5, src: 'playable', type: MainToWorkerMessageType.SOURCE });
+    await waitForMessage(driver, WorkerToMainMessageType.SOURCE_OK);
 
     expect(driver.pipeline.calls).toHaveLength(1);
     const call = driver.pipeline.calls[0];
@@ -290,7 +294,7 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
     expect(call.signal instanceof AbortSignal).toBe(true);
     expect(call.signal.aborted).toBe(false);
 
-    await driver.say({ type: 'DETACH' });
+    await driver.say({ type: MainToWorkerMessageType.DETACH });
     expect(call.signal.aborted).toBe(true);
   });
 
@@ -298,25 +302,25 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
     const driver = makeDriver();
     const result: MediaLoadResult = { reason: 'video-track-missing', status: 'unsupported' };
     driver.pipeline.results.push(result);
-    await driver.say({ preload: 'auto', requestId: 6, src: 'unknown', type: 'SOURCE' });
+    await driver.say({ preload: 'auto', requestId: 6, src: 'unknown', type: MainToWorkerMessageType.SOURCE });
     await settle();
 
-    expect(driver.message('SOURCE_OK')).toEqual([]);
-    const errors = driver.message('ERROR');
+    expect(driver.message(WorkerToMainMessageType.SOURCE_OK)).toEqual([]);
+    const errors = driver.message(WorkerToMainMessageType.ERROR);
     expect(errors).toHaveLength(1);
     expect(errors[0]).toMatchObject({ context: 'video-track-missing', kind: workerErrorCode.unsupported, requestId: 6 });
-    expect(driver.message('CHUNK')).toEqual([]);
-    expect(driver.message('ENDED')).toEqual([]);
+    expect(driver.message(WorkerToMainMessageType.CHUNK)).toEqual([]);
+    expect(driver.message(WorkerToMainMessageType.ENDED)).toEqual([]);
   });
 
   it('appends the raw failure detail to the unsupported error context', async () => {
     const driver = makeDriver();
     const result: MediaLoadResult = { detail: 'no moov box', reason: 'format-unreadable', status: 'unsupported' };
     driver.pipeline.results.push(result);
-    await driver.say({ preload: 'auto', requestId: 7, src: 'broken', type: 'SOURCE' });
+    await driver.say({ preload: 'auto', requestId: 7, src: 'broken', type: MainToWorkerMessageType.SOURCE });
     await settle();
 
-    const errors = driver.message('ERROR');
+    const errors = driver.message(WorkerToMainMessageType.ERROR);
     expect(errors).toHaveLength(1);
     expect(errors[0].context).toBe('format-unreadable: no moov box');
   });
@@ -324,12 +328,12 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
   it('maps a cancelled verdict to silence and releases the source', async () => {
     const driver = makeDriver();
     driver.pipeline.results.push({ status: 'cancelled' });
-    await driver.say({ preload: 'auto', requestId: 8, src: 'dropped', type: 'SOURCE' });
+    await driver.say({ preload: 'auto', requestId: 8, src: 'dropped', type: MainToWorkerMessageType.SOURCE });
     await settle();
 
-    expect(driver.message('SOURCE_OK')).toEqual([]);
-    expect(driver.message('ERROR')).toEqual([]);
-    expect(driver.message('CHUNK')).toEqual([]);
+    expect(driver.message(WorkerToMainMessageType.SOURCE_OK)).toEqual([]);
+    expect(driver.message(WorkerToMainMessageType.ERROR)).toEqual([]);
+    expect(driver.message(WorkerToMainMessageType.CHUNK)).toEqual([]);
     expect(driver.canceled.get('dropped') ?? 0).toBeGreaterThan(0);
   });
 
@@ -337,13 +341,13 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
     const driver = makeDriver();
     const playback = new FakePlayback();
     driver.pipeline.results.push(readyLoad(playback));
-    await driver.say({ preload: 'none', requestId: 9, src: 'playable', type: 'SOURCE' });
-    await waitForMessage(driver, 'SOURCE_OK');
+    await driver.say({ preload: 'none', requestId: 9, src: 'playable', type: MainToWorkerMessageType.SOURCE });
+    await waitForMessage(driver, WorkerToMainMessageType.SOURCE_OK);
 
-    expect(driver.message('CHUNK')).toEqual([]);
+    expect(driver.message(WorkerToMainMessageType.CHUNK)).toEqual([]);
     expect(playback.started).toBe(0);
 
-    await driver.say({ requestId: 10, type: 'PLAY' });
+    await driver.say({ requestId: 10, type: MainToWorkerMessageType.PLAY });
     expect(playback.started).toBe(1);
   });
 
@@ -351,13 +355,13 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
     const driver = makeDriver();
     const playback = new FakePlayback();
     // The pipeline holds the SOURCE's verdict so a SEEK arrives mid-load.
-    const load = driver.say({ preload: 'auto', requestId: 11, src: 'playable', type: 'SOURCE' });
+    const load = driver.say({ preload: 'auto', requestId: 11, src: 'playable', type: MainToWorkerMessageType.SOURCE });
     await settle();
-    await driver.say({ requestId: 12, time: 12.5, type: 'SEEK' });
+    await driver.say({ requestId: 12, time: 12.5, type: MainToWorkerMessageType.SEEK });
 
     driver.pipeline.resolveCall(0, readyLoad(playback));
     await load;
-    await waitForMessage(driver, 'SOURCE_OK');
+    await waitForMessage(driver, WorkerToMainMessageType.SOURCE_OK);
 
     expect(playback.started).toBe(1);
   });
@@ -366,26 +370,26 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
     const driver = makeDriver();
     const first = new FakePlayback(() => driver.cancelSource('first'));
     driver.pipeline.results.push(readyLoad(first));
-    await driver.say({ preload: 'auto', requestId: 13, src: 'first', type: 'SOURCE' });
-    await waitForMessage(driver, 'SOURCE_OK');
+    await driver.say({ preload: 'auto', requestId: 13, src: 'first', type: MainToWorkerMessageType.SOURCE });
+    await waitForMessage(driver, WorkerToMainMessageType.SOURCE_OK);
     expect(first.started).toBe(1);
     const firstSignal = driver.pipeline.calls[0].signal;
 
     const second = new FakePlayback();
     driver.pipeline.results.push(readyLoad(second));
-    await driver.say({ preload: 'auto', requestId: 14, src: 'second', type: 'SOURCE' });
-    await waitForMessage(driver, 'SOURCE_OK');
+    await driver.say({ preload: 'auto', requestId: 14, src: 'second', type: MainToWorkerMessageType.SOURCE });
+    await waitForMessage(driver, WorkerToMainMessageType.SOURCE_OK);
 
-    expect(driver.message('SOURCE_OK')).toHaveLength(2);
-    expect(driver.message('SOURCE_OK')[1].requestId).toBe(14);
+    expect(driver.message(WorkerToMainMessageType.SOURCE_OK)).toHaveLength(2);
+    expect(driver.message(WorkerToMainMessageType.SOURCE_OK)[1].requestId).toBe(14);
     expect(first.disposed).toBe(1);
     expect(firstSignal.aborted).toBe(true);
     expect(driver.canceled.get('first') ?? 0).toBeGreaterThan(0);
     expect(second.started).toBe(1);
 
     second.complete();
-    expect(driver.message('ENDED')).toHaveLength(1);
-    expect(driver.message('ENDED')[0].requestId).toBe(14);
+    expect(driver.message(WorkerToMainMessageType.ENDED)).toHaveLength(1);
+    expect(driver.message(WorkerToMainMessageType.ENDED)[0].requestId).toBe(14);
   });
 
   it('a superseded load completion disposes its own resources and posts nothing', async () => {
@@ -393,21 +397,21 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
     const stale = new FakePlayback(() => driver.cancelSource('stale'));
     // Both loads resolve through held runs so their order is explicit: the
     // fresh load (call 1) becomes the session, the stale load (call 0) drops.
-    const staleLoad = driver.say({ preload: 'auto', requestId: 15, src: 'stale', type: 'SOURCE' });
+    const staleLoad = driver.say({ preload: 'auto', requestId: 15, src: 'stale', type: MainToWorkerMessageType.SOURCE });
     await settle();
-    const freshLoad = driver.say({ preload: 'auto', requestId: 16, src: 'fresh', type: 'SOURCE' });
+    const freshLoad = driver.say({ preload: 'auto', requestId: 16, src: 'fresh', type: MainToWorkerMessageType.SOURCE });
     await settle();
     expect(driver.pipeline.calls).toHaveLength(2);
 
     const staleSignal = driver.pipeline.calls[0].signal;
     driver.pipeline.resolveCall(1, readyLoad());
     await freshLoad;
-    await waitForMessage(driver, 'SOURCE_OK');
+    await waitForMessage(driver, WorkerToMainMessageType.SOURCE_OK);
 
     driver.pipeline.resolveCall(0, readyLoad(stale));
     await staleLoad;
 
-    expect(driver.message('SOURCE_OK')).toHaveLength(1);
+    expect(driver.message(WorkerToMainMessageType.SOURCE_OK)).toHaveLength(1);
     expect(stale.started).toBe(0);
     expect(stale.disposed).toBe(1);
     expect(staleSignal.aborted).toBe(true);
@@ -421,7 +425,7 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
         resolveSource = resolve;
       }),
     });
-    const pending = driver.say({ preload: 'auto', requestId: 17, src: 'slow', type: 'SOURCE' });
+    const pending = driver.say({ preload: 'auto', requestId: 17, src: 'slow', type: MainToWorkerMessageType.SOURCE });
 
     driver.coordinator.destroy();
     resolveSource(new CancellationSpy('slow', driver.canceled));
@@ -435,10 +439,10 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
     const driver = makeDriver();
     const playback = new FakePlayback(() => driver.cancelSource('dettach'));
     driver.pipeline.results.push(readyLoad(playback));
-    await driver.say({ preload: 'auto', requestId: 18, src: 'dettach', type: 'SOURCE' });
-    await waitForMessage(driver, 'SOURCE_OK');
+    await driver.say({ preload: 'auto', requestId: 18, src: 'dettach', type: MainToWorkerMessageType.SOURCE });
+    await waitForMessage(driver, WorkerToMainMessageType.SOURCE_OK);
 
-    await driver.say({ type: 'DETACH' });
+    await driver.say({ type: MainToWorkerMessageType.DETACH });
 
     expect(playback.disposed).toBe(1);
     expect(playback.started).toBe(1);
@@ -450,13 +454,13 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
     const driver = makeDriver();
     const playback = new FakePlayback(() => driver.cancelSource('idle'));
     driver.pipeline.results.push(readyLoad(playback));
-    await driver.say({ preload: 'none', requestId: 18, src: 'idle', type: 'SOURCE' });
-    await waitForMessage(driver, 'SOURCE_OK');
+    await driver.say({ preload: 'none', requestId: 18, src: 'idle', type: MainToWorkerMessageType.SOURCE });
+    await waitForMessage(driver, WorkerToMainMessageType.SOURCE_OK);
 
     // The conversion was prepared but never started; replacement teardown must
     // still cancel it (dispose) and release the transport source it owns.
     expect(playback.started).toBe(0);
-    await driver.say({ type: 'DETACH' });
+    await driver.say({ type: MainToWorkerMessageType.DETACH });
 
     expect(playback.disposed).toBe(1);
     expect(driver.pipeline.calls[0].signal.aborted).toBe(true);
@@ -467,8 +471,8 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
     const driver = makeDriver();
     const playback = new FakePlayback(() => driver.cancelSource('doom'));
     driver.pipeline.results.push(readyLoad(playback));
-    await driver.say({ preload: 'auto', requestId: 19, src: 'doom', type: 'SOURCE' });
-    await waitForMessage(driver, 'SOURCE_OK');
+    await driver.say({ preload: 'auto', requestId: 19, src: 'doom', type: MainToWorkerMessageType.SOURCE });
+    await waitForMessage(driver, WorkerToMainMessageType.SOURCE_OK);
 
     driver.coordinator.destroy();
 
@@ -477,7 +481,7 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
 
     const before = driver.messages.length;
     driver.pipeline.results.push(readyLoad());
-    await driver.say({ preload: 'auto', requestId: 20, src: 'ignored', type: 'SOURCE' });
+    await driver.say({ preload: 'auto', requestId: 20, src: 'ignored', type: MainToWorkerMessageType.SOURCE });
     expect(driver.messages.length).toBe(before);
     expect(driver.pipeline.calls).toHaveLength(1);
   });
@@ -500,10 +504,10 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
       supportsWorkerMse: () => true,
     });
     driver.pipeline.results.push(readyLoad());
-    await driver.say({ preload: 'auto', requestId: 21, src: 'playable', type: 'SOURCE' });
-    await waitForMessage(driver, 'SOURCE_OK');
+    await driver.say({ preload: 'auto', requestId: 21, src: 'playable', type: MainToWorkerMessageType.SOURCE });
+    await waitForMessage(driver, WorkerToMainMessageType.SOURCE_OK);
 
-    await driver.say({ requestId: 21, time: 4.25, type: 'PLAYHEAD' });
+    await driver.say({ requestId: 21, time: 4.25, type: MainToWorkerMessageType.PLAYHEAD });
     await settle();
 
     expect(reflected).toContain(4.25);
@@ -528,8 +532,8 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
     });
     const playback = new FakePlayback();
     driver.pipeline.results.push(readyLoad(playback));
-    await driver.say({ preload: 'auto', requestId: 22, src: 'playable', type: 'SOURCE' });
-    await waitForMessage(driver, 'SOURCE_OK');
+    await driver.say({ preload: 'auto', requestId: 22, src: 'playable', type: MainToWorkerMessageType.SOURCE });
+    await waitForMessage(driver, WorkerToMainMessageType.SOURCE_OK);
 
     expect(contexts).toHaveLength(1);
     expect(contexts[0]).toEqual({
@@ -537,7 +541,7 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
       mime: 'video/mp4; codecs="avc1.640032,mp4a.40.2"',
       requestId: 22,
     });
-    expect(driver.message('CHUNK')).toEqual([]);
+    expect(driver.message(WorkerToMainMessageType.CHUNK)).toEqual([]);
     expect(playback.started).toBe(1);
 
     playback.emit('init');
@@ -549,41 +553,141 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
     const driver = makeDriver();
     const playback = new FakePlayback();
     driver.pipeline.results.push(readyLoad(playback));
-    await driver.say({ preload: 'auto', requestId: 23, src: 'playable', type: 'SOURCE' });
-    await waitForMessage(driver, 'SOURCE_OK');
+    await driver.say({ preload: 'auto', requestId: 23, src: 'playable', type: MainToWorkerMessageType.SOURCE });
+    await waitForMessage(driver, WorkerToMainMessageType.SOURCE_OK);
 
     playback.fail(new Error('engine failed'));
     playback.fail(new Error('again'));
 
-    const errors = driver.message('ERROR');
+    const errors = driver.message(WorkerToMainMessageType.ERROR);
     expect(errors).toHaveLength(1);
     expect(errors[0]).toMatchObject({ kind: workerErrorCode.decode, requestId: 23 });
   });
 
   it('accepts a validated APP_KEY envelope through the real handshake', async () => {
     const driver = makeDriver();
-    await driver.say({ requestId: 1, type: 'HELLO' });
-    const hello = driver.message('HELLO_OK')[0];
+    await driver.say({ requestId: 1, type: MainToWorkerMessageType.HELLO });
+    const hello = driver.message(WorkerToMainMessageType.HELLO_OK)[0];
 
     const seed = new Uint8Array(32).fill(7);
     const envelope = await encryptToWorker(hello.publicKey, seed);
-    await driver.say({ envelope, requestId: 2, type: 'APP_KEY' });
+    await driver.say({ envelope, requestId: 2, type: MainToWorkerMessageType.APP_KEY });
     await settle();
 
-    expect(driver.message('ERROR')).toEqual([]);
+    expect(driver.message(WorkerToMainMessageType.ERROR)).toEqual([]);
   });
 
   it('surfaces a rejected APP_KEY envelope as a network ERROR', async () => {
     const driver = makeDriver();
-    await driver.say({ requestId: 1, type: 'HELLO' });
+    await driver.say({ requestId: 1, type: MainToWorkerMessageType.HELLO });
 
     const wrongKey = new Uint8Array(32).fill(3);
     const envelope = await encryptToWorker(wrongKey, new Uint8Array(32).fill(1));
-    await driver.say({ envelope, requestId: 2, type: 'APP_KEY' });
+    await driver.say({ envelope, requestId: 2, type: MainToWorkerMessageType.APP_KEY });
     await settle();
 
-    const errors = driver.message('ERROR');
+    const errors = driver.message(WorkerToMainMessageType.ERROR);
     expect(errors.length).toBeGreaterThan(0);
     expect(errors[0].kind).toBe(workerErrorCode.network);
+  });
+});
+
+// ---- Fix 1: HELLO seed-presence flags scrub stale credentials --------------
+
+describe('createSessionHandshake HELLO seed-presence flags', () => {
+  const CONFIG: WorkerConfig = {
+    app: {
+      appId: 'app',
+      callbackUrl: '',
+      description: '',
+      logoUrl: '',
+      name: 'app',
+      serviceUrl: 'https://app.example',
+    },
+    indexerUrl: 'https://indexer.example',
+  };
+
+  // Every test reuses one handshake so hello() mints the SAME memoized worker
+  // key pair — a fresh crypto-random pair per call would mint envelopes the
+  // handshake's own acceptAppKey could not decrypt.
+  it('scrubs a sharing seed the host declares absent while re-attaching an identical config', async () => {
+    const handshake = createSessionHandshake();
+    const { publicKey } = handshake.hello(1, CONFIG);
+
+    const appSeed = new Uint8Array(32).fill(81);
+    const sharingSeed = new Uint8Array(32).fill(82);
+    await handshake.acceptAppKey(await encryptToWorker(publicKey, appSeed));
+    await handshake.acceptAppKey(await encryptToWorker(publicKey, sharingSeed, 'sharing'));
+    expect(handshake.seed).toEqual(appSeed);
+    expect(handshake.sharingSeed).toEqual(sharingSeed);
+
+    // The host removed getSharingKeySeed but re-attached the SAME config:
+    // HELLO declares the sharing slot absent (workerConfigsEqual stays true),
+    // so the sharing seed — previously "stuck" while the config never changed
+    // — is scrubbed. The app slot, declared present, is untouched.
+    handshake.hello(2, CONFIG, { app: true, sharing: false });
+    expect(handshake.seed).toEqual(appSeed);
+    expect(handshake.sharingSeed).toBeNull();
+  });
+
+  it('scrubs a declared-absent app seed independently of the sharing slot', async () => {
+    const handshake = createSessionHandshake();
+    const { publicKey } = handshake.hello(1, CONFIG, { app: true, sharing: true });
+
+    const appSeed = new Uint8Array(32).fill(91);
+    const sharingSeed = new Uint8Array(32).fill(92);
+    await handshake.acceptAppKey(await encryptToWorker(publicKey, appSeed));
+    await handshake.acceptAppKey(await encryptToWorker(publicKey, sharingSeed, 'sharing'));
+
+    handshake.hello(2, CONFIG, { app: false, sharing: true });
+    expect(handshake.seed).toBeNull();
+    expect(handshake.sharingSeed).toEqual(sharingSeed);
+  });
+
+  it('keeps a declared-present seed on re-Hello (sync-back never scrubs)', async () => {
+    const handshake = createSessionHandshake();
+    const { publicKey } = handshake.hello(1, CONFIG, { app: true, sharing: true });
+
+    const sharingSeed = new Uint8Array(32).fill(0x63);
+    await handshake.acceptAppKey(await encryptToWorker(publicKey, sharingSeed, 'sharing'));
+    expect(handshake.sharingSeed).toEqual(sharingSeed);
+
+    // The host re-declares the sharing slot present on the same config: the
+    // held seed survives (no "envelope not yet arrived" ambiguity).
+    handshake.hello(2, CONFIG, { app: true, sharing: true });
+    expect(handshake.sharingSeed).toEqual(sharingSeed);
+  });
+
+  it('keeps both seeds when HELLO carries no presence flags (old-protocol backward compat)', async () => {
+    const handshake = createSessionHandshake();
+    const { publicKey } = handshake.hello(1, CONFIG);
+
+    const appSeed = new Uint8Array(32).fill(0x71);
+    const sharingSeed = new Uint8Array(32).fill(0x72);
+    await handshake.acceptAppKey(await encryptToWorker(publicKey, appSeed));
+    await handshake.acceptAppKey(await encryptToWorker(publicKey, sharingSeed, 'sharing'));
+
+    // An old host re-attaches with no appSeed/sharingSeed fields: no claim is
+    // made, so nothing is scrubbed beyond the (unchanged) config rule.
+    handshake.hello(2, CONFIG);
+    expect(handshake.seed).toEqual(appSeed);
+    expect(handshake.sharingSeed).toEqual(sharingSeed);
+  });
+
+  it('routes HELLO presence flags through the coordinator into the handshake', async () => {
+    const driver = makeDriver();
+    await driver.say({
+      appSeed: true,
+      config: CONFIG,
+      requestId: 1,
+      sharingSeed: false,
+      type: MainToWorkerMessageType.HELLO,
+    });
+    await settle();
+
+    // The flags are accepted wire fields on the default handshake path and the
+    // session still negotiates normally (HELLO_OK is posted, no ERROR).
+    expect(driver.message(WorkerToMainMessageType.ERROR)).toEqual([]);
+    expect(driver.message(WorkerToMainMessageType.HELLO_OK)[0]).toMatchObject({ requestId: 1 });
   });
 });

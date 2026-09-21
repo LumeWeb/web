@@ -128,7 +128,7 @@ export function fakeObject(contentLength: number): SiaObjectLike {
   return { id: () => 'composition-object', size: () => contentLength, slabs: () => [slab] };
 }
 
-/** SDK (object + optional sharedObject) whose downloads slice `payload`. */
+/** SDK (object + optional objectFromShareUrl) whose downloads slice `payload`. */
 export function fakeSiaSdk(payload: Uint8Array, options: { shared?: boolean } = {}): FakeSiaSdkResult {
   const downloads: number[] = [];
   const objectKeys: string[] = [];
@@ -152,7 +152,7 @@ export function fakeSiaSdk(payload: Uint8Array, options: { shared?: boolean } = 
     },
     ...(options.shared
       ? {
-          sharedObject: (fetchForm: string): Promise<SiaObjectLike> => {
+          objectFromShareUrl: (fetchForm: string): Promise<SiaObjectLike> => {
             shareForms.push(fetchForm);
             return Promise.resolve(fakeObject(payload.length));
           },

@@ -1,6 +1,66 @@
 import { describe, expect, it } from 'vitest';
 import type { Slab } from '@siafoundation/sia-storage';
-import { LruChunkCache, RangedReader, type SiaObjectLike, type SiaSdkLike } from '../ranged-reader.ts';
+import { LruChunkCache, RangedReader, ReadBudget, type SiaObjectLike, type SiaSdkLike } from '../ranged-reader.ts';
+
+/**
+ * SDK that mirrors the lazy dual-seed adapter: `download()` returns a parked
+ * promise the test resolves (`resolve(i)` materializes the i-th request's
+ * stream) or rejects (`reject(i, reason)`). A materialized stream is
+ * pull-based — `start` stays silent, `pull` enqueues the requested payload
+ * slice then closes — so nothing reaches the reader until `#run` actually
+ * reads. Its `cancel()` hook records the stream's offset: a stale async
+ * download dropped while still open would leak its WebTransport sessions and
+ * show up here as a missing cancel, pinning the adopt-or-cancel invariant.
+ */
+function deferredSdk(payload: Uint8Array): {
+  cancelled: number[];
+  reject(index: number, reason: unknown): void;
+  requests: { length: number; offset: number }[];
+  resolve(index: number): void;
+  sdk: SiaSdkLike;
+} {
+  const cancelled: number[] = [];
+  const requests: { length: number; offset: number }[] = [];
+  const resolvers: ((stream: ReadableStream<Uint8Array>) => void)[] = [];
+  const rejecters: ((reason: unknown) => void)[] = [];
+
+  const sdk: SiaSdkLike = {
+    download: (_object, options) => {
+      const offset = options?.offset ?? 0;
+      const length = options?.length ?? payload.length - offset;
+      requests.push({ length, offset });
+      return new Promise<ReadableStream<Uint8Array>>((resolve, reject) => {
+        resolvers.push(resolve);
+        rejecters.push(reject);
+      });
+    },
+  };
+
+  const materialize = (request: { length: number; offset: number }): ReadableStream<Uint8Array> =>
+    new ReadableStream<Uint8Array>({
+      cancel() {
+        cancelled.push(request.offset);
+      },
+      pull(controller) {
+        const end = Math.min(request.offset + request.length, payload.length);
+        if (request.offset < end) controller.enqueue(payload.slice(request.offset, end));
+        controller.close();
+      },
+    });
+
+  return {
+    cancelled,
+    reject(index, reason) {
+      rejecters[index]?.(reason);
+    },
+    requests,
+    resolve(index) {
+      const request = requests[index];
+      if (request) resolvers[index]?.(materialize(request));
+    },
+    sdk,
+  };
+}
 
 // objectSize() derives the payload size from the slab map, so fakes must
 // return slabs whose lengths add up to the content length.
@@ -52,6 +112,40 @@ function newReader(payload: Uint8Array, delivered: Delivered[], cache?: LruChunk
   });
 }
 
+/**
+ * SDK whose pull-based downloads deliver `CHUNK_SIZE` slices but never
+ * self-close: after the requested range is enqueued the pull stays silent, so
+ * the stream is still logically open when `#run` exits (exact-length
+ * completion or a chunk-error throw). `cancel()` records the download's
+ * offset, making the stream's deterministic abort observable at the source
+ * level — the wasm side (Download → AbortOnDropHandle) is dropped only when
+ * the stream is cancelled, which is exactly what `#run`'s teardown must do.
+ */
+function openPullSdk(payload: Uint8Array): { cancelFiredOffsets: number[]; sdk: SiaSdkLike } {
+  const cancelFiredOffsets: number[] = [];
+  const sdk: SiaSdkLike = {
+    download: (_object, options) => {
+      const offset = options?.offset ?? 0;
+      const end = Math.min(offset + (options?.length ?? payload.length - offset), payload.length);
+      let next = offset;
+      return new ReadableStream<Uint8Array>({
+        cancel() {
+          cancelFiredOffsets.push(offset);
+        },
+        pull(controller) {
+          // desiredSize is null once the stream is closed — a pull racing the
+          // teardown cancel must not enqueue into a closed controller.
+          if (next >= end || controller.desiredSize === null) return;
+          const slice = payload.slice(next, Math.min(next + CHUNK_SIZE, end));
+          next += slice.byteLength;
+          controller.enqueue(slice);
+        },
+      });
+    },
+  };
+  return { cancelFiredOffsets, sdk };
+}
+
 async function settle(): Promise<void> {
   await Promise.resolve();
   await new Promise((resolve) => setTimeout(resolve, 0));
@@ -73,6 +167,26 @@ function stalledSdk(): SiaSdkLike {
           return new Promise<undefined>(() => { /* deliberately never settles */ });
         },
       }),
+  };
+}
+
+/**
+ * Counts unhandled rejections for the duration of one test (node's process
+ * `unhandledRejection`). Vitest would fail the run on its own, but asserting
+ * the local count pins the contract: a swallowed cancel or an awaited
+ * rejection must never surface anywhere.
+ */
+function trackUnhandledRejections(): { count: () => number; dispose: () => void } {
+  let count = 0;
+  const listener = () => {
+    count++;
+  };
+  process.on('unhandledRejection', listener);
+  return {
+    count: () => count,
+    dispose: () => {
+      process.off('unhandledRejection', listener);
+    },
   };
 }
 
@@ -240,5 +354,255 @@ describe('RangedReader', () => {
     expect(reader.active).toBe(false);
     // The stall was aborted promptly — the read must not hang the caller.
     expect(Date.now() - startedAt).toBeLessThan(2000);
+  });
+});
+
+// The adopt-or-cancel invariant now covers every exit path of `#run`'s
+// teardown, not just the stale-async guard: when a run still owns the stream
+// it cancels before clearing, so a stream that is still logically open when
+// the run exits — exact-length completion (pull source never self-closed) or
+// a chunk-error throw (wasm-bindgen slab-recovery tasks ahead of the read
+// head) — is aborted deterministically instead of being dropped to a
+// nondeterministic GC.
+describe('RangedReader — deterministic stream cancel on teardown', () => {
+  it('cancels the still-open stream and reports exactly once when onChunk throws', async () => {
+    const errors: unknown[] = [];
+    const budget = new ReadBudget(1);
+    const unhandled = trackUnhandledRejections();
+    try {
+      const sdk = openPullSdk(PAYLOAD);
+      const reader = new RangedReader({
+        budget,
+        chunkSize: CHUNK_SIZE,
+        object: fakeObject(PAYLOAD.length),
+        onChunk: (_bytes, position) => {
+          if (position >= CHUNK_SIZE) throw new Error('consumer aborted playback');
+        },
+        onError: (error) => errors.push(error),
+        sdk: sdk.sdk,
+      });
+
+      reader.start();
+      await settle();
+      await settle();
+
+      // The throw surfaced exactly once through the existing error contract.
+      expect(errors).toHaveLength(1);
+      expect((errors[0] as Error).message).toBe('consumer aborted playback');
+      // The still-open stream (pull source never closed) was deterministically
+      // cancelled at the source — the wasm Download dropped, aborting any
+      // leftover slab recovery ahead of the read head.
+      expect(sdk.cancelFiredOffsets).toEqual([0]);
+      // The fire-and-forget cancel did not delay the budget permit release.
+      expect(budget.inFlight).toBe(0);
+      expect(reader.active).toBe(false);
+      expect(unhandled.count()).toBe(0);
+    } finally {
+      unhandled.dispose();
+    }
+  });
+
+  it('cancels a stream left open after exact-length completion (no clobber)', async () => {
+    const delivered: Delivered[] = [];
+    const budget = new ReadBudget(1);
+    const sdk = openPullSdk(PAYLOAD);
+    const reader = new RangedReader({
+      budget,
+      chunkSize: CHUNK_SIZE,
+      object: fakeObject(PAYLOAD.length),
+      onChunk: (bytes, position) => delivered.push({ bytes, position }),
+      sdk: sdk.sdk,
+    });
+
+    reader.start();
+    await settle();
+    await settle();
+    await settle();
+
+    // The full range was delivered exactly; `#run` exited on position === end
+    // without the pull source ever self-closing, so the stream is still open.
+    expect(join(delivered)).toEqual(PAYLOAD);
+    expect(reader.position).toBe(PAYLOAD.length);
+    expect(reader.active).toBe(false);
+    // Even though the read is byte-exact, the open stream is now cancelled
+    // (once) rather than dropped — pinning the all-exit-paths invariant.
+    expect(sdk.cancelFiredOffsets).toEqual([0]);
+    expect(budget.inFlight).toBe(0);
+  });
+});
+
+// The lazy dual-seed adapter (worker-runtime.ts) may hand the reader a
+// download that has not resolved when a seek/stop lands. These tests pin the
+// adopt-or-cancel invariant: whatever the SDK promised, a resolved stream is
+// owned until EOF or cancel, so a stale async stream must be cancelled —
+// never dropped still open (leaking its WebTransport sessions).
+describe('RangedReader — delayed (promise) download lifecycle', () => {
+  it('cancels a stale async download that resolves after stop()', async () => {
+    const errors: unknown[] = [];
+    const unhandled = trackUnhandledRejections();
+    try {
+      const delivered: Delivered[] = [];
+      const sdk = deferredSdk(PAYLOAD);
+      const reader = new RangedReader({
+        chunkSize: CHUNK_SIZE,
+        object: fakeObject(PAYLOAD.length),
+        onChunk: (bytes, position) => delivered.push({ bytes, position }),
+        onError: (error) => errors.push(error),
+        sdk: sdk.sdk,
+      });
+
+      reader.start();
+      reader.stop();
+      // stop() superseded the run before its async download resolved; the
+      // still-open stream must be cancelled exactly once (adopt-or-cancel) so
+      // its sessions are released, not leaked.
+      sdk.resolve(0);
+      await settle();
+
+      expect(sdk.cancelled).toEqual([0]);
+      expect(delivered).toEqual([]);
+      expect(errors).toEqual([]);
+      expect(unhandled.count()).toBe(0);
+      expect(reader.active).toBe(false);
+    } finally {
+      unhandled.dispose();
+    }
+  });
+
+  it('cancels only the stale async download when a seek replaces it (owner isolation)', async () => {
+    const errors: unknown[] = [];
+    const delivered: Delivered[] = [];
+    const sdk = deferredSdk(PAYLOAD);
+    const reader = new RangedReader({
+      chunkSize: CHUNK_SIZE,
+      object: fakeObject(PAYLOAD.length),
+      onChunk: (bytes, position) => delivered.push({ bytes, position }),
+      onError: (error) => errors.push(error),
+      sdk: sdk.sdk,
+    });
+
+    reader.start(0);
+    reader.seek(CHUNK_SIZE);
+    // Resolve the superseded (offset 0) download first, then the current one.
+    sdk.resolve(0);
+    await settle();
+    sdk.resolve(1);
+    await settle();
+
+    // Only the stale run's stream is cancelled; the current stream belongs to
+    // its own load generation and must not be touched.
+    expect(sdk.cancelled).toEqual([0]);
+    expect(join(delivered)).toEqual(PAYLOAD.slice(CHUNK_SIZE));
+    expect(reader.position).toBe(PAYLOAD.length);
+    expect(reader.active).toBe(false);
+    expect(errors).toEqual([]);
+  });
+
+  it('cancels a stale async download resolved late, after the replacement finished', async () => {
+    const errors: unknown[] = [];
+    const delivered: Delivered[] = [];
+    const sdk = deferredSdk(PAYLOAD);
+    const reader = new RangedReader({
+      chunkSize: CHUNK_SIZE,
+      object: fakeObject(PAYLOAD.length),
+      onChunk: (bytes, position) => delivered.push({ bytes, position }),
+      onError: (error) => errors.push(error),
+      sdk: sdk.sdk,
+    });
+
+    reader.start(0);
+    reader.seek(CHUNK_SIZE);
+    // Resolve and drain the current download fully first, then park the stale
+    // one resolving late — no long-lived leak, no state corruption.
+    sdk.resolve(1);
+    await settle();
+    sdk.resolve(0);
+    await settle();
+
+    expect(sdk.cancelled).toEqual([0]);
+    expect(join(delivered)).toEqual(PAYLOAD.slice(CHUNK_SIZE));
+    expect(reader.position).toBe(PAYLOAD.length);
+    expect(reader.active).toBe(false);
+    expect(errors).toEqual([]);
+  });
+
+  it('does not surface an error when a stale async download rejects after stop()', async () => {
+    const errors: unknown[] = [];
+    const unhandled = trackUnhandledRejections();
+    try {
+      const delivered: Delivered[] = [];
+      const sdk = deferredSdk(PAYLOAD);
+      const reader = new RangedReader({
+        chunkSize: CHUNK_SIZE,
+        object: fakeObject(PAYLOAD.length),
+        onChunk: (bytes, position) => delivered.push({ bytes, position }),
+        onError: (error) => errors.push(error),
+        sdk: sdk.sdk,
+      });
+
+      reader.start();
+      reader.stop();
+      sdk.reject(0, new Error('connect failed'));
+      await settle();
+
+      // The rejection is generation-guarded away: a superseded run must not
+      // report an error the caller already moved past.
+      expect(errors).toEqual([]);
+      expect(reader.active).toBe(false);
+      expect(reader.position).toBe(0);
+      expect(delivered).toEqual([]);
+      expect(unhandled.count()).toBe(0);
+    } finally {
+      unhandled.dispose();
+    }
+  });
+
+  it('delivers a current async download normally, cancelling nothing', async () => {
+    const delivered: Delivered[] = [];
+    const sdk = deferredSdk(PAYLOAD);
+    const reader = new RangedReader({
+      chunkSize: CHUNK_SIZE,
+      object: fakeObject(PAYLOAD.length),
+      onChunk: (bytes, position) => delivered.push({ bytes, position }),
+      sdk: sdk.sdk,
+    });
+
+    reader.start();
+    sdk.resolve(0);
+    await settle();
+
+    // A current-generation async stream is adopted normally — the fix must
+    // not over-eagerly cancel a stream that is meant to deliver.
+    expect(sdk.cancelled).toEqual([]);
+    expect(join(delivered)).toEqual(PAYLOAD);
+    expect(reader.position).toBe(PAYLOAD.length);
+    expect(reader.active).toBe(false);
+  });
+
+  it('releases the budget permit when a stale async download is cancelled (adopt-or-cancel)', async () => {
+    const budget = new ReadBudget(1);
+    const delivered: Delivered[] = [];
+    const sdk = deferredSdk(PAYLOAD);
+    const reader = new RangedReader({
+      budget,
+      chunkSize: CHUNK_SIZE,
+      object: fakeObject(PAYLOAD.length),
+      onChunk: (bytes, position) => delivered.push({ bytes, position }),
+      sdk: sdk.sdk,
+    });
+
+    reader.start();
+    // Let the run acquire its permit and open the parked download before the
+    // stop lands, so this exercises the stale-cancel path (not the
+    // abandon-before-download path).
+    await settle();
+    reader.stop();
+    sdk.resolve(0);
+    await settle();
+
+    // The fire-and-forget cancel must not stall the run's unwinding: the
+    // permit is released exactly like a delivered/aborted read.
+    expect(budget.inFlight).toBe(0);
+    expect(sdk.cancelled).toEqual([0]);
   });
 });

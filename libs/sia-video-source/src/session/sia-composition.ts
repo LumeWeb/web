@@ -53,12 +53,20 @@ export interface SiaWorkerCompositionDeps {
    * Builds (lazily, once per connection) the Sia SDK the composition's
    * `createSource` resolves SOURCE locators through. Alternative to `sdk` for
    * the real worker root: the HELLO `WorkerConfig` and the decrypted
-   * `APP_KEY` seed are only known after the handshake, so the coordinator's
-   * live handshake config/seed are fed here on the first `SOURCE` (the seed
-   * stays inside this isolate). The build is memoized and connection-guarded;
-   * a changed config or seed rebuilds (and disposes) the previous SDK.
+   * `APP_KEY` seeds are only known after the handshake, so the coordinator's
+   * live handshake config and both decrypted credential seeds (app-key
+   * `appKeySeed`, keyless `sharingSeed`) are fed here on the first `SOURCE`
+   * (the seeds stay inside this isolate). The build is memoized and
+   * connection-guarded; a changed config or seed rebuilds (and disposes) the
+   * previous SDK. The `sharingSeed` argument is new: injected factories
+   * written against the old two-argument shape keep working (unused trailing
+   * arguments are ignored).
    */
-  readonly createSdk?: (config: undefined | WorkerConfig, appKeySeed: null | Uint8Array) => Promise<SiaByteSourceSdk>;
+  readonly createSdk?: (
+    config: undefined | WorkerConfig,
+    appKeySeed: null | Uint8Array,
+    sharingSeed: null | Uint8Array,
+  ) => Promise<SiaByteSourceSdk>;
   /** Handshake for `HELLO`/`APP_KEY` (default: `createSessionHandshake()`). */
   readonly handshake?: SessionHandshake;
   /**
@@ -154,36 +162,55 @@ function appKeySeedsEqual(a: null | Uint8Array, b: null | Uint8Array): boolean {
 }
 
 function connectionEquals(
-  cached: { config: undefined | WorkerConfig; seed: null | Uint8Array },
+  cached: {
+    config: undefined | WorkerConfig;
+    seed: null | Uint8Array;
+    sharingSeed: null | Uint8Array;
+  },
   config: undefined | WorkerConfig,
   seed: null | Uint8Array,
+  sharingSeed: null | Uint8Array,
 ): boolean {
-  return workerConfigsEqual(cached.config, config) && appKeySeedsEqual(cached.seed, seed);
+  return (
+    workerConfigsEqual(cached.config, config) &&
+    appKeySeedsEqual(cached.seed, seed) &&
+    appKeySeedsEqual(cached.sharingSeed, sharingSeed)
+  );
 }
 
 /**
  * Guards a per-connection SDK memo behind the coordinator handshake's live
- * config + decrypted seed: the first SOURCE builds the SDK, later SOURCEs
- * reuse it while the connection is unchanged, and a changed connection
- * rebuilds (disposing the superseded SDK) so stale credentials are never
- * cached over a newer one.
+ * config + decrypted credential seeds (app-key and sharing-key): the first
+ * SOURCE builds the SDK, later SOURCEs reuse it while the connection is
+ * unchanged, and a changed connection rebuilds (disposing the superseded SDK)
+ * so stale credentials are never cached over a newer one.
  */
 function createLazySiaByteSourceFactory(deps: {
   readonly byteSource?: SiaByteSourceFactoryOptions;
-  readonly createSdk: (config: undefined | WorkerConfig, appKeySeed: null | Uint8Array) => Promise<SiaByteSourceSdk>;
-  readonly handshake: Pick<SessionHandshake, 'config' | 'seed'>;
+  readonly createSdk: (
+    config: undefined | WorkerConfig,
+    appKeySeed: null | Uint8Array,
+    sharingSeed: null | Uint8Array,
+  ) => Promise<SiaByteSourceSdk>;
+  readonly handshake: Pick<SessionHandshake, 'config' | 'seed' | 'sharingSeed'>;
 }): (src: string) => Promise<ByteSource> {
   const { byteSource, createSdk, handshake } = deps;
-  let cached: null | { config: undefined | WorkerConfig; sdk: SiaByteSourceSdk; seed: null | Uint8Array; } = null;
+  let cached: null | {
+    config: undefined | WorkerConfig;
+    sdk: SiaByteSourceSdk;
+    seed: null | Uint8Array;
+    sharingSeed: null | Uint8Array;
+  } = null;
 
   return async (src: string): Promise<ByteSource> => {
     const config = handshake.config;
     const seed = handshake.seed ?? null;
-    let sdk = cached && connectionEquals(cached, config, seed) ? cached.sdk : null;
+    const sharingSeed = handshake.sharingSeed ?? null;
+    let sdk = cached && connectionEquals(cached, config, seed, sharingSeed) ? cached.sdk : null;
     if (!sdk) {
-      sdk = await createSdk(config, seed);
+      sdk = await createSdk(config, seed, sharingSeed);
       const previous = cached?.sdk;
-      cached = { config, sdk, seed };
+      cached = { config, sdk, seed, sharingSeed };
       // Defer the call so a synchronous throw inside dispose() never escapes a
       // next-load failure as a rejection of the new SDK build.
       if (previous && previous !== sdk) {

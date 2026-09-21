@@ -8,7 +8,7 @@
  * message listener.
  */
 
-import { isMainToWorkerMessage, workerErrorCode } from './protocol.ts';
+import { isMainToWorkerMessage, workerErrorCode, WorkerToMainMessageType } from './protocol.ts';
 import { createSiaWorkerComposition, createWorkerMseRoot } from './session/sia-composition.ts';
 import {
   createDefaultSdk,
@@ -31,10 +31,12 @@ export {
   type AppKeyEnvelope,
   DEFAULT_FMP4_MIME,
   isAppKeyEnvelope,
+  MainToWorkerMessageType,
   PROTOCOL_VERSION,
   type SiaVideoMessage,
   type WorkerConfig,
   type WorkerToMainMessage,
+  WorkerToMainMessageType,
 } from './protocol.ts';
 
 export {
@@ -80,7 +82,7 @@ export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = 
         context: error instanceof Error ? error.message.slice(0, 240) : String(error).slice(0, 240),
         kind: workerErrorCode.decode,
         requestId,
-        type: 'ERROR',
+        type: WorkerToMainMessageType.ERROR,
       });
     },
     post,

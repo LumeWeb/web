@@ -57,7 +57,21 @@ export interface SiaObjectLike {
   slabs(): Slab[];
 }
 
-/** The slice of the Sia SDK the reader depends on. */
+/**
+ * The slice of the Sia SDK the reader depends on. `download` may resolve
+ * either synchronously (the app-key and keyless SDKs) or as a promise (the
+ * lazy dual-seed adapter connects an untagged download's app-key route on
+ * demand, see `worker-runtime.ts`), so callers await the result before
+ * reading — a plain `ReadableStream` passes through unchanged.
+ *
+ * Once resolved, the caller owns the stream until it is read to EOF or
+ * cancelled, and adopting also means releasing on exit: the reader cancels any
+ * stream it stops owning instead of dropping it open (adopt-or-cancel). That
+ * rule holds on every exit path — superseded/stale runs, `stop()`, the stall
+ * watchdog, exact-length completion, and a chunk-error throw — so the SDK's
+ * WebTransport sessions (held until EOF or cancel) are always released
+ * deterministically, never left to a nondeterministic GC.
+ */
 export interface SiaSdkLike {
   download(
     object: SiaObjectLike,
@@ -67,7 +81,7 @@ export interface SiaSdkLike {
       offset?: number;
       onShardDownloaded?: (progress: ShardProgress) => void;
     }
-  ): ReadableStream<Uint8Array>;
+  ): Promise<ReadableStream<Uint8Array>> | ReadableStream<Uint8Array>;
 }
 
 /**
@@ -320,11 +334,26 @@ export class RangedReader {
 
         // One SDK download serves the whole remaining [start, end) range with
         // exact offset/length; the reader never tiles a read across requests.
-        const stream = sdk.download(object, {
+        // A lazy dual-seed SDK may resolve an untagged download through a
+        // connect-on-demand route (see worker-runtime.ts), which yields a
+        // promise; a settled stream is used synchronously so `active` reflects
+        // the in-flight read without an extra microtask.
+        const resolved = sdk.download(object, {
           length: end - start,
           offset: start,
           ...this.#options.downloadOptions,
         });
+        const stream = resolved instanceof Promise ? await resolved : resolved;
+        // A stale async (connect-on-demand) download that resolves after a seek
+        // landed would otherwise be dropped still open, leaking its
+        // WebTransport sessions (the SDK holds them until EOF or cancel);
+        // adopt-or-cancel: cancel it. The cancel is fire-and-forget so a
+        // stalled WASM cancel never blocks this run's unwinding and permit
+        // release.
+        if (this.#loadGeneration !== loadGeneration) {
+          void stream.cancel().catch(() => { /* empty */ });
+          return;
+        }
         this.#stream = stream;
         const reader = stream.getReader();
         this.#reader = reader;
@@ -351,9 +380,16 @@ export class RangedReader {
         if (release) release();
         // A cancelled run can settle after its replacement already assigned
         // fresh `#reader`/`#stream` references — only the current load generation may
-        // clear them, or the replacement's reader would be orphaned and later
-        // seeks would find no active reader.
+        // touch them, or the replacement's reader would be orphaned and later
+        // seeks would find no active reader. While this run still owns the
+        // refs, cancel before clearing so a stream is never dropped open: on a
+        // throw the wasm-bindgen slab-recovery tasks ahead of the read head
+        // keep running until a nondeterministic GC, and on exact-length
+        // completion the pull source may never have self-closed. cancel() is
+        // the only deterministic abort — it is fire-and-forget (never delays
+        // the permit release above) and a no-op on an already-closed stream.
         if (this.#loadGeneration === loadGeneration) {
+          void this.#reader?.cancel().catch(() => { /* empty */ });
           this.#reader = null;
           this.#stream = null;
         }
@@ -373,7 +409,10 @@ export class RangedReader {
  * The underlying Sia SDK opens one or more WebTransport sessions the moment
  * `download()` is called (one per slab/renter touched by the requested range,
  * bounded only by the download's `maxBufferedChunks`) and holds them until the
- * returned stream is read to EOF or cancelled. Chromium caps *pending*
+ * returned stream is read to EOF or cancelled — or, for a stale async download
+ * that resolves after its run was superseded, until `RangedReader` cancels it
+ * (adopt-or-cancel), so a dropped-open stream can never leak its sessions.
+ * Chromium caps *pending*
  * sessions at 64: too many simultaneous downloads — as when mediabunny issues
  * an overlapping batch of independent reads — exhaust that budget and later
  * reads stall forever with `Too many pending WebTransport sessions (64)`. This

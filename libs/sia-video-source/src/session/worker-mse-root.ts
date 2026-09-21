@@ -23,7 +23,7 @@
  */
 
 import { MseAppendPipe } from '../mse-pipe.ts';
-import type { RequestId } from '../protocol.ts';
+import { type RequestId, WorkerToMainMessageType } from '../protocol.ts';
 import { MseAdapter, type WorkerMseSinkFactoryDeps } from '../sink/mse-adapter.ts';
 import type { AppendSink } from '../sink/append-sink.ts';
 import type { PostMessage, SinkFactoryContext } from './session-coordinator.ts';
@@ -166,7 +166,7 @@ export function createWorkerMseRoot(options: WorkerMseRootOptions): WorkerMseRoo
       const current = createMediaSource();
       mediaSource = current;
       const handle = mediaSourceHandleOf(current);
-      options.post({ handle, requestId: context.requestId, type: 'HANDLE' }, [handle]);
+      options.post({ handle, requestId: context.requestId, type: WorkerToMainMessageType.HANDLE }, [handle]);
 
       // One MseAdapter (fresh MseAppendPipe) per load; the load-generation
       // scoping on resetParser/requestEndOfStream is exactly the
