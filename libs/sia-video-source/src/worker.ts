@@ -88,11 +88,8 @@ export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = 
   });
   return createSiaWorkerComposition({
     // Only build a byte-source profile when there is something to configure;
-    // the undefined path keeps the coordinator's default single-download reads.
-    byteSource:
-      options.cache || options.windowBytes !== undefined
-        ? { cache: options.cache }
-        : undefined,
+    // the undefined path keeps the coordinator's default transport reads.
+    byteSource: options.cache ? { cache: options.cache } : undefined,
     capabilities: options.capabilities,
     createSdk: options.createSdk ?? createDefaultSdk,
     post,

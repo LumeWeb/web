@@ -89,19 +89,6 @@ export interface SiaVideoWorkerOptions {
   stallTimeoutMs?: number;
   /** Overrides the worker-MSE capability probe (e.g. for alternative runtimes). */
   supportsWorkerMse?: () => boolean;
-  /**
-   * Maximum bytes per SDK download for streaming reads. When set, indexed
-   * (finite-VOD) segment reads and forward lookahead are fetched as
-   * sequential bounded windows that tile the segment exactly — each a small
-   * `Sdk.download` — instead of one download over the whole segment, whose
-   * fan-out over renter/slab WebTransport sessions can exhaust Chromium's
-   * ~64 pending-session cap and stall the seek even though direct exact reads
-   * land (see `RangedReader`'s `windowBytes` option). Windows preserve exact
-   * offsets, ordering, cancellation epochs and cache behavior, and a stalled
-   * window is aborted and retried independently. Defaults to 256 KiB; pass a
-   * value to tune it.
-   */
-  windowBytes?: number;
 }
 
 /**
