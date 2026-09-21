@@ -1,723 +1,589 @@
 /**
- * TDD contract for the `SessionCoordinator` / `WorkerComposition` adapter:
- * the tested composition-root seam that wires the pieces — `LoadPipeline`,
- * `ProducerFactory`, `StreamController`, `ContainerClassifier`, ordered
- * `IndexBuilder[]`, `ByteSource`, `AppendSink`, `Clock`, `ErrorReporter` —
- * into one protocol-compatible adapter.
- *
- * The coordinator is protocol-compatible (`handleMessage` speaks the existing
- * `MainToWorkerMessage` wire types and posts existing `WorkerToMainMessage`s)
- * and driven entirely through injected fakes (`createSource` returns a
- * `MemoryByteSource`, no Sia SDK or MSE).
- *
- * Scope: the coordinator's protocol/lifecycle wiring is driven through
- * injected fakes over fMP4/TS fixtures; per-container producer internals are
- * covered by the dedicated producer specs.
+ * Protocol behavior spec for the `SessionCoordinator` (WorkerComposition),
+ * driven with an injected fake `LoadPipeline` so no real media bytes or
+ * mediabunny objects are needed. One load turns into `SOURCE_OK` (exactly five
+ * info fields built from the ready result), streamed units reach the posting
+ * sink or an injected MSE sink, unsupported/cancelled verdicts map to one
+ * error or silence, and source replacement / detach / destroy tear the
+ * previous load down (abort signal first, then its resources).
  */
-
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { encryptToWorker } from '../app-key-handshake.ts';
-import { capabilityVerdict } from '../capabilities/codec-verdict.ts';
 import type { PlaybackCapabilities } from '../capabilities/browser-capabilities.ts';
-import type { ProducerFactoryRegistry } from '../container/producer/producer-factory.ts';
+import type { MediaLoadResult, MediaPlayback } from '../media/library-load.ts';
 import {
-  DEFAULT_FMP4_MIME,
-  isWorkerToMainMessage,
   type MainToWorkerMessage,
   PROTOCOL_VERSION,
-  type WorkerConfig,
+  workerErrorCode,
   type WorkerToMainMessage,
 } from '../protocol.ts';
+import type { LoadPipeline, LoadRequest } from '../session/load-pipeline.ts';
 import {
   createSessionCoordinator,
   type SessionCoordinator,
   type SessionCoordinatorDeps,
   type SinkFactoryContext,
 } from '../session/session-coordinator.ts';
-import { TS_REMUX_CODECS } from '../session/source-capabilities.ts';
-import type { AppendSink } from '../sink/append-sink.ts';
+import type { AppendSink, AppendUnit } from '../sink/append-sink.ts';
 import type { ByteRange, ByteSource, ReadOptions } from '../transport/byte-source.ts';
-import { MemoryByteSource } from '../transport/memory-byte-source.ts';
-
-// ---- fixtures ----------------------------------------------------------------
 
 interface Driver {
+  canceled: Map<string, number>;
+  cancelSource: (name: string) => void;
   coordinator: SessionCoordinator;
-  errors(): Extract<WorkerToMainMessage, { type: 'ERROR'; }>[];
+  message<T extends WorkerToMainMessage['type']>(type: T): Extract<WorkerToMainMessage, { type: T }>[];
   messages: WorkerToMainMessage[];
+  pipeline: FakeLoadPipeline;
   say(message: MainToWorkerMessage): Promise<void>;
 }
 
-/**
- * An `AppendSink` that records which state-changing calls the stream
- * controller actually issued, so the coordinator's PLAYHEAD/SEEK forwarding
- * guards are observable (a dropped message reaches none of these calls).
- */
-class RecordingSink implements AppendSink {
-  aborted = false;
-  appended = 0;
-  eosRequests = 0;
-  evictions: number[] = [];
-  resetParsers = 0;
+/** ByteSource that never serves bytes; it only records cancellation. */
+class CancellationSpy implements ByteSource {
+  readonly size = 0;
+  readonly #counts: Map<string, number>;
+  readonly #name: string;
 
-  abort(): void {
-    this.aborted = true;
+  constructor(name: string, counts: Map<string, number>) {
+    this.#name = name;
+    this.#counts = counts;
   }
 
-  append(): void {
-    this.appended += 1;
-  }
-
-  evictBackBuffer(timeSeconds: number): Promise<boolean> {
-    this.evictions.push(timeSeconds);
-    return Promise.resolve(true);
-  }
-
-  requestEndOfStream(): void {
-    this.eosRequests += 1;
-  }
-
-  resetParser(): void {
-    this.resetParsers += 1;
-  }
-}
-
-/**
- * A `ByteSource` that parks exactly one read (the `parkAt`-th in read order)
- * until `release()` — the coordinator's reads are deterministic (probe, index
- * build, then the per-range stream reads), so this holds the controller's
- * first range read in flight while the test issues a SEEK.
- */
-class SequencedReleaseSource implements ByteSource {
-  get size(): number {
-    return this.#bytes.byteLength;
-  }
-  readonly #bytes: Uint8Array;
-  readonly #parkAt: number;
-  #reads = 0;
-
-  #release: (() => void) | null = null;
-
-  constructor(bytes: Uint8Array, parkAt: number) {
-    this.#bytes = bytes;
-    this.#parkAt = parkAt;
-  }
-
-  cancel(): void {
-    // Test double: no transport work to cancel.
-  }
-
-  read(range: ByteRange, _options: ReadOptions): ReadableStream<Uint8Array> {
-    const start = Math.max(0, Math.floor(range.offset));
-    const end = Math.min(this.#bytes.byteLength, start + Math.max(0, Math.floor(range.length)));
-    const bytes = this.#bytes;
-    const at = ++this.#reads;
-    return new ReadableStream<Uint8Array>({
-      start: (controller) => {
-        const deliver = () => {
-          controller.enqueue(bytes.slice(start, end));
-          controller.close();
-        };
-        if (at === this.#parkAt) {
-          this.#release = deliver;
-        } else {
-          queueMicrotask(deliver);
-        }
-      },
-    });
-  }
-
-  release(): void {
-    const release = this.#release;
-    this.#release = null;
-    release?.();
-  }
-}
-
-/** Errors every read with a hard (non-superseded) transport failure. */
-class ThrowingReadSource implements ByteSource {
-  readonly size = 500;
-
-  cancel(): void {
-    // Test double: no transport work to cancel.
+  cancel(_reason?: unknown): void {
+    this.#counts.set(this.#name, (this.#counts.get(this.#name) ?? 0) + 1);
   }
 
   read(_range: ByteRange, _options: ReadOptions): ReadableStream<Uint8Array> {
-    return new ReadableStream<Uint8Array>({
-      start(controller) {
-        controller.error(new Error('transport down'));
-      },
-    });
+    return new ReadableStream();
   }
 }
 
-/** Three 30 s RAP ranges, each 5008 bytes (segments marked 0x11/0x22/0x33). */
-function boundedIndexedFmp4Payload(): Uint8Array {
-  const u16 = (value: number) => [value >>> 8, value & 255];
-  const u32 = (value: number) => [(value >>> 24) & 255, (value >>> 16) & 255, (value >>> 8) & 255, value & 255];
-  const segmentLength = 5008;
-  const ftyp = isoBox('ftyp', [105, 115, 111, 109]);
-  const mvhd = isoBox('mvhd', [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...u32(1000), ...u32(90_000)]);
-  const moov = isoBox('moov', [...mvhd]);
-  const sidx = isoBox('sidx', [
-    0, 0, 0, 0, ...u32(1), ...u32(1000), ...u32(0), ...u32(0), ...u16(0), ...u16(3),
-    ...u32(segmentLength), ...u32(30_000), 0x80, 0, 0, 0,
-    ...u32(segmentLength), ...u32(30_000), 0x80, 0, 0, 0,
-    ...u32(segmentLength), ...u32(30_000), 0x80, 0, 0, 0,
-  ]);
-  const segment = (marker: number) =>
-    new Uint8Array([...isoBox('moof', []), ...isoBox('mdat', Array.from(new Uint8Array(4992).fill(marker)))]);
-  return new Uint8Array([...ftyp, ...moov, ...sidx, ...segment(0x11), ...segment(0x22), ...segment(0x33)]);
+/** Controls what the coordinator's `LoadPipeline.run` returns per call. */
+class FakeLoadPipeline implements LoadPipeline {
+  readonly calls: LoadRequest[] = [];
+  results: MediaLoadResult[] = [];
+  readonly #steps = new Map<number, (result: MediaLoadResult) => void>();
+
+  /** Resolves a specific held `run` (by call index) with a verdict. */
+  resolveCall(index: number, result: MediaLoadResult): void {
+    const step = this.#steps.get(index);
+    if (step) {
+      this.#steps.delete(index);
+      this.#releaseNonReadySource(index, result);
+      step(result);
+    }
+  }
+
+  async run(request: LoadRequest): Promise<MediaLoadResult> {
+    const index = this.calls.length;
+    this.calls.push(request);
+    const queued = this.results.shift();
+    if (queued !== undefined) {
+      this.#releaseNonReadySource(index, queued);
+      return queued;
+    }
+    return new Promise<MediaLoadResult>((resolve) => {
+      this.#steps.set(index, resolve);
+    });
+  }
+
+  /**
+   * Mirrors inspectMediaLibrary: a non-ready verdict disposes its Input,
+   * whose CustomSource disposal cancels the byte source — so the coordinator
+   * never calls `source.cancel()` a second time for the same load.
+   */
+  #releaseNonReadySource(index: number, result: MediaLoadResult): void {
+    if (result.status === 'ready') return;
+    const request = this.calls[index];
+    if (request) request.source.cancel();
+  }
 }
 
-async function flush(): Promise<void> {
-  await Promise.resolve();
-  await new Promise((resolve) => setTimeout(resolve, 10));
-}
+/**
+ * Playback fake conforming to the final callbacks-object contract. Dispose is
+ * latched like the production playback, so repeated teardown releases it once.
+ */
+class FakePlayback implements MediaPlayback {
+  disposed = 0;
+  generation: null | number = null;
+  sink: AppendSink | null = null;
+  started = 0;
+  #disposed = false;
+  #onComplete: (() => void) | null = null;
+  // Mirrors the production Input/CustomSource disposal path: an accepted
+  // load's `dispose()` cancels its byte source. Wired by tests that abandon a
+  // ready session so source release stays observable at the coordinator seam.
+  readonly #onDispose: (() => void) | undefined;
+  #onError: ((error: unknown) => void) | null = null;
 
-function isoBox(type: string, body: number[]): number[] {
-  const u32 = (value: number) => [(value >>> 24) & 255, (value >>> 16) & 255, (value >>> 8) & 255, value & 255];
-  const size = body.length + 8;
-  return [...u32(size), ...type.split('').map((c) => c.charCodeAt(0)), ...body];
-}
+  constructor(onDispose?: () => void) {
+    this.#onDispose = onDispose;
+  }
 
-// ---- driver -----------------------------------------------------------------
+  complete(): void {
+    this.#onComplete?.();
+  }
+
+  dispose(): void {
+    if (this.#disposed) return;
+    this.#disposed = true;
+    this.disposed += 1;
+    this.#onDispose?.();
+  }
+
+  emit(kind: 'init' | 'media'): void {
+    this.sink?.append({ bytes: new Uint8Array([1, 2, 3]), kind });
+  }
+
+  fail(error: unknown): void {
+    this.#onError?.(error);
+  }
+
+  start(
+    sink: AppendSink,
+    loadGeneration: number,
+    callbacks: { readonly onComplete: () => void; readonly onError: (error: unknown) => void },
+  ): void {
+    this.started += 1;
+    this.generation = loadGeneration;
+    this.sink = sink;
+    this.#onComplete = callbacks.onComplete;
+    this.#onError = callbacks.onError;
+  }
+}
 
 function makeDriver(options: {
   capabilities?: PlaybackCapabilities;
   createSource?: (src: string) => Promise<ByteSource>;
-  headProbeLength?: number;
   onPlayhead?: (timeSeconds: number) => void;
-  producerFactory?: ProducerFactoryRegistry;
+  pipeline?: FakeLoadPipeline;
   sinkFactory?: (context: SinkFactoryContext) => AppendSink;
   supportsWorkerMse?: () => boolean;
 } = {}): Driver {
   const messages: WorkerToMainMessage[] = [];
-  const createSource = options.createSource ?? ((src: string) => {
-    if (src === 'ts') return Promise.resolve(new MemoryByteSource(tsHead()));
-    if (src === 'unknown') return Promise.resolve(new MemoryByteSource(unknownHead()));
-    return Promise.resolve(new MemoryByteSource(boundedIndexedFmp4Payload()));
-  });
+  const canceled = new Map<string, number>();
+  const sources = new Map<string, CancellationSpy>();
+  const pipeline = options.pipeline ?? new FakeLoadPipeline();
+  const createSource =
+    options.createSource ??
+    ((src: string) => {
+      const spy = new CancellationSpy(src, canceled);
+      sources.set(src, spy);
+      return Promise.resolve(spy);
+    });
 
   const deps: SessionCoordinatorDeps = {
     capabilities: options.capabilities ?? permissiveCapabilities(),
     createSource,
-    headProbeLength: options.headProbeLength,
+    loadPipeline: pipeline,
     onPlayhead: options.onPlayhead,
     post: (message) => messages.push(message),
-    producerFactory: options.producerFactory,
     sinkFactory: options.sinkFactory,
     supportsWorkerMse: options.supportsWorkerMse ?? (() => false),
   };
   const coordinator = createSessionCoordinator(deps);
   return {
+    canceled,
+    cancelSource: (name: string) => sources.get(name)?.cancel(),
     coordinator,
-    errors: () => messages.filter((m): m is Extract<WorkerToMainMessage, { type: 'ERROR'; }> => m.type === 'ERROR'),
+    message: <T extends WorkerToMainMessage['type']>(type: T) =>
+      messages.filter((m): m is Extract<WorkerToMainMessage, { type: T }> => m.type === type),
     messages,
+    pipeline,
     say: (message) => coordinator.handleMessage(message),
   };
 }
 
-function posted<Type extends WorkerToMainMessage['type']>(driver: Driver, type: Type): Extract<WorkerToMainMessage, { type: Type; }>[] {
-  return driver.messages.filter((m): m is Extract<WorkerToMainMessage, { type: Type; }> => m.type === type);
-}
-
-/** 3 MPEG-TS transport packets with 0x47 sync bytes. */
-function tsHead(): Uint8Array {
-  return new Uint8Array(3 * 188).map((_, i) => (i % 188 === 0 ? 0x47 : i % 251));
-}
-
-function unknownHead(): Uint8Array {
-  return new Uint8Array(512).map((_, i) => i % 251);
-}
-
-// ---- tests ------------------------------------------------------------------
-
-describe('SessionCoordinator (WorkerComposition adapter)', () => {
-  it('composes the seams and streams an fMP4 SOURCE to SOURCE_OK + CHUNK + ENDED (main mode)', async () => {
-    const driver = makeDriver();
-    await driver.say({ requestId: 1, type: 'ATTACH' });
-    await driver.say({ preload: 'auto', requestId: 2, src: 'fmp4', type: 'SOURCE' });
-    await flush();
-
-    const attach = driver.messages.find((m) => m.type === 'ATTACH_OK');
-    expect(attach).toMatchObject({ mode: 'main', requestId: 1 });
-
-    const ok = posted(driver, 'SOURCE_OK');
-    expect(ok).toHaveLength(1);
-    expect(ok[0].requestId).toBe(2);
-    expect(ok[0].info.container).toBe('fmp4');
-    expect(ok[0].info.playback).toBe('passthrough');
-    expect(ok[0].info.indexGranularity).toBe('exact-byte');
-    expect(ok[0].info.mode).toBe('main');
-    expect(ok[0].info.mime).toBe('video/mp4');
-
-    const chunks = posted(driver, 'CHUNK');
-    expect(chunks.length).toBeGreaterThan(0);
-    expect(chunks[0].kind).toBe('init');
-    expect(chunks.every((chunk) => chunk.requestId === 2)).toBe(true);
-    const delivered = concatBytes(chunks.map((chunk) => chunk.bytes));
-    expect(containsInOrder(delivered, segmentMarker(0x11))).toBe(true);
-    expect(containsInOrder(delivered, segmentMarker(0x22))).toBe(true);
-    expect(containsInOrder(delivered, segmentMarker(0x33))).toBe(true);
-
-    const ended = posted(driver, 'ENDED');
-    expect(ended).toHaveLength(1);
-    expect(ended[0].requestId).toBe(2);
-    expect(driver.errors()).toEqual([]);
-  });
-
-  it('reports the TS route as normalized/throughput and defers streaming under preload none', async () => {
-    const driver = makeDriver();
-    await driver.say({ preload: 'none', requestId: 2, src: 'ts', type: 'SOURCE' });
-    await flush();
-
-    const ok = posted(driver, 'SOURCE_OK');
-    expect(ok).toHaveLength(1);
-    expect(ok[0].info.container).toBe('ts');
-    expect(ok[0].info.playback).toBe('normalized');
-    expect(ok[0].info.indexGranularity).toBe('throughput');
-    expect(ok[0].info.mime).toBe(DEFAULT_FMP4_MIME);
-    expect(ok[0].info.tracks).toEqual(TS_REMUX_CODECS.map(({ codec, kind }) => ({ codec, kind })));
-    // preload 'none' + no play/seek intent → no streaming begins.
-    expect(posted(driver, 'CHUNK')).toEqual([]);
-    expect(posted(driver, 'ENDED')).toEqual([]);
-  });
-
-  it('rejects an unclassifiable container with a protocol ERROR (unsupported) scoped to the request', async () => {
-    const driver = makeDriver();
-    await driver.say({ preload: 'auto', requestId: 3, src: 'unknown', type: 'SOURCE' });
-    await flush();
-
-    expect(posted(driver, 'SOURCE_OK')).toEqual([]);
-    const errors = driver.errors();
-    expect(errors).toHaveLength(1);
-    expect(errors[0].kind).toBe('unsupported');
-    expect(errors[0].requestId).toBe(3);
-    expect(errors[0].context).toMatch(/container:/);
-    expect(posted(driver, 'CHUNK')).toEqual([]);
-    expect(posted(driver, 'ENDED')).toEqual([]);
-  });
-
-  it('answers HELLO and accepts APP_KEY envelopes through the real handshake', async () => {
-    const driver = makeDriver();
-    await driver.say({ requestId: 1, type: 'HELLO' });
-
-    const hello = posted(driver, 'HELLO_OK');
-    expect(hello).toHaveLength(1);
-    expect(hello[0].requestId).toBe(1);
-    expect(hello[0].version).toBe(PROTOCOL_VERSION);
-    expect(hello[0].features).toEqual({ workerMse: false });
-    expect(hello[0].publicKey.byteLength).toBe(32);
-
-    const seed = new Uint8Array(32).fill(7);
-    const envelope = await encryptToWorker(hello[0].publicKey, seed);
-    await driver.say({ envelope, requestId: 2, type: 'APP_KEY' });
-    expect(driver.errors()).toEqual([]);
-  });
-
-  it('surfaces a rejected APP_KEY envelope as a request-less network ERROR', async () => {
-    const driver = makeDriver();
-    await driver.say({ requestId: 1, type: 'HELLO' });
-    const hello = posted(driver, 'HELLO_OK');
-    const seed = new Uint8Array(32).fill(7);
-    const envelope = await encryptToWorker(hello[0].publicKey, seed);
-    const tampered = { ...envelope, ciphertext: new Uint8Array(envelope.ciphertext).map((b) => b ^ 0xff) };
-
-    await driver.say({ envelope: tampered, requestId: 2, type: 'APP_KEY' });
-
-    const errors = driver.errors();
-    expect(errors).toHaveLength(1);
-    expect(errors[0].kind).toBe('network');
-    expect(errors[0].requestId).toBeNull();
-  });
-
-  it('routes HELLO/APP_KEY through an injected handshake seam', async () => {
-    const acceptAppKey = vi.fn().mockResolvedValue(undefined);
-    const publicKey = new Uint8Array(32).fill(3);
-    const messages: WorkerToMainMessage[] = [];
-    const coordinator = createSessionCoordinator({
-      createSource: () => Promise.resolve(new MemoryByteSource(new Uint8Array(0))),
-      handshake: {
-        acceptAppKey,
-        hello: vi.fn(() => ({ publicKey })),
-      },
-      post: (message) => messages.push(message),
-      supportsWorkerMse: () => false,
-    });
-
-    await coordinator.handleMessage({ requestId: 1, type: 'HELLO' });
-    const envelope = { ciphertext: new Uint8Array(2), ephemeralPublicKey: publicKey, iv: new Uint8Array(12) };
-    await coordinator.handleMessage({ envelope, requestId: 2, type: 'APP_KEY' });
-
-    const hello = messages.find((m) => m.type === 'HELLO_OK');
-    expect(hello).toMatchObject({ publicKey, requestId: 1 });
-    expect(acceptAppKey).toHaveBeenCalledWith(envelope);
-  });
-
-  it('drops a superseded SOURCE: only the replacement posts SOURCE_OK and streams', async () => {
-    let resolveFirst: (source: ByteSource) => void = () => undefined;
-    const firstSourcePromise = new Promise<ByteSource>((resolve) => {
-      resolveFirst = resolve;
-    });
-    const driver = makeDriver({
-      createSource: async (src) => {
-        if (src === 'first') return firstSourcePromise;
-        return new MemoryByteSource(boundedIndexedFmp4Payload());
-      },
-    });
-
-    // SOURCE A stays pending; SOURCE B (auto) resolves and completes first.
-    void driver.say({ preload: 'none', requestId: 1, src: 'first', type: 'SOURCE' });
-    await driver.say({ preload: 'auto', requestId: 2, src: 'fmp4', type: 'SOURCE' });
-    await flush();
-
-    // Only B succeeded; A's later resolution must not surface SOURCE_OK/stale chunks.
-    resolveFirst(new MemoryByteSource(boundedIndexedFmp4Payload()));
-    await flush();
-
-    const ok = posted(driver, 'SOURCE_OK');
-    expect(ok).toHaveLength(1);
-    expect(ok[0].requestId).toBe(2);
-    expect(posted(driver, 'CHUNK').every((chunk) => chunk.requestId === 2)).toBe(true);
-    expect(driver.errors()).toEqual([]);
-  });
-
-  it('parks a SEEK issued before the load resolves and starts streaming on completion', async () => {
-    const driver = makeDriver();
-    const pending = driver.say({ preload: 'none', requestId: 2, src: 'fmp4', type: 'SOURCE' });
-    void driver.say({ requestId: 3, time: 35, type: 'SEEK' });
-    await pending;
-    await flush();
-
-    expect(posted(driver, 'SOURCE_OK')).toHaveLength(1);
-    expect(posted(driver, 'CHUNK').length).toBeGreaterThan(0);
-    expect(posted(driver, 'ENDED')).toHaveLength(1);
-    expect(driver.errors()).toEqual([]);
-  });
-
-  it('applies a SEEK parked during the probe to the requested floor once the load resolves (preload auto)', async () => {
-    // Hold the SOURCE resolution so the SEEK lands while no session exists yet.
-    let resolveSource: (source: ByteSource) => void = () => undefined;
-    const sourcePromise = new Promise<ByteSource>((resolve) => {
-      resolveSource = resolve;
-    });
-    const driver = makeDriver({ createSource: () => sourcePromise });
-
-    const pending = driver.say({ preload: 'auto', requestId: 2, src: 'fmp4', type: 'SOURCE' });
-    void driver.say({ requestId: 3, time: 35, type: 'SEEK' }); // floor → segment 1 (0x22)
-    await flush();
-    // Still probing: no session yet, so the SEEK is parked, not applied.
-    expect(posted(driver, 'SOURCE_OK')).toEqual([]);
-
-    resolveSource(new MemoryByteSource(boundedIndexedFmp4Payload()));
-    await pending;
-    await flush();
-
-    expect(posted(driver, 'SOURCE_OK')).toHaveLength(1);
-    const delivered = concatBytes(posted(driver, 'CHUNK').map((chunk) => chunk.bytes));
-    // The parked seek repositions streaming to the 0x22 segment: the 0x11
-    // first segment is never delivered.
-    expect(containsInOrder(delivered, segmentMarker(0x22))).toBe(true);
-    expect(containsInOrder(delivered, segmentMarker(0x33))).toBe(true);
-    expect(containsInOrder(delivered, segmentMarker(0x11))).toBe(false);
-    expect(posted(driver, 'ENDED')).toHaveLength(1);
-    expect(driver.errors()).toEqual([]);
-  });
-
-  it('clears a parked SEEK when the load it targeted fails, so a later unrelated preload-none SOURCE does not auto-start', async () => {
-    let resolveStalled: (source: ByteSource) => void = () => undefined;
-    const stalledPromise = new Promise<ByteSource>((resolve) => {
-      resolveStalled = resolve;
-    });
-    const driver = makeDriver({
-      createSource: (src) =>
-        src === 'stalled' ? stalledPromise : Promise.resolve(new MemoryByteSource(boundedIndexedFmp4Payload())),
-    });
-
-    // SOURCE A never resolves its object; the SEEK parked here targets it and
-    // must die with the failed load — never light up a later unrelated source.
-    void driver.say({ preload: 'none', requestId: 1, src: 'stalled', type: 'SOURCE' });
-    void driver.say({ requestId: 2, time: 35, type: 'SEEK' });
-    await flush();
-
-    // A resolves to an unclassifiable object → unsupported ERROR; nothing streams.
-    resolveStalled(new MemoryByteSource(unknownHead()));
-    await flush();
-    expect(driver.errors()).toEqual([expect.objectContaining({ kind: 'unsupported', requestId: 1 })]);
-    expect(posted(driver, 'CHUNK')).toEqual([]);
-
-    // SOURCE B (preload 'none') resolves with no new intent → still deferred.
-    await driver.say({ preload: 'none', requestId: 3, src: 'fmp4', type: 'SOURCE' });
-    await flush();
-    expect(posted(driver, 'SOURCE_OK')).toHaveLength(1);
-    expect(posted(driver, 'CHUNK')).toEqual([]);
-    expect(posted(driver, 'ENDED')).toEqual([]);
-    expect(driver.errors()).toHaveLength(1);
-  });
-
-  it('a PLAY arriving after a parked SEEK still starts streaming from the parked floor (preload none)', async () => {
-    let resolveSource: (source: ByteSource) => void = () => undefined;
-    const sourcePromise = new Promise<ByteSource>((resolve) => {
-      resolveSource = resolve;
-    });
-    const driver = makeDriver({ createSource: () => sourcePromise });
-
-    void driver.say({ preload: 'none', requestId: 2, src: 'fmp4', type: 'SOURCE' });
-    void driver.say({ requestId: 3, time: 35, type: 'SEEK' });
-    void driver.say({ requestId: 3, type: 'PLAY' });
-    await flush();
-
-    resolveSource(new MemoryByteSource(boundedIndexedFmp4Payload()));
-    await flush();
-
-    expect(posted(driver, 'SOURCE_OK')).toHaveLength(1);
-    const delivered = concatBytes(posted(driver, 'CHUNK').map((chunk) => chunk.bytes));
-    expect(containsInOrder(delivered, segmentMarker(0x22))).toBe(true);
-    expect(containsInOrder(delivered, segmentMarker(0x11))).toBe(false);
-    expect(posted(driver, 'ENDED')).toHaveLength(1);
-    expect(driver.errors()).toEqual([]);
-  });
-
-  it('SEEK while playing re-pumps from the seek floor (stale first-range bytes dropped)', async () => {
-    // Read order: [0]=probe, [1]=index build, [2]=stream range0. Park [2] so
-    // the initial stream read is still in flight when the SEEK lands.
-    const source = new SequencedReleaseSource(boundedIndexedFmp4Payload(), 3);
-    const driver = makeDriver({ createSource: () => Promise.resolve(source) });
-
-    await driver.say({ requestId: 1, type: 'ATTACH' });
-    await driver.say({ preload: 'auto', requestId: 2, src: 'fmp4', type: 'SOURCE' });
-    void driver.say({ requestId: 3, time: 35, type: 'SEEK' }); // floor → segment 1 (0x22)
-    await flush();
-
-    // Release the superseded range-0 read; its bytes must never be delivered.
-    source.release();
-    await flush();
-
-    const delivered = concatBytes(posted(driver, 'CHUNK').map((chunk) => chunk.bytes));
-    // The seek floor is the 0x22 segment; the 0x11 first segment is never delivered.
-    expect(containsInOrder(delivered, segmentMarker(0x22))).toBe(true);
-    expect(containsInOrder(delivered, segmentMarker(0x33))).toBe(true);
-    expect(containsInOrder(delivered, segmentMarker(0x11))).toBe(false);
-    expect(posted(driver, 'ENDED')).toHaveLength(1);
-    expect(driver.errors()).toEqual([]);
-  });
-
-  it('DETACH cancels the active load and DESTROY stops the coordinator permanently', async () => {
-    const driver = makeDriver();
-    await driver.say({ preload: 'auto', requestId: 2, src: 'fmp4', type: 'SOURCE' });
-    await flush();
-    expect(posted(driver, 'CHUNK').length).toBeGreaterThan(0);
-
-    await driver.say({ type: 'DETACH' });
-    const chunksAfterDetach = posted(driver, 'CHUNK').length;
-
-    driver.coordinator.destroy();
-    await driver.say({ preload: 'auto', requestId: 4, src: 'fmp4', type: 'SOURCE' });
-    await flush();
-
-    // Destroyed: the post-destroy SOURCE is ignored; no later CHUNK/ENDED.
-    expect(posted(driver, 'CHUNK').length).toBe(chunksAfterDetach);
-    expect(posted(driver, 'ENDED')).toHaveLength(1);
-    expect(posted(driver, 'ENDED')[0].requestId).toBe(2);
-    expect(driver.errors()).toEqual([]);
-  });
-
-  it('reports a stream transport failure as a request-scoped network ERROR', async () => {
-    const driver = makeDriver({
-      createSource: () => Promise.resolve(new ThrowingReadSource()),
-    });
-    await driver.say({ preload: 'auto', requestId: 2, src: 'fmp4', type: 'SOURCE' });
-    await flush();
-
-    const errors = driver.errors();
-    expect(errors).toHaveLength(1);
-    expect(errors[0].kind).toBe('network');
-    expect(errors[0].requestId).toBe(2);
-    expect(posted(driver, 'ENDED')).toEqual([]);
-  });
-
-  it('drops PLAYHEAD for a stale request id or a non-finite/negative time (worker parity)', async () => {
-    const sink = new RecordingSink();
-    const driver = makeDriver({ sinkFactory: () => sink, supportsWorkerMse: () => true });
-    await driver.say({ preload: 'auto', requestId: 2, src: 'fmp4', type: 'SOURCE' });
-    await flush();
-
-    // All three must be ignored: they name another load, or are not valid times.
-    await driver.say({ requestId: 99, time: 12, type: 'PLAYHEAD' });
-    await driver.say({ requestId: 2, time: Number.NaN, type: 'PLAYHEAD' });
-    await driver.say({ requestId: 2, time: -1, type: 'PLAYHEAD' });
-    await flush();
-    expect(sink.evictions).toEqual([]);
-
-    // The same coordinator still forwards a well-formed playhead for THIS load.
-    await driver.say({ requestId: 2, time: 12, type: 'PLAYHEAD' });
-    await flush();
-    expect(sink.evictions).toEqual([12]);
-  });
-
-  it('drops a SEEK with a non-finite or negative time (worker parity)', async () => {
-    const driver = makeDriver();
-    // preload 'none' + no session yet: a parked seek is the ONLY way streaming
-    // intent can reach this load, so an invalid time must leave it unstarted.
-    const pending = driver.say({ preload: 'none', requestId: 2, src: 'fmp4', type: 'SOURCE' });
-    void driver.say({ requestId: 3, time: -5, type: 'SEEK' });
-    await pending;
-    await flush();
-
-    expect(posted(driver, 'SOURCE_OK')).toHaveLength(1);
-    expect(posted(driver, 'CHUNK')).toEqual([]);
-    expect(posted(driver, 'ENDED')).toEqual([]);
-
-    // A valid seek then starts streaming from the call site.
-    await driver.say({ requestId: 3, time: 35, type: 'SEEK' });
-    await flush();
-    expect(posted(driver, 'CHUNK').length).toBeGreaterThan(0);
-    expect(posted(driver, 'ENDED')).toHaveLength(1);
-  });
-
-  it('posts only wire-valid WorkerToMainMessage payloads', async () => {
-    const driver = makeDriver();
-    await driver.say({ requestId: 1, type: 'ATTACH' });
-    await driver.say({ preload: 'auto', requestId: 2, src: 'fmp4', type: 'SOURCE' });
-    await flush();
-    await driver.say({ preload: 'auto', requestId: 3, src: 'unknown', type: 'SOURCE' });
-    await flush();
-
-    for (const message of driver.messages) {
-      expect(isWorkerToMainMessage(message), `invalid wire message: ${JSON.stringify(message)}`).toBe(true);
-    }
-  });
-
-  it('hands each load its context (mime, durationSeconds, requestId) to sinkFactory', async () => {
-    const contexts: SinkFactoryContext[] = [];
-    const driver = makeDriver({
-      sinkFactory: (context) => {
-        contexts.push(context);
-        return new RecordingSink();
-      },
-      supportsWorkerMse: () => true,
-    });
-    await driver.say({ preload: 'auto', requestId: 2, src: 'fmp4', type: 'SOURCE' });
-    await flush();
-
-    // One sink is created per accepted load, with the produced MIME and the
-    // pipeline-vouched duration (from the sidx index for finite VOD).
-    expect(contexts).toHaveLength(1);
-    expect(contexts[0].requestId).toBe(2);
-    expect(contexts[0].mime).toBe('video/mp4');
-    expect(contexts[0].durationSeconds).toBe(90);
-  });
-
-
-  it('forces main-thread CHUNK mode when the HELLO config prefers main on a worker-capable runtime', async () => {
-    const driver = makeDriver({ supportsWorkerMse: () => true });
-    await driver.say({ config: { ...appConfig(), workerMse: 'main' }, requestId: 1, type: 'HELLO' });
-    await driver.say({ requestId: 2, type: 'ATTACH' });
-
-    // HELLO_OK and ATTACH_OK both advertise the host-preferred main mode.
-    expect(posted(driver, 'HELLO_OK').at(-1)).toMatchObject({ features: { workerMse: false } });
-    expect(posted(driver, 'ATTACH_OK').at(-1)).toMatchObject({ mode: 'main' });
-
-    await driver.say({ preload: 'auto', requestId: 3, src: 'fmp4', type: 'SOURCE' });
-    await flush();
-
-    // Main mode uses the posting sink even though the runtime supports worker
-    // MSE: produced bytes leave as CHUNK, never as a HANDLE'd worker pipe.
-    expect(posted(driver, 'SOURCE_OK').at(-1)).toMatchObject({ info: { mode: 'main' } });
-    expect(posted(driver, 'CHUNK').length).toBeGreaterThan(0);
-    expect(posted(driver, 'HANDLE')).toEqual([]);
-    expect(posted(driver, 'ENDED').length).toBeGreaterThan(0);
-  });
-
-  it('keeps worker mode when the HELLO config prefers auto on a worker-capable runtime', async () => {
-    const sink = new RecordingSink();
-    const driver = makeDriver({ sinkFactory: () => sink, supportsWorkerMse: () => true });
-    await driver.say({ config: { ...appConfig(), workerMse: 'auto' }, requestId: 1, type: 'HELLO' });
-    await driver.say({ requestId: 2, type: 'ATTACH' });
-
-    expect(posted(driver, 'HELLO_OK').at(-1)).toMatchObject({ features: { workerMse: true } });
-    expect(posted(driver, 'ATTACH_OK').at(-1)).toMatchObject({ mode: 'worker' });
-
-    await driver.say({ preload: 'auto', requestId: 3, src: 'fmp4', type: 'SOURCE' });
-    await flush();
-
-    // Worker mode: the MSE-backed sinkFactory is used, no CHUNK is posted.
-    expect(posted(driver, 'SOURCE_OK').at(-1)).toMatchObject({ info: { mode: 'worker' } });
-    expect(posted(driver, 'CHUNK')).toEqual([]);
-    expect(sink.appended).toBeGreaterThan(0);
-  });
-
-  it('reflects validated PLAYHEAD and SEEK times into onPlayhead (worker MSE eviction boundary)', async () => {
-    const reflected: number[] = [];
-    const driver = makeDriver({
-      onPlayhead: (timeSeconds) => reflected.push(timeSeconds),
-      sinkFactory: () => new RecordingSink(),
-      supportsWorkerMse: () => true,
-    });
-    await driver.say({ preload: 'auto', requestId: 2, src: 'fmp4', type: 'SOURCE' });
-    await flush();
-
-    // PLAYHEAD for the active load at a valid time is reflected…
-    await driver.say({ requestId: 2, time: 12.5, type: 'PLAYHEAD' });
-    expect(reflected).toContain(12.5);
-
-    // …stale request ids and malformed times are dropped at the same guard.
-    await driver.say({ requestId: 99, time: 99, type: 'PLAYHEAD' });
-    await driver.say({ requestId: 2, time: Number.NaN, type: 'PLAYHEAD' });
-    await driver.say({ requestId: 2, time: -1, type: 'PLAYHEAD' });
-    expect(reflected).toEqual([12.5]);
-
-    // A valid SEEK is reflected even though it carries no session-wide eviction.
-    await driver.say({ requestId: 3, time: 35, type: 'SEEK' });
-    expect(reflected).toContain(35);
-  });
-});
-
-// ---- helpers ----------------------------------------------------------------
-
-
-/** Minimal HELLO `WorkerConfig` (connection identity) for preference tests. */
-function appConfig(): WorkerConfig {
-  return {
-    app: { appId: 'app', callbackUrl: '', description: '', logoUrl: '', name: 'app', serviceUrl: 'https://app.example' },
-    indexerUrl: 'https://indexer.example',
-  };
-}
-
-function concatBytes(chunks: Uint8Array[]): Uint8Array {
-  const total = chunks.reduce((sum, chunk) => sum + chunk.byteLength, 0);
-  const out = new Uint8Array(total);
-  let offset = 0;
-  for (const chunk of chunks) {
-    out.set(chunk, offset);
-    offset += chunk.byteLength;
-  }
-  return out;
-}
-
-function containsInOrder(bytes: Uint8Array, needle: number[]): boolean {
-  let at = 0;
-  for (const value of needle) {
-    const index = bytes.indexOf(value, at);
-    if (index < 0) return false;
-    at = index + 1;
-  }
-  return true;
-}
-
-/** Node has no `MediaSource`; stub capabilities so the producer eligibility passes. */
 function permissiveCapabilities(): PlaybackCapabilities {
   return {
     canConstructWorkerMse: () => false,
-    mayDecode: () => capabilityVerdict['unknown-codec'],
+    mayDecode: () => ({ decodable: true } as never),
     mseSupported: () => true,
     webCodecsAvailable: () => false,
     workerHandleAvailable: () => false,
   };
 }
 
-/** A byte run present verbatim in every segment's mdat payload. */
-function segmentMarker(marker: number): number[] {
-  return [marker, marker, marker, marker, marker, marker, marker, marker];
+/** A ready verdict built from the library's track facts, without any bytes. */
+function readyLoad(playback: MediaPlayback = new FakePlayback()): MediaLoadResult {
+  return {
+    container: 'mp4',
+    durationSeconds: 6,
+    mime: 'video/mp4; codecs="avc1.640032,mp4a.40.2"',
+    playback,
+    status: 'ready',
+    tracks: [
+      { codec: 'avc1.640032', kind: 'video' },
+      { codec: 'mp4a.40.2', kind: 'audio' },
+    ],
+  };
 }
+
+async function settle(): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, 15));
+}
+
+async function waitForMessage(driver: Driver, type: WorkerToMainMessage['type']): Promise<void> {
+  const deadline = Date.now() + 15_000;
+  while (driver.message(type).length === 0) {
+    if (Date.now() > deadline) throw new Error(`timed out waiting for ${type}`);
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+}
+
+describe('SessionCoordinator (WorkerComposition adapter)', () => {
+  it('answers HELLO and ATTACH, then SOURCE_OK carries exactly the ready-result facts', async () => {
+    const driver = makeDriver();
+    driver.pipeline.results.push(readyLoad());
+    await driver.say({ requestId: 1, type: 'HELLO' });
+    await driver.say({ requestId: 2, type: 'ATTACH' });
+
+    expect(driver.message('HELLO_OK')[0]).toMatchObject({ features: { workerMse: false }, version: PROTOCOL_VERSION });
+    expect(driver.message('ATTACH_OK')[0]).toMatchObject({ mode: 'main', requestId: 2 });
+
+    await driver.say({ preload: 'auto', requestId: 3, src: 'playable', type: 'SOURCE' });
+    await waitForMessage(driver, 'SOURCE_OK');
+
+    const ok = driver.message('SOURCE_OK');
+    expect(ok).toHaveLength(1);
+    expect(ok[0].requestId).toBe(3);
+    expect(ok[0].info).toEqual({
+      container: 'mp4',
+      durationSeconds: 6,
+      mime: 'video/mp4; codecs="avc1.640032,mp4a.40.2"',
+      mode: 'main',
+      tracks: [
+        { codec: 'avc1.640032', kind: 'video' },
+        { codec: 'mp4a.40.2', kind: 'audio' },
+      ],
+    });
+    // The report is reduced to the five allowed fields: no index, no mode.
+    expect(Object.keys(ok[0].info).sort()).toEqual(['container', 'durationSeconds', 'mime', 'mode', 'tracks']);
+  });
+
+  it('streams a fake playback into CHUNK (main mode) and posts ENDED once on completion', async () => {
+    const driver = makeDriver();
+    const playback = new FakePlayback();
+    driver.pipeline.results.push(readyLoad(playback));
+    await driver.say({ preload: 'auto', requestId: 4, src: 'playable', type: 'SOURCE' });
+    await waitForMessage(driver, 'SOURCE_OK');
+
+    expect(playback.started).toBe(1);
+    playback.emit('init');
+    expect(driver.message('CHUNK')).toHaveLength(1);
+    expect(driver.message('CHUNK')[0]).toMatchObject({ kind: 'init', requestId: 4 });
+
+    playback.complete();
+    playback.complete();
+    expect(driver.message('ENDED')).toHaveLength(1);
+    expect(driver.message('ENDED')[0].requestId).toBe(4);
+  });
+
+  it('passes the load generation and one abort signal into the pipeline, aborting on teardown', async () => {
+    const driver = makeDriver();
+    driver.pipeline.results.push(readyLoad());
+    await driver.say({ preload: 'auto', requestId: 5, src: 'playable', type: 'SOURCE' });
+    await waitForMessage(driver, 'SOURCE_OK');
+
+    expect(driver.pipeline.calls).toHaveLength(1);
+    const call = driver.pipeline.calls[0];
+    expect(call.loadGeneration).toBe(1);
+    expect(call.signal instanceof AbortSignal).toBe(true);
+    expect(call.signal.aborted).toBe(false);
+
+    await driver.say({ type: 'DETACH' });
+    expect(call.signal.aborted).toBe(true);
+  });
+
+  it('maps an unsupported verdict to one unsupported ERROR carrying the stable reason', async () => {
+    const driver = makeDriver();
+    const result: MediaLoadResult = { reason: 'video-track-missing', status: 'unsupported' };
+    driver.pipeline.results.push(result);
+    await driver.say({ preload: 'auto', requestId: 6, src: 'unknown', type: 'SOURCE' });
+    await settle();
+
+    expect(driver.message('SOURCE_OK')).toEqual([]);
+    const errors = driver.message('ERROR');
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toMatchObject({ context: 'video-track-missing', kind: workerErrorCode.unsupported, requestId: 6 });
+    expect(driver.message('CHUNK')).toEqual([]);
+    expect(driver.message('ENDED')).toEqual([]);
+  });
+
+  it('appends the raw failure detail to the unsupported error context', async () => {
+    const driver = makeDriver();
+    const result: MediaLoadResult = { detail: 'no moov box', reason: 'format-unreadable', status: 'unsupported' };
+    driver.pipeline.results.push(result);
+    await driver.say({ preload: 'auto', requestId: 7, src: 'broken', type: 'SOURCE' });
+    await settle();
+
+    const errors = driver.message('ERROR');
+    expect(errors).toHaveLength(1);
+    expect(errors[0].context).toBe('format-unreadable: no moov box');
+  });
+
+  it('maps a cancelled verdict to silence and releases the source', async () => {
+    const driver = makeDriver();
+    driver.pipeline.results.push({ status: 'cancelled' });
+    await driver.say({ preload: 'auto', requestId: 8, src: 'dropped', type: 'SOURCE' });
+    await settle();
+
+    expect(driver.message('SOURCE_OK')).toEqual([]);
+    expect(driver.message('ERROR')).toEqual([]);
+    expect(driver.message('CHUNK')).toEqual([]);
+    expect(driver.canceled.get('dropped') ?? 0).toBeGreaterThan(0);
+  });
+
+  it('defers streaming under preload none and starts on a later PLAY', async () => {
+    const driver = makeDriver();
+    const playback = new FakePlayback();
+    driver.pipeline.results.push(readyLoad(playback));
+    await driver.say({ preload: 'none', requestId: 9, src: 'playable', type: 'SOURCE' });
+    await waitForMessage(driver, 'SOURCE_OK');
+
+    expect(driver.message('CHUNK')).toEqual([]);
+    expect(playback.started).toBe(0);
+
+    await driver.say({ requestId: 10, type: 'PLAY' });
+    expect(playback.started).toBe(1);
+  });
+
+  it('parks a SEEK while the load is in flight and applies it when the load resolves', async () => {
+    const driver = makeDriver();
+    const playback = new FakePlayback();
+    // The pipeline holds the SOURCE's verdict so a SEEK arrives mid-load.
+    const load = driver.say({ preload: 'auto', requestId: 11, src: 'playable', type: 'SOURCE' });
+    await settle();
+    await driver.say({ requestId: 12, time: 12.5, type: 'SEEK' });
+
+    driver.pipeline.resolveCall(0, readyLoad(playback));
+    await load;
+    await waitForMessage(driver, 'SOURCE_OK');
+
+    expect(playback.started).toBe(1);
+  });
+
+  it('replacing the source abandons the previous load and streams only the new one', async () => {
+    const driver = makeDriver();
+    const first = new FakePlayback(() => driver.cancelSource('first'));
+    driver.pipeline.results.push(readyLoad(first));
+    await driver.say({ preload: 'auto', requestId: 13, src: 'first', type: 'SOURCE' });
+    await waitForMessage(driver, 'SOURCE_OK');
+    expect(first.started).toBe(1);
+    const firstSignal = driver.pipeline.calls[0].signal;
+
+    const second = new FakePlayback();
+    driver.pipeline.results.push(readyLoad(second));
+    await driver.say({ preload: 'auto', requestId: 14, src: 'second', type: 'SOURCE' });
+    await waitForMessage(driver, 'SOURCE_OK');
+
+    expect(driver.message('SOURCE_OK')).toHaveLength(2);
+    expect(driver.message('SOURCE_OK')[1].requestId).toBe(14);
+    expect(first.disposed).toBe(1);
+    expect(firstSignal.aborted).toBe(true);
+    expect(driver.canceled.get('first') ?? 0).toBeGreaterThan(0);
+    expect(second.started).toBe(1);
+
+    second.complete();
+    expect(driver.message('ENDED')).toHaveLength(1);
+    expect(driver.message('ENDED')[0].requestId).toBe(14);
+  });
+
+  it('a superseded load completion disposes its own resources and posts nothing', async () => {
+    const driver = makeDriver();
+    const stale = new FakePlayback(() => driver.cancelSource('stale'));
+    // Both loads resolve through held runs so their order is explicit: the
+    // fresh load (call 1) becomes the session, the stale load (call 0) drops.
+    const staleLoad = driver.say({ preload: 'auto', requestId: 15, src: 'stale', type: 'SOURCE' });
+    await settle();
+    const freshLoad = driver.say({ preload: 'auto', requestId: 16, src: 'fresh', type: 'SOURCE' });
+    await settle();
+    expect(driver.pipeline.calls).toHaveLength(2);
+
+    const staleSignal = driver.pipeline.calls[0].signal;
+    driver.pipeline.resolveCall(1, readyLoad());
+    await freshLoad;
+    await waitForMessage(driver, 'SOURCE_OK');
+
+    driver.pipeline.resolveCall(0, readyLoad(stale));
+    await staleLoad;
+
+    expect(driver.message('SOURCE_OK')).toHaveLength(1);
+    expect(stale.started).toBe(0);
+    expect(stale.disposed).toBe(1);
+    expect(staleSignal.aborted).toBe(true);
+    expect(driver.canceled.get('stale') ?? 0).toBeGreaterThan(0);
+  });
+
+  it('a stale source creation cancels its own source and posts nothing', async () => {
+    let resolveSource: (source: ByteSource) => void = () => undefined;
+    const driver = makeDriver({
+      createSource: () => new Promise<ByteSource>((resolve) => {
+        resolveSource = resolve;
+      }),
+    });
+    const pending = driver.say({ preload: 'auto', requestId: 17, src: 'slow', type: 'SOURCE' });
+
+    driver.coordinator.destroy();
+    resolveSource(new CancellationSpy('slow', driver.canceled));
+    await pending;
+
+    expect(driver.messages).toEqual([]);
+    expect(driver.canceled.get('slow') ?? 0).toBeGreaterThan(0);
+  });
+
+  it('DETACH abandons the active load and stops streaming', async () => {
+    const driver = makeDriver();
+    const playback = new FakePlayback(() => driver.cancelSource('dettach'));
+    driver.pipeline.results.push(readyLoad(playback));
+    await driver.say({ preload: 'auto', requestId: 18, src: 'dettach', type: 'SOURCE' });
+    await waitForMessage(driver, 'SOURCE_OK');
+
+    await driver.say({ type: 'DETACH' });
+
+    expect(playback.disposed).toBe(1);
+    expect(playback.started).toBe(1);
+    expect(driver.pipeline.calls[0].signal.aborted).toBe(true);
+    expect(driver.canceled.get('dettach') ?? 0).toBeGreaterThan(0);
+  });
+
+  it('DETACH disposes a ready-but-never-played conversion and releases its source', async () => {
+    const driver = makeDriver();
+    const playback = new FakePlayback(() => driver.cancelSource('idle'));
+    driver.pipeline.results.push(readyLoad(playback));
+    await driver.say({ preload: 'none', requestId: 18, src: 'idle', type: 'SOURCE' });
+    await waitForMessage(driver, 'SOURCE_OK');
+
+    // The conversion was prepared but never started; replacement teardown must
+    // still cancel it (dispose) and release the transport source it owns.
+    expect(playback.started).toBe(0);
+    await driver.say({ type: 'DETACH' });
+
+    expect(playback.disposed).toBe(1);
+    expect(driver.pipeline.calls[0].signal.aborted).toBe(true);
+    expect(driver.canceled.get('idle') ?? 0).toBeGreaterThan(0);
+  });
+
+  it('DESTROY abandons the active load permanently and ignores later messages', async () => {
+    const driver = makeDriver();
+    const playback = new FakePlayback(() => driver.cancelSource('doom'));
+    driver.pipeline.results.push(readyLoad(playback));
+    await driver.say({ preload: 'auto', requestId: 19, src: 'doom', type: 'SOURCE' });
+    await waitForMessage(driver, 'SOURCE_OK');
+
+    driver.coordinator.destroy();
+
+    expect(playback.disposed).toBe(1);
+    expect(driver.canceled.get('doom') ?? 0).toBeGreaterThan(0);
+
+    const before = driver.messages.length;
+    driver.pipeline.results.push(readyLoad());
+    await driver.say({ preload: 'auto', requestId: 20, src: 'ignored', type: 'SOURCE' });
+    expect(driver.messages.length).toBe(before);
+    expect(driver.pipeline.calls).toHaveLength(1);
+  });
+
+  it('forwards PLAYHEAD to the onPlayhead reflector and sink eviction', async () => {
+    const reflected: number[] = [];
+    const evictions: number[] = [];
+    const driver = makeDriver({
+      onPlayhead: (time) => reflected.push(time),
+      sinkFactory: () => ({
+        abort: () => undefined,
+        append: (_unit: AppendUnit) => undefined,
+        evictBackBuffer: (timeSeconds) => {
+          evictions.push(timeSeconds);
+          return Promise.resolve(true);
+        },
+        requestEndOfStream: () => undefined,
+        resetParser: () => undefined,
+      }),
+      supportsWorkerMse: () => true,
+    });
+    driver.pipeline.results.push(readyLoad());
+    await driver.say({ preload: 'auto', requestId: 21, src: 'playable', type: 'SOURCE' });
+    await waitForMessage(driver, 'SOURCE_OK');
+
+    await driver.say({ requestId: 21, time: 4.25, type: 'PLAYHEAD' });
+    await settle();
+
+    expect(reflected).toContain(4.25);
+    expect(evictions).toContain(4.25);
+  });
+
+  it('worker mode feeds the injected sink with the load context and never posts CHUNKs', async () => {
+    const contexts: SinkFactoryContext[] = [];
+    const appended: AppendUnit[] = [];
+    const driver = makeDriver({
+      sinkFactory: (context) => {
+        contexts.push(context);
+        return {
+          abort: () => undefined,
+          append: (unit) => appended.push(unit),
+          evictBackBuffer: () => Promise.resolve(false),
+          requestEndOfStream: () => undefined,
+          resetParser: () => undefined,
+        } satisfies AppendSink;
+      },
+      supportsWorkerMse: () => true,
+    });
+    const playback = new FakePlayback();
+    driver.pipeline.results.push(readyLoad(playback));
+    await driver.say({ preload: 'auto', requestId: 22, src: 'playable', type: 'SOURCE' });
+    await waitForMessage(driver, 'SOURCE_OK');
+
+    expect(contexts).toHaveLength(1);
+    expect(contexts[0]).toEqual({
+      durationSeconds: 6,
+      mime: 'video/mp4; codecs="avc1.640032,mp4a.40.2"',
+      requestId: 22,
+    });
+    expect(driver.message('CHUNK')).toEqual([]);
+    expect(playback.started).toBe(1);
+
+    playback.emit('init');
+    expect(appended).toHaveLength(1);
+    expect(appended[0]).toMatchObject({ kind: 'init' });
+  });
+
+  it('reports one playback failure as a decode error scoped to the load', async () => {
+    const driver = makeDriver();
+    const playback = new FakePlayback();
+    driver.pipeline.results.push(readyLoad(playback));
+    await driver.say({ preload: 'auto', requestId: 23, src: 'playable', type: 'SOURCE' });
+    await waitForMessage(driver, 'SOURCE_OK');
+
+    playback.fail(new Error('engine failed'));
+    playback.fail(new Error('again'));
+
+    const errors = driver.message('ERROR');
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toMatchObject({ kind: workerErrorCode.decode, requestId: 23 });
+  });
+
+  it('accepts a validated APP_KEY envelope through the real handshake', async () => {
+    const driver = makeDriver();
+    await driver.say({ requestId: 1, type: 'HELLO' });
+    const hello = driver.message('HELLO_OK')[0];
+
+    const seed = new Uint8Array(32).fill(7);
+    const envelope = await encryptToWorker(hello.publicKey, seed);
+    await driver.say({ envelope, requestId: 2, type: 'APP_KEY' });
+    await settle();
+
+    expect(driver.message('ERROR')).toEqual([]);
+  });
+
+  it('surfaces a rejected APP_KEY envelope as a network ERROR', async () => {
+    const driver = makeDriver();
+    await driver.say({ requestId: 1, type: 'HELLO' });
+
+    const wrongKey = new Uint8Array(32).fill(3);
+    const envelope = await encryptToWorker(wrongKey, new Uint8Array(32).fill(1));
+    await driver.say({ envelope, requestId: 2, type: 'APP_KEY' });
+    await settle();
+
+    const errors = driver.message('ERROR');
+    expect(errors.length).toBeGreaterThan(0);
+    expect(errors[0].kind).toBe(workerErrorCode.network);
+  });
+});

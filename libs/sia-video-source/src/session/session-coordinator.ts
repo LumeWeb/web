@@ -2,16 +2,15 @@
  * `SessionCoordinator` / `WorkerComposition`: the worker composition-root seam
  * that wires the session pieces into one protocol-compatible adapter:
  *
- *   `ContainerClassifier` (+ ordered `IndexBuilder[]`, default sidx)
- *     → `LoadPipeline` (classify → best-effort index → codec check → producer)
- *     → `StreamController` (start/seek/playhead, epochs, EOS)
+ *   `LoadPipeline` (one mediabunny Input: discover + convert)
+ *     → `StreamController` (start/seek/playhead, EOS)
  *     → `AppendSink` (default: main-mode CHUNK poster)
  *   plus `Clock`, `ErrorReporter` (protocol ERROR mapping), and the handshake
  *   seam (`HELLO`/`APP_KEY`), all behind injected interfaces.
  *
  * Responsibilities: protocol validation via the existing
  * `MainToWorkerMessage` types, handshake/app-key lifecycle, request IDs and
- * source replacement (epoch discipline), attach/detach/destroy, and creating
+ * source replacement (load-generation discipline), attach/detach/destroy, and creating
  * and disposing one load/session graph (one `StreamController` per accepted
  * load).
  *
@@ -19,32 +18,21 @@
  * with no SDK and no MSE. `createSource` is where a call site binds the real
  * Sia transport + SDK, and worker-mode MSE is supplied through `sinkFactory`.
  *
+ * One load runs through ONE mediabunny pipeline: metadata discovery and
+ * conversion share the same `Input`, so the metadata bytes are downloaded
+ * once, and `SOURCE_OK` is posted only after the validated startup facts
+ * (video + audio track, MSE-supported codecs) pass. An unsupported object
+ * surfaces as a typed result, not a string comparison, and posts a protocol
+ * `unsupported` error.
+ *
  * Protocol compatibility: outbound messages are the existing
  * `WorkerToMainMessage` shapes (`HELLO_OK`, `ATTACH_OK`, `SOURCE_OK`,
  * `CHUNK`, `ENDED`, `ERROR`), the capability fields on `SOURCE_OK.info` stay
  * optional, and no protocol message is renamed.
  */
 
-import type { ContainerClassifier } from '../capabilities/container-classifier.ts';
-import { createContainerClassifier } from '../capabilities/container-classifier.ts';
 import type { PlaybackCapabilities } from '../capabilities/browser-capabilities.ts';
 import { detectBrowserCapabilities } from '../capabilities/browser-capabilities.ts';
-import type { IndexBuilder } from '../container/index/random-access-index.ts';
-import { createIndexBuilderRegistry } from '../container/index/index-builder.ts';
-import {
-  type Mp4RuntimeProbe,
-  probeProgressiveMp4,
-} from '../container/engine/mp4-runtime-probe.ts';
-import { ProgressiveMp4ProducerStrategy } from '../container/producer/progressive-mp4-producer-strategy.ts';
-import {
-  PassthroughProducerStrategy,
-  ProducerFactoryRegistry,
-  ProducerUnavailableError,
-  producerVerdict,
-  TsToFmp4ProducerStrategy,
-  WebmNativeProducerStrategy,
-} from '../container/producer/producer-factory.ts';
-import type { ProducedSegment } from '../container/producer/appendable-producer.ts';
 import {
   decryptAppKeyEnvelope,
   exportWorkerPublicKey,
@@ -66,10 +54,8 @@ import {
   type WorkerToMainMessage,
 } from '../protocol.ts';
 import type { ByteSource } from '../transport/byte-source.ts';
-import { ByteSourceSupersededError } from '../transport/byte-source.ts';
-import type { AppendSink } from '../sink/append-sink.ts';
+import type { AppendSink, AppendUnit } from '../sink/append-sink.ts';
 import type { Clock } from './clock.ts';
-import { wallClock } from './clock.ts';
 import { createErrorReporter, type ErrorReporter } from './error-reporter.ts';
 import { createLoadPipeline, type LoadPipeline, type LoadResult } from './load-pipeline.ts';
 import { sourceInfoFor } from './source-capabilities.ts';
@@ -82,9 +68,6 @@ import {
 
 /** Outbound protocol channel (same shape as the worker's `PostMessage`). */
 export type PostMessage = (message: WorkerToMainMessage, transfer?: Transferable[]) => void;
-
-/** Bounded probe read before the classifier decides (mirrors `HEAD_PROBE_LENGTH`). */
-const DEFAULT_HEAD_PROBE_LENGTH = 4096;
 
 /** The seam the worker entry will eventually install (`handleMessage` FSM). */
 export interface SessionCoordinator {
@@ -104,8 +87,6 @@ export interface SessionCoordinator {
 export interface SessionCoordinatorDeps {
   /** Browser capability snapshot for the MSE/codec checks (default: detect). */
   readonly capabilities?: PlaybackCapabilities;
-  /** Container classifier (default: `createContainerClassifier()`). */
-  readonly classifier?: ContainerClassifier;
   /** Injectable time (default: `wallClock()`). */
   readonly clock?: Clock;
   /**
@@ -115,19 +96,11 @@ export interface SessionCoordinatorDeps {
   readonly createSource: (src: string) => Promise<ByteSource>;
   /** Handshake for `HELLO`/`APP_KEY` (default: `createSessionHandshake()`). */
   readonly handshake?: SessionHandshake;
-  /** Bounded head-probe length fed to the classifier (default 4096). */
-  readonly headProbeLength?: number;
-  /** Ordered best-effort index builders (default: sidx registry). */
-  readonly indexBuilders?: readonly IndexBuilder[];
-  /** Forward lookahead seconds handed to each session's controller. */
-  readonly lookaheadSeconds?: number;
   /**
-   * Bounded Mediabunny runtime probe for progressive-MP4 loads (default:
-   * `probeProgressiveMp4`). The engine is the single probe path — there is no
-   * selection step and nothing to branch on — so absence only matters for tests
-   * that want to observe a pipeline with probing disabled.
+   * Injected load-pipeline seam for package-owned tests; production defaults
+   * to `createLoadPipeline({ capabilities })`.
    */
-  readonly mp4Probe?: Mp4RuntimeProbe;
+  readonly loadPipeline?: LoadPipeline;
   /**
    * Called whenever the active load/session graph is abandoned — superseded by
    * a new SOURCE, or stopped by DETACH/DESTROY. The production composition
@@ -146,11 +119,6 @@ export interface SessionCoordinatorDeps {
   /** Outbound protocol channel. */
   readonly post: PostMessage;
   /**
-   * Producer registry whose `select` exposes the winning reason. Defaults to
-   * the ladder (passthrough → TS remux).
-   */
-  readonly producerFactory?: ProducerFactoryRegistry;
-  /**
    * Builds the per-load `AppendSink`. Defaults to a main-mode CHUNK poster;
    * worker-mode MSE (a `MseAdapter` over the worker MediaSource pipe) is
    * supplied by the production composition root. Receives the load context
@@ -158,8 +126,6 @@ export interface SessionCoordinatorDeps {
    * SourceBuffer for exactly that load.
    */
   readonly sinkFactory?: (context: SinkFactoryContext) => AppendSink;
-  /** Controller-level stall timeout (0 disables; Sia owns its own watchdog). */
-  readonly stallTimeoutMs?: number;
   /** Worker-MSE capability check; false in node, true where `canConstructInDedicatedWorker`. */
   readonly supportsWorkerMse?: () => boolean;
 }
@@ -222,19 +188,21 @@ export class WorkerComposition implements SessionCoordinator {
     return this.#mode;
   }
 
-  readonly #clock: Clock;
   readonly #createSource: (src: string) => Promise<ByteSource>;
   #destroyed = false;
   readonly #errorReporter: ErrorReporter;
   readonly #handshake: SessionHandshake;
-  readonly #headProbeLength: number;
-  #loadEpoch = 0;
+  /**
+   * One authoritative abort controller for the in-flight load. Created at
+   * SOURCE, aborted by `#abandonLoad` (supersession / DETACH / DESTROY), and
+   * released once the load resolves without an accepted session.
+   */
+  #loadAbortController: AbortController | null = null;
+  #loadGeneration = 0;
   readonly #loadPipeline: LoadPipeline;
-  readonly #lookaheadSeconds: number | undefined;
   // Default 'main' is safe until `#selectMode()` (called in the constructor,
   // then on every HELLO) picks the session's actual MSE site.
   #mode: WorkerMode = workerMode.main;
-  readonly #mp4Probe: Mp4RuntimeProbe;
   readonly #onAbandon: (() => void) | undefined;
   readonly #onPlayhead: ((timeSeconds: number) => void) | undefined;
   #pendingSeekTime: number | undefined = undefined;
@@ -244,25 +212,18 @@ export class WorkerComposition implements SessionCoordinator {
   #session: CompositionSession | null = null;
   readonly #sinkFactory: (context: SinkFactoryContext) => AppendSink;
   #source: ByteSource | null = null;
-  readonly #stallTimeoutMs: number | undefined;
   readonly #supportsWorkerMse: () => boolean;
 
   constructor(deps: SessionCoordinatorDeps) {
     const capabilities = deps.capabilities ?? detectBrowserCapabilities();
-    const classifier = deps.classifier ?? createContainerClassifier();
-    this.#clock = deps.clock ?? wallClock();
     this.#createSource = deps.createSource;
     this.#handshake = deps.handshake ?? createSessionHandshake();
-    this.#headProbeLength = deps.headProbeLength ?? DEFAULT_HEAD_PROBE_LENGTH;
-    this.#lookaheadSeconds = deps.lookaheadSeconds;
-    this.#mp4Probe = deps.mp4Probe ?? probeProgressiveMp4;
     this.#supportsWorkerMse = deps.supportsWorkerMse ?? defaultSupportsWorkerMse;
     this.#selectMode();
     this.#onAbandon = deps.onAbandon;
     this.#onPlayhead = deps.onPlayhead;
     this.#post = deps.post;
     this.#sinkFactory = deps.sinkFactory ?? (() => createPostingSink(this.#post, this.#requestId ?? 0));
-    this.#stallTimeoutMs = deps.stallTimeoutMs;
 
     this.#errorReporter = createErrorReporter((report) => {
       // Failures are scoped to the load that produced them; cancelled drops
@@ -270,27 +231,7 @@ export class WorkerComposition implements SessionCoordinator {
       this.#postError(report.kind, this.#requestId, report.context);
     });
 
-    this.#loadPipeline = createLoadPipeline({
-      capabilities,
-      classifier,
-      indexBuilders: deps.indexBuilders ?? createIndexBuilderRegistry(),
-      mp4Probe: this.#mp4Probe,
-      producerFactory:
-        deps.producerFactory ??
-        // The progressive-MP4 mediabunny strategy is registered FIRST so a
-        // progressive-MP4 load is served by the normalized refragmenter
-        // (mediabunny is the only engine; there is no check to fall through), while
-        // passthrough/TS still win for the containers they serve.
-        new ProducerFactoryRegistry([
-          new ProgressiveMp4ProducerStrategy(),
-          new PassthroughProducerStrategy(),
-          new TsToFmp4ProducerStrategy(),
-          // Native-WebM strategy is wired unconditionally: WebM appends as-is
-          // wherever the browser's MSE supports the object's codecs, so there
-          // is no feature check to wait on.
-          new WebmNativeProducerStrategy(),
-        ]),
-    });
+    this.#loadPipeline = deps.loadPipeline ?? createLoadPipeline({ capabilities });
   }
 
   /** Stops all reads and drops pipeline state; the coordinator cannot be re-attached. */
@@ -352,7 +293,7 @@ export class WorkerComposition implements SessionCoordinator {
           this.#handleSeek(message.time);
           return;
         case 'SOURCE':
-          await this.#handleSource(message.requestId, message.src, message.mimeType, message.preload);
+          await this.#handleSource(message.requestId, message.src, message.preload);
           return;
       }
     } catch (error) {
@@ -361,20 +302,35 @@ export class WorkerComposition implements SessionCoordinator {
     }
   }
 
-  // Tears down the current load/session graph (source, sink, controller) so a
-  // replacement load or a detach can never inherit stale pipeline state. The
-  // onAbandon hook then lets the composition root release any external per-load
-  // state (the worker MediaSource + SourceBuffer) immediately — never a stale
-  // handle waiting for the next load's sinkFactory to reset it.
+  // Tears down the current load/session graph in the authoritative replacement
+  // order: the load-level abort signal first (so every outstanding read fails),
+  // then the session's playback/sink resources, then external worker-MSE state,
+  // and finally the request/session references so no straggler can post under a
+  // dead load. Every operation is idempotent. An accepted load's transport
+  // source is cancelled exactly once, through the Input/CustomSource disposal
+  // path inside `playback.dispose()`; a source that never produced an accepted
+  // playback (still inspecting, or already a non-ready verdict) is stopped
+  // directly — the pipeline's own Input disposal, when it runs, is a second
+  // idempotent stop of the same source.
   #abandonLoad(): void {
+    this.#loadAbortController?.abort();
+    this.#loadAbortController = null;
+
     const session = this.#session;
-    this.#session = null;
-    if (session) session.controller?.destroy();
     const source = this.#source;
-    this.#source = null;
-    source?.cancel();
-    this.#requestId = null;
+    if (session) {
+      session.load.playback.dispose();
+      // The controller's teardown aborts the sink and rejects late callbacks.
+      session.controller?.destroy();
+    } else if (source) {
+      source.cancel();
+    }
+
     this.#onAbandon?.();
+
+    this.#requestId = null;
+    this.#session = null;
+    this.#source = null;
   }
 
   #controllerFor(session: CompositionSession): StreamController {
@@ -398,10 +354,9 @@ export class WorkerComposition implements SessionCoordinator {
   }
 
   // SEEK with an active session: bind the load if streaming has not begun yet
-  // (the synchronous seek supersedes that initial run), then re-pump from the
-  // seek floor. A terminal/failed controller is re-created for the same graph.
-  // A malformed time is dropped before it can park intent or re-pump the
-  // controller, matching the current worker's `#handleSeek` guard.
+  // (the synchronous seek supersedes that initial run), then record the seek
+  // position. A malformed time is dropped before it can park intent or re-pump
+  // the controller, matching the current worker's `#handleSeek` guard.
   #handleSeek(timeSeconds: number): void {
     if (!Number.isFinite(timeSeconds) || timeSeconds < 0) return;
     this.#onPlayhead?.(timeSeconds);
@@ -424,10 +379,9 @@ export class WorkerComposition implements SessionCoordinator {
   async #handleSource(
     requestId: RequestId,
     src: string,
-    mimeType: string | undefined,
     preload: 'auto' | 'metadata' | 'none' | undefined,
   ): Promise<void> {
-    const epoch = ++this.#loadEpoch;
+    const loadGeneration = ++this.#loadGeneration;
     // Play intent is scoped to ONE load attempt (matches the current worker):
     // a stray PLAY that outlived a previous load must not auto-start a later
     // unrelated one. A parked seek survives source supersession.
@@ -436,11 +390,13 @@ export class WorkerComposition implements SessionCoordinator {
     // is bound AFTER the teardown so the session sink/reporter use THIS one.
     this.#abandonLoad();
     this.#requestId = requestId;
+    const loadAbortController = new AbortController();
+    this.#loadAbortController = loadAbortController;
 
     // A genuine load failure kills the intent parked on this attempt: a seek
     // or play that targeted a failed object must not auto-start a later,
-    // unrelated SOURCE. Superseded (stale-epoch) returns skip this, so a seek
-    // parked during a replaced probe survives to the replacement load.
+    // unrelated SOURCE. Superseded returns skip this, so a seek parked during
+    // a replaced load survives to the replacement load.
     const failed = (kind: WorkerErrorCode, context: string): void => {
       this.#playRequested = false;
       this.#pendingSeekTime = undefined;
@@ -451,49 +407,65 @@ export class WorkerComposition implements SessionCoordinator {
     try {
       source = await this.#createSource(src);
     } catch (error) {
-      if (this.#destroyed || epoch !== this.#loadEpoch) return;
+      if (this.#destroyed || loadGeneration !== this.#loadGeneration) {
+        // A stale creation releases its own abort signal and posts nothing.
+        loadAbortController.abort();
+        return;
+      }
       failed(workerErrorCode.network, describeError(error));
       return;
     }
-    if (this.#destroyed || epoch !== this.#loadEpoch) {
+    if (this.#destroyed || loadGeneration !== this.#loadGeneration) {
+      // A superseded source is disposed by its own load, never the newer one.
       source.cancel();
+      loadAbortController.abort();
       return;
     }
     this.#source = source;
 
-    let head: Uint8Array;
+    let result: LoadResult;
     try {
-      // Probe at epoch 0: the pipeline's index builders re-read the object
-      // under epoch 0 too, while the stream controller owns epochs ≥ 1.
-      head = await readProbe(source, this.#headProbeLength);
+      result = await this.#loadPipeline.run({ loadGeneration, signal: loadAbortController.signal, source });
     } catch (error) {
-      if (this.#destroyed || epoch !== this.#loadEpoch) return;
-      if (isSupersededOrAbort(error)) return;
+      if (this.#destroyed || loadGeneration !== this.#loadGeneration) {
+        // The replacement teardown already aborted this load's reads; the
+        // local signal is all it owns to release.
+        loadAbortController.abort();
+        return;
+      }
       failed(workerErrorCode.network, describeError(error));
+      source.cancel();
+      loadAbortController.abort();
+      this.#loadAbortController = null;
       return;
     }
-    if (this.#destroyed || epoch !== this.#loadEpoch) return;
-    if (head.byteLength === 0) {
-      failed(workerErrorCode.network, 'object is empty or unreadable');
-      source.cancel();
+    if (this.#destroyed || loadGeneration !== this.#loadGeneration) {
+      // Stale completion disposes its own resources — the abort signal and an
+      // already-accepted verdict's playback/input (whose CustomSource disposal
+      // cancels the transport source) — and posts nothing.
+      loadAbortController.abort();
+      if (result.status === 'ready') result.playback.dispose();
       return;
     }
 
-    let result: LoadResult;
-    try {
-      result = await this.#loadPipeline.run({ head, inputMime: mimeType, source });
-    } catch (error) {
-      if (this.#destroyed || epoch !== this.#loadEpoch) return;
-      if (error instanceof ProducerUnavailableError) {
-        failed(workerErrorCode.unsupported, producerFailureContext(error));
-      } else {
-        failed(workerErrorCode.network, describeError(error));
-      }
-      source.cancel();
+    // The typed verdict drives the load outcome: a superseded or aborted
+    // discovery posts nothing, an unplayable object posts one unsupported
+    // error, and only a ready load proceeds to the sink + SOURCE_OK.
+    // A non-ready verdict already cancelled the transport source when the
+    // pipeline disposed its Input (CustomSource disposal path), so no second
+    // `source.cancel()` runs here.
+    if (result.status === 'cancelled') {
+      this.#loadAbortController = null;
       return;
     }
-    if (this.#destroyed || epoch !== this.#loadEpoch) {
-      source.cancel();
+    if (result.status === 'unsupported') {
+      // One protocol error per unsupported load: the stable reason string with
+      // the raw failure detail appended after a colon when one exists.
+      failed(
+        workerErrorCode.unsupported,
+        result.detail === undefined ? result.reason : result.reason + ': ' + result.detail,
+      );
+      this.#loadAbortController = null;
       return;
     }
 
@@ -505,29 +477,28 @@ export class WorkerComposition implements SessionCoordinator {
       this.#mode === workerMode.main
         ? createPostingSink(this.#post, requestId)
         : this.#sinkFactory({
-            durationSeconds: result.capabilities.durationSeconds,
+            durationSeconds: result.durationSeconds,
             mime: result.mime,
             requestId,
           });
     const session: CompositionSession = {
       controller: null,
-      load: { index: result.index, producer: result.producer, sink, source },
+      load: { loadGeneration, playback: result.playback, sink },
       requestId,
       started: false,
     };
     session.controller = this.#newController(session);
     this.#session = session;
 
-    // Domain capability report carried by the optional SOURCE_OK.info fields.
+    // The capability report is built directly from the ready result (container,
+    // duration, MIME, tracks) plus the session MSE mode.
     this.#post({
       info: sourceInfoFor(
         {
-          codecs: result.codecs,
-          container: result.capabilities.container,
-          durationSeconds: result.capabilities.durationSeconds,
-          index: result.index,
+          container: result.container,
+          durationSeconds: result.durationSeconds,
           mime: result.mime,
-          playback: result.capabilities.playbackMode,
+          tracks: result.tracks,
         },
         this.#mode,
       ),
@@ -546,9 +517,8 @@ export class WorkerComposition implements SessionCoordinator {
       this.#playRequested = false;
       this.#pendingSeekTime = undefined;
       this.#startStreaming();
-      // start() binds the session's controller synchronously; seek() bumps the
-      // run epoch so the byte-0 start is superseded before it can deliver a
-      // stale first range, restarting playback from the parked seek's floor.
+      // start() binds the session's controller synchronously; seek() records
+      // the parked position so playback resumes from it once MSE buffers.
       if (parkedSeek !== undefined) {
         this.#session?.controller?.seek(parkedSeek);
       }
@@ -559,10 +529,7 @@ export class WorkerComposition implements SessionCoordinator {
   // wire the main-mode ENDED transition onto the wire.
   #newController(session: CompositionSession): StreamController {
     const controller = createStreamController({
-      clock: this.#clock,
       errorReporter: this.#errorReporter,
-      lookaheadSeconds: this.#lookaheadSeconds,
-      stallTimeoutMs: this.#stallTimeoutMs,
     });
     controller.onStateChange((state) => {
       if (this.#destroyed) return;
@@ -687,7 +654,7 @@ function appKeySeedsEqual(a: null | Uint8Array, b: null | Uint8Array): boolean {
 }
 
 /**
- * Main-mode `AppendSink`: posts each produced segment as a protocol `CHUNK`
+ * Main-mode `AppendSink`: posts each append unit as a protocol `CHUNK`
  * (kind init/media) under the load's request id. Worker mode supplies a real
  * MSE-backed sink through `sinkFactory` instead.
  */
@@ -697,9 +664,9 @@ function createPostingSink(post: PostMessage, requestId: RequestId): AppendSink 
     abort(): void {
       active = false;
     },
-    append(segment: ProducedSegment): void {
+    append(unit: AppendUnit): void {
       if (!active) return;
-      post({ bytes: segment.bytes.slice(), kind: segment.kind, requestId, type: 'CHUNK' });
+      post({ bytes: unit.bytes.slice(), kind: unit.kind, requestId, type: 'CHUNK' });
     },
     evictBackBuffer(): Promise<boolean> {
       return Promise.resolve(false);
@@ -708,60 +675,14 @@ function createPostingSink(post: PostMessage, requestId: RequestId): AppendSink 
       // Main-thread MSE: the host ends its own MediaSource when it receives
       // the coordinator's ENDED; a posting sink owns no SourceBuffer.
     },
-    resetParser(): void {
-      // No SourceBuffer parser to reset on a posting sink.
+    resetParser(_loadGeneration: number, _targetTimeSeconds?: number): void {
+      // No SourceBuffer parser to reset (or re-anchor) on a posting sink.
     },
   };
 }
 
 function describeError(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
-}
-
-/** Whether a read error is a supersede/abort that must be dropped, not reported. */
-function isSupersededOrAbort(error: unknown): boolean {
-  if (error instanceof ByteSourceSupersededError) return true;
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'name' in error &&
-    (error as { name?: unknown }).name === 'AbortError'
-  );
-}
-
-/** Presents a producer rejection with the worker's protocol-compatible context. */
-function producerFailureContext(error: ProducerUnavailableError): string {
-  return error.verdict === producerVerdict.codec ? `codec: ${error.detail}` : `container: ${error.container}`;
-}
-
-/** Reads the first `length` bytes (short at EOF) through `source` under epoch 0. */
-async function readProbe(source: ByteSource, length: number): Promise<Uint8Array> {
-  const want = Math.min(length, source.size);
-  if (want <= 0) return new Uint8Array(0);
-  const reader = source.read({ length: want, offset: 0 }, { loadGeneration: 0 }).getReader();
-  const chunks: Uint8Array[] = [];
-  let total = 0;
-  try {
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
-      total += value.byteLength;
-      if (total >= want) break;
-    }
-  } finally {
-    void reader.cancel().catch(() => {
-      /* stream already closed/errored */
-    });
-  }
-  const head = new Uint8Array(total);
-  let offset = 0;
-  for (const chunk of chunks) {
-    const remaining = Math.min(chunk.byteLength, total - offset);
-    head.set(chunk.subarray(0, remaining), offset);
-    offset += remaining;
-  }
-  return head;
 }
 
 /**

@@ -51,13 +51,4 @@ export interface AppendSink {
 export interface AppendUnit {
   readonly bytes: Uint8Array;
   readonly kind: AppendKind;
-  /**
-   * When `true`, this is the producer's final unit: the sink should request
-   * end-of-stream once the queue drains. Asynchronous producers (the
-   * refragmenter) whose media arrives after the stream controller's
-   * terminal-range read announce their last fragment this way. Optional;
-   * conversion-completion wiring on a later branch supersedes it and the
-   * field goes away.
-   */
-  readonly terminal?: boolean;
 }

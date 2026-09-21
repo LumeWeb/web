@@ -16,6 +16,7 @@ import { type WorkerCompositionHost } from '../worker.ts';
 import {
   boundedIndexedFmp4Payload,
   concatBytes,
+  FakeLoadPipeline,
   fakeSiaSdk,
   flush,
   permissiveCapabilities,
@@ -213,6 +214,7 @@ describe('installSiaVideoSourceWorker (default Sia composition root)', () => {
       installSiaVideoSourceWorker({
         capabilities: permissiveCapabilities(),
         createSdk: () => Promise.resolve(sdk),
+        loadPipeline: new FakeLoadPipeline(),
         post: (message) => posted.push(message),
         supportsWorkerMse: () => true,
       });
@@ -281,6 +283,7 @@ describe('installSiaVideoSourceWorker (default Sia composition root)', () => {
       installSiaVideoSourceWorker({
         capabilities: permissiveCapabilities(),
         createSdk,
+        loadPipeline: new FakeLoadPipeline(),
         post: (message) => posted.push(message),
         supportsWorkerMse: () => false,
       });
@@ -330,6 +333,7 @@ describe('installSiaVideoSourceWorker (default Sia composition root)', () => {
       installSiaVideoSourceWorker({
         capabilities: permissiveCapabilities(),
         createSdk: () => Promise.resolve(sdk),
+        loadPipeline: new FakeLoadPipeline(),
         post: (message) => posted.push(message),
       });
       mount.fire({ config: WORKER_CONFIG, requestId: 1, type: 'HELLO' });
@@ -378,6 +382,7 @@ describe('createDefaultWorkerComposition (actual installed default root, browser
         return mediaSource as unknown as MediaSource;
       },
       createSdk: () => Promise.resolve(sdk),
+      loadPipeline: new FakeLoadPipeline(),
       post: (message) => messages.push(message),
       supportsWorkerMse: () => true,
     });
@@ -410,6 +415,7 @@ describe('createDefaultWorkerComposition (actual installed default root, browser
         return mediaSource as unknown as MediaSource;
       },
       createSdk: () => Promise.resolve(sdk),
+      loadPipeline: new FakeLoadPipeline(),
       post: (message) => messages.push(message),
       supportsWorkerMse: () => true,
     });

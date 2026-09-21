@@ -1,8 +1,8 @@
 /**
- * TDD contract for the `Clock` seam: the injected time surface
- * StreamController / LoadPipeline use for throughput estimates, stall
- * watchdogs, and eviction windows. `Clock` is injectable so those decisions
- * are deterministic in tests (`clock?: Clock` in the coordinator bag).
+ * The `Clock` seam: the injected time surface StreamController / LoadPipeline
+ * use for throughput estimates, stall watchdogs, and eviction windows.
+ * `Clock` is injectable so those decisions are deterministic in tests
+ * (`clock?: Clock` in the coordinator bag).
  *
  * `wallClock()` is the production default (monotonic `performance.now()` plus
  * a media-playhead provider); `ManualClock` is the deterministic test double

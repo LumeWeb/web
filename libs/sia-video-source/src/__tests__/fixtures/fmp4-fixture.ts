@@ -1,15 +1,18 @@
 /**
- * Shared deterministic fMP4 + SDK fixtures for the composition/worker-entry
- * specs: a tiny indexed fMP4 payload whose three
- * 30 s RAP ranges are marked 0x11/0x22/0x33, a fake Sia SDK slicing that
- * payload over `download`, a permissive capability snapshot, and the small
- * byte helpers the specs use. Everything is codec-legal and self-contained so
- * container/index/producer behavior never needs the real SDK or network.
+ * Shared deterministic transport + composition fixtures for the
+ * composition/worker-entry specs: a fake Sia SDK slicing a payload over
+ * `download`, a permissive capability snapshot, the fake ready `LoadPipeline`
+ * the composition-root tests inject (so no real inspection runs), and the
+ * small byte helpers the specs use. The composition layout is protocol/wiring
+ * only — nothing here parses media or asserts media validity.
  */
 import { capabilityVerdict } from '../../capabilities/codec-verdict.ts';
 import type { PlaybackCapabilities } from '../../capabilities/browser-capabilities.ts';
 import type { Slab } from '@siafoundation/sia-storage';
+import type { MediaLoadResult, MediaPlayback } from '../../media/library-load.ts';
 import type { SiaObjectLike } from '../../ranged-reader.ts';
+import type { LoadPipeline, LoadRequest } from '../../session/load-pipeline.ts';
+import type { AppendSink } from '../../sink/append-sink.ts';
 import type { SiaByteSourceSdk } from '../../transport/sia-byte-source.ts';
 
 export interface FakeSiaSdkResult {
@@ -17,6 +20,64 @@ export interface FakeSiaSdkResult {
   objectKeys: string[];
   sdk: SiaByteSourceSdk;
   shareForms: string[];
+}
+
+/** Deterministic ready pipeline for composition tests; records every call. */
+export class FakeLoadPipeline implements LoadPipeline {
+  readonly calls: LoadRequest[] = [];
+  readonly results: MediaLoadResult[];
+
+  constructor(results: MediaLoadResult[] = [readyLoadResult()]) {
+    this.results = results;
+  }
+
+  run(request: LoadRequest): Promise<MediaLoadResult> {
+    this.calls.push(request);
+    const next = this.results.shift();
+    return Promise.resolve(next ?? readyLoadResult());
+  }
+}
+
+/**
+ * Playback fake conforming to the final callbacks-object contract. On `start`
+ * it appends three identifiable marker units (init + two media) so composition
+ * tests can assert sink-mode routing without real media bytes.
+ */
+export class FakeMediaPlayback implements MediaPlayback {
+  disposed = 0;
+  sink: AppendSink | null = null;
+  started = 0;
+  #disposed = false;
+  #onComplete: (() => void) | null = null;
+  #onError: ((error: unknown) => void) | null = null;
+
+  complete(): void {
+    this.#onComplete?.();
+  }
+
+  dispose(): void {
+    if (this.#disposed) return;
+    this.#disposed = true;
+    this.disposed += 1;
+  }
+
+  fail(error: unknown): void {
+    this.#onError?.(error);
+  }
+
+  start(
+    sink: AppendSink,
+    _loadGeneration: number,
+    callbacks: { readonly onComplete: () => void; readonly onError: (error: unknown) => void },
+  ): void {
+    this.started += 1;
+    this.sink = sink;
+    this.#onComplete = callbacks.onComplete;
+    this.#onError = callbacks.onError;
+    sink.append({ bytes: new Uint8Array([0x11, 0x11, 0x11, 0x11]), kind: 'init' });
+    sink.append({ bytes: new Uint8Array([0x22, 0x22, 0x22, 0x22]), kind: 'media' });
+    sink.append({ bytes: new Uint8Array([0x33, 0x33, 0x33, 0x33]), kind: 'media' });
+  }
 }
 
 /** Three 30 s RAP ranges, each 5008 bytes (segments marked 0x11/0x22/0x33). */
@@ -114,6 +175,21 @@ export function permissiveCapabilities(): PlaybackCapabilities {
     mseSupported: () => true,
     webCodecsAvailable: () => false,
     workerHandleAvailable: () => false,
+  };
+}
+
+/** A ready verdict that never involves real media bytes or mediabunny objects. */
+export function readyLoadResult(playback: MediaPlayback = new FakeMediaPlayback()): MediaLoadResult {
+  return {
+    container: 'mp4',
+    durationSeconds: 6,
+    mime: 'video/mp4; codecs="avc1.640032,mp4a.40.2"',
+    playback,
+    status: 'ready',
+    tracks: [
+      { codec: 'avc1.640032', kind: 'video' },
+      { codec: 'mp4a.40.2', kind: 'audio' },
+    ],
   };
 }
 

@@ -14,11 +14,10 @@ import {
   type SiaObjectLike,
   type SiaSdkLike,
 } from './ranged-reader.ts';
+import type { LoadPipeline } from './session/load-pipeline.ts';
 
-/** Bytes fetched before playback, purely to sniff the container. */
-export const HEAD_PROBE_LENGTH = 4096;
 /** Back-buffer window the worker-side MSE root evicts beyond. */
-export const FINITE_VOD_BACK_BUFFER_SECONDS = 30;
+export const MSE_BACK_BUFFER_SECONDS = 30;
 
 /** Outbound protocol channel (same shape as the coordinator's `PostMessage`). */
 export type PostMessage = (message: WorkerToMainMessage, transfer?: Transferable[]) => void;
@@ -58,7 +57,7 @@ export interface SiaVideoWorkerOptions {
    * {@link WorkerCompositionHost} (e.g. an injected
    * `createSiaWorkerComposition`-built `SessionCoordinator`) instead of the
    * default worker-side Sia composition root. The options are forwarded so an
-   * injected root can reuse `post`, `supportsWorkerMse`, `stallTimeoutMs`, etc.
+   * injected root can reuse `post`, `supportsWorkerMse`, `loadPipeline`, etc.
    */
   createCompositionRoot?: (options: SiaVideoWorkerOptions) => WorkerCompositionHost;
   /**
@@ -77,16 +76,13 @@ export interface SiaVideoWorkerOptions {
    * copy and stays inside this isolate — it must not be forwarded anywhere.
    */
   createSdk?: (config: undefined | WorkerConfig, appKeySeed: null | Uint8Array) => Promise<SiaVideoSdk>;
+  /**
+   * Injected load-pipeline seam for package-owned tests; production defaults to
+   * the real media-library pipeline owned by the composition root.
+   */
+  loadPipeline?: LoadPipeline;
   /** Overrides message delivery; useful when the caller wires its own channel. */
   post?: PostMessage;
-  /**
-   * Stall watchdog for every SDK read the worker opens: maximum milliseconds a
-   * read may yield no bytes before it is aborted and a bounded retry of the
-   * same range is attempted, so a read stuck on exhausted WebTransport
-   * sessions (Chromium's ~64 cap) never leaves the media element `seeking`
-   * forever. Defaults to 20_000 ms; pass a value to tune it.
-   */
-  stallTimeoutMs?: number;
   /** Overrides the worker-MSE capability probe (e.g. for alternative runtimes). */
   supportsWorkerMse?: () => boolean;
 }

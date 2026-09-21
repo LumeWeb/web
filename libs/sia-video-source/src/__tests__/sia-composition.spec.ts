@@ -1,7 +1,7 @@
 /**
- * TDD contract for the production composition-root binding: the seam that
- * wires the `SessionCoordinator` to the real Sia transport and worker-mode
- * MSE, without rewriting `RangedReader`/`ReadBudget`/`LruChunkCache` or the
+ * Contract for the production composition-root binding: the seam that wires
+ * the `SessionCoordinator` to the real Sia transport and worker-mode MSE,
+ * without rewriting `RangedReader`/`ReadBudget`/`LruChunkCache` or the
  * worker's `MseAppendPipe` internals.
  *
  * The three exported seams under test:
@@ -16,36 +16,40 @@
  *   with the existing worker (`ATTACH_OK.mode`, `SOURCE_OK.info`,
  *   `HELLO_OK.features.workerMse`, CHUNK posting when no MSE is supplied).
  *
- * Scope: exercised over fMP4 fixtures through the real Sia transport
- * composition; per-container producer internals are covered by the dedicated
- * producer specs.
+ * Scope: composition tests inject a fake ready `LoadPipeline` so no real
+ * inspection runs. The real Sia transport factory is still exercised (locator
+ * resolution, SDK wiring, shared window cache); the fake transport only slices
+ * bytes and asserts nothing about media validity.
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { AppMetadata, Slab } from '@siafoundation/sia-storage';
-import { capabilityVerdict } from '../capabilities/codec-verdict.ts';
-import type { PlaybackCapabilities } from '../capabilities/browser-capabilities.ts';
+import type { AppMetadata } from '@siafoundation/sia-storage';
 import { encryptToWorker } from '../app-key-handshake.ts';
 import type { WorkerConfig, WorkerToMainMessage } from '../protocol.ts';
 import type { SiaObjectLike } from '../ranged-reader.ts';
 import { createSiaWorkerComposition } from '../session/sia-composition.ts';
-import { defaultSupportsWorkerMse, type SessionCoordinator } from '../session/session-coordinator.ts';
+import {
+  defaultSupportsWorkerMse,
+  type SessionCoordinator,
+} from '../session/session-coordinator.ts';
 import { createWorkerMseRoot } from '../session/worker-mse-root.ts';
 import { createWorkerMseSinkFactory } from '../sink/mse-adapter.ts';
 import type { ByteSource } from '../transport/byte-source.ts';
+import type { SiaByteSourceSdk } from '../transport/sia-byte-source.ts';
+import { createSiaByteSourceFactory } from '../transport/sia-byte-source.ts';
 import {
-  createSiaByteSourceFactory,
-  type SiaByteSourceSdk,
-} from '../transport/sia-byte-source.ts';
+  concatBytes,
+  containsInOrder,
+  FakeLoadPipeline,
+  FakeMediaPlayback,
+  fakeSiaSdk,
+  flush,
+  permissiveCapabilities,
+  readyLoadResult,
+  shareSrc,
+} from './fixtures/fmp4-fixture.ts';
 
-// ---- transport fixtures ------------------------------------------------------
-
-interface FakeSiaSdkResult {
-  downloads: number[];
-  objectKeys: string[];
-  sdk: SiaByteSourceSdk;
-  shareForms: string[];
-}
+// ---- MSE harness (mirrors append-sink.spec.ts) -------------------------------
 
 class FakeSourceBuffer extends EventTarget {
   abortCalls = 0;
@@ -104,113 +108,12 @@ class FakeMediaSource extends EventTarget {
   }
 }
 
-/** Three 30 s RAP ranges, each 5008 bytes (segments marked 0x11/0x22/0x33). */
-function boundedIndexedFmp4Payload(): Uint8Array {
-  const u16 = (value: number) => [value >>> 8, value & 255];
-  const u32 = (value: number) => [(value >>> 24) & 255, (value >>> 16) & 255, (value >>> 8) & 255, value & 255];
-  const segmentLength = 5008;
-  const ftyp = isoBox('ftyp', [105, 115, 111, 109]);
-  const mvhd = isoBox('mvhd', [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...u32(1000), ...u32(90_000)]);
-  const moov = isoBox('moov', [...mvhd]);
-  const sidx = isoBox('sidx', [
-    0, 0, 0, 0, ...u32(1), ...u32(1000), ...u32(0), ...u32(0), ...u16(0), ...u16(3),
-    ...u32(segmentLength), ...u32(30_000), 0x80, 0, 0, 0,
-    ...u32(segmentLength), ...u32(30_000), 0x80, 0, 0, 0,
-    ...u32(segmentLength), ...u32(30_000), 0x80, 0, 0, 0,
-  ]);
-  const segment = (marker: number) =>
-    new Uint8Array([...isoBox('moof', []), ...isoBox('mdat', Array.from(new Uint8Array(4992).fill(marker)))]);
-  return new Uint8Array([...ftyp, ...moov, ...sidx, ...segment(0x11), ...segment(0x22), ...segment(0x33)]);
+/** Minimal HELLO `WorkerConfig` connection identity for preference tests. */
+function appMetadata(): AppMetadata {
+  return { appId: 'app', callbackUrl: '', description: '', logoUrl: '', name: 'app', serviceUrl: 'https://app.example' };
 }
 
-// ---- MSE harness (mirrors append-sink.spec.ts) -------------------------------
-
-function concatBytes(chunks: Uint8Array[]): Uint8Array {
-  const total = chunks.reduce((sum, chunk) => sum + chunk.byteLength, 0);
-  const out = new Uint8Array(total);
-  let offset = 0;
-  for (const chunk of chunks) {
-    out.set(chunk, offset);
-    offset += chunk.byteLength;
-  }
-  return out;
-}
-
-function containsInOrder(bytes: Uint8Array, needle: number[]): boolean {
-  let at = 0;
-  for (const value of needle) {
-    const index = bytes.indexOf(value, at);
-    if (index < 0) return false;
-    at = index + 1;
-  }
-  return true;
-}
-
-// ---- fMP4 fixture (mirrors session-coordinator.spec.ts) ----------------------
-
-// objectSize() derives the payload size from the slab map, so fakes must
-// return slabs whose lengths add up to the content length.
-function fakeObject(contentLength: number): SiaObjectLike {
-  const slab = { length: contentLength } as unknown as Slab;
-  return { id: () => 'composition-object', size: () => contentLength, slabs: () => [slab] };
-}
-
-/** SDK (object + optional sharedObject) whose downloads slice `payload`. */
-function fakeSiaSdk(payload: Uint8Array, options: { shared?: boolean } = {}): FakeSiaSdkResult {
-  const downloads: number[] = [];
-  const objectKeys: string[] = [];
-  const shareForms: string[] = [];
-  const sdk = {
-    download: (_object: SiaObjectLike, dl?: { length?: number; offset?: number }) => {
-      downloads.push(dl?.offset ?? 0);
-      const start = dl?.offset ?? 0;
-      const end = Math.min(start + (dl?.length ?? payload.length - start), payload.length);
-      return new ReadableStream<Uint8Array>({
-        start: (controller) => {
-          const size = Math.max(0, end - start);
-          if (size > 0) controller.enqueue(payload.slice(start, end));
-          controller.close();
-        },
-      });
-    },
-    object: (key: string): Promise<SiaObjectLike> => {
-      objectKeys.push(key);
-      return Promise.resolve(fakeObject(payload.length));
-    },
-    ...(options.shared
-      ? {
-          sharedObject: (fetchForm: string): Promise<SiaObjectLike> => {
-            shareForms.push(fetchForm);
-            return Promise.resolve(fakeObject(payload.length));
-          },
-        }
-      : {}),
-  };
-  return { downloads, objectKeys, sdk, shareForms };
-}
-
-async function flush(): Promise<void> {
-  await Promise.resolve();
-  await new Promise((resolve) => setTimeout(resolve, 10));
-}
-
-function isoBox(type: string, body: number[]): number[] {
-  const u32 = (value: number) => [(value >>> 24) & 255, (value >>> 16) & 255, (value >>> 8) & 255, value & 255];
-  const size = body.length + 8;
-  return [...u32(size), ...type.split('').map((c) => c.charCodeAt(0)), ...body];
-}
-
-function permissiveCapabilities(): PlaybackCapabilities {
-  return {
-    canConstructWorkerMse: () => false,
-    mayDecode: () => capabilityVerdict['unknown-codec'],
-    mseSupported: () => true,
-    webCodecsAvailable: () => false,
-    workerHandleAvailable: () => false,
-  };
-}
-
-/** Shared-object resolving SDK whose `object()` rejects (network failure). */
+/** SDK whose `object()` rejects (network failure) while `download` slices payload. */
 function rejectingObjectSdk(payload: Uint8Array): SiaByteSourceSdk {
   return {
     download: (_object: SiaObjectLike, dl?: { length?: number; offset?: number }) => {
@@ -228,19 +131,6 @@ function rejectingObjectSdk(payload: Uint8Array): SiaByteSourceSdk {
   };
 }
 
-function segmentMarker(marker: number): number[] {
-  return [marker, marker, marker, marker, marker, marker, marker, marker];
-}
-
-/** Valid Sia share URL (64-hex object key + 32-byte base64url key). */
-function shareSrc(): string {
-  const key = Uint8Array.from({ length: 32 }, (_, i) => i + 1);
-  let binary = '';
-  for (const byte of key) binary += String.fromCharCode(byte);
-  const fragment = btoa(binary).replace(/\+/g, '-').replace(/\//g, '_');
-  return `https://indexer.example/objects/${'a1b2c3d4e5f60718293a4b5c6d7e8f90112233445566778899aabbccddeeff01'}/shared?req=abc#encryption_key=${fragment}`;
-}
-
 // ---- tests -------------------------------------------------------------------
 
 describe('createSiaByteSourceFactory (Sia transport seam)', () => {
@@ -253,7 +143,7 @@ describe('createSiaByteSourceFactory (Sia transport seam)', () => {
     expect(objectKeys).toEqual(['pin-key']);
 
     const chunks: Uint8Array[] = [];
-    for await (const chunk of source.read({ length: 1024, offset: 100 }, { epoch: 1 })) {
+    for await (const chunk of source.read({ length: 1024, offset: 100 }, { loadGeneration: 1 })) {
       chunks.push(chunk);
     }
     const delivered = concatBytes(chunks);
@@ -273,7 +163,7 @@ describe('createSiaByteSourceFactory (Sia transport seam)', () => {
     expect(shareForms).toEqual([shareSrc().replace('https://', 'sia://')]);
 
     const chunks: Uint8Array[] = [];
-    for await (const chunk of source.read({ length: 512, offset: 0 }, { epoch: 1 })) {
+    for await (const chunk of source.read({ length: 512, offset: 0 }, { loadGeneration: 1 })) {
       chunks.push(chunk);
     }
     expect(concatBytes(chunks).byteLength).toBe(512);
@@ -295,9 +185,9 @@ describe('createSiaByteSourceFactory (Sia transport seam)', () => {
     const second = await factory('b');
     // Same range read through two sources; the shared cache replays the second
     // delivery, so only ONE SDK download actually opens for the window.
-    const drain = async (source: ByteSource) => {
+    const drain = async (source: ByteSource): Promise<number> => {
       const chunks: Uint8Array[] = [];
-      for await (const chunk of source.read({ length: 512, offset: 0 }, { epoch: 1 })) {
+      for await (const chunk of source.read({ length: 512, offset: 0 }, { loadGeneration: 1 })) {
         chunks.push(chunk);
       }
       return concatBytes(chunks).byteLength;
@@ -335,7 +225,7 @@ describe('createWorkerMseSinkFactory (worker MSE seam)', () => {
     expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([1, 2]);
   });
 
-  it('forwards resetParser and requestEndOfStream epoch scoping to the pipe', async () => {
+  it('forwards resetParser and requestEndOfStream load-generation scoping to the pipe', async () => {
     const fakeMediaSource = new FakeMediaSource();
     const fakeSourceBuffer = new FakeSourceBuffer();
 
@@ -360,15 +250,16 @@ describe('createWorkerMseSinkFactory (worker MSE seam)', () => {
 });
 
 describe('createSiaWorkerComposition (composition root)', () => {
-  it('wires the Sia transport and worker MSE into a SessionCoordinator', async () => {
-    const payload = boundedIndexedFmp4Payload();
-    const { sdk } = fakeSiaSdk(payload, { shared: true });
+  it('wires the real Sia transport and worker MSE into a SessionCoordinator', async () => {
+    const { sdk } = fakeSiaSdk(new Uint8Array(2048).fill(1), { shared: true });
     const fakeMediaSource = new FakeMediaSource();
     const fakeSourceBuffer = new FakeSourceBuffer();
     const messages: WorkerToMainMessage[] = [];
+    const pipeline = new FakeLoadPipeline();
 
     const coordinator = createSiaWorkerComposition({
       capabilities: permissiveCapabilities(),
+      loadPipeline: pipeline,
       post: (message) => messages.push(message),
       sdk,
       supportsWorkerMse: () => true,
@@ -388,32 +279,41 @@ describe('createSiaWorkerComposition (composition root)', () => {
     await coordinator.handleMessage({ requestId: 1, type: 'ATTACH' });
     expect(messages.find((m) => m.type === 'ATTACH_OK')).toMatchObject({ mode: 'worker', requestId: 1 });
 
-    await coordinator.handleMessage({ preload: 'auto', requestId: 2, src: 'fmp4', type: 'SOURCE' });
+    await coordinator.handleMessage({ preload: 'auto', requestId: 2, src: 'pin-key', type: 'SOURCE' });
     await flush();
 
+    // The fake pipeline resolved the real SiaByteSource (never inspected) and
+    // the load was accepted from its ready verdict.
+    expect(pipeline.calls).toHaveLength(1);
     const ok = messages.find((m) => m.type === 'SOURCE_OK');
     expect(ok).toBeDefined();
     if (ok && ok.type === 'SOURCE_OK') {
       expect(ok.requestId).toBe(2);
-      expect(ok.info.container).toBe('fmp4');
+      expect(ok.info.container).toBe('mp4');
       expect(ok.info.mode).toBe('worker');
+      expect(ok.info.mime).toBe('video/mp4; codecs="avc1.640032,mp4a.40.2"');
+      expect(ok.info.tracks).toEqual([
+        { codec: 'avc1.640032', kind: 'video' },
+        { codec: 'mp4a.40.2', kind: 'audio' },
+      ]);
     }
 
-    // Worker mode: no CHUNK is posted; produced segments went to the MSE sink.
+    // Worker mode: no CHUNK is posted; the fake playback's marker units went to
+    // the MSE sink in order.
     expect(messages.filter((m) => m.type === 'CHUNK')).toEqual([]);
     const delivered = concatBytes(fakeSourceBuffer.appended);
-    expect(containsInOrder(delivered, segmentMarker(0x11))).toBe(true);
-    expect(containsInOrder(delivered, segmentMarker(0x22))).toBe(true);
-    expect(containsInOrder(delivered, segmentMarker(0x33))).toBe(true);
+    expect(containsInOrder(delivered, [0x11])).toBe(true);
+    expect(containsInOrder(delivered, [0x22])).toBe(true);
+    expect(containsInOrder(delivered, [0x33])).toBe(true);
   });
 
   it('posts CHUNK (protocol-compatible) when no worker MSE is supplied', async () => {
-    const payload = boundedIndexedFmp4Payload();
-    const { sdk } = fakeSiaSdk(payload);
+    const { sdk } = fakeSiaSdk(new Uint8Array(2048).fill(1));
     const messages: WorkerToMainMessage[] = [];
 
     const coordinator = createSiaWorkerComposition({
       capabilities: permissiveCapabilities(),
+      loadPipeline: new FakeLoadPipeline(),
       post: (message) => messages.push(message),
       sdk,
       supportsWorkerMse: () => false,
@@ -422,22 +322,22 @@ describe('createSiaWorkerComposition (composition root)', () => {
     await coordinator.handleMessage({ requestId: 1, type: 'ATTACH' });
     expect(messages.find((m) => m.type === 'ATTACH_OK')).toMatchObject({ mode: 'main' });
 
-    await coordinator.handleMessage({ preload: 'auto', requestId: 2, src: 'fmp4', type: 'SOURCE' });
+    await coordinator.handleMessage({ preload: 'auto', requestId: 2, src: 'pin-key', type: 'SOURCE' });
     await flush();
 
     const chunks = messages.filter((m) => m.type === 'CHUNK');
     expect(chunks.length).toBeGreaterThan(0);
     const delivered = concatBytes(chunks.map((c) => (c.type === 'CHUNK' ? c.bytes : new Uint8Array(0))));
-    expect(containsInOrder(delivered, segmentMarker(0x11))).toBe(true);
+    expect(containsInOrder(delivered, [0x11])).toBe(true);
   });
 
   it('resolves a Sia share URL end to end through the composition root', async () => {
-    const payload = boundedIndexedFmp4Payload();
-    const { objectKeys, sdk, shareForms } = fakeSiaSdk(payload, { shared: true });
+    const { objectKeys, sdk, shareForms } = fakeSiaSdk(new Uint8Array(2048).fill(1), { shared: true });
     const messages: WorkerToMainMessage[] = [];
 
     const coordinator = createSiaWorkerComposition({
       capabilities: permissiveCapabilities(),
+      loadPipeline: new FakeLoadPipeline(),
       post: (message) => messages.push(message),
       sdk,
       supportsWorkerMse: () => false,
@@ -450,12 +350,11 @@ describe('createSiaWorkerComposition (composition root)', () => {
     expect(shareForms).toEqual([shareSrc().replace('https://', 'sia://')]);
     const ok = messages.find((m) => m.type === 'SOURCE_OK');
     expect(ok).toBeDefined();
-    expect(ok?.type === 'SOURCE_OK' && ok.info.container).toBe('fmp4');
+    expect(ok?.type === 'SOURCE_OK' && ok.info.container).toBe('mp4');
   });
 
   it('wires a workerMseRoot: worker mode, per-load HANDLE transfer, playhead reflection, no CHUNK', async () => {
-    const payload = boundedIndexedFmp4Payload();
-    const { sdk } = fakeSiaSdk(payload);
+    const { sdk } = fakeSiaSdk(new Uint8Array(2048).fill(1));
     const mediaSources: FakeMediaSource[] = [];
     const messages: WorkerToMainMessage[] = [];
     const root = createWorkerMseRoot({
@@ -470,6 +369,7 @@ describe('createSiaWorkerComposition (composition root)', () => {
 
     const coordinator = createSiaWorkerComposition({
       capabilities: permissiveCapabilities(),
+      loadPipeline: new FakeLoadPipeline(),
       post: (message) => messages.push(message),
       sdk,
       supportsWorkerMse: () => true,
@@ -479,7 +379,7 @@ describe('createSiaWorkerComposition (composition root)', () => {
     await coordinator.handleMessage({ requestId: 1, type: 'ATTACH' });
     expect(messages.find((m) => m.type === 'ATTACH_OK')).toMatchObject({ mode: 'worker', requestId: 1 });
 
-    await coordinator.handleMessage({ preload: 'auto', requestId: 2, src: 'fmp4', type: 'SOURCE' });
+    await coordinator.handleMessage({ preload: 'auto', requestId: 2, src: 'pin-key', type: 'SOURCE' });
     await flush();
 
     // One worker MediaSource per accepted load, its handle transferred as HANDLE.
@@ -488,12 +388,12 @@ describe('createSiaWorkerComposition (composition root)', () => {
     expect(handle?.type === 'HANDLE' && handle.requestId).toBe(2);
     expect(root.deps.getMediaSource()).toBe(mediaSources[0]);
 
-    // Worker mode: produced segments go to the MSE sink, never as CHUNK.
+    // Worker mode: the fake playback's units reached the MSE sink, never CHUNK.
     expect(messages.filter((m) => m.type === 'CHUNK')).toEqual([]);
     const delivered = concatBytes(mediaSources[0].sourceBuffers[0].appended);
-    expect(containsInOrder(delivered, segmentMarker(0x11))).toBe(true);
-    expect(containsInOrder(delivered, segmentMarker(0x22))).toBe(true);
-    expect(containsInOrder(delivered, segmentMarker(0x33))).toBe(true);
+    expect(containsInOrder(delivered, [0x11])).toBe(true);
+    expect(containsInOrder(delivered, [0x22])).toBe(true);
+    expect(containsInOrder(delivered, [0x33])).toBe(true);
 
     // The validated playhead is reflected into the root's eviction boundary.
     await coordinator.handleMessage({ requestId: 2, time: 15, type: 'PLAYHEAD' });
@@ -501,10 +401,10 @@ describe('createSiaWorkerComposition (composition root)', () => {
   });
 
   it('keeps the main-thread CHUNK fallback when worker MSE is unsupported even with a root', async () => {
-    const payload = boundedIndexedFmp4Payload();
-    const { sdk } = fakeSiaSdk(payload);
+    const { sdk } = fakeSiaSdk(new Uint8Array(2048).fill(1));
     const opened: FakeMediaSource[] = [];
     const messages: WorkerToMainMessage[] = [];
+    const playback = new FakeMediaPlayback();
     const root = createWorkerMseRoot({
       backBufferSeconds: 30,
       createMediaSource: () => {
@@ -517,6 +417,7 @@ describe('createSiaWorkerComposition (composition root)', () => {
 
     const coordinator = createSiaWorkerComposition({
       capabilities: permissiveCapabilities(),
+      loadPipeline: new FakeLoadPipeline([readyLoadResult(playback)]),
       post: (message) => messages.push(message),
       sdk,
       supportsWorkerMse: () => false,
@@ -526,21 +427,25 @@ describe('createSiaWorkerComposition (composition root)', () => {
     await coordinator.handleMessage({ requestId: 1, type: 'ATTACH' });
     expect(messages.find((m) => m.type === 'ATTACH_OK')).toMatchObject({ mode: 'main' });
 
-    await coordinator.handleMessage({ preload: 'auto', requestId: 2, src: 'fmp4', type: 'SOURCE' });
+    await coordinator.handleMessage({ preload: 'auto', requestId: 2, src: 'pin-key', type: 'SOURCE' });
     await flush();
 
     // The root is never opened; the coordinator posts CHUNK as before.
     expect(opened).toHaveLength(0);
     expect(messages.filter((m) => m.type === 'CHUNK').length).toBeGreaterThan(0);
     expect(messages.filter((m) => m.type === 'HANDLE')).toEqual([]);
-    expect(messages.find((m) => m.type === 'ENDED')).toBeDefined();
+
+    // Main-mode completion posts one ENDED for the load's request id.
+    playback.complete();
+    await flush();
+    expect(messages.find((m) => m.type === 'ENDED')?.requestId).toBe(2);
   });
 
   it('honors a host main preference: CHUNK and no HANDLE even with a root on a capable runtime', async () => {
-    const payload = boundedIndexedFmp4Payload();
-    const { sdk } = fakeSiaSdk(payload);
+    const { sdk } = fakeSiaSdk(new Uint8Array(2048).fill(1));
     const opened: FakeMediaSource[] = [];
     const messages: WorkerToMainMessage[] = [];
+    const playback = new FakeMediaPlayback();
     const root = createWorkerMseRoot({
       backBufferSeconds: 30,
       createMediaSource: () => {
@@ -553,6 +458,7 @@ describe('createSiaWorkerComposition (composition root)', () => {
 
     const coordinator = createSiaWorkerComposition({
       capabilities: permissiveCapabilities(),
+      loadPipeline: new FakeLoadPipeline([readyLoadResult(playback)]),
       post: (message) => messages.push(message),
       sdk,
       supportsWorkerMse: () => true,
@@ -567,7 +473,7 @@ describe('createSiaWorkerComposition (composition root)', () => {
     await coordinator.handleMessage({ requestId: 2, type: 'ATTACH' });
     expect(messages.find((m) => m.type === 'ATTACH_OK')).toMatchObject({ mode: 'main' });
 
-    await coordinator.handleMessage({ preload: 'auto', requestId: 3, src: 'fmp4', type: 'SOURCE' });
+    await coordinator.handleMessage({ preload: 'auto', requestId: 3, src: 'pin-key', type: 'SOURCE' });
     await flush();
 
     // The host preference overrides the capable runtime: the root is never
@@ -576,16 +482,13 @@ describe('createSiaWorkerComposition (composition root)', () => {
     expect(messages.filter((m) => m.type === 'HANDLE')).toEqual([]);
     expect(messages.filter((m) => m.type === 'CHUNK').length).toBeGreaterThan(0);
     expect(messages.find((m) => m.type === 'SOURCE_OK')).toMatchObject({ info: { mode: 'main' } });
-    expect(messages.find((m) => m.type === 'ENDED')).toBeDefined();
+
+    // Completion posts one ENDED for the accepted load.
+    playback.complete();
+    await flush();
+    expect(messages.find((m) => m.type === 'ENDED')?.requestId).toBe(3);
   });
 });
-
-
-
-/** Minimal HELLO `WorkerConfig` connection identity for preference tests. */
-function appMetadata(): AppMetadata {
-  return { appId: 'app', callbackUrl: '', description: '', logoUrl: '', name: 'app', serviceUrl: 'https://app.example' };
-}
 
 describe('createSiaWorkerComposition (lazy real-transport root binding)', () => {
   // A HELLO config whose app metadata matches the Sia `AppMetadata` shape.
@@ -602,8 +505,7 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
   };
 
   it('builds the SDK from HELLO config + decrypted APP_KEY seed on the first SOURCE', async () => {
-    const payload = boundedIndexedFmp4Payload();
-    const { sdk } = fakeSiaSdk(payload);
+    const { sdk } = fakeSiaSdk(new Uint8Array(2048).fill(1));
     const built: { config: undefined | WorkerConfig; seed: null | Uint8Array }[] = [];
     const createSdk: (config: undefined | WorkerConfig, seed: null | Uint8Array) => Promise<SiaByteSourceSdk> = vi.fn(
       (config: undefined | WorkerConfig, seed: null | Uint8Array) => {
@@ -616,6 +518,7 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
     const coordinator = createSiaWorkerComposition({
       capabilities: permissiveCapabilities(),
       createSdk,
+      loadPipeline: new FakeLoadPipeline(),
       post: (message) => messages.push(message),
       supportsWorkerMse: () => false,
     });
@@ -640,11 +543,11 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
     expect(built[0].config).toEqual(WORKER_CONFIG);
     expect(built[0].seed).toEqual(seed);
     const ok = messages.find((m) => m.type === 'SOURCE_OK');
-    expect(ok?.type === 'SOURCE_OK' && ok.info.container).toBe('fmp4');
+    expect(ok?.type === 'SOURCE_OK' && ok.info.container).toBe('mp4');
   });
 
   it('reuses the memoized SDK for repeat loads and rebuilds + disposes it on a connection change', async () => {
-    const payload = boundedIndexedFmp4Payload();
+    const payload = new Uint8Array(2048).fill(1);
     const sdkA = fakeSiaSdk(payload).sdk;
     const sdkB = fakeSiaSdk(payload).sdk;
     const disposeA = vi.fn();
@@ -661,6 +564,11 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
       },
     );
     const messages: WorkerToMainMessage[] = [];
+    const pipeline = new FakeLoadPipeline([
+      readyLoadResult(),
+      readyLoadResult(),
+      readyLoadResult(),
+    ]);
     const load = async (requestId: number, indexerUrl: string): Promise<void> => {
       await coordinator.handleMessage({ config: { ...WORKER_CONFIG, indexerUrl }, requestId, type: 'HELLO' });
       const helloOk = messages.find((m) => m.type === 'HELLO_OK');
@@ -676,6 +584,7 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
     const coordinator = createSiaWorkerComposition({
       capabilities: permissiveCapabilities(),
       createSdk,
+      loadPipeline: pipeline,
       post: (message) => messages.push(message),
       supportsWorkerMse: () => false,
     });

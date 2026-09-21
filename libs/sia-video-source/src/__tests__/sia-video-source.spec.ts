@@ -93,7 +93,7 @@ describe('SiaVideoSource (host state machine)', () => {
 
     if (!source) throw new Error('SOURCE was not sent');
     worker.reply({
-      info: { container: 'fmp4', durationSeconds: null, mime: 'video/mp4', mode: 'main' },
+      info: { container: 'fmp4', durationSeconds: null, mime: 'video/mp4', mode: 'main', tracks: [] },
       requestId: source.requestId,
       type: 'SOURCE_OK',
     });
@@ -157,7 +157,7 @@ describe('SiaVideoSource (host state machine)', () => {
     host.src = '';
     // ...so the abandoned load's late failure must die with it — not surface
     // as a MediaError on the emptied element.
-    worker.reply({ context: 'late probe failure', kind: 'network', requestId: loadId, type: 'ERROR' });
+    worker.reply({ context: 'late load failure', kind: 'network', requestId: loadId, type: 'ERROR' });
     expect(host.error).toBeNull();
     expect(errorEvents).toBe(0);
 
@@ -246,7 +246,7 @@ describe('SiaVideoSource (host state machine)', () => {
       | { preload: string; requestId: number; src: string; type: 'SOURCE'; };
     if (!source) throw new Error('SOURCE was not sent');
     worker.reply({
-      info: { container: 'fmp4', durationSeconds: null, mime: 'video/mp4', mode: 'worker' },
+      info: { container: 'fmp4', durationSeconds: null, mime: 'video/mp4', mode: 'worker', tracks: [] },
       requestId: source.requestId,
       type: 'SOURCE_OK',
     });
@@ -413,8 +413,7 @@ describe('SiaVideoSource (host state machine)', () => {
 
     worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
     // Let the async seed→envelope chain (and whatever is chained behind it)
-    // settle; the old code posted ATTACH + flush synchronously in the
-    // HELLO_OK handler, so this wait is what exposes the ordering.
+    // settle; the ordering is only observable after it drains.
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     // The worker consumes the captured postMessage sequence FIFO: APP_KEY
@@ -432,7 +431,7 @@ describe('SiaVideoSource (host state machine)', () => {
       | { preload: string; requestId: number; src: string; type: 'SOURCE'; };
     expect(source?.src).toBe('fifo-ordered-object');
     worker.reply({
-      info: { container: 'fmp4', durationSeconds: null, mime: 'video/mp4', mode: 'main' },
+      info: { container: 'fmp4', durationSeconds: null, mime: 'video/mp4', mode: 'main', tracks: [] },
       requestId: source?.requestId ?? 0,
       type: 'SOURCE_OK',
     });
@@ -466,7 +465,7 @@ describe('SiaVideoSource (host state machine)', () => {
     // 'metadata') and the pipeline would stall at byte 0 forever — nothing
     // re-states the user's play after the attach rebuilt the pipeline. The
     // host must re-send PLAY aimed at the replayed source's load so the
-    // worker begins streaming once its probe completes.
+    // worker begins streaming once that load completes.
     const sentTypes = worker.sent.map((m) => m.type);
     expect(sentTypes.filter((t) => t === 'SOURCE' || t === 'PLAY')).toEqual(['SOURCE', 'PLAY']);
 
@@ -574,7 +573,7 @@ describe('SiaVideoSource (host state machine)', () => {
       | { requestId: number; type: 'SOURCE'; };
     if (!source) throw new Error('SOURCE was not sent');
     worker.reply({
-      info: { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main' },
+      info: { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main', tracks: [] },
       requestId: source.requestId,
       type: 'SOURCE_OK',
     });
@@ -613,7 +612,7 @@ describe('SiaVideoSource (host state machine)', () => {
       | { requestId: number; type: 'SOURCE'; };
     if (!source) throw new Error('SOURCE was not sent');
     worker.reply({
-      info: { container: 'fmp4', durationSeconds: null, mime: 'video/mp4', mode: 'main' },
+      info: { container: 'fmp4', durationSeconds: null, mime: 'video/mp4', mode: 'main', tracks: [] },
       requestId: source.requestId,
       type: 'SOURCE_OK',
     });
@@ -640,7 +639,7 @@ describe('SiaVideoSource (host state machine)', () => {
       | { requestId: number; type: 'SOURCE'; };
     if (!source) throw new Error('SOURCE was not sent');
     worker.reply({
-      info: { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main' },
+      info: { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main', tracks: [] },
       requestId: source.requestId,
       type: 'SOURCE_OK',
     });
@@ -670,7 +669,7 @@ describe('SiaVideoSource (host state machine)', () => {
       | { requestId: number; type: 'SOURCE'; };
     if (!source) throw new Error('SOURCE was not sent');
     worker.reply({
-      info: { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main' },
+      info: { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main', tracks: [] },
       requestId: source.requestId,
       type: 'SOURCE_OK',
     });
@@ -680,15 +679,24 @@ describe('SiaVideoSource (host state machine)', () => {
 
     const abortSpy = vi.spyOn(SourceBuffer.prototype, 'abort');
 
-    // Forward seek: the host resets the pipe for the new position and the
+    const timestampOffsetDescriptor = Object.getOwnPropertyDescriptor(SourceBuffer.prototype, 'timestampOffset');
+    const reanchorOffsets: number[] = [];
+    const timestampOffsetSpy = vi.spyOn(SourceBuffer.prototype, 'timestampOffset', 'set').mockImplementation(function (this: SourceBuffer, value: number) {
+      reanchorOffsets.push(value);
+      timestampOffsetDescriptor?.set?.call(this, value);
+    });
+
+    // Forward seek: the host resets the pipe for the new position, the
     // quiesced SourceBuffer's segment parser is aborted so the worker's fresh
     // fragment starts a new segment (the main-thread regression from the
-    // ac55a7b0 parser-reset change).
+    // ac55a7b0 parser-reset change), and the buffer is re-anchored at the new
+    // currentTime so the trimmed output's zero-based timestamps land there.
     target.currentTime = 45;
     target.dispatchEvent(new Event('seeking'));
     expect(worker.sent.at(-1)).toMatchObject({ time: 45, type: 'SEEK' });
     await settle(4);
     expect(abortSpy).toHaveBeenCalledTimes(1);
+    expect(reanchorOffsets).toEqual([45]);
 
     // Backward seek: another reset, another parser abort, same buffer reused.
     target.currentTime = 10;
@@ -696,15 +704,19 @@ describe('SiaVideoSource (host state machine)', () => {
     expect(worker.sent.at(-1)).toMatchObject({ time: 10, type: 'SEEK' });
     await settle(4);
     expect(abortSpy).toHaveBeenCalledTimes(2);
+    expect(reanchorOffsets).toEqual([45, 10]);
 
     // Forward again: rapid repeated seeks each reset the shared pipe exactly
-    // once — never re-entering, and never tearing the pipeline down.
+    // once — never re-entering, and never tearing the pipeline down — and each
+    // re-anchors the buffer at its own currentTime.
     target.currentTime = 30;
     target.dispatchEvent(new Event('seeking'));
     expect(worker.sent.at(-1)).toMatchObject({ time: 30, type: 'SEEK' });
     await settle(4);
     expect(abortSpy).toHaveBeenCalledTimes(3);
+    expect(reanchorOffsets).toEqual([45, 10, 30]);
 
+    timestampOffsetSpy.mockRestore();
     abortSpy.mockRestore();
     host.destroy();
   });
@@ -723,7 +735,7 @@ describe('SiaVideoSource (host state machine)', () => {
       | { requestId: number; type: 'SOURCE'; };
     if (!source) throw new Error('SOURCE was not sent');
     worker.reply({
-      info: { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main' },
+      info: { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main', tracks: [] },
       requestId: source.requestId,
       type: 'SOURCE_OK',
     });
@@ -782,7 +794,7 @@ describe('SiaVideoSource (host state machine)', () => {
       | { requestId: number; type: 'SOURCE'; };
     if (!source) throw new Error('SOURCE was not sent');
     worker.reply({
-      info: { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main' },
+      info: { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main', tracks: [] },
       requestId: source.requestId,
       type: 'SOURCE_OK',
     });

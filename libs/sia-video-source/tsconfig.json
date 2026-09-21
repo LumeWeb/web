@@ -9,5 +9,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "src/vendor/mux-js.d.ts"]
+  "include": ["src"],
 }

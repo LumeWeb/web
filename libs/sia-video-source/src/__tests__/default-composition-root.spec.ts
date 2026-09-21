@@ -5,23 +5,28 @@
  * MSE root / main-mode CHUNK fallback — not a directly-built coordinator.
  *
  * Focus: SDK transport + worker-MSE/main fallback lifecycle, cancellation,
- * teardown, and no stale handles. The two
- * RED tests — `DETACH` and `DESTROY` must release the worker MediaSource /
- * SourceBuffer a load opened — drive the `onAbandon` teardown seam on the
- * composition root; the rest validate that a superseded load's handle is
- * dropped immediately and that neither worker-MSE nor main-mode CHUNK
- * delivery can outlive its load.
+ * teardown, and no stale handles. Two cases — `DETACH` and `DESTROY` must
+ * release the worker MediaSource / SourceBuffer a load opened — drive the
+ * `onAbandon` teardown seam on the composition root; the rest validate that a
+ * superseded load's handle is dropped immediately and that neither
+ * worker-MSE nor main-mode CHUNK delivery can outlive its load.
  *
  * Browser-only surfaces are marked `it.skipIf(!IN_BROWSER)`; the lazy SDK
  * transport rebuild (node-safe) is marked `it.skipIf(!IN_NODE)`. Scope: the
- * root lifecycle (transport + MSE wiring) is the object under test; producer
- * container internals are covered by the dedicated producer specs.
+ * root lifecycle (transport + MSE wiring) is the object under test.
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { WorkerConfig } from '../protocol.ts';
 import type { WorkerToMainMessage } from '../protocol.ts';
 import type { SiaByteSourceSdk } from '../transport/sia-byte-source.ts';
-import { boundedIndexedFmp4Payload, concatBytes, fakeSiaSdk, flush, permissiveCapabilities } from './fixtures/fmp4-fixture.ts';
+import {
+  boundedIndexedFmp4Payload,
+  concatBytes,
+  FakeLoadPipeline,
+  fakeSiaSdk,
+  flush,
+  permissiveCapabilities,
+} from './fixtures/fmp4-fixture.ts';
 import { createDefaultWorkerComposition } from '../worker.ts';
 
 /** Node-only: the browser guards below assert against a real DOM page. */
@@ -131,6 +136,7 @@ function workerModeRoot(messages: WorkerToMainMessage[]): {
       return mediaSource as unknown as MediaSource;
     },
     createSdk: () => Promise.resolve(sdk),
+    loadPipeline: new FakeLoadPipeline(),
     post: (message) => messages.push(message),
     supportsWorkerMse: () => true,
   });
@@ -263,6 +269,7 @@ describe('createDefaultWorkerComposition worker-MSE lifecycle (browser)', () => 
         buildCalls += 1;
         return buildCalls === 1 ? Promise.reject(new Error('transport down')) : Promise.resolve(sdk);
       },
+      loadPipeline: new FakeLoadPipeline(),
       post: (message) => messages.push(message),
       supportsWorkerMse: () => true,
     });
@@ -300,6 +307,7 @@ describe('createDefaultWorkerComposition main-mode CHUNK fallback lifecycle (bro
     const root = createDefaultWorkerComposition({
       capabilities: permissiveCapabilities(),
       createSdk: () => Promise.resolve(sdk),
+      loadPipeline: new FakeLoadPipeline(),
       post: (message) => messages.push(message),
       supportsWorkerMse: () => false, // Firefox-style main-thread MSE fallback
     });
@@ -331,6 +339,7 @@ describe('createDefaultWorkerComposition main-mode CHUNK fallback lifecycle (bro
         buildCalls += 1;
         return buildCalls === 1 ? Promise.reject(new Error('transport down')) : Promise.resolve(sdk);
       },
+      loadPipeline: new FakeLoadPipeline(),
       post: (message) => messages.push(message),
       supportsWorkerMse: () => false, // Firefox-style main-thread MSE fallback
     });
@@ -375,6 +384,7 @@ describe('createDefaultWorkerComposition lazy SDK transport (node)', () => {
           dispose: tag === 'A' ? disposeA : disposeB,
         } as SiaByteSourceSdk);
       },
+      loadPipeline: new FakeLoadPipeline(),
       post: (message) => messages.push(message),
       supportsWorkerMse: () => false,
     });
@@ -398,43 +408,5 @@ describe('createDefaultWorkerComposition lazy SDK transport (node)', () => {
     // indexer).
     expect(disposeA).toHaveBeenCalledTimes(1);
     expect(disposeB).not.toHaveBeenCalled();
-  });
-});
-
-describe('createDefaultWorkerComposition byte source (node)', () => {
-  /** SDK whose downloads are recorded as (offset, length) pairs. */
-  function recordingSdk(payload: Uint8Array, requests: { length: number; offset: number; }[]): SiaByteSourceSdk {
-    const base = fakeSiaSdk(payload).sdk;
-    return {
-      ...base,
-      download: (object, dl) => {
-        requests.push({ length: dl?.length ?? payload.byteLength, offset: dl?.offset ?? 0 });
-        return base.download(object, dl);
-      },
-    };
-  }
-
-  async function load(root: ReturnType<typeof createDefaultWorkerComposition>, requestId = 3): Promise<void> {
-    await root.handleMessage({ config: { ...WORKER_CONFIG, workerMse: 'auto' }, requestId: 1, type: 'HELLO' });
-    await root.handleMessage({ requestId: 2, type: 'ATTACH' });
-    await root.handleMessage({ preload: 'auto', requestId, src: 'pin-key', type: 'SOURCE' });
-    await flush();
-  }
-
-  it.skipIf(!IN_NODE)('keeps the byte source on the default single-download path when nothing is configured', async () => {
-    const payload = boundedIndexedFmp4Payload();
-    const requests: { length: number; offset: number; }[] = [];
-    const messages: WorkerToMainMessage[] = [];
-    const root = createDefaultWorkerComposition({
-      capabilities: permissiveCapabilities(),
-      createSdk: () => Promise.resolve(recordingSdk(payload, requests)),
-      post: (message) => messages.push(message),
-      supportsWorkerMse: () => false,
-    });
-    await load(root);
-
-    // No cache or byte-source profile: the 4096-byte head probe is fetched as
-    // one whole download, preserving the original single-download behavior.
-    expect(requests.some((r) => r.length === 4096)).toBe(true);
   });
 });

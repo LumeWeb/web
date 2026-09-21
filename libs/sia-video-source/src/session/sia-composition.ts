@@ -19,12 +19,10 @@
  */
 
 import type { PlaybackCapabilities } from '../capabilities/browser-capabilities.ts';
-import type { ContainerClassifier } from '../capabilities/container-classifier.ts';
-import type { IndexBuilder } from '../container/index/random-access-index.ts';
-import type { ProducerFactoryRegistry } from '../container/producer/producer-factory.ts';
 import type { WorkerConfig } from '../protocol.ts';
 import type { ByteSource } from '../transport/byte-source.ts';
 import type { Clock } from './clock.ts';
+import type { LoadPipeline } from './load-pipeline.ts';
 import type { SessionHandshake } from './session-coordinator.ts';
 import {
   createSessionCoordinator,
@@ -49,8 +47,6 @@ export interface SiaWorkerCompositionDeps {
   readonly byteSource?: SiaByteSourceFactoryOptions;
   /** Browser capability snapshot for the MSE/codec checks (default: detect). */
   readonly capabilities?: PlaybackCapabilities;
-  /** Container classifier (default: `createContainerClassifier()`). */
-  readonly classifier?: ContainerClassifier;
   /** Injectable time (default: `wallClock()`). */
   readonly clock?: Clock;
   /**
@@ -65,12 +61,11 @@ export interface SiaWorkerCompositionDeps {
   readonly createSdk?: (config: undefined | WorkerConfig, appKeySeed: null | Uint8Array) => Promise<SiaByteSourceSdk>;
   /** Handshake for `HELLO`/`APP_KEY` (default: `createSessionHandshake()`). */
   readonly handshake?: SessionHandshake;
-  /** Bounded head-probe length fed to the classifier (default 4096). */
-  readonly headProbeLength?: number;
-  /** Ordered best-effort index builders (default: sidx registry). */
-  readonly indexBuilders?: readonly IndexBuilder[];
-  /** Forward lookahead seconds handed to each session's controller. */
-  readonly lookaheadSeconds?: number;
+  /**
+   * Injected load-pipeline seam for package-owned tests; production defaults
+   * to `createLoadPipeline({ capabilities })` inside the coordinator.
+   */
+  readonly loadPipeline?: LoadPipeline;
   /**
    * Called whenever the coordinator abandons the active load (superseded
    * SOURCE, DETACH, or DESTROY). When `workerMseRoot` is in use this binding
@@ -80,12 +75,8 @@ export interface SiaWorkerCompositionDeps {
   readonly onAbandon?: () => void;
   /** Outbound protocol channel. */
   readonly post: PostMessage;
-  /** Producer registry whose `select` exposes the winning reason. */
-  readonly producerFactory?: ProducerFactoryRegistry;
   /** The Sia SDK used to resolve and download sources (or use `createSdk` for lazy binding). */
   readonly sdk?: SiaByteSourceSdk;
-  /** Controller-level stall timeout (0 disables). */
-  readonly stallTimeoutMs?: number;
   /** Worker-MSE capability check; false in node, true where `canConstructInDedicatedWorker`. */
   readonly supportsWorkerMse?: () => boolean;
   /**

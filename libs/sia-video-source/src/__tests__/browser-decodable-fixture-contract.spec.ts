@@ -38,12 +38,12 @@ describe('browser-decodable AVC/AAC fixture contract', () => {
   });
 
   it('a committed fixture must flip the availability flag AND pin its sha256 (contract lock)', () => {
-    // This is the RED-first tripwire: flipping HAS_BROWSER_DECODABLE_FIXTURE to
+    // This is the contract tripwire: flipping HAS_BROWSER_DECODABLE_FIXTURE to
     // true while the sha256 sentinel is still un-pinned is always a contract
     // violation, because the acceptance tests would run without committed bytes.
-    // `Boolean(...)` widens the literal-typed const (true today) so the
-    // open/pinned cross-check below is type-legal now AND if the fixture
-    // generation ever flips the flag back — the comparison is the tripwire.
+    // `Boolean(...)` widens the literal-typed const so the open/pinned
+    // cross-check below stays type-legal while the flag value can still
+    // change — the comparison is the tripwire.
     const flagOpen = Boolean(HAS_BROWSER_DECODABLE_FIXTURE);
     const hashPinned = !BROWSER_DECODABLE_FIXTURE_SHA256.includes('<pending');
     expect(flagOpen ? hashPinned : true).toBe(true);

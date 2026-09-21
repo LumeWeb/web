@@ -239,43 +239,6 @@ describe('MseAdapter (AppendSink)', () => {
     expect(fakeMediaSource.endOfStreamCalls).toBe(1);
   });
 
-  it('append(terminal: true) requests endOfStream once the queue drains', async () => {
-    const { adapter, fakeMediaSource, fakeSourceBuffer } = createHarness();
-
-    adapter.append({ ...unit(1), terminal: true });
-    expect(fakeMediaSource.endOfStreamCalls).toBe(0);
-
-    await settle();
-
-    // The terminal unit still appends normally, and its EOS request fires only
-    // after the queued append drains (never while the queue is still busy).
-    expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([1]);
-    expect(fakeMediaSource.endOfStreamCalls).toBe(1);
-  });
-
-  it('append(terminal: true) EOS is idempotent when EOS was already requested', async () => {
-    const { adapter, fakeMediaSource } = createHarness();
-
-    adapter.append({ ...unit(1), terminal: true });
-    adapter.requestEndOfStream(0); // re-request before the queue drains
-
-    await settle();
-
-    expect(fakeMediaSource.endOfStreamCalls).toBe(1);
-  });
-
-  it('append(terminal: true) leaves non-terminal units alone', async () => {
-    const { adapter, fakeMediaSource, fakeSourceBuffer } = createHarness();
-
-    adapter.append(unit(1));
-    adapter.append(unit(2));
-
-    await settle();
-
-    expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([1, 2]);
-    expect(fakeMediaSource.endOfStreamCalls).toBe(0);
-  });
-
   it('evictBackBuffer trims the aged range via the pipe (delegation)', async () => {
     const { adapter, fakeSourceBuffer, setPlayhead } = createHarness(30);
     fakeSourceBuffer.ranges = [

@@ -1,714 +1,308 @@
 /**
- * TDD contract for the `StreamController` seam: the generic session
- * coordinator that turns one load's index + producer + sink + source into a
- * play session — start/seek/playhead trigger semantics, epoch-scoped seeks,
- * FLOOR RAP selection, bounded lookahead, back-buffer eviction, terminal EOS,
- * and fatal-error reporting.
- *
- * The controller depends only on injected interfaces (`RandomAccessIndex`,
- * `AppendableProducer`, `AppendSink`, `ByteSource`, `Clock`, `ErrorReporter`);
- * it imports no Sia SDK and no MSE internals. Everything below runs against
- * deterministic fakes with a `ManualClock`, so the orchestration is testable
+ * Behavior spec for the `StreamController` play session: it starts one
+ * mediabunny conversion over the shared input, appends its fragments to the
+ * sink, ends the stream on conversion completion, and tears the load down on
+ * destroy. The controller depends on injected seams (`MediaPlayback`,
+ * `AppendSink`, `ErrorReporter`), so the play orchestration is testable
  * without Sia or a real MediaSource.
  */
-
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { ByteRange, ByteSource, ReadOptions } from '../transport/byte-source.ts';
-import type { AppendableProducer, ProducedSegment } from '../container/producer/appendable-producer.ts';
-import type { RandomAccessIndex, RangeRead } from '../media/types.ts';
-import { ManualClock } from '../session/clock.ts';
-import type { ErrorReporter, PlaybackFailure } from '../session/error-reporter.ts';
+import { describe, expect, it } from 'vitest';
+import type { MediaPlayback } from '../media/library-load.ts';
+import { type ErrorReporter, type PlaybackFailure } from '../session/error-reporter.ts';
 import {
   createStreamController,
   type StreamController,
   type StreamLoad,
   type StreamState,
 } from '../session/stream-controller.ts';
-import type { AppendSink } from '../sink/append-sink.ts';
-import { MemoryByteSource } from '../transport/memory-byte-source.ts';
-
-describe('StreamController', () => {
-  it('start() streams every index range in order and ends at the terminal range', async () => {
-    const harness = harnessWith();
-    const states: StreamState[] = [];
-    harness.controller.onStateChange((state) => states.push(state));
-
-    harness.controller.start(harness.loadBytes(twoRangeIndex(), new Uint8Array(100)));
-
-    await flush();
-
-    expect(harness.producer.pushes.map((push) => push.offset)).toEqual([0, 40]);
-    expect(harness.producer.pushes[0].bytes).toHaveLength(40);
-    expect(harness.producer.pushes[1].bytes).toHaveLength(60);
-    expect(harness.sink.appends).toHaveLength(2);
-    expect(harness.sink.eosEpochs).toEqual([1]);
-    expect(harness.controller.state).toBe('ended');
-    expect(states.at(-1)).toBe('ended');
-    expect(harness.reporter.reports).toEqual([]);
-  });
-
-  it('seek() bumps the epoch, floor-selects a RAP range, and resets producer + parser', async () => {
-    const harness = harnessWith();
-
-    harness.controller.start(harness.loadBytes(threeRangeIndex(), new Uint8Array(90)));
-    // Synchronous: supersedes the in-flight first read before it can deliver.
-    harness.controller.seek(3.5);
-
-    await flush();
-
-    expect(harness.producer.resets).toEqual([1, 2]);
-    expect(harness.sink.resetEpochs).toEqual([1, 2]);
-    // Only the sought range (t=2 → offset 30) and its successor were fetched.
-    expect(harness.producer.pushes.map((push) => push.offset)).toEqual([30, 60]);
-    expect(harness.sink.eosEpochs).toEqual([2]);
-    expect(harness.reporter.reports).toEqual([]);
-    expect(harness.controller.state).toBe('ended');
-  });
-
-  it('drops a cancelled/aborted read without reporting it', async () => {
-    const harness = harnessWith();
-
-    harness.controller.start(harness.load(singleTerminalIndex(), new AbortByteSource()));
-    await flush();
-
-    expect(harness.reporter.reports).toEqual([]);
-    // The aborted read never reached the producer.
-    expect(harness.producer.pushes).toEqual([]);
-    expect(harness.controller.state).toBe('playing');
-  });
-
-  it('bounds lookahead to the playhead budget and resumes when the playhead advances', async () => {
-    const clock = new ManualClock();
-    clock.setMediaTime(3);
-    const harness = harnessWith({ clock, lookaheadSeconds: 0.5 });
-    const index = new FakeIndex([
-      range(0, 30, 0, 2),
-      range(30, 30, 2, 4),
-      range(60, 30, 4, 6, { terminal: true }),
-    ], 6);
-
-    harness.controller.start(harness.loadBytes(index, new Uint8Array(90)));
-    await flush();
-
-    // r0 and r1 are within the 0.5 s budget from playhead 3; r2 is beyond it.
-    expect(harness.producer.pushes.map((push) => push.offset)).toEqual([0, 30]);
-    expect(harness.controller.state).toBe('playing');
-    expect(harness.sink.eosEpochs).toEqual([]);
-
-    harness.controller.playhead(4.5);
-    await flush();
-
-    expect(harness.producer.pushes.map((push) => push.offset)).toEqual([0, 30, 60]);
-    expect(harness.sink.evictions).toContain(4.5);
-    expect(harness.sink.eosEpochs).toEqual([1]);
-    expect(harness.controller.state).toBe('ended');
-    expect(harness.reporter.reports).toEqual([]);
-  });
-
-  it('reports a non-superseded read failure as transport:unreachable and fails the controller', async () => {
-    const harness = harnessWith();
-
-    harness.controller.start(harness.load(singleTerminalIndex(), new ThrowingByteSource()));
-    await flush();
-
-    expect(harness.reporter.reports).toHaveLength(1);
-    expect(harness.reporter.reports[0]).toMatchObject({ code: 'unreachable', condition: 'transport' });
-    expect(harness.controller.state).toBe('failed');
-    expect(harness.sink.aborted).toBe(true);
-  });
-
-  it('reports a producer error as normalization:failed and never requests EOS', async () => {
-    const harness = harnessWith();
-
-    harness.controller.start(harness.loadBytes(twoRangeIndex(), new Uint8Array(100)));
-    // Fire while the first read is still in flight so the session is playing,
-    // not already ended.
-    harness.producer.emitError(new Error('remux failed'));
-
-    expect(harness.reporter.reports).toHaveLength(1);
-    expect(harness.reporter.reports[0]).toMatchObject({ code: 'failed', condition: 'normalization' });
-    expect(harness.controller.state).toBe('failed');
-    expect(harness.sink.aborted).toBe(true);
-
-    await flush();
-    // A failed controller never requests EOS, even when the read it raced drains.
-    expect(harness.sink.eosEpochs).toEqual([]);
-  });
-
-  it('destroy() aborts the sink and ignores later control messages', async () => {
-    const harness = harnessWith();
-
-    harness.controller.start(harness.loadBytes(twoRangeIndex(), new Uint8Array(100)));
-    harness.controller.destroy('bye');
-    harness.controller.seek(2);
-    harness.controller.playhead(1);
-    harness.controller.endOfStream();
-
-    await flush();
-
-    expect(harness.controller.state).toBe('destroyed');
-    expect(harness.sink.aborted).toBe(true);
-    expect(harness.sink.abortReason).toBe('bye');
-    expect(harness.sink.eosEpochs).toEqual([]);
-    expect(harness.sink.evictions).toEqual([]);
-    expect(harness.reporter.reports).toEqual([]);
-  });
-
-  it('streams a sequential load (no index) as one terminal range from byte 0', async () => {
-    const harness = harnessWith();
-
-    harness.controller.start({ index: null, producer: harness.producer, sink: harness.sink, source: new MemoryByteSource(new Uint8Array(50)) });
-    await flush();
-
-    expect(harness.producer.pushes).toHaveLength(1);
-    expect(harness.producer.pushes[0].offset).toBe(0);
-    expect(harness.producer.pushes[0].bytes).toHaveLength(50);
-    expect(harness.producer.flushed).toEqual([1]);
-    expect(harness.sink.eosEpochs).toEqual([1]);
-    expect(harness.controller.state).toBe('ended');
-    expect(harness.reporter.reports).toEqual([]);
-  });
-
-  it('endOfStream() forces a terminal completion and stops the pump', async () => {
-    const harness = harnessWith();
-
-    harness.controller.start(harness.loadBytes(twoRangeIndex(), new Uint8Array(100)));
-    harness.controller.endOfStream();
-    await flush();
-
-    // EOS is requested once and the pump stops before the second range.
-    expect(harness.sink.eosEpochs).toEqual([1]);
-    expect(harness.controller.state).toBe('ended');
-    expect(harness.producer.pushes.map((push) => push.offset)).not.toContain(40);
-  });
-
-  it('delegates EOS to the producer terminal when an async producer is still pending at flush', async () => {
-    // The mediabunny refragmenter emits asynchronously: the controller ends the
-    // terminal read and flushes before the segments exist, so it must NOT
-    // request endOfStream itself — the producer's terminal media segment does.
-    const harness = harnessWith();
-    const producer: AppendableProducer = {
-      flush: () => undefined,
-      isPending: () => true,
-      mode: 'normalized' as const,
-      onError: () => () => undefined,
-      onSegment: () => () => undefined,
-      outputMime: 'video/mp4; codecs="avc1.640032,mp4a.40.2"',
-      push: () => undefined,
-      reportError: () => undefined,
-      reset: () => undefined,
-    };
-    harness.controller.start({
-      index: null,
-      producer,
-      sink: harness.sink,
-      source: new MemoryByteSource(new Uint8Array(50)),
-    });
-    await flush();
-
-    // The controller ended its own model but deferred the sink EOS to the
-    // producer's terminal media (driven later through the MSE adapter).
-    expect(harness.controller.state).toBe('ended');
-    expect(harness.sink.eosEpochs).toEqual([]);
-  });
-
-  it('requests EOS itself when the producer is not pending at flush', async () => {
-    const harness = harnessWith();
-    const producer: AppendableProducer = {
-      flush: () => undefined,
-      isPending: () => false,
-      mode: 'normalized' as const,
-      onError: () => () => undefined,
-      onSegment: () => () => undefined,
-      outputMime: 'video/mp4; codecs="avc1.640032,mp4a.40.2"',
-      push: () => undefined,
-      reportError: () => undefined,
-      reset: () => undefined,
-    };
-    harness.controller.start({
-      index: null,
-      producer,
-      sink: harness.sink,
-      source: new MemoryByteSource(new Uint8Array(50)),
-    });
-    await flush();
-    expect(harness.sink.eosEpochs).toEqual([1]);
-    expect(harness.controller.state).toBe('ended');
-  });
-
-  it('start() replaces an active load and aborts the previous sink without leaking stale pushes', async () => {
-    const harness = harnessWith();
-    const sinkA = new FakeSink();
-    const producerA = new FakeProducer();
-    const sinkB = new FakeSink();
-    const producerB = new FakeProducer();
-
-    harness.controller.start({ index: twoRangeIndex(), producer: producerA, sink: sinkA, source: new MemoryByteSource(new Uint8Array(100)) });
-    harness.controller.start({ index: new FakeIndex([range(0, 60, 0, 4, { terminal: true })], 4), producer: producerB, sink: sinkB, source: new MemoryByteSource(new Uint8Array(60)) });
-    await flush();
-
-    expect(sinkA.aborted).toBe(true);
-    expect(sinkA.abortReason).toBe('source-replaced');
-    expect(producerA.pushes).toEqual([]);
-    expect(producerB.pushes.map((push) => push.offset)).toEqual([0]);
-    expect(sinkB.eosEpochs).toEqual([2]);
-    expect(harness.reporter.reports).toEqual([]);
-    expect(harness.controller.state).toBe('ended');
-  });
-
-  it('fails as transport:timeout when a read delivers late past the stall budget', async () => {
-    const clock = new ManualClock();
-    const harness = harnessWith({ clock, stallTimeoutMs: 1000 });
-    const source = new LatchedByteSource(new Uint8Array(8));
-
-    harness.controller.start({
-      index: singleTerminalIndex(),
-      producer: harness.producer,
-      sink: harness.sink,
-      source,
-    });
-    await Promise.resolve(); // let the first read park on the latch
-
-    expect(harness.controller.state).toBe('playing');
-    clock.setNow(5000);
-    source.release();
-    await flush();
-
-    expect(harness.reporter.reports).toHaveLength(1);
-    expect(harness.reporter.reports[0]).toMatchObject({ code: 'timeout', condition: 'transport' });
-    expect(harness.controller.state).toBe('failed');
-    expect(harness.sink.aborted).toBe(true);
-  });
-
-  it('fails as transport:timeout when a read never delivers (silently stalled transport)', async () => {
-    const clock = new ManualClock();
-    const harness = harnessWith({ clock, stallTimeoutMs: 1000 });
-    const source = new StalledByteSource(new Uint8Array(8));
-
-    harness.controller.start({
-      index: singleTerminalIndex(),
-      producer: harness.producer,
-      sink: harness.sink,
-      source,
-    });
-    await Promise.resolve(); // let the first read park on the never-resolving read
-
-    expect(harness.controller.state).toBe('playing');
-    clock.setNow(5000);
-    await stallTick(); // let the watchdog observe the deadline
-
-    expect(harness.reporter.reports).toHaveLength(1);
-    expect(harness.reporter.reports[0]).toMatchObject({ code: 'timeout', condition: 'transport' });
-    expect(harness.controller.state).toBe('failed');
-    expect(harness.sink.aborted).toBe(true);
-    expect(harness.producer.pushes).toEqual([]);
-
-    // The aborted run unwound: a fresh start streams to the end.
-    harness.controller.start(harness.loadBytes(threeRangeIndex(), new Uint8Array(90)));
-    await flush();
-    expect(harness.controller.state).toBe('ended');
-    expect(harness.producer.pushes.map((push) => push.offset)).toEqual([0, 30, 60]);
-  });
-
-  it('clears stale stall watchdogs and cancels their readers across repeated seeks on a stalled transport', async () => {
-    const clock = new ManualClock();
-    const harness = harnessWith({ clock, stallTimeoutMs: 4000 });
-    const source = new TrackedStalledByteSource(new Uint8Array(8));
-    const intervals = trackIntervals();
-
-    harness.controller.start({
-      index: singleTerminalIndex(),
-      producer: harness.producer,
-      sink: harness.sink,
-      source,
-    });
-    await Promise.resolve(); // let the epoch-1 read park on the stalled transport
-
-    expect(intervals.active()).toBe(1);
-
-    // Seek before the deadline so each superseded read stays parked; every
-    // bump leaves one watchdog stale against the same stalled source.
-    harness.controller.seek(1.0);
-    harness.controller.seek(1.0);
-    harness.controller.seek(1.0);
-    await Promise.resolve();
-    expect(intervals.active()).toBe(4); // one live + three stale watchdogs
-
-    await stallTick(); // let each stale watchdog poll once
-
-    // Steady-state: only the live epoch's interval remains, every superseded
-    // reader was cancelled, and no failure was reported.
-    expect(intervals.active()).toBe(1);
-    expect([...source.cancelled].sort((a, b) => a - b)).toEqual([1, 2, 3]);
-    expect(harness.reporter.reports).toEqual([]);
-    expect(harness.controller.state).toBe('playing');
-  });
-});
-
-// ---- fakes ------------------------------------------------------------------
+import type { AppendSink, AppendUnit } from '../sink/append-sink.ts';
 
 interface Harness {
-  clock: ManualClock;
   controller: StreamController;
-  load(index: FakeIndex, source: ByteSource): StreamLoad;
-  loadBytes(index: FakeIndex, bytes: Uint8Array): StreamLoad;
-  producer: FakeProducer;
-  reporter: RecordingErrorReporter;
+  errors: PlaybackFailure[];
+  load: () => StreamLoad;
+  playback: FakePlayback;
   sink: FakeSink;
+  states: StreamState[];
 }
 
-/** Errors every read with a cancellation-style AbortError immediately. */
-class AbortByteSource implements ByteSource {
-  readonly size = 8;
-
-  cancel(): void {
-    // Test double: no transport work to cancel.
-  }
-
-  read(_range: ByteRange, _options: ReadOptions): ReadableStream<Uint8Array> {
-    return new ReadableStream<Uint8Array>({
-      start(controller) {
-        controller.error(Object.assign(new Error('aborted by signal'), { name: 'AbortError' }));
-      },
-    });
-  }
+/** One recorded sink parser reset, with the optional seek re-anchor target. */
+interface SinkReset {
+  readonly generation: number;
+  readonly target?: number;
 }
 
-class FakeIndex implements RandomAccessIndex {
-  readonly durationSeconds: null | number;
-  readonly granularity = 'exact-byte' as const;
-  readonly ranges: readonly RangeRead[];
-
-  get first(): null | RangeRead {
-    return this.ranges[0] ?? null;
-  }
-
-  constructor(ranges: readonly RangeRead[], durationSeconds: null | number = null) {
-    this.durationSeconds = durationSeconds;
-    this.ranges = ranges;
-  }
-
-  next(from: RangeRead): null | RangeRead {
-    const at = this.ranges.findIndex((candidate) => candidate.offset === from.offset);
-    if (at < 0) return null;
-    return this.ranges[at + 1] ?? null;
-  }
-
-  seek(timeSeconds: number): null | RangeRead {
-    let candidate: null | RangeRead = null;
-    for (const item of this.ranges) {
-      if (item.startSeconds <= timeSeconds) candidate = item;
-      else break;
-    }
-    return candidate;
-  }
-}
-
-class FakeProducer implements AppendableProducer {
-  readonly flushed: number[] = [];
-  readonly mode = 'passthrough' as const;
-  readonly outputMime = 'video/mp4';
-  readonly pushes: { bytes: Uint8Array; epoch: number; offset: number }[] = [];
-  readonly resets: number[] = [];
-  #epoch = 0;
+/** Deterministic fake playback whose completion/error the test drives. */
+class FakePlayback implements MediaPlayback {
+  disposed = 0;
+  generation: null | number = null;
+  /** When false, `restart` refuses an armed seek (seamless playback mirror). */
+  restartEnabled = true;
+  restartInvocations: number[] = [];
+  sink: AppendSink | null = null;
+  startInvocations = 0;
+  #onComplete: (() => void) | null = null;
   #onError: ((error: unknown) => void) | null = null;
-  readonly #onSegment = new Set<(segment: ProducedSegment) => void>();
 
-  emitError(error: unknown): void {
+  complete(): void {
+    this.#onComplete?.();
+  }
+
+  dispose(): void {
+    this.disposed += 1;
+  }
+
+  fail(error: unknown): void {
     this.#onError?.(error);
   }
 
-  flush(epoch: number): void {
-    if (epoch >= this.#epoch) this.flushed.push(epoch);
+  restart(fromSeconds: number): boolean {
+    // Latest-wins: every valid intent after start is accepted, never latched.
+    if (this.disposed > 0 || this.startInvocations === 0 || !this.restartEnabled) {
+      return false;
+    }
+    this.restartInvocations.push(fromSeconds);
+    return true;
   }
 
-  onError(listener: (error: unknown) => void): () => void {
-    this.#onError = listener;
-    return () => {
-      if (this.#onError === listener) this.#onError = null;
-    };
-  }
-
-  onSegment(listener: (segment: ProducedSegment) => void): () => void {
-    this.#onSegment.add(listener);
-    return () => {
-      this.#onSegment.delete(listener);
-    };
-  }
-
-  push(bytes: Uint8Array, absoluteOffset: number, epoch: number): void {
-    if (epoch < this.#epoch) return;
-    this.pushes.push({ bytes, epoch, offset: absoluteOffset });
-    for (const listener of this.#onSegment) listener({ bytes, kind: 'media' });
-  }
-
-  reportError(error: unknown): void {
-    this.emitError(error);
-  }
-
-  reset(epoch: number): void {
-    this.#epoch = Math.max(this.#epoch, epoch);
-    this.resets.push(epoch);
+  start(
+    sink: AppendSink,
+    loadGeneration: number,
+    callbacks: { readonly onComplete: () => void; readonly onError: (error: unknown) => void },
+  ): void {
+    this.startInvocations += 1;
+    this.sink = sink;
+    this.generation = loadGeneration;
+    this.#onComplete = callbacks.onComplete;
+    this.#onError = callbacks.onError;
   }
 }
 
+/** Records sink calls in the order they arrived. */
 class FakeSink implements AppendSink {
-  aborted = false;
-  abortReason: unknown = undefined;
-  readonly appends: ProducedSegment[] = [];
-  readonly eosEpochs: number[] = [];
-  readonly evictions: number[] = [];
-  readonly resetEpochs: number[] = [];
+  aborts: unknown[] = [];
+  eos: number[] = [];
+  evictions: number[] = [];
+  resets: SinkReset[] = [];
 
   abort(reason?: unknown): void {
-    this.aborted = true;
-    this.abortReason = reason;
+    this.aborts.push(reason);
   }
 
-  append(segment: ProducedSegment): void {
-    this.appends.push(segment);
+  append(_unit: AppendUnit): void {
+    // Appends are exercised through the playback/sink seam, not this controller.
   }
 
-  evictBackBuffer(playheadSeconds: number): Promise<boolean> {
-    this.evictions.push(playheadSeconds);
+  evictBackBuffer(timeSeconds: number): Promise<boolean> {
+    this.evictions.push(timeSeconds);
     return Promise.resolve(true);
   }
 
-  requestEndOfStream(epoch: number): void {
-    this.eosEpochs.push(epoch);
+  requestEndOfStream(loadGeneration: number): void {
+    this.eos.push(loadGeneration);
   }
 
-  resetParser(epoch: number): void {
-    this.resetEpochs.push(epoch);
-  }
-}
-
-/**
- * In-memory source that parks its first read on a manual latch and delivers
- * later reads immediately — used to hold one read in flight while the test
- * advances the `ManualClock` past the stall budget.
- */
-class LatchedByteSource implements ByteSource {
-  get size(): number {
-    return this.#bytes.byteLength;
-  }
-  readonly #bytes: Uint8Array;
-  #latched = false;
-
-  #release: (() => void) | null = null;
-
-  constructor(bytes: Uint8Array) {
-    this.#bytes = bytes;
-  }
-
-  cancel(): void {
-    // Test double: no transport work to cancel.
-  }
-
-  read(range: ByteRange, _options: ReadOptions): ReadableStream<Uint8Array> {
-    const start = Math.max(0, Math.floor(range.offset));
-    const end = Math.min(this.#bytes.byteLength, start + Math.max(0, Math.floor(range.length)));
-    return new ReadableStream<Uint8Array>({
-      start: (controller) => {
-        const deliver = () => {
-          controller.enqueue(this.#bytes.slice(start, end));
-          controller.close();
-        };
-        if (this.#latched) {
-          queueMicrotask(deliver);
-        } else {
-          this.#latched = true;
-          this.#release = deliver;
-        }
-      },
-    });
-  }
-
-  release(): void {
-    const release = this.#release;
-    this.#release = null;
-    release?.();
+  resetParser(loadGeneration: number, targetTimeSeconds?: number): void {
+    this.resets.push(
+      targetTimeSeconds === undefined ? { generation: loadGeneration } : { generation: loadGeneration, target: targetTimeSeconds },
+    );
   }
 }
 
-class RecordingErrorReporter implements ErrorReporter {
-  readonly reports: PlaybackFailure[] = [];
-
-  report(failure: PlaybackFailure): void {
-    this.reports.push(failure);
-  }
-}
-
-/**
- * Source whose read never delivers and never reaches EOF — a silently stalled
- * transport that parks `reader.read()` forever.
- */
-class StalledByteSource implements ByteSource {
-  get size(): number {
-    return this.#bytes.byteLength;
-  }
-  readonly #bytes: Uint8Array;
-
-  constructor(bytes: Uint8Array) {
-    this.#bytes = bytes;
-  }
-
-  cancel(): void {
-    // Test double: no transport work to cancel.
-  }
-
-  read(_range: ByteRange, _options: ReadOptions): ReadableStream<Uint8Array> {
-    return new ReadableStream<Uint8Array>({
-      pull() {
-        // Never enqueues and never closes: the read stays pending forever.
-      },
-    });
-  }
-}
-
-/** Errors every read with a hard (non-superseded) transport failure. */
-class ThrowingByteSource implements ByteSource {
-  readonly size = 8;
-
-  cancel(): void {
-    // Test double: no transport work to cancel.
-  }
-
-  read(_range: ByteRange, _options: ReadOptions): ReadableStream<Uint8Array> {
-    return new ReadableStream<Uint8Array>({
-      start(controller) {
-        controller.error(new Error('transport down'));
-      },
-    });
-  }
-}
-
-/**
- * Stalled source that records which read streams got cancelled — asserts a
- * stale watchdog releases its superseded reader without touching the current
- * read.
- */
-class TrackedStalledByteSource implements ByteSource {
-  readonly cancelled: number[] = [];
-
-  get size(): number {
-    return this.#bytes.byteLength;
-  }
-
-  readonly #bytes: Uint8Array;
-  #reads = 0;
-
-  constructor(bytes: Uint8Array) {
-    this.#bytes = bytes;
-  }
-
-  cancel(): void {
-    // Test double: no transport work to cancel.
-  }
-
-  read(_range: ByteRange, _options: ReadOptions): ReadableStream<Uint8Array> {
-    const index = ++this.#reads;
-    return new ReadableStream<Uint8Array>({
-      cancel: () => {
-        this.cancelled.push(index);
-      },
-      pull() {
-        // Never enqueues and never closes: the read stays pending forever.
-      },
-    });
-  }
-}
-
-async function flush(): Promise<void> {
-  await Promise.resolve();
-  await new Promise((resolve) => setTimeout(resolve, 0));
-}
-
-function harnessWith(options: { clock?: ManualClock; lookaheadSeconds?: number; stallTimeoutMs?: number } = {}): Harness {
-  const clock = options.clock ?? new ManualClock();
-  const reporter = new RecordingErrorReporter();
-  const controller = createStreamController({
-    clock,
-    errorReporter: reporter,
-    lookaheadSeconds: options.lookaheadSeconds,
-    stallTimeoutMs: options.stallTimeoutMs,
-  });
-  const producer = new FakeProducer();
+function harness(): Harness {
+  const playback = new FakePlayback();
   const sink = new FakeSink();
-  return {
-    clock,
-    controller,
-    load: (index, source) => ({ index, producer, sink, source }),
-    loadBytes: (index, bytes) => ({ index, producer, sink, source: new MemoryByteSource(bytes) }),
-    producer,
-    reporter,
-    sink,
+  const errors: PlaybackFailure[] = [];
+  const reporter: ErrorReporter = {
+    report: (failure) => {
+      errors.push(failure);
+    },
   };
+  const controller = createStreamController({ errorReporter: reporter });
+  const states: StreamState[] = [];
+  controller.onStateChange((state) => states.push(state));
+  return { controller, errors, load: () => ({ loadGeneration: 1, playback, sink }), playback, sink, states };
 }
 
-function range(
-  offset: number,
-  length: number,
-  startSeconds: number,
-  endSeconds: number,
-  options: { rap?: boolean; terminal?: boolean } = {},
-): RangeRead {
-  return {
-    endSeconds,
-    length,
-    offset,
-    rap: options.rap ?? true,
-    startSeconds,
-    terminal: options.terminal ?? false,
-  };
-}
+describe('StreamController', () => {
+  it('starts the conversion once and ends the stream on completion', () => {
+    const h = harness();
+    h.controller.start(h.load());
 
-// ---- harness ----------------------------------------------------------------
+    expect(h.playback.startInvocations).toBe(1);
+    expect(h.playback.generation).toBe(1);
+    // The start reset re-anchors nothing: no seek target is recorded.
+    expect(h.sink.resets).toEqual([{ generation: 1 }]);
+    expect(h.states).toContain('starting');
+    expect(h.states).toContain('playing');
 
-function singleTerminalIndex(): FakeIndex {
-  return new FakeIndex([range(0, 8, 0, 2, { terminal: true })], 2);
-}
+    h.playback.complete();
 
-/** Lets the controller's stall watchdog poll the deadline at least once. */
-function stallTick(): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, 250));
-}
-
-function threeRangeIndex(): FakeIndex {
-  return new FakeIndex([
-    range(0, 30, 0, 2),
-    range(30, 30, 2, 4),
-    range(60, 30, 4, 6, { terminal: true }),
-  ], 6);
-}
-
-/**
- * Counts live `setInterval` handles so a leaked stall watchdog is observable.
- * Delegates to the real timers (the watchdog must still poll) and restores the
- * globals after each test.
- */
-function trackIntervals(): { active: () => number } {
-  const originalSetInterval = globalThis.setInterval.bind(globalThis);
-  const originalClearInterval = globalThis.clearInterval.bind(globalThis);
-  let active = 0;
-  vi.spyOn(globalThis, 'setInterval').mockImplementation((handler, timeout) => {
-    active += 1;
-    return originalSetInterval(handler, timeout);
+    expect(h.controller.state).toBe('ended');
+    expect(h.states.at(-1)).toBe('ended');
+    // End-of-stream belongs to MediaPlayback; the controller only moves state.
+    expect(h.sink.eos).toEqual([]);
+    expect(h.errors).toEqual([]);
   });
-  vi.spyOn(globalThis, 'clearInterval').mockImplementation((handle) => {
-    active -= 1;
-    return originalClearInterval(handle);
-  });
-  afterEach(() => {
-    vi.mocked(globalThis.setInterval).mockRestore();
-    vi.mocked(globalThis.clearInterval).mockRestore();
-  });
-  return { active: () => active };
-}
 
-function twoRangeIndex(): FakeIndex {
-  return new FakeIndex([
-    range(0, 40, 0, 4),
-    range(40, 60, 4, 10, { terminal: true }),
-  ], 10);
-}
+  it('ignores completion and errors from a replaced playback generation', () => {
+    const h = harness();
+    h.controller.start(h.load());
+
+    const replacement = new FakePlayback();
+    h.controller.start({ loadGeneration: 2, playback: replacement, sink: h.sink });
+
+    expect(h.playback.disposed).toBe(1);
+    expect(replacement.startInvocations).toBe(1);
+    expect(replacement.generation).toBe(2);
+
+    // The first playback's callbacks still fire with the older generation.
+    h.playback.complete();
+    h.playback.fail(new Error('stale'));
+
+    expect(h.controller.state).toBe('playing');
+    expect(h.errors).toEqual([]);
+
+    replacement.complete();
+
+    expect(h.controller.state).toBe('ended');
+  });
+
+  it('reports one normalization failure and aborts the sink', () => {
+    const h = harness();
+    h.controller.start(h.load());
+
+    h.playback.fail(new Error('engine failed'));
+    h.playback.fail(new Error('again'));
+
+    expect(h.controller.state).toBe('failed');
+    expect(h.errors).toHaveLength(1);
+    expect(h.errors[0].condition).toBe('normalization');
+    expect(h.errors[0].code).toBe('failed');
+    expect(h.sink.aborts).toHaveLength(1);
+  });
+
+  it('suppresses completion and errors after destroy', () => {
+    const h = harness();
+    h.controller.start(h.load());
+
+    h.controller.destroy();
+    h.controller.playhead(9);
+    h.playback.complete();
+    h.playback.fail(new Error('late'));
+
+    expect(h.controller.state).toBe('destroyed');
+    expect(h.sink.eos).toEqual([]);
+    expect(h.sink.evictions).toEqual([]);
+    expect(h.errors).toEqual([]);
+    expect(h.playback.disposed).toBe(1);
+    expect(h.sink.aborts).toHaveLength(1);
+  });
+
+  it('destroys the playback and aborts the sink exactly once', () => {
+    const h = harness();
+    h.controller.start(h.load());
+
+    h.controller.destroy();
+    h.controller.destroy();
+
+    expect(h.playback.disposed).toBe(1);
+    expect(h.sink.aborts).toHaveLength(1);
+  });
+
+  it('drives eviction on playhead and re-anchors the conversion on a seek', () => {
+    const h = harness();
+    h.controller.start(h.load());
+
+    h.controller.playhead(12);
+    expect(h.sink.evictions).toEqual([12]);
+
+    h.controller.seek(45);
+    expect(h.sink.evictions).toEqual([12, 45]);
+
+    // The seek restarted the conversion from the requested timestamp through
+    // the playback's restart seam and had the sink reset its parser so the
+    // fresh init segment lands in a clean SourceBuffer re-anchored at the
+    // target (the trim rebases output timestamps to zero). No second playback
+    // was started and no end-of-stream was issued.
+    expect(h.playback.restartInvocations).toEqual([45]);
+    expect(h.sink.resets).toEqual([{ generation: 1 }, { generation: 1, target: 45 }]);
+    expect(h.playback.startInvocations).toBe(1);
+    expect(h.sink.eos).toEqual([]);
+    expect(h.controller.state).toBe('playing');
+  });
+
+  it('passes the seek target through to the sink reset when the restart is accepted', () => {
+    const h = harness();
+    h.controller.start(h.load());
+
+    h.controller.seek(45);
+
+    expect(h.sink.resets).toEqual([{ generation: 1 }, { generation: 1, target: 45 }]);
+  });
+
+  it('seeks back-to-back: every accepted restart passes its own target', () => {
+    const h = harness();
+    h.controller.start(h.load());
+
+    h.controller.seek(30);
+    h.controller.seek(90);
+
+    // Each accepted seek re-anchors the sink at its own target; only refused
+    // (or absent) restarts leave the prior reset as the last one.
+    expect(h.sink.resets).toEqual([
+      { generation: 1 },
+      { generation: 1, target: 30 },
+      { generation: 1, target: 90 },
+    ]);
+    expect(h.playback.restartInvocations).toEqual([30, 90]);
+  });
+
+  it('only mirrors the playhead when the playback refuses a restart', () => {
+    const h = harness();
+    h.controller.start(h.load());
+    expect(h.sink.resets).toEqual([{ generation: 1 }]);
+
+    // A restart seam that refuses the seek reports false.
+    h.playback.restartEnabled = false;
+    h.controller.seek(60);
+
+    // Eviction still ran; restart and the second parser reset did not.
+    expect(h.sink.evictions).toEqual([60]);
+    expect(h.playback.restartInvocations).toEqual([]);
+    expect(h.sink.resets).toEqual([{ generation: 1 }]);
+    expect(h.playback.startInvocations).toBe(1);
+    expect(h.sink.eos).toEqual([]);
+    expect(h.controller.state).toBe('playing');
+  });
+
+  it('restarts the playback without rebinding the load generation', () => {
+    const h = harness();
+    h.controller.start(h.load());
+    expect(h.playback.startInvocations).toBe(1);
+
+    expect(h.playback.restart(90)).toBe(true);
+    expect(h.playback.restartInvocations).toEqual([90]);
+
+    // The restarted run reuses the original start callbacks and generation.
+    h.playback.complete();
+
+    expect(h.controller.state).toBe('ended');
+    expect(h.playback.generation).toBe(1);
+    expect(h.sink.resets).toEqual([{ generation: 1 }]);
+    expect(h.errors).toEqual([]);
+  });
+
+  it('accepts every valid restart intent and refuses only pre-start or post-dispose', () => {
+    const h = harness();
+    expect(h.playback.restart(10)).toBe(false);
+
+    h.controller.start(h.load());
+    expect(h.playback.restart(10)).toBe(true);
+    // Latest-wins: an in-flight restart no longer drops the next seek.
+    expect(h.playback.restart(20)).toBe(true);
+
+    h.controller.destroy();
+    expect(h.playback.restart(30)).toBe(false);
+  });
+});
