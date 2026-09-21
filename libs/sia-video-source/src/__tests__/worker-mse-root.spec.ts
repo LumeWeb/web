@@ -13,7 +13,7 @@
  * constructible in a unit test page.
  */
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_FMP4_MIME, type WorkerToMainMessage } from '../protocol.ts';
+import { DEFAULT_FMP4_MIME, type WorkerToMainMessage, WorkerToMainMessageType } from '../protocol.ts';
 import { createWorkerMseRoot, type WorkerMseRoot } from '../session/worker-mse-root.ts';
 
 // ---- MSE fakes (sourceopen-scoped; mirror the pipe-compatible SB shape) -------
@@ -125,9 +125,9 @@ describe('createWorkerMseRoot (worker MSE composition root)', () => {
 
     const sink = root.createSink({ durationSeconds: 90, mime: DEFAULT_FMP4_MIME, requestId: 7 });
 
-    const handle = posted.find((message) => message.type === 'HANDLE');
+    const handle = posted.find((message) => message.type === WorkerToMainMessageType.HANDLE);
     expect(handle).toBeDefined();
-    if (handle && handle.type === 'HANDLE') {
+    if (handle && handle.type === WorkerToMainMessageType.HANDLE) {
       expect(handle.requestId).toBe(7);
       expect(handle.handle).toBe(mediaSource.handle);
     }

@@ -6,7 +6,7 @@ import {
   generateWorkerKeyPair,
 } from '../app-key-handshake.ts';
 import { MseAppendPipe } from '../mse-pipe.ts';
-import { type AppKeyEnvelope, DEFAULT_FMP4_MIME, isAppKeyEnvelope, type MainToWorkerMessage, PROTOCOL_VERSION, WORKER_PUBLIC_KEY_LENGTH, type WorkerToMainMessage } from '../protocol.ts';
+import { type AppKeyEnvelope, DEFAULT_FMP4_MIME, isAppKeyEnvelope, type MainToWorkerMessage, MainToWorkerMessageType, PROTOCOL_VERSION, WORKER_PUBLIC_KEY_LENGTH, type WorkerToMainMessage, WorkerToMainMessageType } from '../protocol.ts';
 import { siaVideoDefaultProps, SiaVideoSource } from '../sia-video-source.ts';
 
 /**
@@ -55,7 +55,7 @@ describe('SiaVideoSource (host state machine)', () => {
 
     expect(worker.sent.at(-1)).toMatchObject({
       config: { indexerUrl: 'https://sia.storage' },
-      type: 'HELLO',
+      type: MainToWorkerMessageType.HELLO,
     });
     host.destroy();
   });
@@ -65,12 +65,12 @@ describe('SiaVideoSource (host state machine)', () => {
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     host.attach(document.createElement('video'));
 
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: 999 });
-    expect(worker.sent.some((m) => m.type === 'ATTACH')).toBe(false);
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: 999 });
+    expect(worker.sent.some((m) => m.type === MainToWorkerMessageType.ATTACH)).toBe(false);
     expect(host.error?.code).toBe(4);
 
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 2, type: 'HELLO_OK', version: PROTOCOL_VERSION });
-    expect(worker.sent.some((m) => m.type === 'ATTACH')).toBe(true);
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 2, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    expect(worker.sent.some((m) => m.type === MainToWorkerMessageType.ATTACH)).toBe(true);
     host.destroy();
   });
 
@@ -80,13 +80,13 @@ describe('SiaVideoSource (host state machine)', () => {
     const target = document.createElement('video');
     host.attach(target);
 
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
-    expect(worker.sent.some((m) => m.type === 'ATTACH')).toBe(true);
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    expect(worker.sent.some((m) => m.type === MainToWorkerMessageType.ATTACH)).toBe(true);
 
     host.src = 'k';
-    const source = worker.sent.find((m) => m.type === 'SOURCE') as
+    const source = worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as
       | undefined
-      | { preload: string; requestId: number; src: string; type: 'SOURCE'; };
+      | { preload: string; requestId: number; src: string; type: MainToWorkerMessageType.SOURCE; };
     expect(source?.src).toBe('k');
     expect(source?.preload).toBe(siaVideoDefaultProps.preload);
     expect(typeof source?.requestId).toBe('number');
@@ -95,7 +95,7 @@ describe('SiaVideoSource (host state machine)', () => {
     worker.reply({
       info: { container: 'fmp4', durationSeconds: null, mime: 'video/mp4', mode: 'main', tracks: [] },
       requestId: source.requestId,
-      type: 'SOURCE_OK',
+      type: WorkerToMainMessageType.SOURCE_OK,
     });
     expect(target.src.startsWith('blob:')).toBe(true);
     host.destroy();
@@ -106,20 +106,20 @@ describe('SiaVideoSource (host state machine)', () => {
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     worker.sent.length = 0;
 
     target.currentTime = 12.5;
     target.dispatchEvent(new Event('seeking'));
     const seek = worker.sent.at(-1);
-    expect(seek).toMatchObject({ time: 12.5, type: 'SEEK' });
+    expect(seek).toMatchObject({ time: 12.5, type: MainToWorkerMessageType.SEEK });
 
     target.dispatchEvent(new Event('play'));
-    expect(worker.sent.at(-1)).toMatchObject({ type: 'PLAY' });
+    expect(worker.sent.at(-1)).toMatchObject({ type: MainToWorkerMessageType.PLAY });
 
     target.currentTime = 13;
     target.dispatchEvent(new Event('timeupdate'));
-    expect(worker.sent.at(-1)).toMatchObject({ time: 13, type: 'PLAYHEAD' });
+    expect(worker.sent.at(-1)).toMatchObject({ time: 13, type: MainToWorkerMessageType.PLAYHEAD });
     host.destroy();
   });
 
@@ -128,15 +128,15 @@ describe('SiaVideoSource (host state machine)', () => {
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
 
     host.src = 'k';
     // A superseded load's error must not surface.
-    worker.reply({ context: 'stale', kind: 'network', requestId: 999, type: 'ERROR' });
+    worker.reply({ context: 'stale', kind: 'network', requestId: 999, type: WorkerToMainMessageType.ERROR });
     expect(host.error).toBeNull();
 
-    const loadId = (worker.sent.find((m) => m.type === 'SOURCE') as undefined | { requestId: number; })?.requestId ?? 0;
-    worker.reply({ context: 'container: mp4', kind: 'unsupported', requestId: loadId, type: 'ERROR' });
+    const loadId = (worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as undefined | { requestId: number; })?.requestId ?? 0;
+    worker.reply({ context: 'container: mp4', kind: 'unsupported', requestId: loadId, type: WorkerToMainMessageType.ERROR });
     expect(host.error?.code).toBe(4);
     host.destroy();
   });
@@ -148,21 +148,21 @@ describe('SiaVideoSource (host state machine)', () => {
     let errorEvents = 0;
     host.addEventListener('error', () => errorEvents++);
     host.attach(target);
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
 
     host.src = 'k';
-    const loadId = (worker.sent.find((m) => m.type === 'SOURCE') as undefined | { requestId: number; })?.requestId ?? 0;
+    const loadId = (worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as undefined | { requestId: number; })?.requestId ?? 0;
 
     // Clearing the source resets the active request id...
     host.src = '';
     // ...so the abandoned load's late failure must die with it — not surface
     // as a MediaError on the emptied element.
-    worker.reply({ context: 'late load failure', kind: 'network', requestId: loadId, type: 'ERROR' });
+    worker.reply({ context: 'late load failure', kind: 'network', requestId: loadId, type: WorkerToMainMessageType.ERROR });
     expect(host.error).toBeNull();
     expect(errorEvents).toBe(0);
 
     // Globally-scoped reports (no request id) still stand.
-    worker.reply({ context: 'worker stopped', kind: 'network', requestId: null, type: 'ERROR' });
+    worker.reply({ context: 'worker stopped', kind: 'network', requestId: null, type: WorkerToMainMessageType.ERROR });
     expect(host.error?.code).toBe(2);
     expect(errorEvents).toBe(1);
     host.destroy();
@@ -194,7 +194,7 @@ describe('SiaVideoSource (host state machine)', () => {
     host.detach();
     host.attach(document.createElement('video'));
 
-    const hellos = worker.sent.filter((m) => m.type === 'HELLO');
+    const hellos = worker.sent.filter((m) => m.type === MainToWorkerMessageType.HELLO);
     expect(hellos.length).toBe(2);
     expect(hellos.at(-1)).toMatchObject({ config: { indexerUrl: 'https://changed.example' } });
     host.destroy();
@@ -210,14 +210,14 @@ describe('SiaVideoSource (host state machine)', () => {
       workerMse: 'main',
     });
     forced.attach(document.createElement('video'));
-    const forcedHello = worker.sent.find((m) => m.type === 'HELLO') as { config?: { workerMse?: string }; type: 'HELLO'; };
+    const forcedHello = worker.sent.find((m) => m.type === MainToWorkerMessageType.HELLO) as { config?: { workerMse?: string }; type: MainToWorkerMessageType.HELLO; };
     expect(forcedHello.config).toMatchObject({ workerMse: 'main' });
     forced.destroy();
 
     // Default auto (or unset) leaves the wire byte-identical: no workerMse.
     const auto = new SiaVideoSource({ createWorker: () => worker as unknown as Worker, workerConfig: workerConfig() });
     auto.attach(document.createElement('video'));
-    const autoHello = worker.sent.filter((m) => m.type === 'HELLO').at(-1) as { config?: Record<string, unknown>; type: 'HELLO'; };
+    const autoHello = worker.sent.filter((m) => m.type === MainToWorkerMessageType.HELLO).at(-1) as { config?: Record<string, unknown>; type: MainToWorkerMessageType.HELLO; };
     expect(autoHello.config).not.toHaveProperty('workerMse');
     auto.destroy();
   });
@@ -237,24 +237,24 @@ describe('SiaVideoSource (host state machine)', () => {
     const target = document.createElement('video');
     host.attach(target);
 
-    worker.reply({ features: { workerMse: true }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
-    worker.reply({ mode: 'worker', requestId: 2, type: 'ATTACH_OK' });
+    worker.reply({ features: { workerMse: true }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ mode: 'worker', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
 
     host.src = 'k';
-    const source = worker.sent.find((m) => m.type === 'SOURCE') as
+    const source = worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as
       | undefined
-      | { preload: string; requestId: number; src: string; type: 'SOURCE'; };
+      | { preload: string; requestId: number; src: string; type: MainToWorkerMessageType.SOURCE; };
     if (!source) throw new Error('SOURCE was not sent');
     worker.reply({
       info: { container: 'fmp4', durationSeconds: null, mime: 'video/mp4', mode: 'worker', tracks: [] },
       requestId: source.requestId,
-      type: 'SOURCE_OK',
+      type: WorkerToMainMessageType.SOURCE_OK,
     });
 
     // Worker mode: produced media never leaves the worker — the host only
     // attaches the transferred MediaSourceHandle to the element.
     if (canAttach) {
-      worker.reply({ handle, requestId: source.requestId, type: 'HANDLE' });
+      worker.reply({ handle, requestId: source.requestId, type: WorkerToMainMessageType.HANDLE });
       expect((target as unknown as { srcObject: unknown }).srcObject).toBe(handle);
       // No main-thread object URL is created in worker mode.
       expect(target.src.startsWith('blob:')).toBe(false);
@@ -282,14 +282,14 @@ describe('SiaVideoSource (host state machine)', () => {
     });
     host.attach(document.createElement('video'));
 
-    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     // The seed→envelope chain is async; let it settle.
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     // Exactly one APP_KEY was sent, immediately after HELLO_OK.
-    const appKeyMessages = worker.sent.filter((m) => m.type === 'APP_KEY');
+    const appKeyMessages = worker.sent.filter((m) => m.type === MainToWorkerMessageType.APP_KEY);
     expect(appKeyMessages).toHaveLength(1);
-    const appKey = appKeyMessages[0] as unknown as { envelope: AppKeyEnvelope; requestId: number; type: 'APP_KEY'; };
+    const appKey = appKeyMessages[0] as unknown as { envelope: AppKeyEnvelope; requestId: number; type: MainToWorkerMessageType.APP_KEY; };
     expect(isAppKeyEnvelope(appKey.envelope)).toBe(true);
 
     // The envelope decrypts (inside a "worker") to exactly the supplied seed:
@@ -333,12 +333,12 @@ describe('SiaVideoSource (host state machine)', () => {
       return seed;
     };
     host.attach(document.createElement('video'));
-    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     // The setter-supplied supplier reached the HELLO_OK handler: the APP_KEY
     // envelope still precedes ATTACH (ordering unchanged for this path)…
-    expect(worker.sent.map((m) => m.type)).toEqual(['HELLO', 'APP_KEY', 'ATTACH']);
+    expect(worker.sent.map((m) => m.type)).toEqual([MainToWorkerMessageType.HELLO, MainToWorkerMessageType.APP_KEY, MainToWorkerMessageType.ATTACH]);
     // …and decrypts to exactly the supplied seed, so the worker's SDK is
     // built from real seed bytes rather than the null seed that produces a
     // "No Sia SDK is available" failure at load time.
@@ -362,17 +362,17 @@ describe('SiaVideoSource (host state machine)', () => {
       workerConfig: workerConfig(),
     });
     host.attach(document.createElement('video'));
-    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     await new Promise((resolve) => setTimeout(resolve, 0));
     worker.sent.length = 0;
 
     host.detach();
     host.attach(document.createElement('video'));
-    worker.reply({ features: { workerMse: false }, publicKey, requestId: 2, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey, requestId: 2, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     // A second envelope was delivered for the second handshake.
-    const envelopes = worker.sent.filter((m) => m.type === 'APP_KEY');
+    const envelopes = worker.sent.filter((m) => m.type === MainToWorkerMessageType.APP_KEY);
     expect(envelopes).toHaveLength(1);
     const envelope = (envelopes[0] as unknown as { envelope: AppKeyEnvelope; }).envelope;
     expect(envelope.ephemeralPublicKey.byteLength).toBe(WORKER_PUBLIC_KEY_LENGTH);
@@ -409,9 +409,9 @@ describe('SiaVideoSource (host state machine)', () => {
     target.currentTime = 1;
     target.dispatchEvent(new Event('seeking'));
     target.dispatchEvent(new Event('play'));
-    expect(worker.sent.map((m) => m.type)).toEqual(['HELLO']);
+    expect(worker.sent.map((m) => m.type)).toEqual([MainToWorkerMessageType.HELLO]);
 
-    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     // Let the async seed→envelope chain (and whatever is chained behind it)
     // settle; the ordering is only observable after it drains.
     await new Promise((resolve) => setTimeout(resolve, 0));
@@ -421,22 +421,96 @@ describe('SiaVideoSource (host state machine)', () => {
     // load hits the worker-side seed requirement and fails with a spurious
     // "No Sia SDK is available" network error at playback start.
     const sentTypes = worker.sent.map((m) => m.type);
-    expect(sentTypes).toEqual(['HELLO', 'APP_KEY', 'ATTACH', 'SEEK', 'PLAY']);
+    expect(sentTypes).toEqual([MainToWorkerMessageType.HELLO, MainToWorkerMessageType.APP_KEY, MainToWorkerMessageType.ATTACH, MainToWorkerMessageType.SEEK, MainToWorkerMessageType.PLAY]);
 
     // Playback still proceeds: the ATTACH round trip replays the stored
     // source and the load acknowledges without any spurious error event.
-    worker.reply({ mode: 'main', requestId: 2, type: 'ATTACH_OK' });
-    const source = worker.sent.find((m) => m.type === 'SOURCE') as
+    worker.reply({ mode: 'main', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
+    const source = worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as
       | undefined
-      | { preload: string; requestId: number; src: string; type: 'SOURCE'; };
+      | { preload: string; requestId: number; src: string; type: MainToWorkerMessageType.SOURCE; };
     expect(source?.src).toBe('fifo-ordered-object');
     worker.reply({
       info: { container: 'fmp4', durationSeconds: null, mime: 'video/mp4', mode: 'main', tracks: [] },
       requestId: source?.requestId ?? 0,
-      type: 'SOURCE_OK',
+      type: WorkerToMainMessageType.SOURCE_OK,
     });
     expect(host.error).toBeNull();
     expect(errorEvents).toBe(0);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('sends a keyType "sharing" APP_KEY envelope for the sharing-key supplier, scrubs it, and orders ATTACH after', async () => {
+    const worker = new FakeWorker();
+    // The supplier returns a buffer whose contents stay observable only
+    // through this snapshot; the host is expected to scrub it after the
+    // envelope is built (mirrors the app-key seed discipline).
+    const sharingSeed = crypto.getRandomValues(new Uint8Array(32));
+    const expectedSeed = new Uint8Array(sharingSeed);
+    const keyPair = generateWorkerKeyPair();
+    const publicKey = exportWorkerPublicKey(keyPair);
+    let supplierCalls = 0;
+    const host = new SiaVideoSource({
+      createWorker: () => worker as unknown as Worker,
+      getSharingKeySeed: () => {
+        supplierCalls++;
+        return sharingSeed;
+      },
+      workerConfig: workerConfig(),
+    });
+    host.attach(document.createElement('video'));
+    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // Exactly one APP_KEY, tagged sharing, posted before ATTACH.
+    const appKeyMessages = worker.sent.filter((m) => m.type === MainToWorkerMessageType.APP_KEY);
+    expect(appKeyMessages).toHaveLength(1);
+    expect(worker.sent.map((m) => m.type)).toEqual([MainToWorkerMessageType.HELLO, MainToWorkerMessageType.APP_KEY, MainToWorkerMessageType.ATTACH]);
+    const appKey = appKeyMessages[0] as unknown as { envelope: AppKeyEnvelope & { keyType?: string }; requestId: number; type: MainToWorkerMessageType.APP_KEY; };
+    expect(appKey.envelope.keyType).toBe('sharing');
+    expect(isAppKeyEnvelope(appKey.envelope)).toBe(true);
+
+    // The envelope decrypts to exactly the supplied sharing seed and the host
+    // scrubbed the supplier's buffer after the handoff (one call).
+    const decapsulated = await decryptAppKeyEnvelope(keyPair, appKey.envelope);
+    expect(Array.from(decapsulated)).toEqual(Array.from(expectedSeed));
+    expect(sharingSeed.every((b) => b === 0)).toBe(true);
+    expect(supplierCalls).toBe(1);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('sends both APP_KEY envelopes (app then sharing) when both suppliers are present', async () => {
+    const worker = new FakeWorker();
+    const keyPair = generateWorkerKeyPair();
+    const publicKey = exportWorkerPublicKey(keyPair);
+    const appSeed = crypto.getRandomValues(new Uint8Array(32));
+    const sharingSeed = crypto.getRandomValues(new Uint8Array(32));
+    const host = new SiaVideoSource({
+      createWorker: () => worker as unknown as Worker,
+      getAppKeySeed: () => appSeed,
+      getSharingKeySeed: () => sharingSeed,
+      workerConfig: workerConfig(),
+    });
+    host.attach(document.createElement('video'));
+    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // App first, then sharing — both envelopes precede ATTACH.
+    const appKeyMessages = worker.sent.filter((m) => m.type === MainToWorkerMessageType.APP_KEY);
+    expect(appKeyMessages).toHaveLength(2);
+    const envelopes = appKeyMessages.map(
+      (m) => (m as unknown as { envelope: AppKeyEnvelope & { keyType?: string }; }).envelope,
+    );
+    expect(envelopes[0].keyType).toBeUndefined(); // app (backward-compatible default)
+    expect(envelopes[1].keyType).toBe('sharing');
+    expect(worker.sent.map((m) => m.type)).toEqual([MainToWorkerMessageType.HELLO, MainToWorkerMessageType.APP_KEY, MainToWorkerMessageType.APP_KEY, MainToWorkerMessageType.ATTACH]);
+
+    // Each decrypts to its own seed, independently.
+    expect(Array.from(await decryptAppKeyEnvelope(keyPair, envelopes[0]))).toEqual(Array.from(appSeed));
+    expect(Array.from(await decryptAppKeyEnvelope(keyPair, envelopes[1]))).toEqual(Array.from(sharingSeed));
+    // Both supplier buffers were scrubbed after the handoff.
+    expect(appSeed.every((b) => b === 0)).toBe(true);
+    expect(sharingSeed.every((b) => b === 0)).toBe(true);
     host.destroy();
   });
 
@@ -453,13 +527,13 @@ describe('SiaVideoSource (host state machine)', () => {
     host.attach(target);
     target.dispatchEvent(new Event('play'));
 
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     // No seed supplier → ATTACH goes out synchronously and the queued PLAY is
     // flushed behind it, mirroring the live player's first-load ordering.
-    expect(worker.sent.map((m) => m.type)).toEqual(['HELLO', 'ATTACH', 'PLAY']);
+    expect(worker.sent.map((m) => m.type)).toEqual([MainToWorkerMessageType.HELLO, MainToWorkerMessageType.ATTACH, MainToWorkerMessageType.PLAY]);
 
     worker.sent.length = 0;
-    worker.reply({ mode: 'main', requestId: 2, type: 'ATTACH_OK' });
+    worker.reply({ mode: 'main', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
 
     // The fresh SOURCE alone would start deferred (preload defaults to
     // 'metadata') and the pipeline would stall at byte 0 forever — nothing
@@ -467,10 +541,10 @@ describe('SiaVideoSource (host state machine)', () => {
     // host must re-send PLAY aimed at the replayed source's load so the
     // worker begins streaming once that load completes.
     const sentTypes = worker.sent.map((m) => m.type);
-    expect(sentTypes.filter((t) => t === 'SOURCE' || t === 'PLAY')).toEqual(['SOURCE', 'PLAY']);
+    expect(sentTypes.filter((t) => t === MainToWorkerMessageType.SOURCE || t === MainToWorkerMessageType.PLAY)).toEqual([MainToWorkerMessageType.SOURCE, MainToWorkerMessageType.PLAY]);
 
-    const source = worker.sent.find((m) => m.type === 'SOURCE');
-    const play = worker.sent.find((m) => m.type === 'PLAY');
+    const source = worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE);
+    const play = worker.sent.find((m) => m.type === MainToWorkerMessageType.PLAY);
     expect(source?.src).toBe('replay-play-object');
     // The re-stated PLAY names the load it belongs to, matching the replayed
     // SOURCE's request id, so the worker honors it when that load completes.
@@ -490,16 +564,16 @@ describe('SiaVideoSource (host state machine)', () => {
     // a re-stated PLAY after ATTACH_OK would be resuming what the user stopped.
     target.dispatchEvent(new Event('pause'));
 
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
-    expect(worker.sent.map((m) => m.type)).toEqual(['HELLO', 'ATTACH', 'PLAY']);
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    expect(worker.sent.map((m) => m.type)).toEqual([MainToWorkerMessageType.HELLO, MainToWorkerMessageType.ATTACH, MainToWorkerMessageType.PLAY]);
 
     worker.sent.length = 0;
-    worker.reply({ mode: 'main', requestId: 2, type: 'ATTACH_OK' });
+    worker.reply({ mode: 'main', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
 
     expect(target.paused).toBe(true);
     // The fresh SOURCE replays the current source, but the user's pause won:
     // the rebuilt pipeline must not start streaming on its own.
-    expect(worker.sent.map((m) => m.type)).toEqual(['SOURCE']);
+    expect(worker.sent.map((m) => m.type)).toEqual([MainToWorkerMessageType.SOURCE]);
     host.destroy();
   });
 
@@ -511,15 +585,15 @@ describe('SiaVideoSource (host state machine)', () => {
     host.attach(target);
     target.dispatchEvent(new Event('play'));
 
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     worker.sent.length = 0;
-    worker.reply({ mode: 'main', requestId: 2, type: 'ATTACH_OK' });
+    worker.reply({ mode: 'main', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
 
     // The harness element reports paused (synthetic play is not a real play),
     // so only the sticky intent can drive the re-stated PLAY — clearing it on
     // every pause must not erase an intent no pause superseded.
     const sentTypes = worker.sent.map((m) => m.type);
-    expect(sentTypes.filter((t) => t === 'SOURCE' || t === 'PLAY')).toEqual(['SOURCE', 'PLAY']);
+    expect(sentTypes.filter((t) => t === MainToWorkerMessageType.SOURCE || t === MainToWorkerMessageType.PLAY)).toEqual([MainToWorkerMessageType.SOURCE, MainToWorkerMessageType.PLAY]);
     host.destroy();
   });
 
@@ -534,12 +608,12 @@ describe('SiaVideoSource (host state machine)', () => {
     target.dispatchEvent(new Event('pause'));
     target.dispatchEvent(new Event('play'));
 
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     worker.sent.length = 0;
-    worker.reply({ mode: 'main', requestId: 2, type: 'ATTACH_OK' });
+    worker.reply({ mode: 'main', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
 
     const sentTypes = worker.sent.map((m) => m.type);
-    expect(sentTypes.filter((t) => t === 'SOURCE' || t === 'PLAY')).toEqual(['SOURCE', 'PLAY']);
+    expect(sentTypes.filter((t) => t === MainToWorkerMessageType.SOURCE || t === MainToWorkerMessageType.PLAY)).toEqual([MainToWorkerMessageType.SOURCE, MainToWorkerMessageType.PLAY]);
     host.destroy();
   });
 
@@ -549,11 +623,11 @@ describe('SiaVideoSource (host state machine)', () => {
     const publicKey = exportWorkerPublicKey(keyPair);
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     host.attach(document.createElement('video'));
-    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     // Apps injecting their own SDK factory have no handshake to perform.
-    expect(worker.sent.some((m) => m.type === 'APP_KEY')).toBe(false);
+    expect(worker.sent.some((m) => m.type === MainToWorkerMessageType.APP_KEY)).toBe(false);
     host.destroy();
   });
 
@@ -562,20 +636,20 @@ describe('SiaVideoSource (host state machine)', () => {
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     // The host only acts on main-mode CHUNK/ENDED once the mode is known, so
     // complete the ATTACH round trip before the load starts.
-    worker.reply({ mode: 'main', requestId: 2, type: 'ATTACH_OK' });
+    worker.reply({ mode: 'main', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
 
     host.src = 'k';
-    const source = worker.sent.find((m) => m.type === 'SOURCE') as
+    const source = worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as
       | undefined
-      | { requestId: number; type: 'SOURCE'; };
+      | { requestId: number; type: MainToWorkerMessageType.SOURCE; };
     if (!source) throw new Error('SOURCE was not sent');
     worker.reply({
       info: { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main', tracks: [] },
       requestId: source.requestId,
-      type: 'SOURCE_OK',
+      type: WorkerToMainMessageType.SOURCE_OK,
     });
     // Let sourceopen + addSourceBuffer settle, then deliver one init chunk and
     // the end-of-stream signal. The host must defer endOfStream until the
@@ -587,9 +661,9 @@ describe('SiaVideoSource (host state machine)', () => {
       bytes: new Uint8Array([0, 0, 0, 32, 0x66, 0x74, 0x79, 0x70, 0x69, 0x73, 0x6f, 0x6d]),
       kind: 'init',
       requestId: source.requestId,
-      type: 'CHUNK',
+      type: WorkerToMainMessageType.CHUNK,
     });
-    worker.reply({ requestId: source.requestId, type: 'ENDED' });
+    worker.reply({ requestId: source.requestId, type: WorkerToMainMessageType.ENDED });
 
     const deadline = Date.now() + 3000;
     while (Date.now() < deadline && endSpy.mock.calls.length === 0) {
@@ -604,22 +678,22 @@ describe('SiaVideoSource (host state machine)', () => {
     const worker = new FakeWorker();
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     host.attach(document.createElement('video'));
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
 
     host.src = 'k';
-    const source = worker.sent.find((m) => m.type === 'SOURCE') as
+    const source = worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as
       | undefined
-      | { requestId: number; type: 'SOURCE'; };
+      | { requestId: number; type: MainToWorkerMessageType.SOURCE; };
     if (!source) throw new Error('SOURCE was not sent');
     worker.reply({
       info: { container: 'fmp4', durationSeconds: null, mime: 'video/mp4', mode: 'main', tracks: [] },
       requestId: source.requestId,
-      type: 'SOURCE_OK',
+      type: WorkerToMainMessageType.SOURCE_OK,
     });
     await new Promise((resolve) => setTimeout(resolve, 50));
 
     const endSpy = vi.spyOn(MediaSource.prototype, 'endOfStream');
-    worker.reply({ requestId: 999, type: 'ENDED' });
+    worker.reply({ requestId: 999, type: WorkerToMainMessageType.ENDED });
     await new Promise((resolve) => setTimeout(resolve, 100));
     expect(endSpy.mock.calls.length).toBe(0);
     endSpy.mockRestore();
@@ -630,24 +704,24 @@ describe('SiaVideoSource (host state machine)', () => {
     const worker = new FakeWorker();
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     host.attach(document.createElement('video'));
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
-    worker.reply({ mode: 'main', requestId: 2, type: 'ATTACH_OK' });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ mode: 'main', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
 
     host.src = 'k';
-    const source = worker.sent.find((m) => m.type === 'SOURCE') as
+    const source = worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as
       | undefined
-      | { requestId: number; type: 'SOURCE'; };
+      | { requestId: number; type: MainToWorkerMessageType.SOURCE; };
     if (!source) throw new Error('SOURCE was not sent');
     worker.reply({
       info: { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main', tracks: [] },
       requestId: source.requestId,
-      type: 'SOURCE_OK',
+      type: WorkerToMainMessageType.SOURCE_OK,
     });
     await new Promise((resolve) => setTimeout(resolve, 50));
 
     const endSpy = vi.spyOn(MediaSource.prototype, 'endOfStream');
-    worker.reply({ context: 'append failed', kind: 'decode', requestId: source.requestId, type: 'ERROR' });
-    worker.reply({ requestId: source.requestId, type: 'ENDED' });
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: source.requestId, type: WorkerToMainMessageType.ERROR });
+    worker.reply({ requestId: source.requestId, type: WorkerToMainMessageType.ENDED });
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     expect(endSpy).not.toHaveBeenCalled();
@@ -660,18 +734,18 @@ describe('SiaVideoSource (host state machine)', () => {
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
-    worker.reply({ mode: 'main', requestId: 2, type: 'ATTACH_OK' });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ mode: 'main', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
 
     host.src = 'seek-object';
-    const source = worker.sent.find((m) => m.type === 'SOURCE') as
+    const source = worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as
       | undefined
-      | { requestId: number; type: 'SOURCE'; };
+      | { requestId: number; type: MainToWorkerMessageType.SOURCE; };
     if (!source) throw new Error('SOURCE was not sent');
     worker.reply({
       info: { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main', tracks: [] },
       requestId: source.requestId,
-      type: 'SOURCE_OK',
+      type: WorkerToMainMessageType.SOURCE_OK,
     });
     // Let sourceopen + addSourceBuffer settle so the shared pipe holds a real
     // SourceBuffer and the seek reset can abort its segment parser.
@@ -693,7 +767,7 @@ describe('SiaVideoSource (host state machine)', () => {
     // currentTime so the trimmed output's zero-based timestamps land there.
     target.currentTime = 45;
     target.dispatchEvent(new Event('seeking'));
-    expect(worker.sent.at(-1)).toMatchObject({ time: 45, type: 'SEEK' });
+    expect(worker.sent.at(-1)).toMatchObject({ time: 45, type: MainToWorkerMessageType.SEEK });
     await settle(4);
     expect(abortSpy).toHaveBeenCalledTimes(1);
     expect(reanchorOffsets).toEqual([45]);
@@ -701,7 +775,7 @@ describe('SiaVideoSource (host state machine)', () => {
     // Backward seek: another reset, another parser abort, same buffer reused.
     target.currentTime = 10;
     target.dispatchEvent(new Event('seeking'));
-    expect(worker.sent.at(-1)).toMatchObject({ time: 10, type: 'SEEK' });
+    expect(worker.sent.at(-1)).toMatchObject({ time: 10, type: MainToWorkerMessageType.SEEK });
     await settle(4);
     expect(abortSpy).toHaveBeenCalledTimes(2);
     expect(reanchorOffsets).toEqual([45, 10]);
@@ -711,7 +785,7 @@ describe('SiaVideoSource (host state machine)', () => {
     // re-anchors the buffer at its own currentTime.
     target.currentTime = 30;
     target.dispatchEvent(new Event('seeking'));
-    expect(worker.sent.at(-1)).toMatchObject({ time: 30, type: 'SEEK' });
+    expect(worker.sent.at(-1)).toMatchObject({ time: 30, type: MainToWorkerMessageType.SEEK });
     await settle(4);
     expect(abortSpy).toHaveBeenCalledTimes(3);
     expect(reanchorOffsets).toEqual([45, 10, 30]);
@@ -726,18 +800,18 @@ describe('SiaVideoSource (host state machine)', () => {
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
-    worker.reply({ mode: 'main', requestId: 2, type: 'ATTACH_OK' });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ mode: 'main', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
 
     host.src = 'k';
-    const source = worker.sent.find((m) => m.type === 'SOURCE') as
+    const source = worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as
       | undefined
-      | { requestId: number; type: 'SOURCE'; };
+      | { requestId: number; type: MainToWorkerMessageType.SOURCE; };
     if (!source) throw new Error('SOURCE was not sent');
     worker.reply({
       info: { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main', tracks: [] },
       requestId: source.requestId,
-      type: 'SOURCE_OK',
+      type: WorkerToMainMessageType.SOURCE_OK,
     });
     await new Promise((resolve) => setTimeout(resolve, 50));
 
@@ -755,7 +829,7 @@ describe('SiaVideoSource (host state machine)', () => {
       bytes: new Uint8Array([0, 0, 0, 32, 0x66, 0x74, 0x79, 0x70, 0x69, 0x73, 0x6f, 0x6d]),
       kind: 'init',
       requestId: source.requestId,
-      type: 'CHUNK',
+      type: WorkerToMainMessageType.CHUNK,
     });
     await settle(8);
     expect(appendSpy).toHaveBeenCalledTimes(1);
@@ -767,11 +841,11 @@ describe('SiaVideoSource (host state machine)', () => {
       bytes: new Uint8Array([0, 0, 0, 32, 0x66, 0x74, 0x79, 0x70, 0x69, 0x73, 0x6f, 0x6d]),
       kind: 'init',
       requestId: source.requestId,
-      type: 'CHUNK',
+      type: WorkerToMainMessageType.CHUNK,
     });
     // ...and a late ENDED must not endOfStream a failed pipeline — the
     // main-thread fallback never masks a failure with a clean end.
-    worker.reply({ requestId: source.requestId, type: 'ENDED' });
+    worker.reply({ requestId: source.requestId, type: WorkerToMainMessageType.ENDED });
     await settle(8);
 
     expect(endSpy).not.toHaveBeenCalled();
@@ -785,18 +859,18 @@ describe('SiaVideoSource (host state machine)', () => {
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: 'HELLO_OK', version: PROTOCOL_VERSION });
-    worker.reply({ mode: 'main', requestId: 2, type: 'ATTACH_OK' });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ mode: 'main', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
 
     host.src = 'k';
-    const source = worker.sent.find((m) => m.type === 'SOURCE') as
+    const source = worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as
       | undefined
-      | { requestId: number; type: 'SOURCE'; };
+      | { requestId: number; type: MainToWorkerMessageType.SOURCE; };
     if (!source) throw new Error('SOURCE was not sent');
     worker.reply({
       info: { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main', tracks: [] },
       requestId: source.requestId,
-      type: 'SOURCE_OK',
+      type: WorkerToMainMessageType.SOURCE_OK,
     });
     await new Promise((resolve) => setTimeout(resolve, 50));
 
@@ -809,7 +883,7 @@ describe('SiaVideoSource (host state machine)', () => {
     target.currentTime = 60;
     target.dispatchEvent(new Event('timeupdate'));
     expect(evictSpy).toHaveBeenCalledTimes(1);
-    expect(worker.sent.at(-1)).toMatchObject({ time: 60, type: 'PLAYHEAD' });
+    expect(worker.sent.at(-1)).toMatchObject({ time: 60, type: MainToWorkerMessageType.PLAYHEAD });
 
     target.currentTime = 61;
     target.dispatchEvent(new Event('timeupdate'));

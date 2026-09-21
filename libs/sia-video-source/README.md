@@ -160,7 +160,7 @@ By default the worker builds the SDK from two handshake steps, running
    through the `getAppKeySeed` supplier option (or the React `SiaVideo`
    `getAppKeySeed` prop), never as a stored value.
 
-The worker keeps its X25519 private key and the decrypted seed inside the
+The worker keeps its X25519 private key and the decrypted seeds inside the
 worker isolate; no protocol message extracts either one. Apps that own
 registration elsewhere can inject a resolved SDK instead:
 
@@ -168,6 +168,18 @@ registration elsewhere can inject a resolved SDK instead:
 const core = new SiaVideoWorkerCore({ createSdk: (config, seed) => sdk });
 // or via worker messages when using the default factory
 ```
+
+**Keyless playback (sharing keys).** A share-URL `src` streams without any app
+key when a sharing-key seed is supplied through `getSharingKeySeed` (or the
+React `getSharingKeySeed` prop). The seed is a read-only, expirable, revocable
+credential handed out by the account owner; the worker connects with
+`SharedSdk.connect(indexerUrl, seed)` and routes the share URL through
+`SharedSdk.object(objectKey)` — downloads are paid for by the key's owner.
+It travels exactly like the app-key seed: one `APP_KEY` envelope tagged
+`keyType: 'sharing'` (default `'app'` for the original handshake), never
+plaintext, never in `workerConfig`. With only an app key, share URLs fall back
+to `Sdk.objectFromShareUrl` as before. See ADR
+[0008](decisions/0008-share-link-streaming-via-sharedsdk.md).
 
 ## Development
 

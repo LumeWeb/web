@@ -10,7 +10,13 @@
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { encryptToWorker } from '../app-key-handshake.ts';
-import type { MainToWorkerMessage, WorkerConfig, WorkerToMainMessage } from '../protocol.ts';
+import {
+  type MainToWorkerMessage,
+  MainToWorkerMessageType,
+  type WorkerConfig,
+  type WorkerToMainMessage,
+  WorkerToMainMessageType,
+} from '../protocol.ts';
 import type { SiaByteSourceSdk } from '../transport/sia-byte-source.ts';
 import { type WorkerCompositionHost } from '../worker.ts';
 import {
@@ -158,12 +164,12 @@ describe('installSiaVideoSourceWorker', () => {
     const mount = mountWorkerSelf();
     try {
       installSiaVideoSourceWorker({ post: (message) => posted.push(message) });
-      mount.fire({ requestId: 7, type: 'HELLO' });
+      mount.fire({ requestId: 7, type: MainToWorkerMessageType.HELLO });
       await vi.waitFor(() => {
-        expect(posted.some((message) => message.type === 'HELLO_OK')).toBe(true);
+        expect(posted.some((message) => message.type === WorkerToMainMessageType.HELLO_OK)).toBe(true);
       });
-      const helloOk = posted.find((message): message is Extract<WorkerToMainMessage, { type: 'HELLO_OK'; }> =>
-        message.type === 'HELLO_OK');
+      const helloOk = posted.find((message): message is Extract<WorkerToMainMessage, { type: WorkerToMainMessageType.HELLO_OK; }> =>
+        message.type === WorkerToMainMessageType.HELLO_OK);
       expect(helloOk?.requestId).toBe(7);
     } finally {
       mount.restore();
@@ -181,12 +187,12 @@ describe('installSiaVideoSourceWorker', () => {
     const mount = mountWorkerSelf();
     try {
       installSiaVideoSourceWorker({ createCompositionRoot: () => fakeHost });
-      mount.fire({ requestId: 3, type: 'HELLO' });
+      mount.fire({ requestId: 3, type: MainToWorkerMessageType.HELLO });
       mount.fire({ bogus: true, type: 'NOT_A_PROTOCOL_MESSAGE' });
       await vi.waitFor(() => {
         expect(received.length).toBe(1);
       });
-      expect(received[0]).toMatchObject({ requestId: 3, type: 'HELLO' });
+      expect(received[0]).toMatchObject({ requestId: 3, type: MainToWorkerMessageType.HELLO });
       expect(handleMessage).toHaveBeenCalledTimes(1);
       expect(destroy).not.toHaveBeenCalled();
     } finally {
@@ -218,30 +224,30 @@ describe('installSiaVideoSourceWorker (default Sia composition root)', () => {
         post: (message) => posted.push(message),
         supportsWorkerMse: () => true,
       });
-      mount.fire({ config: { ...WORKER_CONFIG, workerMse: 'main' }, requestId: 1, type: 'HELLO' });
+      mount.fire({ config: { ...WORKER_CONFIG, workerMse: 'main' }, requestId: 1, type: MainToWorkerMessageType.HELLO });
       await vi.waitFor(() => {
-        expect(posted.some((message) => message.type === 'HELLO_OK')).toBe(true);
+        expect(posted.some((message) => message.type === WorkerToMainMessageType.HELLO_OK)).toBe(true);
       });
-      const helloOk = posted.find((message) => message.type === 'HELLO_OK');
-      expect(helloOk?.type === 'HELLO_OK' ? helloOk.features.workerMse : null).toBe(false);
+      const helloOk = posted.find((message) => message.type === WorkerToMainMessageType.HELLO_OK);
+      expect(helloOk?.type === WorkerToMainMessageType.HELLO_OK ? helloOk.features.workerMse : null).toBe(false);
 
       const seed = new Uint8Array(32).fill(5);
       const envelope = await encryptToWorker(
-        helloOk?.type === 'HELLO_OK' ? helloOk.publicKey : new Uint8Array(32),
+        helloOk?.type === WorkerToMainMessageType.HELLO_OK ? helloOk.publicKey : new Uint8Array(32),
         seed,
       );
-      mount.fire({ envelope, requestId: 2, type: 'APP_KEY' });
+      mount.fire({ envelope, requestId: 2, type: MainToWorkerMessageType.APP_KEY });
       await flush();
-      mount.fire({ requestId: 3, type: 'ATTACH' });
+      mount.fire({ requestId: 3, type: MainToWorkerMessageType.ATTACH });
       await flush();
-      const attachOk = posted.find((message) => message.type === 'ATTACH_OK');
-      expect(attachOk?.type === 'ATTACH_OK' ? attachOk.mode : null).toBe('main');
-      mount.fire({ preload: 'auto', requestId: 4, src: 'pin-key', type: 'SOURCE' });
+      const attachOk = posted.find((message) => message.type === WorkerToMainMessageType.ATTACH_OK);
+      expect(attachOk?.type === WorkerToMainMessageType.ATTACH_OK ? attachOk.mode : null).toBe('main');
+      mount.fire({ preload: 'auto', requestId: 4, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
       await vi.waitFor(() => {
-        expect(posted.some((message) => message.type === 'CHUNK')).toBe(true);
+        expect(posted.some((message) => message.type === WorkerToMainMessageType.CHUNK)).toBe(true);
       });
-      expect(posted.filter((message) => message.type === 'CHUNK').length).toBeGreaterThan(0);
-      expect(posted.filter((message) => message.type === 'HANDLE')).toEqual([]);
+      expect(posted.filter((message) => message.type === WorkerToMainMessageType.CHUNK).length).toBeGreaterThan(0);
+      expect(posted.filter((message) => message.type === WorkerToMainMessageType.HANDLE)).toEqual([]);
     } finally {
       mount.restore();
     }
@@ -254,16 +260,16 @@ describe('installSiaVideoSourceWorker (default Sia composition root)', () => {
         post: (message) => posted.push(message),
         supportsWorkerMse: () => true,
       });
-      mount.fire({ config: { ...WORKER_CONFIG, workerMse: 'auto' }, requestId: 1, type: 'HELLO' });
+      mount.fire({ config: { ...WORKER_CONFIG, workerMse: 'auto' }, requestId: 1, type: MainToWorkerMessageType.HELLO });
       await vi.waitFor(() => {
-        expect(posted.some((message) => message.type === 'HELLO_OK')).toBe(true);
+        expect(posted.some((message) => message.type === WorkerToMainMessageType.HELLO_OK)).toBe(true);
       });
-      const helloOk = posted.find((message) => message.type === 'HELLO_OK');
-      expect(helloOk?.type === 'HELLO_OK' ? helloOk.features.workerMse : null).toBe(true);
-      mount.fire({ requestId: 2, type: 'ATTACH' });
+      const helloOk = posted.find((message) => message.type === WorkerToMainMessageType.HELLO_OK);
+      expect(helloOk?.type === WorkerToMainMessageType.HELLO_OK ? helloOk.features.workerMse : null).toBe(true);
+      mount.fire({ requestId: 2, type: MainToWorkerMessageType.ATTACH });
       await flush();
-      const attachOk = posted.find((message) => message.type === 'ATTACH_OK');
-      expect(attachOk?.type === 'ATTACH_OK' ? attachOk.mode : null).toBe('worker');
+      const attachOk = posted.find((message) => message.type === WorkerToMainMessageType.ATTACH_OK);
+      expect(attachOk?.type === WorkerToMainMessageType.ATTACH_OK ? attachOk.mode : null).toBe('worker');
     } finally {
       mount.restore();
     }
@@ -287,23 +293,23 @@ describe('installSiaVideoSourceWorker (default Sia composition root)', () => {
         post: (message) => posted.push(message),
         supportsWorkerMse: () => false,
       });
-      mount.fire({ config: WORKER_CONFIG, requestId: 1, type: 'HELLO' });
+      mount.fire({ config: WORKER_CONFIG, requestId: 1, type: MainToWorkerMessageType.HELLO });
       await vi.waitFor(() => {
-        expect(posted.some((message) => message.type === 'HELLO_OK')).toBe(true);
+        expect(posted.some((message) => message.type === WorkerToMainMessageType.HELLO_OK)).toBe(true);
       });
-      const helloOk = posted.find((message) => message.type === 'HELLO_OK');
+      const helloOk = posted.find((message) => message.type === WorkerToMainMessageType.HELLO_OK);
       const seed = new Uint8Array(32).fill(4);
       const envelope = await encryptToWorker(
-        helloOk?.type === 'HELLO_OK' ? helloOk.publicKey : new Uint8Array(32),
+        helloOk?.type === WorkerToMainMessageType.HELLO_OK ? helloOk.publicKey : new Uint8Array(32),
         seed,
       );
-      mount.fire({ envelope, requestId: 2, type: 'APP_KEY' });
+      mount.fire({ envelope, requestId: 2, type: MainToWorkerMessageType.APP_KEY });
       // APP_KEY decryption is async and the entry fires messages without
       // awaiting each handleMessage, so let the handshake settle before the
       // SOURCE that lazily binds the SDK (mirrors a host awaiting its own
       // handshake round-trips).
       await flush();
-      mount.fire({ requestId: 3, src: 'pin-key', type: 'SOURCE' });
+      mount.fire({ requestId: 3, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
 
       await vi.waitFor(() => {
         expect(built).toHaveLength(1);
@@ -314,9 +320,9 @@ describe('installSiaVideoSourceWorker (default Sia composition root)', () => {
       // asynchronously after the SDK build; wait for the wire result so the
       // assertion is not racing the pipeline.
       await vi.waitFor(() => {
-        expect(posted.some((message) => message.type === 'SOURCE_OK')).toBe(true);
+        expect(posted.some((message) => message.type === WorkerToMainMessageType.SOURCE_OK)).toBe(true);
       });
-      expect(posted.find((message) => message.type === 'SOURCE_OK')?.requestId).toBe(3);
+      expect(posted.find((message) => message.type === WorkerToMainMessageType.SOURCE_OK)?.requestId).toBe(3);
     } finally {
       mount.restore();
     }
@@ -336,27 +342,27 @@ describe('installSiaVideoSourceWorker (default Sia composition root)', () => {
         loadPipeline: new FakeLoadPipeline(),
         post: (message) => posted.push(message),
       });
-      mount.fire({ config: WORKER_CONFIG, requestId: 1, type: 'HELLO' });
+      mount.fire({ config: WORKER_CONFIG, requestId: 1, type: MainToWorkerMessageType.HELLO });
       await vi.waitFor(() => {
-        expect(posted.some((message) => message.type === 'HELLO_OK')).toBe(true);
+        expect(posted.some((message) => message.type === WorkerToMainMessageType.HELLO_OK)).toBe(true);
       });
-      const helloOk = posted.find((message) => message.type === 'HELLO_OK');
-      expect(helloOk?.type === 'HELLO_OK' ? helloOk.features.workerMse : null).toBe(false);
+      const helloOk = posted.find((message) => message.type === WorkerToMainMessageType.HELLO_OK);
+      expect(helloOk?.type === WorkerToMainMessageType.HELLO_OK ? helloOk.features.workerMse : null).toBe(false);
 
       const seed = new Uint8Array(32).fill(5);
       const envelope = await encryptToWorker(
-        helloOk?.type === 'HELLO_OK' ? helloOk.publicKey : new Uint8Array(32),
+        helloOk?.type === WorkerToMainMessageType.HELLO_OK ? helloOk.publicKey : new Uint8Array(32),
         seed,
       );
-      mount.fire({ envelope, requestId: 2, type: 'APP_KEY' });
+      mount.fire({ envelope, requestId: 2, type: MainToWorkerMessageType.APP_KEY });
       await flush();
-      mount.fire({ preload: 'auto', requestId: 3, src: 'pin-key', type: 'SOURCE' });
+      mount.fire({ preload: 'auto', requestId: 3, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
 
       await vi.waitFor(() => {
-        expect(posted.some((message) => message.type === 'CHUNK')).toBe(true);
+        expect(posted.some((message) => message.type === WorkerToMainMessageType.CHUNK)).toBe(true);
       });
-      expect(posted.filter((message) => message.type === 'CHUNK').length).toBeGreaterThan(0);
-      expect(posted.filter((message) => message.type === 'HANDLE')).toEqual([]);
+      expect(posted.filter((message) => message.type === WorkerToMainMessageType.CHUNK).length).toBeGreaterThan(0);
+      expect(posted.filter((message) => message.type === WorkerToMainMessageType.HANDLE)).toEqual([]);
     } finally {
       mount.restore();
     }
@@ -387,19 +393,19 @@ describe('createDefaultWorkerComposition (actual installed default root, browser
       supportsWorkerMse: () => true,
     });
 
-    await root.handleMessage({ config: { ...WORKER_CONFIG, workerMse: 'main' }, requestId: 1, type: 'HELLO' });
-    await root.handleMessage({ requestId: 2, type: 'ATTACH' });
-    expect(messages.find((m) => m.type === 'ATTACH_OK')).toMatchObject({ mode: 'main' });
+    await root.handleMessage({ config: { ...WORKER_CONFIG, workerMse: 'main' }, requestId: 1, type: MainToWorkerMessageType.HELLO });
+    await root.handleMessage({ requestId: 2, type: MainToWorkerMessageType.ATTACH });
+    expect(messages.find((m) => m.type === WorkerToMainMessageType.ATTACH_OK)).toMatchObject({ mode: 'main' });
 
-    await root.handleMessage({ preload: 'auto', requestId: 3, src: 'pin-key', type: 'SOURCE' });
+    await root.handleMessage({ preload: 'auto', requestId: 3, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
     await flush();
 
     // The host preference overrides the capable runtime: the root is never
     // opened, no HANDLE transfer, CHUNK posts instead.
     expect(mediaSources).toHaveLength(0);
-    expect(messages.filter((m) => m.type === 'HANDLE')).toEqual([]);
-    expect(messages.filter((m) => m.type === 'CHUNK').length).toBeGreaterThan(0);
-    expect(messages.find((m) => m.type === 'SOURCE_OK')).toMatchObject({ info: { mode: 'main' } });
+    expect(messages.filter((m) => m.type === WorkerToMainMessageType.HANDLE)).toEqual([]);
+    expect(messages.filter((m) => m.type === WorkerToMainMessageType.CHUNK).length).toBeGreaterThan(0);
+    expect(messages.find((m) => m.type === WorkerToMainMessageType.SOURCE_OK)).toMatchObject({ info: { mode: 'main' } });
   });
 
   it.skipIf(!IN_BROWSER)('keeps worker mode for auto on a capable runtime: HANDLE transfer, MSE appends, no CHUNK', async () => {
@@ -420,21 +426,21 @@ describe('createDefaultWorkerComposition (actual installed default root, browser
       supportsWorkerMse: () => true,
     });
 
-    await root.handleMessage({ config: { ...WORKER_CONFIG, workerMse: 'auto' }, requestId: 1, type: 'HELLO' });
-    await root.handleMessage({ requestId: 2, type: 'ATTACH' });
-    expect(messages.find((m) => m.type === 'ATTACH_OK')).toMatchObject({ mode: 'worker' });
+    await root.handleMessage({ config: { ...WORKER_CONFIG, workerMse: 'auto' }, requestId: 1, type: MainToWorkerMessageType.HELLO });
+    await root.handleMessage({ requestId: 2, type: MainToWorkerMessageType.ATTACH });
+    expect(messages.find((m) => m.type === WorkerToMainMessageType.ATTACH_OK)).toMatchObject({ mode: 'worker' });
 
-    await root.handleMessage({ preload: 'auto', requestId: 3, src: 'pin-key', type: 'SOURCE' });
+    await root.handleMessage({ preload: 'auto', requestId: 3, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
     await flush();
 
     // Auto + capable runtime: worker mode through the ACTUAL installed root —
     // one worker MediaSource per load, its handle transferred as HANDLE, and
     // produced segments appended into the SourceBuffer, never posted as CHUNK.
     expect(mediaSources).toHaveLength(1);
-    const handle = messages.find((m) => m.type === 'HANDLE');
-    expect(handle?.type === 'HANDLE' && handle.requestId).toBe(3);
-    expect(messages.filter((m) => m.type === 'CHUNK')).toEqual([]);
-    expect(messages.find((m) => m.type === 'SOURCE_OK')).toMatchObject({ info: { mode: 'worker' } });
+    const handle = messages.find((m) => m.type === WorkerToMainMessageType.HANDLE);
+    expect(handle?.type === WorkerToMainMessageType.HANDLE && handle.requestId).toBe(3);
+    expect(messages.filter((m) => m.type === WorkerToMainMessageType.CHUNK)).toEqual([]);
+    expect(messages.find((m) => m.type === WorkerToMainMessageType.SOURCE_OK)).toMatchObject({ info: { mode: 'worker' } });
     const delivered = concatBytes(mediaSources[0].sourceBuffers[0].appended);
     expect(delivered.byteLength).toBeGreaterThan(0);
   });

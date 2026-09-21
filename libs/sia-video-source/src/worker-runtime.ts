@@ -6,8 +6,9 @@
  * session-coordinator host.
  */
 
-import { AppKey, Builder, initSia } from '@siafoundation/sia-storage';
+import { AppKey, Builder, initSia, SharedSdk } from '@siafoundation/sia-storage';
 import type { PlaybackCapabilities } from './capabilities/browser-capabilities.ts';
+import { parseSiaShareUrl } from './share-url.ts';
 import type { MainToWorkerMessage, WorkerConfig, WorkerToMainMessage } from './protocol.ts';
 import {
   type LruChunkCache,
@@ -25,8 +26,14 @@ export type PostMessage = (message: WorkerToMainMessage, transfer?: Transferable
 /**
  * The Sia SDK surface the worker needs: ranged reads plus object resolution.
  * `object` covers the pinned-object (directly known object key) path;
- * `sharedObject` covers the share-URL path and is optional so SDKs built
- * against WASM versions predating share support can still be injected.
+ * `objectFromShareUrl` covers the share-URL path (see `share-url.ts`).
+ *
+ * Both credential modes satisfy this surface: the app-key `Sdk` resolves a
+ * share URL through its own `objectFromShareUrl`, while the keyless
+ * `SharedSdk` (ADR 0008) is wrapped by an adapter whose `objectFromShareUrl`
+ * routes through `SharedSdk.object(parseSiaShareUrl(url).objectKey)` — the
+ * underlying primitive is object-id based, not URL based. The seam is optional
+ * so SDKs predating share support can still be injected.
  */
 export type SiaVideoSdk = {
   /**
@@ -39,7 +46,7 @@ export type SiaVideoSdk = {
   dispose?: () => Promise<void> | void;
   object(key: string): Promise<SiaObjectLike>;
   /** Resolves a `sia://` share URL (see `share-url.ts`) into a playable object. */
-  sharedObject?(shareUrl: string): Promise<SiaObjectLike>;
+  objectFromShareUrl?(shareUrl: string): Promise<SiaObjectLike>;
 } & SiaSdkLike;
 
 export interface SiaVideoWorkerOptions {
@@ -71,11 +78,18 @@ export interface SiaVideoWorkerOptions {
   /**
    * Builds the SDK used to resolve and download pinned objects. Defaults to
    * the worker-local registration flow driven by the `HELLO` config plus the
-   * decrypted `APP_KEY` seed; apps that own SDK registration elsewhere inject
-   * a resolved `SiaVideoSdk` here. The seed argument is the worker's decrypted
-   * copy and stays inside this isolate — it must not be forwarded anywhere.
+   * decrypted `APP_KEY` seeds; apps that own SDK registration elsewhere inject
+   * a resolved `SiaVideoSdk` here. Both seed arguments are the worker's
+   * decrypted copies and stay inside this isolate — they must not be forwarded
+   * anywhere. The `sharingSeed` argument is new (keyless playback, ADR 0008);
+   * injected factories written against the old two-argument shape keep working
+   * (unused trailing arguments are ignored).
    */
-  createSdk?: (config: undefined | WorkerConfig, appKeySeed: null | Uint8Array) => Promise<SiaVideoSdk>;
+  createSdk?: (
+    config: undefined | WorkerConfig,
+    appKeySeed: null | Uint8Array,
+    sharingSeed: null | Uint8Array,
+  ) => Promise<SiaVideoSdk>;
   /**
    * Injected load-pipeline seam for package-owned tests; production defaults to
    * the real media-library pipeline owned by the composition root.
@@ -101,17 +115,34 @@ export interface WorkerCompositionHost {
   handleMessage(message: MainToWorkerMessage): Promise<void>;
 }
 
-export async function createDefaultSdk(config: undefined | WorkerConfig, seed: null | Uint8Array): Promise<SiaVideoSdk> {
-  // The seed only exists after a completed APP_KEY handshake (or has been
+export async function createDefaultSdk(
+  config: undefined | WorkerConfig,
+  appKeySeed: null | Uint8Array,
+  sharingSeed: null | Uint8Array,
+): Promise<SiaVideoSdk> {
+  // A seed only exists after a completed APP_KEY handshake (or has been
   // injected via a custom createSdk); config alone can never authenticate.
-  if (!config || !(seed instanceof Uint8Array) || seed.byteLength === 0) {
+  const hasAppKey = appKeySeed instanceof Uint8Array && appKeySeed.byteLength > 0;
+  const hasSharing = sharingSeed instanceof Uint8Array && sharingSeed.byteLength > 0;
+  if (!config || (!hasAppKey && !hasSharing)) {
     throw new Error('No Sia SDK is available: complete the HELLO + APP_KEY handshake or inject createSdk.');
   }
 
   await initSia();
 
+  // Keyless path (ADR 0008): a sharing-key seed grants read-only access to the
+  // objects attached to the key — no app key, no builder, no SSO/approval. The
+  // WASM `SharedSdk.connect` expects the seed as a hex string (browser build;
+  // Node would take a Buffer), so the decrypted bytes are hex-encoded here,
+  // inside this isolate, right at the call site — the plaintext never travels.
+  if (hasSharing) {
+    const sharedSdk = await SharedSdk.connect(config.indexerUrl, bytesToHex(sharingSeed));
+    if (!sharedSdk) throw new Error('The Sia sharing key is not registered with the indexer.');
+    return toSiaVideoSdk(sharedSdk);
+  }
+
   const builder = new Builder(config.indexerUrl, config.app);
-  const appKey = new AppKey(seed);
+  const appKey = new AppKey(appKeySeed!);
   const sdk = await builder.connected(appKey);
   if (!sdk) throw new Error('The Sia app key is not registered with the indexer.');
   return withDisposal(sdk);
@@ -189,4 +220,30 @@ export function withDisposal(sdk: SiaVideoSdk): SiaVideoSdk {
       return value;
     },
   });
+}
+
+/** Lowercase hex encoding of a byte array (the browser `SharedSdk` seed form). */
+function bytesToHex(bytes: Uint8Array): string {
+  let hex = '';
+  for (const byte of bytes) hex += byte.toString(16).padStart(2, '0');
+  return hex;
+}
+
+/**
+ * Wraps a WASM `SharedSdk` into the worker's `SiaVideoSdk` seam. `SharedSdk`
+ * resolves objects by *id* (`object(id)`) rather than by URL, so the share-URL
+ * path is bridged here: `objectFromShareUrl` extracts the `objectKey` via
+ * `parseSiaShareUrl` (the same 64-hex id `SharedSdk.object` fetches) and
+ * routes through it. `download` is structurally identical to the app-key SDK's
+ * (`DownloadOptions`, same `PinnedObject`), so downstream streaming code is
+ * untouched. `dispose` comes from `withDisposal` over the WASM lifecycle.
+ */
+function toSiaVideoSdk(sharedSdk: SharedSdk): SiaVideoSdk {
+  const wrapped = withDisposal(sharedSdk);
+  return {
+    dispose: (): Promise<void> | void => wrapped.dispose?.(),
+    download: (object, options) => wrapped.download(object, options),
+    object: (key) => wrapped.object(key),
+    objectFromShareUrl: (shareUrl) => wrapped.object(parseSiaShareUrl(shareUrl).objectKey),
+  };
 }

@@ -30,6 +30,7 @@ import {
   DEFAULT_FMP4_MIME,
   isWorkerToMainMessage,
   type MainToWorkerMessage,
+  MainToWorkerMessageType,
   nextRequestId,
   PROTOCOL_VERSION,
   type RequestId,
@@ -39,6 +40,7 @@ import {
   workerMode,
   type WorkerMode,
   type WorkerMsePreference,
+  WorkerToMainMessageType,
 } from './protocol.ts';
 
 /** Default props mirrored by the React wrapper's prop-syncing hook. */
@@ -71,6 +73,22 @@ export interface SiaVideoSourceOptions {
    * also keep that buffer elsewhere in usable form.
    */
   getAppKeySeed?: AppKeySeedProvider;
+  /**
+   * Supplies the 32-byte Sia sharing-key seed for the keyless handshake
+   * (ADR 0008). The host treats it exactly like the app-key seed: read once
+   * per (re)attach immediately after `HELLO_OK`, encapsulated into an
+   * `APP_KEY` envelope tagged `keyType: 'sharing'` under an ephemeral X25519
+   * key, then scrubbed — the plaintext never lives in a field, React state,
+   * or storage, only in the login flow's reference and the supplier closure.
+   *
+   * When present, the worker's default SDK factory connects via
+   * `SharedSdk.connect(indexerUrl, seed)` and routes share-URL sources
+   * through `SharedSdk.object(objectKey)`, so a share link streams without an
+   * app key or any SSO/approval. A share-URL `src` still works with only
+   * `getAppKeySeed` (fallback to `Sdk.objectFromShareUrl`); a sharing seed
+   * takes precedence when both are supplied.
+   */
+  getSharingKeySeed?: AppKeySeedProvider;
   /**
    * Declared content type of the source (the `type` from the v10 source
    * contract), forwarded on every `SOURCE`. The worker uses it only when it
@@ -135,6 +153,16 @@ export class SiaVideoSource extends HTMLVideoElementHost {
    */
   set getAppKeySeed(value: AppKeySeedProvider | undefined) {
     this.#appKeySeedProvider = value;
+  }
+  /**
+   * Per-render setter form of the `getSharingKeySeed` option, mirroring
+   * `getAppKeySeed` for the keyless path (ADR 0008): only the supplier
+   * function is stored, never seed bytes. The host reads whichever supplier
+   * is current at each (re)attach's HELLO_OK and sends it inside an
+   * `APP_KEY` envelope tagged `keyType: 'sharing'`.
+   */
+  set getSharingKeySeed(value: AppKeySeedProvider | undefined) {
+    this.#sharingKeySeedProvider = value;
   }
   /** Declared content type for the current source; sent with every `SOURCE`. */
   get mimeType(): string | undefined {
@@ -203,8 +231,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // aborted on teardown/load reset; `null` in worker mode.
   #appendPipe: MseAppendPipe | null = null;
 
-  // Seed supplier from the `getAppKeySeed` option or the per-render setter.
-  // Holding only the function keeps seed bytes out of host state.
+  // Seed suppliers from the `getAppKeySeed`/`getSharingKeySeed` options or the
+  // per-render setters. Holding only the functions keeps seed bytes out of
+  // host state.
   #appKeySeedProvider: AppKeySeedProvider | undefined;
 
   #destroyed = false;
@@ -234,6 +263,8 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
   #requestId: null | RequestId = null;
 
+  #sharingKeySeedProvider: AppKeySeedProvider | undefined;
+
   #sourceBuffer: null | SourceBuffer = null;
 
   #src = '';
@@ -252,6 +283,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     super();
     this.#options = options;
     this.#appKeySeedProvider = options.getAppKeySeed;
+    this.#sharingKeySeedProvider = options.getSharingKeySeed;
     this.#workerConfig = options.workerConfig;
     this.#mimeType = options.mimeType;
     this.#workerMse = options.workerMse;
@@ -276,7 +308,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     target.addEventListener('pause', this.#onPause);
 
     if (this.#worker) {
-      this.#post({ config: this.#helloConfig(), requestId: nextRequestId(), type: 'HELLO' });
+      this.#post({ config: this.#helloConfig(), requestId: nextRequestId(), type: MainToWorkerMessageType.HELLO });
       return;
     }
 
@@ -291,7 +323,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#worker.addEventListener('message', this.#onMessage);
     // HELLO negotiates readiness itself, so it must not go through the
     // pending-message buffer — that buffer only drains on HELLO_OK.
-    this.#post({ config: this.#helloConfig(), requestId: nextRequestId(), type: 'HELLO' });
+    this.#post({ config: this.#helloConfig(), requestId: nextRequestId(), type: MainToWorkerMessageType.HELLO });
   }
 
   /**
@@ -306,7 +338,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
   destroy(): void {
     this.#destroyed = true;
-    this.#send({ type: 'DESTROY' });
+    this.#send({ type: MainToWorkerMessageType.DESTROY });
     const worker = this.#worker;
     this.#worker = null;
 
@@ -324,7 +356,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.target?.removeEventListener('timeupdate', this.#onTimeUpdate);
     this.target?.removeEventListener('play', this.#onPlay);
     this.target?.removeEventListener('pause', this.#onPause);
-    this.#send({ type: 'DETACH' });
+    this.#send({ type: MainToWorkerMessageType.DETACH });
     super.detach();
   }
   /** Reloads the current source through the engine, clearing any stored error. */
@@ -403,28 +435,42 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     target.src = objectUrl;
   }
 
-  // The plaintext seed exists in this method's scope only: read from the
-  // supplier, encrypted into the envelope, then scrubbed before the promise
-  // chain unwinds. It is never assigned to any field, never cloned into
-  // React state, and never closed over beyond this method — the wire and the
-  // host's state hold only the ciphertext.
   async #encryptAndSendSeed(
-    getAppKeySeed: AppKeySeedProvider,
+    getSeed: AppKeySeedProvider,
     workerPublicKey: Uint8Array,
+    keyType: 'app' | 'sharing',
   ): Promise<void> {
     let seed: Uint8Array | undefined;
     try {
-      seed = await Promise.resolve(getAppKeySeed());
-      const envelope = await encryptToWorker(workerPublicKey, seed);
+      seed = await Promise.resolve(getSeed());
+      // The keyType tag rides the envelope itself (see `AppKeyEnvelope`), so
+      // the APP_KEY wire message shape is unchanged — no new message type.
+      const envelope = await encryptToWorker(workerPublicKey, seed, keyType);
       // POSTed directly, outside #send's pending buffer: the seed supplier has
       // been consumed at this point, so a future re-attach re-reads it anyway.
-      this.#post({ envelope, requestId: nextRequestId(), type: 'APP_KEY' });
+      this.#post({ envelope, requestId: nextRequestId(), type: MainToWorkerMessageType.APP_KEY });
     } catch (error) {
       this.#reportError(workerErrorCode.network, errorDescription(error));
     } finally {
       // The supplier's buffer is consumed either way — release whatever bytes
       // made it out of the login flow before the reference dies.
       if (seed) scrub(seed);
+    }
+  }
+
+  // The plaintext seeds exist only inside this method's scope: read from the
+  // supplier, encapsulated into their envelopes, then scrubbed before the
+  // promise chain unwinds. They are never assigned to fields, never cloned
+  // into React state, and never closed over beyond this method — the wire and
+  // the host's state hold only ciphertext (plus the plaintext `keyType` tag).
+  // The app-key envelope is sent first, then the sharing-key envelope; the
+  // worker stores each into its own slot, so no ordering dependency exists.
+  async #encryptAndSendSeeds(workerPublicKey: Uint8Array): Promise<void> {
+    if (this.#appKeySeedProvider) {
+      await this.#encryptAndSendSeed(this.#appKeySeedProvider, workerPublicKey, 'app');
+    }
+    if (this.#sharingKeySeedProvider) {
+      await this.#encryptAndSendSeed(this.#sharingKeySeedProvider, workerPublicKey, 'sharing');
     }
   }
 
@@ -458,7 +504,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     if (!isWorkerToMainMessage(event.data)) return;
     const message = event.data;
     switch (message.type) {
-      case 'ATTACH_OK':
+      case WorkerToMainMessageType.ATTACH_OK:
         this.#mode = message.mode;
         // Every attach generation plays the current source from scratch: the
         // fresh SOURCE rebuilds worker-side or host-side MSE cleanly, no
@@ -478,14 +524,14 @@ export class SiaVideoSource extends HTMLVideoElementHost {
             // Aimed at the fresh SOURCE's request id, so the worker honors it
             // when that load completes (SEEK/PLAY are already request-scoped;
             // this one must be too or a later load could mis-read it).
-            this.#send({ requestId: this.#requestId ?? nextRequestId(), type: 'PLAY' });
+            this.#send({ requestId: this.#requestId ?? nextRequestId(), type: MainToWorkerMessageType.PLAY });
           }
         }
         return;
-      case 'CHUNK':
+      case WorkerToMainMessageType.CHUNK:
         if (message.requestId === this.#requestId) this.#appendChunk(message.bytes);
         return;
-      case 'ENDED':
+      case WorkerToMainMessageType.ENDED:
         // Only the current load may end this MediaSource; a late ENDED from a
         // superseded load must die with its request. The worker itself ends
         // worker-mode MediaSources, so only the main-thread fallback acts here.
@@ -500,7 +546,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // the SourceBuffer quiesces (see `mse-pipe.ts`).
         this.#appendPipe?.requestEndOfStream();
         return;
-      case 'ERROR':
+      case WorkerToMainMessageType.ERROR:
         // After a clear (`src = ''`) there is no active load, so a late
         // request-scoped ERROR (an abandoned load still failing) must die
         // with its request instead of surfacing on the emptied element. Only
@@ -511,13 +557,13 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         }
         this.#reportError(message.kind, message.context);
         return;
-      case 'HANDLE': {
+      case WorkerToMainMessageType.HANDLE: {
         if (message.requestId !== this.#requestId) return;
         const target = this.target as HTMLVideoElement | null;
         if (target) (target as unknown as { srcObject: unknown }).srcObject = message.handle;
         return;
       }
-      case 'HELLO_OK':
+      case WorkerToMainMessageType.HELLO_OK:
         // A worker speaking a different protocol version is incompatible, no
         // matter how much of the message flow happens to match.
         if (message.version !== PROTOCOL_VERSION) {
@@ -526,22 +572,22 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         }
         this.#ready = true;
         // The worker's handshake public key is not secret — only enough to
-        // address the APP_KEY envelope to this worker instance. It is
+        // address the APP_KEY envelopes to this worker instance. It is
         // re-published with every HELLO_OK, so a re-attach re-handshakes with
         // the key of the worker actually speaking now.
         this.#workerPublicKey = message.publicKey;
-        if (this.#appKeySeedProvider && this.#workerPublicKey) {
-          // #encryptAndSendSeed only postMessages the APP_KEY envelope after
-          // awaiting the seed supplier and the worker-key encryption, so
+        if ((this.#appKeySeedProvider || this.#sharingKeySeedProvider) && this.#workerPublicKey) {
+          // #encryptAndSendSeeds only postMessages the APP_KEY envelopes after
+          // awaiting the seed suppliers and the worker-key encryption, so
           // posting ATTACH (and any queued SOURCE) synchronously here would
-          // reach the FIFO worker before the envelope — the first load would
+          // reach the FIFO worker before the envelopes — the first load would
           // then fail #ensureSdk with "No Sia SDK is available". Chain the
-          // ATTACH + flush on the envelope post instead. That promise cannot
+          // ATTACH + flush on the envelope posts instead. That promise cannot
           // reject: supplier/encryption failures are already reported as
           // network errors inside #encryptAndSendSeed, so the session still
           // proceeds and SOURCE fails the same way it would without a seed.
-          void this.#encryptAndSendSeed(this.#appKeySeedProvider, this.#workerPublicKey).then(() => {
-            this.#post({ requestId: nextRequestId(), type: 'ATTACH' });
+          void this.#encryptAndSendSeeds(this.#workerPublicKey).then(() => {
+            this.#post({ requestId: nextRequestId(), type: MainToWorkerMessageType.ATTACH });
             this.#flushPending();
           });
           return;
@@ -550,13 +596,13 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // ATTACH + the pending flush go straight out — there is nothing to
         // order them behind, and they must not wait on an async chain that
         // does not exist for this configuration.
-        this.#post({ requestId: nextRequestId(), type: 'ATTACH' });
+        this.#post({ requestId: nextRequestId(), type: MainToWorkerMessageType.ATTACH });
         this.#flushPending();
         return;
-      case 'PROGRESS':
+      case WorkerToMainMessageType.PROGRESS:
         if (message.requestId === this.#requestId) this.dispatchEvent(new Event('progress'));
         return;
-      case 'SOURCE_OK':
+      case WorkerToMainMessageType.SOURCE_OK:
         // Only the newest load may drive the pipeline; a late acknowledgement
         // of a superseded SOURCE would downgrade the request id and let stale
         // chunks into the current append pipeline.
@@ -590,7 +636,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#playRequested = true;
     // Deferred playback start (preload 'metadata'/'none'): first play (or a
     // user seek) triggers streaming.
-    this.#send({ requestId: this.#requestId ?? nextRequestId(), type: 'PLAY' });
+    this.#send({ requestId: this.#requestId ?? nextRequestId(), type: MainToWorkerMessageType.PLAY });
   };
 
   // ---- Main-thread MSE fallback (Firefox and friends) ----
@@ -608,7 +654,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#send({
       requestId: this.#requestId ?? nextRequestId(),
       time: target.currentTime,
-      type: 'SEEK',
+      type: MainToWorkerMessageType.SEEK,
     });
   };
 
@@ -619,14 +665,14 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#send({
       requestId: this.#requestId ?? nextRequestId(),
       time: target.currentTime,
-      type: 'PLAYHEAD',
+      type: MainToWorkerMessageType.PLAYHEAD,
     });
   };
 
   #post(message: MainToWorkerMessage): void {
     if (!this.#worker) return;
     this.#worker.postMessage(message);
-    if (message.type === 'SOURCE') this.#requestId = message.requestId;
+    if (message.type === MainToWorkerMessageType.SOURCE) this.#requestId = message.requestId;
   }
 
   #reportError(kind: WorkerErrorCode, context?: string): void {
@@ -681,7 +727,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       preload: this.#preload || undefined,
       requestId: nextRequestId(),
       src: this.#src,
-      type: 'SOURCE',
+      type: MainToWorkerMessageType.SOURCE,
     });
   }
 

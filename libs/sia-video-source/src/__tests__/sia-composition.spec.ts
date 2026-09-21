@@ -25,7 +25,12 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { AppMetadata } from '@siafoundation/sia-storage';
 import { encryptToWorker } from '../app-key-handshake.ts';
-import type { WorkerConfig, WorkerToMainMessage } from '../protocol.ts';
+import {
+  MainToWorkerMessageType,
+  type WorkerConfig,
+  type WorkerToMainMessage,
+  WorkerToMainMessageType,
+} from '../protocol.ts';
 import type { SiaObjectLike } from '../ranged-reader.ts';
 import { createSiaWorkerComposition } from '../session/sia-composition.ts';
 import {
@@ -151,14 +156,15 @@ describe('createSiaByteSourceFactory (Sia transport seam)', () => {
     expect(delivered).toEqual(payload.slice(100, 1124));
   });
 
-  it('resolves a sia:// share URL through sdk.sharedObject(fetchForm)', async () => {
+  it('resolves a sia:// share URL through sdk.objectFromShareUrl(fetchForm)', async () => {
     const payload = new Uint8Array(4096).fill(7);
     const { objectKeys, sdk, shareForms } = fakeSiaSdk(payload, { shared: true });
     const factory = createSiaByteSourceFactory(sdk);
 
     const source = await factory(shareSrc());
-    // A share src is NOT an object key; resolution goes through sharedObject
-    // with the sia://-normalized fetchForm (never the https original).
+    // A share src is NOT an object key; resolution goes through
+    // objectFromShareUrl with the sia://-normalized fetchForm (never the
+    // https original).
     expect(objectKeys).toEqual([]);
     expect(shareForms).toEqual([shareSrc().replace('https://', 'sia://')]);
 
@@ -276,18 +282,18 @@ describe('createSiaWorkerComposition (composition root)', () => {
     const coordinatorInterface: SessionCoordinator = coordinator;
     void coordinatorInterface;
 
-    await coordinator.handleMessage({ requestId: 1, type: 'ATTACH' });
-    expect(messages.find((m) => m.type === 'ATTACH_OK')).toMatchObject({ mode: 'worker', requestId: 1 });
+    await coordinator.handleMessage({ requestId: 1, type: MainToWorkerMessageType.ATTACH });
+    expect(messages.find((m) => m.type === WorkerToMainMessageType.ATTACH_OK)).toMatchObject({ mode: 'worker', requestId: 1 });
 
-    await coordinator.handleMessage({ preload: 'auto', requestId: 2, src: 'pin-key', type: 'SOURCE' });
+    await coordinator.handleMessage({ preload: 'auto', requestId: 2, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
     await flush();
 
     // The fake pipeline resolved the real SiaByteSource (never inspected) and
     // the load was accepted from its ready verdict.
     expect(pipeline.calls).toHaveLength(1);
-    const ok = messages.find((m) => m.type === 'SOURCE_OK');
+    const ok = messages.find((m) => m.type === WorkerToMainMessageType.SOURCE_OK);
     expect(ok).toBeDefined();
-    if (ok && ok.type === 'SOURCE_OK') {
+    if (ok && ok.type === WorkerToMainMessageType.SOURCE_OK) {
       expect(ok.requestId).toBe(2);
       expect(ok.info.container).toBe('mp4');
       expect(ok.info.mode).toBe('worker');
@@ -300,7 +306,7 @@ describe('createSiaWorkerComposition (composition root)', () => {
 
     // Worker mode: no CHUNK is posted; the fake playback's marker units went to
     // the MSE sink in order.
-    expect(messages.filter((m) => m.type === 'CHUNK')).toEqual([]);
+    expect(messages.filter((m) => m.type === WorkerToMainMessageType.CHUNK)).toEqual([]);
     const delivered = concatBytes(fakeSourceBuffer.appended);
     expect(containsInOrder(delivered, [0x11])).toBe(true);
     expect(containsInOrder(delivered, [0x22])).toBe(true);
@@ -319,15 +325,15 @@ describe('createSiaWorkerComposition (composition root)', () => {
       supportsWorkerMse: () => false,
     });
 
-    await coordinator.handleMessage({ requestId: 1, type: 'ATTACH' });
-    expect(messages.find((m) => m.type === 'ATTACH_OK')).toMatchObject({ mode: 'main' });
+    await coordinator.handleMessage({ requestId: 1, type: MainToWorkerMessageType.ATTACH });
+    expect(messages.find((m) => m.type === WorkerToMainMessageType.ATTACH_OK)).toMatchObject({ mode: 'main' });
 
-    await coordinator.handleMessage({ preload: 'auto', requestId: 2, src: 'pin-key', type: 'SOURCE' });
+    await coordinator.handleMessage({ preload: 'auto', requestId: 2, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
     await flush();
 
-    const chunks = messages.filter((m) => m.type === 'CHUNK');
+    const chunks = messages.filter((m) => m.type === WorkerToMainMessageType.CHUNK);
     expect(chunks.length).toBeGreaterThan(0);
-    const delivered = concatBytes(chunks.map((c) => (c.type === 'CHUNK' ? c.bytes : new Uint8Array(0))));
+    const delivered = concatBytes(chunks.map((c) => (c.type === WorkerToMainMessageType.CHUNK ? c.bytes : new Uint8Array(0))));
     expect(containsInOrder(delivered, [0x11])).toBe(true);
   });
 
@@ -343,14 +349,14 @@ describe('createSiaWorkerComposition (composition root)', () => {
       supportsWorkerMse: () => false,
     });
 
-    await coordinator.handleMessage({ preload: 'auto', requestId: 2, src: shareSrc(), type: 'SOURCE' });
+    await coordinator.handleMessage({ preload: 'auto', requestId: 2, src: shareSrc(), type: MainToWorkerMessageType.SOURCE });
     await flush();
 
     expect(objectKeys).toEqual([]);
     expect(shareForms).toEqual([shareSrc().replace('https://', 'sia://')]);
-    const ok = messages.find((m) => m.type === 'SOURCE_OK');
+    const ok = messages.find((m) => m.type === WorkerToMainMessageType.SOURCE_OK);
     expect(ok).toBeDefined();
-    expect(ok?.type === 'SOURCE_OK' && ok.info.container).toBe('mp4');
+    expect(ok?.type === WorkerToMainMessageType.SOURCE_OK && ok.info.container).toBe('mp4');
   });
 
   it('wires a workerMseRoot: worker mode, per-load HANDLE transfer, playhead reflection, no CHUNK', async () => {
@@ -376,27 +382,27 @@ describe('createSiaWorkerComposition (composition root)', () => {
       workerMseRoot: root,
     });
 
-    await coordinator.handleMessage({ requestId: 1, type: 'ATTACH' });
-    expect(messages.find((m) => m.type === 'ATTACH_OK')).toMatchObject({ mode: 'worker', requestId: 1 });
+    await coordinator.handleMessage({ requestId: 1, type: MainToWorkerMessageType.ATTACH });
+    expect(messages.find((m) => m.type === WorkerToMainMessageType.ATTACH_OK)).toMatchObject({ mode: 'worker', requestId: 1 });
 
-    await coordinator.handleMessage({ preload: 'auto', requestId: 2, src: 'pin-key', type: 'SOURCE' });
+    await coordinator.handleMessage({ preload: 'auto', requestId: 2, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
     await flush();
 
     // One worker MediaSource per accepted load, its handle transferred as HANDLE.
     expect(mediaSources).toHaveLength(1);
-    const handle = messages.find((m) => m.type === 'HANDLE');
-    expect(handle?.type === 'HANDLE' && handle.requestId).toBe(2);
+    const handle = messages.find((m) => m.type === WorkerToMainMessageType.HANDLE);
+    expect(handle?.type === WorkerToMainMessageType.HANDLE && handle.requestId).toBe(2);
     expect(root.deps.getMediaSource()).toBe(mediaSources[0]);
 
     // Worker mode: the fake playback's units reached the MSE sink, never CHUNK.
-    expect(messages.filter((m) => m.type === 'CHUNK')).toEqual([]);
+    expect(messages.filter((m) => m.type === WorkerToMainMessageType.CHUNK)).toEqual([]);
     const delivered = concatBytes(mediaSources[0].sourceBuffers[0].appended);
     expect(containsInOrder(delivered, [0x11])).toBe(true);
     expect(containsInOrder(delivered, [0x22])).toBe(true);
     expect(containsInOrder(delivered, [0x33])).toBe(true);
 
     // The validated playhead is reflected into the root's eviction boundary.
-    await coordinator.handleMessage({ requestId: 2, time: 15, type: 'PLAYHEAD' });
+    await coordinator.handleMessage({ requestId: 2, time: 15, type: MainToWorkerMessageType.PLAYHEAD });
     expect(root.deps.getPlayheadSeconds()).toBe(15);
   });
 
@@ -424,21 +430,21 @@ describe('createSiaWorkerComposition (composition root)', () => {
       workerMseRoot: root,
     });
 
-    await coordinator.handleMessage({ requestId: 1, type: 'ATTACH' });
-    expect(messages.find((m) => m.type === 'ATTACH_OK')).toMatchObject({ mode: 'main' });
+    await coordinator.handleMessage({ requestId: 1, type: MainToWorkerMessageType.ATTACH });
+    expect(messages.find((m) => m.type === WorkerToMainMessageType.ATTACH_OK)).toMatchObject({ mode: 'main' });
 
-    await coordinator.handleMessage({ preload: 'auto', requestId: 2, src: 'pin-key', type: 'SOURCE' });
+    await coordinator.handleMessage({ preload: 'auto', requestId: 2, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
     await flush();
 
     // The root is never opened; the coordinator posts CHUNK as before.
     expect(opened).toHaveLength(0);
-    expect(messages.filter((m) => m.type === 'CHUNK').length).toBeGreaterThan(0);
-    expect(messages.filter((m) => m.type === 'HANDLE')).toEqual([]);
+    expect(messages.filter((m) => m.type === WorkerToMainMessageType.CHUNK).length).toBeGreaterThan(0);
+    expect(messages.filter((m) => m.type === WorkerToMainMessageType.HANDLE)).toEqual([]);
 
     // Main-mode completion posts one ENDED for the load's request id.
     playback.complete();
     await flush();
-    expect(messages.find((m) => m.type === 'ENDED')?.requestId).toBe(2);
+    expect(messages.find((m) => m.type === WorkerToMainMessageType.ENDED)?.requestId).toBe(2);
   });
 
   it('honors a host main preference: CHUNK and no HANDLE even with a root on a capable runtime', async () => {
@@ -468,25 +474,25 @@ describe('createSiaWorkerComposition (composition root)', () => {
     await coordinator.handleMessage({
       config: { app: appMetadata(), indexerUrl: 'https://sia.storage', workerMse: 'main' },
       requestId: 1,
-      type: 'HELLO',
+      type: MainToWorkerMessageType.HELLO,
     });
-    await coordinator.handleMessage({ requestId: 2, type: 'ATTACH' });
-    expect(messages.find((m) => m.type === 'ATTACH_OK')).toMatchObject({ mode: 'main' });
+    await coordinator.handleMessage({ requestId: 2, type: MainToWorkerMessageType.ATTACH });
+    expect(messages.find((m) => m.type === WorkerToMainMessageType.ATTACH_OK)).toMatchObject({ mode: 'main' });
 
-    await coordinator.handleMessage({ preload: 'auto', requestId: 3, src: 'pin-key', type: 'SOURCE' });
+    await coordinator.handleMessage({ preload: 'auto', requestId: 3, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
     await flush();
 
     // The host preference overrides the capable runtime: the root is never
     // opened (no worker MediaSource), no HANDLE transfer, CHUNK posts instead.
     expect(opened).toHaveLength(0);
-    expect(messages.filter((m) => m.type === 'HANDLE')).toEqual([]);
-    expect(messages.filter((m) => m.type === 'CHUNK').length).toBeGreaterThan(0);
-    expect(messages.find((m) => m.type === 'SOURCE_OK')).toMatchObject({ info: { mode: 'main' } });
+    expect(messages.filter((m) => m.type === WorkerToMainMessageType.HANDLE)).toEqual([]);
+    expect(messages.filter((m) => m.type === WorkerToMainMessageType.CHUNK).length).toBeGreaterThan(0);
+    expect(messages.find((m) => m.type === WorkerToMainMessageType.SOURCE_OK)).toMatchObject({ info: { mode: 'main' } });
 
     // Completion posts one ENDED for the accepted load.
     playback.complete();
     await flush();
-    expect(messages.find((m) => m.type === 'ENDED')?.requestId).toBe(3);
+    expect(messages.find((m) => m.type === WorkerToMainMessageType.ENDED)?.requestId).toBe(3);
   });
 });
 
@@ -523,17 +529,17 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
       supportsWorkerMse: () => false,
     });
 
-    await coordinator.handleMessage({ config: WORKER_CONFIG, requestId: 1, type: 'HELLO' });
-    const helloOk = messages.find((m) => m.type === 'HELLO_OK');
-    expect(helloOk?.type === 'HELLO_OK' ? helloOk.publicKey.byteLength : 0).toBe(32);
+    await coordinator.handleMessage({ config: WORKER_CONFIG, requestId: 1, type: MainToWorkerMessageType.HELLO });
+    const helloOk = messages.find((m) => m.type === WorkerToMainMessageType.HELLO_OK);
+    expect(helloOk?.type === WorkerToMainMessageType.HELLO_OK ? helloOk.publicKey.byteLength : 0).toBe(32);
 
     const seed = new Uint8Array(32).fill(9);
     const envelope = await encryptToWorker(
-      helloOk?.type === 'HELLO_OK' ? helloOk.publicKey : new Uint8Array(32),
+      helloOk?.type === WorkerToMainMessageType.HELLO_OK ? helloOk.publicKey : new Uint8Array(32),
       seed,
     );
-    await coordinator.handleMessage({ envelope, requestId: 2, type: 'APP_KEY' });
-    await coordinator.handleMessage({ preload: 'auto', requestId: 3, src: 'pin-key', type: 'SOURCE' });
+    await coordinator.handleMessage({ envelope, requestId: 2, type: MainToWorkerMessageType.APP_KEY });
+    await coordinator.handleMessage({ preload: 'auto', requestId: 3, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
     await flush();
 
     // The SDK must NOT be built before a SOURCE needs it, and must be built
@@ -542,8 +548,8 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
     expect(built).toHaveLength(1);
     expect(built[0].config).toEqual(WORKER_CONFIG);
     expect(built[0].seed).toEqual(seed);
-    const ok = messages.find((m) => m.type === 'SOURCE_OK');
-    expect(ok?.type === 'SOURCE_OK' && ok.info.container).toBe('mp4');
+    const ok = messages.find((m) => m.type === WorkerToMainMessageType.SOURCE_OK);
+    expect(ok?.type === WorkerToMainMessageType.SOURCE_OK && ok.info.container).toBe('mp4');
   });
 
   it('reuses the memoized SDK for repeat loads and rebuilds + disposes it on a connection change', async () => {
@@ -570,14 +576,14 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
       readyLoadResult(),
     ]);
     const load = async (requestId: number, indexerUrl: string): Promise<void> => {
-      await coordinator.handleMessage({ config: { ...WORKER_CONFIG, indexerUrl }, requestId, type: 'HELLO' });
-      const helloOk = messages.find((m) => m.type === 'HELLO_OK');
+      await coordinator.handleMessage({ config: { ...WORKER_CONFIG, indexerUrl }, requestId, type: MainToWorkerMessageType.HELLO });
+      const helloOk = messages.find((m) => m.type === WorkerToMainMessageType.HELLO_OK);
       const envelope = await encryptToWorker(
-        helloOk?.type === 'HELLO_OK' ? helloOk.publicKey : new Uint8Array(32),
+        helloOk?.type === WorkerToMainMessageType.HELLO_OK ? helloOk.publicKey : new Uint8Array(32),
         new Uint8Array(32).fill(9),
       );
-      await coordinator.handleMessage({ envelope, requestId: requestId + 1, type: 'APP_KEY' });
-      await coordinator.handleMessage({ preload: 'auto', requestId: requestId + 2, src: 'fmp4', type: 'SOURCE' });
+      await coordinator.handleMessage({ envelope, requestId: requestId + 1, type: MainToWorkerMessageType.APP_KEY });
+      await coordinator.handleMessage({ preload: 'auto', requestId: requestId + 2, src: 'fmp4', type: MainToWorkerMessageType.SOURCE });
       await flush();
     };
 
@@ -592,7 +598,7 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
     await load(1, 'https://one.example');
     expect(built).toEqual(['A']);
     // Same connection, second SOURCE: memoized SDK, no rebuild.
-    await coordinator.handleMessage({ preload: 'auto', requestId: 100, src: 'fmp4', type: 'SOURCE' });
+    await coordinator.handleMessage({ preload: 'auto', requestId: 100, src: 'fmp4', type: MainToWorkerMessageType.SOURCE });
     await flush();
     expect(built).toEqual(['A']);
     expect(disposeA).not.toHaveBeenCalled();
@@ -602,6 +608,92 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
     // The connection changed: the old SDK was disposed before the new one took over.
     expect(disposeA).toHaveBeenCalledTimes(1);
     expect(disposeB).not.toHaveBeenCalled();
+  });
+
+  it('passes a decrypted sharing seed to createSdk when the APP_KEY envelope is keyed sharing', async () => {
+    const { sdk } = fakeSiaSdk(new Uint8Array(2048).fill(1));
+    const built: { config: undefined | WorkerConfig; seed: null | Uint8Array; sharingSeed: null | Uint8Array; }[] = [];
+    const createSdk = vi.fn(
+      (
+        config: undefined | WorkerConfig,
+        seed: null | Uint8Array,
+        sharingSeed: null | Uint8Array,
+      ) => {
+        built.push({ config, seed, sharingSeed });
+        return Promise.resolve(sdk);
+      },
+    );
+    const messages: WorkerToMainMessage[] = [];
+
+    const coordinator = createSiaWorkerComposition({
+      capabilities: permissiveCapabilities(),
+      createSdk,
+      loadPipeline: new FakeLoadPipeline(),
+      post: (message) => messages.push(message),
+      supportsWorkerMse: () => false,
+    });
+
+    // A `keyType: 'sharing'` envelope lands in the sharing-seed slot only.
+    await coordinator.handleMessage({ config: WORKER_CONFIG, requestId: 1, type: MainToWorkerMessageType.HELLO });
+    const helloOk = messages.find((m) => m.type === WorkerToMainMessageType.HELLO_OK);
+    const sharingSeed = new Uint8Array(32).fill(0x7a);
+    const envelope = await encryptToWorker(
+      helloOk?.type === WorkerToMainMessageType.HELLO_OK ? helloOk.publicKey : new Uint8Array(32),
+      sharingSeed,
+      'sharing',
+    );
+    expect(envelope.keyType).toBe('sharing');
+    await coordinator.handleMessage({ envelope, requestId: 2, type: MainToWorkerMessageType.APP_KEY });
+
+    // A share-URL src drives the lazy SDK build exactly once, carrying the
+    // decrypted sharing seed and no app-key seed.
+    await coordinator.handleMessage({ preload: 'auto', requestId: 3, src: shareSrc(), type: MainToWorkerMessageType.SOURCE });
+    await flush();
+    expect(built).toHaveLength(1);
+    expect(built[0].config).toEqual(WORKER_CONFIG);
+    expect(built[0].seed).toBeNull();
+    expect(built[0].sharingSeed).toEqual(sharingSeed);
+  });
+
+  it('falls back to the app-key seed (sharingSeed null) when the envelope is untagged', async () => {
+    const { sdk } = fakeSiaSdk(new Uint8Array(2048).fill(1));
+    const built: { config: undefined | WorkerConfig; seed: null | Uint8Array; sharingSeed: null | Uint8Array; }[] = [];
+    const createSdk = vi.fn(
+      (
+        config: undefined | WorkerConfig,
+        seed: null | Uint8Array,
+        sharingSeed: null | Uint8Array,
+      ) => {
+        built.push({ config, seed, sharingSeed });
+        return Promise.resolve(sdk);
+      },
+    );
+    const messages: WorkerToMainMessage[] = [];
+
+    const coordinator = createSiaWorkerComposition({
+      capabilities: permissiveCapabilities(),
+      createSdk,
+      loadPipeline: new FakeLoadPipeline(),
+      post: (message) => messages.push(message),
+      supportsWorkerMse: () => false,
+    });
+
+    // An untagged envelope is the original app-key handshake (backward compat).
+    await coordinator.handleMessage({ config: WORKER_CONFIG, requestId: 1, type: MainToWorkerMessageType.HELLO });
+    const helloOk = messages.find((m) => m.type === WorkerToMainMessageType.HELLO_OK);
+    const seed = new Uint8Array(32).fill(0x3b);
+    const envelope = await encryptToWorker(
+      helloOk?.type === WorkerToMainMessageType.HELLO_OK ? helloOk.publicKey : new Uint8Array(32),
+      seed,
+    );
+    expect(envelope.keyType).toBeUndefined();
+    await coordinator.handleMessage({ envelope, requestId: 2, type: MainToWorkerMessageType.APP_KEY });
+
+    await coordinator.handleMessage({ preload: 'auto', requestId: 3, src: shareSrc(), type: MainToWorkerMessageType.SOURCE });
+    await flush();
+    expect(built).toHaveLength(1);
+    expect(built[0].seed).toEqual(seed);
+    expect(built[0].sharingSeed).toBeNull();
   });
 
   it('rejects at construction when neither sdk nor createSdk is wired', () => {

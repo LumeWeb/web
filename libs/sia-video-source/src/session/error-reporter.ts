@@ -16,7 +16,7 @@
  *
  * `workerErrorForFailure` maps a domain failure onto the existing
  * `WorkerErrorCode` wire kinds (`network`/`unsupported`/`decode`) so the
- * coordinator's `post({ type: 'ERROR', … })` call site stays a one-liner, and
+ * coordinator's `post({ type: WorkerToMainMessageType.ERROR, … })` call site stays a one-liner, and
  * `createErrorReporter` is the adapter that enforces the drop rule before a
  * failure ever reaches the host.
  */
@@ -93,7 +93,7 @@ export interface WorkerErrorReport {
 /**
  * Builds an {@link ErrorReporter} that maps failures through
  * {@link workerErrorForFailure} and forwards only the non-cancelled ones to
- * `emit`. The coordinator supplies `emit` as its `post({ type: 'ERROR', … })`.
+ * `emit`. The coordinator supplies `emit` as its `post({ type: WorkerToMainMessageType.ERROR, … })`.
  */
 export function createErrorReporter(emit: (report: WorkerErrorReport) => void): ErrorReporter {
   return {

@@ -64,13 +64,15 @@ export interface SiaByteSourceOptions {
 /**
  * The Sia SDK surface a `ByteSourceFactory` needs to resolve a SOURCE `src`
  * locator: a pinned object key (`object`) or a Sia share URL
- * (`sharedObject`). `sharedObject` is optional so SDKs predating share
- * support can still be injected; resolving a share URL without it rejects
- * with a descriptive error.
+ * (`objectFromShareUrl`). `objectFromShareUrl` is optional so SDKs predating
+ * share support (or id-based `SharedSdk`s before their adapter wraps them)
+ * can still be injected; resolving a share URL without it rejects with a
+ * descriptive error. The factory stays source-agnostic: it never special-cases
+ * the credential mode, it only calls whichever seam the injected SDK exposes.
  */
 export interface SiaByteSourceSdk extends SiaSdkLike {
   object(key: string): Promise<SiaObjectLike>;
-  sharedObject?(shareUrl: string): Promise<SiaObjectLike>;
+  objectFromShareUrl?(shareUrl: string): Promise<SiaObjectLike>;
 }
 
 export class SiaByteSource implements ByteSource {
@@ -209,9 +211,12 @@ export class SiaByteSource implements ByteSource {
  * `ByteSourceFactory` seam: resolves one SOURCE `src` locator into a
  * `SiaByteSource` over the injected SDK. Plain `src` values are pinned object
  * keys; `sia://` (or https alias) share URLs are parsed and resolved through
- * `sdk.sharedObject(fetchForm)`, exactly like the worker's `#resolveObject`.
- * The factory does not rewrite `RangedReader`/`LruChunkCache`/`ReadBudget`
- * internals, and preserves the SDK's existing share URL form.
+ * `sdk.objectFromShareUrl(fetchForm)`. The factory does not rewrite
+ * `RangedReader`/`LruChunkCache`/`ReadBudget` internals, and preserves the
+ * SDK's existing share URL form. A keyless `SharedSdk` adapter (see
+ * `worker-runtime.ts`) implements `objectFromShareUrl` by routing through
+ * `SharedSdk.object(objectKey)`, so the factory needs no credential-mode
+ * knowledge.
  */
 export function createSiaByteSourceFactory(
   sdk: SiaByteSourceSdk,
@@ -230,8 +235,8 @@ export function createSiaByteSourceFactory(
 async function resolveSiaObject(sdk: SiaByteSourceSdk, src: string): Promise<SiaObjectLike> {
   if (!isSiaShareUrl(src)) return sdk.object(src);
   const share = parseSiaShareUrl(src);
-  if (!sdk.sharedObject) {
-    throw new Error('the injected Sia SDK does not support shared-object URLs');
+  if (!sdk.objectFromShareUrl) {
+    throw new Error('the injected Sia SDK does not support shared-object URLs (inject objectFromShareUrl or a keyless SharedSdk adapter)');
   }
-  return sdk.sharedObject(share.fetchForm);
+  return sdk.objectFromShareUrl(share.fetchForm);
 }

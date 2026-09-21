@@ -16,7 +16,7 @@
  *
  * `workerErrorForFailure` maps the domain failure onto the existing
  * `WorkerErrorCode` wire kinds (`network`/`unsupported`/`decode`) so the
- * coordinator's `post({ type: 'ERROR', … })` call site stays a one-liner, and
+ * coordinator's `post({ type: WorkerToMainMessageType.ERROR, … })` call site stays a one-liner, and
  * `createErrorReporter` is the adapter that enforces the drop rule before a
  * failure ever reaches the host.
  */

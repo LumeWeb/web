@@ -43,6 +43,7 @@ import {
 import {
   type AppKeyEnvelope,
   type MainToWorkerMessage,
+  MainToWorkerMessageType,
   PROTOCOL_VERSION,
   type RequestId,
   type WorkerConfig,
@@ -52,6 +53,7 @@ import {
   type WorkerMode,
   workerMsePreference,
   type WorkerToMainMessage,
+  WorkerToMainMessageType,
 } from '../protocol.ts';
 import type { ByteSource } from '../transport/byte-source.ts';
 import type { AppendSink, AppendUnit } from '../sink/append-sink.ts';
@@ -136,21 +138,27 @@ export interface SessionCoordinatorDeps {
  * handshake crypto stays isolated and tests inject a fake.
  */
 export interface SessionHandshake {
-  /** Validates/consumes one `APP_KEY` envelope; throws on rejection (→ network ERROR). */
+  /**
+   * Validates/consumes one `APP_KEY` envelope; throws on rejection (→ network
+   * ERROR). The envelope's plaintext `keyType` tag routes the decrypted seed
+   * into the `seed` (app-key) or `sharingSeed` slot.
+   */
   acceptAppKey(envelope: AppKeyEnvelope): Promise<void> | void;
   /** Active HELLO `WorkerConfig`, once one was received; undefined before/after clear. */
   readonly config?: undefined | WorkerConfig;
-  /** Releases held connection credentials (scrubs a held app-key seed); optional. */
+  /** Releases held connection credentials (scrubs both held seeds); optional. */
   dispose?(): void;
   /**
    * Returns the worker's static public half for `HELLO_OK`. When a HELLO
-   * `WorkerConfig` is supplied and differs from the active one, the held
-   * app-key seed is dropped (a config change invalidates the connection), so
-   * `seed` only ever describes the active connection.
+   * `WorkerConfig` is supplied and differs from the active one, both held
+   * seeds are dropped (a config change invalidates the connection), so
+   * `seed`/`sharingSeed` only ever describe the active connection.
    */
   hello(requestId: RequestId, config?: WorkerConfig): { readonly publicKey: Uint8Array };
   /** Decrypted app-key seed of the active connection, or null until one is validated. */
   readonly seed?: null | Uint8Array;
+  /** Decrypted sharing-key seed of the active connection, or null until one is validated. */
+  readonly sharingSeed?: null | Uint8Array;
 }
 
 /**
@@ -252,21 +260,21 @@ export class WorkerComposition implements SessionCoordinator {
 
     try {
       switch (message.type) {
-        case 'APP_KEY':
+        case MainToWorkerMessageType.APP_KEY:
           await this.#handshake.acceptAppKey(message.envelope);
           return;
-        case 'ATTACH':
-          this.#post({ mode: this.#mode, requestId: message.requestId, type: 'ATTACH_OK' });
+        case MainToWorkerMessageType.ATTACH:
+          this.#post({ mode: this.#mode, requestId: message.requestId, type: WorkerToMainMessageType.ATTACH_OK });
           return;
-        case 'DESTROY':
+        case MainToWorkerMessageType.DESTROY:
           this.destroy();
           return;
-        case 'DETACH':
+        case MainToWorkerMessageType.DETACH:
           this.#abandonLoad();
           this.#playRequested = false;
           this.#pendingSeekTime = undefined;
           return;
-        case 'HELLO': {
+        case MainToWorkerMessageType.HELLO: {
           const { publicKey } = this.#handshake.hello(message.requestId, message.config);
           // A host `workerMse: 'main'` preference overrides the runtime
           // capability check for this session (auto keeps runtime feature-detection). HELLO
@@ -277,27 +285,27 @@ export class WorkerComposition implements SessionCoordinator {
             features: { workerMse: this.#mode === workerMode.worker },
             publicKey,
             requestId: message.requestId,
-            type: 'HELLO_OK',
+            type: WorkerToMainMessageType.HELLO_OK,
             version: PROTOCOL_VERSION,
           });
           return;
         }
-        case 'PLAY':
+        case MainToWorkerMessageType.PLAY:
           this.#playRequested = true;
           this.#startStreaming();
           return;
-        case 'PLAYHEAD':
+        case MainToWorkerMessageType.PLAYHEAD:
           this.#handlePlayhead(message.requestId, message.time);
           return;
-        case 'SEEK':
+        case MainToWorkerMessageType.SEEK:
           this.#handleSeek(message.time);
           return;
-        case 'SOURCE':
+        case MainToWorkerMessageType.SOURCE:
           await this.#handleSource(message.requestId, message.src, message.preload);
           return;
       }
     } catch (error) {
-      const requestId = message.type === 'SOURCE' || message.type === 'SEEK' ? message.requestId : null;
+      const requestId = message.type === MainToWorkerMessageType.SOURCE || message.type === MainToWorkerMessageType.SEEK ? message.requestId : null;
       this.#postError(workerErrorCode.network, requestId, describeError(error));
     }
   }
@@ -503,7 +511,7 @@ export class WorkerComposition implements SessionCoordinator {
         this.#mode,
       ),
       requestId,
-      type: 'SOURCE_OK',
+      type: WorkerToMainMessageType.SOURCE_OK,
     });
 
     // The parked seek this load carried is consumed when the load resolves:
@@ -537,14 +545,14 @@ export class WorkerComposition implements SessionCoordinator {
       // it once its own append queue drains. Worker mode ends its own
       // MediaSource through the sink and never posts ENDED.
       if (state === streamState.ended && this.#mode === workerMode.main && this.#session === session) {
-        this.#post({ requestId: session.requestId, type: 'ENDED' });
+        this.#post({ requestId: session.requestId, type: WorkerToMainMessageType.ENDED });
       }
     });
     return controller;
   }
 
   #postError(kind: WorkerErrorCode, requestId: null | RequestId, context?: string): void {
-    this.#post({ context, kind, requestId, type: 'ERROR' });
+    this.#post({ context, kind, requestId, type: WorkerToMainMessageType.ERROR });
   }
 
   // Selects the session MSE site from the latest HELLO config + runtime
@@ -581,29 +589,48 @@ export function createSessionCoordinator(deps: SessionCoordinatorDeps): SessionC
 /**
  * Default handshake: memoized X25519 key pair for `HELLO`, AEAD-validated
  * `APP_KEY` decryption through the handshake helpers. The coordinator exposes
- * the active connection's config + decrypted seed so a composition root can
- * bind them lazily to the Sia transport on the first `SOURCE` — the seed is
- * kept while the connection is active and scrubbed on replacement (config
- * change, superseding `APP_KEY`) or on `dispose`.
+ * the active connection's config + both decrypted seeds (app-key `seed` and
+ * `sharingSeed`, routed by the envelope's `keyType` tag) so a composition
+ * root can bind them lazily to the Sia transport on the first `SOURCE` — each
+ * seed is kept while the connection is active and scrubbed on replacement
+ * (config change, superseding `APP_KEY`) or on `dispose`.
  */
 export function createSessionHandshake(): SessionHandshake {
   let config: undefined | WorkerConfig;
   let keyPair: null | WorkerKeyPair = null;
   let seed: null | Uint8Array = null;
+  let sharingSeed: null | Uint8Array = null;
 
   return {
     async acceptAppKey(envelope: AppKeyEnvelope): Promise<void> {
       if (keyPair === null) throw new Error('HELLO must precede APP_KEY');
       const decrypted = await decryptAppKeyEnvelope(keyPair, envelope);
-      // Same connection, fresh envelope (new IV/ephemeral key): keep the active
-      // seed and drop the re-decrypted copy, so repeat attaches never churn the
-      // SDK. A genuinely different seed scrubs the old one before adoption.
-      if (appKeySeedsEqual(seed, decrypted)) {
-        scrub(decrypted);
+      // The plaintext `keyType` tag is routing metadata only — never secret —
+      // so it is trusted to steer the decrypted seed into the right slot.
+      if (envelope.keyType === 'sharing') {
+        adoptSeedSlot('sharing');
         return;
       }
-      if (seed) scrub(seed);
-      seed = decrypted;
+      // Absent keyType = the original app-key handshake (backward compatible).
+      adoptSeedSlot('app');
+      return;
+
+      // Adopts `decrypted` into the slot named by `kind`, scrubbing the
+      // previous occupant when it changes. Same connection, fresh envelope (new
+      // IV/ephemeral key): keep the active seed and drop the re-decrypted copy,
+      // so repeat attaches never churn the SDK.
+      function adoptSeedSlot(kind: 'app' | 'sharing'): void {
+        const previous = kind === 'sharing' ? sharingSeed : seed;
+        if (previous !== null) {
+          if (appKeySeedsEqual(previous, decrypted)) {
+            scrub(decrypted);
+            return;
+          }
+          scrub(previous);
+        }
+        if (kind === 'sharing') sharingSeed = decrypted;
+        else seed = decrypted;
+      }
     },
 
     get config(): undefined | WorkerConfig {
@@ -613,15 +640,19 @@ export function createSessionHandshake(): SessionHandshake {
     dispose(): void {
       if (seed) scrub(seed);
       seed = null;
+      if (sharingSeed) scrub(sharingSeed);
+      sharingSeed = null;
       config = undefined;
     },
 
     hello(_requestId: RequestId, nextConfig?: WorkerConfig): { readonly publicKey: Uint8Array } {
       // A HELLO config that changed — or was cleared entirely — invalidates the
-      // connection: drop the held seed so the next APP_KEY starts fresh.
+      // connection: drop both held seeds so the next APP_KEY starts fresh.
       if (!workerConfigsEqual(config, nextConfig)) {
         if (seed) scrub(seed);
         seed = null;
+        if (sharingSeed) scrub(sharingSeed);
+        sharingSeed = null;
         config = nextConfig;
       }
       keyPair ??= generateWorkerKeyPair();
@@ -630,6 +661,10 @@ export function createSessionHandshake(): SessionHandshake {
 
     get seed(): null | Uint8Array {
       return seed;
+    },
+
+    get sharingSeed(): null | Uint8Array {
+      return sharingSeed;
     },
   };
 }
@@ -666,7 +701,7 @@ function createPostingSink(post: PostMessage, requestId: RequestId): AppendSink 
     },
     append(unit: AppendUnit): void {
       if (!active) return;
-      post({ bytes: unit.bytes.slice(), kind: unit.kind, requestId, type: 'CHUNK' });
+      post({ bytes: unit.bytes.slice(), kind: unit.kind, requestId, type: WorkerToMainMessageType.CHUNK });
     },
     evictBackBuffer(): Promise<boolean> {
       return Promise.resolve(false);

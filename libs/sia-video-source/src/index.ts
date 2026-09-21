@@ -47,6 +47,7 @@ export {
   isAppKeyEnvelope,
   isWorkerToMainMessage,
   type MainToWorkerMessage,
+  MainToWorkerMessageType,
   nextRequestId,
   PROTOCOL_VERSION,
   type RequestId,
@@ -59,6 +60,7 @@ export {
   type WorkerMode,
   type WorkerMsePreference,
   type WorkerToMainMessage,
+  WorkerToMainMessageType,
 } from './protocol.ts';
 export { LruChunkCache, objectSize, RangedReader, ReadBudget, type ShardProgress, type SiaObjectLike, type SiaSdkLike } from './ranged-reader.ts';
 export { type Clock, ManualClock, wallClock } from './session/clock.ts';

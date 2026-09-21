@@ -16,6 +16,7 @@
  * root lifecycle (transport + MSE wiring) is the object under test.
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { MainToWorkerMessageType, WorkerToMainMessageType } from '../protocol.ts';
 import type { WorkerConfig } from '../protocol.ts';
 import type { WorkerToMainMessage } from '../protocol.ts';
 import type { SiaByteSourceSdk } from '../transport/sia-byte-source.ts';
@@ -114,9 +115,9 @@ async function openWorkerLoad(
   requestId: number,
   src = 'pin-key',
 ): Promise<void> {
-  await root.handleMessage({ config: { ...WORKER_CONFIG, workerMse: 'auto' }, requestId: 1, type: 'HELLO' });
-  await root.handleMessage({ requestId: 2, type: 'ATTACH' });
-  await root.handleMessage({ preload: 'auto', requestId, src, type: 'SOURCE' });
+  await root.handleMessage({ config: { ...WORKER_CONFIG, workerMse: 'auto' }, requestId: 1, type: MainToWorkerMessageType.HELLO });
+  await root.handleMessage({ requestId: 2, type: MainToWorkerMessageType.ATTACH });
+  await root.handleMessage({ preload: 'auto', requestId, src, type: MainToWorkerMessageType.SOURCE });
   await flush();
 }
 
@@ -153,15 +154,15 @@ describe('createDefaultWorkerComposition worker-MSE lifecycle (browser)', () => 
     const { mediaSources, root } = workerModeRoot(messages);
     await openWorkerLoad(root, messages, 3);
     // Worker load owns one MediaSource with a live SourceBuffer.
-    expect(messages.find((m) => m.type === 'ATTACH_OK')).toMatchObject({ mode: 'worker' });
+    expect(messages.find((m) => m.type === WorkerToMainMessageType.ATTACH_OK)).toMatchObject({ mode: 'worker' });
     expect(mediaSources).toHaveLength(1);
-    expect(messages.filter((m) => m.type === 'HANDLE')).toHaveLength(1);
+    expect(messages.filter((m) => m.type === WorkerToMainMessageType.HANDLE)).toHaveLength(1);
     expect(mediaSources[0].sourceBuffers).toHaveLength(1);
 
     // RED: abandoning the session (DETACH) must tear the worker MSE root down —
     // the SourceBuffer is removed and the MediaSource is dropped immediately,
     // not left open until some later SOURCE re-opens the pipeline.
-    await root.handleMessage({ type: 'DETACH' });
+    await root.handleMessage({ type: MainToWorkerMessageType.DETACH });
     await flush();
     expect(mediaSources[0].sourceBuffers).toHaveLength(0);
   });
@@ -175,7 +176,7 @@ describe('createDefaultWorkerComposition worker-MSE lifecycle (browser)', () => 
 
     // RED: DESTROY is permanent — no later load can ever re-open this root, so
     // the open MediaSource + SourceBuffer must be released at destroy time.
-    await root.handleMessage({ type: 'DESTROY' });
+    await root.handleMessage({ type: MainToWorkerMessageType.DESTROY });
     await flush();
     expect(mediaSources[0].sourceBuffers).toHaveLength(0);
   });
@@ -184,25 +185,25 @@ describe('createDefaultWorkerComposition worker-MSE lifecycle (browser)', () => 
     const messages: WorkerToMainMessage[] = [];
     const { mediaSources, root } = workerModeRoot(messages);
     // One connection at worker mode, then two sequential loads on it.
-    await root.handleMessage({ config: { ...WORKER_CONFIG, workerMse: 'auto' }, requestId: 1, type: 'HELLO' });
-    await root.handleMessage({ requestId: 2, type: 'ATTACH' });
-    await root.handleMessage({ preload: 'auto', requestId: 3, src: 'pin-key', type: 'SOURCE' });
+    await root.handleMessage({ config: { ...WORKER_CONFIG, workerMse: 'auto' }, requestId: 1, type: MainToWorkerMessageType.HELLO });
+    await root.handleMessage({ requestId: 2, type: MainToWorkerMessageType.ATTACH });
+    await root.handleMessage({ preload: 'auto', requestId: 3, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
     await flush();
     expect(mediaSources).toHaveLength(1);
-    expect(messages.filter((m) => m.type === 'HANDLE')).toHaveLength(1);
+    expect(messages.filter((m) => m.type === WorkerToMainMessageType.HANDLE)).toHaveLength(1);
 
     const superseded = mediaSources[0].sourceBuffers[0];
     const supersededAppendCount = superseded.appended.length;
     expect(supersededAppendCount).toBeGreaterThan(0); // the superseded load genuinely appended
 
     // SOURCE 4 supersedes the active load on the same connection.
-    await root.handleMessage({ preload: 'auto', requestId: 4, src: 'pin-key', type: 'SOURCE' });
+    await root.handleMessage({ preload: 'auto', requestId: 4, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
     await flush();
 
     // Exactly one HANDLE per accepted load, scoped to its request id; the old
     // pipeline's SourceBuffer is released and receives no stale appends, and
     // the new load owns the one live pipeline that streams.
-    expect(messages.filter((m) => m.type === 'HANDLE').map((m) => (m.type === 'HANDLE' ? m.requestId : null))).toEqual([
+    expect(messages.filter((m) => m.type === WorkerToMainMessageType.HANDLE).map((m) => (m.type === WorkerToMainMessageType.HANDLE ? m.requestId : null))).toEqual([
       3, 4,
     ]);
     expect(mediaSources).toHaveLength(2);
@@ -219,11 +220,11 @@ describe('createDefaultWorkerComposition worker-MSE lifecycle (browser)', () => 
     // Build the pipeline WITHOUT streaming (preload none): the worker MediaSource
     // + SourceBuffer exist but nothing has appended yet, so the first PLAY can
     // deterministically trigger the failing append.
-    await root.handleMessage({ config: { ...WORKER_CONFIG, workerMse: 'auto' }, requestId: 1, type: 'HELLO' });
-    await root.handleMessage({ requestId: 2, type: 'ATTACH' });
-    await root.handleMessage({ preload: 'none', requestId: 3, src: 'pin-key', type: 'SOURCE' });
+    await root.handleMessage({ config: { ...WORKER_CONFIG, workerMse: 'auto' }, requestId: 1, type: MainToWorkerMessageType.HELLO });
+    await root.handleMessage({ requestId: 2, type: MainToWorkerMessageType.ATTACH });
+    await root.handleMessage({ preload: 'none', requestId: 3, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
     await flush();
-    expect(messages.filter((m) => m.type === 'ERROR')).toHaveLength(0);
+    expect(messages.filter((m) => m.type === WorkerToMainMessageType.ERROR)).toHaveLength(0);
     expect(mediaSources).toHaveLength(1);
 
     const sourceBuffer = mediaSources[0].sourceBuffers[0];
@@ -234,18 +235,18 @@ describe('createDefaultWorkerComposition worker-MSE lifecycle (browser)', () => 
     // never leave a dead MediaSource/SourceBuffer allocated until some later
     // DETACH/supersede happens to tear it down.
     sourceBuffer.failNextAppendWithEvent = true;
-    await root.handleMessage({ requestId: 4, type: 'PLAY' });
+    await root.handleMessage({ requestId: 4, type: MainToWorkerMessageType.PLAY });
     await flush();
-    const errors = messages.filter((m): m is Extract<WorkerToMainMessage, { type: 'ERROR'; }> => m.type === 'ERROR');
+    const errors = messages.filter((m): m is Extract<WorkerToMainMessage, { type: WorkerToMainMessageType.ERROR; }> => m.type === WorkerToMainMessageType.ERROR);
     expect(errors).toEqual([expect.objectContaining({ kind: 'decode', requestId: 3 })]);
     expect(mediaSources[0].sourceBuffers).toHaveLength(0);
 
     // Recovery: the dead pipeline does not wedge the root — the next load opens
     // a fresh worker MediaSource + HANDLE and streams.
-    await root.handleMessage({ preload: 'auto', requestId: 5, src: 'pin-key', type: 'SOURCE' });
+    await root.handleMessage({ preload: 'auto', requestId: 5, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
     await flush();
     expect(mediaSources).toHaveLength(2);
-    expect(messages.filter((m) => m.type === 'HANDLE').map((m) => (m.type === 'HANDLE' ? m.requestId : null))).toEqual([
+    expect(messages.filter((m) => m.type === WorkerToMainMessageType.HANDLE).map((m) => (m.type === WorkerToMainMessageType.HANDLE ? m.requestId : null))).toEqual([
       3, 5,
     ]);
     expect(mediaSources[1].sourceBuffers).toHaveLength(1);
@@ -273,26 +274,26 @@ describe('createDefaultWorkerComposition worker-MSE lifecycle (browser)', () => 
       post: (message) => messages.push(message),
       supportsWorkerMse: () => true,
     });
-    await root.handleMessage({ config: { ...WORKER_CONFIG, workerMse: 'auto' }, requestId: 1, type: 'HELLO' });
-    await root.handleMessage({ requestId: 2, type: 'ATTACH' });
-    await root.handleMessage({ preload: 'auto', requestId: 3, src: 'pin-key', type: 'SOURCE' });
+    await root.handleMessage({ config: { ...WORKER_CONFIG, workerMse: 'auto' }, requestId: 1, type: MainToWorkerMessageType.HELLO });
+    await root.handleMessage({ requestId: 2, type: MainToWorkerMessageType.ATTACH });
+    await root.handleMessage({ preload: 'auto', requestId: 3, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
     await flush();
 
     // The failing transport never opens a worker MediaSource nor posts a HANDLE;
     // the failure surfaces as a request-scoped network ERROR.
-    const errors = messages.filter((m): m is Extract<WorkerToMainMessage, { type: 'ERROR'; }> => m.type === 'ERROR');
+    const errors = messages.filter((m): m is Extract<WorkerToMainMessage, { type: WorkerToMainMessageType.ERROR; }> => m.type === WorkerToMainMessageType.ERROR);
     expect(errors).toEqual([expect.objectContaining({ kind: 'network', requestId: 3 })]);
     expect(mediaSources).toHaveLength(0);
-    expect(messages.filter((m) => m.type === 'HANDLE')).toHaveLength(0);
+    expect(messages.filter((m) => m.type === WorkerToMainMessageType.HANDLE)).toHaveLength(0);
 
     // The root is not wedged: the same connection retries the (unmemoized)
     // failed SDK build and the next load opens exactly one MediaSource + HANDLE.
-    await root.handleMessage({ preload: 'auto', requestId: 5, src: 'pin-key', type: 'SOURCE' });
+    await root.handleMessage({ preload: 'auto', requestId: 5, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
     await flush();
     expect(buildCalls).toBe(2);
     expect(mediaSources).toHaveLength(1);
     expect(mediaSources[0].sourceBuffers).toHaveLength(1);
-    expect(messages.filter((m) => m.type === 'HANDLE').map((m) => (m.type === 'HANDLE' ? m.requestId : null))).toEqual([
+    expect(messages.filter((m) => m.type === WorkerToMainMessageType.HANDLE).map((m) => (m.type === WorkerToMainMessageType.HANDLE ? m.requestId : null))).toEqual([
       5,
     ]);
     expect(concatBytes(mediaSources[0].sourceBuffers[0].appended).byteLength).toBeGreaterThan(0);
@@ -311,17 +312,17 @@ describe('createDefaultWorkerComposition main-mode CHUNK fallback lifecycle (bro
       post: (message) => messages.push(message),
       supportsWorkerMse: () => false, // Firefox-style main-thread MSE fallback
     });
-    await root.handleMessage({ config: { ...WORKER_CONFIG, workerMse: 'auto' }, requestId: 1, type: 'HELLO' });
-    await root.handleMessage({ requestId: 2, type: 'ATTACH' });
-    expect(messages.find((m) => m.type === 'ATTACH_OK')).toMatchObject({ mode: 'main' });
+    await root.handleMessage({ config: { ...WORKER_CONFIG, workerMse: 'auto' }, requestId: 1, type: MainToWorkerMessageType.HELLO });
+    await root.handleMessage({ requestId: 2, type: MainToWorkerMessageType.ATTACH });
+    expect(messages.find((m) => m.type === WorkerToMainMessageType.ATTACH_OK)).toMatchObject({ mode: 'main' });
 
-    const chunkCount = () => messages.filter((m) => m.type === 'CHUNK').length;
-    await root.handleMessage({ preload: 'auto', requestId: 3, src: 'pin-key', type: 'SOURCE' });
+    const chunkCount = () => messages.filter((m) => m.type === WorkerToMainMessageType.CHUNK).length;
+    await root.handleMessage({ preload: 'auto', requestId: 3, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
     await flush();
     expect(chunkCount()).toBeGreaterThan(0); // fallback really posts CHUNK
 
     // Cancellation: after DETACH the replaced load may post no further CHUNK.
-    await root.handleMessage({ type: 'DETACH' });
+    await root.handleMessage({ type: MainToWorkerMessageType.DETACH });
     await flush();
     const frozen = chunkCount();
     await flush();
@@ -343,24 +344,24 @@ describe('createDefaultWorkerComposition main-mode CHUNK fallback lifecycle (bro
       post: (message) => messages.push(message),
       supportsWorkerMse: () => false, // Firefox-style main-thread MSE fallback
     });
-    await root.handleMessage({ config: { ...WORKER_CONFIG, workerMse: 'auto' }, requestId: 1, type: 'HELLO' });
-    await root.handleMessage({ requestId: 2, type: 'ATTACH' });
-    expect(messages.find((m) => m.type === 'ATTACH_OK')).toMatchObject({ mode: 'main' });
+    await root.handleMessage({ config: { ...WORKER_CONFIG, workerMse: 'auto' }, requestId: 1, type: MainToWorkerMessageType.HELLO });
+    await root.handleMessage({ requestId: 2, type: MainToWorkerMessageType.ATTACH });
+    expect(messages.find((m) => m.type === WorkerToMainMessageType.ATTACH_OK)).toMatchObject({ mode: 'main' });
 
-    const chunkCount = () => messages.filter((m) => m.type === 'CHUNK').length;
-    await root.handleMessage({ preload: 'auto', requestId: 3, src: 'pin-key', type: 'SOURCE' });
+    const chunkCount = () => messages.filter((m) => m.type === WorkerToMainMessageType.CHUNK).length;
+    await root.handleMessage({ preload: 'auto', requestId: 3, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
     await flush();
-    expect(messages.filter((m) => m.type === 'ERROR')).toEqual([
+    expect(messages.filter((m) => m.type === WorkerToMainMessageType.ERROR)).toEqual([
       expect.objectContaining({ kind: 'network', requestId: 3 }),
     ]);
     expect(chunkCount()).toBe(0); // a failed load never posts CHUNK
 
     // Recovery: the (unmemoized) failed SDK build is retried on the same
     // connection and the fallback stream resumes — CHUNK delivery is restored.
-    await root.handleMessage({ preload: 'auto', requestId: 5, src: 'pin-key', type: 'SOURCE' });
+    await root.handleMessage({ preload: 'auto', requestId: 5, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
     await flush();
     expect(buildCalls).toBe(2);
-    expect(messages.filter((m) => m.type === 'ERROR')).toHaveLength(1);
+    expect(messages.filter((m) => m.type === WorkerToMainMessageType.ERROR)).toHaveLength(1);
     expect(chunkCount()).toBeGreaterThan(0);
   });
 });
@@ -389,8 +390,8 @@ describe('createDefaultWorkerComposition lazy SDK transport (node)', () => {
       supportsWorkerMse: () => false,
     });
     const load = async (requestId: number, indexerUrl: string): Promise<void> => {
-      await root.handleMessage({ config: { ...WORKER_CONFIG, indexerUrl }, requestId, type: 'HELLO' });
-      await root.handleMessage({ preload: 'none', requestId: requestId + 1, src: 'pin-key', type: 'SOURCE' });
+      await root.handleMessage({ config: { ...WORKER_CONFIG, indexerUrl }, requestId, type: MainToWorkerMessageType.HELLO });
+      await root.handleMessage({ preload: 'none', requestId: requestId + 1, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
       await flush();
     };
 

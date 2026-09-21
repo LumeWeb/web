@@ -1,6 +1,6 @@
 /**
- * X25519 + AEAD encapsulation of the Sia app-key seed for the worker
- * handshake ("box"-style layering over X25519).
+ * X25519 + AEAD encapsulation of a Sia credential seed (app-key or
+ * sharing-key) for the worker handshake ("box"-style layering over X25519).
  *
  * The worker owns a static X25519 key pair and only ever publishes its raw
  * public key (inside `HELLO_OK`). When the host has a plaintext seed, it
@@ -83,11 +83,15 @@ export async function decryptAppKeyEnvelope(workerKeyPair: WorkerKeyPair, envelo
 /**
  * Host side: encapsulates the seed to the worker's public key. The caller owns
  * `seed` and must scrub it in a `finally` after this resolves — the envelope
- * is the only record of the key material this function leaves behind.
+ * is the only record of the key material this function leaves behind. `keyType`
+ * is a plaintext tag (`'app'` app-key seed, `'sharing'` sharing-key seed)
+ * riding the same envelope shape; it tells the worker which seed slot to
+ * decrypt into and defaults to `'app'` for the original handshake semantics.
  */
 export async function encryptToWorker(
   workerPublicKey: Uint8Array,
   seed: Uint8Array,
+  keyType?: 'app' | 'sharing',
 ): Promise<AppKeyEnvelope> {
   validatePublicKey(workerPublicKey);
   // A fresh pair per envelope: compromise of any single ephemeral private key
@@ -101,7 +105,11 @@ export async function encryptToWorker(
   scrub(ephemeral.privateKey);
   const iv = randomBytes(GCM_IV_LENGTH);
   const ciphertext = gcm(aeadKey, iv, ENCODER.encode(HANDSHAKE_CONTEXT)).encrypt(seed);
-  return { ciphertext, ephemeralPublicKey: ephemeral.publicKey, iv };
+  // `keyType` is part of the *returned* envelope only; it is deliberately not
+  // added to the AEAD's authenticated data, because it is plaintext wire
+  // metadata (routing, not secret material) and mutating it only changes which
+  // slot the decryptor rejects into, never the seed bytes.
+  return { ciphertext, ephemeralPublicKey: ephemeral.publicKey, iv, ...(keyType ? { keyType } : {}) };
 }
 
 /** Exports the worker's public half as the raw 32-byte wire form. */
