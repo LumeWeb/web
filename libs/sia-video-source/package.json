@@ -1,6 +1,7 @@
 {
   "name": "@lumeweb/sia-video-source",
   "version": "0.0.1",
+  "private": true,
   "type": "module",
   "files": [
     "dist",
