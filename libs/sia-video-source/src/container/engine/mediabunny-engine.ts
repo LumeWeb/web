@@ -12,7 +12,7 @@
  * Only the MP4 family is deep-parsed here; non-MP4 heads move no mediabunny
  * bytes.
  */
-import { mediaKind, type MediaKind } from '../../media/types.ts';
+import { mediaKind, type MediaKind } from '../../media/legacy-types.ts';
 
 /**
  * One track the engine discovered in an MP4 head. Facts beyond `codec`/`kind`

@@ -738,7 +738,7 @@ function producerFailureContext(error: ProducerUnavailableError): string {
 async function readProbe(source: ByteSource, length: number): Promise<Uint8Array> {
   const want = Math.min(length, source.size);
   if (want <= 0) return new Uint8Array(0);
-  const reader = source.read({ length: want, offset: 0 }, { epoch: 0 }).getReader();
+  const reader = source.read({ length: want, offset: 0 }, { loadGeneration: 0 }).getReader();
   const chunks: Uint8Array[] = [];
   let total = 0;
   try {

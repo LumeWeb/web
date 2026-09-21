@@ -30,7 +30,7 @@
  */
 
 import type { AppendableProducer } from '../container/producer/appendable-producer.ts';
-import type { RandomAccessIndex, RangeRead } from '../media/types.ts';
+import type { RandomAccessIndex, RangeRead } from '../media/legacy-types.ts';
 import type { AppendSink } from '../sink/append-sink.ts';
 import type { ByteSource, ReadOptions } from '../transport/byte-source.ts';
 import { ByteSourceSupersededError } from '../transport/byte-source.ts';
@@ -252,7 +252,7 @@ class GenericStreamController implements StreamController {
     if (!load) return false;
     const readStartedAt = this.#clock.now();
     let lastByteAt = readStartedAt;
-    const reader = load.source.read({ length: range.length, offset: range.offset }, { epoch } satisfies ReadOptions).getReader();
+    const reader = load.source.read({ length: range.length, offset: range.offset }, { loadGeneration: epoch } satisfies ReadOptions).getReader();
     let ok = true;
     let timedOut = false;
     let watchdog: null | ReturnType<typeof setInterval> = null;

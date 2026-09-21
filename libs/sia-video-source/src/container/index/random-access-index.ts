@@ -2,7 +2,7 @@
  * Container-agnostic random-access index contracts.
  *
  * `RandomAccessIndex`, `RangeRead`, `MediaRange`, and `IndexGranularity` are
- * the shared domain vocabulary defined in `src/media/types.ts`; this module
+ * the shared domain vocabulary defined in `src/media/legacy-types.ts`; this module
  * re-exports them as the canonical import path for `container/*` index code
  * and adds the `IndexBuilder` registry seam plus the minimal `ContainerProfile`
  * it is keyed on. Index builders consume generic bytes through `ByteSource`
@@ -16,7 +16,7 @@ import type {
   ProducerMode,
   RandomAccessIndex,
   RangeRead,
-} from '../../media/types.ts';
+} from '../../media/legacy-types.ts';
 import type { ByteSource } from '../../transport/byte-source.ts';
 
 export type { IndexGranularity, MediaRange, RandomAccessIndex, RangeRead };

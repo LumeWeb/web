@@ -3,7 +3,7 @@
  * registered at the composition root in best-effort order.
  */
 
-import { containerKind } from '../../media/types.ts';
+import { containerKind } from '../../media/legacy-types.ts';
 import type { ByteSource } from '../../transport/byte-source.ts';
 import { CuesIndex } from '../webm/cues-index.ts';
 import { probeWebmStreaming } from '../webm/webm-probe.ts';
@@ -118,7 +118,7 @@ export function createIndexBuilderRegistry(): IndexBuilder[] {
 async function readHead(source: ByteSource, length: number): Promise<null | Uint8Array> {
   const want = Math.min(length, source.size);
   if (want <= 0) return null;
-  const reader = source.read({ length: want, offset: 0 }, { epoch: 0 }).getReader();
+  const reader = source.read({ length: want, offset: 0 }, { loadGeneration: 0 }).getReader();
   const chunks: Uint8Array[] = [];
   let total = 0;
   try {

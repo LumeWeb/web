@@ -21,7 +21,7 @@
 
 import { capabilityVerdict, type CodecId } from '../../capabilities/codec-verdict.ts';
 import type { PlaybackCapabilities } from '../../capabilities/browser-capabilities.ts';
-import { type CodecDescriptor, containerKind, type ContainerKind, producerMode, type ProducerMode } from '../../media/types.ts';
+import { type CodecDescriptor, containerKind, type ContainerKind, producerMode, type ProducerMode } from '../../media/legacy-types.ts';
 import { DEFAULT_FMP4_MIME } from '../../protocol.ts';
 import { webmMimeForCodecs } from '../webm/webm-codecs.ts';
 import { WebmNativeProducer } from '../webm/webm-native-producer.ts';

@@ -8,7 +8,7 @@
  * bounded probe head via the dependency-neutral `probeWebm` walker, so it runs
  * equally in browsers, workers, and Node tests.
  */
-import { type CodecDescriptor, mediaKind } from '../../media/types.ts';
+import { type CodecDescriptor, mediaKind } from '../../media/legacy-types.ts';
 import { ebmlWalkMode } from './ebml-reader.ts';
 import { probeWebm } from './webm-probe.ts';
 

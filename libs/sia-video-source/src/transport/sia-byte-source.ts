@@ -2,20 +2,20 @@
  * {@link ByteSource} adapter over the Sia ranged-read transport
  * (`RangedReader` + `LruChunkCache` + `ReadBudget`). It composes those pieces
  * rather than reimplementing them: range concurrency, cache replay, stall
- * watchdog, and sequential-window fan-out behavior all live in the underlying
+ * watchdog, and single-download exact-range reads all live in the underlying
  * transport.
  *
  * Each `read()` wraps a `RangedReader` whose callbacks drain into the returned
  * `ReadableStream`; the shared cache/budget live on this source so consecutive
- * reads re-serve downloaded windows and stay within the dispatch limit.
+ * reads re-serve cached chunks and stay within the dispatch limit.
  */
 
 import {
   type ByteRange,
   type ByteSource,
-  ByteSourceEpoch,
   ByteSourceSupersededError,
   emptyByteStream,
+  LoadGenerationState,
   type ReadOptions,
   supersededStream,
   toSupersededError,
@@ -44,14 +44,6 @@ export interface SiaByteSourceFactoryOptions {
   chunkSize?: number;
   /** Forwarded to every `Sdk.download` call. */
   downloadOptions?: { maxBufferedChunks?: number };
-  /**
-   * Max bytes per SDK download, forwarded to every `RangedReader` the source
-   * builds so a range is fetched as sequential bounded windows instead of one
-   * wide `Sdk.download` — bounding the per-download fan-out that exhausts
-   * Chromium's ~64 pending WebTransport session cap. Unset preserves the
-   * single-download behavior.
-   */
-  windowBytes?: number;
 }
 
 export interface SiaByteSourceOptions {
@@ -67,12 +59,6 @@ export interface SiaByteSourceOptions {
   object: SiaObjectLike;
   /** Sia SDK (or fake) that serves ranged downloads. */
   sdk: SiaSdkLike;
-  /**
-   * Max bytes per SDK download; falls back for every read that does not
-   * carry its own `ReadOptions.windowBytes`. See
-   * `SiaByteSourceFactoryOptions.windowBytes`.
-   */
-  windowBytes?: number;
 }
 
 /**
@@ -93,7 +79,7 @@ export class SiaByteSource implements ByteSource {
   }
 
   readonly #cache: LruChunkCache;
-  readonly #epochs = new ByteSourceEpoch();
+  readonly #generationState = new LoadGenerationState();
   readonly #options: SiaByteSourceOptions;
 
   constructor(options: SiaByteSourceOptions) {
@@ -102,11 +88,11 @@ export class SiaByteSource implements ByteSource {
   }
 
   cancel(reason?: unknown): void {
-    this.#epochs.reset(reason);
+    this.#generationState.reset(reason);
   }
 
   read(range: ByteRange, options: ReadOptions): ReadableStream<Uint8Array> {
-    const epoch = options.epoch;
+    const loadGeneration = options.loadGeneration;
     let superseded = false;
     let settled = false;
     let controllerRef: null | ReadableStreamDefaultController<Uint8Array> = null;
@@ -133,8 +119,8 @@ export class SiaByteSource implements ByteSource {
       },
     };
 
-    if (!this.#epochs.open(epoch, handle)) {
-      return supersededStream(new ByteSourceSupersededError(`stale epoch ${epoch}`));
+    if (!this.#generationState.open(loadGeneration, handle)) {
+      return supersededStream(new ByteSourceSupersededError(`stale load generation ${loadGeneration}`));
     }
 
     const size = this.size;
@@ -144,7 +130,7 @@ export class SiaByteSource implements ByteSource {
 
     if (end <= start) {
       // Beyond EOF: an empty stream, and no SDK download is opened at all.
-      this.#epochs.settle(handle);
+      this.#generationState.settle(handle);
       return emptyByteStream();
     }
 
@@ -156,7 +142,7 @@ export class SiaByteSource implements ByteSource {
       if (settled) return;
       settled = true;
       signal?.removeEventListener('abort', onAbort);
-      this.#epochs.settle(handle);
+      this.#generationState.settle(handle);
     };
 
     const { budget, chunkSize, downloadOptions, object, sdk } = this.#options;
@@ -211,9 +197,6 @@ export class SiaByteSource implements ByteSource {
           },
           sdk,
           stallTimeoutMs: options.stallTimeoutMs,
-          // A per-read windowBytes wins; otherwise the factory-level knob
-          // (the documentable default for every read the source builds) applies.
-          windowBytes: options.windowBytes ?? this.#options.windowBytes,
         });
         readerRef = reader;
         reader.start(start, end - start);

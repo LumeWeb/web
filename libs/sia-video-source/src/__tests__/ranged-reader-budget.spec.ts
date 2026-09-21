@@ -19,15 +19,15 @@ interface Delivered { bytes: Uint8Array; position: number }
  *  at once — the read concurrency a budget must cap — is observable. */
 class ReleaseableSdk implements SiaSdkLike {
   /** download() calls in creation order (per reader of the same budget). */
-  readonly calls: number[] = [];
+  readonly calls: { length: number; offset: number }[] = [];
   inflight = 0;
   maxInflight = 0;
-  #index = 0;
   #releases: (() => void)[] = [];
 
-  download(): ReadableStream<Uint8Array> {
-    const id = this.#index++;
-    this.calls.push(id);
+  download(_object: SiaObjectLike, options?: { length?: number; offset?: number }): ReadableStream<Uint8Array> {
+    const offset = options?.offset ?? 0;
+    const length = options?.length ?? PAYLOAD.length;
+    this.calls.push({ length, offset });
     this.inflight++;
     this.maxInflight = Math.max(this.maxInflight, this.inflight);
     return new ReadableStream<Uint8Array>({
@@ -85,8 +85,8 @@ describe('ReadBudget', () => {
 
     // While reader A holds the only permit, reader B must not have opened its
     // download yet — SDK reads are bounded at the shared budget limit, so a
-    // far seek's lookahead cannot burst unbounded downloads.
-    expect(sdk.calls).toEqual([0]);
+    // batch of concurrent library reads cannot burst unbounded downloads.
+    expect(sdk.calls).toEqual([{ length: PAYLOAD.length, offset: 0 }]);
     expect(sdk.maxInflight).toBe(1);
 
     await sdk.release(1);
@@ -94,7 +94,10 @@ describe('ReadBudget', () => {
     await tick();
 
     // Only once A's stream fully drained may B begin its own download.
-    expect(sdk.calls).toEqual([0, 1]);
+    expect(sdk.calls).toEqual([
+      { length: PAYLOAD.length, offset: 0 },
+      { length: PAYLOAD.length, offset: 0 },
+    ]);
     const delivered = new Uint8Array(PAYLOAD.length);
     for (const entry of deliveredA) delivered.set(entry.bytes, entry.position);
     expect(delivered).toEqual(PAYLOAD);
@@ -112,7 +115,46 @@ describe('ReadBudget', () => {
     await tick();
 
     // Two downloads may be in flight when the budget allows it.
-    expect(sdk.calls).toEqual([0, 1]);
+    expect(sdk.calls).toEqual([
+      { length: PAYLOAD.length, offset: 0 },
+      { length: PAYLOAD.length, offset: 0 },
+    ]);
     expect(sdk.maxInflight).toBe(2);
+  });
+
+  it('serializes concurrent independent reads without altering either request’s range', async () => {
+    const budget = new ReadBudget(1);
+    const sdk = new ReleaseableSdk();
+    const deliveredA: Delivered[] = [];
+    const deliveredB: Delivered[] = [];
+    const readerA = newReader(sdk, budget, deliveredA);
+    const readerB = newReader(sdk, budget, deliveredB);
+
+    // Independent overlapping ranges, as mediabunny may issue concurrently.
+    readerA.start(0, 24 * 1024);
+    await tick();
+    readerB.start(8 * 1024, 24 * 1024);
+    await tick();
+
+    // Reader A holds the only permit: only its download is open, with its own
+    // exact range untouched.
+    expect(sdk.calls).toEqual([{ length: 24 * 1024, offset: 0 }]);
+    expect(sdk.maxInflight).toBe(1);
+
+    await sdk.release(1);
+    await tick();
+    await tick();
+
+    // Reader B then opens its own download with its own exact range unchanged —
+    // the budget serializes, it never re-shapes either request.
+    expect(sdk.calls).toEqual([
+      { length: 24 * 1024, offset: 0 },
+      { length: 24 * 1024, offset: 8 * 1024 },
+    ]);
+    expect(sdk.maxInflight).toBe(1);
+
+    const delivered = new Uint8Array(24 * 1024);
+    for (const entry of deliveredA) delivered.set(entry.bytes, entry.position);
+    expect(delivered).toEqual(PAYLOAD.slice(0, 24 * 1024));
   });
 });

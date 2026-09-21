@@ -11,7 +11,7 @@
  */
 
 import type { AppMetadata } from '@siafoundation/sia-storage';
-import type { IndexGranularity, PlaybackMode, TrackSummary } from './media/types.ts';
+import type { IndexGranularity, PlaybackMode, TrackSummary } from './media/legacy-types.ts';
 
 /** Wire protocol version; 0 is the initial, unreleased protocol. */
 export const PROTOCOL_VERSION = 0;

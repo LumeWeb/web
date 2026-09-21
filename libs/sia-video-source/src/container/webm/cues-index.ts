@@ -26,7 +26,7 @@
  * hand, so the walk always sees every Cluster (Cues membership only upgrades
  * `rap` evidence; it is not required).
  */
-import { indexGranularity } from '../../media/types.ts';
+import { indexGranularity } from '../../media/legacy-types.ts';
 import type { IndexGranularity, RandomAccessIndex, RangeRead } from '../index/random-access-index.ts';
 import { ebmlWalkMode } from './ebml-reader.ts';
 import { probeWebm } from './webm-probe.ts';

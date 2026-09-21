@@ -87,7 +87,66 @@ describe('RangedReader', () => {
     expect(reader.active).toBe(false);
   });
 
-  it('a cancelled run does not clobber its replacement’s reader (epoch guard)', async () => {
+  it('fetches one exact range with a single SDK download', async () => {
+    const requests: { length: number; offset: number }[] = [];
+    const delivered: Delivered[] = [];
+    const reader = new RangedReader({
+      chunkSize: CHUNK_SIZE,
+      object: fakeObject(PAYLOAD.length),
+      onChunk: (bytes, position) => delivered.push({ bytes, position }),
+      sdk: {
+        download: (object, options) => {
+          requests.push({ length: options?.length ?? PAYLOAD.length, offset: options?.offset ?? 0 });
+          return fakeSdk(PAYLOAD).download(object, options);
+        },
+      },
+    });
+
+    // A far-seek-like range longer than one chunk.
+    reader.start(16 * 1024, 24 * 1024);
+    await settle();
+
+    // Exactly one download spans the whole requested range with exact
+    // offset/length — never tiled into multiple SDK requests.
+    expect(requests).toEqual([{ length: 24 * 1024, offset: 16 * 1024 }]);
+    expect(reader.position).toBe(40 * 1024);
+    expect(reader.active).toBe(false);
+
+    const out = new Uint8Array(24 * 1024);
+    for (const entry of delivered) out.set(entry.bytes, entry.position - 16 * 1024);
+    expect(out).toEqual(PAYLOAD.slice(16 * 1024, 40 * 1024));
+  });
+
+  it('rejects a short read that ends before the requested range is delivered', async () => {
+    const errors: unknown[] = [];
+    const reader = new RangedReader({
+      chunkSize: CHUNK_SIZE,
+      object: fakeObject(PAYLOAD.length),
+      onChunk: () => {
+        /* partial delivery is expected before the short read surfaces */
+      },
+      onError: (error) => errors.push(error),
+      sdk: {
+        download: () =>
+          new ReadableStream<Uint8Array>({
+            start(controller) {
+              controller.enqueue(PAYLOAD.slice(0, 512));
+              controller.close();
+            },
+          }),
+      },
+    });
+
+    reader.start(0, PAYLOAD.length);
+    await settle();
+    await settle();
+
+    expect(errors).toHaveLength(1);
+    expect((errors[0] as Error).message).toMatch(/before the requested range/);
+    expect(reader.active).toBe(false);
+  });
+
+  it('a cancelled run does not clobber its replacement’s reader (load-generation guard)', async () => {
     const delivered: Delivered[] = [];
     const reader = newReader(PAYLOAD, delivered);
     reader.start(0);

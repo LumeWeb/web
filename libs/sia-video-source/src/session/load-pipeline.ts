@@ -32,7 +32,7 @@ import {
   ProducerFactoryRegistry,
   type ProducerSelection,
 } from '../container/producer/producer-factory.ts';
-import { type CodecDescriptor, containerKind, type RandomAccessIndex, type SourceCapabilities } from '../media/types.ts';
+import { type CodecDescriptor, containerKind, type RandomAccessIndex, type SourceCapabilities } from '../media/legacy-types.ts';
 import { mp4CodecsFromInit } from '../mp4-codecs.ts';
 import type { ByteSource } from '../transport/byte-source.ts';
 import {

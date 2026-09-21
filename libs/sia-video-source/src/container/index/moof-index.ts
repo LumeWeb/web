@@ -26,7 +26,7 @@
  * tries sidx first, so the walker only ever backs the sidx-less case.
  */
 import type { IndexGranularity, RandomAccessIndex, RangeRead } from './random-access-index.ts';
-import { indexGranularity } from '../../media/types.ts';
+import { indexGranularity } from '../../media/legacy-types.ts';
 import type { ByteSource } from '../../transport/byte-source.ts';
 
 /** A parsed ISO-BMFF box with absolute byte extents. */
@@ -394,7 +394,7 @@ function parseTrak(bytes: Uint8Array, trak: Box): null | TrackInfo {
 /** Reads `[offset, offset + length)` as one bounded buffer (short at EOF). */
 async function readBoundedRange(source: ByteSource, offset: number, length: number): Promise<null | Uint8Array> {
   if (length <= 0) return null;
-  const reader = source.read({ length, offset }, { epoch: 0 }).getReader();
+  const reader = source.read({ length, offset }, { loadGeneration: 0 }).getReader();
   const chunks: Uint8Array[] = [];
   let total = 0;
   try {

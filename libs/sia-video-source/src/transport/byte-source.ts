@@ -1,11 +1,11 @@
 /**
  * Generic ranged-byte transport contract.
  *
- * `container/*` remux/index code must consume generic bytes through
- * `ByteSource`, never the Sia SDK or `RangedReader` directly. This file
- * carries the interface plus the small epoch/read-lifecycle bookkeeping shared
- * by the concrete in-memory and Sia sources, so their supersede/cancel
- * semantics never diverge.
+ * Consumers — the media library and any other layer that reads an object's
+ * bytes — must read through `ByteSource`, never the Sia SDK or `RangedReader`
+ * directly. This file carries the interface plus the small
+ * load-generation/read-lifecycle bookkeeping shared by the concrete in-memory
+ * and Sia sources, so their supersede/cancel semantics never diverge.
  */
 
 /** One explicit byte window to read from an object. */
@@ -20,14 +20,14 @@ export interface ByteRange {
  * Each `read()` returns a cancellable stream of exactly the requested bytes,
  * clamped at EOF (a short read, never garbage), that always settles — it
  * closes (fully delivered) or errors (superseded, cancelled, or transport
- * failure); it never hangs. Reads started under an epoch older than the
- * source's newest accepted epoch are superseded and error with
- * {@link ByteSourceSupersededError}; starting a newer epoch supersedes every
- * older in-flight read. `cancel()` aborts everything and forgets epoch state
- * (e.g. on a source change).
+ * failure); it never hangs. Reads started under a load generation older than
+ * the source's newest accepted one are superseded and error with
+ * {@link ByteSourceSupersededError}; a newer load generation supersedes every
+ * older in-flight read. `cancel()` aborts everything and forgets the
+ * generation state (e.g. on a source change).
  */
 export interface ByteSource {
-  /** Abort everything in flight and forget epoch state (e.g. source change). */
+  /** Abort everything in flight and forget the load-generation state (e.g. source change). */
   cancel(reason?: unknown): void;
   /** Cancellable, bounded, byte-exact ranged read. */
   read(range: ByteRange, options: ReadOptions): ReadableStream<Uint8Array>;
@@ -38,10 +38,11 @@ export interface ByteSource {
 /** Options for one ranged read. */
 export interface ReadOptions {
   /**
-   * Epoch guard: deliveries past a superseded epoch are dropped. A read under
-   * an epoch older than the source's newest accepted epoch is superseded.
+   * Load-generation guard: deliveries past a superseded generation are
+   * dropped. A read at a generation older than the source's newest accepted
+   * one is superseded.
    */
-  epoch: number;
+  loadGeneration: number;
   /** Optional external abort; aborts this read with the signal's reason. */
   signal?: AbortSignal;
   /**
@@ -49,13 +50,6 @@ export interface ReadOptions {
    * for this long. Sia-only; a memory source can never stall.
    */
   stallTimeoutMs?: number;
-  /**
-   * Max bytes per transport download window (SDK fan-out bound). The Sia
-   * source tiles the range with bounded sequential `Sdk.download` calls; the
-   * in-memory source has no transport windows and ignores it. Unset preserves
-   * the single-download behavior.
-   */
-  windowBytes?: number;
 }
 
 interface ReadHandle {
@@ -66,35 +60,44 @@ interface ReadHandle {
   stop(reason?: unknown): void;
 }
 
+/** Signals a read that was superseded by a newer load generation or by `cancel()`. */
+export class ByteSourceSupersededError extends Error {
+  readonly name = 'ByteSourceSupersededError';
+
+  constructor(reason?: unknown) {
+    super(describeSupersedeReason(reason));
+  }
+}
+
 /**
- * Epoch scoping + active-read cancellation shared by concrete byte sources.
- * Concrete sources call `open()`/`settle()` around each read and forward
- * `cancel()` to `reset()`.
+ * Load-generation scoping + active-read cancellation shared by concrete byte
+ * sources. Concrete sources call `open()`/`settle()` around each read and
+ * forward `cancel()` to `reset()`.
  */
-export class ByteSourceEpoch {
+export class LoadGenerationState {
   readonly #active = new Set<ReadHandle>();
-  #epoch = 0;
+  #loadGeneration = 0;
 
   /**
-   * Opens a read under `epoch`. Returns false when the read is already stale
-   * (an older epoch than the newest accepted) — the caller returns a dead
-   * stream and must not register any work. A newer epoch supersedes every
-   * older in-flight read first (they error).
+   * Opens a read under `loadGeneration`. Returns false when the read is
+   * already stale (an older generation than the newest accepted) — the caller
+   * returns a dead stream and must not register any work. A newer generation
+   * supersedes every older in-flight read first (they error).
    */
-  open(epoch: number, handle: ReadHandle): boolean {
-    if (epoch < this.#epoch) return false;
-    if (epoch > this.#epoch) {
-      this.#epoch = epoch;
+  open(loadGeneration: number, handle: ReadHandle): boolean {
+    if (loadGeneration < this.#loadGeneration) return false;
+    if (loadGeneration > this.#loadGeneration) {
+      this.#loadGeneration = loadGeneration;
       this.#supersede(undefined);
     }
     this.#active.add(handle);
     return true;
   }
 
-  /** Aborts everything in flight with `reason` and forgets epoch state. */
+  /** Aborts everything in flight with `reason` and forgets load-generation state. */
   reset(reason?: unknown): void {
     this.#supersede(reason);
-    this.#epoch = 0;
+    this.#loadGeneration = 0;
   }
 
   /** Removes a settled read; safe to call exactly once after `open()` returned true. */
@@ -105,15 +108,6 @@ export class ByteSourceEpoch {
   #supersede(reason?: unknown): void {
     for (const handle of this.#active) handle.stop(reason);
     this.#active.clear();
-  }
-}
-
-/** Signals a read that was superseded by a newer epoch or by `cancel()`. */
-export class ByteSourceSupersededError extends Error {
-  readonly name = 'ByteSourceSupersededError';
-
-  constructor(reason?: unknown) {
-    super(describeSupersedeReason(reason));
   }
 }
 

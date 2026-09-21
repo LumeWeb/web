@@ -7,7 +7,7 @@
  * failing after megabytes of ranged I/O.
  */
 
-import { containerKind, type ContainerKind } from './media/types.ts';
+import { containerKind, type ContainerKind } from './media/legacy-types.ts';
 
 export type { ContainerKind };
 

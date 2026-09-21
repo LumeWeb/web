@@ -91,7 +91,7 @@ export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = 
     // the undefined path keeps the coordinator's default single-download reads.
     byteSource:
       options.cache || options.windowBytes !== undefined
-        ? { cache: options.cache, windowBytes: options.windowBytes }
+        ? { cache: options.cache }
         : undefined,
     capabilities: options.capabilities,
     createSdk: options.createSdk ?? createDefaultSdk,

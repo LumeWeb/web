@@ -19,7 +19,7 @@
  */
 
 import { type FiniteVodIndex, parseFiniteVodIndex, segmentForTime, type VodSegment } from '../../finite-vod.ts';
-import { indexGranularity } from '../../media/types.ts';
+import { indexGranularity } from '../../media/legacy-types.ts';
 import type { IndexGranularity, RandomAccessIndex, RangeRead } from './random-access-index.ts';
 
 export class SidxIndex implements RandomAccessIndex {
