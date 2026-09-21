@@ -14,7 +14,7 @@
  * composition roots may instantiate SDK-specific objects).
  */
 
-import type { ProducerMode, SegmentKind } from '../../media/types.ts';
+import type { ProducerMode, SegmentKind } from '../../media/legacy-types.ts';
 
 /**
  * The byte→segment producer seam. All calls are synchronous and ordered; a

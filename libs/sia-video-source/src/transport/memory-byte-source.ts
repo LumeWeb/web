@@ -1,8 +1,8 @@
 /**
- * Deterministic in-memory {@link ByteSource} for parser/index/producer tests
- * that must run without the Sia SDK, using in-memory fixtures. It is also the
- * reference for the ByteSource supersede/cancel/EOF semantics the
- * `SiaByteSource` adapter shares.
+ * Deterministic in-memory {@link ByteSource} for tests that must run without
+ * the Sia SDK, using in-memory fixtures. It is also the reference for the
+ * ByteSource supersede/cancel/EOF semantics the `SiaByteSource` adapter
+ * shares.
  *
  * Delivery is scheduled on a microtask so a supersede or cancel issued
  * synchronously right after `read()` always wins — a read that is superseded
@@ -12,9 +12,9 @@
 import {
   type ByteRange,
   type ByteSource,
-  ByteSourceEpoch,
   ByteSourceSupersededError,
   emptyByteStream,
+  LoadGenerationState,
   type ReadOptions,
   supersededStream,
   toSupersededError,
@@ -26,18 +26,18 @@ export class MemoryByteSource implements ByteSource {
   }
 
   readonly #bytes: Uint8Array;
-  readonly #epochs = new ByteSourceEpoch();
+  readonly #generationState = new LoadGenerationState();
 
   constructor(bytes: ArrayBuffer | Uint8Array) {
     this.#bytes = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
   }
 
   cancel(reason?: unknown): void {
-    this.#epochs.reset(reason);
+    this.#generationState.reset(reason);
   }
 
   read(range: ByteRange, options: ReadOptions): ReadableStream<Uint8Array> {
-    const epoch = options.epoch;
+    const loadGeneration = options.loadGeneration;
     let superseded = false;
     let settled = false;
     let controllerRef: null | ReadableStreamDefaultController<Uint8Array> = null;
@@ -61,8 +61,8 @@ export class MemoryByteSource implements ByteSource {
       },
     };
 
-    if (!this.#epochs.open(epoch, handle)) {
-      return supersededStream(new ByteSourceSupersededError(`stale epoch ${epoch}`));
+    if (!this.#generationState.open(loadGeneration, handle)) {
+      return supersededStream(new ByteSourceSupersededError(`stale load generation ${loadGeneration}`));
     }
 
     const start = Math.max(0, Math.floor(range.offset));
@@ -70,7 +70,7 @@ export class MemoryByteSource implements ByteSource {
     const end = Math.min(this.#bytes.byteLength, start + want);
 
     if (end <= start) {
-      this.#epochs.settle(handle);
+      this.#generationState.settle(handle);
       return emptyByteStream();
     }
 
@@ -82,7 +82,7 @@ export class MemoryByteSource implements ByteSource {
       if (settled) return;
       settled = true;
       signal?.removeEventListener('abort', onAbort);
-      this.#epochs.settle(handle);
+      this.#generationState.settle(handle);
     };
 
     const source = this.#bytes;

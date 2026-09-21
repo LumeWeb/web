@@ -20,7 +20,7 @@
  * this module never imports mediabunny itself; the engine stays behind the
  * fragment seam so tests inject a fake for pure shell logic.
  */
-import { producerMode, type ProducerMode, segmentKind } from '../../media/types.ts';
+import { producerMode, type ProducerMode, segmentKind } from '../../media/legacy-types.ts';
 import { type FragmentedMp4Output, mediabunnyFragmentFromBytes } from '../engine/mediabunny-fragment.ts';
 import type { AppendableProducer, ProducedSegment } from './appendable-producer.ts';
 

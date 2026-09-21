@@ -1,19 +1,18 @@
 /**
- * TDD contract for the generic ranged-byte transport: `container/*` remux and
- * index code consumes generic bytes through `ByteSource`, never the Sia SDK or
- * `RangedReader` directly.
+ * Contract for the generic ranged-byte transport: consumers read generic
+ * bytes through `ByteSource`, never the Sia SDK or `RangedReader` directly.
  *
  * The same contract runs against both concrete sources:
  *
- * - `MemoryByteSource` — deterministic in-memory source for parser/producer
- *   tests that must not require the SDK;
+ * - `MemoryByteSource` — deterministic in-memory source for tests that must
+ *   not require the SDK;
  * - `SiaByteSource` — a thin adapter over the existing `RangedReader` +
  *   `LruChunkCache` + `ReadBudget` (whose internals are intentionally not
  *   rewritten here) so range concurrency, cache, and watchdog behavior stay
  *   unchanged.
  *
- * Covered behaviors: exact ranges, EOF, cancellation, stale epochs, short
- * reads, stalled reads, and sequential windows.
+ * Covered behaviors: exact ranges, EOF, cancellation, stale load generations,
+ * short reads, and stalled reads.
  */
 
 import { describe, expect, expectTypeOf, it } from 'vitest';
@@ -204,7 +203,7 @@ describe('ByteSource contract', () => {
 describe('MemoryByteSource', () => {
   it('delivers the exact requested range', async () => {
     const source = new MemoryByteSource(PAYLOAD);
-    const outcome = await readAll(source.read({ length: 4096, offset: 1024 }, { epoch: 1 }));
+    const outcome = await readAll(source.read({ length: 4096, offset: 1024 }, { loadGeneration: 1 }));
 
     expect(outcome.done).toBe(true);
     expect(outcome.error).toBeUndefined();
@@ -217,7 +216,7 @@ describe('MemoryByteSource', () => {
   });
 
   it('a zero-length range closes immediately with no bytes', async () => {
-    const outcome = await readAll(new MemoryByteSource(PAYLOAD).read({ length: 0, offset: 0 }, { epoch: 1 }));
+    const outcome = await readAll(new MemoryByteSource(PAYLOAD).read({ length: 0, offset: 0 }, { loadGeneration: 1 }));
 
     expect(outcome.chunks).toHaveLength(0);
     expect(outcome.done).toBe(true);
@@ -226,7 +225,7 @@ describe('MemoryByteSource', () => {
 
   it('clamps reads at EOF to a short read, never garbage', async () => {
     const source = new MemoryByteSource(PAYLOAD);
-    const outcome = await readAll(source.read({ length: 100, offset: PAYLOAD.length - 10 }, { epoch: 1 }));
+    const outcome = await readAll(source.read({ length: 100, offset: PAYLOAD.length - 10 }, { loadGeneration: 1 }));
 
     expect(outcome.done).toBe(true);
     expect(outcome.error).toBeUndefined();
@@ -235,8 +234,8 @@ describe('MemoryByteSource', () => {
 
   it('a read starting at or beyond EOF yields an empty stream', async () => {
     const source = new MemoryByteSource(PAYLOAD);
-    const atEof = await readAll(source.read({ length: 4, offset: PAYLOAD.length }, { epoch: 1 }));
-    const beyond = await readAll(source.read({ length: 4, offset: PAYLOAD.length + 16 }, { epoch: 1 }));
+    const atEof = await readAll(source.read({ length: 4, offset: PAYLOAD.length }, { loadGeneration: 1 }));
+    const beyond = await readAll(source.read({ length: 4, offset: PAYLOAD.length + 16 }, { loadGeneration: 1 }));
 
     expect(atEof.chunks).toHaveLength(0);
     expect(atEof.done).toBe(true);
@@ -247,24 +246,24 @@ describe('MemoryByteSource', () => {
   });
 
   it('clamps negative offsets to the start of the source', async () => {
-    const outcome = await readAll(new MemoryByteSource(PAYLOAD).read({ length: 16, offset: -128 }, { epoch: 1 }));
+    const outcome = await readAll(new MemoryByteSource(PAYLOAD).read({ length: 16, offset: -128 }, { loadGeneration: 1 }));
 
     expect(join(outcome.chunks)).toEqual(PAYLOAD.slice(0, 16));
   });
 
   it('delivers copies so callers cannot mutate the source', async () => {
     const source = new MemoryByteSource(PAYLOAD);
-    const outcome = await readAll(source.read({ length: 16, offset: 0 }, { epoch: 1 }));
+    const outcome = await readAll(source.read({ length: 16, offset: 0 }, { loadGeneration: 1 }));
     outcome.chunks[0][0] = 0xff;
 
-    const again = await readAll(source.read({ length: 16, offset: 0 }, { epoch: 2 }));
+    const again = await readAll(source.read({ length: 16, offset: 0 }, { loadGeneration: 2 }));
     expect(join(again.chunks)).toEqual(PAYLOAD.slice(0, 16));
   });
 
-  it('drops stale-epoch reads with ByteSourceSupersededError and no bytes', async () => {
+  it('drops stale-load-generation reads with ByteSourceSupersededError and no bytes', async () => {
     const source = new MemoryByteSource(PAYLOAD);
-    const stale = source.read({ length: 16, offset: 0 }, { epoch: 1 });
-    const current = source.read({ length: 16, offset: 16 }, { epoch: 2 });
+    const stale = source.read({ length: 16, offset: 0 }, { loadGeneration: 1 });
+    const current = source.read({ length: 16, offset: 16 }, { loadGeneration: 2 });
 
     const staleOutcome = await readAll(stale);
     expect(staleOutcome.chunks).toHaveLength(0);
@@ -275,19 +274,19 @@ describe('MemoryByteSource', () => {
     expect(join(currentOutcome.chunks)).toEqual(PAYLOAD.slice(16, 32));
   });
 
-  it('drops an already-stale-epoch read immediately', async () => {
+  it('drops an already-stale-load-generation read immediately', async () => {
     const source = new MemoryByteSource(PAYLOAD);
-    void source.read({ length: 16, offset: 0 }, { epoch: 5 });
-    const stale = await readAll(source.read({ length: 16, offset: 0 }, { epoch: 2 }));
+    void source.read({ length: 16, offset: 0 }, { loadGeneration: 5 });
+    const stale = await readAll(source.read({ length: 16, offset: 0 }, { loadGeneration: 2 }));
 
     expect(stale.chunks).toHaveLength(0);
     expect(stale.error).toBeInstanceOf(ByteSourceSupersededError);
   });
 
-  it('never delivers bytes from a read superseded by a newer epoch', async () => {
+  it('never delivers bytes from a read superseded by a newer load generation', async () => {
     const source = new MemoryByteSource(PAYLOAD);
-    const older = source.read({ length: PAYLOAD.length, offset: 0 }, { epoch: 1 });
-    const newer = source.read({ length: 16, offset: 32 }, { epoch: 2 });
+    const older = source.read({ length: PAYLOAD.length, offset: 0 }, { loadGeneration: 1 });
+    const newer = source.read({ length: 16, offset: 32 }, { loadGeneration: 2 });
 
     const olderOutcome = await readAll(older);
     expect(olderOutcome.chunks).toHaveLength(0);
@@ -300,14 +299,14 @@ describe('MemoryByteSource', () => {
 
   it('cancel(reason) supersedes in-flight reads and the source stays reusable', async () => {
     const source = new MemoryByteSource(PAYLOAD);
-    const inFlight = source.read({ length: 16, offset: 0 }, { epoch: 1 });
+    const inFlight = source.read({ length: 16, offset: 0 }, { loadGeneration: 1 });
     source.cancel('source exchanged');
 
     const cancelledOutcome = await readAll(inFlight);
     expect(cancelledOutcome.chunks).toHaveLength(0);
     expect(cancelledOutcome.error).toBeInstanceOf(ByteSourceSupersededError);
 
-    const next = await readAll(source.read({ length: 16, offset: 0 }, { epoch: 9 }));
+    const next = await readAll(source.read({ length: 16, offset: 0 }, { loadGeneration: 9 }));
     expect(next.error).toBeUndefined();
     expect(join(next.chunks)).toEqual(PAYLOAD.slice(0, 16));
   });
@@ -316,7 +315,7 @@ describe('MemoryByteSource', () => {
     const controller = new AbortController();
     const pending = new MemoryByteSource(PAYLOAD).read(
       { length: 16, offset: 0 },
-      { epoch: 1, signal: controller.signal },
+      { loadGeneration: 1, signal: controller.signal },
     );
     controller.abort();
 
@@ -324,20 +323,12 @@ describe('MemoryByteSource', () => {
     expect(outcome.chunks).toHaveLength(0);
     expect((outcome.error as { name?: string }).name).toBe('AbortError');
   });
-
-  it('ignores windowBytes for in-memory delivery (no transport windows)', async () => {
-    const outcome = await readAll(
-      new MemoryByteSource(PAYLOAD).read({ length: 4096, offset: 0 }, { epoch: 1, windowBytes: 512 }),
-    );
-
-    expect(join(outcome.chunks)).toEqual(PAYLOAD.slice(0, 4096));
-  });
 });
 
 describe('SiaByteSource', () => {
   it('delivers the exact requested range through the Sia transport', async () => {
     const source = newSiaSource(PAYLOAD, fakeSdk(PAYLOAD));
-    const outcome = await readAll(source.read({ length: 4096, offset: 1024 }, { epoch: 1 }));
+    const outcome = await readAll(source.read({ length: 4096, offset: 1024 }, { loadGeneration: 1 }));
 
     expect(outcome.done).toBe(true);
     expect(outcome.error).toBeUndefined();
@@ -350,7 +341,7 @@ describe('SiaByteSource', () => {
 
   it('clamps reads at EOF to a short read', async () => {
     const source = newSiaSource(PAYLOAD, fakeSdk(PAYLOAD));
-    const outcome = await readAll(source.read({ length: 100, offset: PAYLOAD.length - 10 }, { epoch: 1 }));
+    const outcome = await readAll(source.read({ length: 100, offset: PAYLOAD.length - 10 }, { loadGeneration: 1 }));
 
     expect(outcome.done).toBe(true);
     expect(outcome.error).toBeUndefined();
@@ -360,32 +351,47 @@ describe('SiaByteSource', () => {
   it('a read starting beyond EOF is empty and opens no SDK download', async () => {
     const recording = recordingSdk(PAYLOAD);
     const source = newSiaSource(PAYLOAD, recording.sdk);
-    const outcome = await readAll(source.read({ length: 8, offset: PAYLOAD.length }, { epoch: 1 }));
+    const outcome = await readAll(source.read({ length: 8, offset: PAYLOAD.length }, { loadGeneration: 1 }));
 
     expect(outcome.chunks).toHaveLength(0);
     expect(outcome.error).toBeUndefined();
     expect(recording.requests).toHaveLength(0);
   });
 
-  it('fans a large read out into bounded sequential SDK windows that tile the exact range', async () => {
+  it('serves one source range with a single SDK request of exact offset/length', async () => {
     const recording = recordingSdk(PAYLOAD);
-    const windowBytes = 8 * 1024;
     const source = newSiaSource(PAYLOAD, recording.sdk);
     const outcome = await readAll(
-      source.read({ length: PAYLOAD.length, offset: 0 }, { epoch: 1, windowBytes }),
+      source.read({ length: 24 * 1024, offset: 16 * 1024 }, { loadGeneration: 1 }),
     );
 
     expect(outcome.error).toBeUndefined();
-    expect(join(outcome.chunks)).toEqual(PAYLOAD);
+    expect(join(outcome.chunks)).toEqual(PAYLOAD.slice(16 * 1024, 16 * 1024 + 24 * 1024));
+    expect(recording.requests).toEqual([{ length: 24 * 1024, offset: 16 * 1024 }]);
+  });
 
-    const expected: { length: number; offset: number; }[] = [];
-    for (let offset = 0; offset < PAYLOAD.length; offset += windowBytes) {
-      expected.push({ length: Math.min(windowBytes, PAYLOAD.length - offset), offset });
-    }
-    expect(recording.requests).toEqual(expected);
-    for (const request of recording.requests) {
-      expect(request.length).toBeLessThanOrEqual(windowBytes);
-    }
+  it('aborts the underlying SDK stream when the read signal fires', async () => {
+    const releaseable = releaseableSdk(PAYLOAD);
+    const controller = new AbortController();
+    const source = newSiaSource(PAYLOAD, releaseable.sdk);
+    const reader = source
+      .read({ length: 16 * 1024, offset: 0 }, { loadGeneration: 1, signal: controller.signal })
+      .getReader();
+
+    await settle();
+    expect(releaseable.requests).toHaveLength(1);
+
+    controller.abort();
+    await settle();
+
+    const error = await reader.read().then(
+      () => undefined,
+      (err: unknown) => err,
+    );
+    expect((error as { name?: string }).name).toBe('AbortError');
+
+    // Aborting the byte source read cancelled the SDK stream it had opened.
+    expect(releaseable.cancelled).toContain(0);
   });
 
   it('errors a stalled read within the stall timeout instead of hanging', async () => {
@@ -393,7 +399,7 @@ describe('SiaByteSource', () => {
     const startedAt = Date.now();
 
     const outcome = await readAll(
-      source.read({ length: 1024, offset: 0 }, { epoch: 1, stallTimeoutMs: 20 }),
+      source.read({ length: 1024, offset: 0 }, { loadGeneration: 1, stallTimeoutMs: 20 }),
     );
 
     expect(outcome.chunks).toHaveLength(0);
@@ -401,11 +407,11 @@ describe('SiaByteSource', () => {
     expect(Date.now() - startedAt).toBeLessThan(2000);
   });
 
-  it('never delivers bytes from an in-flight read superseded by a newer epoch', async () => {
+  it('never delivers bytes from an in-flight read superseded by a newer load generation', async () => {
     const releaseable = releaseableSdk(PAYLOAD);
     const source = newSiaSource(PAYLOAD, releaseable.sdk);
-    const older = source.read({ length: PAYLOAD.length, offset: 0 }, { epoch: 1 });
-    const newer = source.read({ length: 1024, offset: PAYLOAD.length / 2 }, { epoch: 2 });
+    const older = source.read({ length: PAYLOAD.length, offset: 0 }, { loadGeneration: 1 });
+    const newer = source.read({ length: 1024, offset: PAYLOAD.length / 2 }, { loadGeneration: 2 });
 
     const olderOutcomePromise = readAll(older);
     releaseable.releaseAll();
@@ -420,25 +426,25 @@ describe('SiaByteSource', () => {
     );
   });
 
-  it('drops an already-stale-epoch read immediately with no SDK download', async () => {
+  it('drops an already-stale-load-generation read immediately with no SDK download', async () => {
     const recording = recordingSdk(PAYLOAD);
     const source = newSiaSource(PAYLOAD, recording.sdk);
-    void source.read({ length: 16, offset: 0 }, { epoch: 5 });
-    const stale = await readAll(source.read({ length: 16, offset: 0 }, { epoch: 2 }));
+    void source.read({ length: 16, offset: 0 }, { loadGeneration: 5 });
+    const stale = await readAll(source.read({ length: 16, offset: 0 }, { loadGeneration: 2 }));
 
     expect(stale.chunks).toHaveLength(0);
     expect(stale.error).toBeInstanceOf(ByteSourceSupersededError);
-    // Only the epoch-5 read reached the transport; the stale read did not.
+    // Only the load-generation-5 read reached the transport; the stale read did not.
     expect(recording.requests).toHaveLength(1);
   });
 
   it('replays a previously downloaded range from the shared cache without re-downloading', async () => {
     const recording = recordingSdk(PAYLOAD);
     const source = newSiaSource(PAYLOAD, recording.sdk);
-    const first = await readAll(source.read({ length: 16 * 1024, offset: 0 }, { epoch: 1 }));
+    const first = await readAll(source.read({ length: 16 * 1024, offset: 0 }, { loadGeneration: 1 }));
     expect(first.error).toBeUndefined();
 
-    const second = await readAll(source.read({ length: 16 * 1024, offset: 0 }, { epoch: 2 }));
+    const second = await readAll(source.read({ length: 16 * 1024, offset: 0 }, { loadGeneration: 2 }));
     expect(second.error).toBeUndefined();
     expect(join(second.chunks)).toEqual(PAYLOAD.slice(0, 16 * 1024));
     expect(recording.requests).toHaveLength(1);
@@ -447,7 +453,7 @@ describe('SiaByteSource', () => {
   it('cancelling a returned stream aborts the underlying transport read', async () => {
     const releaseable = releaseableSdk(PAYLOAD);
     const source = newSiaSource(PAYLOAD, releaseable.sdk);
-    const stream = source.read({ length: PAYLOAD.length, offset: 0 }, { epoch: 1 });
+    const stream = source.read({ length: PAYLOAD.length, offset: 0 }, { loadGeneration: 1 });
     const reader = stream.getReader();
 
     await settle();

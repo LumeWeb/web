@@ -16,7 +16,7 @@
  * passthrough; the production surface is deliberately identical so the stream
  * controller and MSE sink never branch on container.
  */
-import { producerMode, type ProducerMode, segmentKind, type SegmentKind } from '../../media/types.ts';
+import { producerMode, type ProducerMode, segmentKind, type SegmentKind } from '../../media/legacy-types.ts';
 import type { AppendableProducer, ProducedSegment } from '../producer/appendable-producer.ts';
 
 export interface WebmNativeProducerOptions {

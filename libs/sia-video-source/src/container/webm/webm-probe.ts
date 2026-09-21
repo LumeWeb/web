@@ -19,7 +19,7 @@ import {
 } from './ebml.ts';
 import type { EbmlElement, EbmlWalkMode } from './ebml-reader.ts';
 import type { ByteSource } from '../../transport/byte-source.ts';
-import { containerKind } from '../../media/types.ts';
+import { containerKind } from '../../media/legacy-types.ts';
 import { ebmlWalkMode, findChild, findChildren, readEbmlElements, walkChildren } from './ebml-reader.ts';
 
 /** One parsed Cluster: absolute byte extents + timecode in seconds. */
@@ -254,7 +254,7 @@ function collectCueOffsets(
 /** Reads `[offset, offset + length)` as one bounded buffer (short at EOF). */
 async function readBoundedRange(source: ByteSource, offset: number, length: number): Promise<null | Uint8Array> {
   if (length <= 0) return null;
-  const reader = source.read({ length, offset }, { epoch: 0 }).getReader();
+  const reader = source.read({ length, offset }, { loadGeneration: 0 }).getReader();
   const chunks: Uint8Array[] = [];
   let total = 0;
   try {

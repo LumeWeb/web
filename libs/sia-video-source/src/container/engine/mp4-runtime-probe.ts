@@ -16,7 +16,7 @@
  *   discipline is preserved.
  */
 import { sniffContainer } from '../../container-probe.ts';
-import { type CodecDescriptor, containerKind, type ContainerKind } from '../../media/types.ts';
+import { type CodecDescriptor, containerKind, type ContainerKind } from '../../media/legacy-types.ts';
 import type { ByteSource } from '../../transport/byte-source.ts';
 import { analyzeMp4Head, type MediaTrack, type Mp4HeadParse } from './mediabunny-engine.ts';
 
@@ -123,7 +123,7 @@ async function readBoundedHead(
 ): Promise<Uint8Array> {
   if (signal?.aborted) throw headAbortError(signal);
 
-  const stream = source.read({ length: maxBytes, offset: 0 }, { epoch: 0, signal });
+  const stream = source.read({ length: maxBytes, offset: 0 }, { loadGeneration: 0, signal });
   const reader = stream.getReader();
   const chunks: Uint8Array[] = [];
   let total = 0;

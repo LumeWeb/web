@@ -24,7 +24,7 @@ import {
   type RandomAccessIndex,
   type SourceCapabilities,
   type TrackSummary,
-} from '../media/types.ts';
+} from '../media/legacy-types.ts';
 import type { SourceInfo, WorkerMode } from '../protocol.ts';
 
 /** Codec-id prefixes that unambiguously name an audio track. */

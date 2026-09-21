@@ -15,16 +15,16 @@ import type { Slab } from '@siafoundation/sia-storage';
 export interface RangedReaderOptions {
   /**
    * Shared bounded-dispatch permit (see {@link ReadBudget}). When set, the
-   * reader waits for a free permit before opening each SDK download, so every
-   * reader sharing a budget — the worker's probe reads and its indexed
-   * lookahead reads share one — is guaranteed never to exceed the budget's
-   * concurrency limit. Unset (the default) opens downloads without a cap.
+   * reader waits for a free permit before opening its SDK download, so every
+   * reader sharing a budget — the independent concurrent reads mediabunny can
+   * issue share one — is guaranteed never to exceed the budget's concurrency
+   * limit. Unset (the default) opens downloads without a cap.
    */
   budget?: ReadBudget;
   cache?: LruChunkCache;
   /** Max bytes per chunk handed to `onChunk`; larger stream chunks are split. */
   chunkSize?: number;
-  /** Forwarded to every `Sdk.download` call. */
+  /** Forwarded to the one `Sdk.download` call. */
   downloadOptions?: { maxBufferedChunks?: number };
   object: SiaObjectLike;
   /** Called with delivered bytes and their absolute byte offset in the object. */
@@ -41,19 +41,6 @@ export interface RangedReaderOptions {
    * watchdog, preserving the original no-timeout behavior.
    */
   stallTimeoutMs?: number;
-  /**
-   * Maximum bytes per SDK download. When set, the requested range is fetched
-   * as sequential bounded windows that tile it exactly — each a small
-   * `Sdk.download(object, { offset, length })` — instead of one download over
-   * the whole range. A far-seek range read fans out into one WebTransport
-   * session per slab/renter the range touches the moment `download()` is
-   * called, and Chromium caps pending sessions at ~64: a single wide read can
-   * exhaust that budget and stall, while bounded windows keep the per-download
-   * fan-out (and the read-ahead that `maxBufferedChunks` allows) small and let
-   * a stalled window be aborted and retried independently. Unset (the
-   * default) preserves the original single-download behavior.
-   */
-  windowBytes?: number;
 }
 
 /** Narrowest shape of the `onShardDownloaded` payload the SDK forwards. */
@@ -184,7 +171,9 @@ export class RangedReader {
     return objectSize(this.#options.object);
   }
   readonly #cache: LruChunkCache;
-  #epoch = 0;
+  // Per-run supersede counter; `start()`/`stop()` bump it so an abandoned run
+  // can never clobber the streams of the run that replaced it.
+  #loadGeneration = 0;
   readonly #options: RangedReaderOptions;
 
   #position = 0;
@@ -217,13 +206,13 @@ export class RangedReader {
     this.stop();
     this.#position = offset;
     this.#rangeEnd = length === undefined ? null : Math.max(offset, offset + length);
-    const epoch = ++this.#epoch;
-    void this.#run(epoch);
+    const loadGeneration = ++this.#loadGeneration;
+    void this.#run(loadGeneration);
   }
 
   /** Cancels the in-flight stream; the cache survives for later re-reads. */
   stop(): void {
-    this.#epoch++;
+    this.#loadGeneration++;
     const reader = this.#reader;
     const stream = this.#stream;
     this.#reader = null;
@@ -253,19 +242,20 @@ export class RangedReader {
    * hanging the caller forever. The watchdog always settles the awaited
    * promise — even for an already-superseded run — so the run unwinds and
    * releases its budget permit; whether an error is actually emitted is
-   * decided by `#run`'s epoch guard. The abort side effects are epoch-scoped:
-   * a late watchdog can never cancel a newer run's active streams.
+   * decided by `#run`'s load-generation guard. The abort side effects are
+   * load-generation-scoped: a late watchdog can never cancel a newer run's
+   * active streams.
    */
   #readWithStallWatchdog(
     reader: ReadableStreamDefaultReader<Uint8Array>,
-    epoch: number,
+    loadGeneration: number,
     timeoutMs: number | undefined,
   ): Promise<ReadableStreamReadResult<Uint8Array>> {
     if (timeoutMs === undefined) return reader.read();
 
     return new Promise<ReadableStreamReadResult<Uint8Array>>((resolve, reject) => {
       const timer = setTimeout(() => {
-        if (this.#epoch === epoch) {
+        if (this.#loadGeneration === loadGeneration) {
           this.#reader?.cancel().catch(() => { /* empty */ });
           this.#stream?.cancel().catch(() => { /* empty */ });
           this.#reader = null;
@@ -286,13 +276,13 @@ export class RangedReader {
     });
   }
 
-  async #run(epoch: number): Promise<void> {
-    const { budget, chunkSize, object, onComplete, onError, sdk, stallTimeoutMs, windowBytes } = this.#options;
+  async #run(loadGeneration: number): Promise<void> {
+    const { budget, chunkSize, object, onComplete, onError, sdk, stallTimeoutMs } = this.#options;
 
     try {
       // Replay contiguous cached windows before the network read; a listener
       // sees one seamless delivery either way.
-      while (this.#epoch === epoch) {
+      while (this.#loadGeneration === loadGeneration) {
         const cached = this.#cache.takeAt(this.#position);
         if (cached === undefined) break;
         const remaining = this.#rangeEnd === null ? cached.byteLength : this.#rangeEnd - this.#position;
@@ -303,125 +293,95 @@ export class RangedReader {
         if (delivered.byteLength < cached.byteLength) break;
       }
 
-      if (this.#epoch !== epoch) return;
+      if (this.#loadGeneration !== loadGeneration) return;
 
       const size = objectSize(object);
       const end = Math.min(this.#rangeEnd ?? size, size);
+      const start = Math.min(this.#position, size);
+      if (start >= end) {
+        onComplete?.();
+        return;
+      }
 
-      // Sequential bounded windows. With `windowBytes` set, the requested
-      // range is fetched as a series of small `Sdk.download` calls that tile
-      // it exactly instead of one wide download: a single far-seek range read
-      // would otherwise fan out over many renter/slab WebTransport sessions at
-      // once and exhaust Chromium's ~64 pending-session cap, while each small
-      // window bounds that fan-out and stalls/aborts independently. Unset (the
-      // default) preserves the original single-download behavior for the
-      // non-indexed (throughput) path.
-      while (this.#epoch === epoch) {
-        const start = Math.min(this.#position, size);
-        if (start >= end) {
-          onComplete?.();
-          return;
-        }
-        const windowEnd = windowBytes === undefined ? end : Math.min(end, start + windowBytes);
-        if (windowEnd <= start) {
-          onComplete?.();
-          return;
-        }
-
-        // A mitigation permit held from just before each window's SDK download
-        // until that window's read ends (delivered, aborted, or abandoned).
-        // Released exactly once in the window's `finally`, so a stale or
-        // stalled run can never leak its slot, and the next window cannot open
-        // its download (and its WebTransport sessions) until this one drained.
-        let release: (() => void) | undefined;
-        try {
-          // Hold the shared budget so a far-seek's lookahead — and any read
-          // that replaces a stalled one — can never open more SDK downloads at
-          // once than the budget allows; see {@link ReadBudget} for why that
-          // bounds the browser's pending WebTransport sessions.
-          if (budget) {
-            release = await budget.acquire();
-            // A seek/stop arrived while this run waited for its permit: abandon
-            // (the `finally` releases the just-acquired slot).
-            if (this.#epoch !== epoch) return;
-          }
-
-          const stream = sdk.download(object, {
-            length: windowEnd - start,
-            offset: start,
-            ...this.#options.downloadOptions,
-          });
-          this.#stream = stream;
-          const reader = stream.getReader();
-          this.#reader = reader;
-
-          while (this.#epoch === epoch && this.#position < windowEnd) {
-            const result = await this.#readWithStallWatchdog(reader, epoch, stallTimeoutMs);
-            if (this.#epoch !== epoch) break;
-            if (result.done) {
-              // Window reads must tile the requested range exactly: a bounded
-              // download that closes before the range end is data loss, not a
-              // clean stop, so surface it and let the caller's retry policy
-              // (the worker re-issues the segment on stall) recover rather than
-              // silently skipping bytes. The un-windowed path keeps its
-              // historical done-means-complete semantics.
-              if (windowBytes !== undefined && this.#position < end) {
-                throw new Error('Sia SDK read ended before the requested range was delivered');
-              }
-              onComplete?.();
-              return;
-            }
-            const remaining = windowEnd - this.#position;
-            const delivered = result.value.subarray(0, remaining);
-            this.#emitChunk(delivered, this.#position, chunkSize);
-            this.#position += delivered.byteLength;
-            if (delivered.byteLength < result.value.byteLength) {
-              // The window filled exactly while the stream's chunk overshot it;
-              // the overflow belongs to the next window, which re-downloads it.
-              // (Unreachable when `windowBytes` is undefined, since then
-              // `windowEnd === end` and the loop also ends by position.)
-              break;
-            }
-          }
-        } finally {
-          if (release) release();
-          // A cancelled run can settle after its replacement already assigned
-          // fresh `#reader`/`#stream` references — only the current epoch may
-          // clear them, or the replacement's reader would be orphaned and
-          // later seeks would find no active reader.
-          if (this.#epoch === epoch) {
-            this.#reader = null;
-            this.#stream = null;
-          }
+      // A mitigation permit held from just before the SDK download until that
+      // read ends (delivered, aborted, or abandoned). Released exactly once in
+      // the `finally`, so a stale or stalled run can never leak its slot.
+      let release: (() => void) | undefined;
+      try {
+        // Hold the shared budget so concurrent library reads — mediabunny can
+        // issue independent overlapping reads — can never open more SDK
+        // downloads at once than the budget allows; see {@link ReadBudget}.
+        if (budget) {
+          release = await budget.acquire();
+          // A seek/stop arrived while this run waited for its permit: abandon
+          // (the `finally` releases the just-acquired slot).
+          if (this.#loadGeneration !== loadGeneration) return;
         }
 
-        // A seek/stop abandoned this run mid-window: the replacement owns
-        // delivery from here; never start another window under the stale epoch.
-        if (this.#epoch !== epoch) return;
+        // One SDK download serves the whole remaining [start, end) range with
+        // exact offset/length; the reader never tiles a read across requests.
+        const stream = sdk.download(object, {
+          length: end - start,
+          offset: start,
+          ...this.#options.downloadOptions,
+        });
+        this.#stream = stream;
+        const reader = stream.getReader();
+        this.#reader = reader;
+
+        while (this.#loadGeneration === loadGeneration && this.#position < end) {
+          const result = await this.#readWithStallWatchdog(reader, loadGeneration, stallTimeoutMs);
+          if (this.#loadGeneration !== loadGeneration) break;
+          if (result.done) {
+            // A download that closes before the range end is data loss, not a
+            // clean stop: exact range reads must deliver every requested byte,
+            // so surface the short read and let the caller's retry policy
+            // recover rather than silently skipping bytes.
+            throw new Error('Sia SDK read ended before the requested range was delivered');
+          }
+          const remaining = end - this.#position;
+          const delivered = result.value.subarray(0, remaining);
+          this.#emitChunk(delivered, this.#position, chunkSize);
+          this.#position += delivered.byteLength;
+          if (delivered.byteLength < result.value.byteLength) break;
+        }
+
+        if (this.#loadGeneration === loadGeneration) onComplete?.();
+      } finally {
+        if (release) release();
+        // A cancelled run can settle after its replacement already assigned
+        // fresh `#reader`/`#stream` references — only the current load generation may
+        // clear them, or the replacement's reader would be orphaned and later
+        // seeks would find no active reader.
+        if (this.#loadGeneration === loadGeneration) {
+          this.#reader = null;
+          this.#stream = null;
+        }
       }
     } catch (error) {
-      if (this.#epoch === epoch) onError?.(error);
+      if (this.#loadGeneration === loadGeneration) onError?.(error);
     }
   }
 }
 
 /**
  * Bounded dispatcher for SDK reads. A shared budget caps how many
- * `Sdk.download()` streams may be open at once across every reader that
- * shares it, so a far seek's indexed lookahead can never burst more downloads
- * than the budget allows.
+ * `Sdk.download()` streams may be open at once across every reader that shares
+ * it. It never splits a range: each concurrent read acquires one permit and
+ * keeps its own exact offset/length.
  *
  * The underlying Sia SDK opens one or more WebTransport sessions the moment
  * `download()` is called (one per slab/renter touched by the requested range,
  * bounded only by the download's `maxBufferedChunks`) and holds them until the
  * returned stream is read to EOF or cancelled. Chromium caps *pending*
- * sessions at 64: a wide-range download after a far seek exhausts that budget
- * and later reads stall forever with `Too many pending WebTransport sessions
- * (64)`. This permit serializes stream creation so the SDK never holds more than
- * `limit` downloads' worth of sessions at once, and `RangedReader`'s stall
- * watchdog aborts (and releases) a permit when a read never delivers. The SDK
- * exposes no timeout or concurrency option itself, which is why the dispatch
- * limiter lives here, around the SDK.
+ * sessions at 64: too many simultaneous downloads — as when mediabunny issues
+ * an overlapping batch of independent reads — exhaust that budget and later
+ * reads stall forever with `Too many pending WebTransport sessions (64)`. This
+ * permit serializes stream creation so the SDK never holds more than `limit`
+ * downloads' worth of sessions at once, and `RangedReader`'s stall watchdog
+ * aborts (and releases) a permit when a read never delivers. The SDK exposes
+ * no timeout or concurrency option itself, which is why the dispatch limiter
+ * lives here, around the SDK.
  */
 export class ReadBudget {
   /** Number of permits currently held by active reads. */

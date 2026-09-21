@@ -13,7 +13,7 @@
  * default mapping (`passthrough`, `ts-to-fmp4`) unchanged for existing
  * fMP4/TS loads.
  */
-import { containerKind, producerMode } from '../../media/types.ts';
+import { containerKind, producerMode } from '../../media/legacy-types.ts';
 import { fmp4MimeForCodecs, type ProducerContext, producerId, type ProducerRejection, type ProducerSelection, type ProducerStrategy, producerVerdict } from './producer-factory.ts';
 import { ProgressiveMp4Producer } from './progressive-mp4-producer.ts';
 

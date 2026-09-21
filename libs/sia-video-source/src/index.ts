@@ -94,7 +94,7 @@ export {
   type SegmentMeta,
   type SourceCapabilities,
   type TrackSummary,
-} from './media/types.ts';
+} from './media/legacy-types.ts';
 export {
   type AppKeyEnvelope,
   type BufferWindow,
@@ -179,7 +179,6 @@ export {
 export {
   type ByteRange,
   type ByteSource,
-  ByteSourceEpoch,
   ByteSourceSupersededError,
   emptyByteStream,
   type ReadOptions,

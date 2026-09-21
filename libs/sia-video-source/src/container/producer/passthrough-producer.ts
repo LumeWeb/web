@@ -8,7 +8,7 @@
  * load never re-delivers init because the SourceBuffer keeps the
  * initialization from the load's first window.
  */
-import { producerMode, type ProducerMode, segmentKind, type SegmentKind } from '../../media/types.ts';
+import { producerMode, type ProducerMode, segmentKind, type SegmentKind } from '../../media/legacy-types.ts';
 import { DEFAULT_FMP4_MIME } from '../../protocol.ts';
 import type { AppendableProducer, ProducedSegment } from './appendable-producer.ts';
 

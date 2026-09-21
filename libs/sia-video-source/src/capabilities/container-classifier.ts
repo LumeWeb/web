@@ -13,7 +13,7 @@
 
 import { sniffContainer } from '../container-probe.ts';
 import { type ContainerProfile, indexSourceKind, producerFamily, type ProducerFamily } from '../container/index/random-access-index.ts';
-import { containerKind, type ContainerKind, producerMode } from '../media/types.ts';
+import { containerKind, type ContainerKind, producerMode } from '../media/legacy-types.ts';
 
 /**
  * Injectable classification seam: unit tests override the verdict without

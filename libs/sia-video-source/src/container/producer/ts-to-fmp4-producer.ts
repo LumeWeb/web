@@ -9,7 +9,7 @@
  * builds a fresh transmuxer that re-emits init.
  */
 import muxJs from 'mux.js';
-import { producerMode, type ProducerMode, segmentKind } from '../../media/types.ts';
+import { producerMode, type ProducerMode, segmentKind } from '../../media/legacy-types.ts';
 import { DEFAULT_FMP4_MIME } from '../../protocol.ts';
 import type { AppendableProducer, ProducedSegment } from './appendable-producer.ts';
 

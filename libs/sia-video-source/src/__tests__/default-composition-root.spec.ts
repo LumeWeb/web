@@ -401,7 +401,7 @@ describe('createDefaultWorkerComposition lazy SDK transport (node)', () => {
   });
 });
 
-describe('createDefaultWorkerComposition byte source windowing (node)', () => {
+describe('createDefaultWorkerComposition byte source (node)', () => {
   /** SDK whose downloads are recorded as (offset, length) pairs. */
   function recordingSdk(payload: Uint8Array, requests: { length: number; offset: number; }[]): SiaByteSourceSdk {
     const base = fakeSiaSdk(payload).sdk;
@@ -414,35 +414,14 @@ describe('createDefaultWorkerComposition byte source windowing (node)', () => {
     };
   }
 
-  async function loadWithWindows(root: ReturnType<typeof createDefaultWorkerComposition>, requestId = 3): Promise<void> {
+  async function load(root: ReturnType<typeof createDefaultWorkerComposition>, requestId = 3): Promise<void> {
     await root.handleMessage({ config: { ...WORKER_CONFIG, workerMse: 'auto' }, requestId: 1, type: 'HELLO' });
     await root.handleMessage({ requestId: 2, type: 'ATTACH' });
     await root.handleMessage({ preload: 'auto', requestId, src: 'pin-key', type: 'SOURCE' });
     await flush();
   }
 
-  it.skipIf(!IN_NODE)('threads windowBytes into the byte source so every SDK download stays within the window', async () => {
-    const payload = boundedIndexedFmp4Payload();
-    const requests: { length: number; offset: number; }[] = [];
-    const messages: WorkerToMainMessage[] = [];
-    const root = createDefaultWorkerComposition({
-      capabilities: permissiveCapabilities(),
-      createSdk: () => Promise.resolve(recordingSdk(payload, requests)),
-      post: (message) => messages.push(message),
-      supportsWorkerMse: () => false,
-      windowBytes: 512,
-    });
-    await loadWithWindows(root);
-
-    // The head probe reads 4096 bytes in one request; a wired windowBytes tiles
-    // it into 512-byte windows, so no download may exceed the knob.
-    expect(requests.length).toBeGreaterThan(1);
-    for (const request of requests) {
-      expect(request.length).toBeLessThanOrEqual(512);
-    }
-  });
-
-  it.skipIf(!IN_NODE)('leaves the byte source unwindowed when windowBytes is unset (default path unchanged)', async () => {
+  it.skipIf(!IN_NODE)('keeps the byte source on the default single-download path when nothing is configured', async () => {
     const payload = boundedIndexedFmp4Payload();
     const requests: { length: number; offset: number; }[] = [];
     const messages: WorkerToMainMessage[] = [];
@@ -452,10 +431,10 @@ describe('createDefaultWorkerComposition byte source windowing (node)', () => {
       post: (message) => messages.push(message),
       supportsWorkerMse: () => false,
     });
-    await loadWithWindows(root);
+    await load(root);
 
-    // No knob: the 4096-byte head probe is fetched as one whole download,
-    // preserving the original single-download behavior.
+    // No cache or byte-source profile: the 4096-byte head probe is fetched as
+    // one whole download, preserving the original single-download behavior.
     expect(requests.some((r) => r.length === 4096)).toBe(true);
   });
 });
