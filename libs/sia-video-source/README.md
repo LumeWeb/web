@@ -175,11 +175,14 @@ React `getSharingKeySeed` prop). The seed is a read-only, expirable, revocable
 credential handed out by the account owner; the worker connects with
 `SharedSdk.connect(indexerUrl, seed)` and routes the share URL through
 `SharedSdk.object(objectKey)` — downloads are paid for by the key's owner.
-When **both** seeds are supplied, both SDKs are created and routing is by
-source kind: plain pinned object keys resolve through the app-key SDK, share
-URLs through the sharing-key SDK (an unregistered sharing key still fails
-loudly — share URLs never silently degrade). With only an app key, share URLs
-fall back to `Sdk.objectFromShareUrl` as before. The sharing seed travels
+When **both** seeds are supplied, routing is by source kind: plain pinned
+object keys resolve through the app-key SDK, share URLs through the
+sharing-key SDK (share URLs never silently degrade to app-key resolution).
+Neither SDK connects eagerly — each connects lazily on its route's first
+resolution, so a dual-seed app playing only one source kind pays no
+connection/WASM-object cost for the unused credential; an unregistered key
+surfaces on that route's first resolution instead of at connect time. With
+only an app key, share URLs fall back to `Sdk.objectFromShareUrl` as before. The sharing seed travels
 exactly like the app-key seed: one `APP_KEY` envelope tagged `keyType:
 'sharing'` (default `'app'` for the original handshake), never plaintext,
 never in `workerConfig`; each `HELLO` additionally carries `appSeed` /

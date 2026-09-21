@@ -123,17 +123,26 @@ the blast radius of a dropping provider effectively nil.
 `createDefaultSdk` builds the connection SDK by credential, and the byte-source
 seam stays source-agnostic (it only ever calls `object` / `objectFromShareUrl`):
 
-1. **Both seeds present** → create **both** SDKs and return a routing adapter
-   that resolves by source kind: a plain `src` object key → the app-key
-   `Sdk.object(key)` (the object is pinned under the app account), and a
-   share-URL `src` → `SharedSdk.object(parseSiaShareUrl(src).objectKey)` (the
-   object is attached to the sharing key; the sharing key decrypts and the
-   owner pays). `SharedSdk.connect` is attempted first, so an unregistered
-   sharing key throws exactly as it does on the sharing-only path — share URLs
-   never silently degrade to app-key resolution. Download routing follows the
-   resolver (each resolved object remembers which SDK it came from), and the
-   adapter's disposal releases **both** SDKs exactly once through one
-   release-once latch.
+1. **Both seeds present** → return a routing adapter that resolves by source
+   kind: a plain `src` object key → the app-key `Sdk.object(key)` (the object
+   is pinned under the app account), and a share-URL `src` →
+   `SharedSdk.object(parseSiaShareUrl(src).objectKey)` (the object is attached
+   to the sharing key; the sharing key decrypts and the owner pays). The two
+   SDKs connect **lazily, per route**: nothing connects at `createDefaultSdk`;
+   the app-key SDK connects on the first plain-object resolution and the
+   `SharedSdk` on the first share-URL resolution, each memoized (a failed
+   connect is not cached — a later resolution reattempts). A dual-seed app
+   playing only one source kind therefore pays zero connection/WASM-object
+   cost for the unused credential. Tradeoff vs. the single-credential paths
+   (which stay eager — with exactly one thing to validate, fail-fast is the
+   cheapest way to surface an unregistered key): the eager fast-fail on
+   createDefaultSdk disappears, so an unregistered key surfaces on its route's
+   first source resolution, which stream-controller's error reporting already
+   handles. Share URLs never silently degrade to app-key resolution. Download
+   routing follows the resolver (each resolved object remembers which SDK it
+   came from), and the adapter's disposal releases, exactly once through one
+   release-once latch, only the SDKs that actually connected (an untouched
+   route is never connected just to clean it up).
 2. **Sharing seed only** → `SharedSdk.connect(config.indexerUrl, hex(seed))`,
    wrapped in an adapter whose `objectFromShareUrl(fetchForm)` delegates to
    `SharedSdk.object(objectKey)` — id-based, never URL-based.
@@ -186,10 +195,11 @@ previous SDK.
   absent included), and the memoization gate for the SDK must compare both
   *values* (a stale sharing seed must never cache a newer connection, and a
   scrubbed slot must invalidate the memo so the next load rebuilds).
-- With both seeds present, two SDKs are held per connection; the routing
-  adapter releases both exactly once on dispose, and a config change that
-  flips credential modes rebuilds (and disposes) the previous SDK set — the
-  same cost the single-credential paths already pay.
+- With both seeds present, the per-route SDKs connect (and are held) only when
+  their source kind is actually used; the routing adapter releases exactly the
+  SDKs that connected, once, on dispose, and a config change that flips
+  credential modes rebuilds (and disposes) the previous SDK set — the same
+  cost the single-credential paths already pay.
 - The seed hand-off is duplicated: whatever a caller does to obtain the
   sharing seed (fetch from a key-exchange service, parse from email, etc.)
   inherits the ADR 0006 supplier discipline — supplier function, never stored

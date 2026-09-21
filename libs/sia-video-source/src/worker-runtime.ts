@@ -130,23 +130,22 @@ export async function createDefaultSdk(
 
   await initSia();
 
-  // Both credentials present (ADR 0006 app key + ADR 0008 sharing key): create
-  // BOTH SDKs and route by source kind — pinned object keys resolve through
-  // the app-key SDK, share URLs through the sharing-key SDK. The sharing SDK
-  // connects first so a failed sharing connection throws exactly as on the
-  // sharing-only path: share URLs must never silently degrade to app-key
-  // resolution when the sharing key is unregistered.
+  // Both credentials present (ADR 0006 app key + ADR 0008 sharing key): route
+  // by source kind — pinned object keys resolve through the app-key SDK, share
+  // URLs through the sharing-key SDK. NEITHER SDK connects eagerly: each
+  // connects on first use of its own route, so a dual-seed app playing only
+  // one source kind pays zero connection/WASM-object cost for the credential's
+  // SDK it never uses. The single-credential paths below stay eager — with
+  // exactly one thing to validate, fail-fast is the cheapest way to surface an
+  // unregistered key; when both are held we keep both, but never pay for the
+  // one we don't use. Tradeoff: an unregistered app/sharing key no longer
+  // fails at createDefaultSdk — it surfaces on the route's first source
+  // resolution, which stream-controller's error reporting already handles.
   if (hasSharing && hasAppKey) {
-    const sharedSdk = await connectSharedSdk(config, sharingSeed);
-    try {
-      return createDualSourceSdk(await connectAppKeySdk(config, appKeySeed), sharedSdk);
-    } catch (error) {
-      // The app-key SDK failed after the sharing SDK connected: release the
-      // sharing SDK so no orphaned native resources survive the failed
-      // connection, then surface the app-key registration error.
-      void Promise.resolve(sharedSdk.dispose?.());
-      throw error;
-    }
+    return createDualSourceSdk(
+      () => connectAppKeySdk(config, appKeySeed),
+      () => connectSharedSdk(config, sharingSeed),
+    );
   }
 
   // Keyless path (ADR 0008): a sharing-key seed grants read-only access to the
@@ -269,35 +268,108 @@ async function connectSharedSdk(config: WorkerConfig, sharingSeed: Uint8Array): 
 }
 
 /**
- * Routing adapter for a connection authenticated by BOTH credentials: resolve
- * each source kind through the credential that can read it — plain object keys
- * via the app-key SDK's `object(key)`, share URLs via the keyless SharedSdk's
- * `object(parseSiaShareUrl(url).objectKey)` (the shared key, not the app key,
- * decrypts and funds shared-object downloads). Downloads follow the resolver:
- * a WeakMap remembers which SDK produced each resolved object, so
- * `download(object, options)` reaches the right payer/decryption without the
- * caller tracking it (defaults to the app-key SDK for injected objects).
+ * Routing adapter for a connection authenticated by BOTH credentials, built
+ * LAZILY from two factories: neither underlying SDK is connected up front.
+ * Each source kind resolves through the credential that can read it — plain
+ * object keys via the app-key SDK's `object(key)`, share URLs via the keyless
+ * SharedSdk's `object(parseSiaShareUrl(url).objectKey)` (the shared key, not
+ * the app key, decrypts and funds shared-object downloads) — and each route
+ * connects its SDK on FIRST use. What stays intact vs. an eager dual connect:
+ * the per-route WeakMap (each resolved object remembers which SDK produced it,
+ * so `download` reaches the right payer/decryption without the caller tracking
+ * it; untagged objects default to the app-key SDK once a route has connected),
+ * the identical `SiaVideoSdk` surface, and the release-once dispose latch.
  *
- * Disposal mirrors `withDisposal`'s release-once latch: both `dispose` and
- * `[Symbol.dispose]` route through one shared latch that releases BOTH
- * underlying SDKs exactly once, no matter how a teardown path invokes it.
+ * Why lazy: a dual-seed app that plays only one source kind pays zero
+ * connection/WASM-object cost for the unused credential's SDK. Single-credential
+ * paths (sharing-only, app-key-only) deliberately stay eager in
+ * `createDefaultSdk` — with exactly one thing to validate, failing fast on the
+ * connection is the cheapest way to surface an unregistered key. That eager
+ * fast-fail is a documented tradeoff here: a bogus app/sharing key no longer
+ * fails at `createDefaultSdk`; it surfaces on the route's first source
+ * resolution, which stream-controller's error reporting already handles.
+ *
+ * Each route memoizes its in-flight CONNECTION (not just the resolved SDK), so
+ * concurrent first calls share one connect. FAILED CREATION IS NEVER CACHED: a
+ * rejection clears that route's memo so a later call reattempts — a retry must
+ * not inherit a dead promise.
+ *
+ * Disposal mirrors `withDisposal`'s release-once latch, but releases only the
+ * SDKs that actually exist. An in-flight first-use creation is awaited so its
+ * SDK is captured and released too; an untouched route is NEVER connected by
+ * dispose — cleaning up must not pay the very connection cost this design
+ * removes.
  */
-function createDualSourceSdk(appSdk: SiaVideoSdk, sharedSdk: SiaVideoSdk): SiaVideoSdk {
+function createDualSourceSdk(
+  connectAppKey: () => Promise<SiaVideoSdk>,
+  connectShared: () => Promise<SiaVideoSdk>,
+): SiaVideoSdk {
   const ownerOf = new WeakMap<object, SiaVideoSdk>();
+  // Resolved SDKs, captured as each route's connect settles. These are the
+  // only "real" SDKs dispose may touch; an untouched route has none.
+  let connectedAppKey: SiaVideoSdk | undefined;
+  let connectedShared: SiaVideoSdk | undefined;
+  // Each route's in-flight/connected connect promise, memoized so concurrent
+  // first uses share one connection. Cleared on rejection (never-cache-failed).
+  let appKeyPending: Promise<SiaVideoSdk> | undefined;
+  let sharedPending: Promise<SiaVideoSdk> | undefined;
   let released = false;
 
   const surface: SiaVideoSdk & { readonly [Symbol.dispose]: () => void } = {
-    dispose: (): void => {
-      release();
+    dispose: (): Promise<void> => {
+      return release();
     },
-    download: (object, options) => (ownerOf.get(object) ?? appSdk).download(object, options),
-    object: (key) => tagged(appSdk, appSdk.object(key)),
-    objectFromShareUrl: (shareUrl) => tagged(sharedSdk, sharedSdk.object(parseSiaShareUrl(shareUrl).objectKey)),
+    download: (object, options) => {
+      const owner = ownerOf.get(object);
+      if (owner) return owner.download(object, options);
+      // Untagged object (not resolved through this surface): default to the
+      // app-key SDK — the same fallback the eager dual adapter used. Lazily
+      // created means the fallback exists only once a route has connected;
+      // resolving a source before downloading always happens first in the
+      // byte-source flow, so a connected route is guaranteed by then.
+      return (connectedAppKey ?? connectedShared ?? throwUnresolvedObject()).download(object, options);
+    },
+    object: (key) => connectAppKeyRoute().then((sdk) => tagged(sdk, sdk.object(key))),
+    objectFromShareUrl: (shareUrl) =>
+      connectSharedRoute().then((sdk) => tagged(sdk, sdk.object(parseSiaShareUrl(shareUrl).objectKey))),
     [Symbol.dispose]: () => {
-      release();
+      void release();
     },
   };
   return surface;
+
+  function connectAppKeyRoute(): Promise<SiaVideoSdk> {
+    // `??=` memoizes the in-flight connect so concurrent first calls share one
+    // connection (the promise here is never nullish once created).
+    appKeyPending ??= connectAppKey().then(
+      (sdk) => {
+        connectedAppKey = sdk;
+        return sdk;
+      },
+      (error: unknown) => {
+        // Never cache a failed connect: clear the memo so a retry reattempts.
+        appKeyPending = undefined;
+        throw error;
+      },
+    );
+    return appKeyPending;
+  }
+
+  function connectSharedRoute(): Promise<SiaVideoSdk> {
+    // `??=` memoizes the in-flight connect so concurrent first calls share one
+    // connection (the promise here is never nullish once created).
+    sharedPending ??= connectShared().then(
+      (sdk) => {
+        connectedShared = sdk;
+        return sdk;
+      },
+      (error: unknown) => {
+        sharedPending = undefined;
+        throw error;
+      },
+    );
+    return sharedPending;
+  }
 
   function tagged(sdk: SiaVideoSdk, resolved: Promise<SiaObjectLike> | SiaObjectLike): Promise<SiaObjectLike> {
     // Promise.resolve keeps a synchronous object resolution (tests/fakes) and
@@ -308,11 +380,21 @@ function createDualSourceSdk(appSdk: SiaVideoSdk, sharedSdk: SiaVideoSdk): SiaVi
     });
   }
 
-  function release(): void {
-    if (released) return;
+  function throwUnresolvedObject(): never {
+    throw new Error('Cannot download an object this dual-source SDK did not resolve; resolve a source first.');
+  }
+
+  function release(): Promise<void> {
+    if (released) return Promise.resolve();
     released = true;
-    void Promise.resolve(appSdk.dispose?.());
-    void Promise.resolve(sharedSdk.dispose?.());
+    // Await any in-flight first-use creation so its connect settles and the
+    // SDK lands in `connectedAppKey`/`connectedShared` before release checks
+    // them, then release exactly the SDKs that exist. An untouched route is
+    // never connected here — dispose never connects just to release.
+    return Promise.allSettled([appKeyPending, sharedPending]).then(() => {
+      void Promise.resolve(connectedAppKey?.dispose?.());
+      void Promise.resolve(connectedShared?.dispose?.());
+    });
   }
 }
 

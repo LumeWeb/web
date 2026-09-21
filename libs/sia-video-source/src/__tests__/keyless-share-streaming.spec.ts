@@ -17,6 +17,10 @@
  *   with (indexerUrl, hex seed), share src routed through `SharedSdk.object`
  *   (by `objectKey`, not the URL); app-key seed alone → `Builder.connected`
  *   path with `objectFromShareUrl` untouched; neither → descriptive error.
+ *   With BOTH seeds the dual route is lazy per SDK — each credential connects
+ *   only on its route's first resolution (never eagerly at `createDefaultSdk`),
+ *   failed connects are retryable (never cached), and dispose releases only
+ *   the SDKs actually created.
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
@@ -256,28 +260,41 @@ describe('createDefaultSdk (worker SDK resolution)', () => {
     expect(mocks.appSdkObjectCalls).toEqual([]);
   });
 
-  it('routes pinned keys via the app SDK and share URLs via the SharedSdk when both seeds are present', async () => {
+  it('connects NEITHER SDK eagerly when both seeds are present — createDefaultSdk resolves with zero connects', async () => {
+    const sdk = await createDefaultSdk(WORKER_CONFIG, new Uint8Array(32).fill(0x51), new Uint8Array(32).fill(0x52));
+
+    // The dual path is now lazy per route: creating the surface connects no
+    // SDK at all. The app-key Builder/connected path and the SharedSdk connect
+    // are untouched until a source of that kind first resolves.
+    expect(mocks.sharedConnectCalls).toEqual([]);
+    expect(mocks.builderCtorCalls).toEqual([]);
+    expect(mocks.builderConnectedCalls).toEqual([]);
+    expect(mocks.appKeyCtorSeeds).toEqual([]);
+    void sdk;
+  });
+
+  it('routes pinned keys via the app SDK and share URLs via the SharedSdk, connecting each SDK on first route use', async () => {
     const appKeySeed = new Uint8Array(32).fill(0x51);
     const sharingSeed = new Uint8Array(32).fill(0x52);
     const sdk = await createDefaultSdk(WORKER_CONFIG, appKeySeed, sharingSeed);
 
-    // Both credential SDKs are created: SharedSdk.connect gets the indexer URL
-    // + hex sharing seed, and the app-key Builder/AppKey registration runs.
-    expect(mocks.sharedConnectCalls).toEqual([[WORKER_CONFIG.indexerUrl, bytesToHex(sharingSeed)]]);
-    expect(mocks.builderCtorCalls).toHaveLength(1);
-    expect(mocks.appKeyCtorSeeds).toHaveLength(1);
-
     // A plain pinned object key resolves through the APP-key SDK's object(),
     // never the sharing path (previously it fell through SharedSdk.object and
-    // failed for objects not attached to the sharing key).
+    // failed for objects not attached to the sharing key). This first use is
+    // what connects the app-key route.
     await sdk.object('pinned-key');
+    expect(mocks.builderCtorCalls).toHaveLength(1);
+    expect(mocks.appKeyCtorSeeds).toHaveLength(1);
     expect(mocks.appSdkObjectCalls).toEqual(['pinned-key']);
     expect(mocks.sharedObjectCalls).toEqual([]);
+    expect(mocks.sharedConnectCalls).toEqual([]);
 
-    // A share URL still resolves through the keyless SharedSdk, by objectKey.
+    // A share URL resolves through the keyless SharedSdk, by objectKey; this
+    // first use connects the sharing route with the indexer URL + hex seed.
     const src = shareSrc();
     const parsed = parseSiaShareUrl(src);
     await sdk.objectFromShareUrl?.(parsed.fetchForm);
+    expect(mocks.sharedConnectCalls).toEqual([[WORKER_CONFIG.indexerUrl, bytesToHex(sharingSeed)]]);
     expect(mocks.sharedObjectCalls).toEqual([parsed.objectKey]);
     expect(mocks.appSdkShareFormCalls).toEqual([]);
 
@@ -290,12 +307,98 @@ describe('createDefaultSdk (worker SDK resolution)', () => {
     expect(mocks.sharedFreeCalls).toBe(1);
   });
 
-  it('throws the sharing-key error when SharedSdk.connect fails even with an app key present', async () => {
+  it('connects the app-key SDK once on first pinned-object resolution and reuses it', async () => {
+    const sdk = await createDefaultSdk(WORKER_CONFIG, new Uint8Array(32).fill(0x51), new Uint8Array(32).fill(0x52));
+
+    await sdk.object('pinned-key');
+    await sdk.object('pinned-key-2');
+
+    // Exactly one Builder construction/connect for the whole app route; the
+    // sharing route was never touched.
+    expect(mocks.builderCtorCalls).toHaveLength(1);
+    expect(mocks.builderConnectedCalls).toHaveLength(1);
+    expect(mocks.appKeyCtorSeeds).toHaveLength(1);
+    expect(mocks.appSdkObjectCalls).toEqual(['pinned-key', 'pinned-key-2']);
+    expect(mocks.sharedConnectCalls).toEqual([]);
+    expect(mocks.sharedObjectCalls).toEqual([]);
+  });
+
+  it('connects the SharedSdk once on first share-URL resolution with (indexerUrl, hex seed) and reuses it', async () => {
+    const sharingSeed = new Uint8Array(32).fill(0x52);
+    const sdk = await createDefaultSdk(WORKER_CONFIG, new Uint8Array(32).fill(0x51), sharingSeed);
+    const src = shareSrc();
+    const parsed = parseSiaShareUrl(src);
+
+    await sdk.objectFromShareUrl?.(parsed.fetchForm);
+    await sdk.objectFromShareUrl?.(parsed.fetchForm);
+
+    // Exactly one SharedSdk.connect, on the first share-URL use, with the
+    // indexer URL + hex sharing seed; the app-key route was never touched.
+    expect(mocks.sharedConnectCalls).toEqual([[WORKER_CONFIG.indexerUrl, bytesToHex(sharingSeed)]]);
+    expect(mocks.sharedObjectCalls).toEqual([parsed.objectKey, parsed.objectKey]);
+    expect(mocks.builderCtorCalls).toEqual([]);
+    expect(mocks.appSdkObjectCalls).toEqual([]);
+  });
+
+  it('dispose releases only the SDKs actually created and never connects the untouched route', async () => {
+    const sdk = await createDefaultSdk(WORKER_CONFIG, new Uint8Array(32).fill(0x51), new Uint8Array(32).fill(0x52));
+
+    // Only the app-key route was used: dispose must release exactly that SDK,
+    // and must NOT pay a connection to "clean up" the unused sharing route.
+    await sdk.object('pinned-key');
+    await sdk.dispose?.();
+    expect(mocks.appFreeCalls).toBe(1);
+    expect(mocks.sharedFreeCalls).toBe(0);
+    expect(mocks.sharedConnectCalls).toEqual([]);
+
+    // Mirror case: using only the share route releases only the SharedSdk.
+    const sharingOnly = await createDefaultSdk(WORKER_CONFIG, new Uint8Array(32).fill(0x53), new Uint8Array(32).fill(0x54));
+    const src = shareSrc();
+    const parsed = parseSiaShareUrl(src);
+    await sharingOnly.objectFromShareUrl?.(parsed.fetchForm);
+    await sharingOnly.dispose?.();
+    expect(mocks.sharedFreeCalls).toBe(1);
+    expect(mocks.appFreeCalls).toBe(1);
+    expect(mocks.builderCtorCalls).toHaveLength(1); // only the first test's app route
+  });
+
+  it('does not cache a failed sharing connect — a second share-URL resolution reconnects', async () => {
+    mocks.sharedConnectResultOverride = null;
+    const sdk = await createDefaultSdk(WORKER_CONFIG, new Uint8Array(32).fill(0x51), new Uint8Array(32).fill(0x52));
+    const src = shareSrc();
+    const parsed = parseSiaShareUrl(src);
+
+    await expect(sdk.objectFromShareUrl?.(parsed.fetchForm)).rejects.toThrow(
+      'The Sia sharing key is not registered with the indexer.',
+    );
+    expect(mocks.sharedConnectCalls).toHaveLength(1);
+
+    // The failed connect was NOT cached: a retry reattempts SharedSdk.connect
+    // and succeeds once the indexer knows the key.
+    mocks.sharedConnectResultOverride = undefined;
+    const resolved = await sdk.objectFromShareUrl?.(parsed.fetchForm);
+    expect(resolved).toBeDefined();
+    expect(mocks.sharedConnectCalls).toHaveLength(2);
+  });
+
+  it('surfaces the sharing-key registration error on the first share-URL resolution when both seeds are present', async () => {
     // Force SharedSdk.connect to return null (indexer does not know the key).
     mocks.sharedConnectResultOverride = null;
-    await expect(
-      createDefaultSdk(WORKER_CONFIG, new Uint8Array(32).fill(0x61), new Uint8Array(32).fill(0x62)),
-    ).rejects.toThrow('The Sia sharing key is not registered with the indexer.');
+    const sdk = await createDefaultSdk(WORKER_CONFIG, new Uint8Array(32).fill(0x61), new Uint8Array(32).fill(0x62));
+
+    // Lazy creation resolved without connecting either SDK, so the
+    // unregistered-sharing-key failure surfaces on the route's first use
+    // rather than at createDefaultSdk (the documented eager fast-fail
+    // tradeoff; stream-controller error reporting handles first-resolution
+    // failures).
+    expect(mocks.sharedConnectCalls).toEqual([]);
+    expect(mocks.builderCtorCalls).toEqual([]);
+
+    const src = shareSrc();
+    const parsed = parseSiaShareUrl(src);
+    await expect(sdk.objectFromShareUrl?.(parsed.fetchForm)).rejects.toThrow(
+      'The Sia sharing key is not registered with the indexer.',
+    );
     // Share URLs must never silently degrade to app-key resolution: the
     // app-key Builder path is not reached when the sharing connect fails.
     expect(mocks.builderCtorCalls).toEqual([]);
