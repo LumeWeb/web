@@ -284,6 +284,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#src = value;
 
     this.#resetLoadState();
+    // A different source is now armed and has not been played yet: its own
+    // decode/seek recovery must stay paused until the user actually plays it,
+    // no matter which earlier sources the host played.
+    this.#userPlayIntent = false;
 
     if (!value) return;
 
@@ -419,15 +423,18 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
   #src = '';
 
-  // Host-lifetime playback intent, kept apart from the per-load `#playRequested`
-  // so it survives load resets: decode-error recovery and external-seek
-  // restarts must know the user was watching BEFORE the pipeline was torn
-  // down, even if the engine's teardown fires an incidental native `pause`/
-  // `ended` that would otherwise erase the intent. Cleared only by a deliberate
-  // pause that happens outside an engine-initiated recovery window — the
-  // recovery must never resume playback a genuinely-stopped user never asked
-  // for twice over.
-  #wasPlaying = false;
+  // Playback intent scoped to the armed source, kept apart from the per-load
+  // `#playRequested` so it survives a recovery reload: decode-error recovery
+  // and external-seek restarts must know the user was watching the CURRENT
+  // source before the pipeline was torn down, even if the engine's teardown
+  // fires an incidental native `pause`/`ended` that would otherwise erase the
+  // intent. `#resetLoadState` therefore leaves it untouched — recovery reloads
+  // and ATTACH_OK replays both route through that reset without re-arming the
+  // source, so the intent they are repairing carries over. It is cleared only
+  // when a DIFFERENT source is armed (`src`), the current one is re-armed
+  // (`load()`), or a deliberate pause supersedes it: a fresh source the user
+  // never played must not auto-play when its own recovery runs.
+  #userPlayIntent = false;
 
   #worker: null | Worker = null;
 
@@ -546,6 +553,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   override load(): void {
     if (this.#src && this.#worker) {
       this.#resetLoadState();
+      // An explicit re-load restarts play intent like a fresh `src`: the
+      // rebuilt pipeline begins paused and only streams once the user plays.
+      this.#userPlayIntent = false;
       this.#sendSource();
       return;
     }
@@ -1065,7 +1075,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // a re-attach must not resume the stopped playback. The next native `play`
     // re-asserts the intent, so clearing here loses nothing live.
     this.#playRequested = false;
-    this.#wasPlaying = false;
+    this.#userPlayIntent = false;
   };
 
   #onPlay = (event: Event) => {
@@ -1073,10 +1083,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     if (!target || event.target !== target) return;
     // Play intent is sticky: an attach that rebuilds the pipeline must not
     // lose it (the worker resets its own playback bookkeeping on ATTACH). The
-    // host-lifetime `#wasPlaying` mirrors it so recovery can tell the user was
-    // watching even after the per-load flag was reset by a teardown.
+    // armed-source `#userPlayIntent` mirrors it so recovery can tell the user
+    // was watching this source even after the per-load flag was reset by a
+    // teardown.
     this.#playRequested = true;
-    this.#wasPlaying = true;
+    this.#userPlayIntent = true;
     // Deferred playback start (preload 'metadata'/'none'): first play (or a
     // user seek) triggers streaming.
     this.#send({ requestId: this.#requestId ?? nextRequestId(), type: MainToWorkerMessageType.PLAY });
@@ -1194,15 +1205,18 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     const attempt = this.#reloadsThisLoad + 1;
     // Capture what the reload must restore BEFORE `#resetLoadState` wipes it:
     // the resume position (the newest playhead the host forwarded) and whether
-    // the load carries play intent. `#wasPlaying` is host-lifetime — it
-    // survives the reset, and its clear-in-`#onPause` is guarded while
-    // `#recovering` — so an incidental native `ended`/`pause` fired by the
-    // engine's teardown cannot erase "the user was watching". A watch position
-    // past 0 alone also forces playback on: an element the user was mid-way
-    // through always sat at a positive playhead. Only a source the user never
-    // played (position 0, no intent) stays paused.
+    // the armed source carries user play intent. `#userPlayIntent` is scoped to
+    // that source — set only by a genuine user `play`, cleared only by a
+    // deliberate pause or a new-`src`/`load()` boundary — and both this reload
+    // and `#resetLoadState` (which it routes through) preserve it, while its
+    // clear-in-`#onPause` is guarded when `#recovering`, so an incidental
+    // native `ended`/`pause` fired by the engine's teardown cannot erase "the
+    // user was watching". A watch position past 0 alone also forces playback
+    // on: an element the user was mid-way through always sat at a positive
+    // playhead. Only a source the user never played (position 0, no intent)
+    // stays paused.
     const resumeSeconds = this.#lastPlayheadSeconds;
-    const shouldPlay = this.#wasPlaying || resumeSeconds > 0;
+    const shouldPlay = this.#userPlayIntent || resumeSeconds > 0;
     this.#logger.child('host').warn('decode error on active load — reloading', {
       attempt,
       play: shouldPlay,
@@ -1275,10 +1289,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     const attempt = this.#externalSeeksThisLoad;
     // Restarting a source the user is scrubbing while paused must not
     // auto-start playback: only resume when playback was actually in flight
-    // (`#wasPlaying` survives the teardown's incidental events). A seek from a
-    // playing element restarts and keeps playing.
+    // (`#userPlayIntent` is scoped to the armed source and survives the
+    // teardown's incidental events). A seek from a playing element restarts
+    // and keeps playing.
     const target = this.target as HTMLVideoElement | null;
-    const shouldPlay = this.#wasPlaying || (target ? !target.paused : false);
+    const shouldPlay = this.#userPlayIntent || (target ? !target.paused : false);
     this.#logger.child('host').warn('seek outside window — restarting source', {
       attempt,
       play: shouldPlay,
@@ -1346,9 +1361,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // announces the load boundary with the native `emptied` event. This is the
   // fresh/load/ATTACH_OK boundary: budgets and recovery windows die with the
   // old load (the recovery helpers re-arm their own counters/flags AFTER this
-  // reset). `#wasPlaying` is deliberately preserved — it records "has the user
-  // asked for playback this session" and survives reloads until a deliberate,
-  // non-teardown pause clears it.
+  // reset). `#userPlayIntent` is deliberately untouched: it is scoped to the
+  // armed source, which this reset never changes, so it survives both recovery
+  // reloads and ATTACH_OK replays of that source — only a new `src`, an
+  // explicit `load()`, or a deliberate pause clears it, so a fresh source
+  // never played never auto-plays on its own recovery.
   #resetLoadState(): void {
     this.#error = null;
     // Any automatic decode-error reloads or out-of-window seek restarts

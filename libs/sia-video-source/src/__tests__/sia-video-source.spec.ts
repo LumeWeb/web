@@ -1029,6 +1029,34 @@ describe('decode failure recovery', () => {
     host.destroy();
   });
 
+  it.skipIf(!IN_BROWSER)('does not auto-play a fresh source that loads behind a previously played one', () => {
+    const { host, target, worker } = attachAndHandshake();
+    // The user plays the first source, which records armed-source play intent
+    // for it; the fresh source armed afterwards is never played itself.
+    loadAndAcknowledge(host, worker, 'k');
+    target.dispatchEvent(new Event('play'));
+    target.currentTime = 12.5;
+    target.dispatchEvent(new Event('timeupdate'));
+    worker.sent.length = 0;
+
+    host.src = 'k2';
+    const freshLoadId = newestSourceId(worker);
+    worker.sent.length = 0;
+
+    // The never-played fresh source decode-errors: its recovery repairs the
+    // load (fresh SOURCE + SEEK to 0) but must stay paused — the earlier
+    // source's play must not leak into an unsolicited PLAY for this one.
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: freshLoadId, type: WorkerToMainMessageType.ERROR });
+
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK).at(-1)).toMatchObject({
+      time: 0,
+      type: MainToWorkerMessageType.SEEK,
+    });
+    host.destroy();
+  });
+
   it.skipIf(!IN_BROWSER)('keeps playback intent across recovery', () => {
     const { host, target, worker } = attachAndHandshake();
     const originalLoadId = loadAndAcknowledge(host, worker, 'k');
@@ -1375,6 +1403,38 @@ describe('out-of-window seek recovery', () => {
     const reloadSources = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE);
     expect(reloadSources).toHaveLength(1);
     expect(reloadSources[0]).toMatchObject({ src: 'k', type: MainToWorkerMessageType.SOURCE });
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK).at(-1)).toMatchObject({
+      requestId: reloadSources[0].requestId,
+      time: 120,
+      type: MainToWorkerMessageType.SEEK,
+    });
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('does not auto-play a fresh source restarted by an out-of-window seek after an earlier source played', () => {
+    const { host, target, worker } = attachAndHandshake();
+    // The user plays the first source; the next armed source is never played.
+    loadWithDuration(host, worker, 'k', 60);
+    target.dispatchEvent(new Event('play'));
+    worker.sent.length = 0;
+
+    host.src = 'k2';
+    const freshSource = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).at(-1);
+    if (!freshSource) throw new Error('SOURCE was not sent');
+    worker.reply({ info: { ...mainInfo, durationSeconds: 60 }, requestId: freshSource.requestId, type: WorkerToMainMessageType.SOURCE_OK });
+    // Scrub the never-played fresh source while the element stays paused (the
+    // harness's synthetic events never change native paused state): the restart
+    // must repair the position without starting playback — the earlier
+    // source's stale play intent must not leak into an unsolicited PLAY.
+    worker.sent.length = 0;
+
+    target.currentTime = 120;
+    target.dispatchEvent(new Event('seeking'));
+
+    const reloadSources = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE);
+    expect(reloadSources).toHaveLength(1);
+    expect(reloadSources[0]).toMatchObject({ src: 'k2', type: MainToWorkerMessageType.SOURCE });
     expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
     expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK).at(-1)).toMatchObject({
       requestId: reloadSources[0].requestId,
