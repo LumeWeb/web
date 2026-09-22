@@ -894,6 +894,227 @@ describe('SiaVideoSource (host state machine)', () => {
   });
 });
 
+describe('decode failure recovery', () => {
+  // Recovery spec under test: a worker-reported `decode` ERROR on the ACTIVE
+  // load means the pipeline tore down underneath the element (e.g. the worker
+  // took its MediaSource down after a fatal append failure), so the host
+  // reloads automatically — a fresh SOURCE for the same src, then SEEK back
+  // to the last reported playhead and PLAY — a bounded number of times before
+  // giving up and surfacing the MediaError normally (MEDIA_ERR_DECODE, code 3).
+  // A successful SOURCE_OK and a fresh `src` each reset the budget.
+  //
+  // Recovery is synchronous and immediate: on the decode ERROR the host posts
+  // SOURCE → SEEK → PLAY in the same turn, with SEEK/PLAY naming the NEW
+  // SOURCE's request id (the id `#sendSource` assigned synchronously via the
+  // `#post` hook). Max reloads per load = 2; the error surfaces on the
+  // (maxReloads + 1)-th decode error of the same load.
+
+  /** attach + HELLO_OK → a ready host with a main-mode session. */
+  function attachAndHandshake(): { host: SiaVideoSource; target: HTMLVideoElement; worker: FakeWorker; } {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const target = document.createElement('video');
+    host.attach(target);
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    return { host, target, worker };
+  }
+
+  const mainInfo = { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main', tracks: [] } as const;
+
+  /** Loads `src` and acknowledges it (main-mode SOURCE_OK), returning its request id. */
+  function loadAndAcknowledge(host: SiaVideoSource, worker: FakeWorker, src: string): number {
+    host.src = src;
+    // `filter` by the SOURCE discriminator narrows to the SOURCE variant
+    // (inferred type predicate), so the id and src are directly readable.
+    const source = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).at(-1);
+    if (!source) throw new Error('SOURCE was not sent');
+    worker.reply({
+      info: mainInfo,
+      requestId: source.requestId,
+      type: WorkerToMainMessageType.SOURCE_OK,
+    });
+    return source.requestId;
+  }
+
+  /** Request id of the newest SOURCE on the wire (the currently active load). */
+  function newestSourceId(worker: FakeWorker): number {
+    const source = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).at(-1);
+    if (!source) throw new Error('no SOURCE on the wire');
+    return source.requestId;
+  }
+
+  it.skipIf(!IN_BROWSER)('reloads the source with a bounded replay after a decode error on the active load', () => {
+    const { host, target, worker } = attachAndHandshake();
+    const originalLoadId = loadAndAcknowledge(host, worker, 'k');
+    worker.sent.length = 0;
+
+    // The host's most recent playhead: forwarded on timeupdate as PLAYHEAD,
+    // and the recovery must reposition the reloaded source there.
+    target.currentTime = 42.5;
+    target.dispatchEvent(new Event('timeupdate'));
+    expect(worker.sent.at(-1)).toMatchObject({ time: 42.5, type: MainToWorkerMessageType.PLAYHEAD });
+
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: originalLoadId, type: WorkerToMainMessageType.ERROR });
+
+    const reloadSources = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE);
+    expect(reloadSources).toHaveLength(1);
+    expect(reloadSources[0]).toMatchObject({ src: 'k', type: MainToWorkerMessageType.SOURCE });
+    expect(reloadSources[0].requestId).not.toBe(originalLoadId);
+
+    // The replay is a bounded reposition-and-resume: SOURCE → SEEK (at the
+    // last reported playhead) → PLAY, and both control messages name the NEW
+    // load's request id.
+    const seeks = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK);
+    expect(seeks).toHaveLength(1);
+    expect(seeks[0]).toMatchObject({ time: 42.5, type: MainToWorkerMessageType.SEEK });
+    expect(seeks[0].requestId).toBe(reloadSources[0].requestId);
+
+    const plays = worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY);
+    expect(plays).toHaveLength(1);
+    expect(plays[0].requestId).toBe(reloadSources[0].requestId);
+
+    const postError = worker.sent.slice(worker.sent.findIndex((m) => m.type === MainToWorkerMessageType.SOURCE));
+    expect(postError.map((m) => m.type)).toEqual([MainToWorkerMessageType.SOURCE, MainToWorkerMessageType.SEEK, MainToWorkerMessageType.PLAY]);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('reports the decode error to the UI only after recovery attempts are exhausted', () => {
+    const { host, worker } = attachAndHandshake();
+    const initialLoadId = loadAndAcknowledge(host, worker, 'k');
+    worker.sent.length = 0;
+
+    let errorEvents = 0;
+    host.addEventListener('error', () => errorEvents++);
+
+    // Decode error #1 on the active load → reload 1; no surface yet.
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: initialLoadId, type: WorkerToMainMessageType.ERROR });
+    expect(errorEvents).toBe(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+
+    // Decode error #2 on the recovered load → reload 2; still no surface.
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: newestSourceId(worker), type: WorkerToMainMessageType.ERROR });
+    expect(errorEvents).toBe(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(2);
+
+    // Decode error #3 (max reloads = 2 exhausted) → surfaces with
+    // MEDIA_ERR_DECODE, and no third reload is attempted.
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: newestSourceId(worker), type: WorkerToMainMessageType.ERROR });
+    expect(errorEvents).toBe(1);
+    expect(host.error?.code).toBe(3);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(2);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('resets the recovery budget after a successful SOURCE_OK', () => {
+    const { host, worker } = attachAndHandshake();
+    const initialLoadId = loadAndAcknowledge(host, worker, 'k');
+    worker.sent.length = 0;
+
+    let errorEvents = 0;
+    host.addEventListener('error', () => errorEvents++);
+
+    // Decode error #1 → reload 1.
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: initialLoadId, type: WorkerToMainMessageType.ERROR });
+    expect(errorEvents).toBe(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+
+    // The recovered load acknowledges cleanly: the budget resets, so a later
+    // decode error gets a fresh run of reloads instead of surfacing at once.
+    const recoveredLoadId = newestSourceId(worker);
+    worker.reply({ info: mainInfo, requestId: recoveredLoadId, type: WorkerToMainMessageType.SOURCE_OK });
+
+    // Decode error #2 → reload 2 (budget restarted).
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: recoveredLoadId, type: WorkerToMainMessageType.ERROR });
+    expect(errorEvents).toBe(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(2);
+
+    // Decode error #3 → reload 3.
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: newestSourceId(worker), type: WorkerToMainMessageType.ERROR });
+    expect(errorEvents).toBe(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(3);
+
+    // Decode error #4 → exhausted (3 total reloads across the test), surfaces.
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: newestSourceId(worker), type: WorkerToMainMessageType.ERROR });
+    expect(errorEvents).toBe(1);
+    expect(host.error?.code).toBe(3);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('does not reload on decode errors for a superseded load', () => {
+    const { host, worker } = attachAndHandshake();
+    const supersededLoadId = loadAndAcknowledge(host, worker, 'k');
+
+    let errorEvents = 0;
+    host.addEventListener('error', () => errorEvents++);
+
+    // The user moves on to a new source before the old load fails.
+    host.src = 'k2';
+    const sourcesBeforeError = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE);
+    expect(sourcesBeforeError.map((s) => s.src)).toEqual(['k', 'k2']);
+
+    // The stale load's late decode error must neither reload nor surface:
+    // recovery is scoped to the ACTIVE load only.
+    worker.reply({ context: 'stale append failed', kind: 'decode', requestId: supersededLoadId, type: WorkerToMainMessageType.ERROR });
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(2);
+    expect(errorEvents).toBe(0);
+    expect(host.error).toBeNull();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('does not reload for non-decode kinds', () => {
+    const { host, worker } = attachAndHandshake();
+    const initialLoadId = loadAndAcknowledge(host, worker, 'k');
+    worker.sent.length = 0;
+
+    let errorEvents = 0;
+    host.addEventListener('error', () => errorEvents++);
+
+    // A network-class failure on the active load is fatal as-is: no replay,
+    // surfaced immediately with MEDIA_ERR_NETWORK. Only `decode` reloads.
+    worker.reply({ context: 'network down', kind: 'network', requestId: initialLoadId, type: WorkerToMainMessageType.ERROR });
+    expect(errorEvents).toBe(1);
+    expect(host.error?.code).toBe(2);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('clears recovery state on a fresh src', () => {
+    const { host, worker } = attachAndHandshake();
+    const kLoadId = loadAndAcknowledge(host, worker, 'k');
+
+    let errorEvents = 0;
+    host.addEventListener('error', () => errorEvents++);
+
+    // Exhaust the recovery budget for 'k': decode error #1 → reload, #2 →
+    // reload, #3 → surface with MEDIA_ERR_DECODE.
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: kLoadId, type: WorkerToMainMessageType.ERROR });
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: newestSourceId(worker), type: WorkerToMainMessageType.ERROR });
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: newestSourceId(worker), type: WorkerToMainMessageType.ERROR });
+    expect(errorEvents).toBe(1);
+    expect(host.error?.code).toBe(3);
+
+    // A fresh source must not inherit the exhausted budget: assigning a new
+    // src restarts recovery from a full set of reloads.
+    host.src = 'k2';
+    const k2Sources = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).filter((m) => m.src === 'k2');
+    expect(k2Sources).toHaveLength(1);
+    worker.reply({ info: mainInfo, requestId: k2Sources[0].requestId, type: WorkerToMainMessageType.SOURCE_OK });
+
+    // Decode error on the fresh load → reload happens again (not 0, and not
+    // surfacing immediately from the old exhausted budget).
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: k2Sources[0].requestId, type: WorkerToMainMessageType.ERROR });
+    expect(errorEvents).toBe(1);
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: newestSourceId(worker), type: WorkerToMainMessageType.ERROR });
+    expect(errorEvents).toBe(1);
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: newestSourceId(worker), type: WorkerToMainMessageType.ERROR });
+    expect(errorEvents).toBe(2);
+    // The fresh load gets its own full budget (2 reloads, then surface): the
+    // initial k2 SOURCE plus both reload attempts = 3 k2 SOURCE messages.
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).filter((m) => m.src === 'k2')).toHaveLength(3);
+    host.destroy();
+  });
+});
+
 /** Depth-first walk collecting every Uint8Array embedded in a message. */
 function* byteArraysOf(value: unknown): Generator<Uint8Array> {
   if (value instanceof Uint8Array) {
