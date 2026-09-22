@@ -53,8 +53,38 @@ const MSE_BACK_BUFFER_SECONDS = 30;
  * Automatic reloads the host performs after a decode-class `ERROR` on the
  * active load before it gives up and surfaces the MediaError normally. Bounded
  * so a genuinely broken source cannot spin the worker forever.
+ *
+ * The budget is per user-initiated arming, NOT per worker session: the counter
+ * is only restored when a recovery reload demonstrably plays (the playhead
+ * advances again, or the load ends cleanly). A recovered load that re-opens
+ * (`SOURCE_OK`) and then fails again is the SAME broken object consuming the
+ * same attempts — a naive reset on every `SOURCE_OK` reverts to attempt=1
+ * forever (the observed ~2.6s infinite reload loop).
  */
 const MAX_DECODE_RELOADS = 2;
+
+/**
+ * Tolerated overshoot past the worker-vouched duration before a seek is
+ * treated as external: the reported duration can trail the real object by a
+ * tick, so a seek exactly at the end must not be treated as unreachable.
+ */
+const SEEK_DURATION_TOLERANCE_SECONDS = 0.25;
+
+/**
+ * Bounded host-side source restarts for a seek that lands outside the
+ * playable window (or that stalls unresolved past the stall timeout). Once
+ * exhausted the host surfaces a decode-class error and force-clears the stuck
+ * `seeking` state instead of hanging in HAVE_METADATA forever.
+ */
+const MAX_EXTERNAL_SEEK_RESTARTS = 2;
+
+/**
+ * How long an unresolved seek may hold the element in `seeking` before the
+ * host assumes it will never resolve (the target is unreachable) and restarts
+ * the source re-anchored there. Slow-but-real remote reads re-anchor with a
+ * fresh attempt; only repeated failures surface an error.
+ */
+const SEEK_STALL_TIMEOUT_MS = 6000;
 
 /**
  * Friendly names for the host→worker messages that carry a request identity,
@@ -254,6 +284,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#src = value;
 
     this.#resetLoadState();
+    // A different source is now armed and has not been played yet: its own
+    // decode/seek recovery must stay paused until the user actually plays it,
+    // no matter which earlier sources the host played.
+    this.#userPlayIntent = false;
 
     if (!value) return;
 
@@ -299,15 +333,30 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   #appKeySeedProvider: AppKeySeedProvider | undefined;
 
   #destroyed = false;
+  // Duration the worker vouched for the active load (`SOURCE_OK.info`), used
+  // to judge whether a seek target can ever be satisfied. Nulled at every load
+  // boundary until the next SOURCE_OK.
+  #durationSeconds: null | number = null;
+  // True once the active load reached end-of-stream (worker `ENDED` or a real
+  // native `ended`); nothing past the delivered buffer will ever arrive, so an
+  // out-of-window seek there is provably unreachable.
+  #endedReached = false;
   #error: MediaError | null = null;
+  // Out-of-window seek restarts already spent on the current load (see
+  // `#recoverFromOutOfWindowSeek`). Restored by a completed restart seek or by
+  // a fresh src / load / ATTACH_OK replay, exactly like the decode budget.
+  #externalSeeksThisLoad = 0;
   // Most recent playhead the host forwarded via PLAYHEAD; decode-error
   // recovery repositions the reloaded load here. Starts at 0 until the first
   // timeupdate.
   #lastPlayheadSeconds = 0;
   // Main-thread MSE fallback state (Firefox and other `main`-mode sessions).
   #logger: Logger;
+
   #mediaSource: MediaSource | null = null;
+
   #mimeType: string | undefined;
+
   #mode: null | WorkerMode = null;
 
   #objectUrl: null | string = null;
@@ -315,6 +364,17 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   readonly #options: SiaVideoSourceOptions;
 
   #pending: MainToWorkerMessage[] = [];
+
+  // Element re-anchor a recovery (decode reload / external-seek restart) wants
+  // applied once the FRESH resource actually attaches. Setting `currentTime`
+  // immediately after `#sendSource()` runs while the element still holds the
+  // OLD (dead) resource — readyState ≥ HAVE_METADATA — so per spec it is a
+  // plain seek on a tombstoned pipeline, NOT a HAVE_NOTHING default-playback
+  // position, and the replacement resource resets the playhead to 0. Deferred
+  // to the HANDLE / object-URL attach point (readyState is HAVE_NOTHING for
+  // the fresh resource there), where the write parks the new load at the
+  // target instead of stranding it at 0 with the worker buffering elsewhere.
+  #pendingReanchorSeconds: null | number = null;
 
   // Current user playback intent, tracked from native events: a `play` sets
   // it, a `pause` clears it. Sticky across attaches only while unbroken — the
@@ -328,13 +388,34 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
   #ready = false;
 
+  // An engine-initiated reload/restart (decode recovery or external-seek
+  // restart) is in flight. Native `pause`/`ended` observed inside this window
+  // are the pipeline being replaced, not the user stopping or reaching EOF:
+  // they neither clear playback intent nor latch end-state.
+  #recovering = false;
+
+  // The current load is a decode-error recovery reload. Its `SOURCE_OK` must
+  // NOT restore the reload budget — a reloaded load that merely re-opens and
+  // then fails again is the same broken object consuming the same attempts.
+  // The budget restores only once that load actually plays (advancing playhead)
+  // or ends cleanly, which keeps a persistently broken object from looping at
+  // attempt=1 forever.
+  #recoveryLoadInFlight = false;
+
   // Automatic reloads already spent recovering from decode-class errors on the
-  // current load (see `#recoverFromDecodeError`). Reset to a full budget by a
-  // fresh src assignment / load / ATTACH_OK replay and by a SOURCE_OK for the
-  // current request; a decode error surfaces instead once it is exhausted.
+  // current load (see `#recoverFromDecodeError`). Restored to a full budget
+  // only by a fresh src assignment / load / ATTACH_OK replay, by a normal
+  // (non-recovery) `SOURCE_OK`, or once a recovery load actually plays — NOT
+  // by a recovery load re-opening; a decode error surfaces once exhausted.
   #reloadsThisLoad = 0;
 
   #requestId: null | RequestId = null;
+
+  // Watchdog for a `seeking` state that never resolves: armed on every user
+  // seek, cancelled the moment `seeked` / a load boundary arrives. On fire it
+  // treats the seek as stuck and restarts the source re-anchored at the target
+  // (bounded), so the element never hangs in HAVE_METADATA forever.
+  #seekWatchdog: null | ReturnType<typeof setTimeout> = null;
 
   #sharingKeySeedProvider: AppKeySeedProvider | undefined;
 
@@ -342,7 +423,24 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
   #src = '';
 
+  // Playback intent scoped to the armed source, kept apart from the per-load
+  // `#playRequested` so it survives a recovery reload: decode-error recovery
+  // and external-seek restarts must know the user was watching the CURRENT
+  // source before the pipeline was torn down, even if the engine's teardown
+  // fires an incidental native `pause`/`ended` that would otherwise erase the
+  // intent. `#resetLoadState` therefore leaves it untouched — recovery reloads
+  // and ATTACH_OK replays both route through that reset without re-arming the
+  // source, so the intent they are repairing carries over. It is cleared only
+  // when a DIFFERENT source is armed (`src`), the current one is re-armed
+  // (`load()`), or a deliberate pause supersedes it: a fresh source the user
+  // never played must not auto-play when its own recovery runs.
+  #userPlayIntent = false;
+
   #worker: null | Worker = null;
+
+  // Highest buffered end the worker reported (`PROGRESS`) for the active load;
+  // a seek far beyond it leaves the engine's window (see `#isOutOfWindowSeek`).
+  #workerBufferEndSeconds = 0;
 
   #workerConfig: undefined | WorkerConfig;
 
@@ -377,9 +475,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     if (this.#destroyed) return;
     super.attach(target);
     target.addEventListener('seeking', this.#onSeeking);
+    target.addEventListener('seeked', this.#onSeeked);
     target.addEventListener('timeupdate', this.#onTimeUpdate);
     target.addEventListener('play', this.#onPlay);
     target.addEventListener('pause', this.#onPause);
+    target.addEventListener('ended', this.#onEnded);
 
     if (this.#worker) {
       this.#post(this.#helloMessage());
@@ -428,17 +528,24 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
     this.#teardownMainThreadMse();
     // A destroyed host keeps no pipeline to recover or resume, so recovery
-    // state dies with it.
+    // state (decode budget, seek watchdog/restart state) dies with it.
     this.#reloadsThisLoad = 0;
+    this.#externalSeeksThisLoad = 0;
     this.#lastPlayheadSeconds = 0;
+    this.#recovering = false;
+    this.#recoveryLoadInFlight = false;
+    this.#pendingReanchorSeconds = null;
+    this.#cancelSeekWatchdog();
     super.destroy();
   }
 
   detach(): void {
     this.target?.removeEventListener('seeking', this.#onSeeking);
+    this.target?.removeEventListener('seeked', this.#onSeeked);
     this.target?.removeEventListener('timeupdate', this.#onTimeUpdate);
     this.target?.removeEventListener('play', this.#onPlay);
     this.target?.removeEventListener('pause', this.#onPause);
+    this.target?.removeEventListener('ended', this.#onEnded);
     this.#send({ type: MainToWorkerMessageType.DETACH });
     super.detach();
   }
@@ -446,6 +553,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   override load(): void {
     if (this.#src && this.#worker) {
       this.#resetLoadState();
+      // An explicit re-load restarts play intent like a fresh `src`: the
+      // rebuilt pipeline begins paused and only streams once the user plays.
+      this.#userPlayIntent = false;
       this.#sendSource();
       return;
     }
@@ -483,6 +593,40 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       return;
     }
     this.#appendPipe?.append(bytes);
+  }
+
+  // Applies (once) the element re-anchor a recovery parked for the fresh load,
+  // then forgets it. Called at the point the replacement resource genuinely
+  // attaches — the worker-MSE `HANDLE` swap and the main-MSE object-URL
+  // assignment — when the element is HAVE_NOTHING for that resource, which is
+  // exactly the state where a `currentTime` write parks the new load at the
+  // target (the shared default-playback-start-position mechanism).
+  #applyPendingReanchor(target: HTMLVideoElement | null): void {
+    const reanchorSeconds = this.#pendingReanchorSeconds;
+    if (reanchorSeconds === null || !target) return;
+    this.#pendingReanchorSeconds = null;
+    try {
+      target.currentTime = reanchorSeconds;
+    } catch {
+      // A dead MediaSource mid-teardown can refuse the write; the recovery
+      // budgets + stall watchdog still bound the failure if this never plays.
+    }
+  }
+
+  // Arming/clearing for the unresolved-seek watchdog. When `seeking` is still
+  // latched (no `seeked` has resolved it) past the stall interval, the seek is
+  // judged stuck and recovered via `#recoverFromOutOfWindowSeek`.
+  #armSeekWatchdog(): void {
+    this.#cancelSeekWatchdog();
+    this.#seekWatchdog = setTimeout(() => {
+      this.#seekWatchdog = null;
+      const target = this.target as HTMLVideoElement | null;
+      if (!target || !target.seeking || this.#destroyed) return;
+      this.#logger.child('host').warn('seek unresolved — recovering', {
+        seekSeconds: target.currentTime,
+      });
+      this.#recoverFromOutOfWindowSeek(target.currentTime);
+    }, SEEK_STALL_TIMEOUT_MS);
   }
 
   #beginMainThreadMse(mime: string, durationSeconds: null | number): void {
@@ -536,6 +680,17 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     const objectUrl = URL.createObjectURL(mediaSource);
     this.#objectUrl = objectUrl;
     target.src = objectUrl;
+    // The main-MSE replacement resource is now attached (the element is
+    // HAVE_NOTHING for it); a recovery's parked re-anchor applies here, the
+    // same HAVE_NOTHING park the worker-MSE path gets on HANDLE.
+    this.#applyPendingReanchor(target);
+  }
+
+  #cancelSeekWatchdog(): void {
+    if (this.#seekWatchdog !== null) {
+      clearTimeout(this.#seekWatchdog);
+      this.#seekWatchdog = null;
+    }
   }
 
   async #encryptAndSendSeed(
@@ -589,6 +744,22 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     for (const message of pending) this.#post(message);
   }
 
+  // Pauses and re-anchors an element stranded mid-`seeking` back onto buffered
+  // data (or 0 when nothing is buffered) so the native `seeking` flag clears
+  // and the element stops hanging in HAVE_METADATA.
+  #forceClearStuckSeek(): void {
+    const target = this.target as HTMLVideoElement | null;
+    if (!target) return;
+    target.pause();
+    const end = nativeBufferedEnd(target);
+    try {
+      target.currentTime = end > 0 ? end : 0;
+    } catch {
+      // A MediaSource mid-teardown can refuse writes; the error event that
+      // accompanies the exhaust branch surfaces the failure regardless.
+    }
+  }
+
   // HELLO config: the connection metadata plus the host's worker-MSE
   // preference. The preference is only forwarded when the app explicitly set
   // it (default `'auto'` leaves the wire payload byte-identical to before),
@@ -632,6 +803,30 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     };
   }
 
+  // True when the seek target can never be satisfied by the current load: past
+  // the worker-vouched duration, or past the delivered buffer once the source
+  // reached end-of-stream. These are the only positions the engine provably
+  // cannot reach — a far-but-valid forward seek stays on the ordinary SEEK path
+  // (the worker's restart seam re-anchors it), so common in-buffer seeks are
+  // unchanged.
+  #isOutOfWindowSeek(seekSeconds: number, bufferedEnd: number): boolean {
+    if (
+      this.#durationSeconds !== null &&
+      seekSeconds > this.#durationSeconds + SEEK_DURATION_TOLERANCE_SECONDS
+    ) {
+      return true;
+    }
+    const windowEnd = Math.max(bufferedEnd, this.#workerBufferEndSeconds);
+    if (
+      this.#endedReached &&
+      windowEnd > 0 &&
+      seekSeconds > windowEnd + SEEK_DURATION_TOLERANCE_SECONDS
+    ) {
+      return true;
+    }
+    return false;
+  }
+
   // One debug line per posted request that carries an identity, at the single
   // postMessage choke point, so every outbound host→worker message is
   // attributable. DESTROY/DETACH have no request id and are skipped.
@@ -642,6 +837,31 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       this.#logger.debug('request', { action, requestId: message.requestId });
     }
   }
+
+  // ---- Main-thread MSE fallback (Firefox and friends) ----
+
+  #onEnded = (event: Event) => {
+    const target = this.target;
+    if (!target || event.target !== target) return;
+    if (this.#recovering) {
+      // An engine-initiated teardown (recovery reload / source restart) ends
+      // the old MediaSource mid-flight; that is not the user reaching EOF, so
+      // it must neither latch end-state nor count as the recovered load having
+      // played.
+      return;
+    }
+    // Genuine end-of-stream: the active load played out. Nothing past the
+    // delivered buffer will arrive, so an out-of-window seek here is provably
+    // unreachable — and a recovery load that reached EOF demonstrably played,
+    // so its reload budget may restore.
+    this.#endedReached = true;
+    if (this.#recoveryLoadInFlight) {
+      this.#logger.child('host').info('decode-recovery.played', { at: 'ended' });
+      this.#recoveryLoadInFlight = false;
+      this.#reloadsThisLoad = 0;
+      this.#recovering = false;
+    }
+  };
 
   #onMessage = (event: MessageEvent) => {
     // Foreign or malformed payloads (another library's worker, a draft
@@ -700,6 +920,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // cleared at every load boundary, so its presence here means *this*
         // load reported an error.
         if (message.requestId !== this.#requestId) return;
+        // End-of-stream for the active load: nothing past the delivered buffer
+        // will ever arrive, so a later out-of-window seek is provably
+        // unreachable (see `#isOutOfWindowSeek`).
+        this.#endedReached = true;
         if (this.#mode !== workerMode.main) return;
         if (this.#error) return;
         // The pipe deals endOfStream only after the append queue drains and
@@ -729,11 +953,15 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         }
         // A decode-class failure that exhausted its reload budget is a genuine
         // fatal error now — note the exhaustion, then surface it as before.
+        // The recovery window also closes: no reload is in flight to protect,
+        // so a subsequent new load starts with clean recovery state.
         if (message.kind === workerErrorCode.decode && this.#src) {
           this.#logger.child('host').error('decode-recovery.exhausted', {
             attempt: MAX_DECODE_RELOADS,
             requestId: this.#requestId,
           });
+          this.#recovering = false;
+          this.#recoveryLoadInFlight = false;
         }
         this.#reportError(message.kind, message.context);
         return;
@@ -741,6 +969,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         if (message.requestId !== this.#requestId) return;
         const target = this.target as HTMLVideoElement | null;
         if (target) (target as unknown as { srcObject: unknown }).srcObject = message.handle;
+        // The replacement resource is now live on the element; a recovery's
+        // parked re-anchor (see `#pendingReanchorSeconds`) belongs HERE, in
+        // HAVE_NOTHING, not on the tombstoned pipeline it was written before.
+        this.#applyPendingReanchor(target);
         return;
       }
       case WorkerToMainMessageType.HELLO_OK:
@@ -790,21 +1022,33 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         forwardWorkerLog(this.#logger, message);
         return;
       case WorkerToMainMessageType.PROGRESS:
-        if (message.requestId === this.#requestId) this.dispatchEvent(new Event('progress'));
+        if (message.requestId !== this.#requestId) return;
+        // Track the highest window end the worker reports so `#onSeeking` can
+        // tell an out-of-window target from an ordinary in-buffer one.
+        this.#workerBufferEndSeconds = message.buffered.reduce(
+          (max, win) => (win.end > max ? win.end : max),
+          this.#workerBufferEndSeconds,
+        );
+        this.dispatchEvent(new Event('progress'));
         return;
       case WorkerToMainMessageType.SOURCE_OK:
         // Only the newest load may drive the pipeline; a late acknowledgement
         // of a superseded SOURCE would downgrade the request id and let stale
         // chunks into the current append pipeline.
         if (message.requestId !== this.#requestId) return;
-        // A clean acknowledgement proves this load made it, so its recovery
-        // budget restarts: a later decode error gets a fresh run of reloads
-        // instead of surfacing at once. A reload still in flight means this
-        // SOURCE_OK is the recovered load succeeding.
-        if (this.#reloadsThisLoad > 0) {
+        // A clean acknowledgement proves this load opened, so a normal load's
+        // recovery budget restarts from here. A RECOVERY reload, however, is
+        // the SAME broken object re-opening: restoring the budget here is what
+        // let the observed loop reset to attempt=1 every ~2.6s. It stays armed
+        // (counter intact, `#recoveryLoadInFlight` true) until that load
+        // actually plays — `#onTimeUpdate` sees the playhead advance — or ends
+        // cleanly, and only then is the budget restored.
+        if (this.#recoveryLoadInFlight) {
           this.#logger.child('host').info('decode-recovery.done', { attempt: this.#reloadsThisLoad });
+        } else {
+          this.#reloadsThisLoad = 0;
         }
-        this.#reloadsThisLoad = 0;
+        this.#durationSeconds = message.info.durationSeconds;
         if (message.info.mode === workerMode.main) {
           this.#beginMainThreadMse(
             message.info.mime || DEFAULT_FMP4_MIME,
@@ -820,52 +1064,107 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   #onPause = (event: Event) => {
     const target = this.target;
     if (!target || event.target !== target) return;
+    if (this.#recovering) {
+      // The engine is replacing the pipeline (decode recovery / external-seek
+      // restart); the incidental native pause that surfaces during teardown is
+      // engine work, not the user stopping — it must not erase the intent the
+      // recovery is preserving, or re-attaches would regain nothing.
+      return;
+    }
     // A deliberate pause supersedes earlier play intent: once the user stops,
     // a re-attach must not resume the stopped playback. The next native `play`
     // re-asserts the intent, so clearing here loses nothing live.
     this.#playRequested = false;
+    this.#userPlayIntent = false;
   };
 
   #onPlay = (event: Event) => {
     const target = this.target;
     if (!target || event.target !== target) return;
     // Play intent is sticky: an attach that rebuilds the pipeline must not
-    // lose it (the worker resets its own playback bookkeeping on ATTACH).
+    // lose it (the worker resets its own playback bookkeeping on ATTACH). The
+    // armed-source `#userPlayIntent` mirrors it so recovery can tell the user
+    // was watching this source even after the per-load flag was reset by a
+    // teardown.
     this.#playRequested = true;
+    this.#userPlayIntent = true;
     // Deferred playback start (preload 'metadata'/'none'): first play (or a
     // user seek) triggers streaming.
     this.#send({ requestId: this.#requestId ?? nextRequestId(), type: MainToWorkerMessageType.PLAY });
   };
 
-  // ---- Main-thread MSE fallback (Firefox and friends) ----
+  #onSeeked = (event: Event) => {
+    const target = this.target;
+    if (!target || event.target !== target) return;
+    this.#cancelSeekWatchdog();
+    if (this.#externalSeeksThisLoad > 0) {
+      // An external-seek restart's re-anchor seek resolved: the target is
+      // reachable after all, so its restart budget restores and the recovery
+      // window closes (later incidental pause/ended register normally again).
+      this.#logger.child('host').info('seek-recovery.done', {
+        attempt: this.#externalSeeksThisLoad,
+      });
+      this.#externalSeeksThisLoad = 0;
+      this.#recovering = false;
+    }
+  };
 
   #onSeeking = (event: Event) => {
     const target = this.target;
     if (!target || event.target !== target) return;
+    // A recovery reload parks the element at its re-anchor target, which
+    // surfaces as a native `seeking` here; the recovery already issued the
+    // SEEK + watchdog it needs, so re-entering the out-of-window check would
+    // only double-send and double-arm (or worse, restart once more).
+    if (this.#recovering) return;
+    const seekSeconds = target.currentTime;
+    if (this.#isOutOfWindowSeek(seekSeconds, nativeBufferedEnd(target))) {
+      // The target can never be satisfied by this load (past the vouched
+      // duration, or past the delivered buffer once the source ended). A bare
+      // SEEK would leave the element in `seeking` / HAVE_METADATA forever, so
+      // restart the source re-anchored at the target instead — the same remedy
+      // as decode recovery, bounded, with the stall watchdog as backstop.
+      this.#recoverFromOutOfWindowSeek(seekSeconds);
+      return;
+    }
     // A seek supersedes the current position: drop chunks still queued for it
     // and (once quiesced) reset the SourceBuffer's segment parser so the
     // worker's fresh fragment parses clean instead of continuing the tail the
     // seek cut off mid-fragment (Chromium's RunSegmentParserLoop failure).
     // The reset carries the target so the main-owned buffer is re-anchored to
     // the sought position (the trimmed output's timestamps rebase to zero).
-    this.#appendPipe?.reset(target.currentTime);
+    this.#appendPipe?.reset(seekSeconds);
     this.#send({
       requestId: this.#requestId ?? nextRequestId(),
-      time: target.currentTime,
+      time: seekSeconds,
       type: MainToWorkerMessageType.SEEK,
     });
+    // Watchdog for a seek that never resolves (e.g. an in-window target the
+    // engine silently refuses): cleared on `seeked` / a load boundary.
+    this.#armSeekWatchdog();
   };
 
   #onTimeUpdate = (event: Event) => {
     const target = this.target;
     if (!target || event.target !== target) return;
+    const now = target.currentTime;
+    // A recovery reload that is genuinely playing advances the playhead again;
+    // only that (or a clean `ended`) is "the load actually played", so the
+    // consecutive-recovery budget may restore. A stalled reload emits no
+    // advancing timeupdate at all, keeping its count busy and the loop bounded.
+    if (this.#recoveryLoadInFlight && now > this.#lastPlayheadSeconds + 0.05) {
+      this.#logger.child('host').info('decode-recovery.played', { at: 'timeupdate' });
+      this.#recoveryLoadInFlight = false;
+      this.#reloadsThisLoad = 0;
+      this.#recovering = false;
+    }
     // Keep the newest position the host forwarded: decode-error recovery
     // seeks the reloaded source back here.
-    this.#lastPlayheadSeconds = target.currentTime;
+    this.#lastPlayheadSeconds = now;
     this.#evictMainBuffer();
     this.#send({
       requestId: this.#requestId ?? nextRequestId(),
-      time: target.currentTime,
+      time: now,
       type: MainToWorkerMessageType.PLAYHEAD,
     });
   };
@@ -903,14 +1202,21 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // PLAY — and only retry a bounded number of times so a genuinely broken
   // source still surfaces its decode error instead of reloading forever.
   #recoverFromDecodeError(): void {
-    const target = this.target as HTMLVideoElement | null;
     const attempt = this.#reloadsThisLoad + 1;
     // Capture what the reload must restore BEFORE `#resetLoadState` wipes it:
     // the resume position (the newest playhead the host forwarded) and whether
-    // the load carries play intent (element playing, or a `play` the user
-    // asked for — the reset clears both).
+    // the armed source carries user play intent. `#userPlayIntent` is scoped to
+    // that source — set only by a genuine user `play`, cleared only by a
+    // deliberate pause or a new-`src`/`load()` boundary — and both this reload
+    // and `#resetLoadState` (which it routes through) preserve it, while its
+    // clear-in-`#onPause` is guarded when `#recovering`, so an incidental
+    // native `ended`/`pause` fired by the engine's teardown cannot erase "the
+    // user was watching". A watch position past 0 alone also forces playback
+    // on: an element the user was mid-way through always sat at a positive
+    // playhead. Only a source the user never played (position 0, no intent)
+    // stays paused.
     const resumeSeconds = this.#lastPlayheadSeconds;
-    const shouldPlay = target === null ? false : !target.paused || this.#playRequested;
+    const shouldPlay = this.#userPlayIntent || resumeSeconds > 0;
     this.#logger.child('host').warn('decode error on active load — reloading', {
       attempt,
       play: shouldPlay,
@@ -918,14 +1224,38 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       resumeSeconds,
     });
     // The reload runs the same teardown a new src/load() performs, which also
-    // zeroes the recovery budget — restore the old count including this one.
+    // zeros the budget + recovery flags — restore the old count including this
+    // one and reopen the recovery window AFTER the reset, so the reload's own
+    // incidental pause/ended never register as user intent.
     this.#resetLoadState();
     this.#reloadsThisLoad = attempt;
+    this.#recovering = true;
+    this.#recoveryLoadInFlight = true;
     // The reset also cleared the captured watch position, but the stalled
     // element emits no further timeupdate to re-record it — keep the position
     // for later recoveries of this same load.
     this.#lastPlayheadSeconds = resumeSeconds;
     this.#sendSource();
+    // Re-anchor the ELEMENT at the resume position the same way the external-
+    // seek restart does (see `#recoverFromOutOfWindowSeek`): the reloaded
+    // source's real-timestamped fragments need the display element parked on
+    // the target so playback resumes where it broke. `#onSeeking` re-entrance
+    // from this native seek is suppressed while `#recovering`. The write is
+    // also parked for replay at the replacement-resource attach, because the
+    // element may still be sat on the tombstoned pipeline here (readyState ≥
+    // HAVE_METADATA), where the write is just a plain seek — the fresh
+    // resource opens HAVE_NOTHING at 0 and would strand the element there
+    // without the replay (see `#applyPendingReanchor`).
+    this.#pendingReanchorSeconds = resumeSeconds;
+    const recoverTarget = this.target as HTMLVideoElement | null;
+    if (recoverTarget) {
+      try {
+        recoverTarget.currentTime = resumeSeconds;
+      } catch {
+        // A dead MediaSource mid-teardown can refuse the write; the bounded
+        // budget still surfaces the failure if this load never plays.
+      }
+    }
     const requestId = this.#requestId ?? nextRequestId();
     // The fresh source is re-anchored at the position the user was watching —
     // position 0 for a source the host never played yet — and only resumed
@@ -938,8 +1268,86 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     }
   }
 
+  // Bounded recovery for a seek that lands outside the playable window (see
+  // `#isOutOfWindowSeek`) or that the stall watchdog found stuck: restart the
+  // whole load re-anchored at the target (SOURCE → SEEK → PLAY-if-needed), the
+  // same remedy as decode recovery. Once its budget is exhausted the target is
+  // treated as unreachable: surface a decode-class error and force the stuck
+  // element out of `seeking` instead of leaving it in HAVE_METADATA forever.
+  #recoverFromOutOfWindowSeek(seekSeconds: number): void {
+    if (this.#externalSeeksThisLoad >= MAX_EXTERNAL_SEEK_RESTARTS) {
+      this.#logger.child('host').error('seek-recovery.exhausted', {
+        restarts: MAX_EXTERNAL_SEEK_RESTARTS,
+        seekSeconds,
+      });
+      this.#recovering = false;
+      this.#forceClearStuckSeek();
+      this.#reportError(workerErrorCode.decode, `seek to ${seekSeconds}s is outside the playable range`);
+      return;
+    }
+    this.#externalSeeksThisLoad += 1;
+    const attempt = this.#externalSeeksThisLoad;
+    // Restarting a source the user is scrubbing while paused must not
+    // auto-start playback: only resume when playback was actually in flight
+    // (`#userPlayIntent` is scoped to the armed source and survives the
+    // teardown's incidental events). A seek from a playing element restarts
+    // and keeps playing.
+    const target = this.target as HTMLVideoElement | null;
+    const shouldPlay = this.#userPlayIntent || (target ? !target.paused : false);
+    this.#logger.child('host').warn('seek outside window — restarting source', {
+      attempt,
+      play: shouldPlay,
+      seekSeconds,
+    });
+    // `#resetLoadState` zeros the budget + recovery window like any fresh load;
+    // restore this restart's count and reopen the window AFTER it, mirroring
+    // the decode-recovery pattern.
+    this.#resetLoadState();
+    this.#externalSeeksThisLoad = attempt;
+    this.#recovering = true;
+    this.#lastPlayheadSeconds = seekSeconds;
+    this.#sendSource();
+    // Re-anchor the ELEMENT at the seek target, not just the worker's read:
+    // the restarted source appends real-timestamped fragments (the main-mode
+    // pipe rebases to zero, worker MSE does not), so a display element parked
+    // at 0 would sit on data-less track and stall paused even though the
+    // buffer holds the target. Setting currentTime while HAVE_NOTHING (the
+    // post-`emptied` state) parks the native default playback start position,
+    // which the fresh load honors as soon as its metadata opens; re-entrance
+    // into `#onSeeking` from this native seek is suppressed while `#recovering`.
+    // The write is also parked for replay at the replacement-resource attach,
+    // because the element may not have reached the HAVE_NOTHING park yet (it
+    // can still hold the tombstoned pipeline), where the write would be lost
+    // to the fresh resource resetting the playhead to 0.
+    this.#pendingReanchorSeconds = seekSeconds;
+    if (target) {
+      try {
+        target.currentTime = seekSeconds;
+      } catch {
+        // A MediaSource mid-teardown can refuse the write; the watchdog +
+        // restart budget still bound the recovery regardless.
+      }
+    }
+    const requestId = this.#requestId ?? nextRequestId();
+    this.#send({ requestId, time: seekSeconds, type: MainToWorkerMessageType.SEEK });
+    if (shouldPlay) {
+      this.#send({ requestId, type: MainToWorkerMessageType.PLAY });
+    }
+    // The restarted source must re-buffer the target; the stall watchdog
+    // re-checks after a fresh interval and re-enters this method (or its
+    // exhaust branch) if the seek still has not resolved.
+    this.#armSeekWatchdog();
+  }
+
   #reportError(kind: WorkerErrorCode, context?: string): void {
     if (this.#destroyed) return;
+    // A fatal error ends all recovery ambitions: no reload is in flight to
+    // protect, no unresolved seek needs a watchdog any longer, and no fresh
+    // resource will arrive to honor a parked re-anchor.
+    this.#recovering = false;
+    this.#recoveryLoadInFlight = false;
+    this.#pendingReanchorSeconds = null;
+    this.#cancelSeekWatchdog();
     // An errored pipeline is never ended: the pipe refuses end-of-stream once
     // it has failed, and the ENDED handler refuses on `#error` — either way a
     // failure is never masked by a clean end. `#error` is cleared at every
@@ -950,12 +1358,34 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   }
 
   // Drops pipeline state attached to the previously played source and
-  // announces the load boundary with the native `emptied` event.
+  // announces the load boundary with the native `emptied` event. This is the
+  // fresh/load/ATTACH_OK boundary: budgets and recovery windows die with the
+  // old load (the recovery helpers re-arm their own counters/flags AFTER this
+  // reset). `#userPlayIntent` is deliberately untouched: it is scoped to the
+  // armed source, which this reset never changes, so it survives both recovery
+  // reloads and ATTACH_OK replays of that source — only a new `src`, an
+  // explicit `load()`, or a deliberate pause clears it, so a fresh source
+  // never played never auto-plays on its own recovery.
   #resetLoadState(): void {
     this.#error = null;
-    // Any automatic decode-error reloads belonged to the old load; a fresh
-    // source, load(), or ATTACH_OK replay starts with a full recovery budget.
+    // Any automatic decode-error reloads or out-of-window seek restarts
+    // belonged to the old load; a fresh source, load(), or ATTACH_OK replay
+    // starts with full budgets.
     this.#reloadsThisLoad = 0;
+    this.#externalSeeksThisLoad = 0;
+    this.#recoveryLoadInFlight = false;
+    this.#recovering = false;
+    // A fresh/load/ATTACH_OK boundary supersedes any recovery: no parked
+    // re-anchor from the old load may reach the new one (the recovery helpers
+    // re-arm their own re-anchor AFTER this reset).
+    this.#pendingReanchorSeconds = null;
+    // Per-load window facts are gone until the next SOURCE_OK / PROGRESS.
+    this.#endedReached = false;
+    this.#durationSeconds = null;
+    this.#workerBufferEndSeconds = 0;
+    // No load is seeking after a boundary; a stale watchdog must not fire into
+    // the fresh pipeline.
+    this.#cancelSeekWatchdog();
     // Position memory belongs to the old source too: a fresh load starts at 0
     // and must never seek back to the previous playhead on its own recovery.
     this.#lastPlayheadSeconds = 0;
@@ -1099,4 +1529,11 @@ function defaultCreateWorker(): Worker {
 function errorDescription(error: unknown): string {
   if (error instanceof Error) return error.message.slice(0, 240);
   return String(error).slice(0, 240);
+}
+
+/** Highest end of the element's native buffered ranges; 0 when empty. */
+function nativeBufferedEnd(target: HTMLVideoElement): number {
+  const buffered = target.buffered;
+  if (buffered.length === 0) return 0;
+  return buffered.end(buffered.length - 1);
 }

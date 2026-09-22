@@ -1029,6 +1029,34 @@ describe('decode failure recovery', () => {
     host.destroy();
   });
 
+  it.skipIf(!IN_BROWSER)('does not auto-play a fresh source that loads behind a previously played one', () => {
+    const { host, target, worker } = attachAndHandshake();
+    // The user plays the first source, which records armed-source play intent
+    // for it; the fresh source armed afterwards is never played itself.
+    loadAndAcknowledge(host, worker, 'k');
+    target.dispatchEvent(new Event('play'));
+    target.currentTime = 12.5;
+    target.dispatchEvent(new Event('timeupdate'));
+    worker.sent.length = 0;
+
+    host.src = 'k2';
+    const freshLoadId = newestSourceId(worker);
+    worker.sent.length = 0;
+
+    // The never-played fresh source decode-errors: its recovery repairs the
+    // load (fresh SOURCE + SEEK to 0) but must stay paused — the earlier
+    // source's play must not leak into an unsolicited PLAY for this one.
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: freshLoadId, type: WorkerToMainMessageType.ERROR });
+
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK).at(-1)).toMatchObject({
+      time: 0,
+      type: MainToWorkerMessageType.SEEK,
+    });
+    host.destroy();
+  });
+
   it.skipIf(!IN_BROWSER)('keeps playback intent across recovery', () => {
     const { host, target, worker } = attachAndHandshake();
     const originalLoadId = loadAndAcknowledge(host, worker, 'k');
@@ -1119,8 +1147,40 @@ describe('decode failure recovery', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('resets the recovery budget after a successful SOURCE_OK', () => {
+  it.skipIf(!IN_BROWSER)('keeps the recovery budget armed across a recovery reload until that load plays', () => {
     const { host, worker } = attachAndHandshake();
+    const initialLoadId = loadAndAcknowledge(host, worker, 'k');
+    worker.sent.length = 0;
+
+    let errorEvents = 0;
+    host.addEventListener('error', () => errorEvents++);
+
+    // Decode error #1 → reload 1 (the same broken object, budget now 1).
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: initialLoadId, type: WorkerToMainMessageType.ERROR });
+    expect(errorEvents).toBe(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+
+    // The reloaded load acknowledges cleanly — but it has NOT played, so the
+    // budget must stay armed. Resetting here is exactly what let a persistently
+    // broken object loop at attempt=1 forever. Decode error #2 on the same
+    // object → reload 2, never a fresh budget.
+    const recoveredLoadId = newestSourceId(worker);
+    worker.reply({ info: mainInfo, requestId: recoveredLoadId, type: WorkerToMainMessageType.SOURCE_OK });
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: recoveredLoadId, type: WorkerToMainMessageType.ERROR });
+    expect(errorEvents).toBe(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(2);
+
+    // Decode error #3 → exhausted (2 reloads total, never a third attempt=1
+    // loop): the failure surfaces and reloading stops for good.
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: newestSourceId(worker), type: WorkerToMainMessageType.ERROR });
+    expect(errorEvents).toBe(1);
+    expect(host.error?.code).toBe(3);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(2);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('restores the recovery budget once the recovered load actually plays', () => {
+    const { host, target, worker } = attachAndHandshake();
     const initialLoadId = loadAndAcknowledge(host, worker, 'k');
     worker.sent.length = 0;
 
@@ -1130,27 +1190,58 @@ describe('decode failure recovery', () => {
     // Decode error #1 → reload 1.
     worker.reply({ context: 'append failed', kind: 'decode', requestId: initialLoadId, type: WorkerToMainMessageType.ERROR });
     expect(errorEvents).toBe(0);
-    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
 
-    // The recovered load acknowledges cleanly: the budget resets, so a later
-    // decode error gets a fresh run of reloads instead of surfacing at once.
+    // The recovered load acknowledges cleanly AND then genuinely plays: the
+    // playhead advances past the recovery anchor, which is the only thing that
+    // proves the load "actually played" and may restore the budget.
     const recoveredLoadId = newestSourceId(worker);
     worker.reply({ info: mainInfo, requestId: recoveredLoadId, type: WorkerToMainMessageType.SOURCE_OK });
+    target.currentTime = 1.5;
+    target.dispatchEvent(new Event('timeupdate'));
+    worker.sent.length = 0;
 
-    // Decode error #2 → reload 2 (budget restarted).
+    // From here the budget is restored: decode error #2 → reload 1 again (a
+    // fresh run), not an instant surfacing.
     worker.reply({ context: 'append failed', kind: 'decode', requestId: recoveredLoadId, type: WorkerToMainMessageType.ERROR });
     expect(errorEvents).toBe(0);
-    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(2);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
 
-    // Decode error #3 → reload 3.
+    // Decode error #3 → reload 2; error #4 → exhausted → surfaces.
     worker.reply({ context: 'append failed', kind: 'decode', requestId: newestSourceId(worker), type: WorkerToMainMessageType.ERROR });
     expect(errorEvents).toBe(0);
-    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(3);
-
-    // Decode error #4 → exhausted (3 total reloads across the test), surfaces.
     worker.reply({ context: 'append failed', kind: 'decode', requestId: newestSourceId(worker), type: WorkerToMainMessageType.ERROR });
     expect(errorEvents).toBe(1);
     expect(host.error?.code).toBe(3);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('forces the reload to resume when the watch position is past 0 even without play intent', () => {
+    // The user paused mid-watch (an incidental teardown pause may even have
+    // erased the play intent): a positive playhead alone means "was watching",
+    // so the recovery must resume rather than strand them paused.
+    const { host, target, worker } = attachAndHandshake();
+    const originalLoadId = loadAndAcknowledge(host, worker, 'k');
+    worker.sent.length = 0;
+
+    // Deliberate pause at a positive watch position, then the decode error.
+    target.dispatchEvent(new Event('pause'));
+    target.dispatchEvent(new Event('play')); // intent is live
+    target.currentTime = 12.5;
+    target.dispatchEvent(new Event('timeupdate'));
+    target.dispatchEvent(new Event('pause')); // deliberate pause supersedes it
+    expect(target.paused).toBe(true);
+    worker.sent.length = 0;
+
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: originalLoadId, type: WorkerToMainMessageType.ERROR });
+
+    // The reloaded load is re-anchored at 12.5 AND resumed: resumeSeconds > 0.
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY).at(-1)).toMatchObject({
+      type: MainToWorkerMessageType.PLAY,
+    });
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK).at(-1)).toMatchObject({
+      time: 12.5,
+      type: MainToWorkerMessageType.SEEK,
+    });
     host.destroy();
   });
 
@@ -1225,6 +1316,213 @@ describe('decode failure recovery', () => {
     // The fresh load gets its own full budget (2 reloads, then surface): the
     // initial k2 SOURCE plus both reload attempts = 3 k2 SOURCE messages.
     expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).filter((m) => m.src === 'k2')).toHaveLength(3);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('re-anchors the element at the resume position when the replacement resource attaches', () => {
+    // A recovery writes `currentTime` right after `#sendSource()`, but the
+    // element may still sit on the tombstoned pipeline then (readyState ≥
+    // HAVE_METADATA), where the write is a plain seek that the replacement
+    // resource resets to 0. The re-anchor must therefore be re-applied at the
+    // fresh load's resource attach (main-mode SOURCE_OK → beginMainThreadMse).
+    const { host, target, worker } = attachAndHandshake();
+    const originalLoadId = loadAndAcknowledge(host, worker, 'k');
+    worker.sent.length = 0;
+
+    // Mid-watch playback, then a decode error → recovery reload.
+    target.dispatchEvent(new Event('play'));
+    target.currentTime = 42;
+    target.dispatchEvent(new Event('timeupdate'));
+    worker.sent.length = 0;
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: originalLoadId, type: WorkerToMainMessageType.ERROR });
+
+    // The replacement resource boots the element at 0 (the tombstoned
+    // pipeline's write clobbered), exactly the stranded state this guards.
+    target.currentTime = 0;
+
+    // The reloaded load's SOURCE_OK attaches the fresh object URL in main
+    // mode; the element must be parked back at the resume position, not left
+    // at 0 with the worker buffering at 42.
+    worker.reply({ info: mainInfo, requestId: newestSourceId(worker), type: WorkerToMainMessageType.SOURCE_OK });
+    expect(target.currentTime).toBe(42);
+    host.destroy();
+  });
+});
+
+describe('out-of-window seek recovery', () => {
+  /** attach + HELLO_OK → a ready host with a main-mode session. */
+  function attachAndHandshake(): { host: SiaVideoSource; target: HTMLVideoElement; worker: FakeWorker; } {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const target = document.createElement('video');
+    host.attach(target);
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    return { host, target, worker };
+  }
+
+  const mainInfo = { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main', tracks: [] } as const;
+
+  /** Loads `src` and acknowledges it with a known duration, returning its request id. */
+  function loadWithDuration(host: SiaVideoSource, worker: FakeWorker, src: string, durationSeconds: number): number {
+    host.src = src;
+    const source = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).at(-1);
+    if (!source) throw new Error('SOURCE was not sent');
+    worker.reply({
+      info: { ...mainInfo, durationSeconds },
+      requestId: source.requestId,
+      type: WorkerToMainMessageType.SOURCE_OK,
+    });
+    return source.requestId;
+  }
+
+  it.skipIf(!IN_BROWSER)('keeps a seek within the known duration on the ordinary SEEK path', () => {
+    const { host, target, worker } = attachAndHandshake();
+    loadWithDuration(host, worker, 'k', 60);
+    worker.sent.length = 0;
+
+    target.currentTime = 30;
+    target.dispatchEvent(new Event('seeking'));
+    // No source restart, just the plain in-window SEEK.
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+    expect(worker.sent.at(-1)).toMatchObject({ time: 30, type: MainToWorkerMessageType.SEEK });
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('restarts the source re-anchored at the target when the seek passes the known duration', () => {
+    const { host, target, worker } = attachAndHandshake();
+    loadWithDuration(host, worker, 'k', 60);
+
+    // A deliberate pause leaves no play intent: the restart repairs the
+    // position (fresh SOURCE + SEEK to the target) without starting playback.
+    target.dispatchEvent(new Event('pause'));
+    worker.sent.length = 0;
+
+    target.currentTime = 120;
+    target.dispatchEvent(new Event('seeking'));
+
+    const reloadSources = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE);
+    expect(reloadSources).toHaveLength(1);
+    expect(reloadSources[0]).toMatchObject({ src: 'k', type: MainToWorkerMessageType.SOURCE });
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK).at(-1)).toMatchObject({
+      requestId: reloadSources[0].requestId,
+      time: 120,
+      type: MainToWorkerMessageType.SEEK,
+    });
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('does not auto-play a fresh source restarted by an out-of-window seek after an earlier source played', () => {
+    const { host, target, worker } = attachAndHandshake();
+    // The user plays the first source; the next armed source is never played.
+    loadWithDuration(host, worker, 'k', 60);
+    target.dispatchEvent(new Event('play'));
+    worker.sent.length = 0;
+
+    host.src = 'k2';
+    const freshSource = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).at(-1);
+    if (!freshSource) throw new Error('SOURCE was not sent');
+    worker.reply({ info: { ...mainInfo, durationSeconds: 60 }, requestId: freshSource.requestId, type: WorkerToMainMessageType.SOURCE_OK });
+    // Scrub the never-played fresh source while the element stays paused (the
+    // harness's synthetic events never change native paused state): the restart
+    // must repair the position without starting playback — the earlier
+    // source's stale play intent must not leak into an unsolicited PLAY.
+    worker.sent.length = 0;
+
+    target.currentTime = 120;
+    target.dispatchEvent(new Event('seeking'));
+
+    const reloadSources = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE);
+    expect(reloadSources).toHaveLength(1);
+    expect(reloadSources[0]).toMatchObject({ src: 'k2', type: MainToWorkerMessageType.SOURCE });
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK).at(-1)).toMatchObject({
+      requestId: reloadSources[0].requestId,
+      time: 120,
+      type: MainToWorkerMessageType.SEEK,
+    });
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('resumes playback when an out-of-window seek restarts a playing element', () => {
+    const { host, target, worker } = attachAndHandshake();
+    loadWithDuration(host, worker, 'k', 60);
+
+    // Playing element: the restart re-anchors AND keeps playing.
+    target.dispatchEvent(new Event('play'));
+    worker.sent.length = 0;
+
+    target.currentTime = 120;
+    target.dispatchEvent(new Event('seeking'));
+
+    const reloadSources = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE);
+    expect(reloadSources).toHaveLength(1);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY).at(-1)).toMatchObject({
+      requestId: reloadSources[0].requestId,
+      type: MainToWorkerMessageType.PLAY,
+    });
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('surfaces a decode error once out-of-window seek restarts are exhausted', () => {
+    const { host, target, worker } = attachAndHandshake();
+    loadWithDuration(host, worker, 'k', 60);
+
+    let errorEvents = 0;
+    host.addEventListener('error', () => errorEvents++);
+
+    // The re-anchor seek after a restart must stay stuck (this is the case
+    // that keeps the element in HAVE_METADATA): the host's recovery restarts
+    // suppress re-entry from their OWN re-anchor seek via `#recovering`, so a
+    // second out-of-window attempt only ever comes from the stall watchdog —
+    // not from re-dispatching `seeking`, which `#recovering` now swallows.
+    // Model the unresolved seek with a `seeking` flag that never clears and
+    // drive the watchdog with fake timers.
+    //
+    // WILL_MIRROR_SOURCE_CONSTANT: must track SEEK_STALL_TIMEOUT_MS in
+    // sia-video-source.ts; a drift would make the watchdog fire early/late.
+    const SEEK_STALL_MS = 6000;
+    Object.defineProperty(target, 'seeking', { configurable: true, get: () => true });
+    vi.useFakeTimers();
+    try {
+      // First out-of-window seek (past the vouched 60s duration) → restart #1
+      // (one fresh SOURCE), watchdog armed. Acknowledging the SOURCE_OK keeps
+      // the known duration restored the way a real load would.
+      const restartOnce = () => {
+        // Park the element past the vouched duration so `#onSeeking` classifies
+        // it as out-of-window (the recovery's own re-anchor keeps currentTime
+        // at 120 on subsequent watchdog-driven attempts).
+        target.currentTime = 120;
+        target.dispatchEvent(new Event('seeking'));
+        const restart = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).at(-1);
+        expect(restart).toBeDefined();
+        if (restart && 'requestId' in restart) {
+          worker.reply({ info: { ...mainInfo, durationSeconds: 60 }, requestId: restart.requestId, type: WorkerToMainMessageType.SOURCE_OK });
+        }
+      };
+      worker.sent.length = 0;
+      restartOnce();
+      expect(errorEvents).toBe(0);
+      worker.sent.length = 0;
+
+      // The re-anchor seek never resolves → the stalled-seek watchdog fires →
+      // restart #2 (budget spent), still no error surfaced.
+      vi.advanceTimersByTime(SEEK_STALL_MS);
+      expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+      expect(errorEvents).toBe(0);
+      restartOnce();
+      worker.sent.length = 0;
+
+      // Still stuck → watchdog fires again → MAX_EXTERNAL_SEEK_RESTARTS is
+      // exhausted: the failure surfaces as a decode-class error and no further
+      // SOURCE restart happens.
+      vi.advanceTimersByTime(SEEK_STALL_MS);
+      expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+      expect(errorEvents).toBe(1);
+      expect(host.error?.code).toBe(3);
+    } finally {
+      vi.useRealTimers();
+    }
     host.destroy();
   });
 });
