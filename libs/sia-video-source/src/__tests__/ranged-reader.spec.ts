@@ -171,21 +171,37 @@ function stalledSdk(): SiaSdkLike {
 }
 
 /**
- * Counts unhandled rejections for the duration of one test (node's process
- * `unhandledRejection`). Vitest would fail the run on its own, but asserting
- * the local count pins the contract: a swallowed cancel or an awaited
- * rejection must never surface anywhere.
+ * Counts unhandled rejections for the duration of one test. Under node that
+ * is `process`'s `unhandledRejection` event; browsers have no `process`
+ * global, so the same contract is pinned through the DOM `unhandledrejection`
+ * event instead (fires when a rejected promise leaves the task loop with no
+ * handler). Vitest would fail the run on its own, but asserting the local
+ * count pins the contract: a swallowed cancel or an awaited rejection must
+ * never surface anywhere.
  */
 function trackUnhandledRejections(): { count: () => number; dispose: () => void } {
   let count = 0;
-  const listener = () => {
+  if (typeof process !== 'undefined' && typeof process.on === 'function') {
+    const listener = () => {
+      count++;
+    };
+    process.on('unhandledRejection', listener);
+    return {
+      count: () => count,
+      dispose: () => {
+        process.off('unhandledRejection', listener);
+      },
+    };
+  }
+  const listener = (event: PromiseRejectionEvent) => {
+    event.preventDefault();
     count++;
   };
-  process.on('unhandledRejection', listener);
+  window.addEventListener('unhandledrejection', listener);
   return {
     count: () => count,
     dispose: () => {
-      process.off('unhandledRejection', listener);
+      window.removeEventListener('unhandledrejection', listener);
     },
   };
 }

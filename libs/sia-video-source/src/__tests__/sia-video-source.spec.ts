@@ -485,6 +485,11 @@ describe('SiaVideoSource (host state machine)', () => {
     const publicKey = exportWorkerPublicKey(keyPair);
     const appSeed = crypto.getRandomValues(new Uint8Array(32));
     const sharingSeed = crypto.getRandomValues(new Uint8Array(32));
+    // Snapshots of the raw seeds for later comparison: the host scrubs the
+    // suppliers' buffers once each envelope is built, so the plaintext must
+    // be captured before the handshake (mirrors the single-envelope tests).
+    const expectedAppSeed = new Uint8Array(appSeed);
+    const expectedSharingSeed = new Uint8Array(sharingSeed);
     const host = new SiaVideoSource({
       createWorker: () => worker as unknown as Worker,
       getAppKeySeed: () => appSeed,
@@ -501,13 +506,13 @@ describe('SiaVideoSource (host state machine)', () => {
     const envelopes = appKeyMessages.map(
       (m) => (m as unknown as { envelope: AppKeyEnvelope & { keyType?: string }; }).envelope,
     );
-    expect(envelopes[0].keyType).toBeUndefined(); // app (backward-compatible default)
+    expect(envelopes[0].keyType).toBe('app'); // explicitly tagged by #encryptAndSendSeeds
     expect(envelopes[1].keyType).toBe('sharing');
     expect(worker.sent.map((m) => m.type)).toEqual([MainToWorkerMessageType.HELLO, MainToWorkerMessageType.APP_KEY, MainToWorkerMessageType.APP_KEY, MainToWorkerMessageType.ATTACH]);
 
     // Each decrypts to its own seed, independently.
-    expect(Array.from(await decryptAppKeyEnvelope(keyPair, envelopes[0]))).toEqual(Array.from(appSeed));
-    expect(Array.from(await decryptAppKeyEnvelope(keyPair, envelopes[1]))).toEqual(Array.from(sharingSeed));
+    expect(Array.from(await decryptAppKeyEnvelope(keyPair, envelopes[0]))).toEqual(Array.from(expectedAppSeed));
+    expect(Array.from(await decryptAppKeyEnvelope(keyPair, envelopes[1]))).toEqual(Array.from(expectedSharingSeed));
     // Both supplier buffers were scrubbed after the handoff.
     expect(appSeed.every((b) => b === 0)).toBe(true);
     expect(sharingSeed.every((b) => b === 0)).toBe(true);
