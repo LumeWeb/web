@@ -164,6 +164,43 @@ describe('HELLO log threshold wiring (real worker sink)', () => {
     expect(serialized).not.toContain('/objects/');
   });
 
+  it('redacts the share URL out of a rejected SDK bootstrap so sdk.build-failed never leaks the key', async () => {
+    const messages: WorkerToMainMessage[] = [];
+    const root = createDefaultWorkerComposition({
+      capabilities: permissiveCapabilities(),
+      // A failing SDK bootstrap yields an error message that carries the
+      // resolved share URL (which embeds the decryption key); the derived
+      // sdk.build-failed milestone must scrub URL-shaped runs before the
+      // message reaches LOG detail.
+      createSdk: () =>
+        Promise.reject(new Error('fetch to https://host/objects/aabbcc/shared?x=1#encryption_key=zzzz failed')),
+      loadPipeline: new FakeLoadPipeline(),
+      post: (message) => messages.push(message),
+      supportsWorkerMse: () => false,
+    });
+    await root.handleMessage({ config: WORKER_CONFIG, log: 'debug', requestId: 1, type: MainToWorkerMessageType.HELLO });
+    await root.handleMessage({ requestId: 2, type: MainToWorkerMessageType.ATTACH });
+    await root.handleMessage({ preload: 'auto', requestId: 3, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
+    await flush();
+
+    const logs = logsOf(messages);
+    // The build-failure milestone is error-severity and connection-level; the
+    // SDK's message has its URL run replaced, the rest kept readable.
+    const buildFailed = logs.find((log) => log.name === 'sdk.build-failed');
+    expect(buildFailed).toMatchObject({ level: 'error', requestId: null });
+    expect(buildFailed?.detail).toMatchObject({ message: 'fetch to [redacted] failed' });
+
+    // The rethrown error's ERROR envelope context still reaches session.error,
+    // but redacted the same way — the URL and the encryption-key fragment it
+    // embeds never appear in any LOG detail.
+    const sessionError = logs.find((log) => log.name === 'session.error');
+    expect(sessionError?.detail).toMatchObject({ context: 'fetch to [redacted] failed', kind: 'network' });
+    const serialized = JSON.stringify(logs);
+    expect(serialized).not.toContain('https://');
+    expect(serialized).not.toContain('encryption_key');
+    expect(serialized).not.toContain('/objects/');
+  });
+
   it('a HELLO without a log threshold keeps the wire fully silent (zero LOG messages)', async () => {
     const { messages, root } = loggedRoot();
     await driveSource(root, undefined);

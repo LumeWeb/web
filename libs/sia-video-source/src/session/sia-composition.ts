@@ -239,7 +239,10 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
       case WorkerToMainMessageType.ERROR:
         // The ERROR wire already carries the diagnostic context string from
         // `#postError` (describeError of the throwing read/pipeline); include
-        // it next to the kind so a gated host sees why the session failed.
+        // it next to the kind so a gated host sees why the session failed. The
+        // context can be an SDK/fetch error string that embeds the resolved
+        // share URL (which carries the decryption key), so URL-shaped runs are
+        // scrubbed here before they reach the LOG detail.
         emitLog(
           logSink,
           handshake.log,
@@ -247,7 +250,7 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
           'session.error',
           message.context === undefined || message.context === ''
             ? { kind: message.kind }
-            : { context: message.context, kind: message.kind },
+            : { context: redactUrls(message.context), kind: message.kind },
           message.requestId,
         );
         break;
@@ -419,11 +422,11 @@ function createLazySiaByteSourceFactory(deps: {
         // A rejected SDK bootstrap is otherwise invisible (it only surfaces as
         // a generic ERROR after the fact); report it as its own error milestone
         // with the scalar message before rethrowing so the caller's existing
-        // failure path is unchanged. The message comes from controlled factory
-        // errors ("No Sia SDK is available…" / "The Sia app key is not
-        // registered…"), never seeds or share-URL strings.
+        // failure path is unchanged. The message may carry the resolved share
+        // URL (which embeds the object decryption key), so URL-shaped runs are
+        // scrubbed before they reach the LOG detail.
         emitLog(logSink, handshake.log, workerLogLevel.error, 'sdk.build-failed', {
-          message: error instanceof Error ? error.message : String(error),
+          message: redactUrls(error instanceof Error ? error.message : String(error)),
         });
         throw error;
       }
@@ -454,6 +457,18 @@ function disposeSdk(sdk: unknown): void {
         /* best-effort teardown; never propagates */
       });
   }
+}
+
+/**
+ * Scrubs URL-shaped runs out of a diagnostic string before it enters `LOG`
+ * detail. Share URLs embed the object decryption key in the fragment, and an
+ * SDK/fetch error message can carry the resolved share URL verbatim; replacing
+ * any http(s)/`sia://` URL-ish run with `[redacted]` keeps the key (and the
+ * object identity) out of worker logs while leaving the rest of the message
+ * readable. Over-replacement is fine here — lossy only for an attacker.
+ */
+function redactUrls(text: string): string {
+  return text.replace(/(?:https?|sia):\/\/\S+/g, '[redacted]');
 }
 
 /** True when two HELLO worker configs describe the same connection (indexer identity). */
