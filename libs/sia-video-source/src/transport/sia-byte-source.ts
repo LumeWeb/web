@@ -44,6 +44,8 @@ export interface SiaByteSourceFactoryOptions {
   chunkSize?: number;
   /** Forwarded to every `Sdk.download` call. */
   downloadOptions?: { maxBufferedChunks?: number };
+  /** Milestone listener forwarded into every `RangedReader` (see `RangedReaderOptions.onMilestone`). */
+  onMilestone?: (name: string, detail: Readonly<Record<string, unknown>>) => void;
 }
 
 export interface SiaByteSourceOptions {
@@ -57,6 +59,8 @@ export interface SiaByteSourceOptions {
   downloadOptions?: { maxBufferedChunks?: number };
   /** Pinned-object handle (or fake) whose payload the source reads. */
   object: SiaObjectLike;
+  /** Milestone listener forwarded into every `RangedReader` this source creates. */
+  onMilestone?: (name: string, detail: Readonly<Record<string, unknown>>) => void;
   /** Sia SDK (or fake) that serves ranged downloads. */
   sdk: SiaSdkLike;
 }
@@ -147,7 +151,7 @@ export class SiaByteSource implements ByteSource {
       this.#generationState.settle(handle);
     };
 
-    const { budget, chunkSize, downloadOptions, object, sdk } = this.#options;
+    const { budget, chunkSize, downloadOptions, object, onMilestone, sdk } = this.#options;
     const cache = this.#cache;
 
     return new ReadableStream<Uint8Array>({
@@ -197,6 +201,7 @@ export class SiaByteSource implements ByteSource {
             }
             settle();
           },
+          onMilestone,
           sdk,
           stallTimeoutMs: options.stallTimeoutMs,
         });
@@ -226,8 +231,18 @@ export function createSiaByteSourceFactory(
   // replays already-downloaded windows across loads (mirrors the worker's
   // per-core cache). An explicit caller-supplied cache still wins.
   const cache = options.cache ?? new LruChunkCache();
+  const onMilestone = options.onMilestone;
   return async (src: string): Promise<ByteSource> => {
     const object = await resolveSiaObject(sdk, src);
+    // Emit only on successful resolution — a rejection already propagated
+    // above. `share` is a plain boolean (`isSiaShareUrl`): the share URL
+    // string itself embeds the object's decryption key and must NEVER appear
+    // in a milestone detail. `size` comes from the resolved object. requestId
+    // is unknown at this layer, so milestones pick up their load affiliation
+    // at the composition level instead.
+    if (onMilestone !== undefined) {
+      onMilestone('object.resolved', { share: isSiaShareUrl(src), size: objectSize(object) });
+    }
     return new SiaByteSource({ ...options, cache, object, sdk });
   };
 }

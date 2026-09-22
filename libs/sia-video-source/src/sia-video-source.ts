@@ -25,6 +25,7 @@ import { type AppKeySeedProvider, encryptToWorker, scrub } from './app-key-hands
 import { HTMLVideoElementHost } from '@videojs/media/dom/video-host';
 import { type ErrorLike, MediaError, type MediaPreloadType } from '@videojs/media';
 import { mediaErrorEvent, mediaErrorFromWorkerMessage } from './errors.ts';
+import { createConsoleLogger, type LogFields, type Logger, type LogLevelFilter } from './log/logger.ts';
 import { MseAppendPipe } from './mse-pipe.ts';
 import {
   DEFAULT_FMP4_MIME,
@@ -37,6 +38,8 @@ import {
   type WorkerConfig,
   workerErrorCode,
   type WorkerErrorCode,
+  workerLogLevel,
+  type WorkerLogLevel,
   workerMode,
   type WorkerMode,
   type WorkerMsePreference,
@@ -93,6 +96,15 @@ export interface SiaVideoSourceOptions {
    * metadata), so the worker scrubs a seed slot whose provider was removed.
    */
   getSharingKeySeed?: AppKeySeedProvider;
+  /**
+   * The ONLY logging hook for this host. Defaults to `createConsoleLogger()`
+   * so developers get out-of-the-box visibility (`'debug'` in non-production
+   * builds, `'warn'` in production); pass `nullLogger` to mute the library.
+   * The library never logs credential seeds, decrypted key material, or
+   * share-URL strings (they embed decryption keys); worker events are scalar
+   * milestone facts only, forwarded on `logger.child('worker')`.
+   */
+  logger?: Logger;
   /**
    * Declared content type of the source (the `type` from the v10 source
    * contract), forwarded on every `SOURCE`. The worker uses it only when it
@@ -167,6 +179,27 @@ export class SiaVideoSource extends HTMLVideoElementHost {
    */
   set getSharingKeySeed(value: AppKeySeedProvider | undefined) {
     this.#sharingKeySeedProvider = value;
+  }
+  /**
+   * The host's diagnostics hook: worker milestone `LOG` events are forwarded
+   * on `logger.child('worker')`, and `logger.level` drives the worker's HELLO
+   * `log` forwarding threshold on the next (re)attach. Defaults to
+   * `createConsoleLogger()`; swap in `nullLogger` to mute the library.
+   */
+  get logger(): Logger {
+    return this.#logger;
+  }
+  /**
+   * Per-render setter form of the `logger` option, mirroring the
+   * `getAppKeySeed` setter pattern: stores only the logger reference (never
+   * any derived state — the worker's threshold and each forward re-derive
+   * from the live `.level`), so wrappers can swap the sink on a persistent
+   * media instance without going through options. Absent (`undefined`) resets
+   * to the documented `createConsoleLogger()` default, exactly as the
+   * constructor seeds the field and as `mimeType` clears on an omitted prop.
+   */
+  set logger(value: Logger | undefined) {
+    this.#logger = value ?? createConsoleLogger();
   }
   /** Declared content type for the current source; sent with every `SOURCE`. */
   get mimeType(): string | undefined {
@@ -243,6 +276,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   #destroyed = false;
   #error: MediaError | null = null;
   // Main-thread MSE fallback state (Firefox and other `main`-mode sessions).
+  #logger: Logger;
   #mediaSource: MediaSource | null = null;
   #mimeType: string | undefined;
   #mode: null | WorkerMode = null;
@@ -289,6 +323,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#appKeySeedProvider = options.getAppKeySeed;
     this.#sharingKeySeedProvider = options.getSharingKeySeed;
     this.#workerConfig = options.workerConfig;
+    this.#logger = options.logger ?? createConsoleLogger();
     this.#mimeType = options.mimeType;
     this.#workerMse = options.workerMse;
   }
@@ -508,13 +543,18 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // travel exclusively inside encrypted APP_KEY envelopes). A provider the
   // app removed between attaches is declared `false`, so the worker scrubs a
   // seed slot it previously held even though the config re-attached unchanged.
+  // The `log` forwarding threshold rides along too, mapped from the host
+  // logger's level (see `logThresholdFor`); a silent host omits the field, so
+  // the HELLO payload stays byte-identical to the pre-logging wire shape.
   #helloMessage(): MainToWorkerMessage {
+    const log = logThresholdFor(this.#logger.level);
     return {
       appSeed: this.#appKeySeedProvider !== undefined,
       config: this.#helloConfig(),
       requestId: nextRequestId(),
       sharingSeed: this.#sharingKeySeedProvider !== undefined,
       type: MainToWorkerMessageType.HELLO,
+      ...(log === undefined ? {} : { log }),
     };
   }
 
@@ -618,6 +658,12 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // does not exist for this configuration.
         this.#post({ requestId: nextRequestId(), type: MainToWorkerMessageType.ATTACH });
         this.#flushPending();
+        return;
+      case WorkerToMainMessageType.LOG:
+        // Worker milestone facts only (the protocol's `detail` is scalar-only
+        // and never carries key material); forwarded onto the host logger's
+        // `worker` scope. Unknown severities are dropped silently inside.
+        forwardWorkerLog(this.#logger, message);
         return;
       case WorkerToMainMessageType.PROGRESS:
         if (message.requestId === this.#requestId) this.dispatchEvent(new Event('progress'));
@@ -762,6 +808,78 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     }
     this.#mediaSource = null;
     this.#sourceBuffer = null;
+  }
+}
+
+/**
+ * Forwards one worker `LOG` event onto `logger.child('worker')` as a scalar
+ * milestone line: `'worker <name>'` with the event's (scalar-only) `detail`
+ * spread in alongside its owning `requestId` — the wire member the `#onMessage`
+ * switch narrows to. Severities the wire does not know (a foreign or draft
+ * worker) are dropped via the default — never thrown, never echoed as garbage —
+ * and a `nullLogger` sink is already a no-op, so nothing else guards needed.
+ * Field spreading (never the original `detail` object) keeps host-side sink
+ * behavior from mutating the worker's payload.
+ */
+export function forwardWorkerLog(
+  logger: Logger,
+  message: Readonly<{
+    detail?: Readonly<Record<string, unknown>>;
+    level: WorkerLogLevel;
+    name: string;
+    requestId: null | RequestId;
+    type: WorkerToMainMessageType.LOG;
+  }>,
+): void {
+  const sink = logger.child('worker');
+  const fields: LogFields = { ...message.detail, requestId: message.requestId };
+  switch (message.level) {
+    case workerLogLevel.debug:
+      sink.debug(`worker ${message.name}`, fields);
+      return;
+    case workerLogLevel.error:
+      sink.error(`worker ${message.name}`, fields);
+      return;
+    case workerLogLevel.info:
+      sink.info(`worker ${message.name}`, fields);
+      return;
+    case workerLogLevel.warn:
+      sink.warn(`worker ${message.name}`, fields);
+      return;
+    default:
+      return;
+  }
+}
+
+// Maps the host logger's console level to the HELLO `log` wire threshold.
+// WHY these buckets: the wire deliberately carries only the four severities
+// `debug`/`info`/`warn`/`error` (see `workerLogLevel` — trace is excluded to
+// keep the worker-to-main channel cheap). Trace/debug mean "forward everything
+// the wire can carry" (full wire). Info means "lifecycle milestones only": the
+// worker posts its info-level events (attach, sdk.built, object.resolved,
+// stream.*) but skips the debug-level per-read `bytes.read` / `read.window-*`
+// milestones — the default console logger at 'info' would swallow those anyway,
+// so keeping them off the wire avoids pointless traffic. Warn/error raise the
+// worker's bar to match the console filter; 'silent' opts the host out of
+// worker LOG entirely by omitting the field (absent = the worker posts
+// nothing), keeping the wire payload byte-identical to before for a muted host.
+export function logThresholdFor(level: LogLevelFilter): undefined | WorkerLogLevel {
+  switch (level) {
+    case 'debug':
+      return workerLogLevel.debug;
+    case 'error':
+      return workerLogLevel.error;
+    case 'info':
+      return workerLogLevel.info;
+    case 'silent':
+      return undefined;
+    case 'trace':
+      return workerLogLevel.debug;
+    case 'warn':
+      return workerLogLevel.warn;
+    default:
+      // Unknown/future level: omit the threshold rather than leak debug traffic.
+      return undefined;
   }
 }
 

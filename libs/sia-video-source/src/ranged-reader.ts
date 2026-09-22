@@ -12,6 +12,9 @@
 
 import type { Slab } from '@siafoundation/sia-storage';
 
+/** Whole-MiB granularity for `'bytes.read'` milestone boundaries (1048576 bytes). */
+const MIB = 1024 * 1024;
+
 export interface RangedReaderOptions {
   /**
    * Shared bounded-dispatch permit (see {@link ReadBudget}). When set, the
@@ -31,6 +34,17 @@ export interface RangedReaderOptions {
   onChunk: (chunk: Uint8Array, position: number) => void;
   onComplete?: () => void;
   onError?: (error: unknown) => void;
+  /**
+   * Optional milestone listener for the windowed-read observability seam:
+   * `'read.window-start'` when an SDK download opens, `'read.window-complete'`
+   * when it completes successfully, and `'bytes.read'` each time cumulative
+   * delivery to `onChunk` crosses a whole 1 MiB boundary (names follow
+   * `WORKER_LOG_EVENT_NAMES` in protocol.ts). Only scalar detail is ever
+   * passed, and a throwing listener is swallowed so it can never interrupt
+   * the read. Undefined (the default) adds no per-chunk work — each site is a
+   * single optional call check, so the hot path is unchanged.
+   */
+  onMilestone?: (name: string, detail: Readonly<Record<string, unknown>>) => void;
   sdk: SiaSdkLike;
   /**
    * Stall watchdog: maximum milliseconds a single SDK read may yield no bytes
@@ -184,10 +198,14 @@ export class RangedReader {
   get size(): number {
     return objectSize(this.#options.object);
   }
+  /** Cumulative bytes handed to `onChunk` since construction; monotonic, never reset on seek. */
+  #bytesRead = 0;
   readonly #cache: LruChunkCache;
   // Per-run supersede counter; `start()`/`stop()` bump it so an abandoned run
   // can never clobber the streams of the run that replaced it.
   #loadGeneration = 0;
+  /** Next whole-1 MiB cumulative boundary a `'bytes.read'` milestone fires for (fired at most once each). */
+  #nextBytesMilestone = MIB;
   readonly #options: RangedReaderOptions;
 
   #position = 0;
@@ -235,16 +253,52 @@ export class RangedReader {
     if (stream) void stream.cancel().catch(() => { /* empty */ });
   }
 
+  /**
+   * Accumulates delivered bytes and crosses whole-1 MiB `'bytes.read'`
+   * boundaries as they are reached (fired at most once per boundary, never
+   * per chunk). When no milestone listener is set the whole accounting
+   * short-circuits on a single check, so the no-opt-in hot path costs nothing
+   * beyond today.
+   */
+  #accountBytes(count: number): void {
+    if (this.#options.onMilestone === undefined) return;
+    this.#bytesRead += count;
+    while (this.#bytesRead >= this.#nextBytesMilestone) {
+      const boundary = this.#nextBytesMilestone;
+      this.#nextBytesMilestone += MIB;
+      this.#milestone('bytes.read', { bytes: boundary });
+    }
+  }
+
   #emitChunk(bytes: Uint8Array, position: number, maxChunkSize?: number): void {
     if (bytes.byteLength <= (maxChunkSize ?? Infinity)) {
       this.#cache.put(position, bytes.byteLength, bytes);
       this.#options.onChunk(bytes, position);
+      this.#accountBytes(bytes.byteLength);
       return;
     }
     for (let offset = 0; offset < bytes.byteLength; offset += maxChunkSize!) {
       const slice = bytes.subarray(offset, Math.min(offset + maxChunkSize!, bytes.byteLength));
       this.#cache.put(position + offset, slice.byteLength, slice);
       this.#options.onChunk(slice, position + offset);
+      this.#accountBytes(slice.byteLength);
+    }
+  }
+
+  /**
+   * Fires one milestone. The listener is untrusted host code (it may feed a
+   * logger or telemetry), so a throw is silently swallowed: it must never
+   * abort the read or surface an error that belongs to the stream, which the
+   * caller owns, not this hint seam.
+   */
+  #milestone(name: string, detail: Readonly<Record<string, unknown>>): void {
+    const onMilestone = this.#options.onMilestone;
+    if (onMilestone === undefined) return;
+    try {
+      onMilestone(name, detail);
+    } catch {
+      // Untrusted listener: a throwing onMilestone must not corrupt the
+      // stream — swallow and keep reading.
     }
   }
 
@@ -332,6 +386,12 @@ export class RangedReader {
           if (this.#loadGeneration !== loadGeneration) return;
         }
 
+        // Milestone: a network read window begins here — after cache replay
+        // and budget dispatch, at the single point where the SDK download
+        // actually starts. Exact single-download reads emit once per attempt
+        // with the whole requested range, never per chunk.
+        this.#milestone('read.window-start', { deltaBytes: end - start, position: start });
+
         // One SDK download serves the whole remaining [start, end) range with
         // exact offset/length; the reader never tiles a read across requests.
         // A lazy dual-seed SDK may resolve an untagged download through a
@@ -375,7 +435,14 @@ export class RangedReader {
           if (delivered.byteLength < result.value.byteLength) break;
         }
 
-        if (this.#loadGeneration === loadGeneration) onComplete?.();
+        if (this.#loadGeneration === loadGeneration) {
+          // Milestone: the download attempt completed successfully. The
+          // short-read/retry path throws before this point and never
+          // advertises completion; position/delta carry the same window the
+          // matching `read.window-start` opened.
+          this.#milestone('read.window-complete', { deltaBytes: end - start, position: start });
+          onComplete?.();
+        }
       } finally {
         if (release) release();
         // A cancelled run can settle after its replacement already assigned

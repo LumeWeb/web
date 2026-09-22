@@ -19,7 +19,14 @@
  */
 
 import type { PlaybackCapabilities } from '../capabilities/browser-capabilities.ts';
-import type { WorkerConfig } from '../protocol.ts';
+import {
+  type RequestId,
+  type WorkerConfig,
+  type WorkerLogLevel,
+  workerLogLevel,
+  type WorkerToMainMessage,
+  WorkerToMainMessageType,
+} from '../protocol.ts';
 import type { ByteSource } from '../transport/byte-source.ts';
 import type { Clock } from './clock.ts';
 import type { LoadPipeline } from './load-pipeline.ts';
@@ -75,6 +82,15 @@ export interface SiaWorkerCompositionDeps {
    */
   readonly loadPipeline?: LoadPipeline;
   /**
+   * Optional outbound worker `LOG` sink. When supplied, this binding derives
+   * milestones from the coordinator's outbound messages (attach/detach,
+   * sdk.built, stream started/ended, session errors) and forwards them here as
+   * `LOG` messages, each gated by the live HELLO `log` threshold and the
+   * per-sink 256 cap (see `emitLog`). The real worker root wires this to its
+   * `post` channel; tests inject a recorder. Absent = no LOG messages.
+   */
+  readonly logSink?: WorkerLogSink;
+  /**
    * Called whenever the coordinator abandons the active load (superseded
    * SOURCE, DETACH, or DESTROY). When `workerMseRoot` is in use this binding
    * ignores a caller-supplied value and tears the root down itself so the
@@ -104,6 +120,36 @@ export interface SiaWorkerCompositionDeps {
 }
 
 /**
+ * Outbound worker `LOG` message sink: receives fully-formed `LOG` protocol
+ * messages (see `emitLog`) that a host opted into via the HELLO `log`
+ * threshold. The sink must be total (never throw): the composition forwards
+ * every derived milestone through it after the real protocol message already
+ * went out, so a misbehaving consumer can never wedge the wire.
+ */
+export type WorkerLogSink = (message: Extract<WorkerToMainMessage, { type: WorkerToMainMessageType.LOG }>) => void;
+
+/**
+ * Hard ceiling on the number of `LOG` messages one sink instance may receive.
+ * A pathological loop (e.g. a per-read milestone inside a tight retry storm)
+ * must never flood the worker→main `postMessage` channel, so past this budget
+ * `emitLog` silently drops. The count closes over the sink identity via a
+ * `WeakMap`, so independent compositions/workers never borrow from each
+ * other's budget.
+ */
+export const MAX_WORKER_LOG_MESSAGES = 256;
+
+/** Severity rank for the four wire levels, least to most severe (drives the threshold gate). */
+const LOG_LEVEL_RANK = {
+  [workerLogLevel.debug]: 0,
+  [workerLogLevel.error]: 3,
+  [workerLogLevel.info]: 1,
+  [workerLogLevel.warn]: 2,
+} as const satisfies Record<WorkerLogLevel, number>;
+
+/** Per-sink `LOG` message counts backing the `MAX_WORKER_LOG_MESSAGES` cap. */
+const emitLogCounts = new WeakMap<WorkerLogSink, number>();
+
+/**
  * Composition-root factory: builds a fully wired, protocol-compatible
  * `SessionCoordinator` for a Sia worker. A resolved `sdk` becomes
  * `createSource` directly; with `createSdk` instead, the real transport root is
@@ -113,7 +159,7 @@ export interface SiaWorkerCompositionDeps {
  * produces one `MseAdapter` per load.
  */
 export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): SessionCoordinator {
-  const { byteSource, sdk, workerMse, workerMseRoot, ...rest } = deps;
+  const { byteSource, logSink, sdk, workerMse, workerMseRoot, ...rest } = deps;
   if (!sdk && !deps.createSdk) {
     throw new Error(
       'createSiaWorkerComposition requires a resolved `sdk` or a `createSdk` factory (HELLO/APP_KEY-driven).',
@@ -122,17 +168,97 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
   // The composition root owns the handshake instance so `createSource` can
   // read the live connection (config + decrypted seed) for lazy SDK binding.
   const handshake = deps.handshake ?? createSessionHandshake();
+
+  // Reader/source milestones (`read.window-start` / `read.window-complete` /
+  // `bytes.read` from `RangedReader`, and `object.resolved` from the byte
+  // source factory) route through `emitLog` — the single gated code path — so
+  // a missing `logSink` or a below-threshold HELLO `log` keeps every reader
+  // milestone fully suppressed. The callback is only attached when a
+  // `logSink` exists. The coordinator's `createSource` seam hands the factory
+  // only the `src` string, never the SOURCE requestId, so these milestones
+  // travel connection-level (requestId null).
+  const onMilestone = logSink
+    ? (name: string, detail: Readonly<Record<string, unknown>>): void => {
+        const level =
+          name === 'object.resolved'
+            ? workerLogLevel.info
+            : name === 'read.window-start' || name === 'read.window-complete' || name === 'bytes.read'
+              ? workerLogLevel.debug
+              : undefined;
+        if (level === undefined) return;
+        emitLog(logSink, handshake.log, level, name, detail);
+      }
+    : undefined;
+  const byteSourceOptions: SiaByteSourceFactoryOptions | undefined = onMilestone
+    ? { ...byteSource, onMilestone }
+    : byteSource;
   const createSource: (src: string) => Promise<ByteSource> = deps.createSdk
-    ? createLazySiaByteSourceFactory({ byteSource, createSdk: deps.createSdk, handshake })
-    : createSiaByteSourceFactory(sdk!, byteSource);
+    ? createLazySiaByteSourceFactory({ byteSource: byteSourceOptions, createSdk: deps.createSdk, handshake, logSink })
+    : createSiaByteSourceFactory(sdk!, byteSourceOptions);
   // Worker MSE is used only when the runtime can construct it in a dedicated
   // worker AND a worker MSE binding is supplied; otherwise the coordinator
   // keeps its default main-mode CHUNK posting sink (the Firefox fallback).
   const workerMseSupported = (deps.supportsWorkerMse ?? defaultSupportsWorkerMse)();
+
+  // Derived stream/session milestones, observed at the coordinator's outbound
+  // `post` boundary: the coordinator surfaces load success, failure, and
+  // terminal conditions as SOURCE_OK / ERROR / ENDED (and ATTACH as ATTACH_OK),
+  // all of which flow through this wrapper. The wrapper passes everything
+  // through and decides nothing —
+  // every message is passed through to the real channel unchanged, AFTER the
+  // milestone (if any) was derived, so a milestone can never suppress or delay
+  // the protocol message that triggered it.
+  let loadAccepted = false;
+  const wrappedPost: PostMessage = (message, transfer) => {
+    switch (message.type) {
+      case WorkerToMainMessageType.ATTACH_OK:
+        emitLog(logSink, handshake.log, workerLogLevel.info, 'session.attach');
+        break;
+      case WorkerToMainMessageType.ENDED:
+        emitLog(logSink, handshake.log, workerLogLevel.info, 'stream.ended', undefined, message.requestId);
+        break;
+      case WorkerToMainMessageType.ERROR:
+        emitLog(
+          logSink,
+          handshake.log,
+          workerLogLevel.error,
+          'session.error',
+          { kind: message.kind },
+          message.requestId,
+        );
+        break;
+      case WorkerToMainMessageType.SOURCE_OK:
+        // A load was accepted: the session graph now exists, so the next
+        // abandon (DETACH / DESTROY / superseding SOURCE) is a real detach.
+        loadAccepted = true;
+        emitLog(logSink, handshake.log, workerLogLevel.info, 'stream.started', undefined, message.requestId);
+        break;
+    }
+    deps.post(message, transfer);
+  };
+
+  // `session.detach` is derived at the coordinator's abandon boundary — the
+  // lifecycle hook that fires when the active session graph is torn down by
+  // DETACH/DESTROY or superseded by a new SOURCE. The `loadAccepted` latch
+  // keeps the no-op first-source abandon (nothing accepted yet) from logging a
+  // spurious detach. The root teardown semantics are preserved: with
+  // `workerMseRoot` the caller's onAbandon is ignored (the root owns MSE
+  // teardown), otherwise the caller's onAbandon still runs.
+  const onAbandon = (): void => {
+    if (workerMseSupported && workerMseRoot) workerMseRoot.teardown();
+    else deps.onAbandon?.();
+    if (loadAccepted) {
+      loadAccepted = false;
+      emitLog(logSink, handshake.log, workerLogLevel.info, 'session.detach');
+    }
+  };
+
   return createSessionCoordinator({
     ...rest,
     createSource,
     handshake,
+    onAbandon,
+    post: wrappedPost,
     supportsWorkerMse: () => workerMseSupported,
     ...(workerMseSupported && workerMseRoot
       ? {
@@ -141,13 +267,47 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
           // Any abandoned/ended session tears the root's pipeline down so a
           // superseded or detached load never leaves a stale MediaSource +
           // SourceBuffer allocated on the worker.
-          onAbandon: () => workerMseRoot.teardown(),
           onPlayhead: (timeSeconds) => workerMseRoot.setPlayhead(timeSeconds),
           sinkFactory: (context) => workerMseRoot.createSink(context),
         }
       : workerMseSupported && workerMse
         ? { sinkFactory: createWorkerMseSinkFactory(workerMse) }
         : {}),
+  });
+}
+
+/**
+ * Forwards one milestone as a worker→main `LOG` message through `sink`, gated
+ * by the HELLO `log` forwarding threshold:
+ *
+ * - no-ops when `sink` or `threshold` is undefined — no sink wired, or a host
+ *   that never opted in (absent HELLO `log` keeps the wire fully silent),
+ * - no-ops when the event's severity ranks below `threshold` (severity order
+ *   `debug < info < warn < error`; rank via the tiny `LOG_LEVEL_RANK` map over
+ *   the `workerLogLevel` const, never the chatty `logger.ts` ranks),
+ * - enforces the per-sink `MAX_WORKER_LOG_MESSAGES` cap described above,
+ * - otherwise hands `sink` the complete `LOG` message (scalar `detail` only —
+ *   never seed bytes or share-URL strings).
+ */
+export function emitLog(
+  sink: undefined | WorkerLogSink,
+  threshold: undefined | WorkerLogLevel,
+  level: WorkerLogLevel,
+  name: string,
+  detail?: Readonly<Record<string, unknown>>,
+  requestId?: null | RequestId,
+): void {
+  if (sink === undefined || threshold === undefined) return;
+  if (LOG_LEVEL_RANK[level] < LOG_LEVEL_RANK[threshold]) return;
+  const count = emitLogCounts.get(sink) ?? 0;
+  if (count >= MAX_WORKER_LOG_MESSAGES) return;
+  emitLogCounts.set(sink, count + 1);
+  sink({
+    detail,
+    level,
+    name,
+    requestId: requestId ?? null,
+    type: WorkerToMainMessageType.LOG,
   });
 }
 
@@ -192,9 +352,10 @@ function createLazySiaByteSourceFactory(deps: {
     appKeySeed: null | Uint8Array,
     sharingSeed: null | Uint8Array,
   ) => Promise<SiaByteSourceSdk>;
-  readonly handshake: Pick<SessionHandshake, 'config' | 'seed' | 'sharingSeed'>;
+  readonly handshake: Pick<SessionHandshake, 'config' | 'log' | 'seed' | 'sharingSeed'>;
+  readonly logSink?: WorkerLogSink;
 }): (src: string) => Promise<ByteSource> {
-  const { byteSource, createSdk, handshake } = deps;
+  const { byteSource, createSdk, handshake, logSink } = deps;
   let cached: null | {
     config: undefined | WorkerConfig;
     sdk: SiaByteSourceSdk;
@@ -209,6 +370,10 @@ function createLazySiaByteSourceFactory(deps: {
     let sdk = cached && connectionEquals(cached, config, seed, sharingSeed) ? cached.sdk : null;
     if (!sdk) {
       sdk = await createSdk(config, seed, sharingSeed);
+      // A fresh SDK build for this connection: report it at connection level
+      // (no owning request), carrying only the indexer identity — never seeds
+      // or share-URL strings (share URLs embed encryption keys).
+      emitLog(logSink, handshake.log, workerLogLevel.info, 'sdk.built', { indexerUrl: config?.indexerUrl });
       const previous = cached?.sdk;
       cached = { config, sdk, seed, sharingSeed };
       // Defer the call so a synchronous throw inside dispose() never escapes a

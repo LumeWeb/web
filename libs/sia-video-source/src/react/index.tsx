@@ -7,8 +7,9 @@
  * callback wires the real `<video>` element into it.
  *
  * Media props (`src`, `preload`, `streamType`) and the
- * `sia`/`mimeType`/`getAppKeySeed`/`getSharingKeySeed` config are synced from
- * JSX into the media object during render instead of becoming HTML attributes,
+ * `sia`/`mimeType`/`logger`/`getAppKeySeed`/`getSharingKeySeed` config are
+ * synced from JSX into the media object during render instead of becoming HTML
+ * attributes,
  * exactly what the packaged components' internal prop-syncing hook does.
  * Because the media instance persists across renders, these are synced on
  * EVERY render — `mimeType` forwards immediately on the next `SOURCE`, while
@@ -26,6 +27,7 @@
 import { forwardRef, type ReactNode, type VideoHTMLAttributes } from 'react';
 import { useAttachMedia, useComposedRefs, useMediaInstance } from '@videojs/react';
 import { type AppKeySeedProvider } from '../app-key-handshake.ts';
+import type { Logger } from '../log/logger.ts';
 import { siaVideoDefaultProps, SiaVideoSource } from '../sia-video-source.ts';
 import type { WorkerConfig } from '../protocol.ts';
 
@@ -47,6 +49,14 @@ export interface SiaVideoProps
    * When present, a share-URL `src` streams via `SharedSdk` without an app key.
    */
   getSharingKeySeed?: AppKeySeedProvider;
+  /**
+   * Logging hook for the underlying media host (see
+   * `SiaVideoSourceOptions.logger`). Synced to the persistent media instance
+   * on every render; a change applies immediately to host-side worker-event
+   * forwarding and to the worker's HELLO `log` threshold on the next
+   * (re)attach. Defaults to `createConsoleLogger()`.
+   */
+  logger?: Logger;
   /** Declared content type for the source; forwarded to the worker on every `SOURCE`. */
   mimeType?: string;
   /** Connection metadata for the worker's default Sia SDK factory (no seed — see `getAppKeySeed`). */
@@ -78,7 +88,7 @@ function asMediaLike(media: SiaVideoSource): MediaLike {
  * required for the account connection that funds the downloads.
  */
 export const SiaVideo = forwardRef<HTMLVideoElement, SiaVideoProps>(function SiaVideo(
-  { children, getAppKeySeed, getSharingKeySeed, sia, ...props },
+  { children, getAppKeySeed, getSharingKeySeed, logger, sia, ...props },
   ref,
 ) {
   // The media instance is created lazily and kept for the component's whole
@@ -120,6 +130,10 @@ export const SiaVideo = forwardRef<HTMLVideoElement, SiaVideoProps>(function Sia
     media.workerConfig = sia;
     media.getAppKeySeed = getAppKeySeed;
     media.getSharingKeySeed = getSharingKeySeed;
+    // Also unconditional: the logger sink is a live reference the host re-reads
+    // from its `logger.level` for the worker's HELLO threshold and forwards
+    // worker events through; swapping it per-render needs no attach.
+    media.logger = logger;
     for (const [key, value] of Object.entries(siaVideoDefaultProps)) {
       if (sourceProps[key] === undefined && value !== undefined && owning[key] !== value) {
         owning[key] = value;
