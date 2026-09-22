@@ -142,8 +142,9 @@ describe('opting in (HELLO log: debug) collects the LOG stream end-to-end', () =
       name: 'object.resolved',
       requestId: null,
     });
-    // `session.source-ok`-adjacent: SOURCE_OK derives `stream.started` scoped to load 3.
-    expect(logs[3]).toMatchObject({ name: 'stream.started', requestId: 3 });
+    // SOURCE_OK derives `stream.started` scoped to load 3; the mode comes from
+    // the ATTACH_OK that preceded it (this root ran in main-mode fallback).
+    expect(logs[3]).toMatchObject({ detail: { mode: 'main' }, name: 'stream.started', requestId: 3 });
 
     // Every message passes the worker→main wire guard, and its detail is
     // scalar-only — primitives/null, never nested objects or credentials.
@@ -228,6 +229,15 @@ describe('HELLO log: warn suppresses info/debug but still surfaces a failing loa
       name: 'session.error',
       requestId: 3,
     });
+    // The derived session.error carries the ERROR envelope's context string
+    // (here the rejecting SDK's "boom") next to the kind — scalars only.
+    expect(logs[0].detail).toMatchObject({ context: 'boom', kind: 'network' });
+    // Wire-safety: the context is a controlled error message, never a share
+    // URL or credential (a share URL embeds the decryption key).
+    const serialized = JSON.stringify(logs);
+    expect(serialized).not.toContain('encryption_key');
+    expect(serialized).not.toContain('/objects/');
+    for (const value of Object.values(logs[0].detail ?? {})) expect(isScalar(value)).toBe(true);
     expect(isWorkerToMainMessage(logs[0])).toBe(true);
     expect(logs.some((log) => log.name === 'session.attach')).toBe(false);
   });
@@ -252,7 +262,7 @@ describe('host-side contract: threshold mapper + console-logger forwarding', () 
     const message: LogMessage = {
       detail: { bytes: 4096, position: 0 },
       level: workerLogLevel.warn,
-      name: WORKER_LOG_EVENT_NAMES[3],
+      name: WORKER_LOG_EVENT_NAMES[9],
       requestId: 7,
       type: WorkerToMainMessageType.LOG,
     };
@@ -261,7 +271,7 @@ describe('host-side contract: threshold mapper + console-logger forwarding', () 
     // The console logger dot-joins the `worker` child scope into the header
     // and the line renders as `worker <name>` with detail spread + requestId.
     expect(console.warn).toHaveBeenCalledTimes(1);
-    expect(console.warn).toHaveBeenCalledWith('[sia-video-source:worker] worker session.source-ok', {
+    expect(console.warn).toHaveBeenCalledWith('[sia-video-source:worker] worker read.window-complete', {
       bytes: 4096,
       position: 0,
       requestId: 7,

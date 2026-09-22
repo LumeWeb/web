@@ -24,6 +24,7 @@ import {
   type WorkerConfig,
   type WorkerLogLevel,
   workerLogLevel,
+  type WorkerMode,
   type WorkerToMainMessage,
   WorkerToMainMessageType,
 } from '../protocol.ts';
@@ -182,9 +183,13 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
         const level =
           name === 'object.resolved'
             ? workerLogLevel.info
-            : name === 'read.window-start' || name === 'read.window-complete' || name === 'bytes.read'
-              ? workerLogLevel.debug
-              : undefined;
+            : // Failure milestones are rare (only on a stalled or errored read),
+              // so they never crowd the per-sink 256-message cap.
+              name === 'read.stalled' || name === 'read.error'
+              ? workerLogLevel.error
+              : name === 'read.window-start' || name === 'read.window-complete' || name === 'bytes.read'
+                ? workerLogLevel.debug
+                : undefined;
         if (level === undefined) return;
         emitLog(logSink, handshake.log, level, name, detail);
       }
@@ -209,21 +214,31 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
   // milestone (if any) was derived, so a milestone can never suppress or delay
   // the protocol message that triggered it.
   let loadAccepted = false;
+  // The negotiated MSE site from the last ATTACH_OK (`message.mode`), used to
+  // annotate `stream.started`. It lags by design: no whole config is plumbed
+  // here, the ATTACH_OK wire field is the one honest source.
+  let sessionMode: undefined | WorkerMode;
   const wrappedPost: PostMessage = (message, transfer) => {
     switch (message.type) {
       case WorkerToMainMessageType.ATTACH_OK:
+        sessionMode = message.mode;
         emitLog(logSink, handshake.log, workerLogLevel.info, 'session.attach');
         break;
       case WorkerToMainMessageType.ENDED:
         emitLog(logSink, handshake.log, workerLogLevel.info, 'stream.ended', undefined, message.requestId);
         break;
       case WorkerToMainMessageType.ERROR:
+        // The ERROR wire already carries the diagnostic context string from
+        // `#postError` (describeError of the throwing read/pipeline); include
+        // it next to the kind so a gated host sees why the session failed.
         emitLog(
           logSink,
           handshake.log,
           workerLogLevel.error,
           'session.error',
-          { kind: message.kind },
+          message.context === undefined || message.context === ''
+            ? { kind: message.kind }
+            : { context: message.context, kind: message.kind },
           message.requestId,
         );
         break;
@@ -231,7 +246,14 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
         // A load was accepted: the session graph now exists, so the next
         // abandon (DETACH / DESTROY / superseding SOURCE) is a real detach.
         loadAccepted = true;
-        emitLog(logSink, handshake.log, workerLogLevel.info, 'stream.started', undefined, message.requestId);
+        emitLog(
+          logSink,
+          handshake.log,
+          workerLogLevel.info,
+          'stream.started',
+          sessionMode === undefined ? undefined : { mode: sessionMode },
+          message.requestId,
+        );
         break;
     }
     deps.post(message, transfer);
@@ -369,7 +391,20 @@ function createLazySiaByteSourceFactory(deps: {
     const sharingSeed = handshake.sharingSeed ?? null;
     let sdk = cached && connectionEquals(cached, config, seed, sharingSeed) ? cached.sdk : null;
     if (!sdk) {
-      sdk = await createSdk(config, seed, sharingSeed);
+      try {
+        sdk = await createSdk(config, seed, sharingSeed);
+      } catch (error) {
+        // A rejected SDK bootstrap is otherwise invisible (it only surfaces as
+        // a generic ERROR after the fact); report it as its own error milestone
+        // with the scalar message before rethrowing so the caller's existing
+        // failure path is unchanged. The message comes from controlled factory
+        // errors ("No Sia SDK is available…" / "The Sia app key is not
+        // registered…"), never seeds or share-URL strings.
+        emitLog(logSink, handshake.log, workerLogLevel.error, 'sdk.build-failed', {
+          message: error instanceof Error ? error.message : String(error),
+        });
+        throw error;
+      }
       // A fresh SDK build for this connection: report it at connection level
       // (no owning request), carrying only the indexer identity — never seeds
       // or share-URL strings (share URLs embed encryption keys).

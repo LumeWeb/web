@@ -185,11 +185,17 @@ describe('HELLO log threshold wiring (real worker sink)', () => {
 
     const logs = logsOf(messages);
     // session.error is error-severity (at/above the 'error' threshold) so it posts.
-    expect(logs.find((log) => log.name === 'session.error')).toMatchObject({
+    const sessionError = logs.find((log) => log.name === 'session.error');
+    expect(sessionError).toMatchObject({
       detail: { kind: 'network' },
       level: 'error',
       requestId: 3,
     });
+    // The ERROR envelope's context (the rejecting object()'s "boom") rides
+    // along in the detail — scalar only, never a share URL or credential.
+    expect(sessionError?.detail).toMatchObject({ context: 'boom', kind: 'network' });
+    expect(JSON.stringify(logs)).not.toContain('encryption_key');
+    expect(JSON.stringify(logs)).not.toContain('/objects/');
     // Every info-level milestone (sdk.built, session.attach, …) is suppressed.
     expect(logs.filter((log) => log.level !== 'error')).toHaveLength(0);
   });

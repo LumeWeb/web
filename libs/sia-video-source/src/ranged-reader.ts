@@ -37,12 +37,16 @@ export interface RangedReaderOptions {
   /**
    * Optional milestone listener for the windowed-read observability seam:
    * `'read.window-start'` when an SDK download opens, `'read.window-complete'`
-   * when it completes successfully, and `'bytes.read'` each time cumulative
-   * delivery to `onChunk` crosses a whole 1 MiB boundary (names follow
-   * `WORKER_LOG_EVENT_NAMES` in protocol.ts). Only scalar detail is ever
-   * passed, and a throwing listener is swallowed so it can never interrupt
-   * the read. Undefined (the default) adds no per-chunk work — each site is a
-   * single optional call check, so the hot path is unchanged.
+   * when it completes successfully, `'bytes.read'` each time cumulative
+   * delivery to `onChunk` crosses a whole 1 MiB boundary, `'read.stalled'`
+   * when the stall watchdog aborts a read that yielded no bytes, and
+   * `'read.error'` when a run fails for any other reason (short read / SDK
+   * stream error; the stall error is reported only as `read.stalled`, never
+   * also as `read.error`) (names follow `WORKER_LOG_EVENT_NAMES` in
+   * protocol.ts). Only scalar detail is ever passed, and a throwing listener
+   * is swallowed so it can never interrupt the read. Undefined (the default)
+   * adds no per-chunk work — each site is a single optional call check, so
+   * the hot path is unchanged.
    */
   onMilestone?: (name: string, detail: Readonly<Record<string, unknown>>) => void;
   sdk: SiaSdkLike;
@@ -328,6 +332,10 @@ export class RangedReader {
           this.#stream?.cancel().catch(() => { /* empty */ });
           this.#reader = null;
           this.#stream = null;
+          // Only an in-flight run's watchdog reports the stall (a superseded
+          // run's late watchdog must not blame the replacement). No bytes
+          // arrived, so the position is still the read's start offset.
+          this.#milestone('read.stalled', { position: this.#position, stallTimeoutMs: timeoutMs });
         }
         reject(new Error(`Sia SDK read stalled: no bytes for ${timeoutMs}ms`));
       }, timeoutMs);
@@ -347,6 +355,13 @@ export class RangedReader {
   async #run(loadGeneration: number): Promise<void> {
     const { budget, chunkSize, object, onComplete, onError, sdk, stallTimeoutMs } = this.#options;
 
+    // Hoisted so the failure milestone below can report the read window even
+    // when the download throws before `read.window-complete`; `start` is
+    // seeded with the current position so a pre-download failure (e.g. a
+    // cache-replay onChunk throw) still names where the read stood.
+    let end = 0;
+    let start = this.#position;
+
     try {
       // Replay contiguous cached windows before the network read; a listener
       // sees one seamless delivery either way.
@@ -364,8 +379,8 @@ export class RangedReader {
       if (this.#loadGeneration !== loadGeneration) return;
 
       const size = objectSize(object);
-      const end = Math.min(this.#rangeEnd ?? size, size);
-      const start = Math.min(this.#position, size);
+      end = Math.min(this.#rangeEnd ?? size, size);
+      start = Math.min(this.#position, size);
       if (start >= end) {
         onComplete?.();
         return;
@@ -462,7 +477,23 @@ export class RangedReader {
         }
       }
     } catch (error) {
-      if (this.#loadGeneration === loadGeneration) onError?.(error);
+      if (this.#loadGeneration === loadGeneration) {
+        // The stall watchdog already reported `read.stalled` with its own
+        // timeout detail; do not double-report it as a generic read.error.
+        // Every other failure (short read / SDK stream error / a throwing
+        // onChunk) reports the read window it failed on, with only scalar
+        // facts: the start position, the requested length, and how many bytes
+        // were actually delivered (omitted when none were).
+        if (!isStallWatchdogError(error)) {
+          const deliveredBytes = this.#position - start;
+          this.#milestone('read.error', {
+            expectedBytes: Math.max(0, end - start),
+            position: start,
+            ...(deliveredBytes > 0 ? { deliveredBytes } : {}),
+          });
+        }
+        onError?.(error);
+      }
     }
   }
 }
@@ -535,4 +566,14 @@ export class ReadBudget {
 /** Object payload size in bytes, from the local slab map. */
 export function objectSize(object: SiaObjectLike): number {
   return object.slabs().reduce((total, slab) => total + slab.length, 0);
+}
+
+/**
+ * True when the caught error is the stall watchdog's own rejection, which
+ * already fired `read.stalled` — the run's catch must not re-report it as a
+ * generic `read.error`. Coupled to the message this module itself raises in
+ * `#readWithStallWatchdog`, never to an SDK-provided string.
+ */
+function isStallWatchdogError(error: unknown): boolean {
+  return error instanceof Error && error.message.startsWith('Sia SDK read stalled: ');
 }

@@ -131,6 +131,25 @@ function shortReadSdk(payload: Uint8Array, delivered: number): SiaSdkLike {
   };
 }
 
+/**
+ * SDK whose downloads never deliver a byte and never reach EOF — models a
+ * read stalled by exhausted WebTransport sessions. `cancel` settles so the
+ * watchdog's abort unwinds.
+ */
+function stalledSdk(): SiaSdkLike {
+  return {
+    download: () =>
+      new ReadableStream<Uint8Array>({
+        cancel() {
+          /* swallow: lets the watchdog's abort resolve */
+        },
+        pull() {
+          return new Promise<undefined>(() => { /* deliberately never settles */ });
+        },
+      }),
+  };
+}
+
 describe('RangedReader — read window milestones', () => {
   it('emits one window-start, one window-complete, and 1 MiB byte-boundary crossings for a full read', async () => {
     const recorder = milestoneRecorder();
@@ -286,6 +305,67 @@ describe('RangedReader — read window milestones', () => {
     expect(join(delivered)).toEqual(PAYLOAD);
     expect(reader.position).toBe(PAYLOAD.length);
     expect(reader.active).toBe(false);
+  });
+
+  it('emits read.stalled when the stall watchdog aborts a read that never delivers', async () => {
+    const recorder = milestoneRecorder();
+    const errors: unknown[] = [];
+    const reader = new RangedReader({
+      chunkSize: CHUNK_SIZE,
+      object: fakeObject(PAYLOAD.length),
+      onChunk: () => {
+        throw new Error('a stalled read must never deliver a chunk');
+      },
+      onError: (error) => errors.push(error),
+      onMilestone: recorder.onMilestone,
+      sdk: stalledSdk(),
+      stallTimeoutMs: 20,
+    });
+
+    reader.start();
+    await new Promise((resolve) => setTimeout(resolve, 150));
+
+    // read.stalled names the watchdog's own timeout and the position the read
+    // never advanced past; nothing claims the window completed, and the stall
+    // error is NOT double-reported as a generic read.error.
+    expect(recorder.events.filter((e) => e.name === 'read.stalled')).toEqual([
+      { detail: { position: 0, stallTimeoutMs: 20 }, name: 'read.stalled' },
+    ]);
+    expect(recorder.events.filter((e) => e.name === 'read.error')).toHaveLength(0);
+    expect(recorder.events.filter((e) => e.name === 'read.window-complete')).toHaveLength(0);
+    expect(errors).toHaveLength(1);
+    expect(reader.active).toBe(false);
+  });
+
+  it('emits read.error with the read-window facts for a short read', async () => {
+    const recorder = milestoneRecorder();
+    const errors: unknown[] = [];
+    const reader = new RangedReader({
+      chunkSize: CHUNK_SIZE,
+      object: fakeObject(PAYLOAD.length),
+      onChunk: () => {
+        /* partial delivery is expected before the short read surfaces */
+      },
+      onError: (error) => errors.push(error),
+      onMilestone: recorder.onMilestone,
+      sdk: shortReadSdk(PAYLOAD, 512 * 1024),
+    });
+
+    reader.start();
+    await settle();
+    await settle();
+
+    // read.error carries only scalar facts the catch held: the window start,
+    // the requested length, and the bytes actually delivered (512 KiB here).
+    expect(recorder.events.filter((e) => e.name === 'read.error')).toEqual([
+      {
+        detail: { deliveredBytes: 512 * 1024, expectedBytes: PAYLOAD.length, position: 0 },
+        name: 'read.error',
+      },
+    ]);
+    expect(recorder.events.filter((e) => e.name === 'read.window-complete')).toHaveLength(0);
+    expect(errors).toHaveLength(1);
+    expect((errors[0] as Error).message).toMatch(/before the requested range/);
   });
 });
 

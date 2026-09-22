@@ -246,15 +246,16 @@ export type WorkerLogLevel = (typeof workerLogLevel)[keyof typeof workerLogLevel
 export const WORKER_LOG_EVENT_NAMES = [
   'session.attach',
   'session.detach',
-  'session.source-start',
-  'session.source-ok',
   'session.error',
   'sdk.built',
+  'sdk.build-failed',
   'object.resolved',
   'stream.started',
   'stream.ended',
   'read.window-start',
   'read.window-complete',
+  'read.stalled',
+  'read.error',
   'bytes.read',
 ] as const;
 
