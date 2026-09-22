@@ -1052,6 +1052,41 @@ describe('decode failure recovery', () => {
     host.destroy();
   });
 
+  it.skipIf(!IN_BROWSER)('seeks subsequent recoveries on the reloaded load back to the original watch position', () => {
+    const { host, target, worker } = attachAndHandshake();
+    const idA = loadAndAcknowledge(host, worker, 'k');
+
+    // The user is watching at t=12.5 and playback (play intent) must survive
+    // every reload: the reloaded source must SEEK back here each time.
+    target.currentTime = 12.5;
+    target.dispatchEvent(new Event('timeupdate'));
+    target.dispatchEvent(new Event('play'));
+    worker.sent.length = 0;
+
+    // Decode error #1 on the active load A → reload 1: a fresh SOURCE (id B),
+    // a SEEK back to the captured playhead, and a PLAY on the new load.
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: idA, type: WorkerToMainMessageType.ERROR });
+    const idB = newestSourceId(worker);
+    const firstReloadSeeks = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK);
+    expect(firstReloadSeeks).toHaveLength(1);
+    expect(firstReloadSeeks[0]).toMatchObject({ time: 12.5, type: MainToWorkerMessageType.SEEK });
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY).at(-1)).toMatchObject({ requestId: idB, type: MainToWorkerMessageType.PLAY });
+
+    // The reloaded element stays stalled — the worker's MediaSource died under
+    // it, so no further `timeupdate` fires and the host's last known watch
+    // position remains 12.5. No SOURCE_OK is needed for load B to trigger the
+    // next recovery: it is request-scoped to the active load either way.
+    worker.sent.length = 0;
+
+    // Decode error #2 on the reloaded load B → reload 2 must seek to the SAME
+    // watch position, not back to 0 as if the position had been lost.
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: idB, type: WorkerToMainMessageType.ERROR });
+    const secondReloadSeeks = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK);
+    expect(secondReloadSeeks).toHaveLength(1);
+    expect(secondReloadSeeks[0]).toMatchObject({ time: 12.5, type: MainToWorkerMessageType.SEEK });
+    host.destroy();
+  });
+
   it.skipIf(!IN_BROWSER)('reports the decode error to the UI only after recovery attempts are exhausted', () => {
     const { host, worker } = attachAndHandshake();
     const initialLoadId = loadAndAcknowledge(host, worker, 'k');

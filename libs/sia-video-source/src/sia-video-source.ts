@@ -808,6 +808,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // zeroes the recovery budget — restore the old count including this one.
     this.#resetLoadState();
     this.#reloadsThisLoad = attempt;
+    // The reset also cleared the captured watch position, but the stalled
+    // element emits no further timeupdate to re-record it — keep the position
+    // for later recoveries of this same load.
+    this.#lastPlayheadSeconds = resumeSeconds;
     this.#sendSource();
     const requestId = this.#requestId ?? nextRequestId();
     // The fresh source is re-anchored at the position the user was watching —
