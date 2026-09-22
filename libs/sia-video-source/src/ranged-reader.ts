@@ -11,6 +11,7 @@
  */
 
 import type { Slab } from '@siafoundation/sia-storage';
+import type { RequestId } from './protocol.ts';
 
 /** Whole-MiB granularity for `'bytes.read'` milestone boundaries (1048576 bytes). */
 const MIB = 1024 * 1024;
@@ -37,14 +38,25 @@ export interface RangedReaderOptions {
   /**
    * Optional milestone listener for the windowed-read observability seam:
    * `'read.window-start'` when an SDK download opens, `'read.window-complete'`
-   * when it completes successfully, and `'bytes.read'` each time cumulative
-   * delivery to `onChunk` crosses a whole 1 MiB boundary (names follow
-   * `WORKER_LOG_EVENT_NAMES` in protocol.ts). Only scalar detail is ever
-   * passed, and a throwing listener is swallowed so it can never interrupt
-   * the read. Undefined (the default) adds no per-chunk work — each site is a
-   * single optional call check, so the hot path is unchanged.
+   * when it completes successfully, `'bytes.read'` each time cumulative
+   * delivery to `onChunk` crosses a whole 1 MiB boundary, `'read.cache-hit'`
+   * (at most once per read-window, when the LRU replay served bytes before any
+   * download), `'read.budget-wait'` (once per blocking `ReadBudget.acquire`,
+   * i.e. when a permit wait begins behind the concurrency cap), `'read.stalled'`
+   * when the stall watchdog aborts a read that yielded no bytes, and
+   * `'read.error'` when a run fails for any other reason (short read / SDK
+   * stream error; the stall error is reported only as `read.stalled`, never
+   * also as `read.error`) (names follow `WORKER_LOG_EVENT_NAMES` in
+   * protocol.ts). The owning SOURCE `requestId` rides each call (null when the
+   * reader has none) so a load's milestones keep their request-scoped
+   * identity. Only scalar detail is ever passed, and a throwing listener is
+   * swallowed so it can never interrupt the read. Undefined (the default)
+   * adds no per-chunk work — each site is a single optional call check, so
+   * the hot path is unchanged.
    */
-  onMilestone?: (name: string, detail: Readonly<Record<string, unknown>>) => void;
+  onMilestone?: (name: string, requestId: null | RequestId, detail: Readonly<Record<string, unknown>>) => void;
+  /** The SOURCE requestId owning this reader; null when constructed without one. */
+  requestId?: null | RequestId;
   sdk: SiaSdkLike;
   /**
    * Stall watchdog: maximum milliseconds a single SDK read may yield no bytes
@@ -286,7 +298,8 @@ export class RangedReader {
   }
 
   /**
-   * Fires one milestone. The listener is untrusted host code (it may feed a
+   * Fires one milestone, tagged with the owning SOURCE requestId (null when
+   * the reader has none). The listener is untrusted host code (it may feed a
    * logger or telemetry), so a throw is silently swallowed: it must never
    * abort the read or surface an error that belongs to the stream, which the
    * caller owns, not this hint seam.
@@ -295,7 +308,7 @@ export class RangedReader {
     const onMilestone = this.#options.onMilestone;
     if (onMilestone === undefined) return;
     try {
-      onMilestone(name, detail);
+      onMilestone(name, this.#options.requestId ?? null, detail);
     } catch {
       // Untrusted listener: a throwing onMilestone must not corrupt the
       // stream — swallow and keep reading.
@@ -328,6 +341,10 @@ export class RangedReader {
           this.#stream?.cancel().catch(() => { /* empty */ });
           this.#reader = null;
           this.#stream = null;
+          // Only an in-flight run's watchdog reports the stall (a superseded
+          // run's late watchdog must not blame the replacement). No bytes
+          // arrived, so the position is still the read's start offset.
+          this.#milestone('read.stalled', { position: this.#position, stallTimeoutMs: timeoutMs });
         }
         reject(new Error(`Sia SDK read stalled: no bytes for ${timeoutMs}ms`));
       }, timeoutMs);
@@ -347,9 +364,20 @@ export class RangedReader {
   async #run(loadGeneration: number): Promise<void> {
     const { budget, chunkSize, object, onComplete, onError, sdk, stallTimeoutMs } = this.#options;
 
+    // Hoisted so the failure milestone below can report the read window even
+    // when the download throws before `read.window-complete`; `start` is
+    // seeded with the current position so a pre-download failure (e.g. a
+    // cache-replay onChunk throw) still names where the read stood.
+    let end = 0;
+    let start = this.#position;
+
     try {
       // Replay contiguous cached windows before the network read; a listener
-      // sees one seamless delivery either way.
+      // sees one seamless delivery either way. The replay ahead of budget
+      // dispatch is the "cache" phase: what it serves is what a seek or re-read
+      // spared the network, reported once per read-window (never per chunk).
+      const cacheReplayStart = this.#position;
+      let cacheBytes = 0;
       while (this.#loadGeneration === loadGeneration) {
         const cached = this.#cache.takeAt(this.#position);
         if (cached === undefined) break;
@@ -358,14 +386,22 @@ export class RangedReader {
         const delivered = cached.subarray(0, remaining);
         this.#emitChunk(delivered, this.#position, chunkSize);
         this.#position += delivered.byteLength;
+        cacheBytes += delivered.byteLength;
         if (delivered.byteLength < cached.byteLength) break;
+      }
+      // A window served fully or partly from the LRU cache before any SDK
+      // download opened: `{ bytes }` served and where the replay started. The
+      // un-served tail (when any) continues from the network below, so this is
+      // a cache hit even for a partial replay.
+      if (cacheBytes > 0) {
+        this.#milestone('read.cache-hit', { bytes: cacheBytes, position: cacheReplayStart });
       }
 
       if (this.#loadGeneration !== loadGeneration) return;
 
       const size = objectSize(object);
-      const end = Math.min(this.#rangeEnd ?? size, size);
-      const start = Math.min(this.#position, size);
+      end = Math.min(this.#rangeEnd ?? size, size);
+      start = Math.min(this.#position, size);
       if (start >= end) {
         onComplete?.();
         return;
@@ -380,7 +416,17 @@ export class RangedReader {
         // issue independent overlapping reads — can never open more SDK
         // downloads at once than the budget allows; see {@link ReadBudget}.
         if (budget) {
-          release = await budget.acquire();
+          // When the acquire actually blocks (every permit is held — e.g. the
+          // 64 pending WebTransport sessions are exhausted), the wait is the
+          // backpressure event worth surfacing: one emit per wait, carrying the
+          // live budget counters that describe how deep the queue sat.
+          release = await budget.acquire(() => {
+            this.#milestone('read.budget-wait', {
+              inFlight: budget.inFlight,
+              limit: budget.limit,
+              waiters: budget.waiters,
+            });
+          });
           // A seek/stop arrived while this run waited for its permit: abandon
           // (the `finally` releases the just-acquired slot).
           if (this.#loadGeneration !== loadGeneration) return;
@@ -462,7 +508,23 @@ export class RangedReader {
         }
       }
     } catch (error) {
-      if (this.#loadGeneration === loadGeneration) onError?.(error);
+      if (this.#loadGeneration === loadGeneration) {
+        // The stall watchdog already reported `read.stalled` with its own
+        // timeout detail; do not double-report it as a generic read.error.
+        // Every other failure (short read / SDK stream error / a throwing
+        // onChunk) reports the read window it failed on, with only scalar
+        // facts: the start position, the requested length, and how many bytes
+        // were actually delivered (omitted when none were).
+        if (!isStallWatchdogError(error)) {
+          const deliveredBytes = this.#position - start;
+          this.#milestone('read.error', {
+            expectedBytes: Math.max(0, end - start),
+            position: start,
+            ...(deliveredBytes > 0 ? { deliveredBytes } : {}),
+          });
+        }
+        onError?.(error);
+      }
     }
   }
 }
@@ -498,6 +560,10 @@ export class ReadBudget {
   get limit(): number {
     return this.#limit;
   }
+  /** Number of readers queued waiting for a permit (the blocking one included once queued). */
+  get waiters(): number {
+    return this.#waiters.length;
+  }
   #inFlight = 0;
   readonly #limit: number;
   #waiters: (() => void)[] = [];
@@ -511,8 +577,16 @@ export class ReadBudget {
    * Resolves once a permit is free. The returned function releases the permit;
    * call it exactly once when the read it capped has ended (delivered, aborted,
    * or abandoned). Waits are FIFO so callers cannot starve each other.
+   *
+   * `onWait`, when supplied, runs synchronously exactly when this call
+   * actually blocks — queued behind the limit rather than granted a free
+   * permit — which is the single place a caller can observe a backpressure
+   * wait beginning. The live `inFlight`/`limit`/`waiters` counters are
+   * readable at that instant. Never invoked for an immediately-granted
+   * acquire, and a throwing callback is swallowed so a diagnostic hook can
+   * never corrupt the dispatch queue.
    */
-  acquire(): Promise<() => void> {
+  acquire(onWait?: () => void): Promise<() => void> {
     if (this.#inFlight < this.#limit) {
       this.#inFlight++;
       return Promise.resolve(() => this.#release());
@@ -522,6 +596,11 @@ export class ReadBudget {
         this.#inFlight++;
         resolve(() => this.#release());
       });
+      try {
+        onWait?.();
+      } catch {
+        // A throwing diagnostic hook must not corrupt the wait queue.
+      }
     });
   }
 
@@ -535,4 +614,14 @@ export class ReadBudget {
 /** Object payload size in bytes, from the local slab map. */
 export function objectSize(object: SiaObjectLike): number {
   return object.slabs().reduce((total, slab) => total + slab.length, 0);
+}
+
+/**
+ * True when the caught error is the stall watchdog's own rejection, which
+ * already fired `read.stalled` — the run's catch must not re-report it as a
+ * generic `read.error`. Coupled to the message this module itself raises in
+ * `#readWithStallWatchdog`, never to an SDK-provided string.
+ */
+function isStallWatchdogError(error: unknown): boolean {
+  return error instanceof Error && error.message.startsWith('Sia SDK read stalled: ');
 }

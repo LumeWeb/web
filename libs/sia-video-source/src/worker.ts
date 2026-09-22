@@ -8,8 +8,14 @@
  * message listener.
  */
 
-import { isMainToWorkerMessage, workerErrorCode, WorkerToMainMessageType } from './protocol.ts';
-import { createSiaWorkerComposition, createWorkerMseRoot, type WorkerLogSink } from './session/sia-composition.ts';
+import {
+  isMainToWorkerMessage,
+  workerErrorCode,
+  workerLogLevel,
+  WorkerToMainMessageType,
+} from './protocol.ts';
+import { createSiaWorkerComposition, createWorkerMseRoot, emitLog, type WorkerLogSink } from './session/sia-composition.ts';
+import { createSessionHandshake } from './session/session-coordinator.ts';
 import {
   createDefaultSdk,
   defaultPost,
@@ -83,6 +89,18 @@ export interface WorkerScopeRuntime {
  */
 export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = {}): WorkerCompositionHost {
   const post = options.post ?? defaultPost;
+  // The worker owns the handshake so the worker-MSE root's `onLog` closure can
+  // read the live HELLO `log` threshold through the same instance the
+  // composition emits milestones through — one threshold, zero drift. The
+  // composition receives this same instance and never creates its own.
+  const handshake = createSessionHandshake();
+  // The real worker `logSink`: forwards `LOG` messages back over the same
+  // outbound `post` channel the coordinator uses. It only ever receives
+  // threshold-compliant, cap-allowed messages — the composition's `emitLog`
+  // gates every milestone against the live HELLO `log` threshold and the 256
+  // sink cap before invoking it — and stays dumb and total so a log line can
+  // never block the wire.
+  const logSink: WorkerLogSink = (message) => post(message);
   const workerMseRoot = createWorkerMseRoot({
     backBufferSeconds: MSE_BACK_BUFFER_SECONDS,
     createMediaSource: options.createMediaSource,
@@ -95,26 +113,38 @@ export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = 
         type: WorkerToMainMessageType.ERROR,
       });
     },
+    // Worker-MSE open facts (`session.mse-open` / `session.mse-open-failed`)
+    // forward into the composition's single gated emitLog path (same sink,
+    // same live threshold, same 256 cap) — no parallel logging system.
+    onLog: (name, level, requestId, detail) => emitLog(logSink, handshake.log, level, name, detail, requestId),
     post,
   });
-  // The real worker `logSink`: forwards `LOG` messages back over the same
-  // outbound `post` channel the coordinator uses. It only ever receives
-  // threshold-compliant, cap-allowed messages — the composition's `emitLog`
-  // gates every milestone against the live HELLO `log` threshold and the 256
-  // sink cap before invoking it — and stays dumb and total so a log line can
-  // never block the wire.
-  const logSink: WorkerLogSink = (message) => post(message);
-  return createSiaWorkerComposition({
+  const coordinator = createSiaWorkerComposition({
     // Only build a byte-source profile when there is something to configure;
     // the undefined path keeps the coordinator's default transport reads.
     byteSource: options.cache ? { cache: options.cache } : undefined,
     capabilities: options.capabilities,
     createSdk: options.createSdk ?? createDefaultSdk,
+    handshake,
     loadPipeline: options.loadPipeline,
     logSink,
     post,
     supportsWorkerMse: options.supportsWorkerMse,
     workerMseRoot,
+  });
+  // The default root owns the handshake + logSink, so a main→worker payload
+  // the entry's guard drops in `installSiaVideoSourceWorker` can still be
+  // reported through the same gated emitLog — one threshold, one cap. The
+  // `direction` names the wire half; no `type` rides along here because the
+  // guard never parsed the foreign envelope. A rejected payload is rare, so
+  // this never crowds the 256 cap; a custom injected root without this seam
+  // simply skips the line.
+  return Object.assign(coordinator, {
+    logProtocolReject: (): void => {
+      emitLog(logSink, handshake.log, workerLogLevel.debug, 'protocol.rejected', {
+        direction: 'main-to-worker',
+      });
+    },
   });
 }
 
@@ -137,8 +167,18 @@ export function installSiaVideoSourceWorker(options: SiaVideoWorkerOptions = {})
     : createDefaultWorkerComposition(options);
   (self as unknown as { addEventListener(type: 'message', listener: (event: MessageEvent) => void): void })
     .addEventListener('message', (event) => {
-      // Malformed or foreign payloads must not reach the state machine.
-      if (!isMainToWorkerMessage(event.data)) return;
+      // Malformed or foreign payloads must not reach the state machine. The
+      // default root's guard-seam surfaces the dropped envelope through the
+      // gated worker LOG path (debug, direction main-to-worker); an injected
+      // root without the seam stays silent — behavior otherwise unchanged.
+      if (!isMainToWorkerMessage(event.data)) {
+        try {
+          host.logProtocolReject?.();
+        } catch {
+          // A throwing reject-reporter must never break the message guard.
+        }
+        return;
+      }
       void host.handleMessage(event.data);
     });
 }

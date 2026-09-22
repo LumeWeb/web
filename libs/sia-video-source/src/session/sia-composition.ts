@@ -24,6 +24,7 @@ import {
   type WorkerConfig,
   type WorkerLogLevel,
   workerLogLevel,
+  type WorkerMode,
   type WorkerToMainMessage,
   WorkerToMainMessageType,
 } from '../protocol.ts';
@@ -37,6 +38,7 @@ import {
   defaultSupportsWorkerMse,
   type PostMessage,
   type SessionCoordinator,
+  type WorkerAbandonReason,
 } from './session-coordinator.ts';
 import type { WorkerMseRoot } from './worker-mse-root.ts';
 import type { SiaByteSourceSdk } from '../transport/sia-byte-source.ts';
@@ -174,25 +176,37 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
   // source factory) route through `emitLog` — the single gated code path — so
   // a missing `logSink` or a below-threshold HELLO `log` keeps every reader
   // milestone fully suppressed. The callback is only attached when a
-  // `logSink` exists. The coordinator's `createSource` seam hands the factory
-  // only the `src` string, never the SOURCE requestId, so these milestones
-  // travel connection-level (requestId null).
+  // `logSink` exists. The SOURCE requestId is threaded through `createSource`
+  // into the per-load reader, so each reader milestone already carries its
+  // owning load's requestId when it reaches this listener.
   const onMilestone = logSink
-    ? (name: string, detail: Readonly<Record<string, unknown>>): void => {
+    ? (name: string, requestId: null | RequestId, detail: Readonly<Record<string, unknown>>): void => {
         const level =
           name === 'object.resolved'
             ? workerLogLevel.info
-            : name === 'read.window-start' || name === 'read.window-complete' || name === 'bytes.read'
-              ? workerLogLevel.debug
-              : undefined;
+            : // Failure milestones are rare (only on a stalled or errored read),
+              // so they never crowd the per-sink 256-message cap.
+              name === 'read.stalled' || name === 'read.error'
+              ? workerLogLevel.error
+              : // Debug-level read diagnostics: the per-window window bookends
+                // and byte boundaries, plus the two backpressure/debug events —
+                // a budget wait (one per blocking acquire) and a cache hit (one
+                // per replayed window) — both rare enough to stay off the cap.
+                name === 'read.window-start' ||
+                  name === 'read.window-complete' ||
+                  name === 'bytes.read' ||
+                  name === 'read.budget-wait' ||
+                  name === 'read.cache-hit'
+                ? workerLogLevel.debug
+                : undefined;
         if (level === undefined) return;
-        emitLog(logSink, handshake.log, level, name, detail);
+        emitLog(logSink, handshake.log, level, name, detail, requestId);
       }
     : undefined;
   const byteSourceOptions: SiaByteSourceFactoryOptions | undefined = onMilestone
     ? { ...byteSource, onMilestone }
     : byteSource;
-  const createSource: (src: string) => Promise<ByteSource> = deps.createSdk
+  const createSource: (src: string, requestId?: null | RequestId) => Promise<ByteSource> = deps.createSdk
     ? createLazySiaByteSourceFactory({ byteSource: byteSourceOptions, createSdk: deps.createSdk, handshake, logSink })
     : createSiaByteSourceFactory(sdk!, byteSourceOptions);
   // Worker MSE is used only when the runtime can construct it in a dedicated
@@ -209,21 +223,34 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
   // milestone (if any) was derived, so a milestone can never suppress or delay
   // the protocol message that triggered it.
   let loadAccepted = false;
+  // The negotiated MSE site from the last ATTACH_OK (`message.mode`), used to
+  // annotate `stream.started`. It lags by design: no whole config is plumbed
+  // here, the ATTACH_OK wire field is the one honest source.
+  let sessionMode: undefined | WorkerMode;
   const wrappedPost: PostMessage = (message, transfer) => {
     switch (message.type) {
       case WorkerToMainMessageType.ATTACH_OK:
+        sessionMode = message.mode;
         emitLog(logSink, handshake.log, workerLogLevel.info, 'session.attach');
         break;
       case WorkerToMainMessageType.ENDED:
         emitLog(logSink, handshake.log, workerLogLevel.info, 'stream.ended', undefined, message.requestId);
         break;
       case WorkerToMainMessageType.ERROR:
+        // The ERROR wire already carries the diagnostic context string from
+        // `#postError` (describeError of the throwing read/pipeline); include
+        // it next to the kind so a gated host sees why the session failed. The
+        // context can be an SDK/fetch error string that embeds the resolved
+        // share URL (which carries the decryption key), so URL-shaped runs are
+        // scrubbed here before they reach the LOG detail.
         emitLog(
           logSink,
           handshake.log,
           workerLogLevel.error,
           'session.error',
-          { kind: message.kind },
+          message.context === undefined || message.context === ''
+            ? { kind: message.kind }
+            : { context: redactUrls(message.context), kind: message.kind },
           message.requestId,
         );
         break;
@@ -231,7 +258,14 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
         // A load was accepted: the session graph now exists, so the next
         // abandon (DETACH / DESTROY / superseding SOURCE) is a real detach.
         loadAccepted = true;
-        emitLog(logSink, handshake.log, workerLogLevel.info, 'stream.started', undefined, message.requestId);
+        emitLog(
+          logSink,
+          handshake.log,
+          workerLogLevel.info,
+          'stream.started',
+          sessionMode === undefined ? undefined : { mode: sessionMode },
+          message.requestId,
+        );
         break;
     }
     deps.post(message, transfer);
@@ -244,12 +278,25 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
   // spurious detach. The root teardown semantics are preserved: with
   // `workerMseRoot` the caller's onAbandon is ignored (the root owns MSE
   // teardown), otherwise the caller's onAbandon still runs.
-  const onAbandon = (): void => {
+  //
+  // The reason is NOT derivable here from the wire alone: DETACH, DESTROY, and
+  // a superseding SOURCE all abandon with the same observable state (none of
+  // the stop messages posts an outgoing response, and at abandon time the new
+  // SOURCE's accept has not happened yet), so the coordinator threads the
+  // reason it knows at each call site through this existing hook — the most
+  // precise fact honestly convertible, never a heuristic guess.
+  const onAbandon = (reason?: WorkerAbandonReason): void => {
     if (workerMseSupported && workerMseRoot) workerMseRoot.teardown();
     else deps.onAbandon?.();
     if (loadAccepted) {
       loadAccepted = false;
-      emitLog(logSink, handshake.log, workerLogLevel.info, 'session.detach');
+      emitLog(
+        logSink,
+        handshake.log,
+        workerLogLevel.info,
+        'session.detach',
+        reason === undefined ? undefined : { reason },
+      );
     }
   };
 
@@ -354,7 +401,7 @@ function createLazySiaByteSourceFactory(deps: {
   ) => Promise<SiaByteSourceSdk>;
   readonly handshake: Pick<SessionHandshake, 'config' | 'log' | 'seed' | 'sharingSeed'>;
   readonly logSink?: WorkerLogSink;
-}): (src: string) => Promise<ByteSource> {
+}): (src: string, requestId?: null | RequestId) => Promise<ByteSource> {
   const { byteSource, createSdk, handshake, logSink } = deps;
   let cached: null | {
     config: undefined | WorkerConfig;
@@ -363,13 +410,26 @@ function createLazySiaByteSourceFactory(deps: {
     sharingSeed: null | Uint8Array;
   } = null;
 
-  return async (src: string): Promise<ByteSource> => {
+  return async (src: string, requestId?: null | RequestId): Promise<ByteSource> => {
     const config = handshake.config;
     const seed = handshake.seed ?? null;
     const sharingSeed = handshake.sharingSeed ?? null;
     let sdk = cached && connectionEquals(cached, config, seed, sharingSeed) ? cached.sdk : null;
     if (!sdk) {
-      sdk = await createSdk(config, seed, sharingSeed);
+      try {
+        sdk = await createSdk(config, seed, sharingSeed);
+      } catch (error) {
+        // A rejected SDK bootstrap is otherwise invisible (it only surfaces as
+        // a generic ERROR after the fact); report it as its own error milestone
+        // with the scalar message before rethrowing so the caller's existing
+        // failure path is unchanged. The message may carry the resolved share
+        // URL (which embeds the object decryption key), so URL-shaped runs are
+        // scrubbed before they reach the LOG detail.
+        emitLog(logSink, handshake.log, workerLogLevel.error, 'sdk.build-failed', {
+          message: redactUrls(error instanceof Error ? error.message : String(error)),
+        });
+        throw error;
+      }
       // A fresh SDK build for this connection: report it at connection level
       // (no owning request), carrying only the indexer identity — never seeds
       // or share-URL strings (share URLs embed encryption keys).
@@ -382,7 +442,9 @@ function createLazySiaByteSourceFactory(deps: {
         queueMicrotask(() => disposeSdk(previous));
       }
     }
-    return createSiaByteSourceFactory(sdk, byteSource)(src);
+    // The SOURCE requestId travels into the per-load source so its milestones
+    // keep the owning load's identity even though the SDK is connection-scoped.
+    return createSiaByteSourceFactory(sdk, byteSource)(src, requestId);
   };
 }
 
@@ -395,6 +457,18 @@ function disposeSdk(sdk: unknown): void {
         /* best-effort teardown; never propagates */
       });
   }
+}
+
+/**
+ * Scrubs URL-shaped runs out of a diagnostic string before it enters `LOG`
+ * detail. Share URLs embed the object decryption key in the fragment, and an
+ * SDK/fetch error message can carry the resolved share URL verbatim; replacing
+ * any http(s)/`sia://` URL-ish run with `[redacted]` keeps the key (and the
+ * object identity) out of worker logs while leaving the rest of the message
+ * readable. Over-replacement is fine here — lossy only for an attacker.
+ */
+function redactUrls(text: string): string {
+  return text.replace(/(?:https?|sia):\/\/\S+/g, '[redacted]');
 }
 
 /** True when two HELLO worker configs describe the same connection (indexer identity). */

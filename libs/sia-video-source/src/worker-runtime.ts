@@ -113,6 +113,14 @@ export interface WorkerCompositionHost {
   destroy(): void;
   /** Processes one validated main→worker message. */
   handleMessage(message: MainToWorkerMessage): Promise<void>;
+  /**
+   * Optional guard-seam: reports a main→worker payload the entry's message
+   * guard dropped (a foreign or malformed envelope), on the composition's own
+   * gated `LOG` path when one exists. The default Sia composition root
+   * provides it so `protocol.rejected` reaches an opted-in host; an injected
+   * root that has no log path simply omits it.
+   */
+  logProtocolReject?(): void;
 }
 
 export async function createDefaultSdk(

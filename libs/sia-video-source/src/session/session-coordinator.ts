@@ -111,9 +111,11 @@ export interface SessionCoordinatorDeps {
   readonly clock?: Clock;
   /**
    * Resolves one SOURCE locator into a `ByteSource`. Sia in production (via
-   * the SDK); `MemoryByteSource` in tests. Errors → network ERROR.
+   * the SDK); `MemoryByteSource` in tests. Errors → network ERROR. The
+   * owning SOURCE `requestId` is supplied (null before any load) so
+   * request-scoped reader milestones the source emits pick up their load.
    */
-  readonly createSource: (src: string) => Promise<ByteSource>;
+  readonly createSource: (src: string, requestId?: null | RequestId) => Promise<ByteSource>;
   /** Handshake for `HELLO`/`APP_KEY` (default: `createSessionHandshake()`). */
   readonly handshake?: SessionHandshake;
   /**
@@ -123,13 +125,17 @@ export interface SessionCoordinatorDeps {
   readonly loadPipeline?: LoadPipeline;
   /**
    * Called whenever the active load/session graph is abandoned — superseded by
-   * a new SOURCE, or stopped by DETACH/DESTROY. The production composition
-   * root uses it to tear the worker-side MSE root down immediately (release
-   * the MediaSource + SourceBuffer a load opened) instead of leaving the stale
-   * handle allocated until the next load's `sinkFactory` happens to reset it.
-   * Optional; main-mode posting and non-MSE roots ignore it.
+   * a new SOURCE, or stopped by DETACH/DESTROY — with the honest reason the
+   * coordinator derives at the call site (`'replace'` for a superseding
+   * SOURCE, `'detach'`/`'destroy'` for the two stop messages; undefined only
+   * where the coordinator abandons without a caller-visible cause). The
+   * production composition root uses it to tear the worker-side MSE root down
+   * immediately (release the MediaSource + SourceBuffer a load opened) instead
+   * of leaving the stale handle allocated until the next load's `sinkFactory`
+   * happens to reset it, and derives its `session.detach` detail from the
+   * reason. Optional; main-mode posting and non-MSE roots ignore it.
    */
-  readonly onAbandon?: () => void;
+  readonly onAbandon?: (reason?: WorkerAbandonReason) => void;
   /**
    * Reflects the validated media playhead (from PLAYHEAD/SEEK) to a worker-MSE
    * root, which derives the pipe's back-buffer eviction boundary from it.
@@ -213,6 +219,18 @@ export interface SinkFactoryContext {
   readonly requestId: RequestId;
 }
 
+/**
+ * Why the coordinator abandoned the active load/session graph, derived at the
+ * exact call site: `'replace'` when a superseding SOURCE tore the previous
+ * load down, `'detach'` when the DETACH stop message did, `'destroy'` when
+ * DESTROY did (the coordinator stays dead after). Passed to `onAbandon` so
+ * the composition can report the most precise reason convertible from the
+ * wire — DETACH vs DESTROY vs a replace no longer collapse into one bare
+ * event. `undefined` is the fallback for an abandon without a caller-facing
+ * cause (none today; kept for forward compatibility).
+ */
+export type WorkerAbandonReason = 'destroy' | 'detach' | 'replace';
+
 /** One accepted load: the bound stream graph plus its wire context. */
 interface CompositionSession {
   /** Session-scoped stream controller; created once the load is accepted. */
@@ -233,7 +251,7 @@ export class WorkerComposition implements SessionCoordinator {
     return this.#mode;
   }
 
-  readonly #createSource: (src: string) => Promise<ByteSource>;
+  readonly #createSource: (src: string, requestId?: null | RequestId) => Promise<ByteSource>;
   #destroyed = false;
   readonly #errorReporter: ErrorReporter;
   readonly #handshake: SessionHandshake;
@@ -248,7 +266,7 @@ export class WorkerComposition implements SessionCoordinator {
   // Default 'main' is safe until `#selectMode()` (called in the constructor,
   // then on every HELLO) picks the session's actual MSE site.
   #mode: WorkerMode = workerMode.main;
-  readonly #onAbandon: (() => void) | undefined;
+  readonly #onAbandon: ((reason?: WorkerAbandonReason) => void) | undefined;
   readonly #onPlayhead: ((timeSeconds: number) => void) | undefined;
   #pendingSeekTime: number | undefined = undefined;
   #playRequested = false;
@@ -283,7 +301,7 @@ export class WorkerComposition implements SessionCoordinator {
   destroy(): void {
     if (this.#destroyed) return;
     this.#destroyed = true;
-    this.#abandonLoad();
+    this.#abandonLoad('destroy');
     this.#pendingSeekTime = undefined;
     this.#playRequested = false;
     // Release any connection credential the handshake held (scrubs the
@@ -307,7 +325,7 @@ export class WorkerComposition implements SessionCoordinator {
           this.destroy();
           return;
         case MainToWorkerMessageType.DETACH:
-          this.#abandonLoad();
+          this.#abandonLoad('detach');
           this.#playRequested = false;
           this.#pendingSeekTime = undefined;
           return;
@@ -365,7 +383,7 @@ export class WorkerComposition implements SessionCoordinator {
   // playback (still inspecting, or already a non-ready verdict) is stopped
   // directly — the pipeline's own Input disposal, when it runs, is a second
   // idempotent stop of the same source.
-  #abandonLoad(): void {
+  #abandonLoad(reason?: WorkerAbandonReason): void {
     this.#loadAbortController?.abort();
     this.#loadAbortController = null;
 
@@ -379,7 +397,7 @@ export class WorkerComposition implements SessionCoordinator {
       source.cancel();
     }
 
-    this.#onAbandon?.();
+    this.#onAbandon?.(reason);
 
     this.#requestId = null;
     this.#session = null;
@@ -441,7 +459,9 @@ export class WorkerComposition implements SessionCoordinator {
     this.#playRequested = false;
     // `#abandonLoad` clears the previous load's request id; the new load's id
     // is bound AFTER the teardown so the session sink/reporter use THIS one.
-    this.#abandonLoad();
+    // The previous load's abandon is a `'replace'` — a superseding SOURCE tore
+    // it down, which the composition distinguishes from a DETACH/DESTROY stop.
+    this.#abandonLoad('replace');
     this.#requestId = requestId;
     const loadAbortController = new AbortController();
     this.#loadAbortController = loadAbortController;
@@ -458,7 +478,9 @@ export class WorkerComposition implements SessionCoordinator {
 
     let source: ByteSource;
     try {
-      source = await this.#createSource(src);
+      // The new SOURCE's request id is threaded into the byte-source factory
+      // so reader/source milestones the load emits carry their owning request.
+      source = await this.#createSource(src, requestId);
     } catch (error) {
       if (this.#destroyed || loadGeneration !== this.#loadGeneration) {
         // A stale creation releases its own abort signal and posts nothing.

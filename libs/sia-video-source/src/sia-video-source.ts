@@ -56,6 +56,24 @@ const MSE_BACK_BUFFER_SECONDS = 30;
  */
 const MAX_DECODE_RELOADS = 2;
 
+/**
+ * Friendly names for the host→worker messages that carry a request identity,
+ * used by the per-post `request` debug line (DESTROY/DETACH have none).
+ * HELLO reads as `set-log`: that is the one post that tunes the worker's
+ * forwarding threshold.
+ */
+type RequestAction = 'app-key' | 'attach' | 'play' | 'playhead' | 'seek' | 'set-log' | 'source';
+
+const REQUEST_ACTION_BY_TYPE: Readonly<Partial<Record<MainToWorkerMessageType, RequestAction>>> = {
+  [MainToWorkerMessageType.APP_KEY]: 'app-key',
+  [MainToWorkerMessageType.ATTACH]: 'attach',
+  [MainToWorkerMessageType.HELLO]: 'set-log',
+  [MainToWorkerMessageType.PLAY]: 'play',
+  [MainToWorkerMessageType.PLAYHEAD]: 'playhead',
+  [MainToWorkerMessageType.SEEK]: 'seek',
+  [MainToWorkerMessageType.SOURCE]: 'source',
+};
+
 export const siaVideoDefaultProps = {
   preload: 'metadata',
   src: '',
@@ -372,10 +390,13 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       this.#worker = (this.#options.createWorker ?? defaultCreateWorker)();
     } catch (error) {
       this.#worker = null;
+      this.#logger.child('host').error('worker.spawn-failed', { message: errorDescription(error) });
       this.#reportError(workerErrorCode.network, errorDescription(error));
       return;
     }
 
+    this.#worker.addEventListener('error', this.#onWorkerError);
+    this.#worker.addEventListener('messageerror', this.#onWorkerMessageError);
     this.#worker.addEventListener('message', this.#onMessage);
     // HELLO negotiates readiness itself, so it must not go through the
     // pending-message buffer — that buffer only drains on HELLO_OK.
@@ -400,6 +421,8 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
     if (worker) {
       worker.removeEventListener('message', this.#onMessage);
+      worker.removeEventListener('error', this.#onWorkerError);
+      worker.removeEventListener('messageerror', this.#onWorkerMessageError);
       worker.terminate();
     }
 
@@ -440,7 +463,16 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       sourceBuffer.addEventListener('updateend', () => this.#appendPipe?.kick());
       this.#sourceBuffer = sourceBuffer;
       this.#appendPipe?.kick();
+      // The main-thread SourceBuffer opened (mirror of the worker's
+      // `session.mse-open`): scalar MIME + duration facts only.
+      this.#logger.child('host').info(
+        'mse-open',
+        durationSeconds === null ? { mime } : { durationSeconds, mime },
+      );
     } catch (error) {
+      // The MIME the host applied was refused — name it, then report decode as
+      // before (mirror of the worker's `session.mse-open-failed`).
+      this.#logger.child('host').error('mse-open-failed', { mime });
       this.#reportError(workerErrorCode.decode, errorDescription(error));
     }
   }
@@ -465,6 +497,17 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       getMediaSource: () => this.#mediaSource,
       getPlayheadSeconds: () => this.target?.currentTime ?? 0,
       getSourceBuffer: () => this.#sourceBuffer,
+      // MSE-pipe diagnostics mirror the worker path's onLog forwarding onto
+      // the host logger's `host` scope: the back-buffer eviction trace is
+      // debug, and the rare best-effort breadcrumbs (failed eviction /
+      // parser-reset / EOS — all still swallowed, just observable now) are
+      // warn. Scalar detail only, and behavior is unchanged (all hooks
+      // optional).
+      onDiag: (name, detail) => {
+        const sink = this.#logger.child('host');
+        if (name === 'mse.evict') sink.debug(name, detail);
+        else sink.warn(name, detail);
+      },
       onError: (error) => this.#reportError(workerErrorCode.decode, errorDescription(error)),
     });
     const target = this.target;
@@ -569,6 +612,16 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // the HELLO payload stays byte-identical to the pre-logging wire shape.
   #helloMessage(): MainToWorkerMessage {
     const log = logThresholdFor(this.#logger.level);
+    // Presence facts and connection metadata only: seeds and keys never
+    // appear, and the configured indexer URL is not a share URL.
+    this.#logger.info('hello', {
+      hasAppKeySeed: this.#appKeySeedProvider !== undefined,
+      hasSharingSeed: this.#sharingKeySeedProvider !== undefined,
+      indexerUrl: this.#workerConfig?.indexerUrl,
+      protocol: PROTOCOL_VERSION,
+      threshold: log ?? 'silent',
+      workerMse: this.#workerMse,
+    });
     return {
       appSeed: this.#appKeySeedProvider !== undefined,
       config: this.#helloConfig(),
@@ -579,14 +632,40 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     };
   }
 
+  // One debug line per posted request that carries an identity, at the single
+  // postMessage choke point, so every outbound host→worker message is
+  // attributable. DESTROY/DETACH have no request id and are skipped.
+  #logRequest(message: MainToWorkerMessage): void {
+    if (!('requestId' in message)) return;
+    const action = REQUEST_ACTION_BY_TYPE[message.type];
+    if (action !== undefined) {
+      this.#logger.debug('request', { action, requestId: message.requestId });
+    }
+  }
+
   #onMessage = (event: MessageEvent) => {
     // Foreign or malformed payloads (another library's worker, a draft
     // protocol version) must never reach the state-machine handlers as casts.
-    if (!isWorkerToMainMessage(event.data)) return;
+    // The dropped envelope's `type` field is the only safe identity — scalar,
+    // never payload contents — and it is reported at debug as a dropped-message
+    // counter (a foreign/wayward worker is rare, so this stays off the noise
+    // budget).
+    if (!isWorkerToMainMessage(event.data)) {
+      const envelope = event.data as null | { type?: unknown };
+      const type =
+        typeof envelope?.type === 'string' || typeof envelope?.type === 'number'
+          ? String(envelope.type)
+          : 'unknown';
+      this.#logger.child('host').debug('protocol.rejected', { type });
+      return;
+    }
     const message = event.data;
     switch (message.type) {
       case WorkerToMainMessageType.ATTACH_OK:
         this.#mode = message.mode;
+        // The worker accepted our HELLO; `version` is the protocol we spoke,
+        // `mode` is the MSE construction site the worker picked for the session.
+        this.#logger.info('hello-ok', { mode: message.mode, version: PROTOCOL_VERSION });
         // Every attach generation plays the current source from scratch: the
         // fresh SOURCE rebuilds worker-side or host-side MSE cleanly, no
         // matter what a previous detach tore down. The worker's attach path
@@ -648,6 +727,14 @@ export class SiaVideoSource extends HTMLVideoElementHost {
           this.#recoverFromDecodeError();
           return;
         }
+        // A decode-class failure that exhausted its reload budget is a genuine
+        // fatal error now — note the exhaustion, then surface it as before.
+        if (message.kind === workerErrorCode.decode && this.#src) {
+          this.#logger.child('host').error('decode-recovery.exhausted', {
+            attempt: MAX_DECODE_RELOADS,
+            requestId: this.#requestId,
+          });
+        }
         this.#reportError(message.kind, message.context);
         return;
       case WorkerToMainMessageType.HANDLE: {
@@ -660,6 +747,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // A worker speaking a different protocol version is incompatible, no
         // matter how much of the message flow happens to match.
         if (message.version !== PROTOCOL_VERSION) {
+          this.#logger.warn('hello-ok.protocol-mismatch', {
+            expectedVersion: PROTOCOL_VERSION,
+            gotVersion: message.version,
+          });
           this.#reportError(workerErrorCode.unsupported, `worker protocol ${message.version}`);
           return;
         }
@@ -708,7 +799,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         if (message.requestId !== this.#requestId) return;
         // A clean acknowledgement proves this load made it, so its recovery
         // budget restarts: a later decode error gets a fresh run of reloads
-        // instead of surfacing at once.
+        // instead of surfacing at once. A reload still in flight means this
+        // SOURCE_OK is the recovered load succeeding.
+        if (this.#reloadsThisLoad > 0) {
+          this.#logger.child('host').info('decode-recovery.done', { attempt: this.#reloadsThisLoad });
+        }
         this.#reloadsThisLoad = 0;
         if (message.info.mode === workerMode.main) {
           this.#beginMainThreadMse(
@@ -775,10 +870,28 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     });
   };
 
+  // A worker isolate crash or top-level error never arrives as a protocol
+  // message, so it is surfaced only here — logged, never thrown; the worker
+  // is left for the existing teardown paths to reap.
+  #onWorkerError = (event: ErrorEvent): void => {
+    const reason = event.error instanceof Error ? event.error.message : undefined;
+    this.#logger.child('host').error('worker.error', {
+      message: event.message || 'error',
+      reason,
+    });
+  };
+
+  // A postMessage round-trip failure (a structured-clone error) has no payload
+  // of its own; the event name is the only identity there is.
+  #onWorkerMessageError = (): void => {
+    this.#logger.child('host').error('worker.error', { message: 'messageerror' });
+  };
+
   #post(message: MainToWorkerMessage): void {
     if (!this.#worker) return;
     this.#worker.postMessage(message);
     if (message.type === MainToWorkerMessageType.SOURCE) this.#requestId = message.requestId;
+    this.#logRequest(message);
   }
 
   // Bounded recovery from a decode-class ERROR delivered on the ACTIVE load

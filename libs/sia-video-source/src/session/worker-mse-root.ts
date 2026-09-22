@@ -23,7 +23,7 @@
  */
 
 import { MseAppendPipe } from '../mse-pipe.ts';
-import { type RequestId, WorkerToMainMessageType } from '../protocol.ts';
+import { type RequestId, workerLogLevel, type WorkerLogLevel, WorkerToMainMessageType } from '../protocol.ts';
 import { MseAdapter, type WorkerMseSinkFactoryDeps } from '../sink/mse-adapter.ts';
 import type { AppendSink } from '../sink/append-sink.ts';
 import type { PostMessage, SinkFactoryContext } from './session-coordinator.ts';
@@ -64,6 +64,22 @@ export interface WorkerMseRootOptions {
    * most once per pipe lifetime (the pipe suppresses repeats).
    */
   onError?: (requestId: null | RequestId, error: unknown) => void;
+  /**
+   * Optional observability hook mirroring the `onError` option style: receives
+   * worker MSE open facts as milestones — `session.mse-open` (info) once the
+   * per-load MediaSource opens and its SourceBuffer is created successfully
+   * (`{ mime, durationSeconds? }`), `session.mse-open-failed` (error) when
+   * `addSourceBuffer` throws (`{ mime }`). The active load's request id is
+   * supplied when one is bound, else null. Only scalar detail is passed; a
+   * host that wires this into the composition's `emitLog` gets the HELLO
+   * threshold + 256 cap for free. Undefined = zero change to the open path.
+   */
+  onLog?: (
+    name: string,
+    level: WorkerLogLevel,
+    requestId: null | RequestId,
+    detail: Readonly<Record<string, unknown>>,
+  ) => void;
   /** Outbound protocol channel (HANDLE posting with the transferred handle). */
   post: PostMessage;
 }
@@ -97,6 +113,16 @@ export function createWorkerMseRoot(options: WorkerMseRootOptions): WorkerMseRoo
     getMediaSource: () => mediaSource,
     getPlayheadSeconds: () => playheadSeconds,
     getSourceBuffer: () => sourceBuffer,
+    // MSE-pipe diagnostics forward through the same onLog seam as
+    // session.mse-open (the worker entry feeds that into the composition's
+    // gated emitLog, so the HELLO threshold + 256 cap apply to these too):
+    // the eviction trace is debug, and the rare best-effort breadcrumbs that
+    // dot the swallowed failures are warn. The pipe has no requestId of its
+    // own; the active load's id rides along (null when the root has none).
+    onDiag: (name, detail) => {
+      const level = name === 'mse.evict' ? workerLogLevel.debug : workerLogLevel.warn;
+      options.onLog?.(name, level, requestId, detail);
+    },
     onError: (error) => reportFatal(requestId, error),
   };
 
@@ -128,9 +154,27 @@ export function createWorkerMseRoot(options: WorkerMseRootOptions): WorkerMseRoo
       created.addEventListener('updateend', () => pipe?.kick());
       sourceBuffer = created;
       pipe?.kick();
+      // The MediaSource opened and its SourceBuffer was created: report the
+      // applied MIME + duration (when one was set) at the active load.
+      try {
+        options.onLog?.(
+          'session.mse-open',
+          workerLogLevel.info,
+          requestId,
+          durationSeconds === null ? { mime } : { durationSeconds, mime },
+        );
+      } catch {
+        // A throwing observability hook must not fail a successful open.
+      }
     } catch (error) {
-      // A pipeline whose SourceBuffer cannot be created is dead too: report then
-      // release the freshly opened MediaSource (see `reportFatal`).
+      // A pipeline whose SourceBuffer cannot be created is dead too: report
+      // the open failure (the MIME that was refused) first, then release the
+      // freshly opened MediaSource (see `reportFatal`).
+      try {
+        options.onLog?.('session.mse-open-failed', workerLogLevel.error, requestId, { mime });
+      } catch {
+        // A throwing observability hook must not skip the fatal teardown.
+      }
       reportFatal(requestId, error);
     }
   }

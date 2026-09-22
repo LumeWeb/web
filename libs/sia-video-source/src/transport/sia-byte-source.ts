@@ -29,6 +29,7 @@ import {
   type SiaSdkLike,
 } from '../ranged-reader.ts';
 import { isSiaShareUrl, parseSiaShareUrl } from '../share-url.ts';
+import type { RequestId } from '../protocol.ts';
 
 /**
  * Construction options shared across every source one factory creates. A
@@ -45,7 +46,7 @@ export interface SiaByteSourceFactoryOptions {
   /** Forwarded to every `Sdk.download` call. */
   downloadOptions?: { maxBufferedChunks?: number };
   /** Milestone listener forwarded into every `RangedReader` (see `RangedReaderOptions.onMilestone`). */
-  onMilestone?: (name: string, detail: Readonly<Record<string, unknown>>) => void;
+  onMilestone?: (name: string, requestId: null | RequestId, detail: Readonly<Record<string, unknown>>) => void;
 }
 
 export interface SiaByteSourceOptions {
@@ -60,7 +61,9 @@ export interface SiaByteSourceOptions {
   /** Pinned-object handle (or fake) whose payload the source reads. */
   object: SiaObjectLike;
   /** Milestone listener forwarded into every `RangedReader` this source creates. */
-  onMilestone?: (name: string, detail: Readonly<Record<string, unknown>>) => void;
+  onMilestone?: (name: string, requestId: null | RequestId, detail: Readonly<Record<string, unknown>>) => void;
+  /** The SOURCE requestId owning this source; milestones it emits carry it (null when none). */
+  requestId?: null | RequestId;
   /** Sia SDK (or fake) that serves ranged downloads. */
   sdk: SiaSdkLike;
 }
@@ -151,7 +154,7 @@ export class SiaByteSource implements ByteSource {
       this.#generationState.settle(handle);
     };
 
-    const { budget, chunkSize, downloadOptions, object, onMilestone, sdk } = this.#options;
+    const { budget, chunkSize, downloadOptions, object, onMilestone, requestId, sdk } = this.#options;
     const cache = this.#cache;
 
     return new ReadableStream<Uint8Array>({
@@ -202,6 +205,7 @@ export class SiaByteSource implements ByteSource {
             settle();
           },
           onMilestone,
+          requestId,
           sdk,
           stallTimeoutMs: options.stallTimeoutMs,
         });
@@ -226,24 +230,24 @@ export class SiaByteSource implements ByteSource {
 export function createSiaByteSourceFactory(
   sdk: SiaByteSourceSdk,
   options: SiaByteSourceFactoryOptions = {},
-): (src: string) => Promise<ByteSource> {
+): (src: string, requestId?: null | RequestId) => Promise<ByteSource> {
   // One shared exact-window cache per factory, so every source it creates
   // replays already-downloaded windows across loads (mirrors the worker's
   // per-core cache). An explicit caller-supplied cache still wins.
   const cache = options.cache ?? new LruChunkCache();
   const onMilestone = options.onMilestone;
-  return async (src: string): Promise<ByteSource> => {
+  return async (src: string, requestId?: null | RequestId): Promise<ByteSource> => {
     const object = await resolveSiaObject(sdk, src);
     // Emit only on successful resolution — a rejection already propagated
     // above. `share` is a plain boolean (`isSiaShareUrl`): the share URL
     // string itself embeds the object's decryption key and must NEVER appear
-    // in a milestone detail. `size` comes from the resolved object. requestId
-    // is unknown at this layer, so milestones pick up their load affiliation
-    // at the composition level instead.
+    // in a milestone detail. `size` comes from the resolved object. The
+    // owning SOURCE requestId rides the milestone (null when the factory is
+    // driven without one) so `object.resolved` keeps its load affiliation.
     if (onMilestone !== undefined) {
-      onMilestone('object.resolved', { share: isSiaShareUrl(src), size: objectSize(object) });
+      onMilestone('object.resolved', requestId ?? null, { share: isSiaShareUrl(src), size: objectSize(object) });
     }
-    return new SiaByteSource({ ...options, cache, object, sdk });
+    return new SiaByteSource({ ...options, cache, object, requestId, sdk });
   };
 }
 

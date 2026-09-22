@@ -129,8 +129,9 @@ describe('opting in (HELLO log: debug) collects the LOG stream end-to-end', () =
     ]);
     expect(logs.map((log) => log.level)).toEqual(['info', 'info', 'info', 'info']);
 
-    // Connection-level milestones (attach, lazy SDK bootstrap, resolution)
-    // carry no owning request; only the load-accepted streak is request-scoped.
+    // Connection-level milestones (attach, lazy SDK bootstrap) carry no owning
+    // request; the load-accepted streak and the SOURCE-scoped object.resolution
+    // ride the load's request id (3).
     expect(logs[0]).toMatchObject({ name: 'session.attach', requestId: null });
     expect(logs[1]).toMatchObject({
       detail: { indexerUrl: WORKER_CONFIG.indexerUrl },
@@ -140,10 +141,11 @@ describe('opting in (HELLO log: debug) collects the LOG stream end-to-end', () =
     expect(logs[2]).toMatchObject({
       detail: { share: false, size: 2048 },
       name: 'object.resolved',
-      requestId: null,
+      requestId: 3,
     });
-    // `session.source-ok`-adjacent: SOURCE_OK derives `stream.started` scoped to load 3.
-    expect(logs[3]).toMatchObject({ name: 'stream.started', requestId: 3 });
+    // SOURCE_OK derives `stream.started` scoped to load 3; the mode comes from
+    // the ATTACH_OK that preceded it (this root ran in main-mode fallback).
+    expect(logs[3]).toMatchObject({ detail: { mode: 'main' }, name: 'stream.started', requestId: 3 });
 
     // Every message passes the worker→main wire guard, and its detail is
     // scalar-only — primitives/null, never nested objects or credentials.
@@ -158,9 +160,15 @@ describe('opting in (HELLO log: debug) collects the LOG stream end-to-end', () =
     expect(JSON.stringify(logs)).not.toContain('encryption_key');
     expect(JSON.stringify(logs)).not.toContain('pin-key');
 
-    // DETACH derives connection-level session.detach at the abandon boundary.
+    // DETACH derives connection-level session.detach at the abandon boundary,
+    // carrying the stop reason the coordinator derived for it.
     await root.handleMessage({ type: MainToWorkerMessageType.DETACH });
-    expect(logsOf(messages).at(-1)).toMatchObject({ level: 'info', name: 'session.detach', requestId: null });
+    expect(logsOf(messages).at(-1)).toMatchObject({
+      detail: { reason: 'detach' },
+      level: 'info',
+      name: 'session.detach',
+      requestId: null,
+    });
     expect(logsOf(messages)).toHaveLength(5);
   });
 
@@ -172,11 +180,12 @@ describe('opting in (HELLO log: debug) collects the LOG stream end-to-end', () =
     await flush();
 
     const logs = logsOf(messages);
-    // The share path resolves with share:true + the object size…
+    // The share path resolves with share:true + the object size, scoped to the
+    // owning SOURCE request…
     expect(logs.find((log) => log.name === 'object.resolved')).toMatchObject({
       detail: { share: true, size: 2048 },
       level: 'info',
-      requestId: null,
+      requestId: 3,
     });
     // …but the share URL string (which embeds the decryption key) is never
     // serialized anywhere in the LOG stream.
@@ -228,6 +237,15 @@ describe('HELLO log: warn suppresses info/debug but still surfaces a failing loa
       name: 'session.error',
       requestId: 3,
     });
+    // The derived session.error carries the ERROR envelope's context string
+    // (here the rejecting SDK's "boom") next to the kind — scalars only.
+    expect(logs[0].detail).toMatchObject({ context: 'boom', kind: 'network' });
+    // Wire-safety: the context is a controlled error message, never a share
+    // URL or credential (a share URL embeds the decryption key).
+    const serialized = JSON.stringify(logs);
+    expect(serialized).not.toContain('encryption_key');
+    expect(serialized).not.toContain('/objects/');
+    for (const value of Object.values(logs[0].detail ?? {})) expect(isScalar(value)).toBe(true);
     expect(isWorkerToMainMessage(logs[0])).toBe(true);
     expect(logs.some((log) => log.name === 'session.attach')).toBe(false);
   });
@@ -248,11 +266,13 @@ describe('host-side contract: threshold mapper + console-logger forwarding', () 
   it('forwardWorkerLog renders a warn LOG onto console.warn with the worker scope in the header', () => {
     vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const logger = createConsoleLogger({ level: 'warn' });
-    // A captured wire LOG at warn severity, name straight from the catalog.
+    // A captured wire LOG at warn severity, name straight from the catalog
+    // (resolved by name, never by index — the catalog grows as milestones are
+    // added).
     const message: LogMessage = {
       detail: { bytes: 4096, position: 0 },
       level: workerLogLevel.warn,
-      name: WORKER_LOG_EVENT_NAMES[3],
+      name: WORKER_LOG_EVENT_NAMES[WORKER_LOG_EVENT_NAMES.indexOf('read.window-complete')],
       requestId: 7,
       type: WorkerToMainMessageType.LOG,
     };
@@ -261,7 +281,7 @@ describe('host-side contract: threshold mapper + console-logger forwarding', () 
     // The console logger dot-joins the `worker` child scope into the header
     // and the line renders as `worker <name>` with detail spread + requestId.
     expect(console.warn).toHaveBeenCalledTimes(1);
-    expect(console.warn).toHaveBeenCalledWith('[sia-video-source:worker] worker session.source-ok', {
+    expect(console.warn).toHaveBeenCalledWith('[sia-video-source:worker] worker read.window-complete', {
       bytes: 4096,
       position: 0,
       requestId: 7,

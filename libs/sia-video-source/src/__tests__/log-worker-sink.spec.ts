@@ -112,20 +112,22 @@ describe('HELLO log threshold wiring (real worker sink)', () => {
     expect(logs.find((log) => log.name === 'session.attach')).toMatchObject({ level: 'info', requestId: null });
 
     // Source resolution: the plain pin-key src resolves with share:false plus
-    // the object's size (2048-byte fake payload), connection-level (createSource
-    // never sees the load's requestId). The src string itself ("pin-key") must
-    // never appear in any milestone detail — share URLs embed encryption keys,
-    // so the locator is never echoed.
+    // the object's size (2048-byte fake payload), scoped to the owning SOURCE
+    // request id (3). The src string itself ("pin-key") must never appear in
+    // any milestone detail — share URLs embed encryption keys, so the locator
+    // is never echoed.
     expect(logs.find((log) => log.name === 'object.resolved')).toMatchObject({
       detail: { share: false, size: 2048 },
       level: 'info',
-      requestId: null,
+      requestId: 3,
     });
     expect(JSON.stringify(logs)).not.toContain('pin-key');
 
-    // DETACH derives session.detach at the abandon boundary, still connection-level.
+    // DETACH derives session.detach at the abandon boundary, still
+    // connection-level, carrying the DETACH stop reason.
     await root.handleMessage({ type: MainToWorkerMessageType.DETACH });
     expect(logsOf(messages).find((log) => log.name === 'session.detach')).toMatchObject({
+      detail: { reason: 'detach' },
       level: 'info',
       requestId: null,
     });
@@ -148,16 +150,53 @@ describe('HELLO log threshold wiring (real worker sink)', () => {
 
     const logs = logsOf(messages);
     // `object.resolved` marks the share path with share:true and the object
-    // size; like every connection-level milestone, requestId is null.
+    // size, scoped to the owning SOURCE request (3).
     expect(logs.find((log) => log.name === 'object.resolved')).toMatchObject({
       detail: { share: true, size: 2048 },
       level: 'info',
-      requestId: null,
+      requestId: 3,
     });
     // Hard security rule: the share URL carries the decryption key, so the
     // URL string and its `encryption_key` fragment must never appear anywhere
     // in the emitted LOG messages.
     const serialized = JSON.stringify(logs);
+    expect(serialized).not.toContain('encryption_key');
+    expect(serialized).not.toContain('/objects/');
+  });
+
+  it('redacts the share URL out of a rejected SDK bootstrap so sdk.build-failed never leaks the key', async () => {
+    const messages: WorkerToMainMessage[] = [];
+    const root = createDefaultWorkerComposition({
+      capabilities: permissiveCapabilities(),
+      // A failing SDK bootstrap yields an error message that carries the
+      // resolved share URL (which embeds the decryption key); the derived
+      // sdk.build-failed milestone must scrub URL-shaped runs before the
+      // message reaches LOG detail.
+      createSdk: () =>
+        Promise.reject(new Error('fetch to https://host/objects/aabbcc/shared?x=1#encryption_key=zzzz failed')),
+      loadPipeline: new FakeLoadPipeline(),
+      post: (message) => messages.push(message),
+      supportsWorkerMse: () => false,
+    });
+    await root.handleMessage({ config: WORKER_CONFIG, log: 'debug', requestId: 1, type: MainToWorkerMessageType.HELLO });
+    await root.handleMessage({ requestId: 2, type: MainToWorkerMessageType.ATTACH });
+    await root.handleMessage({ preload: 'auto', requestId: 3, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
+    await flush();
+
+    const logs = logsOf(messages);
+    // The build-failure milestone is error-severity and connection-level; the
+    // SDK's message has its URL run replaced, the rest kept readable.
+    const buildFailed = logs.find((log) => log.name === 'sdk.build-failed');
+    expect(buildFailed).toMatchObject({ level: 'error', requestId: null });
+    expect(buildFailed?.detail).toMatchObject({ message: 'fetch to [redacted] failed' });
+
+    // The rethrown error's ERROR envelope context still reaches session.error,
+    // but redacted the same way — the URL and the encryption-key fragment it
+    // embeds never appear in any LOG detail.
+    const sessionError = logs.find((log) => log.name === 'session.error');
+    expect(sessionError?.detail).toMatchObject({ context: 'fetch to [redacted] failed', kind: 'network' });
+    const serialized = JSON.stringify(logs);
+    expect(serialized).not.toContain('https://');
     expect(serialized).not.toContain('encryption_key');
     expect(serialized).not.toContain('/objects/');
   });
@@ -185,11 +224,17 @@ describe('HELLO log threshold wiring (real worker sink)', () => {
 
     const logs = logsOf(messages);
     // session.error is error-severity (at/above the 'error' threshold) so it posts.
-    expect(logs.find((log) => log.name === 'session.error')).toMatchObject({
+    const sessionError = logs.find((log) => log.name === 'session.error');
+    expect(sessionError).toMatchObject({
       detail: { kind: 'network' },
       level: 'error',
       requestId: 3,
     });
+    // The ERROR envelope's context (the rejecting object()'s "boom") rides
+    // along in the detail — scalar only, never a share URL or credential.
+    expect(sessionError?.detail).toMatchObject({ context: 'boom', kind: 'network' });
+    expect(JSON.stringify(logs)).not.toContain('encryption_key');
+    expect(JSON.stringify(logs)).not.toContain('/objects/');
     // Every info-level milestone (sdk.built, session.attach, …) is suppressed.
     expect(logs.filter((log) => log.level !== 'error')).toHaveLength(0);
   });
