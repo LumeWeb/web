@@ -8,6 +8,11 @@
  * Main-thread entry: the `SiaVideoSource` host element and the shared wire
  * types. The worker entry lives behind the `/worker` subpath; a React wrapper
  * behind `/react`.
+ *
+ * Logging is pluggable through the dependency-free `Logger` seam: pass a
+ * `logger` to the host (or the React wrapper's `logger` prop) and re-level it
+ * at runtime, and opt in to coarse worker milestone `LOG` events over the
+ * `/worker` wire via the host's HELLO log threshold.
  */
 
 export {
@@ -25,6 +30,17 @@ export {
   type CodecId,
 } from './capabilities/codec-verdict.ts';
 export { DEFAULT_ERROR_MESSAGES, MEDIA_ERROR_CODES, mediaErrorEvent, mediaErrorFromWorkerMessage } from './errors.ts';
+export {
+  createConsoleLogger,
+  LOG_LEVELS,
+  type LogFields,
+  type Logger,
+  type LogLevel,
+  type LogLevelFilter,
+  logLevelRank,
+  nullLogger,
+} from './log/logger.ts';
+export { type LoglevelLike, wrapLoglevel } from './log/loglevel.ts';
 export {
   type CancelledMediaLoad,
   inspectMediaLibrary,
@@ -53,10 +69,14 @@ export {
   type RequestId,
   type SiaVideoMessage,
   type SourceInfo,
+  WORKER_LOG_EVENT_NAMES,
   WORKER_PUBLIC_KEY_LENGTH,
   WORKER_TO_MAIN_TYPES,
   type WorkerConfig,
   type WorkerErrorCode,
+  type WorkerLogEventName,
+  workerLogLevel,
+  type WorkerLogLevel,
   type WorkerMode,
   type WorkerMsePreference,
   type WorkerToMainMessage,
@@ -110,7 +130,13 @@ export {
   type WorkerMseRootOptions,
 } from './session/worker-mse-root.ts';
 export { isSiaShareUrl, parseSiaShareUrl, type SiaShareUrl } from './share-url.ts';
-export { siaVideoDefaultProps, SiaVideoSource, type SiaVideoSourceOptions } from './sia-video-source.ts';
+export {
+  forwardWorkerLog,
+  logThresholdFor,
+  siaVideoDefaultProps,
+  SiaVideoSource,
+  type SiaVideoSourceOptions,
+} from './sia-video-source.ts';
 export { type AppendSink } from './sink/append-sink.ts';
 export {
   createWorkerMseSinkFactory,

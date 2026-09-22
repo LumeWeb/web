@@ -190,6 +190,58 @@ never in `workerConfig`; each `HELLO` additionally carries `appSeed` /
 slot whose provider the app removed. See ADR
 [0008](decisions/0008-share-link-streaming-via-sharedsdk.md).
 
+## Logging
+
+Logging is pluggable through a small dependency-free `Logger` interface:
+`createConsoleLogger`, `nullLogger`, or a wrapped third-party logger. Pass one
+to `new SiaVideoSource({ logger })` or the React wrapper's `logger` prop. The
+default is a built-in console logger that emits `info` in development builds
+and `warn` in production. Re-level at runtime by installing a fresh logger or
+wrapping the current one.
+
+Worker milestones reach the host logger only when it opts in via the HELLO
+`log` threshold (derived from the logger's level by `logThresholdFor`; a
+muted host omits it and the worker posts nothing). Events are a coarse
+catalog: `sdk.built`, `object.resolved`, `read.window-*`, `bytes.read`,
+`session.*`, `stream.*` — scalar details only, capped at 256 messages per
+connection, and forwarded onto `logger.child('worker')`.
+
+Use `loglevel` as the sink by wrapping your own instance:
+
+```ts
+import log from 'loglevel';
+import { wrapLoglevel } from '@lumeweb/sia-video-source';
+
+const source = new SiaVideoSource({ logger: wrapLoglevel(log.getLogger('sia')) });
+```
+
+LogTape has no library dependency; adapt its logger with a tiny sink-shim that
+conforms to the `Logger` interface:
+
+```ts
+import { getLogger } from '@logtape/logtape';
+import type { Logger } from '@lumeweb/sia-video-source';
+
+function logTapeLogger(category: string): Logger {
+  const tape = getLogger(['sia', category]);
+  return {
+    child: (scope) => logTapeLogger(`${category}.${scope}`),
+    debug: (msg, fields) => tape.debug(msg, fields),
+    error: (msg, fields) => tape.error(msg, fields),
+    info: (msg, fields) => tape.info(msg, fields),
+    level: 'debug',
+    trace: (msg, fields) => tape.debug(msg, fields),
+    warn: (msg, fields) => tape.warning(msg, fields),
+  };
+}
+
+const source = new SiaVideoSource({ logger: logTapeLogger('main') });
+```
+
+Logs never contain seeds, decrypted key material, or share URLs. A share URL
+embeds its decryption key, so share-URL playback shows up only as the
+`share: true` boolean in `object.resolved` details.
+
 ## Development
 
 ```bash

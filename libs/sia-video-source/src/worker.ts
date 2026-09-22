@@ -9,7 +9,7 @@
  */
 
 import { isMainToWorkerMessage, workerErrorCode, WorkerToMainMessageType } from './protocol.ts';
-import { createSiaWorkerComposition, createWorkerMseRoot } from './session/sia-composition.ts';
+import { createSiaWorkerComposition, createWorkerMseRoot, type WorkerLogSink } from './session/sia-composition.ts';
 import {
   createDefaultSdk,
   defaultPost,
@@ -34,7 +34,11 @@ export {
   MainToWorkerMessageType,
   PROTOCOL_VERSION,
   type SiaVideoMessage,
+  WORKER_LOG_EVENT_NAMES,
   type WorkerConfig,
+  type WorkerLogEventName,
+  workerLogLevel,
+  type WorkerLogLevel,
   type WorkerToMainMessage,
   WorkerToMainMessageType,
 } from './protocol.ts';
@@ -70,6 +74,12 @@ export interface WorkerScopeRuntime {
  * protocol-safe main-mode CHUNK posting sink — the host owns MSE in that
  * case. No Node-vs-browser branch exists here: this entry is browser-only, so
  * the browser globals (`self`) are used directly.
+ *
+ * The worker LOG seam: a host that opts in via the HELLO `log` forwarding
+ * threshold receives worker `LOG` milestones (session attach/detach, sdk
+ * built, stream started/ended, session errors) forwarded by this root's
+ * `logSink` over the same `post` channel, each gated by the live HELLO
+ * threshold and the per-sink 256-message cap inside the composition.
  */
 export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = {}): WorkerCompositionHost {
   const post = options.post ?? defaultPost;
@@ -87,6 +97,13 @@ export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = 
     },
     post,
   });
+  // The real worker `logSink`: forwards `LOG` messages back over the same
+  // outbound `post` channel the coordinator uses. It only ever receives
+  // threshold-compliant, cap-allowed messages — the composition's `emitLog`
+  // gates every milestone against the live HELLO `log` threshold and the 256
+  // sink cap before invoking it — and stays dumb and total so a log line can
+  // never block the wire.
+  const logSink: WorkerLogSink = (message) => post(message);
   return createSiaWorkerComposition({
     // Only build a byte-source profile when there is something to configure;
     // the undefined path keeps the coordinator's default transport reads.
@@ -94,6 +111,7 @@ export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = 
     capabilities: options.capabilities,
     createSdk: options.createSdk ?? createDefaultSdk,
     loadPipeline: options.loadPipeline,
+    logSink,
     post,
     supportsWorkerMse: options.supportsWorkerMse,
     workerMseRoot,

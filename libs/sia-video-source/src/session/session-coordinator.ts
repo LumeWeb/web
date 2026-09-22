@@ -49,6 +49,7 @@ import {
   type WorkerConfig,
   workerErrorCode,
   type WorkerErrorCode,
+  type WorkerLogLevel,
   workerMode,
   type WorkerMode,
   workerMsePreference,
@@ -174,9 +175,23 @@ export interface SessionHandshake {
    * held seed whose slot the host declares absent (`false`) — a host may
    * remove a seed provider while re-attaching an identical config, and the
    * worker must not keep a stale (possibly revoked) credential. Absent flags
-   * (an old-protocol HELLO) scrub nothing beyond the config-change rule.
+   * (an old-protocol HELLO) scrub nothing beyond the config-change rule. The
+   * optional `log` is the host's `LOG` forwarding threshold for this
+   * connection (absent = silent); it is adopted as the live `log` getter.
    */
-  hello(requestId: RequestId, config?: WorkerConfig, presence?: HelloSeedPresence): { readonly publicKey: Uint8Array };
+  hello(
+    requestId: RequestId,
+    config?: WorkerConfig,
+    presence?: HelloSeedPresence,
+    log?: WorkerLogLevel,
+  ): { readonly publicKey: Uint8Array };
+  /**
+   * Live HELLO `log` forwarding threshold for worker `LOG` messages, as last
+   * declared by the most recent `hello` (absent = no threshold = the worker
+   * posts no LOG messages at all). Read at emit time so a threshold change on
+   * re-attach takes effect without any stale snapshot.
+   */
+  readonly log?: WorkerLogLevel;
   /** Decrypted app-key seed of the active connection, or null until one is validated. */
   readonly seed?: null | Uint8Array;
   /** Decrypted sharing-key seed of the active connection, or null until one is validated. */
@@ -297,10 +312,15 @@ export class WorkerComposition implements SessionCoordinator {
           this.#pendingSeekTime = undefined;
           return;
         case MainToWorkerMessageType.HELLO: {
-          const { publicKey } = this.#handshake.hello(message.requestId, message.config, {
-            app: message.appSeed,
-            sharing: message.sharingSeed,
-          });
+          const { publicKey } = this.#handshake.hello(
+            message.requestId,
+            message.config,
+            {
+              app: message.appSeed,
+              sharing: message.sharingSeed,
+            },
+            message.log,
+          );
           // A host `workerMse: 'main'` preference overrides the runtime
           // capability check for this session (auto keeps runtime feature-detection). HELLO
           // arrives before ATTACH, so HELLO_OK's `features.workerMse` and the
@@ -624,6 +644,10 @@ export function createSessionCoordinator(deps: SessionCoordinatorDeps): SessionC
 export function createSessionHandshake(): SessionHandshake {
   let config: undefined | WorkerConfig;
   let keyPair: null | WorkerKeyPair = null;
+  // The active LOG forwarding threshold, adopted from the latest HELLO (absent
+  // = silent). Lives the same way as config/seed/sharingSeed so the composition
+  // can read it live at emit time via the getter.
+  let log: undefined | WorkerLogLevel = undefined;
   let seed: null | Uint8Array = null;
   let sharingSeed: null | Uint8Array = null;
 
@@ -669,13 +693,19 @@ export function createSessionHandshake(): SessionHandshake {
       if (sharingSeed) scrub(sharingSeed);
       sharingSeed = null;
       config = undefined;
+      log = undefined;
     },
 
     hello(
       _requestId: RequestId,
       nextConfig?: WorkerConfig,
       presence?: HelloSeedPresence,
+      logThreshold?: WorkerLogLevel,
     ): { readonly publicKey: Uint8Array } {
+      // The LOG threshold travels with the HELLO that (re)establishes the
+      // connection, so adopt it unconditionally — the live `log` getter always
+      // reflects the most recent HELLO, never a stale snapshot.
+      log = logThreshold;
       // A HELLO config that changed — or was cleared entirely — invalidates the
       // connection: drop both held seeds so the next APP_KEY starts fresh.
       if (!workerConfigsEqual(config, nextConfig)) {
@@ -701,6 +731,10 @@ export function createSessionHandshake(): SessionHandshake {
       }
       keyPair ??= generateWorkerKeyPair();
       return { publicKey: exportWorkerPublicKey(keyPair) };
+    },
+
+    get log(): undefined | WorkerLogLevel {
+      return log;
     },
 
     get seed(): null | Uint8Array {

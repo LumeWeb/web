@@ -50,6 +50,7 @@ export enum WorkerToMainMessageType {
   ERROR = 'ERROR',
   HANDLE = 'HANDLE',
   HELLO_OK = 'HELLO_OK',
+  LOG = 'LOG',
   PROGRESS = 'PROGRESS',
   SOURCE_OK = 'SOURCE_OK',
 }
@@ -105,6 +106,13 @@ export type MainToWorkerMessage =
       readonly appSeed?: boolean;
       /** Required with the default worker SDK factory; ignored when the app injected its own. */
       readonly config?: WorkerConfig;
+      /**
+       * Host forwarding threshold for worker `LOG` messages: the worker posts
+       * only events whose severity is at or above this level. Absent = the
+       * worker must not post any LOG messages at all, which keeps the wire
+       * quiet for hosts that never opted in.
+       */
+      readonly log?: WorkerLogLevel;
       readonly requestId: RequestId;
       /** Mirror of `appSeed` for the sharing-key seed slot (`APP_KEY` tagged `keyType: 'sharing'`). */
       readonly sharingSeed?: boolean;
@@ -212,6 +220,46 @@ export const workerMsePreference = {
 
 export type WorkerMsePreference = (typeof workerMsePreference)[keyof typeof workerMsePreference];
 
+/**
+ * Severities a worker `LOG` message may carry. The wire deliberately drops
+ * `'trace'` (the finest library level): milestones worth forwarding start at
+ * `'debug'`, and excluding trace keeps the wire cheap by never serializing
+ * chatty per-read trace lines.
+ */
+export const workerLogLevel = {
+  debug: 'debug',
+  error: 'error',
+  info: 'info',
+  warn: 'warn',
+} as const;
+
+export type WorkerLogLevel = (typeof workerLogLevel)[keyof typeof workerLogLevel];
+
+/**
+ * Coarse milestone names a worker `LOG` message may carry, grouped by phase:
+ * session lifecycle (`session.*`), SDK bootstrap (`sdk.*`), object resolution
+ * (`object.*`), stream lifecycle (`stream.*`), and windowed-read progress
+ * (`read.*` / `bytes.*`). Names are plain strings on the wire — a future
+ * worker may post a name absent here without a protocol bump, so the catalog
+ * is typed/advisory for host-side rendering, never a wire constraint.
+ */
+export const WORKER_LOG_EVENT_NAMES = [
+  'session.attach',
+  'session.detach',
+  'session.source-start',
+  'session.source-ok',
+  'session.error',
+  'sdk.built',
+  'object.resolved',
+  'stream.started',
+  'stream.ended',
+  'read.window-start',
+  'read.window-complete',
+  'bytes.read',
+] as const;
+
+export type WorkerLogEventName = (typeof WORKER_LOG_EVENT_NAMES)[number];
+
 /** Worker → main. */
 export type WorkerToMainMessage =
   | {
@@ -223,6 +271,16 @@ export type WorkerToMainMessage =
        */
       readonly requestId: RequestId;
       readonly type: WorkerToMainMessageType.ENDED;
+    }
+  | {
+      /** Scalar-only detail; NEVER bytes, object references, or key material. */
+      readonly detail?: Readonly<Record<string, unknown>>;
+      readonly level: WorkerLogLevel;
+      /** Coarse milestone name (see WORKER_LOG_EVENT_NAMES). */
+      readonly name: string;
+      /** Owning load, or `null` for connection-level events. */
+      readonly requestId: null | RequestId;
+      readonly type: WorkerToMainMessageType.LOG;
     }
   | {
       readonly buffered: readonly BufferWindow[];
@@ -272,10 +330,14 @@ export function isMainToWorkerMessage(message: unknown): message is MainToWorker
     case MainToWorkerMessageType.HELLO:
       // The additive seed-presence flags are optional booleans (wire metadata;
       // a non-boolean value is a malformed HELLO, never a silent default).
+      // `log` is the opt-in forwarding threshold: absent stays accepted for
+      // backward compatibility, and any present value must be one of the four
+      // wire severities — a foreign level (or non-string) is a malformed HELLO.
       return (
         typeof typed.requestId === 'number' &&
         (typeof typed.appSeed === 'undefined' || typeof typed.appSeed === 'boolean') &&
-        (typeof typed.sharingSeed === 'undefined' || typeof typed.sharingSeed === 'boolean')
+        (typeof typed.sharingSeed === 'undefined' || typeof typed.sharingSeed === 'boolean') &&
+        (typeof typed.log === 'undefined' || Object.values(workerLogLevel).includes(typed.log))
       );
     case MainToWorkerMessageType.PLAYHEAD:
     case MainToWorkerMessageType.SEEK:
@@ -312,6 +374,13 @@ export function isWorkerToMainMessage(message: unknown): message is WorkerToMain
         typeof typed.requestId === 'number' &&
         typed.publicKey instanceof Uint8Array &&
         typed.publicKey.byteLength === WORKER_PUBLIC_KEY_LENGTH
+      );
+    case WorkerToMainMessageType.LOG:
+      return (
+        typeof typed.name === 'string' &&
+        Object.values(workerLogLevel).includes(typed.level) &&
+        (typed.requestId === null || typeof typed.requestId === 'number') &&
+        (typed.detail === undefined || (typeof typed.detail === 'object' && typed.detail !== null))
       );
     case WorkerToMainMessageType.PROGRESS:
       return typeof typed.requestId === 'number' && typeof typed.received === 'number';
