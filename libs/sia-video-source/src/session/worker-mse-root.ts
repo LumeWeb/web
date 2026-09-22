@@ -113,6 +113,16 @@ export function createWorkerMseRoot(options: WorkerMseRootOptions): WorkerMseRoo
     getMediaSource: () => mediaSource,
     getPlayheadSeconds: () => playheadSeconds,
     getSourceBuffer: () => sourceBuffer,
+    // MSE-pipe diagnostics forward through the same onLog seam as
+    // session.mse-open (the worker entry feeds that into the composition's
+    // gated emitLog, so the HELLO threshold + 256 cap apply to these too):
+    // the eviction trace is debug, and the rare best-effort breadcrumbs that
+    // dot the swallowed failures are warn. The pipe has no requestId of its
+    // own; the active load's id rides along (null when the root has none).
+    onDiag: (name, detail) => {
+      const level = name === 'mse.evict' ? workerLogLevel.debug : workerLogLevel.warn;
+      options.onLog?.(name, level, requestId, detail);
+    },
     onError: (error) => reportFatal(requestId, error),
   };
 
@@ -146,17 +156,25 @@ export function createWorkerMseRoot(options: WorkerMseRootOptions): WorkerMseRoo
       pipe?.kick();
       // The MediaSource opened and its SourceBuffer was created: report the
       // applied MIME + duration (when one was set) at the active load.
-      options.onLog?.(
-        'session.mse-open',
-        workerLogLevel.info,
-        requestId,
-        durationSeconds === null ? { mime } : { durationSeconds, mime },
-      );
+      try {
+        options.onLog?.(
+          'session.mse-open',
+          workerLogLevel.info,
+          requestId,
+          durationSeconds === null ? { mime } : { durationSeconds, mime },
+        );
+      } catch {
+        // A throwing observability hook must not fail a successful open.
+      }
     } catch (error) {
       // A pipeline whose SourceBuffer cannot be created is dead too: report
       // the open failure (the MIME that was refused) first, then release the
       // freshly opened MediaSource (see `reportFatal`).
-      options.onLog?.('session.mse-open-failed', workerLogLevel.error, requestId, { mime });
+      try {
+        options.onLog?.('session.mse-open-failed', workerLogLevel.error, requestId, { mime });
+      } catch {
+        // A throwing observability hook must not skip the fatal teardown.
+      }
       reportFatal(requestId, error);
     }
   }

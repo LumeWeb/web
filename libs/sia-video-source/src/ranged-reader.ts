@@ -39,7 +39,10 @@ export interface RangedReaderOptions {
    * Optional milestone listener for the windowed-read observability seam:
    * `'read.window-start'` when an SDK download opens, `'read.window-complete'`
    * when it completes successfully, `'bytes.read'` each time cumulative
-   * delivery to `onChunk` crosses a whole 1 MiB boundary, `'read.stalled'`
+   * delivery to `onChunk` crosses a whole 1 MiB boundary, `'read.cache-hit'`
+   * (at most once per read-window, when the LRU replay served bytes before any
+   * download), `'read.budget-wait'` (once per blocking `ReadBudget.acquire`,
+   * i.e. when a permit wait begins behind the concurrency cap), `'read.stalled'`
    * when the stall watchdog aborts a read that yielded no bytes, and
    * `'read.error'` when a run fails for any other reason (short read / SDK
    * stream error; the stall error is reported only as `read.stalled`, never
@@ -370,7 +373,11 @@ export class RangedReader {
 
     try {
       // Replay contiguous cached windows before the network read; a listener
-      // sees one seamless delivery either way.
+      // sees one seamless delivery either way. The replay ahead of budget
+      // dispatch is the "cache" phase: what it serves is what a seek or re-read
+      // spared the network, reported once per read-window (never per chunk).
+      const cacheReplayStart = this.#position;
+      let cacheBytes = 0;
       while (this.#loadGeneration === loadGeneration) {
         const cached = this.#cache.takeAt(this.#position);
         if (cached === undefined) break;
@@ -379,7 +386,15 @@ export class RangedReader {
         const delivered = cached.subarray(0, remaining);
         this.#emitChunk(delivered, this.#position, chunkSize);
         this.#position += delivered.byteLength;
+        cacheBytes += delivered.byteLength;
         if (delivered.byteLength < cached.byteLength) break;
+      }
+      // A window served fully or partly from the LRU cache before any SDK
+      // download opened: `{ bytes }` served and where the replay started. The
+      // un-served tail (when any) continues from the network below, so this is
+      // a cache hit even for a partial replay.
+      if (cacheBytes > 0) {
+        this.#milestone('read.cache-hit', { bytes: cacheBytes, position: cacheReplayStart });
       }
 
       if (this.#loadGeneration !== loadGeneration) return;
@@ -401,7 +416,17 @@ export class RangedReader {
         // issue independent overlapping reads — can never open more SDK
         // downloads at once than the budget allows; see {@link ReadBudget}.
         if (budget) {
-          release = await budget.acquire();
+          // When the acquire actually blocks (every permit is held — e.g. the
+          // 64 pending WebTransport sessions are exhausted), the wait is the
+          // backpressure event worth surfacing: one emit per wait, carrying the
+          // live budget counters that describe how deep the queue sat.
+          release = await budget.acquire(() => {
+            this.#milestone('read.budget-wait', {
+              inFlight: budget.inFlight,
+              limit: budget.limit,
+              waiters: budget.waiters,
+            });
+          });
           // A seek/stop arrived while this run waited for its permit: abandon
           // (the `finally` releases the just-acquired slot).
           if (this.#loadGeneration !== loadGeneration) return;
@@ -535,6 +560,10 @@ export class ReadBudget {
   get limit(): number {
     return this.#limit;
   }
+  /** Number of readers queued waiting for a permit (the blocking one included once queued). */
+  get waiters(): number {
+    return this.#waiters.length;
+  }
   #inFlight = 0;
   readonly #limit: number;
   #waiters: (() => void)[] = [];
@@ -548,8 +577,16 @@ export class ReadBudget {
    * Resolves once a permit is free. The returned function releases the permit;
    * call it exactly once when the read it capped has ended (delivered, aborted,
    * or abandoned). Waits are FIFO so callers cannot starve each other.
+   *
+   * `onWait`, when supplied, runs synchronously exactly when this call
+   * actually blocks — queued behind the limit rather than granted a free
+   * permit — which is the single place a caller can observe a backpressure
+   * wait beginning. The live `inFlight`/`limit`/`waiters` counters are
+   * readable at that instant. Never invoked for an immediately-granted
+   * acquire, and a throwing callback is swallowed so a diagnostic hook can
+   * never corrupt the dispatch queue.
    */
-  acquire(): Promise<() => void> {
+  acquire(onWait?: () => void): Promise<() => void> {
     if (this.#inFlight < this.#limit) {
       this.#inFlight++;
       return Promise.resolve(() => this.#release());
@@ -559,6 +596,11 @@ export class ReadBudget {
         this.#inFlight++;
         resolve(() => this.#release());
       });
+      try {
+        onWait?.();
+      } catch {
+        // A throwing diagnostic hook must not corrupt the wait queue.
+      }
     });
   }
 

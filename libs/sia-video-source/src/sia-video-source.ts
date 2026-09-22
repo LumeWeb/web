@@ -497,6 +497,17 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       getMediaSource: () => this.#mediaSource,
       getPlayheadSeconds: () => this.target?.currentTime ?? 0,
       getSourceBuffer: () => this.#sourceBuffer,
+      // MSE-pipe diagnostics mirror the worker path's onLog forwarding onto
+      // the host logger's `host` scope: the back-buffer eviction trace is
+      // debug, and the rare best-effort breadcrumbs (failed eviction /
+      // parser-reset / EOS — all still swallowed, just observable now) are
+      // warn. Scalar detail only, and behavior is unchanged (all hooks
+      // optional).
+      onDiag: (name, detail) => {
+        const sink = this.#logger.child('host');
+        if (name === 'mse.evict') sink.debug(name, detail);
+        else sink.warn(name, detail);
+      },
       onError: (error) => this.#reportError(workerErrorCode.decode, errorDescription(error)),
     });
     const target = this.target;
@@ -635,7 +646,19 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   #onMessage = (event: MessageEvent) => {
     // Foreign or malformed payloads (another library's worker, a draft
     // protocol version) must never reach the state-machine handlers as casts.
-    if (!isWorkerToMainMessage(event.data)) return;
+    // The dropped envelope's `type` field is the only safe identity — scalar,
+    // never payload contents — and it is reported at debug as a dropped-message
+    // counter (a foreign/wayward worker is rare, so this stays off the noise
+    // budget).
+    if (!isWorkerToMainMessage(event.data)) {
+      const envelope = event.data as null | { type?: unknown };
+      const type =
+        typeof envelope?.type === 'string' || typeof envelope?.type === 'number'
+          ? String(envelope.type)
+          : 'unknown';
+      this.#logger.child('host').debug('protocol.rejected', { type });
+      return;
+    }
     const message = event.data;
     switch (message.type) {
       case WorkerToMainMessageType.ATTACH_OK:

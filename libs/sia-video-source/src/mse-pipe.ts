@@ -43,6 +43,21 @@ export interface MseAppendPipeOptions {
    */
   getSourceBuffer(): null | SourceBuffer;
   /**
+   * Optional MSE-pipe diagnostic seam: receives observable-but-best-effort
+   * facts the pipe neither acts on nor surfaces through `onError` — the
+   * evicted back-buffer span (`mse.evict`, `{ start, end, bytes }` where
+   * `start`/`end` are TimeRanges seconds and `bytes` is the flushed span
+   * length), a failed eviction trim (`mse.evict-failed`, `{ message }`), a
+   * failed parser reset / timestamp re-anchor (`mse.parser-reset-failed`),
+   * and a failed deferred end-of-stream (`mse.eos-failed`, both `{ message }`).
+   * Only scalar detail is passed, never bytes or object references, and a
+   * throwing listener is swallowed so a diagnostic hook can never change pipe
+   * behavior (every error it reports was already being swallowed). No requestId
+   * is available inside the pipe; the owner binds one if it can. Undefined
+   * (the default) is a single optional-call check and zero behavior change.
+   */
+  onDiag?(name: string, detail: Readonly<Record<string, unknown>>): void;
+  /**
    * Fatal append failure. Invoked at most once per pipe lifetime (a SourceBuffer
    * `error` event or a synchronous non-quota append throw). After it fires,
    * further appends and end-of-stream are suppressed.
@@ -162,12 +177,15 @@ export class MseAppendPipe {
   // Resets the SourceBuffer's segment parser so the next appendBuffer begins
   // a fresh segment. Best-effort: a SourceBuffer mid-update, or a MediaSource
   // that left 'open', refuses abort() — the queued bytes are still dropped,
-  // and the next append simply proceeds.
+  // and the next append simply proceeds. The swallow is unchanged, but the
+  // refused reset is now observable (`mse.parser-reset-failed`).
   #abortParser(sourceBuffer: SourceBuffer): void {
     try {
       sourceBuffer.abort();
-    } catch {
-      // Best-effort parser reset; nothing further to recover.
+    } catch (error) {
+      // Best-effort parser reset; nothing further to recover. The queued bytes
+      // are dropped regardless, so this must never fail the pipeline.
+      this.#diag('mse.parser-reset-failed', { message: errorMessage(error) });
     }
   }
 
@@ -176,7 +194,8 @@ export class MseAppendPipe {
   // target was parked, set `timestampOffset` to it — all before anything is
   // dequeued. Both places a reset can complete (before a dequeue, or behind a
   // settling in-flight append) call this one helper so the order can never
-  // drift. The timestamp assignment is best-effort like the parser reset.
+  // drift. The timestamp assignment is best-effort like the parser reset, and
+  // its refused re-anchor reports through the same parser-reset breadcrumb.
   #applyParserReset(sourceBuffer: SourceBuffer): void {
     this.#parserResetPending = false;
     this.#abortParser(sourceBuffer);
@@ -185,9 +204,21 @@ export class MseAppendPipe {
     if (target !== null) {
       try {
         sourceBuffer.timestampOffset = target;
-      } catch {
-        // Best-effort re-anchor; nothing further to recover.
+      } catch (error) {
+        // Best-effort re-anchor; nothing further to recover, but observable.
+        this.#diag('mse.parser-reset-failed', { message: errorMessage(error) });
       }
+    }
+  }
+
+  // One diagnostic line through the optional onDiag seam. Untrusted host code
+  // may feed it to a logger; a throw is swallowed so it can never corrupt the
+  // pipe's append/evict/EOS flow — the sole rule of this seam.
+  #diag(name: string, detail: Readonly<Record<string, unknown>>): void {
+    try {
+      this.#options.onDiag?.(name, detail);
+    } catch {
+      // A throwing diagnostic hook must never affect pipe behavior.
     }
   }
 
@@ -203,9 +234,16 @@ export class MseAppendPipe {
       if (end <= start) continue;
       try {
         await flushBuffer(sourceBuffer, start, end);
-      } catch {
+        // A real trim reached flushBuffer: report the evicted span. The pipe
+        // knows only TimeRanges, so `start`/`end` are seconds and `bytes` is
+        // the flushed span length (end - start) — never a fabricated byte
+        // count for what the browser discarded.
+        this.#diag('mse.evict', { bytes: end - start, end, start });
+      } catch (error) {
         // SourceBuffer state can change between the range read and the remove;
         // eviction is a best-effort trim and must never fail the pipeline.
+        // The swallow is unchanged, but the failed trim is now observable.
+        this.#diag('mse.evict-failed', { message: errorMessage(error) });
       }
       return true;
     }
@@ -238,9 +276,11 @@ export class MseAppendPipe {
     if (mediaSource.readyState !== 'open') return;
     try {
       mediaSource.endOfStream();
-    } catch {
+    } catch (error) {
       // endOfStream requires readyState 'open' and no in-flight updates; the
       // guards above own both, so a racing platform rejection is a no-op here.
+      // The swallow is unchanged, but that rejected EOS is now observable.
+      this.#diag('mse.eos-failed', { message: errorMessage(error) });
     }
     this.#eosRequested = false;
   }
@@ -324,6 +364,11 @@ export class MseAppendPipe {
       }
     }
   }
+}
+
+/** Scalar message of a caught best-effort failure (DOMException or Error alike). */
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 function isQuotaExceeded(error: unknown): boolean {

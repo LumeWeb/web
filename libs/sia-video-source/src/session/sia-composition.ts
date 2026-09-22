@@ -188,7 +188,15 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
               // so they never crowd the per-sink 256-message cap.
               name === 'read.stalled' || name === 'read.error'
               ? workerLogLevel.error
-              : name === 'read.window-start' || name === 'read.window-complete' || name === 'bytes.read'
+              : // Debug-level read diagnostics: the per-window window bookends
+                // and byte boundaries, plus the two backpressure/debug events —
+                // a budget wait (one per blocking acquire) and a cache hit (one
+                // per replayed window) — both rare enough to stay off the cap.
+                name === 'read.window-start' ||
+                  name === 'read.window-complete' ||
+                  name === 'bytes.read' ||
+                  name === 'read.budget-wait' ||
+                  name === 'read.cache-hit'
                 ? workerLogLevel.debug
                 : undefined;
         if (level === undefined) return;

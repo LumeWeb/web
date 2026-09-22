@@ -118,9 +118,10 @@ describe('WORKER_LOG_EVENT_NAMES milestone catalog', () => {
   it('holds exactly the live milestone names: dead entries are removed, failure events added', () => {
     // The catalog is the single source of truth for emitted milestones, so it
     // cannot drift from the emitters: the never-emitted `session.source-start`
-    // and `session.source-ok` are gone (no worker derives them), and the new
-    // failure events (`sdk.build-failed`, `read.stalled`, `read.error`) are
-    // present.
+    // and `session.source-ok` are gone (no worker derives them), the failure
+    // events (`sdk.build-failed`, `read.stalled`, `read.error`) are present,
+    // and the deep-pipeline diagnostics (backpressure/cache read events, MSE
+    // pipe breadcrumbs, and the wire-guard rejection counter) are listed.
     expect(WORKER_LOG_EVENT_NAMES).toEqual([
       'session.attach',
       'session.detach',
@@ -134,9 +135,16 @@ describe('WORKER_LOG_EVENT_NAMES milestone catalog', () => {
       'stream.ended',
       'read.window-start',
       'read.window-complete',
+      'read.budget-wait',
+      'read.cache-hit',
       'read.stalled',
       'read.error',
       'bytes.read',
+      'mse.evict',
+      'mse.evict-failed',
+      'mse.parser-reset-failed',
+      'mse.eos-failed',
+      'protocol.rejected',
     ]);
   });
 });

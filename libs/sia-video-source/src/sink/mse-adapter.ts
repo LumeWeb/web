@@ -45,6 +45,11 @@ export interface WorkerMseSinkFactoryDeps {
   getPlayheadSeconds(): number;
   /** The SourceBuffer for this load's MSE pipeline (may appear late). */
   getSourceBuffer(): null | SourceBuffer;
+  /**
+   * Optional MSE-pipe diagnostics (eviction / parser-reset / EOS breadcrumbs),
+   * forwarded straight from the pipe's own `onDiag` seam.
+   */
+  onDiag?(name: string, detail: Readonly<Record<string, unknown>>): void;
   /** Fatal MSE append failure; fires at most once per pipe lifetime. */
   onError(error: unknown): void;
 }
@@ -104,6 +109,7 @@ export function createWorkerMseSinkFactory(deps: WorkerMseSinkFactoryDeps): () =
         getMediaSource: () => deps.getMediaSource(),
         getPlayheadSeconds: () => deps.getPlayheadSeconds(),
         getSourceBuffer: () => deps.getSourceBuffer(),
+        onDiag: (name, detail) => deps.onDiag?.(name, detail),
         onError: (error) => deps.onError(error),
       }),
     });

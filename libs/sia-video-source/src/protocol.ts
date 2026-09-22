@@ -238,10 +238,12 @@ export type WorkerLogLevel = (typeof workerLogLevel)[keyof typeof workerLogLevel
 /**
  * Coarse milestone names a worker `LOG` message may carry, grouped by phase:
  * session lifecycle (`session.*`), SDK bootstrap (`sdk.*`), object resolution
- * (`object.*`), stream lifecycle (`stream.*`), and windowed-read progress
- * (`read.*` / `bytes.*`). Names are plain strings on the wire — a future
- * worker may post a name absent here without a protocol bump, so the catalog
- * is typed/advisory for host-side rendering, never a wire constraint.
+ * (`object.*`), stream lifecycle (`stream.*`), windowed-read progress
+ * (`read.*` / `bytes.*`), MSE-pipe diagnostics (`mse.*`), and the wire-boundary
+ * rejection counter (`protocol.rejected`). Names are plain strings on the
+ * wire — a future worker may post a name absent here without a protocol bump,
+ * so the catalog is typed/advisory for host-side rendering, never a wire
+ * constraint.
  */
 export const WORKER_LOG_EVENT_NAMES = [
   'session.attach',
@@ -256,9 +258,16 @@ export const WORKER_LOG_EVENT_NAMES = [
   'stream.ended',
   'read.window-start',
   'read.window-complete',
+  'read.budget-wait',
+  'read.cache-hit',
   'read.stalled',
   'read.error',
   'bytes.read',
+  'mse.evict',
+  'mse.evict-failed',
+  'mse.parser-reset-failed',
+  'mse.eos-failed',
+  'protocol.rejected',
 ] as const;
 
 export type WorkerLogEventName = (typeof WORKER_LOG_EVENT_NAMES)[number];
