@@ -49,6 +49,13 @@ import {
 /** Default props mirrored by the React wrapper's prop-syncing hook. */
 const MSE_BACK_BUFFER_SECONDS = 30;
 
+/**
+ * Automatic reloads the host performs after a decode-class `ERROR` on the
+ * active load before it gives up and surfaces the MediaError normally. Bounded
+ * so a genuinely broken source cannot spin the worker forever.
+ */
+const MAX_DECODE_RELOADS = 2;
+
 export const siaVideoDefaultProps = {
   preload: 'metadata',
   src: '',
@@ -275,6 +282,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
   #destroyed = false;
   #error: MediaError | null = null;
+  // Most recent playhead the host forwarded via PLAYHEAD; decode-error
+  // recovery repositions the reloaded load here. Starts at 0 until the first
+  // timeupdate.
+  #lastPlayheadSeconds = 0;
   // Main-thread MSE fallback state (Firefox and other `main`-mode sessions).
   #logger: Logger;
   #mediaSource: MediaSource | null = null;
@@ -298,6 +309,12 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   #preload: MediaPreloadType = siaVideoDefaultProps.preload;
 
   #ready = false;
+
+  // Automatic reloads already spent recovering from decode-class errors on the
+  // current load (see `#recoverFromDecodeError`). Reset to a full budget by a
+  // fresh src assignment / load / ATTACH_OK replay and by a SOURCE_OK for the
+  // current request; a decode error surfaces instead once it is exhausted.
+  #reloadsThisLoad = 0;
 
   #requestId: null | RequestId = null;
 
@@ -387,6 +404,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     }
 
     this.#teardownMainThreadMse();
+    // A destroyed host keeps no pipeline to recover or resume, so recovery
+    // state dies with it.
+    this.#reloadsThisLoad = 0;
+    this.#lastPlayheadSeconds = 0;
     super.destroy();
   }
 
@@ -615,6 +636,18 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         if (message.requestId !== null) {
           if (this.#requestId === null || message.requestId !== this.#requestId) return;
         }
+        // A decode-class failure on the active load is the one kind worth
+        // retrying (worker MSE and the main-thread fallback both stall the
+        // same way): the pipeline tearing down underneath the element leaves a
+        // dead worker MediaSource / dead srcObject, so the browser sits in
+        // HAVE_CURRENT_DATA forever with no signal this side can react to.
+        // Restart the load — fresh SOURCE → SEEK to the last playhead → PLAY —
+        // a bounded number of times, then surface the error normally. Any
+        // other kind, and any decode error past the budget, stays fatal.
+        if (message.kind === workerErrorCode.decode && this.#src && this.#reloadsThisLoad < MAX_DECODE_RELOADS) {
+          this.#recoverFromDecodeError();
+          return;
+        }
         this.#reportError(message.kind, message.context);
         return;
       case WorkerToMainMessageType.HANDLE: {
@@ -673,6 +706,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // of a superseded SOURCE would downgrade the request id and let stale
         // chunks into the current append pipeline.
         if (message.requestId !== this.#requestId) return;
+        // A clean acknowledgement proves this load made it, so its recovery
+        // budget restarts: a later decode error gets a fresh run of reloads
+        // instead of surfacing at once.
+        this.#reloadsThisLoad = 0;
         if (message.info.mode === workerMode.main) {
           this.#beginMainThreadMse(
             message.info.mime || DEFAULT_FMP4_MIME,
@@ -727,6 +764,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   #onTimeUpdate = (event: Event) => {
     const target = this.target;
     if (!target || event.target !== target) return;
+    // Keep the newest position the host forwarded: decode-error recovery
+    // seeks the reloaded source back here.
+    this.#lastPlayheadSeconds = target.currentTime;
     this.#evictMainBuffer();
     this.#send({
       requestId: this.#requestId ?? nextRequestId(),
@@ -739,6 +779,50 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     if (!this.#worker) return;
     this.#worker.postMessage(message);
     if (message.type === MainToWorkerMessageType.SOURCE) this.#requestId = message.requestId;
+  }
+
+  // Bounded recovery from a decode-class ERROR delivered on the ACTIVE load
+  // (see the ERROR handler in #onMessage for the failure mode it covers: the
+  // worker's MediaSource died under the element, so the browser stalls forever
+  // in HAVE_CURRENT_DATA with no error this side could otherwise react to).
+  // Restart the whole load — a fresh SOURCE (new request id) torn down like
+  // any new load, then SEEK back to the last playhead the host forwarded and
+  // PLAY — and only retry a bounded number of times so a genuinely broken
+  // source still surfaces its decode error instead of reloading forever.
+  #recoverFromDecodeError(): void {
+    const target = this.target as HTMLVideoElement | null;
+    const attempt = this.#reloadsThisLoad + 1;
+    // Capture what the reload must restore BEFORE `#resetLoadState` wipes it:
+    // the resume position (the newest playhead the host forwarded) and whether
+    // the load carries play intent (element playing, or a `play` the user
+    // asked for — the reset clears both).
+    const resumeSeconds = this.#lastPlayheadSeconds;
+    const shouldPlay = target === null ? false : !target.paused || this.#playRequested;
+    this.#logger.child('host').warn('decode error on active load — reloading', {
+      attempt,
+      play: shouldPlay,
+      requestId: this.#requestId,
+      resumeSeconds,
+    });
+    // The reload runs the same teardown a new src/load() performs, which also
+    // zeroes the recovery budget — restore the old count including this one.
+    this.#resetLoadState();
+    this.#reloadsThisLoad = attempt;
+    // The reset also cleared the captured watch position, but the stalled
+    // element emits no further timeupdate to re-record it — keep the position
+    // for later recoveries of this same load.
+    this.#lastPlayheadSeconds = resumeSeconds;
+    this.#sendSource();
+    const requestId = this.#requestId ?? nextRequestId();
+    // The fresh source is re-anchored at the position the user was watching —
+    // position 0 for a source the host never played yet — and only resumed
+    // when that load actually carried play intent. A paused element stays
+    // paused: the recovery repairs the load, it does not start playback the
+    // user never asked for.
+    this.#send({ requestId, time: resumeSeconds, type: MainToWorkerMessageType.SEEK });
+    if (shouldPlay) {
+      this.#send({ requestId, type: MainToWorkerMessageType.PLAY });
+    }
   }
 
   #reportError(kind: WorkerErrorCode, context?: string): void {
@@ -756,6 +840,12 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // announces the load boundary with the native `emptied` event.
   #resetLoadState(): void {
     this.#error = null;
+    // Any automatic decode-error reloads belonged to the old load; a fresh
+    // source, load(), or ATTACH_OK replay starts with a full recovery budget.
+    this.#reloadsThisLoad = 0;
+    // Position memory belongs to the old source too: a fresh load starts at 0
+    // and must never seek back to the previous playhead on its own recovery.
+    this.#lastPlayheadSeconds = 0;
     // A new/explicit load has no playback intent yet: the element's next
     // native `play` re-asserts it. (The ATTACH_OK path re-captures intent
     // before this reset, so a rebuilt pipeline still resumes.)
