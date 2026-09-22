@@ -946,6 +946,10 @@ describe('decode failure recovery', () => {
   it.skipIf(!IN_BROWSER)('reloads the source with a bounded replay after a decode error on the active load', () => {
     const { host, target, worker } = attachAndHandshake();
     const originalLoadId = loadAndAcknowledge(host, worker, 'k');
+    // The element is playing, so the reload must resume playback (a paused
+    // element would only get SOURCE + SEEK). Register the play intent first,
+    // then clear the wire so it never pollutes the replay assertions below.
+    target.dispatchEvent(new Event('play'));
     worker.sent.length = 0;
 
     // The host's most recent playhead: forwarded on timeupdate as PLAYHEAD,
@@ -975,6 +979,76 @@ describe('decode failure recovery', () => {
 
     const postError = worker.sent.slice(worker.sent.findIndex((m) => m.type === MainToWorkerMessageType.SOURCE));
     expect(postError.map((m) => m.type)).toEqual([MainToWorkerMessageType.SOURCE, MainToWorkerMessageType.SEEK, MainToWorkerMessageType.PLAY]);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('seeks a fresh source to position 0, not the previous source playhead', () => {
+    const { host, target, worker } = attachAndHandshake();
+    loadAndAcknowledge(host, worker, 'k');
+
+    // Play the first source to t=42.5 so the host remembers a non-zero playhead.
+    target.currentTime = 42.5;
+    target.dispatchEvent(new Event('timeupdate'));
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAYHEAD).at(-1)).toMatchObject({ time: 42.5 });
+
+    // The user moves to a fresh source before anything else happens; the new
+    // load must recover to its own position 0, never the old source's playhead.
+    host.src = 'k2';
+    const newLoadId = newestSourceId(worker);
+
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: newLoadId, type: WorkerToMainMessageType.ERROR });
+
+    // The reload repositions the fresh source at the start, not at 42.5.
+    const seeks = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK);
+    expect(seeks.at(-1)).toMatchObject({ time: 0, type: MainToWorkerMessageType.SEEK });
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).at(-1)).toMatchObject({ src: 'k2', type: MainToWorkerMessageType.SOURCE });
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('does not force playback when the user never asked to play', () => {
+    const { host, target, worker } = attachAndHandshake();
+    const originalLoadId = loadAndAcknowledge(host, worker, 'k');
+    worker.sent.length = 0;
+
+    // No native `play` ever happened: the element is paused and the host holds
+    // no play intent, so the recovery must repair the load without restarting
+    // playback behind the user's back.
+    expect(target.paused).toBe(true);
+
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: originalLoadId, type: WorkerToMainMessageType.ERROR });
+
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
+    // The load itself still recovers: a fresh SOURCE plus a SEEK to position 0.
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK).at(-1)).toMatchObject({ time: 0, type: MainToWorkerMessageType.SEEK });
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('keeps playback intent across recovery', () => {
+    const { host, target, worker } = attachAndHandshake();
+    const originalLoadId = loadAndAcknowledge(host, worker, 'k');
+    worker.sent.length = 0;
+
+    // A user `play` registers intent the recovery must carry over.
+    target.dispatchEvent(new Event('play'));
+    target.currentTime = 12.5;
+    target.dispatchEvent(new Event('timeupdate'));
+
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: originalLoadId, type: WorkerToMainMessageType.ERROR });
+
+    const reloadSources = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE);
+    expect(reloadSources).toHaveLength(1);
+    expect(reloadSources[0].requestId).not.toBe(originalLoadId);
+
+    // The reload repositions at the remembered playhead, naming the new request id.
+    const seeks = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK);
+    expect(seeks).toHaveLength(1);
+    expect(seeks[0]).toMatchObject({ time: 12.5, type: MainToWorkerMessageType.SEEK });
+    expect(seeks[0].requestId).toBe(reloadSources[0].requestId);
+
+    // ...and playback resumes on the NEW load's request id.
+    const plays = worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY);
+    expect(plays.at(-1)).toMatchObject({ requestId: reloadSources[0].requestId, type: MainToWorkerMessageType.PLAY });
     host.destroy();
   });
 

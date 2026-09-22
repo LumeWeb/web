@@ -792,9 +792,17 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   #recoverFromDecodeError(): void {
     const target = this.target as HTMLVideoElement | null;
     const attempt = this.#reloadsThisLoad + 1;
+    // Capture what the reload must restore BEFORE `#resetLoadState` wipes it:
+    // the resume position (the newest playhead the host forwarded) and whether
+    // the load carries play intent (element playing, or a `play` the user
+    // asked for — the reset clears both).
+    const resumeSeconds = this.#lastPlayheadSeconds;
+    const shouldPlay = target === null ? false : !target.paused || this.#playRequested;
     this.#logger.child('host').warn('decode error on active load — reloading', {
       attempt,
+      play: shouldPlay,
       requestId: this.#requestId,
+      resumeSeconds,
     });
     // The reload runs the same teardown a new src/load() performs, which also
     // zeroes the recovery budget — restore the old count including this one.
@@ -802,11 +810,13 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#reloadsThisLoad = attempt;
     this.#sendSource();
     const requestId = this.#requestId ?? nextRequestId();
-    this.#send({ requestId, time: this.#lastPlayheadSeconds, type: MainToWorkerMessageType.SEEK });
-    // Resume playback whenever an element is attached: the recovery is a
-    // reposition-and-resume, so a present element is replayed regardless of
-    // the transient paused state the stall left it in.
-    if (target !== null) {
+    // The fresh source is re-anchored at the position the user was watching —
+    // position 0 for a source the host never played yet — and only resumed
+    // when that load actually carried play intent. A paused element stays
+    // paused: the recovery repairs the load, it does not start playback the
+    // user never asked for.
+    this.#send({ requestId, time: resumeSeconds, type: MainToWorkerMessageType.SEEK });
+    if (shouldPlay) {
       this.#send({ requestId, type: MainToWorkerMessageType.PLAY });
     }
   }
@@ -829,6 +839,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // Any automatic decode-error reloads belonged to the old load; a fresh
     // source, load(), or ATTACH_OK replay starts with a full recovery budget.
     this.#reloadsThisLoad = 0;
+    // Position memory belongs to the old source too: a fresh load starts at 0
+    // and must never seek back to the previous playhead on its own recovery.
+    this.#lastPlayheadSeconds = 0;
     // A new/explicit load has no playback intent yet: the element's next
     // native `play` re-asserts it. (The ATTACH_OK path re-captures intent
     // before this reset, so a rebuilt pipeline still resumes.)
