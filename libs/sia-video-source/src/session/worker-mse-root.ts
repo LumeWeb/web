@@ -23,7 +23,7 @@
  */
 
 import { MseAppendPipe } from '../mse-pipe.ts';
-import { type RequestId, WorkerToMainMessageType } from '../protocol.ts';
+import { type RequestId, workerLogLevel, type WorkerLogLevel, WorkerToMainMessageType } from '../protocol.ts';
 import { MseAdapter, type WorkerMseSinkFactoryDeps } from '../sink/mse-adapter.ts';
 import type { AppendSink } from '../sink/append-sink.ts';
 import type { PostMessage, SinkFactoryContext } from './session-coordinator.ts';
@@ -64,6 +64,22 @@ export interface WorkerMseRootOptions {
    * most once per pipe lifetime (the pipe suppresses repeats).
    */
   onError?: (requestId: null | RequestId, error: unknown) => void;
+  /**
+   * Optional observability hook mirroring the `onError` option style: receives
+   * worker MSE open facts as milestones — `session.mse-open` (info) once the
+   * per-load MediaSource opens and its SourceBuffer is created successfully
+   * (`{ mime, durationSeconds? }`), `session.mse-open-failed` (error) when
+   * `addSourceBuffer` throws (`{ mime }`). The active load's request id is
+   * supplied when one is bound, else null. Only scalar detail is passed; a
+   * host that wires this into the composition's `emitLog` gets the HELLO
+   * threshold + 256 cap for free. Undefined = zero change to the open path.
+   */
+  onLog?: (
+    name: string,
+    level: WorkerLogLevel,
+    requestId: null | RequestId,
+    detail: Readonly<Record<string, unknown>>,
+  ) => void;
   /** Outbound protocol channel (HANDLE posting with the transferred handle). */
   post: PostMessage;
 }
@@ -128,9 +144,19 @@ export function createWorkerMseRoot(options: WorkerMseRootOptions): WorkerMseRoo
       created.addEventListener('updateend', () => pipe?.kick());
       sourceBuffer = created;
       pipe?.kick();
+      // The MediaSource opened and its SourceBuffer was created: report the
+      // applied MIME + duration (when one was set) at the active load.
+      options.onLog?.(
+        'session.mse-open',
+        workerLogLevel.info,
+        requestId,
+        durationSeconds === null ? { mime } : { durationSeconds, mime },
+      );
     } catch (error) {
-      // A pipeline whose SourceBuffer cannot be created is dead too: report then
-      // release the freshly opened MediaSource (see `reportFatal`).
+      // A pipeline whose SourceBuffer cannot be created is dead too: report
+      // the open failure (the MIME that was refused) first, then release the
+      // freshly opened MediaSource (see `reportFatal`).
+      options.onLog?.('session.mse-open-failed', workerLogLevel.error, requestId, { mime });
       reportFatal(requestId, error);
     }
   }

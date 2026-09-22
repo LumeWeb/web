@@ -38,6 +38,7 @@ import {
   defaultSupportsWorkerMse,
   type PostMessage,
   type SessionCoordinator,
+  type WorkerAbandonReason,
 } from './session-coordinator.ts';
 import type { WorkerMseRoot } from './worker-mse-root.ts';
 import type { SiaByteSourceSdk } from '../transport/sia-byte-source.ts';
@@ -175,11 +176,11 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
   // source factory) route through `emitLog` — the single gated code path — so
   // a missing `logSink` or a below-threshold HELLO `log` keeps every reader
   // milestone fully suppressed. The callback is only attached when a
-  // `logSink` exists. The coordinator's `createSource` seam hands the factory
-  // only the `src` string, never the SOURCE requestId, so these milestones
-  // travel connection-level (requestId null).
+  // `logSink` exists. The SOURCE requestId is threaded through `createSource`
+  // into the per-load reader, so each reader milestone already carries its
+  // owning load's requestId when it reaches this listener.
   const onMilestone = logSink
-    ? (name: string, detail: Readonly<Record<string, unknown>>): void => {
+    ? (name: string, requestId: null | RequestId, detail: Readonly<Record<string, unknown>>): void => {
         const level =
           name === 'object.resolved'
             ? workerLogLevel.info
@@ -191,13 +192,13 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
                 ? workerLogLevel.debug
                 : undefined;
         if (level === undefined) return;
-        emitLog(logSink, handshake.log, level, name, detail);
+        emitLog(logSink, handshake.log, level, name, detail, requestId);
       }
     : undefined;
   const byteSourceOptions: SiaByteSourceFactoryOptions | undefined = onMilestone
     ? { ...byteSource, onMilestone }
     : byteSource;
-  const createSource: (src: string) => Promise<ByteSource> = deps.createSdk
+  const createSource: (src: string, requestId?: null | RequestId) => Promise<ByteSource> = deps.createSdk
     ? createLazySiaByteSourceFactory({ byteSource: byteSourceOptions, createSdk: deps.createSdk, handshake, logSink })
     : createSiaByteSourceFactory(sdk!, byteSourceOptions);
   // Worker MSE is used only when the runtime can construct it in a dedicated
@@ -266,12 +267,25 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
   // spurious detach. The root teardown semantics are preserved: with
   // `workerMseRoot` the caller's onAbandon is ignored (the root owns MSE
   // teardown), otherwise the caller's onAbandon still runs.
-  const onAbandon = (): void => {
+  //
+  // The reason is NOT derivable here from the wire alone: DETACH, DESTROY, and
+  // a superseding SOURCE all abandon with the same observable state (none of
+  // the stop messages posts an outgoing response, and at abandon time the new
+  // SOURCE's accept has not happened yet), so the coordinator threads the
+  // reason it knows at each call site through this existing hook — the most
+  // precise fact honestly convertible, never a heuristic guess.
+  const onAbandon = (reason?: WorkerAbandonReason): void => {
     if (workerMseSupported && workerMseRoot) workerMseRoot.teardown();
     else deps.onAbandon?.();
     if (loadAccepted) {
       loadAccepted = false;
-      emitLog(logSink, handshake.log, workerLogLevel.info, 'session.detach');
+      emitLog(
+        logSink,
+        handshake.log,
+        workerLogLevel.info,
+        'session.detach',
+        reason === undefined ? undefined : { reason },
+      );
     }
   };
 
@@ -376,7 +390,7 @@ function createLazySiaByteSourceFactory(deps: {
   ) => Promise<SiaByteSourceSdk>;
   readonly handshake: Pick<SessionHandshake, 'config' | 'log' | 'seed' | 'sharingSeed'>;
   readonly logSink?: WorkerLogSink;
-}): (src: string) => Promise<ByteSource> {
+}): (src: string, requestId?: null | RequestId) => Promise<ByteSource> {
   const { byteSource, createSdk, handshake, logSink } = deps;
   let cached: null | {
     config: undefined | WorkerConfig;
@@ -385,7 +399,7 @@ function createLazySiaByteSourceFactory(deps: {
     sharingSeed: null | Uint8Array;
   } = null;
 
-  return async (src: string): Promise<ByteSource> => {
+  return async (src: string, requestId?: null | RequestId): Promise<ByteSource> => {
     const config = handshake.config;
     const seed = handshake.seed ?? null;
     const sharingSeed = handshake.sharingSeed ?? null;
@@ -417,7 +431,9 @@ function createLazySiaByteSourceFactory(deps: {
         queueMicrotask(() => disposeSdk(previous));
       }
     }
-    return createSiaByteSourceFactory(sdk, byteSource)(src);
+    // The SOURCE requestId travels into the per-load source so its milestones
+    // keep the owning load's identity even though the SDK is connection-scoped.
+    return createSiaByteSourceFactory(sdk, byteSource)(src, requestId);
   };
 }
 

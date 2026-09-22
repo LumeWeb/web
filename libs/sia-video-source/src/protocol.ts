@@ -246,6 +246,8 @@ export type WorkerLogLevel = (typeof workerLogLevel)[keyof typeof workerLogLevel
 export const WORKER_LOG_EVENT_NAMES = [
   'session.attach',
   'session.detach',
+  'session.mse-open',
+  'session.mse-open-failed',
   'session.error',
   'sdk.built',
   'sdk.build-failed',

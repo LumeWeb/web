@@ -124,6 +124,8 @@ describe('WORKER_LOG_EVENT_NAMES milestone catalog', () => {
     expect(WORKER_LOG_EVENT_NAMES).toEqual([
       'session.attach',
       'session.detach',
+      'session.mse-open',
+      'session.mse-open-failed',
       'session.error',
       'sdk.built',
       'sdk.build-failed',

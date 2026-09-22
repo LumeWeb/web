@@ -129,8 +129,9 @@ describe('opting in (HELLO log: debug) collects the LOG stream end-to-end', () =
     ]);
     expect(logs.map((log) => log.level)).toEqual(['info', 'info', 'info', 'info']);
 
-    // Connection-level milestones (attach, lazy SDK bootstrap, resolution)
-    // carry no owning request; only the load-accepted streak is request-scoped.
+    // Connection-level milestones (attach, lazy SDK bootstrap) carry no owning
+    // request; the load-accepted streak and the SOURCE-scoped object.resolution
+    // ride the load's request id (3).
     expect(logs[0]).toMatchObject({ name: 'session.attach', requestId: null });
     expect(logs[1]).toMatchObject({
       detail: { indexerUrl: WORKER_CONFIG.indexerUrl },
@@ -140,7 +141,7 @@ describe('opting in (HELLO log: debug) collects the LOG stream end-to-end', () =
     expect(logs[2]).toMatchObject({
       detail: { share: false, size: 2048 },
       name: 'object.resolved',
-      requestId: null,
+      requestId: 3,
     });
     // SOURCE_OK derives `stream.started` scoped to load 3; the mode comes from
     // the ATTACH_OK that preceded it (this root ran in main-mode fallback).
@@ -159,9 +160,15 @@ describe('opting in (HELLO log: debug) collects the LOG stream end-to-end', () =
     expect(JSON.stringify(logs)).not.toContain('encryption_key');
     expect(JSON.stringify(logs)).not.toContain('pin-key');
 
-    // DETACH derives connection-level session.detach at the abandon boundary.
+    // DETACH derives connection-level session.detach at the abandon boundary,
+    // carrying the stop reason the coordinator derived for it.
     await root.handleMessage({ type: MainToWorkerMessageType.DETACH });
-    expect(logsOf(messages).at(-1)).toMatchObject({ level: 'info', name: 'session.detach', requestId: null });
+    expect(logsOf(messages).at(-1)).toMatchObject({
+      detail: { reason: 'detach' },
+      level: 'info',
+      name: 'session.detach',
+      requestId: null,
+    });
     expect(logsOf(messages)).toHaveLength(5);
   });
 
@@ -173,11 +180,12 @@ describe('opting in (HELLO log: debug) collects the LOG stream end-to-end', () =
     await flush();
 
     const logs = logsOf(messages);
-    // The share path resolves with share:true + the object size…
+    // The share path resolves with share:true + the object size, scoped to the
+    // owning SOURCE request…
     expect(logs.find((log) => log.name === 'object.resolved')).toMatchObject({
       detail: { share: true, size: 2048 },
       level: 'info',
-      requestId: null,
+      requestId: 3,
     });
     // …but the share URL string (which embeds the decryption key) is never
     // serialized anywhere in the LOG stream.
@@ -258,11 +266,13 @@ describe('host-side contract: threshold mapper + console-logger forwarding', () 
   it('forwardWorkerLog renders a warn LOG onto console.warn with the worker scope in the header', () => {
     vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const logger = createConsoleLogger({ level: 'warn' });
-    // A captured wire LOG at warn severity, name straight from the catalog.
+    // A captured wire LOG at warn severity, name straight from the catalog
+    // (resolved by name, never by index — the catalog grows as milestones are
+    // added).
     const message: LogMessage = {
       detail: { bytes: 4096, position: 0 },
       level: workerLogLevel.warn,
-      name: WORKER_LOG_EVENT_NAMES[9],
+      name: WORKER_LOG_EVENT_NAMES[WORKER_LOG_EVENT_NAMES.indexOf('read.window-complete')],
       requestId: 7,
       type: WorkerToMainMessageType.LOG,
     };

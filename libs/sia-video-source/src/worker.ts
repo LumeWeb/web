@@ -9,7 +9,8 @@
  */
 
 import { isMainToWorkerMessage, workerErrorCode, WorkerToMainMessageType } from './protocol.ts';
-import { createSiaWorkerComposition, createWorkerMseRoot, type WorkerLogSink } from './session/sia-composition.ts';
+import { createSiaWorkerComposition, createWorkerMseRoot, emitLog, type WorkerLogSink } from './session/sia-composition.ts';
+import { createSessionHandshake } from './session/session-coordinator.ts';
 import {
   createDefaultSdk,
   defaultPost,
@@ -83,6 +84,18 @@ export interface WorkerScopeRuntime {
  */
 export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = {}): WorkerCompositionHost {
   const post = options.post ?? defaultPost;
+  // The worker owns the handshake so the worker-MSE root's `onLog` closure can
+  // read the live HELLO `log` threshold through the same instance the
+  // composition emits milestones through — one threshold, zero drift. The
+  // composition receives this same instance and never creates its own.
+  const handshake = createSessionHandshake();
+  // The real worker `logSink`: forwards `LOG` messages back over the same
+  // outbound `post` channel the coordinator uses. It only ever receives
+  // threshold-compliant, cap-allowed messages — the composition's `emitLog`
+  // gates every milestone against the live HELLO `log` threshold and the 256
+  // sink cap before invoking it — and stays dumb and total so a log line can
+  // never block the wire.
+  const logSink: WorkerLogSink = (message) => post(message);
   const workerMseRoot = createWorkerMseRoot({
     backBufferSeconds: MSE_BACK_BUFFER_SECONDS,
     createMediaSource: options.createMediaSource,
@@ -95,21 +108,19 @@ export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = 
         type: WorkerToMainMessageType.ERROR,
       });
     },
+    // Worker-MSE open facts (`session.mse-open` / `session.mse-open-failed`)
+    // forward into the composition's single gated emitLog path (same sink,
+    // same live threshold, same 256 cap) — no parallel logging system.
+    onLog: (name, level, requestId, detail) => emitLog(logSink, handshake.log, level, name, detail, requestId),
     post,
   });
-  // The real worker `logSink`: forwards `LOG` messages back over the same
-  // outbound `post` channel the coordinator uses. It only ever receives
-  // threshold-compliant, cap-allowed messages — the composition's `emitLog`
-  // gates every milestone against the live HELLO `log` threshold and the 256
-  // sink cap before invoking it — and stays dumb and total so a log line can
-  // never block the wire.
-  const logSink: WorkerLogSink = (message) => post(message);
   return createSiaWorkerComposition({
     // Only build a byte-source profile when there is something to configure;
     // the undefined path keeps the coordinator's default transport reads.
     byteSource: options.cache ? { cache: options.cache } : undefined,
     capabilities: options.capabilities,
     createSdk: options.createSdk ?? createDefaultSdk,
+    handshake,
     loadPipeline: options.loadPipeline,
     logSink,
     post,

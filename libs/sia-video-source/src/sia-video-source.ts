@@ -463,7 +463,16 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       sourceBuffer.addEventListener('updateend', () => this.#appendPipe?.kick());
       this.#sourceBuffer = sourceBuffer;
       this.#appendPipe?.kick();
+      // The main-thread SourceBuffer opened (mirror of the worker's
+      // `session.mse-open`): scalar MIME + duration facts only.
+      this.#logger.child('host').info(
+        'mse-open',
+        durationSeconds === null ? { mime } : { durationSeconds, mime },
+      );
     } catch (error) {
+      // The MIME the host applied was refused — name it, then report decode as
+      // before (mirror of the worker's `session.mse-open-failed`).
+      this.#logger.child('host').error('mse-open-failed', { mime });
       this.#reportError(workerErrorCode.decode, errorDescription(error));
     }
   }

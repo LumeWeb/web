@@ -11,6 +11,7 @@
  */
 
 import type { Slab } from '@siafoundation/sia-storage';
+import type { RequestId } from './protocol.ts';
 
 /** Whole-MiB granularity for `'bytes.read'` milestone boundaries (1048576 bytes). */
 const MIB = 1024 * 1024;
@@ -43,12 +44,16 @@ export interface RangedReaderOptions {
    * `'read.error'` when a run fails for any other reason (short read / SDK
    * stream error; the stall error is reported only as `read.stalled`, never
    * also as `read.error`) (names follow `WORKER_LOG_EVENT_NAMES` in
-   * protocol.ts). Only scalar detail is ever passed, and a throwing listener
-   * is swallowed so it can never interrupt the read. Undefined (the default)
+   * protocol.ts). The owning SOURCE `requestId` rides each call (null when the
+   * reader has none) so a load's milestones keep their request-scoped
+   * identity. Only scalar detail is ever passed, and a throwing listener is
+   * swallowed so it can never interrupt the read. Undefined (the default)
    * adds no per-chunk work — each site is a single optional call check, so
    * the hot path is unchanged.
    */
-  onMilestone?: (name: string, detail: Readonly<Record<string, unknown>>) => void;
+  onMilestone?: (name: string, requestId: null | RequestId, detail: Readonly<Record<string, unknown>>) => void;
+  /** The SOURCE requestId owning this reader; null when constructed without one. */
+  requestId?: null | RequestId;
   sdk: SiaSdkLike;
   /**
    * Stall watchdog: maximum milliseconds a single SDK read may yield no bytes
@@ -290,7 +295,8 @@ export class RangedReader {
   }
 
   /**
-   * Fires one milestone. The listener is untrusted host code (it may feed a
+   * Fires one milestone, tagged with the owning SOURCE requestId (null when
+   * the reader has none). The listener is untrusted host code (it may feed a
    * logger or telemetry), so a throw is silently swallowed: it must never
    * abort the read or surface an error that belongs to the stream, which the
    * caller owns, not this hint seam.
@@ -299,7 +305,7 @@ export class RangedReader {
     const onMilestone = this.#options.onMilestone;
     if (onMilestone === undefined) return;
     try {
-      onMilestone(name, detail);
+      onMilestone(name, this.#options.requestId ?? null, detail);
     } catch {
       // Untrusted listener: a throwing onMilestone must not corrupt the
       // stream — swallow and keep reading.

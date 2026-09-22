@@ -112,20 +112,22 @@ describe('HELLO log threshold wiring (real worker sink)', () => {
     expect(logs.find((log) => log.name === 'session.attach')).toMatchObject({ level: 'info', requestId: null });
 
     // Source resolution: the plain pin-key src resolves with share:false plus
-    // the object's size (2048-byte fake payload), connection-level (createSource
-    // never sees the load's requestId). The src string itself ("pin-key") must
-    // never appear in any milestone detail — share URLs embed encryption keys,
-    // so the locator is never echoed.
+    // the object's size (2048-byte fake payload), scoped to the owning SOURCE
+    // request id (3). The src string itself ("pin-key") must never appear in
+    // any milestone detail — share URLs embed encryption keys, so the locator
+    // is never echoed.
     expect(logs.find((log) => log.name === 'object.resolved')).toMatchObject({
       detail: { share: false, size: 2048 },
       level: 'info',
-      requestId: null,
+      requestId: 3,
     });
     expect(JSON.stringify(logs)).not.toContain('pin-key');
 
-    // DETACH derives session.detach at the abandon boundary, still connection-level.
+    // DETACH derives session.detach at the abandon boundary, still
+    // connection-level, carrying the DETACH stop reason.
     await root.handleMessage({ type: MainToWorkerMessageType.DETACH });
     expect(logsOf(messages).find((log) => log.name === 'session.detach')).toMatchObject({
+      detail: { reason: 'detach' },
       level: 'info',
       requestId: null,
     });
@@ -148,11 +150,11 @@ describe('HELLO log threshold wiring (real worker sink)', () => {
 
     const logs = logsOf(messages);
     // `object.resolved` marks the share path with share:true and the object
-    // size; like every connection-level milestone, requestId is null.
+    // size, scoped to the owning SOURCE request (3).
     expect(logs.find((log) => log.name === 'object.resolved')).toMatchObject({
       detail: { share: true, size: 2048 },
       level: 'info',
-      requestId: null,
+      requestId: 3,
     });
     // Hard security rule: the share URL carries the decryption key, so the
     // URL string and its `encryption_key` fragment must never appear anywhere
