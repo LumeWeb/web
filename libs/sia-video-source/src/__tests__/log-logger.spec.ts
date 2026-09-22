@@ -18,6 +18,12 @@ function spyConsole(): void {
   for (const method of CONSOLE_METHODS) vi.spyOn(console, method).mockImplementation(() => undefined);
 }
 
+/** Node-only: the default level reads `process.env.NODE_ENV`; browsers have
+ * no `process` global (and Vite hardcodes `process.env.NODE_ENV` to
+ * `'production'` in the browser bundle), so the env-derived default-level
+ * block below only runs under `SIA_TEST_ENV=node`. */
+const IN_NODE = typeof process !== 'undefined';
+
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllEnvs();
@@ -158,7 +164,12 @@ describe('console formatting', () => {
 
 // ---- default level -----------------------------------------------------------------
 
-describe('default level', () => {
+// The default level is derived from a real `process.env.NODE_ENV` read (see
+// `defaultLogLevel` in log/logger.ts). Its value cannot be stubbed in the
+// browser, where there is no `process` global and the bundler hardcodes
+// `process.env.NODE_ENV` to 'production'; these env-stub tests only make
+// sense under the node environment.
+describe.runIf(IN_NODE)('default level', () => {
   it('defaults to "warn" in production', () => {
     vi.stubEnv('NODE_ENV', 'production');
     expect(createConsoleLogger().level).toBe('warn');
