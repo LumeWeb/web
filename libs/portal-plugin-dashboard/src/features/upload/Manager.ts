@@ -247,10 +247,10 @@ export class Manager implements IUploadManager {
       // For folder bundles, use the size field
       const meta = file.meta as BundleMetadata;
       if (meta?.isVirtualBundle && meta?.displayAsFolder) {
-        if (file.size) {
-          totalBytes += file.size;
+        const bundleTotal = file.progress.bytesTotal || file.size;
+        if (bundleTotal) {
+          totalBytes += bundleTotal;
         }
-        // Use Uppy's built-in progress tracking
         if (file.progress.bytesUploaded) {
           uploadedBytes += file.progress.bytesUploaded;
         }
