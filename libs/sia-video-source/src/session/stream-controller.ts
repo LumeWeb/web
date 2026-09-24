@@ -173,12 +173,13 @@ class GenericStreamController implements StreamController {
     // A transport/ranged-read failure (a `ReadTransportError` that already
     // exhausted its retry budget, possibly wrapped by an intermediate layer)
     // is a distinct condition, not a normalization slip: error-reporter maps
-    // it to the `network` wire kind so the HOST runs its bounded reload
-    // recovery, while a genuine conversion failure stays `normalization` →
-    // `unsupported` (fatal, no auto-reload). Carry the underlying cause's
-    // message as `detail` either way so the wire context (via error-reporter's
-    // describeFailure) names the real failure instead of a bare
-    // `normalization:failed` / `transport:failed`.
+    // it to the `network` wire kind, which the host surfaces as
+    // MEDIA_ERR_NETWORK with no auto-reload — an explicit play/seek restarts
+    // the source (repair deferred). A genuine conversion failure stays
+    // `normalization` → `unsupported` (fatal, no auto-reload). Carry the
+    // underlying cause's message as `detail` either way so the wire context
+    // (via error-reporter's describeFailure) names the real failure instead
+    // of a bare `normalization:failed` / `transport:failed`.
     this.#errorReporter.report({
       cause: error,
       code: failureCode.failed,
