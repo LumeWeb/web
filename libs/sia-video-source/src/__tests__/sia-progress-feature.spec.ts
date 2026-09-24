@@ -105,6 +105,28 @@ describe('the Sia progress player feature', () => {
     expect(snapshot().retries).toBe(2);
   });
 
+  it('a terminal read.error clears the in-flight read/retry state', () => {
+    const media = new FakeSiaMedia();
+    const store = createStore<PlayerTarget>()(siaProgressFeature);
+    store.attach(mediaTarget(media));
+    const snapshot = () => selectSiaProgress(store.state)!;
+
+    milestone(media, 'read.window-start', { position: 4096 });
+    milestone(media, 'read.retry', { position: 4096 });
+    expect(snapshot().retrying).toBe(true);
+
+    // The reader gave up after exhausting its retry budget: no
+    // `read.window-complete` fires on this path, so the flags must clear on
+    // the error milestone itself.
+    milestone(media, 'read.error', { deliveredBytes: 4096, expectedBytes: 8192, position: 4096 });
+    expect(snapshot().reading).toBe(false);
+    expect(snapshot().retrying).toBe(false);
+    expect(snapshot().last).toEqual({ name: 'read.error', position: 4096, requestId: 7 });
+    // The per-load counters survive: they are load facts, not flags.
+    expect(snapshot().reads).toBe(1);
+    expect(snapshot().retries).toBe(1);
+  });
+
   it('bytes.read tracks the cumulative scalar and ignores a non-scalar detail', () => {
     const media = new FakeSiaMedia();
     const store = createStore<PlayerTarget>()(siaProgressFeature);

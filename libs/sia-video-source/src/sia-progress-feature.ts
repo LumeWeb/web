@@ -18,7 +18,8 @@
  * - `read.retry`: sets `retrying` to true and increments `retries`;
  * - `bytes.read`: updates `bytesRead` from the worker's cumulative scalar
  *   (`detail.bytes`);
- * - `read.stalled`: the read/retry window is dead, so both clear;
+ * - `read.stalled` / `read.error`: the read/retry window is dead, so both
+ *   clear;
  * - `sia-load-change { accepted: false }`: the whole state resets, because a
  *   load boundary (fresh source/load, reload/reattach replay, recovery
  *   restart, detach) supersedes everything the previous load's reader
@@ -152,6 +153,12 @@ export const siaProgressFeature: PlayerFeature<SiaProgressState> = definePlayerF
           else set({ last });
           return;
         }
+        case workerLogEventName.readError:
+          // The reader gave up on the window after exhausting its retry
+          // budget; no `read.window-complete` fires on this terminal path, so
+          // both flags must clear here.
+          set({ last, reading: false, retrying: false });
+          return;
         case workerLogEventName.readRetry:
           // The window stays in flight (`reading` untouched); the retry is the
           // visible fact.
