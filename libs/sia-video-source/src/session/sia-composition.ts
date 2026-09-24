@@ -1,9 +1,9 @@
 /**
- * Production composition-root binding: wires the `SessionCoordinator` to the
- * real Sia transport and worker-mode MSE, so the worker entry can construct a
- * fully wired coordinator without touching the protocol wire shapes.
+ * Production composition-root binding: connects the `SessionCoordinator` to
+ * the real Sia transport and worker-mode MSE, so the worker entry can build a
+ * fully connected coordinator without touching the protocol wire shapes.
  *
- * Three seams compose here:
+ * Three exports compose here:
  *
  * - `createSiaByteSourceFactory(sdk, opts)` (re-exported from `transport/`) —
  *   the coordinator's `createSource`, resolving a SOURCE `src` locator into a
@@ -79,17 +79,17 @@ export interface SiaWorkerCompositionDeps {
   /** Handshake for `HELLO`/`APP_KEY` (default: `createSessionHandshake()`). */
   readonly handshake?: SessionHandshake;
   /**
-   * Injected load-pipeline seam for package-owned tests; production defaults
-   * to `createLoadPipeline({ capabilities })` inside the coordinator.
+   * Injected load pipeline for package-owned tests; production defaults to
+   * `createLoadPipeline({ capabilities })` inside the coordinator.
    */
   readonly loadPipeline?: LoadPipeline;
   /**
    * Optional outbound worker `LOG` sink. When supplied, this binding derives
    * milestones from the coordinator's outbound messages (attach/detach,
    * sdk.built, stream started/ended, session errors) and forwards them here as
-   * `LOG` messages, each gated by the live HELLO `log` threshold and the
-   * per-sink 256 cap (see `emitLog`). The real worker root wires this to its
-   * `post` channel; tests inject a recorder. Absent = no LOG messages.
+   * `LOG` messages, filtered by the live HELLO `log` threshold and the
+   * per-sink 256 cap (see `emitLog`). The real worker root sends these over
+   * its `post` channel; tests inject a recorder. Absent = no LOG messages.
    */
   readonly logSink?: WorkerLogSink;
   /**
@@ -107,14 +107,14 @@ export interface SiaWorkerCompositionDeps {
   readonly supportsWorkerMse?: () => boolean;
   /**
    * Live worker MediaSource state. When present and worker MSE is supported,
-   * each load gets an MSE-backed `AppendSink` (one `MseAdapter` per load, no
-   * MediaSource ownership — the caller's getters decide what it appends into).
+   * each load gets an MSE-backed `AppendSink` (one `MseAdapter` per load; the
+   * caller's getters decide the MediaSource it appends into).
    */
   readonly workerMse?: WorkerMseSinkFactoryDeps;
   /**
-   * Worker-side MSE composition root (production): owns the worker MediaSource
-   * lifecycle and transfers each load's `MediaSourceHandle` as a `HANDLE`
-   * protocol message. Prefer this over `workerMse` for the real worker entry;
+   * Worker-side MSE composition root (production): manages a worker
+   * MediaSource per load and transfers each load's `MediaSourceHandle` as a
+   * `HANDLE` protocol message. Prefer this over `workerMse` for the real entry;
    * it keeps the main-thread CHUNK fallback whenever the runtime cannot
    * construct MSE in a dedicated worker.
    */
@@ -140,7 +140,7 @@ export type WorkerLogSink = (message: Extract<WorkerToMainMessage, { type: Worke
  */
 export const MAX_WORKER_LOG_MESSAGES = 256;
 
-/** Severity rank for the four wire levels, least to most severe (drives the threshold gate). */
+/** Severity rank for the four wire levels, least to most severe (drives the log threshold). */
 const LOG_LEVEL_RANK = {
   [workerLogLevel.debug]: 0,
   [workerLogLevel.error]: 3,
@@ -173,8 +173,8 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
 
   // Reader/source milestones (`read.window-start` / `read.window-complete` /
   // `bytes.read` from `RangedReader`, and `object.resolved` from the byte
-  // source factory) route through `emitLog` — the single gated code path — so
-  // a missing `logSink` or a below-threshold HELLO `log` keeps every reader
+  // source factory) route through `emitLog` — the single filtered code path —
+  // so a missing `logSink` or a below-threshold HELLO `log` keeps every reader
   // milestone fully suppressed. The callback is only attached when a
   // `logSink` exists. The SOURCE requestId is threaded through `createSource`
   // into the per-load reader, so each reader milestone already carries its
@@ -214,8 +214,8 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
   // keeps its default main-mode CHUNK posting sink (the Firefox fallback).
   const workerMseSupported = (deps.supportsWorkerMse ?? defaultSupportsWorkerMse)();
 
-  // Derived stream/session milestones, observed at the coordinator's outbound
-  // `post` boundary: the coordinator surfaces load success, failure, and
+  // Derived stream/session milestones, tapped at the coordinator's outbound
+  // `post`: the coordinator reports load success, failure, and
   // terminal conditions as SOURCE_OK / ERROR / ENDED (and ATTACH as ATTACH_OK),
   // all of which flow through this wrapper. The wrapper passes everything
   // through and decides nothing —
@@ -239,8 +239,8 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
       case WorkerToMainMessageType.ERROR:
         // The ERROR wire already carries the diagnostic context string from
         // `#postError` (describeError of the throwing read/pipeline); include
-        // it next to the kind so a gated host sees why the session failed. The
-        // context can be an SDK/fetch error string that embeds the resolved
+        // it next to the kind so an opted-in host sees why the session failed.
+        // The context can be an SDK/fetch error string that embeds the resolved
         // share URL (which carries the decryption key), so URL-shaped runs are
         // scrubbed here before they reach the LOG detail.
         emitLog(
@@ -271,13 +271,13 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
     deps.post(message, transfer);
   };
 
-  // `session.detach` is derived at the coordinator's abandon boundary — the
-  // lifecycle hook that fires when the active session graph is torn down by
-  // DETACH/DESTROY or superseded by a new SOURCE. The `loadAccepted` latch
-  // keeps the no-op first-source abandon (nothing accepted yet) from logging a
-  // spurious detach. The root teardown semantics are preserved: with
-  // `workerMseRoot` the caller's onAbandon is ignored (the root owns MSE
-  // teardown), otherwise the caller's onAbandon still runs.
+  // `session.detach` is derived at the coordinator's abandon point — the hook
+  // that fires when the active session graph is torn down by DETACH/DESTROY or
+  // superseded by a new SOURCE. The `loadAccepted` latch keeps the no-op
+  // first-source abandon (nothing accepted yet) from logging a spurious
+  // detach. Teardown stays the same: with `workerMseRoot` the caller's
+  // onAbandon is ignored (the root releases the MSE resources), otherwise the
+  // caller's onAbandon still runs.
   //
   // The reason is NOT derivable here from the wire alone: DETACH, DESTROY, and
   // a superseding SOURCE all abandon with the same observable state (none of
@@ -324,10 +324,10 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
 }
 
 /**
- * Forwards one milestone as a worker→main `LOG` message through `sink`, gated
+ * Sends one milestone as a worker→main `LOG` message through `sink`, filtered
  * by the HELLO `log` forwarding threshold:
  *
- * - no-ops when `sink` or `threshold` is undefined — no sink wired, or a host
+ * - no-ops when `sink` or `threshold` is undefined — no sink bound, or a host
  *   that never opted in (absent HELLO `log` keeps the wire fully silent),
  * - no-ops when the event's severity ranks below `threshold` (severity order
  *   `debug < info < warn < error`; rank via the tiny `LOG_LEVEL_RANK` map over

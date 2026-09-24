@@ -12,9 +12,9 @@ import { WORKER_PUBLIC_KEY_LENGTH } from '../protocol.ts';
 /**
  * X25519 + HKDF + AES-GCM handshake primitives over the pure-JS noble stack.
  * These exercise the exact code the host encryptor and the worker decryptor
- * run; every test below fails (not just skips) if the crypto wiring is
- * removed or misparameterized, since the noble calls in
- * `app-key-handshake.ts` are the only way to satisfy them.
+ * run; every test below fails (not just skips) if the crypto is removed or
+ * misparameterized, since the noble calls in `app-key-handshake.ts` are the
+ * only way to satisfy them.
  */
 
 /** A random 32-byte seed standing in for the Sia app-key seed. */

@@ -1,9 +1,9 @@
 /**
- * Worker-side MSE composition root:
- * owns the worker `MediaSource` lifecycle for the `SessionCoordinator` —
- * one fresh MediaSource per load, its `MediaSourceHandle` transferred to the
- * host as a `HANDLE` protocol message, live getters served to the per-load
- * `MseAppendPipe`, and worker-side teardown/rebuild semantics:
+ * Worker-side MSE composition root: manages the worker `MediaSource` for the
+ * `SessionCoordinator` — one fresh MediaSource per load, its
+ * `MediaSourceHandle` transferred to the host as a `HANDLE` protocol message,
+ * live getters served to the per-load `MseAppendPipe`, and worker-side
+ * teardown/rebuild:
  *
  * - `createSink(context)` (the coordinator's `sinkFactory`) tears down the
  *   previous pipeline, opens a brand-new worker MediaSource, posts `HANDLE`
@@ -13,11 +13,11 @@
  *   event (a worker MediaSource only opens once the host attaches the handle
  *   to a `<video>` element), setting the media duration and MIME, and kicks
  *   the pipe so appends queued before the SourceBuffer existed can drain.
- * - `deps` mirrors `WorkerMseSinkFactoryDeps`, so the pipe's EOS/eviction
+ * - `deps` matches `WorkerMseSinkFactoryDeps`, so the pipe's EOS/eviction
  *   timing reads the live worker MSE state.
  *
  * Firefox and other runtimes that cannot construct MSE in a dedicated worker
- * never reach this module's `createSink`: the worker entry wires it only as
+ * never reach this module's `createSink`: the worker entry binds it only as
  * the `sinkFactory` when `supportsWorkerMse()` is true, so the main-thread
  * CHUNK posting fallback is preserved intact.
  */
@@ -29,10 +29,10 @@ import type { AppendSink } from '../sink/append-sink.ts';
 import type { PostMessage, SinkFactoryContext } from './session-coordinator.ts';
 
 /**
- * The worker-side MSE root surface the composition root and worker entry
- * bind: live MediaSource getters for the sink factory, a per-load sink
- * builder that also transfers a fresh `MediaSourceHandle`, a playhead
- * reflector (eviction boundary), and permanent teardown.
+ * The worker-side MSE root the composition root and worker entry bind: live
+ * MediaSource getters for the sink factory, a per-load sink builder that also
+ * transfers a fresh `MediaSourceHandle`, a playhead report (eviction
+ * boundary), and permanent teardown.
  */
 export interface WorkerMseRoot {
   /**
@@ -65,14 +65,14 @@ export interface WorkerMseRootOptions {
    */
   onError?: (requestId: null | RequestId, error: unknown) => void;
   /**
-   * Optional observability hook mirroring the `onError` option style: receives
-   * worker MSE open facts as milestones — `session.mse-open` (info) once the
-   * per-load MediaSource opens and its SourceBuffer is created successfully
-   * (`{ mime, durationSeconds? }`), `session.mse-open-failed` (error) when
-   * `addSourceBuffer` throws (`{ mime }`). The active load's request id is
-   * supplied when one is bound, else null. Only scalar detail is passed; a
-   * host that wires this into the composition's `emitLog` gets the HELLO
-   * threshold + 256 cap for free. Undefined = zero change to the open path.
+   * Optional milestone hook in the `onError` style: receives worker MSE open
+   * facts — `session.mse-open` (info) once the per-load MediaSource opens and
+   * its SourceBuffer is created successfully (`{ mime, durationSeconds? }`),
+   * `session.mse-open-failed` (error) when `addSourceBuffer` throws
+   * (`{ mime }`). The active load's request id is supplied when one is bound,
+   * else null. Only scalar detail is passed; a host that feeds this into the
+   * composition's `emitLog` gets the HELLO threshold + 256 cap for free.
+   * Undefined = zero change to the open path.
    */
   onLog?: (
     name: string,
@@ -113,9 +113,9 @@ export function createWorkerMseRoot(options: WorkerMseRootOptions): WorkerMseRoo
     getMediaSource: () => mediaSource,
     getPlayheadSeconds: () => playheadSeconds,
     getSourceBuffer: () => sourceBuffer,
-    // MSE-pipe diagnostics forward through the same onLog seam as
+    // MSE-pipe diagnostics go through the same onLog hook as
     // session.mse-open (the worker entry feeds that into the composition's
-    // gated emitLog, so the HELLO threshold + 256 cap apply to these too):
+    // filtered emitLog, so the HELLO threshold + 256 cap apply to these too):
     // the eviction trace is debug, and the rare best-effort breadcrumbs that
     // dot the swallowed failures are warn. The pipe has no requestId of its
     // own; the active load's id rides along (null when the root has none).

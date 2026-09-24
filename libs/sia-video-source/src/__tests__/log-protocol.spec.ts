@@ -1,9 +1,9 @@
 /**
- * Wire-protocol contract for the revived worker "debug event" seam: the HELLO
- * `log` forwarding threshold that opts a host in, the worker → main `LOG`
- * messages it gates on, and the typed milestone catalog those messages draw
- * their `name` from. Pure wire-shape checks — no worker or MediaSource — so
- * these run under the node vitest environment (`SIA_TEST_ENV=node`).
+ * Wire-protocol facts for the worker debug-event channel: the HELLO `log`
+ * forwarding threshold that opts a host in, the worker → main `LOG` messages
+ * it filters, and the typed milestone catalog those messages draw their
+ * `name` from. Pure wire-shape checks — no worker or MediaSource — so these
+ * run under the node vitest environment (`SIA_TEST_ENV=node`).
  */
 
 import { describe, expect, it } from 'vitest';
@@ -17,7 +17,7 @@ import {
   WorkerToMainMessageType,
 } from '../protocol.ts';
 
-/** Builds a well-formed LOG message, the happy path every rejection is tested against. */
+/** Builds a well-formed LOG message; every rejection case is tested against it. */
 function logMessage(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     detail: { bytes: 4096, position: 0 },
@@ -41,7 +41,7 @@ describe('isWorkerToMainMessage: LOG messages', () => {
 
   it('accepts every severity advertised by workerLogLevel', () => {
     // The four wire severities are the only valid `level` values; each one
-    // must clear the guard so gated hosts never see their own threshold echo.
+    // must clear the guard so opted-in hosts never see their own threshold echo.
     for (const level of Object.values(workerLogLevel)) {
       expect(isWorkerToMainMessage(logMessage({ level })), level).toBe(true);
     }
@@ -53,7 +53,7 @@ describe('isWorkerToMainMessage: LOG messages', () => {
   });
 
   it('rejects a LOG message whose level is not one of the four wire severities', () => {
-    // trace is deliberately not forwardable over the wire, and a foreign level
+    // trace is not forwardable over the wire, and a foreign level
     // string is a malformed message — a reject, never a silent downgrade.
     expect(isWorkerToMainMessage(logMessage({ level: 'trace' }))).toBe(false);
     expect(isWorkerToMainMessage(logMessage({ level: 'verbose' }))).toBe(false);
@@ -98,10 +98,10 @@ describe('WORKER_LOG_EVENT_NAMES milestone catalog', () => {
     }
   });
 
-  it('exposes exactly the four forwardable severities — trace is deliberately excluded', () => {
+  it('exposes exactly the four forwardable severities, trace deliberately excluded', () => {
     // The wire excludes chatty trace by construction; the constant cannot
-    // drift to accidentally carry it after this contract is relied on by gated
-    // hosts and the LOG guard.
+    // drift to accidentally carry it after opted-in hosts and the LOG guard
+    // rely on it.
     expect(Object.values(workerLogLevel).sort()).toEqual(['debug', 'error', 'info', 'warn']);
     expect(workerLogLevel).not.toHaveProperty('trace');
   });
@@ -116,12 +116,12 @@ describe('WORKER_LOG_EVENT_NAMES milestone catalog', () => {
   });
 
   it('holds exactly the live milestone names: dead entries are removed, failure events added', () => {
-    // The catalog is the single source of truth for emitted milestones, so it
-    // cannot drift from the emitters: the never-emitted `session.source-start`
-    // and `session.source-ok` are gone (no worker derives them), the failure
-    // events (`sdk.build-failed`, `read.stalled`, `read.error`) are present,
-    // and the deep-pipeline diagnostics (backpressure/cache read events, MSE
-    // pipe breadcrumbs, and the wire-guard rejection counter) are listed.
+    // The catalog must match the emitters: the never-emitted
+    // `session.source-start` and `session.source-ok` are gone (no worker
+    // derives them), the failure events (`sdk.build-failed`, `read.stalled`,
+    // `read.error`) are present, and the deep-pipeline diagnostics
+    // (backpressure/cache read events, MSE pipe breadcrumbs, and the
+    // wire-guard rejection counter) are listed.
     expect(WORKER_LOG_EVENT_NAMES).toEqual([
       'session.attach',
       'session.detach',

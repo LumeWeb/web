@@ -1,6 +1,6 @@
 /**
- * Worker-side `LOG` emission contract: the HELLO `log` forwarding threshold
- * (proto `WorkerToMainMessageType.LOG`) gates every derived milestone end to
+ * Worker-side `LOG` emission: the HELLO `log` forwarding threshold
+ * (proto `WorkerToMainMessageType.LOG`) filters every derived milestone end to
  * end — absent = fully silent, `'debug'` = all milestones, `'error'` = only
  * error-severity milestones. Exercised through the REAL worker sink wiring
  * (`createDefaultWorkerComposition`: its `logSink` forwards `LOG` messages
@@ -91,7 +91,7 @@ function rejectingObjectSdk(payload: Uint8Array): SiaByteSourceSdk {
 }
 
 describe('HELLO log threshold wiring (real worker sink)', () => {
-  it('log: debug posts sdk.built + lifecycle milestones over post; attach/detach are connection-level', async () => {
+  it('log: debug posts sdk.built + the per-phase milestones over post; attach/detach are connection-level', async () => {
     const { messages, root } = loggedRoot();
     await driveSource(root, 'debug');
     const logs = logsOf(messages);

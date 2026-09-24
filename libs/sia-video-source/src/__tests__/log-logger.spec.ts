@@ -29,9 +29,9 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 
-// ---- level gating --------------------------------------------------------------
+// ---- level filtering -----------------------------------------------------------
 
-describe('level gating', () => {
+describe('level filtering', () => {
   const EXPECTED: Record<LogLevelFilter, ConsoleMethod[]> = {
     debug: ['debug', 'error', 'info', 'warn'],
     error: ['error'],
@@ -43,7 +43,7 @@ describe('level gating', () => {
   const FILTERS: readonly LogLevelFilter[] = ['trace', 'debug', 'info', 'warn', 'error', 'silent'];
 
   for (const filter of FILTERS) {
-    it(`level "${filter}" gates which severities reach the console`, () => {
+    it(`level "${filter}" filters which severities reach the console`, () => {
       spyConsole();
       const logger = createConsoleLogger({ level: filter });
       logger.trace('trace');

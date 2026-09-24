@@ -1,29 +1,30 @@
 /**
- * Far-seek ByteSource contract at the library seam: drive the real production
- * wiring — `inspectMediaLibrary` -> `createStreamController` -> a recording
- * sink, no MSE involved — and prove that a far `StreamController.seek()` makes
- * the pipeline REQUEST bytes from the target region. The transport read cursor
+ * Far-seek ByteSource behavior: drive the real production wiring —
+ * `inspectMediaLibrary` -> `createStreamController` -> a recording sink, no
+ * MSE involved — and prove that a far `StreamController.seek()` makes the
+ * pipeline REQUEST bytes from the target region. The transport read cursor
  * must jump to a fixed deep offset in the fixture, not keep streaming on from
  * the front and rely on a local in-memory seek.
  *
  * The committed fixture delivers eagerly (MemoryByteSource settles on a
  * microtask), which would finish the first conversion before a test observer
- * could seek into it, so the transport here is a paced test seam that serves
- * the SAME fixture bytes across macrotask gaps — the trick the MSE seek-reanchor
- * spec uses. A first full run records the strictly sequential read order (the
- * object tiles from the front, one contiguous run to EOF); then a fresh
- * identical load is driven through the SAME controller and re-anchored far into
- * the timeline. The restart's trimmed conversion needs bytes the fresh input
- * has not cached yet, so a NEW ranged read beginning at or after a fixed
- * deep-offset scalar is issued AFTER the seek: the pipeline jumped the
- * ByteSource read cursor into the target region instead of streaming on to it.
+ * could seek into it, so the transport here is a paced test double that
+ * serves the SAME fixture bytes across macrotask gaps — the trick the
+ * `mse-seek-timestamp-reset` spec uses. A first full run records the strictly
+ * sequential read order (the object tiles from the front, one contiguous run
+ * to EOF); then a fresh identical load is driven through the SAME controller
+ * and restarted far into the timeline. The restart's trimmed conversion needs
+ * bytes the fresh input has not cached yet, so a NEW ranged read beginning at
+ * or after a fixed deep-offset scalar is issued AFTER the seek: the pipeline
+ * jumped the ByteSource read cursor into the target region instead of
+ * streaming on to it.
  *
- * The seek is issued at the very start of the fresh run (its conversion is
- * armed and streaming, but no media bytes have been pulled yet). Streaming the
+ * The seek is issued at the very start of the fresh run (its conversion has
+ * started and is streaming, but no media bytes have been pulled yet). Streaming the
  * run a few fragments first makes the restart continue from exactly where the
  * front reads paused — the target-region request then loses its sharp offset,
- * so the immediate re-anchor keeps the byte jump to the deep scalar
- * unambiguous at this seam.
+ * so the immediate restart keeps the byte jump to the deep scalar
+ * unambiguous.
  */
 import { describe, expect, it } from 'vitest';
 import type { PlaybackCapabilities } from '../capabilities/browser-capabilities.ts';
@@ -112,7 +113,7 @@ class PacedRecordingByteSource implements ByteSource {
   }
 }
 
-/** Records sink calls in arrival order, mirroring the sibling seam specs. */
+/** Records sink calls in arrival order. */
 class RecordingSink implements AppendSink {
   readonly eos: number[] = [];
   readonly resets: number[] = [];
@@ -139,7 +140,7 @@ class RecordingSink implements AppendSink {
   }
 }
 
-/** Fast, permissive capability snapshot matching the other seam specs. */
+/** Fast, permissive capability snapshot matching the other pipeline specs. */
 function permissiveCapabilities(): PlaybackCapabilities {
   return {
     canConstructWorkerMse: () => false,
@@ -150,9 +151,9 @@ function permissiveCapabilities(): PlaybackCapabilities {
   };
 }
 
-/** Inspects the fixture through `seam` and returns the ready load's playback. */
-async function readyPlayback(seam: ByteSource, loadGeneration: number): Promise<ReadyMediaLoad> {
-  const result = await inspectMediaLibrary(seam, {
+/** Inspects the fixture through `source` and returns the ready load's playback. */
+async function readyPlayback(source: ByteSource, loadGeneration: number): Promise<ReadyMediaLoad> {
+  const result = await inspectMediaLibrary(source, {
     capabilities: permissiveCapabilities(),
     loadGeneration,
   });
@@ -169,7 +170,7 @@ async function waitFor(predicate: () => boolean, timeoutMs = 30000): Promise<voi
   }
 }
 
-describe('far seek requests bytes from the target region at the ByteSource seam', () => {
+describe('far seek requests bytes from the target region', () => {
   it('jumps the transport read cursor into the target region after a far seek', async () => {
     const fixture = progressiveMp4Fixture({ seconds: FIXTURE_SECONDS });
     // The fixed scalar sits comfortably past the object's midpoint (the 120 s
@@ -186,9 +187,9 @@ describe('far seek requests bytes from the target region at the ByteSource seam'
     const controller = createStreamController({ errorReporter });
 
     // --- full sequential run; capture the read order (baseline) ---------------
-    const baselineSeam = new PacedRecordingByteSource(fixture);
+    const baselineSource = new PacedRecordingByteSource(fixture);
     const baselineSink = new RecordingSink();
-    const baselineLoad = await readyPlayback(baselineSeam, 1);
+    const baselineLoad = await readyPlayback(baselineSource, 1);
     controller.start({ loadGeneration: 1, playback: baselineLoad.playback, sink: baselineSink });
     await waitFor(() => baselineSink.eos.length === 1);
 
@@ -196,22 +197,22 @@ describe('far seek requests bytes from the target region at the ByteSource seam'
     // the front: the reads tile the whole object contiguously, offset 0 to EOF,
     // with no jumps and no out-of-order reads.
     let covered = 0;
-    for (const read of baselineSeam.reads) {
+    for (const read of baselineSource.reads) {
       expect(read.offset).toBe(covered);
       covered = read.offset + read.length;
     }
-    expect(covered).toBe(baselineSeam.size);
+    expect(covered).toBe(baselineSource.size);
 
     // --- reset: a fresh identical load through the same controller -----------
-    const seam = new PacedRecordingByteSource(fixture);
+    const source = new PacedRecordingByteSource(fixture);
     const sink = new RecordingSink();
-    const load = await readyPlayback(seam, 2);
+    const load = await readyPlayback(source, 2);
 
     // The fresh load starts streaming its front reads; the seek below is issued
     // right away, so everything recorded before it is the front inspection read.
     controller.start({ loadGeneration: 2, playback: load.playback, sink });
-    const readCountBeforeSeek = seam.reads.length;
-    const readsBeforeSeek = seam.reads.slice();
+    const readCountBeforeSeek = source.reads.length;
+    const readsBeforeSeek = source.reads.slice();
     expect(readsBeforeSeek.length).toBeGreaterThan(0);
 
     // --- far seek -------------------------------------------------------------
@@ -221,14 +222,14 @@ describe('far seek requests bytes from the target region at the ByteSource seam'
     // deep read can only be the seek's work, not ongoing sequential streaming.
     expect(readsBeforeSeek.every((read) => read.offset < FIXED_TARGET_BYTE_OFFSET)).toBe(true);
 
-    // The accepted restart re-anchors the sink parser so the fresh init lands
+    // The accepted restart resets the sink parser so the fresh init lands
     // in a clean SourceBuffer.
     await waitFor(() => sink.resets.length >= 2);
 
     // The trimmed conversion needs bytes the fresh input has not cached, so the
     // transport is asked for a range starting at or after the fixed scalar.
-    await waitFor(() => seam.reads.some((read) => read.offset >= FIXED_TARGET_BYTE_OFFSET));
-    const afterSeek = seam.reads.slice(readCountBeforeSeek);
+    await waitFor(() => source.reads.some((read) => read.offset >= FIXED_TARGET_BYTE_OFFSET));
+    const afterSeek = source.reads.slice(readCountBeforeSeek);
     const firstDeep = afterSeek.findIndex((read) => read.offset >= FIXED_TARGET_BYTE_OFFSET);
     // Condition (a): a read starting at N >= scalar appears after earlier
     // smaller-offset reads — a byte jump into the target region rather than

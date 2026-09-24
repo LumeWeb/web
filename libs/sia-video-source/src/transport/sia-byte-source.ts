@@ -34,10 +34,10 @@ import type { RequestId } from '../protocol.ts';
 /**
  * Construction options shared across every source one factory creates. A
  * caller that constructs the factory once and reuses it gets one shared
- * budget/cache across all loads (mirrors the worker's per-core budget/cache).
+ * budget/cache across all loads (like the worker's per-core budget/cache).
  */
 export interface SiaByteSourceFactoryOptions {
-  /** Shared bounded-dispatch permit (defaults to no cap). */
+  /** Shared concurrency permit (defaults to no cap). */
   budget?: ReadBudget;
   /** Shared exact-window LRU cache (defaults to a fresh per-source one). */
   cache?: LruChunkCache;
@@ -50,7 +50,7 @@ export interface SiaByteSourceFactoryOptions {
 }
 
 export interface SiaByteSourceOptions {
-  /** Shared bounded-dispatch permit; defaults to no cap. */
+  /** Shared concurrency permit; defaults to no cap. */
   budget?: ReadBudget;
   /** Shared exact-window LRU cache; defaults to a fresh per-source cache. */
   cache?: LruChunkCache;
@@ -69,13 +69,14 @@ export interface SiaByteSourceOptions {
 }
 
 /**
- * The Sia SDK surface a `ByteSourceFactory` needs to resolve a SOURCE `src`
+ * The Sia SDK interface a `ByteSourceFactory` needs to resolve a SOURCE `src`
  * locator: a pinned object key (`object`) or a Sia share URL
  * (`objectFromShareUrl`). `objectFromShareUrl` is optional so SDKs predating
  * share support (or id-based `SharedSdk`s before their adapter wraps them)
  * can still be injected; resolving a share URL without it rejects with a
  * descriptive error. The factory stays source-agnostic: it never special-cases
- * the credential mode, it only calls whichever seam the injected SDK exposes.
+ * the credential mode, it only calls whichever entry point the injected SDK
+ * exposes.
  */
 export interface SiaByteSourceSdk extends SiaSdkLike {
   object(key: string): Promise<SiaObjectLike>;
@@ -217,13 +218,13 @@ export class SiaByteSource implements ByteSource {
 }
 
 /**
- * `ByteSourceFactory` seam: resolves one SOURCE `src` locator into a
+ * `ByteSourceFactory`: resolves one SOURCE `src` locator into a
  * `SiaByteSource` over the injected SDK. Plain `src` values are pinned object
  * keys; `sia://` (or https alias) share URLs are parsed and resolved through
  * `sdk.objectFromShareUrl(fetchForm)`. The factory does not rewrite
- * `RangedReader`/`LruChunkCache`/`ReadBudget` internals, and preserves the
+ * `RangedReader`/`LruChunkCache`/`ReadBudget` internals, and keeps the
  * SDK's existing share URL form. A keyless `SharedSdk` adapter (see
- * `worker-runtime.ts`) implements `objectFromShareUrl` by routing through
+ * `worker-runtime.ts`) implements `objectFromShareUrl` by passing through
  * `SharedSdk.object(objectKey)`, so the factory needs no credential-mode
  * knowledge.
  */
@@ -232,7 +233,7 @@ export function createSiaByteSourceFactory(
   options: SiaByteSourceFactoryOptions = {},
 ): (src: string, requestId?: null | RequestId) => Promise<ByteSource> {
   // One shared exact-window cache per factory, so every source it creates
-  // replays already-downloaded windows across loads (mirrors the worker's
+  // replays already-downloaded windows across loads (like the worker's
   // per-core cache). An explicit caller-supplied cache still wins.
   const cache = options.cache ?? new LruChunkCache();
   const onMilestone = options.onMilestone;

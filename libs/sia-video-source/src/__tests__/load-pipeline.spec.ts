@@ -1,8 +1,8 @@
 /**
- * Behavior spec for the `LoadPipeline` seam: each load verdict comes from the
- * injected media-library `inspect` call, and `run()` forwards the source,
- * capabilities, load generation, and abort signal untouched. The injected
- * fake keeps the seam verifiable without real media bytes or mediabunny.
+ * `LoadPipeline` passes each load verdict through from the injected
+ * media-library `inspect` call, and `run()` hands the source, capabilities,
+ * load generation, and abort signal on to that call untouched. The injected
+ * fake keeps the path verifiable without real media bytes or mediabunny.
  */
 import { describe, expect, it } from 'vitest';
 import type { PlaybackCapabilities } from '../capabilities/browser-capabilities.ts';
@@ -44,7 +44,7 @@ function stubPlayback(): MediaPlayback {
   return { dispose: () => undefined, start: () => undefined };
 }
 
-/** ByteSource the seam never reads; it only forwards the object to `inspect`. */
+/** ByteSource the pipeline never reads; it only passes the object to `inspect`. */
 function stubSource(): ByteSource {
   return {
     cancel: () => undefined,
@@ -54,7 +54,7 @@ function stubSource(): ByteSource {
 }
 
 describe('load pipeline passes one verdict through', () => {
-  it('forwards source, capabilities, load generation, and signal to the injected inspect call', async () => {
+  it('passes source, capabilities, load generation, and signal to the injected inspect call', async () => {
     const calls: { options: InspectMediaLibraryOptions; source: ByteSource }[] = [];
     const capabilities = permissiveCapabilities();
     const controller = new AbortController();
@@ -101,7 +101,7 @@ describe('load pipeline passes one verdict through', () => {
     expect(verdict).toBe(fixture);
   });
 
-  it('propagates a rejected inspect call unchanged', async () => {
+  it('a rejected inspect call rejects the run', async () => {
     const failure = new Error('pipeline failed');
     const inspect: Inspect = () => Promise.reject(failure);
     const pipeline = createLoadPipeline({ capabilities: permissiveCapabilities(), inspect });

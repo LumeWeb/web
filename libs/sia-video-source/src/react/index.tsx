@@ -4,7 +4,7 @@
  * React wrapper for the Sia media engine, following the packaged video.js v10
  * media components (e.g. `HlsJsVideo`): the media instance is created once and
  * attached through the player context via `useMediaInstance`, and a ref
- * callback wires the real `<video>` element into it.
+ * callback connects the real `<video>` element to it.
  *
  * Media props (`src`, `preload`, `streamType`) and the
  * `sia`/`mimeType`/`logger`/`getAppKeySeed`/`getSharingKeySeed` config are
@@ -66,7 +66,7 @@ export interface SiaVideoProps
 type MediaLike = Record<string, unknown>;
 
 /**
- * Views the persistent media instance as its dynamic prop surface. The fixed
+ * Views the persistent media instance as its dynamic prop interface. The fixed
  * config fields (`mimeType`, `workerConfig`, the seed-supplier setters) are
  * typed on `SiaVideoSource` and assigned directly without a cast; only the
  * keyed prop-sync loops below need the anonymous record shape, and the single

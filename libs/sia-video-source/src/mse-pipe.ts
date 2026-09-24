@@ -4,7 +4,7 @@
  * One instance serializes every SourceBuffer mutation for a MediaSource
  * pipeline through the public `@videojs/spf/dom` primitives (`appendSegment`
  * to hand it bytes one `updateend`-quiesced append at a time, `flushBuffer`
- * to trim the back-buffer). It owns the bookkeeping shared by the worker-side
+ * to trim the back-buffer). It keeps the bookkeeping shared by the worker-side
  * MSE pipeline (mode 'worker') and the main-thread MSE fallback
  * (`SiaVideoSource`, mode 'main'):
  *
@@ -43,18 +43,18 @@ export interface MseAppendPipeOptions {
    */
   getSourceBuffer(): null | SourceBuffer;
   /**
-   * Optional MSE-pipe diagnostic seam: receives observable-but-best-effort
-   * facts the pipe neither acts on nor surfaces through `onError` — the
-   * evicted back-buffer span (`mse.evict`, `{ start, end, bytes }` where
-   * `start`/`end` are TimeRanges seconds and `bytes` is the flushed span
-   * length), a failed eviction trim (`mse.evict-failed`, `{ message }`), a
-   * failed parser reset / timestamp re-anchor (`mse.parser-reset-failed`),
-   * and a failed deferred end-of-stream (`mse.eos-failed`, both `{ message }`).
-   * Only scalar detail is passed, never bytes or object references, and a
-   * throwing listener is swallowed so a diagnostic hook can never change pipe
-   * behavior (every error it reports was already being swallowed). No requestId
-   * is available inside the pipe; the owner binds one if it can. Undefined
-   * (the default) is a single optional-call check and zero behavior change.
+   * Optional MSE-pipe diagnostics hook: receives best-effort facts the pipe
+   * neither acts on nor reports through `onError` — the evicted back-buffer
+   * span (`mse.evict`, `{ start, end, seconds }` where `start`/`end` are
+   * TimeRanges seconds and `seconds` is the flushed span length in seconds), a
+   * failed eviction trim (`mse.evict-failed`, `{ message }`), a failed parser
+   * reset / timestamp rebase (`mse.parser-reset-failed`), and a failed
+   * deferred end-of-stream (`mse.eos-failed`, both `{ message }`). Only scalar
+   * detail is passed, never bytes or object references, and a throwing
+   * listener is swallowed so a diagnostic hook can never change pipe behavior
+   * (every error it reports was already being swallowed). No requestId is
+   * available inside the pipe; the owner binds one if it can. Undefined (the
+   * default) is a single optional-call check and zero behavior change.
    */
   onDiag?(name: string, detail: Readonly<Record<string, unknown>>): void;
   /**
@@ -76,15 +76,15 @@ export class MseAppendPipe {
   // abandons work that a superseded load queued.
   #loadGeneration = 0;
   readonly #options: MseAppendPipeOptions;
-  // Armed by `reset()` (a seek superseding an in-flight position): once the
+  // Set by `reset()` (a seek superseding an in-flight position): once the
   // SourceBuffer quiesces, its segment parser is aborted so the next append
   // starts a fresh fragment instead of continuing the truncated one that the
   // seek cut off (Chromium's RunSegmentParserLoop append failure).
   #parserResetPending = false;
-  // Re-anchor target parked by a seek's `reset(target)` until the owed parser
-  // reset runs: the trimmed conversion rebases its output timestamps to zero,
-  // so the buffer must be told the sought position (`timestampOffset`) before
-  // its fresh init/media lands. Null when no seek target is owed.
+  // Timestamp a seek's `reset(target)` holds until the owed parser reset runs:
+  // the trimmed conversion rebases its output timestamps to zero, so the
+  // buffer must be told the sought position (`timestampOffset`) before its
+  // fresh init/media lands. Null when no seek target is owed.
   #pendingTargetOffset: null | number = null;
   #pumping = false;
   #queue: Uint8Array[] = [];
@@ -151,24 +151,24 @@ export class MseAppendPipe {
 
   /**
    * Drops state belonging to a superseded position (a seek, or the end of a
-   * load). Queued appends and a parked end-of-stream die with the old load generation,
-   * and once the in-flight append quiesces the SourceBuffer's segment parser
-   * is reset (`abort`) so the next queued fragment parses fresh — a fragment
-   * whose head the seek cut off mid-`mdat` would otherwise swallow the new
-   * position's `moof` and fail Chromium's segment parser loop. When a seek
-   * target is given, the parser reset also re-anchors the SourceBuffer's
-   * `timestampOffset` to it so the trimmed conversion's zero-based output
-   * lands at the sought position. The pipe stays live for the same MediaSource
-   * / SourceBuffer; `abort()` is for teardown.
+   * load). Queued appends and a pending end-of-stream die with the old load
+   * generation, and once the in-flight append quiesces the SourceBuffer's
+   * segment parser is reset (`abort`) so the next queued fragment parses
+   * fresh — a fragment whose head the seek cut off mid-`mdat` would otherwise
+   * swallow the new position's `moof` and fail Chromium's segment parser
+   * loop. When a seek target is given, the parser reset also sets the
+   * SourceBuffer's `timestampOffset` to it so the trimmed conversion's
+   * zero-based output lands at the sought position. The pipe stays live for
+   * the same MediaSource / SourceBuffer; `abort()` is for teardown.
    */
   reset(targetTimeSeconds?: number): void {
     this.#loadGeneration += 1;
     this.#queue.length = 0;
     this.#eosRequested = false;
-    // Park the seek's re-anchor target for the owed parser reset. Each reset
-    // stores its own value, so a newer reset supersedes an older parked target
-    // and a target-less reset (a load start) parks nothing — the buffer's
-    // current offset is left untouched until a seek target actually lands.
+    // Hold the seek target for the owed parser reset. Each reset stores its
+    // own value, so a newer reset supersedes an older held target and a
+    // target-less reset (a load start) holds none — the buffer's current
+    // offset is left untouched until a seek target actually lands.
     this.#pendingTargetOffset = targetTimeSeconds ?? null;
     this.#parserResetPending = true;
     this.#kick();
@@ -177,8 +177,8 @@ export class MseAppendPipe {
   // Resets the SourceBuffer's segment parser so the next appendBuffer begins
   // a fresh segment. Best-effort: a SourceBuffer mid-update, or a MediaSource
   // that left 'open', refuses abort() — the queued bytes are still dropped,
-  // and the next append simply proceeds. The swallow is unchanged, but the
-  // refused reset is now observable (`mse.parser-reset-failed`).
+  // and the next append simply proceeds. The swallow is unchanged, but a
+  // refused reset is now reported (`mse.parser-reset-failed`).
   #abortParser(sourceBuffer: SourceBuffer): void {
     try {
       sourceBuffer.abort();
@@ -189,13 +189,13 @@ export class MseAppendPipe {
     }
   }
 
-  // The parser reset a seek owes, plus its re-anchor: abort the SourceBuffer
-  // FIRST (so the fresh fragment starts a clean segment), then, when a seek
-  // target was parked, set `timestampOffset` to it — all before anything is
-  // dequeued. Both places a reset can complete (before a dequeue, or behind a
-  // settling in-flight append) call this one helper so the order can never
-  // drift. The timestamp assignment is best-effort like the parser reset, and
-  // its refused re-anchor reports through the same parser-reset breadcrumb.
+  // The parser reset a seek owes, plus its timestamp rebase: abort the
+  // SourceBuffer FIRST (so the fresh fragment starts a clean segment), then,
+  // when a seek target was held, set `timestampOffset` to it — all before
+  // anything is dequeued. Both places a reset can complete (before a dequeue,
+  // or behind a settling in-flight append) call this one helper so the order
+  // can never drift. The timestamp assignment is best-effort like the parser
+  // reset, and its refusal reports through the same parser-reset breadcrumb.
   #applyParserReset(sourceBuffer: SourceBuffer): void {
     this.#parserResetPending = false;
     this.#abortParser(sourceBuffer);
@@ -205,15 +205,16 @@ export class MseAppendPipe {
       try {
         sourceBuffer.timestampOffset = target;
       } catch (error) {
-        // Best-effort re-anchor; nothing further to recover, but observable.
+        // Best-effort timestamp assignment; nothing further to recover, but
+        // reported.
         this.#diag('mse.parser-reset-failed', { message: errorMessage(error) });
       }
     }
   }
 
-  // One diagnostic line through the optional onDiag seam. Untrusted host code
+  // One diagnostic line through the optional onDiag hook. Untrusted host code
   // may feed it to a logger; a throw is swallowed so it can never corrupt the
-  // pipe's append/evict/EOS flow — the sole rule of this seam.
+  // pipe's append/evict/EOS flow — the sole rule of this hook.
   #diag(name: string, detail: Readonly<Record<string, unknown>>): void {
     try {
       this.#options.onDiag?.(name, detail);
@@ -235,14 +236,14 @@ export class MseAppendPipe {
       try {
         await flushBuffer(sourceBuffer, start, end);
         // A real trim reached flushBuffer: report the evicted span. The pipe
-        // knows only TimeRanges, so `start`/`end` are seconds and `bytes` is
-        // the flushed span length (end - start) — never a fabricated byte
-        // count for what the browser discarded.
-        this.#diag('mse.evict', { bytes: end - start, end, start });
+        // knows only TimeRanges, so `start`/`end` and the flushed span length
+        // are ALL seconds — the field is named `seconds`, never a fabricated
+        // byte count for what the browser discarded.
+        this.#diag('mse.evict', { end, seconds: end - start, start });
       } catch (error) {
         // SourceBuffer state can change between the range read and the remove;
         // eviction is a best-effort trim and must never fail the pipeline.
-        // The swallow is unchanged, but the failed trim is now observable.
+        // The swallow is unchanged, but the failed trim is now reported.
         this.#diag('mse.evict-failed', { message: errorMessage(error) });
       }
       return true;
@@ -278,8 +279,8 @@ export class MseAppendPipe {
       mediaSource.endOfStream();
     } catch (error) {
       // endOfStream requires readyState 'open' and no in-flight updates; the
-      // guards above own both, so a racing platform rejection is a no-op here.
-      // The swallow is unchanged, but that rejected EOS is now observable.
+      // guards above cover both, so a racing platform rejection is a no-op
+      // here. The swallow is unchanged, but that rejected EOS is now reported.
       this.#diag('mse.eos-failed', { message: errorMessage(error) });
     }
     this.#eosRequested = false;
@@ -295,17 +296,18 @@ export class MseAppendPipe {
       while (!this.#stopped && !this.#failed) {
         const loadGeneration = this.#loadGeneration;
         const sourceBuffer = this.#options.getSourceBuffer();
-        // No SourceBuffer yet: park until the owner creates one and kicks.
+        // No SourceBuffer yet: wait until the owner creates one and kicks.
         if (!sourceBuffer) return;
         // A seek asked for a parser reset but the SourceBuffer is still
         // updating — e.g. the back-buffer eviction the seek started, or the
-        // superseded position's tail still quiescing. NEVER append across this
+        // superseded position's tail still quiescing. Never append across this
         // window: dequeuing the fresh fragment now would let the deferred
         // parser reset land AFTER its `moof`, and Chromium then parses the
         // following `mdat` continuation without the fragment's context —
-        // PipelineStatus::CHUNK_DEMUXER_ERROR_APPEND_FAILED, surfaced as
-        // `SourceBuffer append error` on the live far seek. Park until the
-        // update settles, then the reset below runs before anything is dequeued.
+        // PipelineStatus::CHUNK_DEMUXER_ERROR_APPEND_FAILED, reported as
+        // `SourceBuffer append error` on the live far seek. Wait for the
+        // update to settle, then the reset below runs before anything is
+        // dequeued.
         if (this.#parserResetPending && sourceBuffer.updating) {
           await waitForUpdateEnd(sourceBuffer);
           continue;
@@ -313,7 +315,8 @@ export class MseAppendPipe {
         // A seek asked for a parser reset; do it as soon as the buffer
         // quiesces, even if nothing new is queued yet, so the next fragment
         // parses fresh rather than continuing the superseded position (and,
-        // with a parked target, the buffer is re-anchored to the seek target).
+        // when a target was held, the buffer's `timestampOffset` is set to the
+        // seek target).
         if (this.#parserResetPending && !sourceBuffer.updating) {
           this.#applyParserReset(sourceBuffer);
           continue;
@@ -348,7 +351,7 @@ export class MseAppendPipe {
         // The in-flight append was the superseded position's: once it settles
         // the parser is reset so the next append (a fresh fragment) starts
         // clean instead of continuing the truncated one — same helper as the
-        // no-queue path, so the re-anchor ordering cannot drift.
+        // no-queue path, so the timestamp ordering cannot drift.
         if (this.#parserResetPending && !sourceBuffer.updating) {
           this.#applyParserReset(sourceBuffer);
         }
@@ -377,9 +380,9 @@ function isQuotaExceeded(error: unknown): boolean {
 
 /**
  * Resolves once the SourceBuffer's in-flight update quiesces (`updateend`, or
- * `error` — either way `updating` is false again). Mirrors SPF's own
- * one-shot `updateend` wait used inside `appendSegment`, so an owed parser
- * reset can park the pump for exactly as long as the platform update lasts.
+ * `error` — either way `updating` is false again). Uses the same one-shot
+ * `updateend` wait SPF's `appendSegment` does, so an owed parser reset can
+ * hold the pump for exactly as long as the platform update lasts.
  */
 function waitForUpdateEnd(sourceBuffer: SourceBuffer): Promise<void> {
   return new Promise((resolve) => {

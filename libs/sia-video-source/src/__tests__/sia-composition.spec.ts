@@ -1,10 +1,10 @@
 /**
- * Contract for the production composition-root binding: the seam that wires
- * the `SessionCoordinator` to the real Sia transport and worker-mode MSE,
- * without rewriting `RangedReader`/`ReadBudget`/`LruChunkCache` or the
- * worker's `MseAppendPipe` internals.
+ * The production composition-root binding: wires the `SessionCoordinator` to
+ * the real Sia transport and worker-mode MSE, without rewriting
+ * `RangedReader`/`ReadBudget`/`LruChunkCache` or the worker's `MseAppendPipe`
+ * internals.
  *
- * The three exported seams under test:
+ * The three exported bindings under test:
  *
  * - `createSiaByteSourceFactory(sdk, opts)` — a `ByteSourceFactory` that
  *   resolves a SOURCE `src` locator — a pinned object key or a `sia://`
@@ -55,7 +55,7 @@ import {
   shareSrc,
 } from './fixtures/fmp4-fixture.ts';
 
-// ---- MSE harness (mirrors append-sink.spec.ts) -------------------------------
+// ---- MSE harness (same fakes as append-sink.spec.ts) -------------------------
 
 class FakeSourceBuffer extends EventTarget {
   abortCalls = 0;
@@ -139,7 +139,7 @@ function rejectingObjectSdk(payload: Uint8Array): SiaByteSourceSdk {
 
 // ---- tests -------------------------------------------------------------------
 
-describe('createSiaByteSourceFactory (Sia transport seam)', () => {
+describe('createSiaByteSourceFactory (real Sia transport)', () => {
   it('resolves a plain object key into a SiaByteSource serving exact ranges', async () => {
     const payload = new Uint8Array(8192).map((_, i) => i % 251);
     const { objectKeys, sdk } = fakeSiaSdk(payload);
@@ -208,6 +208,11 @@ describe('createSiaByteSourceFactory (Sia transport seam)', () => {
 
   it('shares one dispatch budget across the sources it creates', async () => {
     const payload = new Uint8Array(4096).map((_, i) => i % 251);
+    // Held SDK: each download records that it opened and stays open until
+    // `release` drains it, so concurrent opens across distinct sources
+    // are observable — the same shape the worker's shared `ReadBudget` relies
+    // on to keep aggregate renter WebTransport session creation under the
+    // browser's 64 pending-session cap.
     let inflight = 0;
     let maxInflight = 0;
     const pending: (() => void)[] = [];
@@ -243,10 +248,15 @@ describe('createSiaByteSourceFactory (Sia transport seam)', () => {
       return concatBytes(chunks).byteLength;
     };
     const firstRead = drain(first);
+    // Let the first read acquire the single permit and open its download before
+    // the second read starts, so the shared budget actually serializes them.
     await flush();
     const secondRead = drain(second);
     await flush();
 
+    // Exactly one SDK download is open at a time even though two distinct
+    // sources created by the same factory read concurrently: the budget is
+    // shared per factory, exactly what the worker wires for real playback.
     expect(maxInflight).toBe(1);
 
     pending.shift()?.();
@@ -259,7 +269,7 @@ describe('createSiaByteSourceFactory (Sia transport seam)', () => {
   });
 });
 
-describe('createWorkerMseSinkFactory (worker MSE seam)', () => {
+describe('createWorkerMseSinkFactory (worker MSE sink)', () => {
   it('returns a fresh per-load AppendSink adapting MseAppendPipe', async () => {
     const fakeMediaSource = new FakeMediaSource();
     const fakeSourceBuffer = new FakeSourceBuffer();
@@ -709,8 +719,8 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
 
     // Session 2: the host removed getSharingKeySeed but re-attaches the SAME
     // config — HELLO declares sharingSeed: false, so the sharing slot is
-    // scrubbed even though workerConfigsEqual stays true. The memo gate now
-    // sees sharingSeed null and the next SOURCE rebuilds + disposes SDK A.
+    // scrubbed even though workerConfigsEqual stays true. The memoized-SDK
+    // guard now sees sharingSeed null and the next SOURCE rebuilds + disposes SDK A.
     await coordinator.handleMessage({ appSeed: true, config: WORKER_CONFIG, requestId: 5, sharingSeed: false, type: MainToWorkerMessageType.HELLO });
     await coordinator.handleMessage({ preload: 'auto', requestId: 6, src: 'fmp4', type: MainToWorkerMessageType.SOURCE });
     await flush();

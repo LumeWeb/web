@@ -1,14 +1,13 @@
 /**
- * Behavior spec for the restartable conversion seam on the ready playback:
- * `restart(seconds)` cancels the current conversion, arms a new one trimmed
- * near the seek point over the same input, re-emits its init segment for the
- * freshly-reset SourceBuffer, and keeps the superseded run out of the sink.
- * Runs against the real mediabunny pipeline over the deterministic MP4
- * fixture. The fixture's eager single-range read makes `execute` resolve on
- * the next tick, so the initial run finishes before the restart; the seam's
- * in-flight cancellation still covers a mid-read Sia object, and its
- * observable contract (guard, re-init, trim, per-run completion) is verified
- * here.
+ * `MediaPlayback.restart(seconds)` on the ready playback: cancels the current
+ * conversion, starts a new one trimmed near the seek point over the same
+ * input, re-emits its init segment for the freshly-reset SourceBuffer, and
+ * keeps the superseded run out of the sink. Runs against the real mediabunny
+ * pipeline over the deterministic MP4 fixture. The fixture's eager
+ * single-range read makes `execute` resolve on the next tick, so the initial
+ * run finishes before the restart; in-flight cancellation still covers a
+ * mid-read Sia object, and the observable behavior (guard, re-init, trim,
+ * per-run completion) is verified here.
  */
 import { describe, expect, it } from 'vitest';
 import type { PlaybackCapabilities } from '../capabilities/browser-capabilities.ts';
@@ -60,7 +59,7 @@ async function loadPlayback(): Promise<MediaPlayback> {
   return (result as ReadyMediaLoad).playback;
 }
 
-/** Fast, permissive capability snapshot matching the other seam specs. */
+/** Fast, permissive capability snapshot matching the other pipeline specs. */
 function permissiveCapabilities(): PlaybackCapabilities {
   return {
     canConstructWorkerMse: () => false,
@@ -91,7 +90,7 @@ const SOURCE_CHUNK_GAP_MS = 10;
  * conversion stays yieldable: a rapid seek lands while a prior run is still
  * reading, which is exactly the window quick user seeks race through.
  */
-class GatedByteSource implements ByteSource {
+class PacedByteSource implements ByteSource {
   get size(): number {
     return this.#bytes.byteLength;
   }
@@ -134,8 +133,8 @@ class GatedByteSource implements ByteSource {
 }
 
 /** Inspects the fixture through the paced transport and returns its playback. */
-async function loadGatedPlayback(): Promise<MediaPlayback> {
-  const result = await inspectMediaLibrary(new GatedByteSource(mediabunnyMp4FixtureBytes()), {
+async function loadPacedPlayback(): Promise<MediaPlayback> {
+  const result = await inspectMediaLibrary(new PacedByteSource(mediabunnyMp4FixtureBytes()), {
     capabilities: permissiveCapabilities(),
   });
   expect(result.status).toBe('ready');
@@ -155,8 +154,8 @@ describe('MediaPlayback.restart', () => {
     expect(playback.restart?.(10)).toBe(false);
   });
 
-  it('accepts every valid seek and lets only the latest run emit (latest-wins)', async () => {
-    const playback = await loadGatedPlayback();
+  it('accepts every valid seek and lets only the newest run emit', async () => {
+    const playback = await loadPacedPlayback();
     const sink = new RecordingSink();
     let completed = 0;
     const errors: unknown[] = [];
@@ -170,7 +169,7 @@ describe('MediaPlayback.restart', () => {
     });
 
     // Rapid triple seek while the initial run is still reading: every valid
-    // intent is accepted (the old in-flight latch dropped the later seeks, so
+    // seek is accepted (the old in-flight latch dropped the later seeks, so
     // the playhead could never reach the newest position).
     expect(playback.restart?.(30)).toBe(true);
     expect(playback.restart?.(60)).toBe(true);
@@ -193,7 +192,7 @@ describe('MediaPlayback.restart', () => {
     playback.dispose();
   });
 
-  it('replaces the superseded run and replays from the seek point with a fresh init', async () => {
+  it('restarting replaces the earlier conversion and replays from the seek point with a fresh init', async () => {
     const playback = await loadPlayback();
     const sink = new RecordingSink();
     let completed = 0;

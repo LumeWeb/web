@@ -1,10 +1,9 @@
 /**
- * Worker-side MSE composition root:
- * `createWorkerMseRoot` owns the worker `MediaSource` lifecycle for the
- * `SessionCoordinator` — one fresh MediaSource per load, its
- * `MediaSourceHandle` transferred to the host as a `HANDLE` protocol message,
- * live getters served to the per-load `MseAppendPipe`, and worker-side
- * teardown/rebuild semantics.
+ * Worker-side MSE composition root: `createWorkerMseRoot` manages the worker
+ * `MediaSource` for the `SessionCoordinator` — one fresh MediaSource per load,
+ * its `MediaSourceHandle` transferred to the host as a `HANDLE` protocol
+ * message, live getters served to the per-load `MseAppendPipe`, and worker-side
+ * teardown/rebuild.
  *
  * These tests drive a fake MediaSource injected through `createMediaSource`,
  * so the lifecycle is deterministic in both node and browser environments — a
@@ -16,7 +15,7 @@ import { describe, expect, it } from 'vitest';
 import { DEFAULT_FMP4_MIME, type WorkerToMainMessage, WorkerToMainMessageType } from '../protocol.ts';
 import { createWorkerMseRoot, type WorkerMseRoot } from '../session/worker-mse-root.ts';
 
-// ---- MSE fakes (sourceopen-scoped; mirror the pipe-compatible SB shape) -------
+// ---- MSE fakes (sourceopen-scoped; same shape as the pipe-compatible SB) -----
 
 class FakeSourceBuffer extends EventTarget {
   appended: Uint8Array[] = [];
@@ -178,7 +177,7 @@ describe('createWorkerMseRoot (worker MSE composition root)', () => {
     expect(root.deps.getPlayheadSeconds()).toBe(0);
   });
 
-  it('ends its own MediaSource on requestEndOfStream (worker-mode EOS)', async () => {
+  it('ends its own MediaSource on requestEndOfStream (worker-mode end-of-stream)', async () => {
     const mediaSource = new FakeMediaSource();
     const root = rootOf(mediaSource);
     const sink = root.createSink({ durationSeconds: 90, mime: DEFAULT_FMP4_MIME, requestId: 5 });

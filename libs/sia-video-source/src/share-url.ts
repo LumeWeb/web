@@ -16,7 +16,7 @@
  * out of config fields and React state (see ADR 0006) and only lives inside
  * `src` until the worker consumes it.
  *
- * This mirrors the Go SDK's `SharedObject` parse (path must start `/objects/`
+ * This matches the Go SDK's `SharedObject` parse (path must start `/objects/`
  * and end `/shared`, fragment parsed as a query, key must decode to exactly 32
  * bytes) and the Rust SDK's `shared_object` (scheme must be `sia`, fragment
  * must carry `encryption_key=`).
@@ -37,7 +37,7 @@ export interface SiaShareUrl {
   /**
    * Base origin of the indexer that signed the URL. The signed metadata fetch
    * already targets this host via `fetchForm`, so this is an aid for callers
-   * that need "the indexer this share came from" (logging, account wiring),
+   * that need "the indexer this share came from" (logging, account linking),
    * not a required input: payment/account access still comes from the
    * configured worker connection.
    */

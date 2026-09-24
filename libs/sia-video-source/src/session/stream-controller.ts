@@ -1,24 +1,23 @@
 /**
- * StreamController contract + generic reference implementation: the play-side
- * session coordinator that turns one load's mediabunny conversion and sink
- * into a play session.
+ * StreamController: the play-side session coordinator that turns one load's
+ * mediabunny conversion and sink into a play session.
  *
  * Responsibilities:
  *
  * - start/seek/playhead trigger semantics;
  * - starting and tearing down the library conversion (one per play session);
  * - back-buffer eviction on `playhead()`;
- * - restarting the conversion through the playback's restart seam on `seek()`;
+ * - restarting the conversion through the playback's `restart` on `seek()`;
  * - fatal-error reporting.
  *
- * The conversion owns its reads through the transport and requests
+ * The conversion drives its own reads through the transport and requests
  * end-of-stream itself once its final fragment appends; the controller only
  * observes completion and moves state. A seek restarts the conversion from
- * the requested timestamp via the playback's restart seam and has the sink
+ * the requested timestamp via the playback's `restart` and has the sink
  * reset its parser, so the fresh init segment lands in a clean SourceBuffer;
  * the controller never reads bytes or resets the parser itself.
  *
- * The controller depends only on injected seams (`MediaPlayback`,
+ * The controller depends only on injected deps (`MediaPlayback`,
  * `AppendSink`, `ErrorReporter`): it imports no Sia SDK and no MSE internals.
  *
  * The coordinator's `loadGeneration` arrives inside `StreamLoad`; the
@@ -41,13 +40,12 @@ export interface StreamController {
   /** Reports the media playhead: drives back-buffer eviction. */
   playhead(timeSeconds: number): void;
   /**
-   * Re-anchors the pipeline at `timeSeconds`: mirrors the playhead for
-   * back-buffer eviction, then restarts the conversion from the requested
-   * timestamp via the playback's restart seam and has the sink reset its
-   * parser — passing the target so the fresh init segment lands in a clean
-   * SourceBuffer re-anchored at the sought position. When the playback exposes
-   * no restart seam (or refuses the timestamp) the seek only mirrors the
-   * playhead.
+   * Seeks to `timeSeconds`: reports the playhead for back-buffer eviction,
+   * then restarts the conversion from the requested timestamp via the
+   * playback's `restart` and has the sink reset its parser — passing the
+   * target so the fresh init segment lands in a clean SourceBuffer at the
+   * sought position. When the playback exposes no restart (or refuses the
+   * timestamp) the seek only reports the playhead.
    */
   seek(timeSeconds: number): void;
   /** Binds one load and starts its conversion. */
@@ -78,7 +76,7 @@ export interface StreamLoad {
   readonly sink: AppendSink;
 }
 
-/** The controller lifecycle. */
+/** The controller state set. */
 export const streamState = {
   destroyed: 'destroyed',
   ended: 'ended',
@@ -88,7 +86,7 @@ export const streamState = {
   starting: 'starting',
 } as const;
 
-/** The controller lifecycle. */
+/** The controller state set. */
 export type StreamState = (typeof streamState)[keyof typeof streamState];
 
 class GenericStreamController implements StreamController {
@@ -135,11 +133,11 @@ class GenericStreamController implements StreamController {
       // Eviction is best-effort; the sink reports its own failures.
     });
     // A seek restarts the conversion from the requested timestamp: when the
-    // playback's restart seam accepts the position, the sink's parser reset
-    // makes sure the fresh init segment lands in a clean SourceBuffer
-    // re-anchored at the target (its output timestamps rebase to zero). The
-    // load generation stays bound and no second playback is started; a
-    // playback that exposes no restart seam falls back to playhead mirroring.
+    // playback's restart accepts the position, the sink's parser reset makes
+    // sure the fresh init segment lands in a clean SourceBuffer at the target
+    // (its output timestamps rebase to zero). The load generation stays bound
+    // and no second playback is started; a playback that exposes no restart
+    // only reports the playhead.
     if (load.playback.restart?.(timeSeconds) === true) {
       load.sink.resetParser(load.loadGeneration, timeSeconds);
     }
@@ -173,13 +171,12 @@ class GenericStreamController implements StreamController {
     // A transport/ranged-read failure (a `ReadTransportError` that already
     // exhausted its retry budget, possibly wrapped by an intermediate layer)
     // is a distinct condition, not a normalization slip: error-reporter maps
-    // it to the `network` wire kind, which the host surfaces as
-    // MEDIA_ERR_NETWORK with no auto-reload — an explicit play/seek restarts
-    // the source (repair deferred). A genuine conversion failure stays
-    // `normalization` → `unsupported` (fatal, no auto-reload). Carry the
-    // underlying cause's message as `detail` either way so the wire context
-    // (via error-reporter's describeFailure) names the real failure instead
-    // of a bare `normalization:failed` / `transport:failed`.
+    // it to the `network` wire kind so the HOST runs its retry-capped reload
+    // recovery, while a genuine conversion failure stays `normalization` →
+    // `unsupported` (fatal, no auto-reload). Carry the underlying cause's
+    // message as `detail` either way so the wire context (via error-reporter's
+    // describeFailure) names the real failure instead of a bare
+    // `normalization:failed` / `transport:failed`.
     this.#errorReporter.report({
       cause: error,
       code: failureCode.failed,
@@ -204,7 +201,7 @@ class GenericStreamController implements StreamController {
   }
 }
 
-/** Builds a generic {@link StreamController} over injected seams. */
+/** Builds a generic {@link StreamController} over injected dependencies. */
 export function createStreamController(options: StreamControllerOptions): StreamController {
   return new GenericStreamController(options);
 }

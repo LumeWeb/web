@@ -168,8 +168,9 @@ describe('protocol', () => {
   });
 
   it('carries no plaintext seed field on the wire anywhere', () => {
-    // Compile- and runtime-level assertion of the contract: the HELLO config
-    // structurally cannot carry either seed (the properties are absent), and
+    // Compile- and runtime-level check that no plaintext seed rides the wire:
+    // the HELLO config structurally cannot carry either seed (the properties
+    // are absent), and
     // the APP_KEY discriminator rides a ciphertext envelope (plus a plaintext
     // routing tag), never a raw key value.
     const config: WorkerConfig = { app: { appId: 'x', callbackUrl: '', description: 'test', logoUrl: '', name: 'test', serviceUrl: 'https://app.example' }, indexerUrl: 'https://sia.storage' };

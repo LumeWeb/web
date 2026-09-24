@@ -1,7 +1,7 @@
 /**
- * Contracts for the CustomSource adapter that maps the ranged ByteSource onto
- * mediabunny. A fake ByteSource stands in for the transport so the adapter is
- * exercised without any media fixture or mediabunny Input.
+ * The CustomSource adapter maps the ranged ByteSource onto mediabunny. A fake
+ * ByteSource stands in for the transport so the adapter is exercised without
+ * any media fixture or mediabunny Input.
  */
 import { describe, expect, it, vi } from 'vitest';
 import type { CustomSource } from 'mediabunny';
@@ -63,7 +63,7 @@ function streamOf(...chunks: Uint8Array[]): ReadableStream<Uint8Array> {
 }
 
 describe('mediaLibrarySource adapter', () => {
-  it('forwards the requested range unmodified and passes loadGeneration to the transport read', async () => {
+  it('passes the requested range through unmodified and hands loadGeneration to the transport read', async () => {
     const fake = fakeByteSource(() => streamOf(new Uint8Array(10)));
     const adapter = mediaLibrarySource(fake.source, { loadGeneration: 7 });
 
@@ -146,7 +146,7 @@ describe('mediaLibrarySource adapter', () => {
     expect(fake.streams[0].locked).toBe(false);
   });
 
-  it('forwards dispose to the underlying ByteSource cancel', () => {
+  it('passes dispose through to the underlying ByteSource cancel', () => {
     const fake = fakeByteSource(() => streamOf());
     const adapter = mediaLibrarySource(fake.source);
 

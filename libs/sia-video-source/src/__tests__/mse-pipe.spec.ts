@@ -1,16 +1,15 @@
 /**
- * Focused tests for the shared MSE append pipe (`src/mse-pipe.ts`), the thin
- * production-library adapter around the public `@videojs/spf/dom` primitives
- * (`appendSegment` / `flushBuffer`).
+ * The shared MSE append pipe (`src/mse-pipe.ts`), the thin production-library
+ * adapter around the public `@videojs/spf/dom` primitives (`appendSegment` /
+ * `flushBuffer`).
  *
  * The pipe centralizes the append-queue serialization, back-buffer eviction,
- * stale-load-generation cancellation, fatal-error suppression and
- * end-of-stream deferral shared by the worker-side MSE pipeline (mode
- * 'worker') and the main-thread MSE fallback path (`sia-video-source.ts`,
- * mode 'main').
+ * stale-load-generation cancellation, fatal-error suppression and end-of-stream
+ * deferral shared by the worker-side MSE pipeline (mode 'worker') and the
+ * main-thread MSE fallback path (`sia-video-source.ts`, mode 'main').
  *
  * These tests run under the node vitest environment (SIA_TEST_ENV=node) and
- * drive a fake SourceBuffer that mirrors the browser's async `updateend` /
+ * drive a fake SourceBuffer that matches the browser's async `updateend` /
  * `error` contract so the real SPF `appendSegment` / `flushBuffer`
  * implementations are exercised.
  */
@@ -138,7 +137,7 @@ class FakeSourceBuffer extends EventTarget {
     this.updating = true;
     queueMicrotask(() => {
       this.updating = false;
-      // Subtract [start, end] from the tracked ranges, mirroring a real SB.
+      // Subtract [start, end] from the tracked ranges, like a real SourceBuffer.
       const next: [number, number][] = [];
       for (const [rangeStart, rangeEnd] of this.ranges) {
         if (end <= rangeStart || start >= rangeEnd) {
@@ -265,6 +264,23 @@ describe('MseAppendPipe', () => {
       expect(fakeSourceBuffer.ranges).toEqual([[100, 200]]);
     });
 
+    it('reports the evicted back-buffer span in seconds, never bytes', async () => {
+      const diags: { detail: Readonly<Record<string, unknown>>; name: string }[] = [];
+      const { fakeSourceBuffer, pipe, setPlayhead } = createHarness({
+        onDiag: (name, detail) => diags.push({ detail, name }),
+      });
+      fakeSourceBuffer.ranges = [[0, 120]];
+      setPlayhead(60); // target end = 30, so [0, 30] is owed for removal
+
+      await pipe.evictBackBuffer();
+
+      // `start`/`end` come from TimeRanges (seconds) and the flushed span
+      // length is also seconds — the field is `seconds`, never a fabricated
+      // `bytes` count for what the browser discarded.
+      expect(fakeSourceBuffer.removed).toEqual([[0, 30]]);
+      expect(diags).toEqual([{ detail: { end: 30, seconds: 30, start: 0 }, name: 'mse.evict' }]);
+    });
+
     it('recovers from QuotaExceededError by evicting then retrying the same head', async () => {
       const { fakeSourceBuffer, onError, pipe, setPlayhead } = createHarness();
       fakeSourceBuffer.ranges = [[0, 120]];
@@ -287,7 +303,7 @@ describe('MseAppendPipe', () => {
       const { fakeSourceBuffer, pipe } = createHarness();
 
       // Hold the first append in flight so the reset lands mid-load, with the
-      // head copying done and bytes 2 & 3 still parked in the queue.
+      // head copying done and bytes 2 & 3 still waiting in the queue.
       fakeSourceBuffer.holdNextAppend = true;
       pipe.append(bytes(1));
       pipe.append(bytes(2));
@@ -316,7 +332,7 @@ describe('MseAppendPipe', () => {
       expect(fakeSourceBuffer.appended[fakeSourceBuffer.appended.length - 1][0]).toBe(9);
     });
 
-    it('aborts the SourceBuffer parser between a superseded seek and the fresh fragment', async () => {
+    it('a seek that cuts off the previous fragment resets the parser before appending the new one', async () => {
       const { fakeSourceBuffer, pipe } = createHarness();
 
       // A rapid seek cuts the previous position's fragment while its head is
@@ -332,7 +348,7 @@ describe('MseAppendPipe', () => {
       await settle(1);
       expect(fakeSourceBuffer.updating).toBe(true);
 
-      // Seek supersedes the old position: queued appends die, parser reset armed.
+      // Seek supersedes the old position: queued appends die, parser reset owed.
       pipe.reset();
 
       // The superseded in-flight append settles (its mdat tail was cut off).
@@ -354,7 +370,7 @@ describe('MseAppendPipe', () => {
       );
     });
 
-    it('never appends a fresh moof while the parser reset a seek owes is still pending', async () => {
+    it('waits for the pending parser reset before appending the fresh fragment', async () => {
       const { fakeSourceBuffer, onError, pipe } = createHarness();
 
       // A fully settled first fragment (the old position's buffered data).
@@ -364,21 +380,21 @@ describe('MseAppendPipe', () => {
 
       // A seek lands while the SourceBuffer is STILL mid-update — e.g. the
       // back-buffer eviction the seek started (`remove()` in flight) or a
-      // superseded position's tail still quiescing. `reset()` arms the parser
+      // superseded position's tail still quiescing. `reset()` queues the parser
       // reset but the buffer has not quiesced yet, so it cannot run yet.
       fakeSourceBuffer.updating = true; // simulated in-flight remove/update
       pipe.reset();
 
       // The fresh position's `moof` is queued immediately (its RAP bytes are
       // cached), racing the owed parser reset. The pump's next iteration now
-      // OBSERVES `updating=true` with a reset owed — it must PARK and abort
-      // FIRST; appending the moof here would let the deferred `abort()` land
+      // sees `updating=true` with a reset owed, so it must abort FIRST;
+      // appending the moof here would let the deferred `abort()` land
       // AFTER it, destroying its parser context before the `mdat` continuation
       // (Chromium CHUNK_DEMUXER_ERROR_APPEND_FAILED on the live far seek).
       pipe.append(bytes(2));
       await settle(1);
 
-      // The in-flight update quiesces; the parked pump may proceed.
+      // The in-flight update quiesces; the waiting pump may proceed.
       fakeSourceBuffer.updating = false;
       fakeSourceBuffer.dispatchEvent(new Event('updateend'));
       await settle();
@@ -409,8 +425,8 @@ describe('MseAppendPipe', () => {
     });
   });
 
-  describe('seek timestamp re-anchor', () => {
-    it('re-anchors the SourceBuffer to the seek target after abort and before the fresh append', async () => {
+  describe('seek timestamp offset', () => {
+    it('sets the SourceBuffer timestamp to the seek target after the abort, before appending fresh data', async () => {
       const { fakeSourceBuffer, pipe } = createHarness();
 
       // The superseded position's fragment settles fully first.
@@ -418,14 +434,14 @@ describe('MseAppendPipe', () => {
       await settle();
       expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([1]);
 
-      // A seek re-anchors at 45 s: queued tail dies, the parser reset is armed,
-      // and the new position's offset is parked for when the buffer quiesces.
+      // A seek to 45 s needs a parser reset: queued tail dies, the reset runs,
+      // and the new position's offset is held until the buffer quiesces.
       pipe.reset(45);
       pipe.append(bytes(9));
       await settle();
 
       expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([1, 9]);
-      // Parser abort then timestamp re-anchor, both strictly before the fresh
+      // Parser abort then timestamp reset, both strictly before the fresh
       // fragment; the offset is applied exactly once.
       expect(fakeSourceBuffer.timestampOffsets).toEqual([45]);
       const abortIndex = fakeSourceBuffer.eventLog.indexOf('abort');
@@ -436,7 +452,7 @@ describe('MseAppendPipe', () => {
       expect(offsetIndex).toBeLessThan(freshIndex);
     });
 
-    it('re-anchors from behind a settling in-flight append', async () => {
+    it('a seek arriving while an append is still settling still sets the new timestamp', async () => {
       const { fakeSourceBuffer, pipe } = createHarness();
 
       fakeSourceBuffer.holdNextAppend = true;
@@ -446,8 +462,8 @@ describe('MseAppendPipe', () => {
       expect(fakeSourceBuffer.updating).toBe(true);
 
       // The seek lands while the superseded head is mid-append; the tail (2)
-      // dies with the reset and the parser reset + re-anchor wait for the
-      // in-flight update to settle.
+      // dies with the reset and the parser reset + timestamp reset wait for
+      // the in-flight update to settle.
       pipe.reset(60);
       fakeSourceBuffer.releaseHeldAppend();
       await settle();
@@ -532,7 +548,7 @@ describe('MseAppendPipe', () => {
     });
   });
 
-  describe('end-of-stream deferral', () => {
+  describe('end-of-stream', () => {
     it('ends the MediaSource once the queue drains and the buffer is quiescent', async () => {
       const { fakeMediaSource, pipe } = createHarness();
 

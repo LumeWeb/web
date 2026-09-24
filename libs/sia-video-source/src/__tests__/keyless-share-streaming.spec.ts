@@ -2,9 +2,9 @@
  * Keyless share-link streaming (ADR 0008): the `APP_KEY` envelope `keyType`
  * extension and the worker's `SharedSdk` resolution order.
  *
- * This spec is purely node-runnable: the SDK-binding seam (`createDefaultSdk`)
- * is exercised over a mocked `@siafoundation/sia-storage` — never the real
- * WASM — and the session handshake routing is exercised through
+ * This spec is purely node-runnable: the SDK binding (`createDefaultSdk`) is
+ * exercised over a mocked `@siafoundation/sia-storage` — never the real WASM —
+ * and the session handshake routing is exercised through
  * `createSessionHandshake` directly.
  *
  * Covered:
@@ -37,7 +37,7 @@ import type { SiaVideoSdk } from '../worker-runtime.ts';
 import { createDefaultSdk } from '../worker-runtime.ts';
 import { shareSrc } from './fixtures/fmp4-fixture.ts';
 
-/** Recorded side effects of the mocked sia-storage seam, captured per test. */
+/** Recorded side effects of the mocked sia-storage SDK, captured per test. */
 const mocks = vi.hoisted(() => ({
   appFreeCalls: 0,
   appKeyCtorSeeds: [] as Uint8Array[],
@@ -56,7 +56,7 @@ const mocks = vi.hoisted(() => ({
 // A node-runnable fake `@siafoundation/sia-storage` (the real WASM SDK stays
 // out of these tests). `SharedSdk.connect` records its (indexerUrl, hex-seed)
 // arguments; `SharedSdk.object(id)` records the id `createSdk` routes share
-// URLs through; `Builder.connected` + `AppKey` mirror the app-key path; the
+// URLs through; `Builder.connected` + `AppKey` stand in for the app-key path; the
 // `free` hooks count how many times each WASM object is released (the real
 // SDK aliases [Symbol.dispose] to free(), and `withDisposal` latches it). All
 // recorded through `vi.hoisted` so assertions read fresh per test.
@@ -128,7 +128,7 @@ const WORKER_CONFIG: WorkerConfig = {
   indexerUrl: 'https://indexer.example',
 };
 
-/** Lowercase hex encoding (mirrors the worker-runtime bytesToHex helper). */
+/** Lowercase hex encoding (same as the worker-runtime bytesToHex helper). */
 function bytesToHex(bytes: Uint8Array): string {
   let hex = '';
   for (const byte of bytes) hex += byte.toString(16).padStart(2, '0');
@@ -270,7 +270,7 @@ describe('createDefaultSdk (worker SDK resolution)', () => {
     expect(mocks.appSdkObjectCalls).toEqual([]);
   });
 
-  it('connects NEITHER SDK eagerly when both seeds are present — createDefaultSdk resolves with zero connects', async () => {
+  it('connects no SDK eagerly when both seeds are present (createDefaultSdk resolves with zero connects)', async () => {
     const sdk = await createDefaultSdk(WORKER_CONFIG, new Uint8Array(32).fill(0x51), new Uint8Array(32).fill(0x52));
 
     // The dual path is now lazy per route: creating the surface connects no
@@ -391,7 +391,7 @@ describe('createDefaultSdk (worker SDK resolution)', () => {
     expect(mocks.sharedFreeCalls).toBe(0);
     expect(mocks.sharedConnectCalls).toEqual([]);
 
-    // Mirror case: using only the share route releases only the SharedSdk.
+    // The reverse: using only the share route releases only the SharedSdk.
     const sharingOnly = await createDefaultSdk(WORKER_CONFIG, new Uint8Array(32).fill(0x53), new Uint8Array(32).fill(0x54));
     const src = shareSrc();
     const parsed = parseSiaShareUrl(src);
@@ -402,7 +402,7 @@ describe('createDefaultSdk (worker SDK resolution)', () => {
     expect(mocks.builderCtorCalls).toHaveLength(1); // only the first test's app route
   });
 
-  it('does not cache a failed sharing connect — a second share-URL resolution reconnects', async () => {
+  it('does not cache a failed sharing connect (a second share-URL resolution reconnects)', async () => {
     mocks.sharedConnectResultOverride = null;
     const sdk = await createDefaultSdk(WORKER_CONFIG, new Uint8Array(32).fill(0x51), new Uint8Array(32).fill(0x52));
     const src = shareSrc();
@@ -474,9 +474,9 @@ describe('createDefaultSdk (worker SDK resolution)', () => {
     );
   });
 
-  it('returns an SiaVideoSdk-shaped surface whose download forwards unchanged', async () => {
+  it('returns an SiaVideoSdk whose download forwards unchanged', async () => {
     const sdk = await createDefaultSdk(WORKER_CONFIG, null, new Uint8Array(32).fill(0x61));
-    // The seam this resolves into is a SiaVideoSdk: object + optional
+    // The resolved surface is a SiaVideoSdk: object + optional
     // objectFromShareUrl + download (same DownloadOptions/PinnedObject shape as
     // the app-key SDK, so downstream streaming code needs no churn).
     const surface: SiaVideoSdk = sdk;

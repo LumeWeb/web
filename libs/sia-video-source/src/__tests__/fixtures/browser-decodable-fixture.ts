@@ -51,7 +51,7 @@ export const HAS_BROWSER_DECODABLE_FIXTURE = true;
  * pinned toolchain with
  * `node src/__fixtures__/media/generate-browser-decodable-fixture.mjs --generate --emit-bytes-ts`
  * and carry the NEW hash here AND into
- * `browser-decodable-fixture-contract.spec.ts` — a mismatch (bytes present but
+ * `browser-decodable-fixture.spec.ts` — a mismatch (bytes present but
  * hash unpinned, or pinned hash not matching the committed file) fails RED.
  */
 export const BROWSER_DECODABLE_FIXTURE_SHA256 =

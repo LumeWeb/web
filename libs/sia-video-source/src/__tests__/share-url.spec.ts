@@ -47,7 +47,7 @@ describe('isSiaShareUrl', () => {
     expect(isSiaShareUrl(`https://indexer.example/objects/${HEX_KEY}/shared?req=abc`)).toBe(false);
   });
 
-  it('does not require the key to be valid — parse decides that', () => {
+  it('does not require the key to be valid (parse decides that)', () => {
     // Detection is a cheap shape check: a two-byte key fragment still looks
     // like a share URL so the caller gets the descriptive parse error.
     expect(isSiaShareUrl(`https://indexer.example/objects/${HEX_KEY}/shared#encryption_key=AAAA`)).toBe(true);
@@ -63,7 +63,7 @@ describe('parseSiaShareUrl', () => {
     expect(Array.from(parsed.encryptionKey)).toEqual(Array.from(key));
   });
 
-  it('normalizes https share URLs to the sia:// fetch form and exposes the indexer origin', () => {
+  it('swaps https:// for sia:// in the fetch form and exposes the indexer origin', () => {
     const url = shareUrlFor();
     const parsed = parseSiaShareUrl(url);
     expect(parsed.fetchForm).toBe(url.replace('https://', 'sia://'));
@@ -111,7 +111,7 @@ describe('parseSiaShareUrl', () => {
     expect(sia.objectKey).toBe(https.objectKey);
   });
 
-  it('preserves the signed query parameters in the fetch form', () => {
+  it('keeps the signed query parameters in the fetch form', () => {
     const parsed = parseSiaShareUrl(shareUrlFor(HEX_KEY, new Uint8Array(32).fill(7)));
     expect(parsed.fetchForm).toContain('?req=abc');
   });

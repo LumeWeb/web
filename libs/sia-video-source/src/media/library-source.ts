@@ -1,8 +1,8 @@
 /**
  * Maps the package's ranged ByteSource onto mediabunny's CustomSource so the
- * media library drives its own reads and prefetching. No media-format knowledge
- * lives here; this module only adapts the transport contract (exact ranges,
- * cancellation) to the library's source contract.
+ * media library drives its own reads and prefetching. No media-format
+ * knowledge lives here; this module only adapts the transport interface (exact
+ * ranges, cancellation) to the library's source interface.
  */
 import { CustomSource } from 'mediabunny';
 import type { ByteSource } from '../transport/byte-source.ts';

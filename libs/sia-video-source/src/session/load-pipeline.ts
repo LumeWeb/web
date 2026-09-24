@@ -1,13 +1,12 @@
 /**
- * `LoadPipeline` seam: the composition-root call that turns one load's
- * `ByteSource` into a typed verdict through the single media-library pipeline.
- * Discovery and conversion share one `Input`, so the metadata bytes are
- * downloaded once and a ready result carries runnable playback over that same
- * input.
+ * `LoadPipeline`: the composition-root call that turns one load's `ByteSource`
+ * into a typed verdict through the single media-library pipeline. Discovery and
+ * conversion share one `Input`, so the metadata bytes are downloaded once and a
+ * ready result carries runnable playback over that same input.
  *
- * The seam is generic: it imports no Sia SDK and no MSE internals. Load
+ * The module is generic: it imports no Sia SDK and no MSE internals. Load
  * generation and cancellation are the coordinator's concern when it drives
- * `run`; this module only forwards the facts it needs.
+ * `run`; this module only passes on the facts it needs.
  */
 
 import type { PlaybackCapabilities } from '../capabilities/browser-capabilities.ts';
@@ -17,7 +16,7 @@ import {
 } from '../media/library-load.ts';
 import type { ByteSource } from '../transport/byte-source.ts';
 
-/** The seam the coordinator depends on for one load verdict. */
+/** The load-verdict interface the coordinator depends on. */
 export interface LoadPipeline {
   run(request: LoadRequest): Promise<LoadResult>;
 }
@@ -46,7 +45,7 @@ export interface LoadRequest {
 /** Typed verdict for one load: ready, unsupported, or cancelled. */
 export type LoadResult = MediaLoadResult;
 
-/** Builds the load-pipeline seam over the media-library pipeline. */
+/** Builds a load pipeline over the media-library pipeline. */
 export function createLoadPipeline(deps: LoadPipelineDeps): LoadPipeline {
   const { capabilities, inspect = inspectMediaLibrary } = deps;
   return {
