@@ -810,7 +810,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // resource, which is exactly the state where a `currentTime` write positions
   // the new load at the target (the shared default-playback-start-position
   // mechanism).
-  #applyPendingReanchor(target: HTMLVideoElement | null): void {
+  #applyPendingReanchor(target: HTMLVideoTargetLike | null): void {
     const reanchorSeconds = this.#pendingReanchorSeconds;
     if (reanchorSeconds === null || !target) return;
     this.#pendingReanchorSeconds = null;
@@ -1051,7 +1051,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // buffered data (or 0 when nothing is buffered) so the native `seeking` flag
   // clears and the element stops hanging in HAVE_METADATA.
   #forceClearStuckSeek(): void {
-    const target = this.target as HTMLVideoElement | null;
+    const target = this.target;
     if (!target) return;
     target.pause();
     const end = nativeBufferedEnd(target);
@@ -1306,7 +1306,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       }
       case WorkerToMainMessageType.HANDLE: {
         if (message.requestId !== this.#requestId) return;
-        const target = this.target as HTMLVideoElement | null;
+        const target = this.target;
         if (target) (target as unknown as { srcObject: unknown }).srcObject = message.handle;
         // The transferred handle is now the identity of the live resource:
         // only its native events are trusted until the next load boundary.
@@ -1974,7 +1974,7 @@ function errorDescription(error: unknown): string {
 }
 
 /** Highest end of the element's native buffered ranges; 0 when empty. */
-function nativeBufferedEnd(target: HTMLVideoElement): number {
+function nativeBufferedEnd(target: HTMLVideoTargetLike): number {
   const buffered = target.buffered;
   if (buffered.length === 0) return 0;
   return buffered.end(buffered.length - 1);
