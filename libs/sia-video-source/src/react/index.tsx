@@ -32,6 +32,10 @@ import {
   selectSiaRecovery,
   type SiaRecoveryState,
 } from '../sia-recovery-feature.ts';
+import {
+  selectSiaLoad,
+  type SiaLoadState,
+} from '../sia-load-feature.ts';
 import { siaVideoDefaultProps, SiaVideoSource } from '../sia-video-source.ts';
 import type { WorkerConfig } from '../protocol.ts';
 
@@ -209,6 +213,27 @@ export const SiaVideo = forwardRef<HTMLVideoElement, SiaVideoProps>(function Sia
 
   return <video ref={composedRef} {...htmlProps}>{children}</video>;
 });
+
+/**
+ * Subscribes to the Sia load-acceptance state of the nearest `<Player>`.
+ *
+ * Reads the same `selectSiaLoad` slice the non-React store consumers use
+ * (via `usePlayer(selectSiaLoad)`), so one feature/store drives both. The
+ * store must be built with `siaLoadFeature`; only the absence of that
+ * configured feature makes this yield `undefined`.
+ *
+ * `accepted: true` means the current load's worker pipeline accepted the
+ * source at the host's SOURCE_OK — a boolean fact, not a playable/ready
+ * signal.
+ *
+ * @returns The Sia load-acceptance state for the attached media, or `undefined`
+ *   when the player store was built without `siaLoadFeature`.
+ * @throws If called outside a `<Player>` — `usePlayer` requires the player
+ *   context.
+ */
+export function useSiaLoad(): SiaLoadState | undefined {
+  return usePlayer(selectSiaLoad);
+}
 
 /**
  * Subscribes to the Sia recovery state of the nearest `<Player>`.

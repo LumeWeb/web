@@ -6,11 +6,12 @@
  * otherwise).
  *
  * Main-thread entry: the `SiaVideoSource` host element, the shared wire
- * types, and the Video.js v10 recovery player feature (`siaRecoveryFeature`)
- * that mirrors the host's typed `sia-recovery-change` event into a player
- * store (read via `selectSiaRecovery`, or the React `useSiaRecovery` hook
- * behind `/react`). The worker entry lives behind the `/worker` subpath; a
- * React wrapper behind `/react`.
+ * types, and the Video.js v10 recovery and load-acceptance player features
+ * (`siaRecoveryFeature` / `siaLoadFeature`) that mirror the host's typed
+ * `sia-recovery-change` / `sia-load-change` events into a player store (read
+ * via `selectSiaRecovery` / `selectSiaLoad`, or the React `useSiaRecovery` /
+ * `useSiaLoad` hooks behind `/react`). The worker entry lives behind the
+ * `/worker` subpath; a React wrapper behind `/react`.
  *
  * Logging is pluggable through the dependency-free `Logger` interface: pass a
  * `logger` to the host (or the React wrapper's `logger` prop) and re-level it
@@ -134,6 +135,11 @@ export {
 } from './session/worker-mse-root.ts';
 export { isSiaShareUrl, parseSiaShareUrl, type SiaShareUrl } from './share-url.ts';
 export {
+  selectSiaLoad,
+  siaLoadFeature,
+  type SiaLoadState,
+} from './sia-load-feature.ts';
+export {
   selectSiaRecovery,
   siaRecoveryFeature,
   type SiaRecoveryState,
@@ -142,6 +148,8 @@ export {
   forwardWorkerLog,
   logThresholdFor,
   type RecoveryChangeDetail,
+  siaLoadChange,
+  type SiaLoadChangeDetail,
   siaRecoveryChange,
   siaVideoDefaultProps,
   SiaVideoSource,
