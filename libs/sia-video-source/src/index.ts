@@ -6,15 +6,18 @@
  * otherwise).
  *
  * Main-thread entry: the `SiaVideoSource` host element, the shared wire
- * types, and the Video.js v10 recovery and load-acceptance player features
- * (`siaRecoveryFeature` / `siaLoadFeature`) that mirror the host's typed
- * `sia-recovery-change` / `sia-load-change` events into a player store (read
- * via `selectSiaRecovery` / `selectSiaLoad`, or the React `useSiaRecovery` /
- * `useSiaLoad` hooks behind `/react`). `siaFeatures` is the shared mutable
- * tuple of both features (`[siaRecoveryFeature, siaLoadFeature]`) for
- * consumer composition — the same tuple feeds non-React `combine(...)` and
- * React `createPlayer({ features: siaFeatures })`. The worker entry lives
- * behind the `/worker` subpath; a React wrapper behind `/react`.
+ * types, and the Video.js v10 recovery, load-acceptance and source-info
+ * player features (`siaRecoveryFeature` / `siaLoadFeature` /
+ * `siaSourceInfoFeature`) that mirror the host's typed
+ * `sia-recovery-change` / `sia-load-change` / `sia-source-info-change` events
+ * into a player store (read via `selectSiaRecovery` / `selectSiaLoad` /
+ * `selectSiaSourceInfo`, or the React `useSiaRecovery` / `useSiaLoad` /
+ * `useSiaSourceInfo` hooks behind `/react`). `siaFeatures` is the shared
+ * mutable tuple of all three features
+ * (`[siaRecoveryFeature, siaLoadFeature, siaSourceInfoFeature]`) for consumer
+ * composition — the same tuple feeds non-React `combine(...)` and React
+ * `createPlayer({ features: siaFeatures })`. The worker entry lives behind
+ * the `/worker` subpath; a React wrapper behind `/react`.
  *
  * Logging is pluggable through the dependency-free `Logger` interface: pass a
  * `logger` to the host (or the React wrapper's `logger` prop) and re-level it
@@ -149,12 +152,19 @@ export {
   type SiaRecoveryState,
 } from './sia-recovery-feature.ts';
 export {
+  selectSiaSourceInfo,
+  siaSourceInfoFeature,
+  type SiaSourceInfoState,
+} from './sia-source-info-feature.ts';
+export {
   forwardWorkerLog,
   logThresholdFor,
   type RecoveryChangeDetail,
   siaLoadChange,
   type SiaLoadChangeDetail,
   siaRecoveryChange,
+  siaSourceInfoChange,
+  type SiaSourceInfoChangeDetail,
   siaVideoDefaultProps,
   SiaVideoSource,
   type SiaVideoSourceOptions,

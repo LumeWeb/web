@@ -1,11 +1,10 @@
 /**
- * A minimal React harness for the shared `siaFeatures` tuple: mounts a real
- * `@videojs/react` `createPlayer` `<Player>` built with the SHARED tuple
- * (`features: siaFeatures` — not separate per-feature players), attaches the
- * same fake media the non-React specs use, and records every recovery, load
- * AND source-info snapshot the three hooks re-render with — proving one
- * Player/store driven by one feature tuple serves all hooks against the same
- * store.
+ * A minimal React harness for `useSiaSourceInfo`: mounts a real `@videojs/react`
+ * `createPlayer` `<Player>` built with `siaSourceInfoFeature`, attaches the
+ * same fake media the non-React source-info spec uses, and records every
+ * source-info snapshot the hook re-renders with. Test-only; lives outside the
+ * package surface (`.spec.ts` files stay runnable against `@videojs/store`
+ * alone).
  *
  * The harness deliberately does not use React `act`: `act` only ships in the
  * development React build (the package's browser tests run against the
@@ -16,44 +15,26 @@
 import { createRoot } from 'react-dom/client';
 import { createPlayer, useMediaAttach, usePlayer } from '@videojs/react';
 import type { Media } from '@videojs/media';
-import { useSiaLoad, useSiaRecovery, useSiaSourceInfo } from '../../react/index.tsx';
-import { siaFeatures } from '../../sia-features.ts';
-import type { SiaLoadState } from '../../sia-load-feature.ts';
-import type { SiaRecoveryState } from '../../sia-recovery-feature.ts';
-import type { SiaSourceInfoState } from '../../sia-source-info-feature.ts';
-import type {
-  RecoveryChangeDetail,
-  SiaLoadChangeDetail,
-  SiaSourceInfoChangeDetail,
-} from '../../sia-video-source.ts';
+import { useSiaSourceInfo } from '../../react/index.tsx';
+import {
+  siaSourceInfoFeature,
+  type SiaSourceInfoState,
+} from '../../sia-source-info-feature.ts';
+import type { SiaSourceInfoChangeDetail } from '../../sia-video-source.ts';
 import { FakeSiaMedia } from './fake-sia-media.ts';
 
 const { Player } = createPlayer({
-  displayName: 'SiaFeaturesTestPlayer',
-  features: siaFeatures,
+  displayName: 'SiaSourceInfoTestPlayer',
+  features: [siaSourceInfoFeature],
 });
 
-export interface SiaFeaturesReactHarness {
+export interface SourceInfoReactHarness {
   /** Attach a media to the player (mirrors the real element -> player handoff). */
   attach(media: Media | null): Promise<void>;
-  /** Every load value the mounted probe has rendered with, in order. */
-  loadSnapshots: (SiaLoadState | undefined)[];
-  /** Every recovery value the mounted probe has rendered with, in order. */
-  recoverySnapshots: (SiaRecoveryState | undefined)[];
   /** Every source-info value the mounted probe has rendered with, in order. */
-  sourceInfoSnapshots: (SiaSourceInfoState | undefined)[];
+  snapshots: (SiaSourceInfoState | undefined)[];
   /** Unmount the root and detach from the DOM. */
   unmount(): void;
-}
-
-/** Fire a load detail through the attached media (the caller polls). */
-export function emitLoad(media: FakeSiaMedia, detail: SiaLoadChangeDetail): void {
-  media.emitLoad(detail);
-}
-
-/** Fire a recovery detail through the attached media (the caller polls). */
-export function emitRecovery(media: FakeSiaMedia, detail: RecoveryChangeDetail): void {
-  media.emitRecovery(detail);
 }
 
 /** Fire a source-info detail through the attached media (the caller polls). */
@@ -61,13 +42,11 @@ export function emitSourceInfo(media: FakeSiaMedia, detail: SiaSourceInfoChangeD
   media.emitSourceInfo(detail);
 }
 
-export async function mountSiaFeaturesReactHarness(): Promise<SiaFeaturesReactHarness> {
+export async function mountSourceInfoReactHarness(): Promise<SourceInfoReactHarness> {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
-  const recoverySnapshots: (SiaRecoveryState | undefined)[] = [];
-  const loadSnapshots: (SiaLoadState | undefined)[] = [];
-  const sourceInfoSnapshots: (SiaSourceInfoState | undefined)[] = [];
+  const snapshots: (SiaSourceInfoState | undefined)[] = [];
   let setMedia: ((media: Media | null) => void) | null = null;
   let readTarget: (() => unknown) | null = null;
 
@@ -77,9 +56,7 @@ export async function mountSiaFeaturesReactHarness(): Promise<SiaFeaturesReactHa
     // Player has attached) without calling a hook outside a component.
     const store = usePlayer();
     readTarget = () => (store as { target: unknown }).target;
-    recoverySnapshots.push(useSiaRecovery());
-    loadSnapshots.push(useSiaLoad());
-    sourceInfoSnapshots.push(useSiaSourceInfo());
+    snapshots.push(useSiaSourceInfo());
     setMedia = useMediaAttach() ?? null;
     return null;
   }
@@ -105,9 +82,7 @@ export async function mountSiaFeaturesReactHarness(): Promise<SiaFeaturesReactHa
         }
       });
     },
-    loadSnapshots,
-    recoverySnapshots,
-    sourceInfoSnapshots,
+    snapshots,
     unmount: () => {
       root.unmount();
       container.remove();

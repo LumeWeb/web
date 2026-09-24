@@ -45,6 +45,7 @@ import {
   nextRequestId,
   PROTOCOL_VERSION,
   type RequestId,
+  type SourceInfo,
   type WorkerConfig,
   workerErrorCode,
   type WorkerErrorCode,
@@ -117,6 +118,34 @@ export const siaLoadChange = 'sia-load-change' as const;
 export interface SiaLoadChangeDetail {
   accepted: boolean;
 }
+
+/**
+ * The typed DOM event `SiaVideoSource` dispatches when source information for
+ * the CURRENT load changes: the current request's `SOURCE_OK` opens the window
+ * (`{ active: true, info }`, exactly once per load, carrying the exact typed
+ * `SourceInfo` the worker vouched for on the wire) or a load boundary closes
+ * it (`{ active: false }`, exactly once at every fresh source/load,
+ * reloadConfiguration/reattach replay, recovery restart, and detach/destroy).
+ * The host dispatches it on BOTH its own EventTarget and the attached
+ * `<video>` element, so consumers holding either can subscribe and read the
+ * `detail` — the same pattern as `siaRecoveryChange`/`siaLoadChange`.
+ *
+ * There is no protocol change: the payload is the host's existing
+ * `SOURCE_OK.info`, exposed without re-shaping it. An open `info` means the
+ * worker pipeline accepted the source with those facts — not that the load is
+ * playable/ready, and `durationSeconds` may be `null`.
+ */
+export const siaSourceInfoChange = 'sia-source-info-change' as const;
+
+/**
+ * The `siaSourceInfoChange` payload — a closed window (`active: false`, no
+ * info) or an open one (`active: true`, the exact `SourceInfo` the worker
+ * vouched for at `SOURCE_OK`). The close detail deliberately carries no
+ * `info`, so the host clears the value when the window closes.
+ */
+export type SiaSourceInfoChangeDetail =
+  | { active: false }
+  | { active: true; info: SourceInfo };
 
 /**
  * Friendly names for the host→worker messages that carry a request identity,
@@ -504,6 +533,13 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
   #sourceBuffer: null | SourceBuffer = null;
 
+  // Whether the ACTIVE load's source information is currently announced as
+  // `active: true` (with the worker's `SourceInfo`). Set exactly once per
+  // SOURCE_OK — the same accepted load that opens acceptance — and reset (and
+  // announced `active: false`, exactly once) at every load boundary, detach,
+  // and destroy, so a stale `info` can never leak across loads.
+  #sourceInfoNotified = false;
+
   #src = '';
 
   #worker: null | Worker = null;
@@ -645,6 +681,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // well, so this is defense-in-depth for the instant before that — the
     // already-accepted guard makes a second call a no-op.)
     this.#resetLoadAcceptance();
+    // The lifecycle ends source information too: an open window must not stay
+    // open with its `info` on a dead host (same defense-in-depth, no-op when
+    // already closed).
+    this.#resetSourceInfo();
     this.#cancelPauseConfirm();
     this.#cancelSeekWatchdog();
     super.destroy();
@@ -673,6 +713,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // replayed source's SOURCE_OK lands (under a brand-new request id).
     this.#requestId = null;
     this.#resetLoadAcceptance();
+    // A detached host's source-info window is over too: close it (and clear
+    // the stored `info`) so nothing leaks into the detached session. A
+    // re-attach replay re-opens when the replayed source's SOURCE_OK lands.
+    this.#resetSourceInfo();
     this.#cancelPauseConfirm();
     // The element's resource identity dies with the detach; a re-attach
     // rebuilds the load and re-identifies it.
@@ -940,6 +984,16 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // it exactly once, never duplicated by dispatching on both sides.
   #emitRecoveryDetail(detail: RecoveryChangeDetail): void {
     this.target?.dispatchEvent(new CustomEvent<RecoveryChangeDetail>(siaRecoveryChange, { detail }));
+  }
+
+  // Emits the typed source-info-change event through the attached <video>
+  // element — the identical dispatch path (and element→host forwarding) as
+  // `#emitLoadDetail`/`#emitRecoveryDetail`, so element and host listeners
+  // each receive it exactly once.
+  #emitSourceInfoDetail(detail: SiaSourceInfoChangeDetail): void {
+    this.target?.dispatchEvent(
+      new CustomEvent<SiaSourceInfoChangeDetail>(siaSourceInfoChange, { detail }),
+    );
   }
 
   async #encryptAndSendSeed(
@@ -1414,6 +1468,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // plays — which is what keeps a persistently broken object from
         // looping at attempt=1 forever.
         this.#acceptLoad();
+        // The same accepted load opens the source-info window, exposing the
+        // exact `SourceInfo` the worker vouched for (exactly once, guarded
+        // like acceptance). No protocol change: it is the existing
+        // `message.info` payload, just surfaced — not playability.
+        this.#openSourceInfo(message.info);
         this.#machine.send({ type: hostPlaybackEvent.sourceReady });
         this.#durationSeconds = message.info.durationSeconds;
         if (message.info.mode === workerMode.main) {
@@ -1612,6 +1671,19 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#logger.child('host').error('worker.error', { message: 'messageerror' });
   };
 
+  // Announces the ACTIVE load's source information exactly once (the "no
+  // duplicate open" guard), aligned with `#acceptLoad`: the same SOURCE_OK
+  // that opens acceptance opens the source-info window, exposing the exact
+  // `SourceInfo` the worker vouched for on the wire (no protocol change, no
+  // reshaped metadata). It does NOT mean playable/ready, and
+  // `durationSeconds` may be null. A duplicate ack of the same load never
+  // re-announces.
+  #openSourceInfo(info: SourceInfo): void {
+    if (this.#sourceInfoNotified) return;
+    this.#sourceInfoNotified = true;
+    this.#emitSourceInfoDetail({ active: true, info });
+  }
+
   #post(message: MainToWorkerMessage): void {
     if (!this.#worker) return;
     this.#worker.postMessage(message);
@@ -1718,7 +1790,21 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // The load boundary also resets load acceptance (exactly once, only when
     // a load had actually been accepted), so the fresh SOURCE_OK can re-open.
     this.#resetLoadAcceptance();
+    // The same boundary closes the source-info window (exactly once, only when
+    // a window was actually open), so a stale `info` never crosses into the
+    // fresh load and the fresh SOURCE_OK can re-open it.
+    this.#resetSourceInfo();
     this.dispatchEvent(new Event('emptied'));
+  }
+
+  // Resets the announced source-info window to closed exactly once (the "no
+  // duplicate close" guard): a load boundary / lifecycle end only announces
+  // the close when a window had actually been open, so a stale `info` never
+  // leaks past the boundary. The close detail carries no `info`.
+  #resetSourceInfo(): void {
+    if (!this.#sourceInfoNotified) return;
+    this.#sourceInfoNotified = false;
+    this.#emitSourceInfoDetail({ active: false });
   }
 
   // Shared body of an automatic reload/restart (decode recovery, an owed

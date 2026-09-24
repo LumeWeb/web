@@ -1,9 +1,10 @@
 /**
- * Test fake for the piece of the video.js `Media` surface the recovery
- * feature depends on: an EventTarget-like subscription honoring an abort
- * `signal` plus a typed emit helper for the `sia-recovery-change` event. Not
- * a mock — it implements the real contract the host exposes, so the feature
- * code is exercised unmodified.
+ * Test fake for the piece of the video.js `Media` surface the Sia player
+ * features depend on: an EventTarget-like subscription honoring an abort
+ * `signal` plus typed emit helpers for the `sia-recovery-change`,
+ * `sia-load-change` and `sia-source-info-change` events. Not a mock — it
+ * implements the real contract the host exposes, so the feature code is
+ * exercised unmodified.
  */
 import type { Media } from '@videojs/media';
 import {
@@ -11,6 +12,8 @@ import {
   siaLoadChange,
   type SiaLoadChangeDetail,
   siaRecoveryChange,
+  siaSourceInfoChange,
+  type SiaSourceInfoChangeDetail,
 } from '../../sia-video-source.ts';
 
 export class FakeSiaMedia {
@@ -43,6 +46,12 @@ export class FakeSiaMedia {
   emitRecovery(detail: RecoveryChangeDetail): void {
     for (const listener of this.listeners.get(siaRecoveryChange) ?? []) {
       listener({ detail, type: siaRecoveryChange });
+    }
+  }
+
+  emitSourceInfo(detail: SiaSourceInfoChangeDetail): void {
+    for (const listener of this.listeners.get(siaSourceInfoChange) ?? []) {
+      listener({ detail, type: siaSourceInfoChange });
     }
   }
 
