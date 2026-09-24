@@ -1216,6 +1216,16 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // for the replayed load — otherwise a deferred-family preload starts
         // the load but never streams, stalling the element at byte 0.
         if (this.#src) {
+          // A user pause issued while the load was actively playing is
+          // provisional: the machine retains the playing choice until the
+          // next-task confirmation settles it. A reload replays the source at
+          // ATTACH_OK, and the re-state decision below is computed from the
+          // machine preference — so an armed pause confirmation must be
+          // settled HERE, before that decision. Without it the reload would
+          // re-state PLAY over the live pause and then cancel the armed
+          // confirmation (in `#resetLoadState`), losing the pause for good
+          // and letting a later recovery resurrect playback.
+          this.#settlePauseConfirmIfArmed();
           const target = this.target as HTMLVideoElement | null;
           const shouldPlay = target !== null && (!target.paused || this.#machine.preference === 'playing');
           // The re-attach rebuilds the same source's load: recovery state
@@ -1784,13 +1794,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // playing choice to paused unless a seek/play/load boundary cancels first.
   #schedulePauseConfirm(): void {
     this.#cancelPauseConfirm();
-    this.#pauseConfirm = setTimeout(() => {
-      this.#pauseConfirm = null;
-      // The window closed with no seek in between: the pause was deliberate. In
-      // `pausepending` this settles the retained playing choice to paused;
-      // anywhere else (already superseded by a seek/play) it is a no-op.
-      this.#applyDecisions(this.#machine.send({ type: hostPlaybackEvent.pauseConfirmed }));
-    }, 0);
+    this.#pauseConfirm = setTimeout(() => this.#settlePauseConfirmIfArmed(), 0);
   }
 
   #send(message: MainToWorkerMessage): void {
@@ -1819,6 +1823,23 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       src: this.#src,
       type: MainToWorkerMessageType.SOURCE,
     });
+  }
+
+  // Settles an armed provisional pause confirmation NOW, without waiting for
+  // the next-task timer: cancels the pending handle and reports
+  // `pause.confirmed` to the machine so the retained playing choice becomes
+  // paused. No-op when no confirmation is armed. Shared by the timer callback
+  // (`#schedulePauseConfirm`) and by the ATTACH_OK boundary, where the reload
+  // would otherwise re-state PLAY from the still-retained playing choice and
+  // then cancel the armed confirmation in `#resetLoadState` — losing the user's
+  // live pause (and letting a later recovery resurrect playback).
+  #settlePauseConfirmIfArmed(): void {
+    if (this.#pauseConfirm === null) return;
+    this.#cancelPauseConfirm();
+    // The window closed with no seek in between: the pause was deliberate. In
+    // `pausepending` this settles the retained playing choice to paused;
+    // anywhere else (already superseded by a seek/play) it is a no-op.
+    this.#applyDecisions(this.#machine.send({ type: hostPlaybackEvent.pauseConfirmed }));
   }
 
   // Posts a fresh HELLO (the only message that re-negotiates the session) and
