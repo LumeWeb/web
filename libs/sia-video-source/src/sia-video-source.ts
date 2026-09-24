@@ -96,6 +96,29 @@ export type RecoveryChangeDetail =
   | { active: true; reason: RecoveryReason; resumeSeconds: number; wantsPlay: boolean };
 
 /**
+ * The typed DOM event `SiaVideoSource` dispatches when a load's acceptance
+ * changes: the current request's `SOURCE_OK` acknowledges the source
+ * (`{ accepted: true }`, exactly once per load) or a load boundary resets it
+ * (`{ accepted: false }`, exactly once at every fresh source/load,
+ * reloadConfiguration/reattach replay, recovery restart, and detach/destroy).
+ * The host dispatches it on BOTH its own `EventTarget` and the attached
+ * `<video>` element, so consumers holding either can subscribe and read the
+ * `detail` — the same pattern as `siaRecoveryChange`.
+ */
+export const siaLoadChange = 'sia-load-change' as const;
+
+/**
+ * The `siaLoadChange` payload — boolean-only. `accepted: true` means the
+ * worker pipeline accepted the source at the existing unconditional `SOURCE_OK`
+ * for the current request; it deliberately carries NO `SOURCE_OK.info`
+ * metadata, progress, retries, counters, or broad phase, and a true value
+ * does NOT mean the load is playable/ready.
+ */
+export interface SiaLoadChangeDetail {
+  accepted: boolean;
+}
+
+/**
  * Friendly names for the host→worker messages that carry a request identity,
  * used by the per-post `request` debug line (DESTROY/DETACH have none).
  * HELLO reads as `set-log`: that is the one post that tunes the worker's
@@ -407,6 +430,12 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // repositions the reloaded load here. Starts at 0 until the first
   // timeupdate.
   #lastPlayheadSeconds = 0;
+  // Whether the ACTIVE load's acceptance is currently announced as
+  // `accepted: true`. Set exactly once per SOURCE_OK; reset (and announced
+  // `accepted: false`, exactly once) at every load boundary, detach, and
+  // destroy. Guards the "exactly once" open and close, never a second fact to
+  // infer acceptance from.
+  #loadAccepted = false;
   // Main-thread MSE fallback state (Firefox and other `main`-mode sessions).
   #logger: Logger;
 
@@ -611,6 +640,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // open recovery observation so consumers never wait on a close that
     // cannot come.
     this.#closeRecoveryObservation();
+    // The lifecycle ends acceptance too: an accepted load must not stay open
+    // on a dead host. (The override `detach` runs through `super.destroy` as
+    // well, so this is defense-in-depth for the instant before that — the
+    // already-accepted guard makes a second call a no-op.)
+    this.#resetLoadAcceptance();
     this.#cancelPauseConfirm();
     this.#cancelSeekWatchdog();
     super.destroy();
@@ -632,6 +666,13 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // A detached host's recovery window is over: close any open observation
     // (a re-attach replay re-announces if it recovers again).
     this.#closeRecoveryObservation();
+    // A detached host's accepted load is over too: reset the announced
+    // acceptance, and drop the current request identity so no still-in-flight
+    // SOURCE_OK (or PROGRESS/CHUNK/ERROR) for the torn-down load can apply to
+    // a host with no current load. A re-attach replay re-announces when the
+    // replayed source's SOURCE_OK lands (under a brand-new request id).
+    this.#requestId = null;
+    this.#resetLoadAcceptance();
     this.#cancelPauseConfirm();
     // The element's resource identity dies with the detach; a re-attach
     // rebuilds the load and re-identifies it.
@@ -685,6 +726,16 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   reloadConfiguration(): void {
     if (this.#destroyed || !this.target) return;
     this.#startHandshake();
+  }
+
+  // Announces the active load as accepted exactly once (the "no duplicate
+  // true" guard): the worker's SOURCE_OK proves a load opened, and a load can
+  // only open once. It does NOT mean playable/ready — only that the pipeline
+  // accepted the source for the current request.
+  #acceptLoad(): void {
+    if (this.#loadAccepted) return;
+    this.#loadAccepted = true;
+    this.#emitLoadDetail({ accepted: true });
   }
 
   #addMainSourceBuffer(mediaSource: MediaSource, mime: string, durationSeconds: null | number): void {
@@ -873,6 +924,13 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     if (!this.#recoveryNotified) return;
     this.#recoveryNotified = false;
     this.#emitRecoveryDetail({ active: false });
+  }
+
+  // Emits the typed load-change event through the attached <video> element,
+  // the identical dispatch path (and element→host forwarding) as
+  // `#emitRecoveryDetail`.
+  #emitLoadDetail(detail: SiaLoadChangeDetail): void {
+    this.target?.dispatchEvent(new CustomEvent<SiaLoadChangeDetail>(siaLoadChange, { detail }));
   }
 
   // Emits the typed recovery-change event through the attached <video>
@@ -1336,12 +1394,16 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // of a superseded SOURCE would downgrade the request id and let stale
         // chunks into the current append pipeline.
         if (message.requestId !== this.#requestId) return;
-        // A clean acknowledgement proves a load opened. On a FRESH load the
+        // A clean acknowledgement proves a load opened: announce the typed
+        // load-acceptance fact exactly once per load. It says nothing about
+        // playability/ready — only that the worker pipeline accepted the
+        // source for the current request. On a FRESH load the
         // machine's recovery budget restarts from here; on a recovery reload
         // (the machine is still `recovering`) it is the same broken object
         // re-opening, so the budget stays in place until that load genuinely
         // plays — which is what keeps a persistently broken object from
         // looping at attempt=1 forever.
+        this.#acceptLoad();
         this.#machine.send({ type: hostPlaybackEvent.sourceReady });
         this.#durationSeconds = message.info.durationSeconds;
         if (message.info.mode === workerMode.main) {
@@ -1580,6 +1642,15 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.dispatchEvent(mediaErrorEvent(error));
   }
 
+  // Resets the announced load-acceptance to false exactly once (the "no
+  // duplicate false" guard): a load boundary / lifecycle end only announces
+  // the reset when a load had actually been accepted.
+  #resetLoadAcceptance(): void {
+    if (!this.#loadAccepted) return;
+    this.#loadAccepted = false;
+    this.#emitLoadDetail({ accepted: false });
+  }
+
   // Drops HOST-owned pipeline facts attached to the previously played source
   // and announces the load boundary with the native `emptied` event. This is
   // the fresh/load/ATTACH_OK boundary. Recovery state (attempts, owed repair,
@@ -1634,6 +1705,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // load can announce its own. A restart's own teardown keeps the window
     // open (the machine is still `recovering` there).
     this.#endRecoveryObservationIfMachineLeft();
+    // The load boundary also resets load acceptance (exactly once, only when
+    // a load had actually been accepted), so the fresh SOURCE_OK can re-open.
+    this.#resetLoadAcceptance();
     this.dispatchEvent(new Event('emptied'));
   }
 

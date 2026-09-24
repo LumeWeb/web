@@ -6,7 +6,12 @@
  * code is exercised unmodified.
  */
 import type { Media } from '@videojs/media';
-import { type RecoveryChangeDetail, siaRecoveryChange } from '../../sia-video-source.ts';
+import {
+  type RecoveryChangeDetail,
+  siaLoadChange,
+  type SiaLoadChangeDetail,
+  siaRecoveryChange,
+} from '../../sia-video-source.ts';
 
 export class FakeSiaMedia {
   readonly listeners = new Map<string, Set<(event: unknown) => void>>();
@@ -27,6 +32,12 @@ export class FakeSiaMedia {
       () => this.removeEventListener(type, listener),
       { once: true },
     );
+  }
+
+  emitLoad(detail: SiaLoadChangeDetail): void {
+    for (const listener of this.listeners.get(siaLoadChange) ?? []) {
+      listener({ detail, type: siaLoadChange });
+    }
   }
 
   emitRecovery(detail: RecoveryChangeDetail): void {

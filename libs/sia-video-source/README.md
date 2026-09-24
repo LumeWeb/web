@@ -177,6 +177,56 @@ the host's `active: false` close detail clears them, and detach/reattach resets
 the slice to its inert initial state, so a stale window can never leak across
 sources or players.
 
+### Video.js v10 load acceptance
+
+The host also announces when the worker pipeline **accepts** a source through
+the typed `sia-load-change` DOM event, mirrored into the player store by the
+`siaLoadFeature` player feature — the same store/selector mechanism as
+recovery, but boolean-only and separate from it. `accepted: true` means the
+current request's `SOURCE_OK` opened the load; it deliberately carries no
+`SOURCE_OK.info` metadata, progress, retries, counters, or broad phase, and it
+does **not** mean the load is playable/ready. `accepted: false` is the inert
+state and the reset at every load boundary (fresh source/load,
+`reloadConfiguration`/reattach replay, recovery restart, detach/destroy), so
+an accepted load can never leak across sources or players.
+
+```ts
+// Non-React Video.js: same combine/selector pattern as recovery.
+import { combine, createStore } from '@videojs/store';
+import { siaLoadFeature, selectSiaLoad } from '@lumeweb/sia-video-source';
+
+const store = createStore()(combine(siaLoadFeature));
+const detach = store.attach({ media: siaMedia, container: elem.parentElement });
+const { accepted } = selectSiaLoad(store.state) ?? {};
+if (accepted) { /* the current load was accepted by the worker pipeline */ }
+detach();
+```
+
+Like recovery, the root feature depends only on the non-React video.js peer
+packages (`@videojs/core`, `@videojs/store`, `@videojs/media`), and React
+consumers read the exact same slice through `useSiaLoad()`:
+
+```tsx
+import { createPlayer } from '@videojs/react';
+import { SiaVideo, useSiaLoad } from '@lumeweb/sia-video-source/react';
+import { siaLoadFeature } from '@lumeweb/sia-video-source';
+
+const { Player } = createPlayer({ features: [siaLoadFeature] });
+
+function LoadGate() {
+  const load = useSiaLoad(); // { accepted } | undefined
+  return load?.accepted ? <span>source accepted</span> : null;
+}
+
+<Player>
+  <SiaVideo src={pinnedObjectKey} />
+  <LoadGate />
+</Player>
+```
+
+The same natural `SiaVideoSource` consumers can of course subscribe to the raw
+`sia-load-change` DOM event on the element or host.
+
 ### The worker
 
 The engine runs in a dedicated worker; its entry is exported so the app's
