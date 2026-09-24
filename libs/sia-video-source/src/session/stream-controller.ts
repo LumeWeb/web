@@ -28,6 +28,7 @@
  */
 
 import type { MediaPlayback } from '../media/library-load.ts';
+import { isTransportReadError } from '../ranged-reader.ts';
 import type { AppendSink } from '../sink/append-sink.ts';
 import { type ErrorReporter, failureCode, failureCondition } from './error-reporter.ts';
 
@@ -169,10 +170,20 @@ class GenericStreamController implements StreamController {
     const load = this.#load;
     if (!load) return;
     this.#setState(streamState.failed);
+    // A transport/ranged-read failure (a `ReadTransportError` that already
+    // exhausted its retry budget, possibly wrapped by an intermediate layer)
+    // is a distinct condition, not a normalization slip: error-reporter maps
+    // it to the `network` wire kind so the HOST runs its bounded reload
+    // recovery, while a genuine conversion failure stays `normalization` →
+    // `unsupported` (fatal, no auto-reload). Carry the underlying cause's
+    // message as `detail` either way so the wire context (via error-reporter's
+    // describeFailure) names the real failure instead of a bare
+    // `normalization:failed` / `transport:failed`.
     this.#errorReporter.report({
       cause: error,
       code: failureCode.failed,
-      condition: failureCondition.normalization,
+      condition: isTransportReadError(error) ? failureCondition.transport : failureCondition.normalization,
+      detail: error instanceof Error ? error.message : String(error),
     });
     load.sink.abort(error);
   }

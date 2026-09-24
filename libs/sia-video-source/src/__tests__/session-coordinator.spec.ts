@@ -549,7 +549,7 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
     expect(appended[0]).toMatchObject({ kind: 'init' });
   });
 
-  it('reports one playback failure as a decode error scoped to the load', async () => {
+  it('reports one playback failure as an unsupported error scoped to the load', async () => {
     const driver = makeDriver();
     const playback = new FakePlayback();
     driver.pipeline.results.push(readyLoad(playback));
@@ -561,7 +561,8 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
 
     const errors = driver.message(WorkerToMainMessageType.ERROR);
     expect(errors).toHaveLength(1);
-    expect(errors[0]).toMatchObject({ kind: workerErrorCode.decode, requestId: 23 });
+    expect(errors[0]).toMatchObject({ kind: workerErrorCode.unsupported, requestId: 23 });
+    expect(errors[0].kind).not.toBe(workerErrorCode.decode);
   });
 
   it('accepts a validated APP_KEY envelope through the real handshake', async () => {

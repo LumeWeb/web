@@ -15,7 +15,7 @@ const CHUNK_SIZE = 16 * 1024;
 interface Delivered { bytes: Uint8Array; position: number }
 
 /** Shared-budget SDK probe: every `download()` opens a stream whose delivery
- *  is parked until the test calls `release()`, so the number of streams open
+ *  is held until the test calls `release()`, so the number of streams open
  *  at once — the read concurrency a budget must cap — is observable. */
 class ReleaseableSdk implements SiaSdkLike {
   /** download() calls in creation order (per reader of the same budget). */
@@ -43,7 +43,7 @@ class ReleaseableSdk implements SiaSdkLike {
     });
   }
 
-  /** Lets one parked stream's read deliver and drain. */
+  /** Lets one held stream's read deliver and drain. */
   async release(howMany = 1): Promise<void> {
     for (let i = 0; i < howMany; i++) {
       const pending = this.#releases.shift();
@@ -84,8 +84,8 @@ describe('ReadBudget', () => {
     await tick();
 
     // While reader A holds the only permit, reader B must not have opened its
-    // download yet — SDK reads are bounded at the shared budget limit, so a
-    // batch of concurrent library reads cannot burst unbounded downloads.
+    // download yet — SDK reads are capped at the shared budget, so a batch of
+    // concurrent library reads cannot open unlimited downloads.
     expect(sdk.calls).toEqual([{ length: PAYLOAD.length, offset: 0 }]);
     expect(sdk.maxInflight).toBe(1);
 
@@ -119,6 +119,46 @@ describe('ReadBudget', () => {
       { length: PAYLOAD.length, offset: 0 },
       { length: PAYLOAD.length, offset: 0 },
     ]);
+    expect(sdk.maxInflight).toBe(2);
+  });
+
+  it('queues the additional run behind N busy slots, in FIFO order', async () => {
+    const budget = new ReadBudget(2);
+    const sdk = new ReleaseableSdk();
+    const readerA = newReader(sdk, budget, []);
+    const readerB = newReader(sdk, budget, []);
+    const readerC = newReader(sdk, budget, []);
+
+    readerA.start();
+    readerB.start();
+    readerC.start();
+    await tick();
+
+    // Two permits, three readers: exactly the limit worth of downloads are
+    // open (maxInflight pinned at 2) and C's download has not been opened yet —
+    // it waits behind the two busy slots. This is the production shape: the
+    // worker's shared ReadBudget caps a batch of concurrent library reads so
+    // they can never open more renter WebTransport sessions than the browser's
+    // 64 pending-session cap absorbs.
+    expect(sdk.calls).toEqual([
+      { length: PAYLOAD.length, offset: 0 },
+      { length: PAYLOAD.length, offset: 0 },
+    ]);
+    expect(sdk.maxInflight).toBe(2);
+
+    // Release A's slot: C (earliest in the FIFO wait queue) may now open its
+    // own download; B still holds the other permit, so concurrent opens stay
+    // pinned at the limit.
+    await sdk.release(1);
+    await tick();
+    await tick();
+    expect(sdk.calls).toHaveLength(3);
+    expect(sdk.maxInflight).toBe(2);
+
+    // Drain the two remaining held downloads; the cap never exceeds 2.
+    await sdk.release(2);
+    await tick();
+    await tick();
     expect(sdk.maxInflight).toBe(2);
   });
 

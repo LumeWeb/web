@@ -12,6 +12,7 @@ import { parseSiaShareUrl } from './share-url.ts';
 import type { MainToWorkerMessage, WorkerConfig, WorkerToMainMessage } from './protocol.ts';
 import {
   type LruChunkCache,
+  type ReadBudget,
   type SiaObjectLike,
   type SiaSdkLike,
 } from './ranged-reader.ts';
@@ -50,6 +51,16 @@ export type SiaVideoSdk = {
 } & SiaSdkLike;
 
 export interface SiaVideoWorkerOptions {
+  /**
+   * Shared bounded-dispatch permit for SDK ranged downloads (see
+   * {@link ReadBudget}). Defaults to one shared `ReadBudget` at
+   * `DEFAULT_SDK_READ_CONCURRENCY` (4) for the default composition root, so a
+   * batch of concurrent library reads can never open more renter WebTransport
+   * sessions than the browser's 64 pending-session cap absorbs (the recurring
+   * `Too many pending WebTransport sessions (64)` storm). Injectable so a host
+   * that needs a different limit (or an unlimited transport) can opt out.
+   */
+  budget?: ReadBudget;
   /** Replaces the default byte chunk cache (capacity-limited LRU). */
   cache?: LruChunkCache;
   /**

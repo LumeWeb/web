@@ -1,13 +1,13 @@
 /**
- * Behavior spec for the `StreamController` play session: it starts one
- * mediabunny conversion over the shared input, appends its fragments to the
- * sink, ends the stream on conversion completion, and tears the load down on
- * destroy. The controller depends on injected seams (`MediaPlayback`,
- * `AppendSink`, `ErrorReporter`), so the play orchestration is testable
- * without Sia or a real MediaSource.
+ * The `StreamController` play session: it starts one mediabunny conversion
+ * over the shared input, appends its fragments to the sink, ends the stream on
+ * conversion completion, and tears the load down on destroy. The controller
+ * depends on injected deps (`MediaPlayback`, `AppendSink`, `ErrorReporter`),
+ * so the play path is testable without Sia or a real MediaSource.
  */
 import { describe, expect, it } from 'vitest';
 import type { MediaPlayback } from '../media/library-load.ts';
+import { ReadTransportError } from '../ranged-reader.ts';
 import { type ErrorReporter, type PlaybackFailure } from '../session/error-reporter.ts';
 import {
   createStreamController,
@@ -26,7 +26,7 @@ interface Harness {
   states: StreamState[];
 }
 
-/** One recorded sink parser reset, with the optional seek re-anchor target. */
+/** One recorded sink parser reset, with the optional seek target. */
 interface SinkReset {
   readonly generation: number;
   readonly target?: number;
@@ -36,7 +36,7 @@ interface SinkReset {
 class FakePlayback implements MediaPlayback {
   disposed = 0;
   generation: null | number = null;
-  /** When false, `restart` refuses an armed seek (seamless playback mirror). */
+  /** When false, `restart` refuses the seek. */
   restartEnabled = true;
   restartInvocations: number[] = [];
   sink: AppendSink | null = null;
@@ -90,7 +90,7 @@ class FakeSink implements AppendSink {
   }
 
   append(_unit: AppendUnit): void {
-    // Appends are exercised through the playback/sink seam, not this controller.
+    // Appends are exercised through the playback/sink path, not this controller.
   }
 
   evictBackBuffer(timeSeconds: number): Promise<boolean> {
@@ -131,7 +131,7 @@ describe('StreamController', () => {
 
     expect(h.playback.startInvocations).toBe(1);
     expect(h.playback.generation).toBe(1);
-    // The start reset re-anchors nothing: no seek target is recorded.
+    // The start reset carries no target: no seek target is recorded.
     expect(h.sink.resets).toEqual([{ generation: 1 }]);
     expect(h.states).toContain('starting');
     expect(h.states).toContain('playing');
@@ -182,6 +182,89 @@ describe('StreamController', () => {
     expect(h.sink.aborts).toHaveLength(1);
   });
 
+  it('carries the underlying Error message into the normalization failure detail', () => {
+    // The bare `normalization:failed` the host previously saw hid the real
+    // cause (e.g. a failed ranged read). #onError must forward the underlying
+    // message as `detail` so error-reporter's describeFailure names it on the
+    // wire (`normalization:failed (Sia SDK read ended before ...)`).
+    const h = harness();
+    h.controller.start(h.load());
+
+    h.playback.fail(new Error('Sia SDK read ended before the requested range was delivered'));
+
+    expect(h.errors).toHaveLength(1);
+    const reported = h.errors[0];
+    // Narrow the failure union to the normalization variant #onError emits, so
+    // the `cause`/`detail` fields it owns are type-checked.
+    if (reported.condition === 'normalization') {
+      expect(reported.code).toBe('failed');
+      expect(reported.detail).toBe('Sia SDK read ended before the requested range was delivered');
+      expect(reported.cause).toBeInstanceOf(Error);
+    } else {
+      throw new Error(`expected a normalization failure, got ${reported.condition}`);
+    }
+  });
+
+  it('reports a transport-tagged failure as condition transport with the detail retained', () => {
+    // A ReadTransportError (a ranged-read failure that exhausted its retry
+    // budget, possibly wrapped by an intermediate layer) is a distinct
+    // condition: error-reporter maps it to the host's `network` recovery kind.
+    const transport = new ReadTransportError('Sia SDK ranged read failed after 3 attempts (expected 65536 bytes at 0)', {
+      attempts: 3,
+      cause: new Error('Sia SDK read ended before the requested range was delivered'),
+      expectedBytes: 65536,
+      position: 0,
+    });
+
+    // Direct instance: classified as transport.
+    const direct = harness();
+    direct.controller.start(direct.load());
+    direct.playback.fail(transport);
+    expect(direct.controller.state).toBe('failed');
+    expect(direct.errors).toHaveLength(1);
+    const directReport = direct.errors[0];
+    if (directReport.condition === 'transport') {
+      expect(directReport.code).toBe('failed');
+      expect(directReport.detail).toMatch(/failed after 3 attempts/);
+      expect(directReport.cause).toBe(transport);
+    } else {
+      throw new Error(`expected a transport failure, got ${directReport.condition}`);
+    }
+    expect(direct.sink.aborts).toHaveLength(1);
+
+    // A wrapped transport error (Error with the transport as `cause`) must
+    // still classify as transport — the cause-walk reaches it.
+    const wrapped = harness();
+    wrapped.controller.start(wrapped.load());
+    wrapped.playback.fail(new Error('conversion failed', { cause: transport }));
+    expect(wrapped.errors).toHaveLength(1);
+    const wrappedReport = wrapped.errors[0];
+    if (wrappedReport.condition === 'transport') {
+      expect(wrappedReport.detail).toBe('conversion failed');
+    } else {
+      throw new Error(`expected a transport failure, got ${wrappedReport.condition}`);
+    }
+  });
+
+  it('still reports an ordinary conversion failure as normalization', () => {
+    // A non-transport conversion failure (the engine broke, not the transport)
+    // must stay on the normalization path → `unsupported`, never the network
+    // recovery kind, even when it loosely mentions a read.
+    const h = harness();
+    h.controller.start(h.load());
+
+    h.playback.fail(new Error('muxer rejected a packet'));
+
+    expect(h.errors).toHaveLength(1);
+    const reported = h.errors[0];
+    if (reported.condition === 'normalization') {
+      expect(reported.code).toBe('failed');
+      expect(reported.detail).toBe('muxer rejected a packet');
+    } else {
+      throw new Error(`expected a normalization failure, got ${reported.condition}`);
+    }
+  });
+
   it('suppresses completion and errors after destroy', () => {
     const h = harness();
     h.controller.start(h.load());
@@ -210,7 +293,7 @@ describe('StreamController', () => {
     expect(h.sink.aborts).toHaveLength(1);
   });
 
-  it('drives eviction on playhead and re-anchors the conversion on a seek', () => {
+  it('a seek evicts the back buffer and restarts the conversion at the target time', () => {
     const h = harness();
     h.controller.start(h.load());
 
@@ -221,10 +304,10 @@ describe('StreamController', () => {
     expect(h.sink.evictions).toEqual([12, 45]);
 
     // The seek restarted the conversion from the requested timestamp through
-    // the playback's restart seam and had the sink reset its parser so the
-    // fresh init segment lands in a clean SourceBuffer re-anchored at the
-    // target (the trim rebases output timestamps to zero). No second playback
-    // was started and no end-of-stream was issued.
+    // the playback's `restart` and had the sink reset its parser so the fresh
+    // init segment lands in a clean SourceBuffer repointed at the target (the
+    // trim rebases output timestamps to zero). No second playback was started
+    // and no end-of-stream was issued.
     expect(h.playback.restartInvocations).toEqual([45]);
     expect(h.sink.resets).toEqual([{ generation: 1 }, { generation: 1, target: 45 }]);
     expect(h.playback.startInvocations).toBe(1);
@@ -248,7 +331,7 @@ describe('StreamController', () => {
     h.controller.seek(30);
     h.controller.seek(90);
 
-    // Each accepted seek re-anchors the sink at its own target; only refused
+    // Each accepted seek resets the parser at its own target; only refused
     // (or absent) restarts leave the prior reset as the last one.
     expect(h.sink.resets).toEqual([
       { generation: 1 },
@@ -258,12 +341,12 @@ describe('StreamController', () => {
     expect(h.playback.restartInvocations).toEqual([30, 90]);
   });
 
-  it('only mirrors the playhead when the playback refuses a restart', () => {
+  it('when a restart is refused, the seek only trims the back buffer', () => {
     const h = harness();
     h.controller.start(h.load());
     expect(h.sink.resets).toEqual([{ generation: 1 }]);
 
-    // A restart seam that refuses the seek reports false.
+    // A restart that refuses the seek reports false.
     h.playback.restartEnabled = false;
     h.controller.seek(60);
 
@@ -276,7 +359,7 @@ describe('StreamController', () => {
     expect(h.controller.state).toBe('playing');
   });
 
-  it('restarts the playback without rebinding the load generation', () => {
+  it('a restart keeps the same load generation', () => {
     const h = harness();
     h.controller.start(h.load());
     expect(h.playback.startInvocations).toBe(1);
@@ -293,7 +376,7 @@ describe('StreamController', () => {
     expect(h.errors).toEqual([]);
   });
 
-  it('accepts every valid restart intent and refuses only pre-start or post-dispose', () => {
+  it('restarts are refused before start and after destroy, and accepted while live', () => {
     const h = harness();
     expect(h.playback.restart(10)).toBe(false);
 

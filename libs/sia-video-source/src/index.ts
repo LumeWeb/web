@@ -82,7 +82,7 @@ export {
   type WorkerToMainMessage,
   WorkerToMainMessageType,
 } from './protocol.ts';
-export { LruChunkCache, objectSize, RangedReader, ReadBudget, type ShardProgress, type SiaObjectLike, type SiaSdkLike } from './ranged-reader.ts';
+export { DEFAULT_SDK_READ_CONCURRENCY, isTransportReadError, LruChunkCache, objectSize, RangedReader, ReadBudget, ReadTransportError, type ShardProgress, type SiaObjectLike, type SiaSdkLike } from './ranged-reader.ts';
 export { type Clock, ManualClock, wallClock } from './session/clock.ts';
 export {
   createErrorReporter,

@@ -16,6 +16,23 @@ import type { RequestId } from './protocol.ts';
 /** Whole-MiB granularity for `'bytes.read'` milestone boundaries (1048576 bytes). */
 const MIB = 1024 * 1024;
 
+/**
+ * Total attempts a read window gets (the original download plus bounded
+ * retries) before a transient transport failure is surfaced as `read.error`.
+ * A single blipped ranged `sdk.download()` (0 bytes delivered, early close,
+ * or a failed stream) previously aborted the whole normalization conversion;
+ * retrying the same window keeps a blip from killing the session.
+ */
+const DEFAULT_MAX_ATTEMPTS = 3;
+
+/**
+ * Fixed backoff delay in milliseconds before each retry attempt, so a burst
+ * of transient transport failures does not hammer the SDK. The default waits
+ * 250ms before the second attempt and 500ms before the third (two retries in
+ * the default budget); a single number applies the same delay to every retry.
+ */
+const DEFAULT_RETRY_BACKOFF_MS: readonly number[] = [250, 500];
+
 export interface RangedReaderOptions {
   /**
    * Shared bounded-dispatch permit (see {@link ReadBudget}). When set, the
@@ -28,8 +45,19 @@ export interface RangedReaderOptions {
   cache?: LruChunkCache;
   /** Max bytes per chunk handed to `onChunk`; larger stream chunks are split. */
   chunkSize?: number;
-  /** Forwarded to the one `Sdk.download` call. */
+  /** Forwarded to each `Sdk.download` call. */
   downloadOptions?: { maxBufferedChunks?: number };
+  /**
+   * Total download attempts for one read window: the original download plus
+   * bounded retries on a transient failure (a download-open throw, a stream
+   * error, or a short/dropped read that delivered < expected including zero
+   * bytes). Defaults to 3 (`DEFAULT_MAX_ATTEMPTS`, i.e. two retries). A run
+   * superseded by a seek/stop, the stall watchdog (which has its own
+   * semantics), or a throwing `onChunk` (the caller's own handler, never a
+   * transport blip) is never retried; after the budget is exhausted the
+   * failure surfaces exactly as before.
+   */
+  maxAttempts?: number;
   object: SiaObjectLike;
   /** Called with delivered bytes and their absolute byte offset in the object. */
   onChunk: (chunk: Uint8Array, position: number) => void;
@@ -43,11 +71,14 @@ export interface RangedReaderOptions {
    * (at most once per read-window, when the LRU replay served bytes before any
    * download), `'read.budget-wait'` (once per blocking `ReadBudget.acquire`,
    * i.e. when a permit wait begins behind the concurrency cap), `'read.stalled'`
-   * when the stall watchdog aborts a read that yielded no bytes, and
-   * `'read.error'` when a run fails for any other reason (short read / SDK
-   * stream error; the stall error is reported only as `read.stalled`, never
-   * also as `read.error`) (names follow `WORKER_LOG_EVENT_NAMES` in
-   * protocol.ts). The owning SOURCE `requestId` rides each call (null when the
+   * when the stall watchdog aborts a read that yielded no bytes, `'read.retry'`
+   * once per bounded retry of a failed download (carrying the attempt number,
+   * the window's position/length, and the previous attempt's error message),
+   * and `'read.error'` when a run fails for any other reason after the retry
+   * budget is exhausted (short read / SDK stream error; the stall error is
+   * reported only as `read.stalled`, never also as `read.error`) (names follow
+   * `WORKER_LOG_EVENT_NAMES` in protocol.ts). The owning SOURCE `requestId`
+   * rides each call (null when the
    * reader has none) so a load's milestones keep their request-scoped
    * identity. Only scalar detail is ever passed, and a throwing listener is
    * swallowed so it can never interrupt the read. Undefined (the default)
@@ -57,6 +88,14 @@ export interface RangedReaderOptions {
   onMilestone?: (name: string, requestId: null | RequestId, detail: Readonly<Record<string, unknown>>) => void;
   /** The SOURCE requestId owning this reader; null when constructed without one. */
   requestId?: null | RequestId;
+  /**
+   * Fixed backoff delay in milliseconds before each retry attempt: a single
+   * number applies the same delay to every retry, while an array gives one
+   * delay per retry (indexed by retry ordinal, the last value reused beyond
+   * its length). Defaults to `DEFAULT_RETRY_BACKOFF_MS` (`[250, 500]` for the
+   * two retries in the default budget). 0 disables the wait entirely.
+   */
+  retryBackoffMs?: number | readonly number[];
   sdk: SiaSdkLike;
   /**
    * Stall watchdog: maximum milliseconds a single SDK read may yield no bytes
@@ -362,7 +401,10 @@ export class RangedReader {
   }
 
   async #run(loadGeneration: number): Promise<void> {
-    const { budget, chunkSize, object, onComplete, onError, sdk, stallTimeoutMs } = this.#options;
+    const { budget, chunkSize, maxAttempts, object, onComplete, onError, retryBackoffMs, sdk, stallTimeoutMs } = this.#options;
+    // Total attempts for the read window, capped at the configured budget
+    // (default: original download + two bounded retries).
+    const attempts = maxAttempts === undefined ? DEFAULT_MAX_ATTEMPTS : Math.max(1, Math.floor(maxAttempts));
 
     // Hoisted so the failure milestone below can report the read window even
     // when the download throws before `read.window-complete`; `start` is
@@ -407,9 +449,11 @@ export class RangedReader {
         return;
       }
 
-      // A mitigation permit held from just before the SDK download until that
-      // read ends (delivered, aborted, or abandoned). Released exactly once in
-      // the `finally`, so a stale or stalled run can never leak its slot.
+      // A mitigation permit held from just before the first SDK download until
+      // that run ends (delivered, aborted, abandoned, or retry-budget
+      // exhausted). One acquire, one release: every retry attempt of the same
+      // window keeps the same permit (never re-acquired, never leaked), so a
+      // stale or stalled run can never double-hold or double-free its slot.
       let release: (() => void) | undefined;
       try {
         // Hold the shared budget so concurrent library reads — mediabunny can
@@ -433,74 +477,169 @@ export class RangedReader {
         }
 
         // Milestone: a network read window begins here — after cache replay
-        // and budget dispatch, at the single point where the SDK download
-        // actually starts. Exact single-download reads emit once per attempt
-        // with the whole requested range, never per chunk.
+        // and budget dispatch, at the single point where the first SDK
+        // download actually starts. Emitted once per read window (the original
+        // open), never again for a retry — retries add `read.retry` lines
+        // instead, so the external log keeps one start per completed/pending
+        // window.
         this.#milestone('read.window-start', { deltaBytes: end - start, position: start });
 
-        // One SDK download serves the whole remaining [start, end) range with
-        // exact offset/length; the reader never tiles a read across requests.
-        // A lazy dual-seed SDK may resolve an untagged download through a
-        // connect-on-demand route (see worker-runtime.ts), which yields a
-        // promise; a settled stream is used synchronously so `active` reflects
-        // the in-flight read without an extra microtask.
-        const resolved = sdk.download(object, {
-          length: end - start,
-          offset: start,
-          ...this.#options.downloadOptions,
-        });
-        const stream = resolved instanceof Promise ? await resolved : resolved;
-        // A stale async (connect-on-demand) download that resolves after a seek
-        // landed would otherwise be dropped still open, leaking its
-        // WebTransport sessions (the SDK holds them until EOF or cancel);
-        // adopt-or-cancel: cancel it. The cancel is fire-and-forget so a
-        // stalled WASM cancel never blocks this run's unwinding and permit
-        // release.
-        if (this.#loadGeneration !== loadGeneration) {
-          void stream.cancel().catch(() => { /* empty */ });
-          return;
-        }
-        this.#stream = stream;
-        const reader = stream.getReader();
-        this.#reader = reader;
-
-        while (this.#loadGeneration === loadGeneration && this.#position < end) {
-          const result = await this.#readWithStallWatchdog(reader, loadGeneration, stallTimeoutMs);
-          if (this.#loadGeneration !== loadGeneration) break;
-          if (result.done) {
-            // A download that closes before the range end is data loss, not a
-            // clean stop: exact range reads must deliver every requested byte,
-            // so surface the short read and let the caller's retry policy
-            // recover rather than silently skipping bytes.
-            throw new Error('Sia SDK read ended before the requested range was delivered');
+        // Bounded retry loop: one attempt is one full SDK download serving the
+        // window's un-delivered tail. A transient transport failure — the
+        // download open throwing, a stream read error, or a short/dropped read
+        // (delivered < expected, including zero bytes) — retries the SAME
+        // window from the point delivery stopped, so a single blipped ranged
+        // `sdk.download()` can never abort the whole conversion. The retry
+        // budget is `maxAttempts` (default 3 = two retries); `read.window-start`
+        // is not re-emitted per attempt and `read.error` fires only once, after
+        // the final attempt. Never retried: a run superseded by a seek/stop,
+        // the stall watchdog (own semantics, `read.stalled` already fired), or
+        // a throwing `onChunk` (the caller's own handler, never a transport
+        // blip).
+        let attempt = 0;
+        // `consumer` records whether the failed attempt was the caller's own
+        // throwing onChunk (never a transport blip, never retried) so the
+        // final wrap below can classify what actually exhausted the loop.
+        let failure: null | { consumer: boolean; delivered: number; error: unknown } = null;
+        while (attempt < attempts && this.#loadGeneration === loadGeneration) {
+          if (attempt > 0) {
+            // Modest fixed backoff so a burst of transient blips does not
+            // hammer the SDK. A seek/stop that lands mid-wait supersedes the
+            // run: no further attempt is started.
+            const backoffMs = retryBackoffMsFor(attempt, retryBackoffMs);
+            if (backoffMs > 0) await new Promise((resolve) => setTimeout(resolve, backoffMs));
+            if (this.#loadGeneration !== loadGeneration) return;
+            this.#milestone('read.retry', {
+              attempt: attempt + 1,
+              error: failure === null ? '' : errorDescription(failure.error),
+              expectedBytes: Math.max(0, end - start),
+              position: start,
+            });
           }
-          const remaining = end - this.#position;
-          const delivered = result.value.subarray(0, remaining);
-          this.#emitChunk(delivered, this.#position, chunkSize);
-          this.#position += delivered.byteLength;
-          if (delivered.byteLength < result.value.byteLength) break;
+          attempt++;
+          // A fresh download serves `[this.#position, end)` — the range still
+          // owed to onChunk. For a zero-byte failure that is the whole
+          // `[start, end)` window retried from scratch; after a partial
+          // delivery it resumes where delivery stopped so bytes already
+          // consumed by onChunk are never re-delivered (a from-scratch retry
+          // would duplicate them).
+          let consumerError: unknown = null;
+          try {
+            // One SDK download serves the whole un-delivered range with exact
+            // offset/length; the reader never tiles a read across requests. A
+            // lazy dual-seed SDK may resolve an untagged download through a
+            // connect-on-demand route (see worker-runtime.ts), which yields a
+            // promise; a settled stream is used synchronously so `active`
+            // reflects the in-flight read without an extra microtask.
+            const resolved = sdk.download(object, {
+              length: end - this.#position,
+              offset: this.#position,
+              ...this.#options.downloadOptions,
+            });
+            const stream = resolved instanceof Promise ? await resolved : resolved;
+            // A stale async (connect-on-demand) download that resolves after a
+            // seek landed would otherwise be dropped still open, leaking its
+            // WebTransport sessions (the SDK holds them until EOF or cancel);
+            // adopt-or-cancel: cancel it. The cancel is fire-and-forget so a
+            // stalled WASM cancel never blocks this run's unwinding and permit
+            // release.
+            if (this.#loadGeneration !== loadGeneration) {
+              void stream.cancel().catch(() => { /* empty */ });
+              return;
+            }
+            this.#stream = stream;
+            const reader = stream.getReader();
+            this.#reader = reader;
+
+            while (this.#loadGeneration === loadGeneration && this.#position < end) {
+              const result = await this.#readWithStallWatchdog(reader, loadGeneration, stallTimeoutMs);
+              if (this.#loadGeneration !== loadGeneration) break;
+              if (result.done) {
+                // A download that closes before the range end is data loss, not
+                // a clean stop: exact range reads must deliver every requested
+                // byte. Surface the short read so the retry loop re-downloads
+                // the owed range rather than silently skipping bytes.
+                throw new Error('Sia SDK read ended before the requested range was delivered');
+              }
+              const remaining = end - this.#position;
+              const delivered = result.value.subarray(0, remaining);
+              try {
+                this.#emitChunk(delivered, this.#position, chunkSize);
+              } catch (error) {
+                // onChunk is the caller's own handler: a throw there is a
+                // consumer failure, never a transport blip, so it is not
+                // retried — the run fails as today.
+                consumerError = error;
+                throw error;
+              }
+              this.#position += delivered.byteLength;
+              if (delivered.byteLength < result.value.byteLength) break;
+            }
+
+            if (this.#loadGeneration !== loadGeneration) return;
+            // Milestone: the window completed successfully (possibly after
+            // retries). Emitted once, with the same window `read.window-start`
+            // opened; retries never add another start/complete pair.
+            this.#milestone('read.window-complete', { deltaBytes: end - start, position: start });
+            onComplete?.();
+            failure = null;
+            break;
+          } catch (error) {
+            failure = { consumer: consumerError !== null, delivered: Math.max(0, this.#position - start), error };
+            // The stall watchdog has its own semantics (read.stalled already
+            // fired) and a throwing onChunk is the caller's failure — neither
+            // is a retryable transport blip, so both end the retry loop now.
+            if (isStallWatchdogError(error) || consumerError !== null) break;
+          } finally {
+            // The attempt ended (delivered, dropped, or failed): cancel the
+            // stream it still owns before the next attempt or the final
+            // unwinding — exactly once per attempt, and only while this run is
+            // still the current load generation so a superseded run's teardown
+            // can never orphan a replacement's reader. cancel() is
+            // fire-and-forget (never delays permit release or the next attempt)
+            // and a no-op on an already-closed stream; the wasm-bindgen
+            // slab-recovery tasks ahead of a dead read head are the reason the
+            // stream is always aborted deterministically.
+            if (this.#loadGeneration === loadGeneration) {
+              void this.#reader?.cancel().catch(() => { /* empty */ });
+              this.#reader = null;
+              this.#stream = null;
+            }
+          }
         }
 
-        if (this.#loadGeneration === loadGeneration) {
-          // Milestone: the download attempt completed successfully. The
-          // short-read/retry path throws before this point and never
-          // advertises completion; position/delta carry the same window the
-          // matching `read.window-start` opened.
-          this.#milestone('read.window-complete', { deltaBytes: end - start, position: start });
-          onComplete?.();
+        // The retry budget was exhausted (or the run was stalled / hit a
+        // consumer error): surface the failure through the catch below, which
+        // reports it exactly once with the read-window facts. A superseded run
+        // exits silently — a stale failure must not reach onError.
+        if (failure !== null && this.#loadGeneration === loadGeneration) {
+          // A transport/ranged-read failure that exhausted the budget is
+          // wrapped so the stream chain (and the host's recovery gate) can
+          // classify it: the message names the read window it gave up on,
+          // `cause` keeps the SDK/short-read error, and the window facts ride
+          // as fields. A throwing onChunk (the caller's own handler) and the
+          // stall watchdog are never transport failures and keep their
+          // original identity — and the wrapped message below, not a bare SDK
+          // string, is what describes the failure to the wire.
+          if (!failure.consumer && !isStallWatchdogError(failure.error)) {
+            throw new ReadTransportError(
+              `Sia SDK ranged read failed after ${attempts} attempts (expected ${Math.max(0, end - start)} bytes at ${start})`,
+              {
+                attempts,
+                cause: failure.error,
+                expectedBytes: Math.max(0, end - start),
+                position: start,
+              },
+            );
+          }
+          throw failure.error;
         }
       } finally {
         if (release) release();
-        // A cancelled run can settle after its replacement already assigned
-        // fresh `#reader`/`#stream` references — only the current load generation may
-        // touch them, or the replacement's reader would be orphaned and later
-        // seeks would find no active reader. While this run still owns the
-        // refs, cancel before clearing so a stream is never dropped open: on a
-        // throw the wasm-bindgen slab-recovery tasks ahead of the read head
-        // keep running until a nondeterministic GC, and on exact-length
-        // completion the pull source may never have self-closed. cancel() is
-        // the only deterministic abort — it is fire-and-forget (never delays
-        // the permit release above) and a no-op on an already-closed stream.
+        // The per-attempt finally already cancelled and cleared this run's
+        // stream; this guard only defends paths that never opened one (e.g. a
+        // supersede right after permit acquire). Same generation-scoped rule:
+        // only the current load generation may touch the refs.
         if (this.#loadGeneration === loadGeneration) {
           void this.#reader?.cancel().catch(() => { /* empty */ });
           this.#reader = null;
@@ -528,6 +667,21 @@ export class RangedReader {
     }
   }
 }
+
+/**
+ * Default cap on how many SDK ranged downloads may be open at once across the
+ * worker. The Sia SDK opens one or more WebTransport sessions the moment
+ * `download()` is called (one per slab/renter) and holds them until the stream
+ * is read to EOF or cancelled, and Chromium caps *pending* sessions at 64:
+ * unbounded concurrent library reads burst past that budget and every later
+ * download fails with `Too many pending WebTransport sessions (64)`, the
+ * recurring stream-error storm behind the QUIC idle timeouts observed in the
+ * live demo. 4 concurrent downloads keeps aggregate session establishment far
+ * below the cap while leaving enough parallelism for mediabunny's overlapping
+ * reads to make progress. The worker creates one shared `ReadBudget` at this
+ * limit; a host that knows better injects its own via `SiaVideoWorkerOptions`.
+ */
+export const DEFAULT_SDK_READ_CONCURRENCY = 4;
 
 /**
  * Bounded dispatcher for SDK reads. A shared budget caps how many
@@ -611,9 +765,64 @@ export class ReadBudget {
   }
 }
 
+/**
+ * A ranged-read (transport) failure that exhausted the reader's bounded retry
+ * budget. It surfaces through `onError` → the byte-source's `controller.error`
+ * → mediabunny's conversion rejection (which passes the original instance
+ * through unwrapped), so the host can tell a genuinely broken/unreachable
+ * transport apart from a conversion problem: this kind gets its own bounded
+ * reload recovery instead of being treated as an `unsupported` container.
+ * Carries the read-window facts and the original failure as `cause`; use
+ * {@link isTransportReadError} to recognize it (even when some layer wrapped
+ * it with its own `cause`).
+ */
+export class ReadTransportError extends Error {
+  /** Total download attempts the failed window consumed (original + retries). */
+  readonly attempts: number;
+  /** Bytes the window tried to deliver (`end - start`). */
+  readonly expectedBytes: number;
+  /** Absolute byte offset the failed window started at. */
+  readonly position: number;
+
+  constructor(
+    message: string,
+    options: { readonly attempts: number; readonly cause?: unknown; readonly expectedBytes: number; readonly position: number },
+  ) {
+    super(message, options.cause === undefined ? undefined : { cause: options.cause });
+    this.name = 'ReadTransportError';
+    this.attempts = options.attempts;
+    this.expectedBytes = options.expectedBytes;
+    this.position = options.position;
+  }
+}
+
+/**
+ * True when `error` is (or is wrapped around) a {@link ReadTransportError}.
+ * mediabunny surfaces a failed byte-source stream by rejecting with the exact
+ * controller.error() instance, so the direct check usually fires — but a layer
+ * that wraps the failure (an `Error` with its own `cause`, or a chain of
+ * them) must not hide the transport kind, so the check walks the `cause`
+ * chain defensively. Cycle-safe (a corrupted cause graph can never loop).
+ */
+export function isTransportReadError(error: unknown): boolean {
+  let current: unknown = error;
+  const seen = new Set<unknown>();
+  while (current !== null && current !== undefined && !seen.has(current)) {
+    if (current instanceof ReadTransportError) return true;
+    seen.add(current);
+    current = current instanceof Error ? current.cause : undefined;
+  }
+  return false;
+}
+
 /** Object payload size in bytes, from the local slab map. */
 export function objectSize(object: SiaObjectLike): number {
   return object.slabs().reduce((total, slab) => total + slab.length, 0);
+}
+
+/** Scalar, log-safe rendering of a caught failure for a `read.retry` milestone. */
+function errorDescription(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 /**
@@ -624,4 +833,16 @@ export function objectSize(object: SiaObjectLike): number {
  */
 function isStallWatchdogError(error: unknown): boolean {
   return error instanceof Error && error.message.startsWith('Sia SDK read stalled: ');
+}
+
+/**
+ * Resolves the backoff delay before retry number `retry` (1-based, so 1 is the
+ * first retry): a number option applies the same delay to every retry, an
+ * array applies one delay per retry (the last value reused past its length),
+ * and the unset default is `DEFAULT_RETRY_BACKOFF_MS` (`[250, 500]`).
+ */
+function retryBackoffMsFor(retry: number, configured: number | readonly number[] | undefined): number {
+  const schedule: readonly number[] =
+    configured === undefined ? DEFAULT_RETRY_BACKOFF_MS : typeof configured === 'number' ? [configured] : configured;
+  return schedule[Math.min(retry, schedule.length) - 1] ?? 0;
 }
