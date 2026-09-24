@@ -10,8 +10,11 @@
  * (`siaRecoveryFeature` / `siaLoadFeature`) that mirror the host's typed
  * `sia-recovery-change` / `sia-load-change` events into a player store (read
  * via `selectSiaRecovery` / `selectSiaLoad`, or the React `useSiaRecovery` /
- * `useSiaLoad` hooks behind `/react`). The worker entry lives behind the
- * `/worker` subpath; a React wrapper behind `/react`.
+ * `useSiaLoad` hooks behind `/react`). `siaFeatures` is the shared mutable
+ * tuple of both features (`[siaRecoveryFeature, siaLoadFeature]`) for
+ * consumer composition — the same tuple feeds non-React `combine(...)` and
+ * React `createPlayer({ features: siaFeatures })`. The worker entry lives
+ * behind the `/worker` subpath; a React wrapper behind `/react`.
  *
  * Logging is pluggable through the dependency-free `Logger` interface: pass a
  * `logger` to the host (or the React wrapper's `logger` prop) and re-level it
@@ -134,6 +137,7 @@ export {
   type WorkerMseRootOptions,
 } from './session/worker-mse-root.ts';
 export { isSiaShareUrl, parseSiaShareUrl, type SiaShareUrl } from './share-url.ts';
+export { type SiaFeatures, siaFeatures } from './sia-features.ts';
 export {
   selectSiaLoad,
   siaLoadFeature,
