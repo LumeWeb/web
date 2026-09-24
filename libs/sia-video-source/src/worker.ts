@@ -11,6 +11,7 @@
 import {
   isMainToWorkerMessage,
   workerErrorCode,
+  workerLogEventName,
   workerLogLevel,
   WorkerToMainMessageType,
 } from './protocol.ts';
@@ -46,6 +47,7 @@ export {
   type SiaVideoMessage,
   WORKER_LOG_EVENT_NAMES,
   type WorkerConfig,
+  workerLogEventName,
   type WorkerLogEventName,
   workerLogLevel,
   type WorkerLogLevel,
@@ -153,7 +155,7 @@ export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = 
   // skips the line.
   return Object.assign(coordinator, {
     logProtocolReject: (): void => {
-      emitLog(logSink, handshake.log, workerLogLevel.debug, 'protocol.rejected', {
+      emitLog(logSink, handshake.log, workerLogLevel.debug, workerLogEventName.protocolRejected, {
         direction: 'main-to-worker',
       });
     },

@@ -11,7 +11,7 @@
  */
 
 import type { Slab } from '@siafoundation/sia-storage';
-import type { RequestId } from './protocol.ts';
+import { type RequestId, workerLogEventName } from './protocol.ts';
 
 /** Whole-MiB granularity for `'bytes.read'` milestone boundaries (1048576 bytes). */
 const MIB = 1024 * 1024;
@@ -317,7 +317,7 @@ export class RangedReader {
     while (this.#bytesRead >= this.#nextBytesMilestone) {
       const boundary = this.#nextBytesMilestone;
       this.#nextBytesMilestone += MIB;
-      this.#milestone('bytes.read', { bytes: boundary });
+      this.#milestone(workerLogEventName.bytesRead, { bytes: boundary });
     }
   }
 
@@ -383,7 +383,7 @@ export class RangedReader {
           // Only an in-flight run's watchdog reports the stall (a superseded
           // run's late watchdog must not blame the replacement). No bytes
           // arrived, so the position is still the read's start offset.
-          this.#milestone('read.stalled', { position: this.#position, stallTimeoutMs: timeoutMs });
+          this.#milestone(workerLogEventName.readStalled, { position: this.#position, stallTimeoutMs: timeoutMs });
         }
         reject(new Error(`Sia SDK read stalled: no bytes for ${timeoutMs}ms`));
       }, timeoutMs);
@@ -436,7 +436,7 @@ export class RangedReader {
       // un-served tail (when any) continues from the network below, so this is
       // a cache hit even for a partial replay.
       if (cacheBytes > 0) {
-        this.#milestone('read.cache-hit', { bytes: cacheBytes, position: cacheReplayStart });
+        this.#milestone(workerLogEventName.readCacheHit, { bytes: cacheBytes, position: cacheReplayStart });
       }
 
       if (this.#loadGeneration !== loadGeneration) return;
@@ -465,7 +465,7 @@ export class RangedReader {
           // backpressure event worth surfacing: one emit per wait, carrying the
           // live budget counters that describe how deep the queue sat.
           release = await budget.acquire(() => {
-            this.#milestone('read.budget-wait', {
+            this.#milestone(workerLogEventName.readBudgetWait, {
               inFlight: budget.inFlight,
               limit: budget.limit,
               waiters: budget.waiters,
@@ -482,7 +482,7 @@ export class RangedReader {
         // open), never again for a retry — retries add `read.retry` lines
         // instead, so the external log keeps one start per completed/pending
         // window.
-        this.#milestone('read.window-start', { deltaBytes: end - start, position: start });
+        this.#milestone(workerLogEventName.readWindowStart, { deltaBytes: end - start, position: start });
 
         // Bounded retry loop: one attempt is one full SDK download serving the
         // window's un-delivered tail. A transient transport failure — the
@@ -509,7 +509,7 @@ export class RangedReader {
             const backoffMs = retryBackoffMsFor(attempt, retryBackoffMs);
             if (backoffMs > 0) await new Promise((resolve) => setTimeout(resolve, backoffMs));
             if (this.#loadGeneration !== loadGeneration) return;
-            this.#milestone('read.retry', {
+            this.#milestone(workerLogEventName.readRetry, {
               attempt: attempt + 1,
               error: failure === null ? '' : errorDescription(failure.error),
               expectedBytes: Math.max(0, end - start),
@@ -580,7 +580,7 @@ export class RangedReader {
             // Milestone: the window completed successfully (possibly after
             // retries). Emitted once, with the same window `read.window-start`
             // opened; retries never add another start/complete pair.
-            this.#milestone('read.window-complete', { deltaBytes: end - start, position: start });
+            this.#milestone(workerLogEventName.readWindowComplete, { deltaBytes: end - start, position: start });
             onComplete?.();
             failure = null;
             break;
@@ -656,7 +656,7 @@ export class RangedReader {
         // were actually delivered (omitted when none were).
         if (!isStallWatchdogError(error)) {
           const deliveredBytes = this.#position - start;
-          this.#milestone('read.error', {
+          this.#milestone(workerLogEventName.readError, {
             expectedBytes: Math.max(0, end - start),
             position: start,
             ...(deliveredBytes > 0 ? { deliveredBytes } : {}),

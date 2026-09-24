@@ -23,7 +23,7 @@
  */
 
 import { MseAppendPipe } from '../mse-pipe.ts';
-import { type RequestId, workerLogLevel, type WorkerLogLevel, WorkerToMainMessageType } from '../protocol.ts';
+import { type RequestId, workerLogEventName, workerLogLevel, type WorkerLogLevel, WorkerToMainMessageType } from '../protocol.ts';
 import { MseAdapter, type WorkerMseSinkFactoryDeps } from '../sink/mse-adapter.ts';
 import type { AppendSink } from '../sink/append-sink.ts';
 import type { PostMessage, SinkFactoryContext } from './session-coordinator.ts';
@@ -158,7 +158,7 @@ export function createWorkerMseRoot(options: WorkerMseRootOptions): WorkerMseRoo
       // applied MIME + duration (when one was set) at the active load.
       try {
         options.onLog?.(
-          'session.mse-open',
+          workerLogEventName.sessionMseOpen,
           workerLogLevel.info,
           requestId,
           durationSeconds === null ? { mime } : { durationSeconds, mime },
@@ -171,7 +171,7 @@ export function createWorkerMseRoot(options: WorkerMseRootOptions): WorkerMseRoo
       // the open failure (the MIME that was refused) first, then release the
       // freshly opened MediaSource (see `reportFatal`).
       try {
-        options.onLog?.('session.mse-open-failed', workerLogLevel.error, requestId, { mime });
+        options.onLog?.(workerLogEventName.sessionMseOpenFailed, workerLogLevel.error, requestId, { mime });
       } catch {
         // A throwing observability hook must not skip the fatal teardown.
       }

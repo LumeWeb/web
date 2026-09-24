@@ -22,6 +22,7 @@ import type { PlaybackCapabilities } from '../capabilities/browser-capabilities.
 import {
   type RequestId,
   type WorkerConfig,
+  workerLogEventName,
   type WorkerLogLevel,
   workerLogLevel,
   type WorkerMode,
@@ -214,10 +215,10 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
     switch (message.type) {
       case WorkerToMainMessageType.ATTACH_OK:
         sessionMode = message.mode;
-        emitLog(logSink, handshake.log, workerLogLevel.info, 'session.attach');
+        emitLog(logSink, handshake.log, workerLogLevel.info, workerLogEventName.sessionAttach);
         break;
       case WorkerToMainMessageType.ENDED:
-        emitLog(logSink, handshake.log, workerLogLevel.info, 'stream.ended', undefined, message.requestId);
+        emitLog(logSink, handshake.log, workerLogLevel.info, workerLogEventName.streamEnded, undefined, message.requestId);
         break;
       case WorkerToMainMessageType.ERROR:
         // The ERROR wire already carries the diagnostic context string from
@@ -230,7 +231,7 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
           logSink,
           handshake.log,
           workerLogLevel.error,
-          'session.error',
+          workerLogEventName.sessionError,
           message.context === undefined || message.context === ''
             ? { kind: message.kind }
             : { context: redactUrls(message.context), kind: message.kind },
@@ -245,7 +246,7 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
           logSink,
           handshake.log,
           workerLogLevel.info,
-          'stream.started',
+          workerLogEventName.streamStarted,
           sessionMode === undefined ? undefined : { mode: sessionMode },
           message.requestId,
         );
@@ -277,7 +278,7 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
         logSink,
         handshake.log,
         workerLogLevel.info,
-        'session.detach',
+        workerLogEventName.sessionDetach,
         reason === undefined ? undefined : { reason },
       );
     }
@@ -343,25 +344,24 @@ export function emitLog(
 
 /** The wire severity a reader/source milestone forwards at (`undefined` = dropped). */
 export function milestoneLevel(name: string): undefined | WorkerLogLevel {
-  return name === 'object.resolved'
-    ? workerLogLevel.info
-    : // Failure milestones are rare (only on a stalled or errored read), so
-      // they never crowd the per-sink 256-message cap.
-      name === 'read.stalled' || name === 'read.error'
-      ? workerLogLevel.error
-      : // Debug-level read diagnostics: the per-window window bookends and byte
-        // boundaries, plus the backpressure/debug events. `read.retry` (one
-        // per retry attempt, the observable fact of a retry being active), a
-        // budget wait (one per blocking acquire), and a cache hit (one per
-        // replayed window) are all rare enough to stay off the cap.
-        name === 'read.window-start' ||
-          name === 'read.window-complete' ||
-          name === 'bytes.read' ||
-          name === 'read.retry' ||
-          name === 'read.budget-wait' ||
-          name === 'read.cache-hit'
+  switch (name) {
+    case workerLogEventName.objectResolved:
+      return workerLogLevel.info;
+    // Failure milestones are rare (only on a stalled or errored read), so
+    // they never crowd the per-sink 256-message cap.
+    case workerLogEventName.readError:
+    case workerLogEventName.readStalled:
+      return workerLogLevel.error;
+    default:
+      return name === workerLogEventName.readWindowStart ||
+        name === workerLogEventName.readWindowComplete ||
+        name === workerLogEventName.bytesRead ||
+        name === workerLogEventName.readRetry ||
+        name === workerLogEventName.readBudgetWait ||
+        name === workerLogEventName.readCacheHit
         ? workerLogLevel.debug
         : undefined;
+  }
 }
 
 function appKeySeedsEqual(a: null | Uint8Array, b: null | Uint8Array): boolean {
@@ -431,7 +431,7 @@ function createLazySiaByteSourceFactory(deps: {
         // failure path is unchanged. The message may carry the resolved share
         // URL (which embeds the object decryption key), so URL-shaped runs are
         // scrubbed before they reach the LOG detail.
-        emitLog(logSink, handshake.log, workerLogLevel.error, 'sdk.build-failed', {
+        emitLog(logSink, handshake.log, workerLogLevel.error, workerLogEventName.sdkBuildFailed, {
           message: redactUrls(error instanceof Error ? error.message : String(error)),
         });
         throw error;
@@ -439,7 +439,7 @@ function createLazySiaByteSourceFactory(deps: {
       // A fresh SDK build for this connection: report it at connection level
       // (no owning request), carrying only the indexer identity — never seeds
       // or share-URL strings (share URLs embed encryption keys).
-      emitLog(logSink, handshake.log, workerLogLevel.info, 'sdk.built', { indexerUrl: config?.indexerUrl });
+      emitLog(logSink, handshake.log, workerLogLevel.info, workerLogEventName.sdkBuilt, { indexerUrl: config?.indexerUrl });
       const previous = cached?.sdk;
       cached = { config, sdk, seed, sharingSeed };
       // Defer the call so a synchronous throw inside dispose() never escapes a

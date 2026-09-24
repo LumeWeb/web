@@ -45,6 +45,7 @@ import {
   siaWorkerMilestoneChange,
   type SiaWorkerMilestoneDetail,
 } from './sia-video-source.ts';
+import { workerLogEventName } from './protocol.ts';
 
 /** The reader-progress facts a consumer reads off the player store. */
 export interface SiaProgressState {
@@ -142,7 +143,7 @@ export const siaProgressFeature: PlayerFeature<SiaProgressState> = definePlayerF
         requestId: milestone.requestId,
       };
       switch (milestone.name) {
-        case 'bytes.read': {
+        case workerLogEventName.bytesRead: {
           // The worker crosses each whole-1 MiB boundary exactly once, so the
           // scalar is monotonic per load. A non-scalar detail is not a byte
           // fact: record only the provenance (`last`), never the count.
@@ -151,19 +152,19 @@ export const siaProgressFeature: PlayerFeature<SiaProgressState> = definePlayerF
           else set({ last });
           return;
         }
-        case 'read.retry':
+        case workerLogEventName.readRetry:
           // The window stays in flight (`reading` untouched); the retry is the
           // visible fact.
           set({ last, retries: get().retries + 1, retrying: true });
           return;
-        case 'read.stalled':
+        case workerLogEventName.readStalled:
           // The watchdog aborted the read; nothing of the window is in flight.
           set({ last, reading: false, retrying: false });
           return;
-        case 'read.window-complete':
+        case workerLogEventName.readWindowComplete:
           set({ last, reading: false, retrying: false });
           return;
-        case 'read.window-start':
+        case workerLogEventName.readWindowStart:
           set({ last, reading: true, reads: get().reads + 1 });
           return;
         default:

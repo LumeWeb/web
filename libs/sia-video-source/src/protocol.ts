@@ -236,7 +236,8 @@ export const workerLogLevel = {
 export type WorkerLogLevel = (typeof workerLogLevel)[keyof typeof workerLogLevel];
 
 /**
- * Coarse milestone names a worker `LOG` message may carry, grouped by phase:
+ * Coarse milestone names a worker `LOG` message may carry (the typed const
+ * object below), grouped by phase:
  * session lifecycle (`session.*`), SDK bootstrap (`sdk.*`), object resolution
  * (`object.*`), stream lifecycle (`stream.*`), windowed-read progress
  * (`read.*` / `bytes.*`), MSE-pipe diagnostics (`mse.*`), and the wire-boundary
@@ -245,33 +246,65 @@ export type WorkerLogLevel = (typeof workerLogLevel)[keyof typeof workerLogLevel
  * so the catalog is typed/advisory for host-side rendering, never a wire
  * constraint.
  */
-export const WORKER_LOG_EVENT_NAMES = [
-  'session.attach',
-  'session.detach',
-  'session.mse-open',
-  'session.mse-open-failed',
-  'session.error',
-  'sdk.built',
-  'sdk.build-failed',
-  'object.resolved',
-  'stream.started',
-  'stream.ended',
-  'read.window-start',
-  'read.window-complete',
-  'read.budget-wait',
-  'read.cache-hit',
-  'read.stalled',
-  'read.retry',
-  'read.error',
-  'bytes.read',
-  'mse.evict',
-  'mse.evict-failed',
-  'mse.parser-reset-failed',
-  'mse.eos-failed',
-  'protocol.rejected',
-] as const;
+export const workerLogEventName = {
+  bytesRead: 'bytes.read',
+  mseEosFailed: 'mse.eos-failed',
+  mseEvict: 'mse.evict',
+  mseEvictFailed: 'mse.evict-failed',
+  mseParserResetFailed: 'mse.parser-reset-failed',
+  objectResolved: 'object.resolved',
+  protocolRejected: 'protocol.rejected',
+  readBudgetWait: 'read.budget-wait',
+  readCacheHit: 'read.cache-hit',
+  readError: 'read.error',
+  readRetry: 'read.retry',
+  readStalled: 'read.stalled',
+  readWindowComplete: 'read.window-complete',
+  readWindowStart: 'read.window-start',
+  sdkBuildFailed: 'sdk.build-failed',
+  sdkBuilt: 'sdk.built',
+  sessionAttach: 'session.attach',
+  sessionDetach: 'session.detach',
+  sessionError: 'session.error',
+  sessionMseOpen: 'session.mse-open',
+  sessionMseOpenFailed: 'session.mse-open-failed',
+  streamEnded: 'stream.ended',
+  streamStarted: 'stream.started',
+} as const;
 
-export type WorkerLogEventName = (typeof WORKER_LOG_EVENT_NAMES)[number];
+export type WorkerLogEventName = (typeof workerLogEventName)[keyof typeof workerLogEventName];
+
+/**
+ * All milestone names, in the wire-order the log specs pin down. Derived from
+ * `workerLogEventName` so a name cannot exist in one and not the other; code
+ * ever comparing or emitting a milestone name uses the const object, and this
+ * array stays the exhaustive catalog view of it.
+ */
+export const WORKER_LOG_EVENT_NAMES: readonly WorkerLogEventName[] = [
+  workerLogEventName.sessionAttach,
+  workerLogEventName.sessionDetach,
+  workerLogEventName.sessionMseOpen,
+  workerLogEventName.sessionMseOpenFailed,
+  workerLogEventName.sessionError,
+  workerLogEventName.sdkBuilt,
+  workerLogEventName.sdkBuildFailed,
+  workerLogEventName.objectResolved,
+  workerLogEventName.streamStarted,
+  workerLogEventName.streamEnded,
+  workerLogEventName.readWindowStart,
+  workerLogEventName.readWindowComplete,
+  workerLogEventName.readBudgetWait,
+  workerLogEventName.readCacheHit,
+  workerLogEventName.readStalled,
+  workerLogEventName.readRetry,
+  workerLogEventName.readError,
+  workerLogEventName.bytesRead,
+  workerLogEventName.mseEvict,
+  workerLogEventName.mseEvictFailed,
+  workerLogEventName.mseParserResetFailed,
+  workerLogEventName.mseEosFailed,
+  workerLogEventName.protocolRejected,
+];
 
 /** Worker → main. */
 export type WorkerToMainMessage =

@@ -49,6 +49,7 @@ import {
   type WorkerConfig,
   workerErrorCode,
   type WorkerErrorCode,
+  workerLogEventName,
   workerLogLevel,
   type WorkerLogLevel,
   workerMode,
@@ -955,7 +956,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       // optional).
       onDiag: (name, detail) => {
         const sink = this.#logger.child('host');
-        if (name === 'mse.evict') sink.debug(name, detail);
+        if (name === workerLogEventName.mseEvict) sink.debug(name, detail);
         else sink.warn(name, detail);
       },
       onError: (error) => this.#reportError(workerErrorCode.decode, errorDescription(error)),
