@@ -227,6 +227,52 @@ function LoadGate() {
 The same natural `SiaVideoSource` consumers can of course subscribe to the raw
 `sia-load-change` DOM event on the element or host.
 
+### The shared `siaFeatures` tuple
+
+Both Sia features are also published as one annotated **mutable** tuple
+(`siaFeatures: SiaFeatures` = `[siaRecoveryFeature, siaLoadFeature]`), mirroring
+the packaged `videoFeatures` pattern. Pass it to either consumption API and you
+get both slices in one store — no separate vanilla/React systems:
+
+```ts
+// Non-React Video.js: combine the tuple into a player store.
+import { combine, createStore } from '@videojs/store';
+import { siaFeatures } from '@lumeweb/sia-video-source';
+
+const store = createStore()(combine(...siaFeatures));
+```
+
+```tsx
+// React: the same tuple drives createPlayer directly, or composes with the
+// packaged video features. The React hooks and selectors read the same store.
+import { createPlayer } from '@videojs/react';
+import { videoFeatures } from '@videojs/core/dom';
+import { SiaVideo, useSiaRecovery, useSiaLoad } from '@lumeweb/sia-video-source/react';
+import { siaFeatures } from '@lumeweb/sia-video-source';
+
+const { Player } = createPlayer({ features: siaFeatures });
+// or: createPlayer({ features: [...videoFeatures, ...siaFeatures] });
+
+function SiaStatus() {
+  const recovery = useSiaRecovery(); // { active, reason?, resumeSeconds?, wantsPlay? } | undefined
+  const load = useSiaLoad(); // { accepted } | undefined
+  return recovery?.active ? <span>recovering ({recovery.reason})</span> : load?.accepted ? <span>source accepted</span> : null;
+}
+
+<Player>
+  <SiaVideo src={pinnedObjectKey} />
+  <SiaStatus />
+</Player>
+```
+
+`SiaFeatures` must stay an explicitly typed mutable tuple (not `as const`):
+React `createPlayer` requires mutable feature arrays (`Features extends
+AnyPlayerFeature[]`), rejecting a readonly literal with TS2769; `combine(...)`
+accepts either. The individual `siaRecoveryFeature`/`siaLoadFeature` exports
+remain available unchanged for override/custom composition, and the tuple only
+depends on the non-React video.js peer packages — importing it from the root
+never pulls in `@videojs/react`.
+
 ### The worker
 
 The engine runs in a dedicated worker; its entry is exported so the app's
