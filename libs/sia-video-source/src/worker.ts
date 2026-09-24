@@ -17,6 +17,10 @@ import {
 import { createSiaWorkerComposition, createWorkerMseRoot, emitLog, type WorkerLogSink } from './session/sia-composition.ts';
 import { createSessionHandshake } from './session/session-coordinator.ts';
 import {
+  DEFAULT_SDK_READ_CONCURRENCY,
+  ReadBudget,
+} from './ranged-reader.ts';
+import {
   createDefaultSdk,
   defaultPost,
   MSE_BACK_BUFFER_SECONDS,
@@ -120,9 +124,16 @@ export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = 
     post,
   });
   const coordinator = createSiaWorkerComposition({
-    // Only build a byte-source profile when there is something to configure;
-    // the undefined path keeps the coordinator's default transport reads.
-    byteSource: options.cache ? { cache: options.cache } : undefined,
+    // One shared bounded-dispatch permit for every SDK ranged download the
+    // worker's sources open (unless the host injects its own). Without it, a
+    // batch of concurrent library reads opens unbounded renter WebTransport
+    // sessions and exhausts the browser's 64 pending-session cap, storming the
+    // pool with `Too many pending WebTransport sessions (64)` — the same budget
+    // the coordinator forwards into each `SiaByteSource` it creates.
+    byteSource: {
+      budget: options.budget ?? new ReadBudget(DEFAULT_SDK_READ_CONCURRENCY),
+      ...(options.cache ? { cache: options.cache } : {}),
+    },
     capabilities: options.capabilities,
     createSdk: options.createSdk ?? createDefaultSdk,
     handshake,

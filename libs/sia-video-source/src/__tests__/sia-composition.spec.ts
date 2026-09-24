@@ -31,7 +31,7 @@ import {
   type WorkerToMainMessage,
   WorkerToMainMessageType,
 } from '../protocol.ts';
-import type { SiaObjectLike } from '../ranged-reader.ts';
+import { ReadBudget, type SiaObjectLike } from '../ranged-reader.ts';
 import { createSiaWorkerComposition } from '../session/sia-composition.ts';
 import {
   defaultSupportsWorkerMse,
@@ -47,6 +47,7 @@ import {
   containsInOrder,
   FakeLoadPipeline,
   FakeMediaPlayback,
+  fakeObject,
   fakeSiaSdk,
   flush,
   permissiveCapabilities,
@@ -203,6 +204,58 @@ describe('createSiaByteSourceFactory (Sia transport seam)', () => {
     expect(secondLength).toBe(512);
     // The second read re-served bytes from the shared cache, not the SDK.
     expect(downloads.filter((offset) => offset === 0)).toHaveLength(1);
+  });
+
+  it('shares one dispatch budget across the sources it creates', async () => {
+    const payload = new Uint8Array(4096).map((_, i) => i % 251);
+    let inflight = 0;
+    let maxInflight = 0;
+    const pending: (() => void)[] = [];
+    const sdk: SiaByteSourceSdk = {
+      download: (_object, options) => {
+        inflight++;
+        maxInflight = Math.max(maxInflight, inflight);
+        const offset = options?.offset ?? 0;
+        const length = options?.length ?? payload.length - offset;
+        return new ReadableStream<Uint8Array>({
+          pull: (controller) =>
+            new Promise<void>((resolve) => {
+              pending.push(() => {
+                controller.enqueue(payload.slice(offset, offset + length));
+                controller.close();
+                inflight--;
+                resolve();
+              });
+            }),
+        });
+      },
+      object: (_key: string): Promise<SiaObjectLike> => Promise.resolve(fakeObject(payload.length)),
+    };
+    const factory = createSiaByteSourceFactory(sdk, { budget: new ReadBudget(1) });
+    const first = await factory('a');
+    const second = await factory('b');
+
+    const drain = async (source: ByteSource): Promise<number> => {
+      const chunks: Uint8Array[] = [];
+      for await (const chunk of source.read({ length: 512, offset: 0 }, { loadGeneration: 1 })) {
+        chunks.push(chunk);
+      }
+      return concatBytes(chunks).byteLength;
+    };
+    const firstRead = drain(first);
+    await flush();
+    const secondRead = drain(second);
+    await flush();
+
+    expect(maxInflight).toBe(1);
+
+    pending.shift()?.();
+    await flush();
+    pending.shift()?.();
+    await flush();
+
+    expect(await firstRead).toBe(512);
+    expect(await secondRead).toBe(512);
   });
 });
 

@@ -1,18 +1,18 @@
 /**
- * Milestone seam for the windowed-read observability path: `RangedReader`
- * emits `read.window-start` / `read.window-complete` around its single SDK
- * download attempt and `bytes.read` each time cumulative delivery crosses a
- * whole 1 MiB boundary, and `SiaByteSource` threads that listener through
- * from its own options into every `RangedReader` it constructs.
+ * Read milestones in the windowed-read path: `RangedReader` emits
+ * `read.window-start` / `read.window-complete` around its single SDK download
+ * attempt and `bytes.read` each time cumulative delivery crosses a whole 1 MiB
+ * boundary, and `SiaByteSource` passes that listener through from its own
+ * options into every `RangedReader` it constructs.
  *
  * Pure reader/source behavior — no worker or MediaSource — so these run under
- * the node vitest environment (`SIA_TEST_ENV=node`), mirroring the fake
- * SDK/object setup of the existing ranged-reader and byte-source specs.
+ * the node vitest environment (`SIA_TEST_ENV=node`), with the same fake
+ * SDK/object setup as the ranged-reader and byte-source specs.
  */
 
 import { describe, expect, it } from 'vitest';
 import type { Slab } from '@siafoundation/sia-storage';
-import { RangedReader, type SiaObjectLike, type SiaSdkLike } from '../ranged-reader.ts';
+import { isTransportReadError, RangedReader, type SiaObjectLike, type SiaSdkLike } from '../ranged-reader.ts';
 import {
   createSiaByteSourceFactory,
   SiaByteSource,
@@ -154,7 +154,7 @@ function stalledSdk(): SiaSdkLike {
   };
 }
 
-describe('RangedReader — read window milestones', () => {
+describe('RangedReader read window milestones', () => {
   it('emits one window-start, one window-complete, and 1 MiB byte-boundary crossings for a full read', async () => {
     const recorder = milestoneRecorder();
     const delivered: Delivered[] = [];
@@ -212,7 +212,7 @@ describe('RangedReader — read window milestones', () => {
     expect(join(delivered)).toEqual(PAYLOAD);
   });
 
-  it('does not emit a boundary for a read that ends short of one (1.5 MiB → one 1 MiB boundary)', async () => {
+  it('does not emit a boundary for a read that ends short of one (1.5 MiB yields a single 1 MiB boundary)', async () => {
     const payload = new Uint8Array(MIB + 512 * 1024).map((_, i) => i % 251);
     const recorder = milestoneRecorder();
     const reader = new RangedReader({
@@ -240,16 +240,21 @@ describe('RangedReader — read window milestones', () => {
     // requested range arrived) must NOT advertise completion — the caller
     // treats that as a retryable failure, and a completion milestone would
     // falsely suggest the window was fully read.
+    //
+    // `maxAttempts: 1` pins the single-attempt shape (window-start, no retry,
+    // no complete): the bounded-retry behavior has its own spec below.
     const recorder = milestoneRecorder();
     const errors: unknown[] = [];
     const reader = new RangedReader({
       chunkSize: CHUNK_SIZE,
+      maxAttempts: 1,
       object: fakeObject(PAYLOAD.length),
       onChunk: () => {
         /* partial delivery is expected before the short read surfaces */
       },
       onError: (error) => errors.push(error),
       onMilestone: recorder.onMilestone,
+      retryBackoffMs: 0,
       sdk: shortReadSdk(PAYLOAD, 512 * 1024),
     });
 
@@ -262,7 +267,10 @@ describe('RangedReader — read window milestones', () => {
     expect(recorder.events.filter((e) => e.name === 'read.window-start')).toHaveLength(1);
     expect(recorder.events.filter((e) => e.name === 'read.window-complete')).toHaveLength(0);
     expect(errors).toHaveLength(1);
-    expect((errors[0] as Error).message).toMatch(/before the requested range/);
+    // The exhausted-budget failure is wrapped as a ReadTransportError; the
+    // original short-read error is retained as its `cause`.
+    expect(isTransportReadError(errors[0])).toBe(true);
+    expect(((errors[0] as Error).cause as Error).message).toMatch(/before the requested range/);
     expect(reader.active).toBe(false);
   });
 
@@ -287,7 +295,7 @@ describe('RangedReader — read window milestones', () => {
     await settle();
 
     // All bytes still delivered, the read unwound cleanly, and the listener's
-    // throw never leaked into the reader's own error contract.
+    // throw never reached the reader's own error path.
     expect(join(delivered)).toEqual(PAYLOAD);
     expect(reader.position).toBe(PAYLOAD.length);
     expect(reader.active).toBe(false);
@@ -295,8 +303,8 @@ describe('RangedReader — read window milestones', () => {
   });
 
   it('leaves behavior unchanged when onMilestone is undefined', async () => {
-    // Existing ranged-reader/byte-source specs already pin the no-listener
-    // behavior; this confirms the seam adds nothing when not opted in.
+    // Existing ranged-reader/byte-source specs already cover the no-listener
+    // behavior; this confirms the milestone hook adds nothing when not set.
     const delivered: Delivered[] = [];
     const reader = new RangedReader({
       chunkSize: CHUNK_SIZE,
@@ -344,16 +352,21 @@ describe('RangedReader — read window milestones', () => {
   });
 
   it('emits read.error with the read-window facts for a short read', async () => {
+    // `maxAttempts: 1` pins the single-attempt shape (retry behavior has its
+    // own spec below); with retries the accumulated deliveredBytes would span
+    // every attempt.
     const recorder = milestoneRecorder();
     const errors: unknown[] = [];
     const reader = new RangedReader({
       chunkSize: CHUNK_SIZE,
+      maxAttempts: 1,
       object: fakeObject(PAYLOAD.length),
       onChunk: () => {
         /* partial delivery is expected before the short read surfaces */
       },
       onError: (error) => errors.push(error),
       onMilestone: recorder.onMilestone,
+      retryBackoffMs: 0,
       sdk: shortReadSdk(PAYLOAD, 512 * 1024),
     });
 
@@ -372,11 +385,116 @@ describe('RangedReader — read window milestones', () => {
     ]);
     expect(recorder.events.filter((e) => e.name === 'read.window-complete')).toHaveLength(0);
     expect(errors).toHaveLength(1);
-    expect((errors[0] as Error).message).toMatch(/before the requested range/);
+    expect(isTransportReadError(errors[0])).toBe(true);
+    expect(((errors[0] as Error).cause as Error).message).toMatch(/before the requested range/);
+  });
+
+  it('retries a zero-byte failure once, emitting read.retry, then completes the window', async () => {
+    // The milestone log must stay clean across a bounded retry: one window-start
+    // for the original open, one read.retry per retry attempt (naming the
+    // attempt, the window, and the previous failure), one window-complete on
+    // success, and never a read.error for a recovered blip.
+    const recorder = milestoneRecorder();
+    const errors: unknown[] = [];
+    const flaky = flakySdk(PAYLOAD, 1);
+    const reader = new RangedReader({
+      chunkSize: CHUNK_SIZE,
+      object: fakeObject(PAYLOAD.length),
+      onChunk: () => {
+        /* delivery is pinned by the ranged-reader retry spec; milestones here */
+      },
+      onError: (error) => errors.push(error),
+      onMilestone: recorder.onMilestone,
+      retryBackoffMs: 0,
+      sdk: flaky.sdk,
+    });
+
+    reader.start(0, PAYLOAD.length);
+    await settle();
+    await settle();
+
+    expect(recorder.events.filter((e) => e.name === 'read.window-start')).toEqual([
+      { detail: { deltaBytes: PAYLOAD.length, position: 0 }, name: 'read.window-start', requestId: null },
+    ]);
+    expect(recorder.events.filter((e) => e.name === 'read.retry')).toEqual([
+      {
+        detail: {
+          attempt: 2,
+          error: 'Sia SDK read ended before the requested range was delivered',
+          expectedBytes: PAYLOAD.length,
+          position: 0,
+        },
+        name: 'read.retry',
+        requestId: null,
+      },
+    ]);
+    expect(recorder.events.filter((e) => e.name === 'read.window-complete')).toEqual([
+      { detail: { deltaBytes: PAYLOAD.length, position: 0 }, name: 'read.window-complete', requestId: null },
+    ]);
+    expect(recorder.events.filter((e) => e.name === 'read.error')).toHaveLength(0);
+    expect(errors).toEqual([]);
+  });
+
+  it('after exhausting the budget, emits one read.retry per retry and a single final read.error', async () => {
+    const recorder = milestoneRecorder();
+    const errors: unknown[] = [];
+    const flaky = flakySdk(PAYLOAD, 3); // every one of the 3 attempts fails with 0 bytes
+    const reader = new RangedReader({
+      chunkSize: CHUNK_SIZE,
+      maxAttempts: 3,
+      object: fakeObject(PAYLOAD.length),
+      onChunk: () => {
+        /* a failed window delivers nothing */
+      },
+      onError: (error) => errors.push(error),
+      onMilestone: recorder.onMilestone,
+      retryBackoffMs: 0,
+      sdk: flaky.sdk,
+    });
+
+    reader.start(0, PAYLOAD.length);
+    await settle();
+    await settle();
+
+    // One window-start, a read.retry for each of the two retries (attempts 2
+    // and 3), and exactly ONE read.error after the final attempt — never one
+    // per attempt.
+    expect(recorder.events.filter((e) => e.name === 'read.window-start')).toHaveLength(1);
+    expect(recorder.events.filter((e) => e.name === 'read.retry').map((e) => e.detail.attempt)).toEqual([2, 3]);
+    expect(recorder.events.filter((e) => e.name === 'read.error')).toHaveLength(1);
+    expect(recorder.events.filter((e) => e.name === 'read.window-complete')).toHaveLength(0);
+    expect(errors).toHaveLength(1);
+    // The surfaced failure is the wrapped ReadTransportError; the retry-eligible
+    // short-read error it retried lives on as the `cause`.
+    expect(isTransportReadError(errors[0])).toBe(true);
+    expect(((errors[0] as Error).cause as Error).message).toMatch(/before the requested range/);
   });
 });
 
-describe('SiaByteSource — onMilestone threading', () => {
+/** SDK whose first `failCount` downloads short-read with zero bytes, then serves `payload` normally. */
+function flakySdk(payload: Uint8Array, failCount: number): { requests: { length: number; offset: number }[]; sdk: SiaSdkLike } {
+  const requests: { length: number; offset: number }[] = [];
+  let failuresLeft = failCount;
+  const sdk: SiaSdkLike = {
+    download: (_object, options) => {
+      const offset = options?.offset ?? 0;
+      const length = options?.length ?? payload.length - offset;
+      requests.push({ length, offset });
+      if (failuresLeft > 0) {
+        failuresLeft--;
+        return new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.close();
+          },
+        });
+      }
+      return fakeSdk(payload).download(_object, options);
+    },
+  };
+  return { requests, sdk };
+}
+
+describe('SiaByteSource onMilestone threading', () => {
   it('forwards the source-level onMilestone into the constructed RangedReader', async () => {
     const recorder = milestoneRecorder();
     const source = new SiaByteSource({

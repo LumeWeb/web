@@ -11,6 +11,12 @@
  *   surfaced — a superseded seek or teardown must not produce a host error;
  * - unsupported-container and unsupported-codec stay distinct (both map to the
  *   host's `MEDIA_ERR_SRC_NOT_SUPPORTED`, but the *context* names the condition);
+ * - normalization (a pipeline/seek-servicing failure) is NOT `decode`: it maps
+ *   to `unsupported` so the host's decode-recovery reload is never triggered by
+ *   a failed trim — only genuine `mse` decode/append failures retry;
+ * - transport (a ranged-read failure that exhausted its retry budget) maps to
+ *   `network`, so the HOST can run its own bounded reload recovery for a
+ *   genuinely broken/unreachable transport;
  * - sequential fallback is a mode, not an error (nothing here emits it);
  * - no raw secret-bearing SDK object or URL is included in a message.
  *
@@ -74,8 +80,9 @@ export type FailureCode = (typeof failureCode)[keyof typeof failureCode];
 /** The condition-specific failure model the host's error mapping understands. */
 export type PlaybackFailure =
   | { readonly cause?: unknown; readonly code: typeof failureCode.append | typeof failureCode.decode | typeof failureCode.eos | typeof failureCode.quota; readonly condition: typeof failureCondition.mse }
+  | { readonly cause?: unknown; readonly code: typeof failureCode.failed; readonly condition: typeof failureCondition.transport; readonly detail?: string }
   | { readonly cause?: unknown; readonly code: typeof failureCode.failed | typeof failureCode['unsupported-route']; readonly condition: typeof failureCondition.normalization; readonly detail?: string }
-  | { readonly cause?: unknown; readonly code: typeof failureCode.timeout | typeof failureCode.unauthorized | typeof failureCode.unreachable; readonly condition: typeof failureCondition.transport }
+  | { readonly cause?: unknown; readonly code: typeof failureCode.timeout | typeof failureCode.unauthorized | typeof failureCode.unreachable; readonly condition: typeof failureCondition.transport; readonly detail?: string }
   | { readonly code: typeof failureCode.destroyed | typeof failureCode.superseded; readonly condition: typeof failureCondition.cancelled }
   | { readonly code: typeof failureCode.malformed | typeof failureCode.unknown | typeof failureCode['limits-exceeded']; readonly condition: typeof failureCondition.container; readonly detail?: string }
   | { readonly code: typeof failureCode.unsupported; readonly codec: string; readonly condition: typeof failureCondition.codec; readonly mime?: string }
@@ -123,12 +130,16 @@ function describeFailure(failure: PlaybackFailure): string {
       return `codec:${failure.code}:${failure.codec}`;
     case failureCondition.container:
     case failureCondition.layout:
-    case failureCondition.normalization: {
+    case failureCondition.normalization:
+    case failureCondition.transport: {
+      // A transport failure (including the StreamController's
+      // `transport:failed` with the SDK/short-read cause as `detail`) carries
+      // its real message, e.g. `transport:failed (Sia SDK ranged read failed
+      // after 3 attempts (expected 65536 bytes at 0))`.
       const base = `${failure.condition}:${failure.code}`;
       return failure.detail ? `${base} (${failure.detail})` : base;
     }
     case failureCondition.mse:
-    case failureCondition.transport:
       return `${failure.condition}:${failure.code}`;
   }
 }
@@ -142,8 +153,17 @@ function errorKindForFailure(failure: PlaybackFailure): null | WorkerErrorCode {
     case failureCondition.layout:
       return workerErrorCode.unsupported;
     case failureCondition.mse:
-    case failureCondition.normalization:
       return workerErrorCode.decode;
+    case failureCondition.normalization:
+      // A normalization failure (a trim/seek restart that cannot be serviced,
+      // or a load whose conversion broke) is a pipeline/seek-servicing
+      // failure, not a media decode failure. Mapping it to 'decode' makes the
+      // host run its bounded full-reload recovery — tearing the pipeline down
+      // mid-seek when the only real problem is the requested position. Surface
+      // it as 'unsupported' (fatal, no auto-reload) instead so genuine
+      // decode/append failures (`mse`) keep the decode-recovery path to
+      // themselves.
+      return workerErrorCode.unsupported;
     case failureCondition.transport:
       return workerErrorCode.network;
   }

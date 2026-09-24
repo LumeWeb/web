@@ -138,6 +138,7 @@ describe('WORKER_LOG_EVENT_NAMES milestone catalog', () => {
       'read.budget-wait',
       'read.cache-hit',
       'read.stalled',
+      'read.retry',
       'read.error',
       'bytes.read',
       'mse.evict',
