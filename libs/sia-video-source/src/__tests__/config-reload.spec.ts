@@ -743,6 +743,33 @@ describe('SiaVideoSource.reloadConfiguration', () => {
     host.destroy();
   });
 
+  it.skipIf(!IN_BROWSER)('a user pause issued during reload of a playing load wins over the re-stated PLAY', () => {
+    const { host, target, worker } = attachAndHandshake();
+    loadAndAcknowledge(host, worker, 'k');
+    // The load is actively playing (machine playback choice 'playing').
+    target.dispatchEvent(new Event('play'));
+    worker.sent.length = 0;
+
+    host.reloadConfiguration();
+    // The user pauses DURING the reload window, before the ATTACH_OK that
+    // replays the source. On a playing load this pause is provisional (the
+    // machine retains the playing choice until the next-task confirmation),
+    // and in this deterministic probe the confirm timer has not fired yet at
+    // the ATTACH_OK boundary, so the live pause must survive the replay.
+    target.dispatchEvent(new Event('pause'));
+    replyHelloOk(worker);
+    const attach = newestAttach(worker);
+    worker.sent.length = 0;
+    worker.reply({ mode: 'main', requestId: attach.requestId, type: WorkerToMainMessageType.ATTACH_OK });
+
+    // The rebuilt load replays the source, but the user's live pause must NOT
+    // be overridden into a re-stated PLAY.
+    const types = worker.sent.map((m) => m.type);
+    expect(types).toEqual([MainToWorkerMessageType.SOURCE]);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
+    host.destroy();
+  });
+
   it.skipIf(!IN_BROWSER)('ignores an ATTACH_OK that answers a superseded reload', () => {
     const { host, target, worker } = attachAndHandshake();
     loadAndAcknowledge(host, worker, 'k');
