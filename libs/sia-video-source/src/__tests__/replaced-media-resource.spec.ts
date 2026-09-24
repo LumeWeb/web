@@ -55,6 +55,13 @@ class FakeWorker {
   }
 }
 
+/** The requestId of the newest HELLO the host posted — what a HELLO_OK must echo. */
+function helloRequestId(worker: FakeWorker): number {
+  const hello = worker.sent.filter((m) => m.type === MainToWorkerMessageType.HELLO).at(-1);
+  if (!hello || !('requestId' in hello)) throw new Error('no HELLO posted to echo');
+  return hello.requestId;
+}
+
 /** Main-mode SOURCE_OK info (the host builds an object URL for it). */
 const mainInfo = {
   container: 'fmp4',
@@ -113,7 +120,7 @@ function mainSession(): { host: SiaVideoSource; target: HTMLVideoElement; worker
   worker.reply({
     features: { workerMse: false },
     publicKey: new Uint8Array(32),
-    requestId: 1,
+    requestId: helloRequestId(worker),
     type: WorkerToMainMessageType.HELLO_OK,
     version: PROTOCOL_VERSION,
   });
@@ -159,7 +166,7 @@ function workerSession(): { host: SiaVideoSource; target: HTMLVideoElement; work
   worker.reply({
     features: { workerMse: true },
     publicKey: new Uint8Array(32),
-    requestId: 1,
+    requestId: helloRequestId(worker),
     type: WorkerToMainMessageType.HELLO_OK,
     version: PROTOCOL_VERSION,
   });

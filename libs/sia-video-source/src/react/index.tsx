@@ -24,7 +24,7 @@
  * postMessage channel stores the plaintext.
  */
 
-import { forwardRef, type ReactNode, type VideoHTMLAttributes } from 'react';
+import { forwardRef, type ReactNode, useEffect, useRef, type VideoHTMLAttributes } from 'react';
 import { useAttachMedia, useComposedRefs, useMediaInstance, usePlayer } from '@videojs/react';
 import { type AppKeySeedProvider } from '../app-key-handshake.ts';
 import type { Logger } from '../log/logger.ts';
@@ -63,11 +63,30 @@ export interface SiaVideoProps
   logger?: Logger;
   /** Declared content type for the source; forwarded to the worker on every `SOURCE`. */
   mimeType?: string;
+  /**
+   * Explicit in-place reload trigger: when this string changes (e.g. a mode or
+   * account identifier the app increments), the persistent media instance
+   * calls `reloadConfiguration()` exactly once — re-running the HELLO/APP_KEY/
+   * ATTACH handshake against the current config and seed suppliers without
+   * remounting the media or the element. Combined with the structural
+   * auto-detection below, so changing `reloadKey` and a structural HELLO input
+   * in the same render still reloads exactly once.
+   */
+  reloadKey?: string;
   /** Connection metadata for the worker's default Sia SDK factory (no seed — see `getAppKeySeed`). */
   sia?: WorkerConfig;
 }
 
 type MediaLike = Record<string, unknown>;
+
+/**
+ * Value facts the reload auto-detection compares: primitives/booleans only
+ * (`reloadKey`, worker-config presence, `indexerUrl`, `workerMse`, seed-supplier
+ * presence). Computed element-wise per render — NEVER a composite string (a
+ * NUL-joined signature would be collision-prone for the free-form
+ * `reloadKey`/`indexerUrl` strings) and NEVER supplier function refs.
+ */
+type ReloadValueDependency = boolean | string | undefined;
 
 /**
  * Views the persistent media instance as its dynamic prop interface. The fixed
@@ -92,12 +111,51 @@ function asMediaLike(media: SiaVideoSource): MediaLike {
  * required for the account connection that funds the downloads.
  */
 export const SiaVideo = forwardRef<HTMLVideoElement, SiaVideoProps>(function SiaVideo(
-  { children, getAppKeySeed, getSharingKeySeed, logger, sia, ...props },
+  { children, getAppKeySeed, getSharingKeySeed, logger, reloadKey, sia, ...props },
   ref,
 ) {
   // The media instance is created lazily and kept for the component's whole
   // lifetime; `workerConfig`/`mimeType` are applied per-render below.
   const media = useMediaInstance(SiaVideoSource);
+
+  // Structural HELLO inputs only. The host applies configuration at handshake
+  // time, so a CHANGE to any of these after the initial attach must push an
+  // explicit `reloadConfiguration()`. The comparison deliberately uses value
+  // facts only — presence booleans and primitives/strings, compared ELEMENT-WISE
+  // (a composite signature string would be collision-prone for the free-form
+  // `reloadKey`/`indexerUrl`) — NEVER supplier function refs (inline arrows
+  // change on every render), NEVER the nested `app` metadata, NEVER the logger
+  // identity: those reach the worker at the next attach and must not re-handshake.
+  //
+  // The element attaches during commit (the ref callback spawns the worker), so
+  // by the time this passive effect runs the initial attach has already HELLO'd
+  // with the first render's props. The FIRST run therefore only records the
+  // mount-time baseline and never reloads — otherwise a fresh mount would
+  // double-HELLO. Every later primitive change to a structural HELLO input
+  // (including `reloadKey`) triggers exactly one in-place
+  // `reloadConfiguration()`; the previous facts are recorded in a ref so a
+  // re-render with unchanged facts (or a StrictMode effect re-run) is a no-op.
+  const appliedReloadDeps = useRef<null | readonly ReloadValueDependency[]>(null);
+  useEffect(() => {
+    if (!media.engine) return;
+    const next: ReloadValueDependency[] = [
+      reloadKey,
+      sia !== undefined,
+      sia?.indexerUrl,
+      sia?.workerMse,
+      getAppKeySeed !== undefined,
+      getSharingKeySeed !== undefined,
+    ];
+    const prev = appliedReloadDeps.current;
+    if (prev === null) {
+      appliedReloadDeps.current = next;
+      return;
+    }
+    const changed =
+      prev.length !== next.length || next.some((value, index) => prev[index] !== value);
+    appliedReloadDeps.current = next;
+    if (changed) media.reloadConfiguration();
+  }, [media, reloadKey, sia, getAppKeySeed, getSharingKeySeed]);
 
   let htmlProps = props as VideoHTMLAttributes<HTMLVideoElement>;
   if (media) {
