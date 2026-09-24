@@ -26,6 +26,12 @@ import { type AppKeySeedProvider, encryptToWorker, scrub } from './app-key-hands
 import { HTMLVideoElementHost, type HTMLVideoTargetLike } from '@videojs/media/dom/video-host';
 import { type ErrorLike, MediaError, type MediaPreloadType, type MediaStreamType } from '@videojs/media';
 import { mediaErrorEvent, mediaErrorFromWorkerMessage } from './errors.ts';
+import {
+  constructMseMediaSource,
+  detectMseRuntime,
+  mseImplementation,
+  prepareMediaElementForMse,
+} from './capabilities/mse-runtime.ts';
 import { createConsoleLogger, type LogFields, type Logger, type LogLevelFilter } from './log/logger.ts';
 import {
   type HostDecision,
@@ -483,6 +489,12 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
   #mode: null | WorkerMode = null;
 
+  // MSE implementation snapshot for this runtime (standard / managed / none /
+  // webkit-legacy). Snapped once at construction: the impl never changes for
+  // a page's lifetime, and the host needs it for the element-side
+  // `disableRemotePlayback` prep and the fail-fast device gate.
+  readonly #mseSnapshot = detectMseRuntime();
+
   #objectUrl: null | string = null;
 
   readonly #options: SiaVideoSourceOptions;
@@ -915,16 +927,31 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     const target = this.target;
     if (!target || this.#mediaSource) return;
 
+    // Only a standard or managed-implementing MSE runtime can play Sia video:
+    // anything else — no MSE at all (all iPhone Safari pre-17.1) or only the
+    // legacy WebKit-prefixed surface — is device-too-old, and fails with the
+    // honest `device` kind instead of grinding toward a generic unsupported
+    // error. (The same gate already ran at `#sendSource` on the main path;
+    // this backstops a worker-mode session that degrades to main-mode
+    // posting.)
+    const impl = this.#mseSnapshot.impl;
+    if (impl === mseImplementation.none || impl === mseImplementation.webkitLegacy) {
+      this.#reportError(workerErrorCode.device, 'no-mse');
+      return;
+    }
+
     // Unsupported codec-qualified MIME fails as "unsupported source" here —
     // where it belongs — instead of appearing later as an `addSourceBuffer`
     // decode error. Bare container MIMEs are not decisive (see the worker's
-    // matching comment), so they fall through to the concrete attempt.
+    // matching comment), so they fall through to the concrete attempt. On
+    // MMS-only runtimes there is no `MediaSource` global, so the check is
+    // skipped exactly as it always was on such runtimes.
     if (typeof MediaSource !== 'undefined' && mime.includes('codecs=') && !MediaSource.isTypeSupported(mime)) {
       this.#reportError(workerErrorCode.unsupported, `MIME: ${mime}`);
       return;
     }
 
-    const mediaSource = new MediaSource();
+    const mediaSource = constructMseMediaSource();
     this.#mediaSource = mediaSource;
 
     if (mediaSource.readyState === 'open') {
@@ -937,6 +964,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
     const objectUrl = URL.createObjectURL(mediaSource);
     this.#objectUrl = objectUrl;
+    // Managed runtimes require `disableRemotePlayback = true` BEFORE the
+    // source is attached or `sourceopen` never fires; a no-op for standard.
+    prepareMediaElementForMse(target, this.#mseSnapshot.impl, (name) => this.#logger.child('host').debug(name));
     target.src = objectUrl;
     // The main-MSE replacement resource is now attached (the element is
     // HAVE_NOTHING for it); a recovery's recorded position applies here, the
@@ -1361,7 +1391,13 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       case WorkerToMainMessageType.HANDLE: {
         if (message.requestId !== this.#requestId) return;
         const target = this.target;
-        if (target) (target as unknown as { srcObject: unknown }).srcObject = message.handle;
+        // The handle attaches on the MAIN thread even in worker mode, so the
+        // ManagedMediaSource `disableRemotePlayback = true` prep must happen
+        // here too — a transferred worker-MMS handle never opens otherwise.
+        if (target) {
+          prepareMediaElementForMse(target, this.#mseSnapshot.impl, (name) => this.#logger.child('host').debug(name));
+          (target as unknown as { srcObject: unknown }).srcObject = message.handle;
+        }
         // The transferred handle is now the identity of the live resource:
         // only its native events are trusted until the next load boundary.
         this.#activeHandle = message.handle;
@@ -1899,7 +1935,19 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#post(message);
   }
 
+  // Every SOURCE posts through here — a fresh `src`, an explicit `load()`,
+  // an ATTACH_OK replay, and a recovery restart — so it is the single choke
+  // point for the fail-fast device gate: a runtime whose MSE surface is not
+  // standard or managed-implementing (no MSE at all, or only the legacy
+  // WebKit-prefixed one) is device-too-old and reports the honest `device`
+  // error immediately instead of paying a worker roundtrip that can only end
+  // in a generic unsupported error.
   #sendSource(): void {
+    const impl = this.#mseSnapshot.impl;
+    if (impl === mseImplementation.none || impl === mseImplementation.webkitLegacy) {
+      this.#reportError(workerErrorCode.device, 'no-mse');
+      return;
+    }
     this.#post({
       // An empty preload reads as "no signal", so the worker is left at its
       // own deferring default rather than promising eager streaming.

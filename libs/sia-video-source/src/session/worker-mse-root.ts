@@ -22,6 +22,7 @@
  * CHUNK posting fallback is preserved intact.
  */
 
+import { constructMseMediaSource } from '../capabilities/mse-runtime.ts';
 import { MseAppendPipe } from '../mse-pipe.ts';
 import { type RequestId, workerLogLevel, type WorkerLogLevel, WorkerToMainMessageType } from '../protocol.ts';
 import { MseAdapter, type WorkerMseSinkFactoryDeps } from '../sink/mse-adapter.ts';
@@ -52,7 +53,9 @@ export interface WorkerMseRootOptions {
   /** Seconds of media kept buffered behind the playhead before eviction. */
   backBufferSeconds: number;
   /**
-   * Creates the worker MediaSource (default `() => new MediaSource()`). Tests
+   * Creates the worker MediaSource (default resolves the runtime's MSE
+   * implementation, so on MMS-only runtimes the worker MediaSource is a
+   * `ManagedMediaSource` and the transferred `.handle` still posts). Tests
    * inject a fake: a real detached MediaSource never fires `sourceopen`
    * (MSE opening events on attachment to a video element), so no real
    * `MediaSourceHandle` is constructible in a unit test page.
@@ -85,7 +88,7 @@ export interface WorkerMseRootOptions {
 }
 
 export function createWorkerMseRoot(options: WorkerMseRootOptions): WorkerMseRoot {
-  const createMediaSource = options.createMediaSource ?? (() => new MediaSource());
+  const createMediaSource = options.createMediaSource ?? (() => constructMseMediaSource(globalThis));
   let durationSeconds: null | number = null;
   let mediaSource: MediaSource | null = null;
   let mime = '';

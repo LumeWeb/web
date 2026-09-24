@@ -90,12 +90,33 @@ requested once the conversion finishes executing.
   cancels the transport source), aborts the sink, and, in worker mode, tears
   the worker `MediaSource`/`SourceBuffer` down.
 - **Errors** follow the v10 error feature contract. The worker reports
-  `{ kind: 'unsupported' | 'decode' | 'network', context }`; the host maps
-  that to `MediaError` codes 4 / 3 / 2 (unknown kinds → custom 100), exposes
-  it via the `error` getter, dispatches `error` events, and clears it
-  (dispatching `emptied`) when the source changes. Skin `ErrorDialog`s pick it
-  up without extra wiring. Unsupported loads are rejected with a stable reason
-  code during inspection, before any streaming starts.
+  `{ kind: 'unsupported' | 'device' | 'decode' | 'network', context }`; the
+  host maps that to `MediaError` codes 4 / 4 / 3 / 2 (unknown kinds → custom
+  100), exposes it via the `error` getter, dispatches `error` events, and
+  clears it (dispatching `emptied`) when the source changes. Skin
+  `ErrorDialog`s pick it up without extra wiring. Unsupported loads are
+  rejected with a stable reason code during inspection, before any streaming
+  starts.
+
+### Browser support
+
+Playback requires a usable MSE surface; the library resolves which one the
+runtime exposes before it does anything else. Chrome/Edge/Firefox (and
+Safari 17+ desktop/iPad) use the standard `MediaSource`; iPhone Safari has no
+MSE before iOS 17.1 and only `ManagedMediaSource` from 17.1, which works both
+on the main thread and (from 18.1) in a dedicated worker — the host applies
+`disableRemotePlayback = true` before attach so its `sourceopen` can fire.
+Runtimes with no MSE at all (iPhone Safari pre-17.1) or only the legacy
+`WebKitMediaSource` surface report a `device` error (`MEDIA_ERR_SRC_NOT_SUPPORTED`)
+instead of a generic unsupported error — the `webkit-legacy` surface is
+detect-only, never a playback path.
+
+| MSE implementation            | Surface                     | Supported |
+| ----------------------------- | --------------------------- | --------- |
+| Standard `MediaSource`        | Chrome, Edge, Firefox, Safari 17+ desktop/iPad | ✓ (preferred) |
+| `ManagedMediaSource`          | iPhone Safari 17.1+         | ✓ (17.1 main, 18.1+ worker) |
+| `WebKitMediaSource` (legacy)  | old Safari/WebKit           | ✗ detect-only → `device` |
+| None                          | iPhone Safari <17.1         | ✗ → `device`            |
 
 Out of scope by design: transcoding (a codec is accepted only when a forced
 copy into CMAF succeeds and this browser's MSE supports the resulting MIME —

@@ -172,6 +172,7 @@ export function permissiveCapabilities(): PlaybackCapabilities {
   return {
     canConstructWorkerMse: () => false,
     mayDecode: () => capabilityVerdict['unknown-codec'],
+    mseImpl: () => ({ canConstructInDedicatedWorker: false, impl: 'standard', managed: false }),
     mseSupported: () => true,
     webCodecsAvailable: () => false,
     workerHandleAvailable: () => false,

@@ -78,6 +78,7 @@ function permissiveCapabilities(): PlaybackCapabilities {
   return {
     canConstructWorkerMse: () => false,
     mayDecode: () => ({ decodable: true } as never),
+    mseImpl: () => ({ canConstructInDedicatedWorker: false, impl: 'standard', managed: false }),
     mseSupported: () => true,
     webCodecsAvailable: () => false,
     workerHandleAvailable: () => false,

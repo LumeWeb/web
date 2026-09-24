@@ -1,15 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { detectBrowserCapabilities } from '../capabilities/browser-capabilities.ts';
+import { type MseCtorLike, mseImplementation } from '../capabilities/mse-runtime.ts';
 import { capabilityVerdict, capabilityVerdictForCodec, type CodecId } from '../capabilities/codec-verdict.ts';
 
 describe('browser playback capabilities', () => {
   it('reports MSE and worker-MSE features from the supplied runtime', () => {
     const capabilities = detectBrowserCapabilities({
       AudioDecoder: class AudioDecoder {},
-      MediaSource: {
-        canConstructInDedicatedWorker: true,
-        isTypeSupported: (mime: string) => mime === 'video/mp4; codecs="avc1.640028"',
-      },
+      MediaSource: class {
+        static canConstructInDedicatedWorker = true;
+        static isTypeSupported = (mime: string) => mime === 'video/mp4; codecs="avc1.640028"';
+      } as unknown as MseCtorLike,
       MediaSourceHandle: class MediaSourceHandle {},
       VideoDecoder: class VideoDecoder {},
     });
@@ -19,6 +20,21 @@ describe('browser playback capabilities', () => {
     expect(capabilities.canConstructWorkerMse()).toBe(true);
     expect(capabilities.workerHandleAvailable()).toBe(true);
     expect(capabilities.webCodecsAvailable()).toBe(true);
+  });
+
+  it('reports an mseImpl() snapshot matching the resolved runtime surface', () => {
+    const capabilities = detectBrowserCapabilities({
+      MediaSource: class {
+        static canConstructInDedicatedWorker = false;
+      } as unknown as MseCtorLike,
+      MediaSourceHandle: class MediaSourceHandle {},
+    });
+
+    expect(capabilities.mseImpl()).toEqual({
+      canConstructInDedicatedWorker: false,
+      impl: mseImplementation.standard,
+      managed: false,
+    });
   });
 
   it('does not claim WebCodecs support when either decoder is absent', () => {

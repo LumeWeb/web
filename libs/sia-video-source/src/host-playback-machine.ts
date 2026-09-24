@@ -132,6 +132,7 @@ export type HostPlaybackEventName = (typeof hostPlaybackEvent)[keyof typeof host
 /** The failure kinds a `load.failed` event may carry (the same set as the wire's `WorkerErrorCode`). */
 export const hostReportKind = {
   decode: 'decode',
+  device: 'device',
   network: 'network',
   unsupported: 'unsupported',
 } as const;

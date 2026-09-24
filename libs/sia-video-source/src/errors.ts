@@ -23,6 +23,8 @@ export interface WorkerErrorMessage {
  * - `unsupported` → `MEDIA_ERR_SRC_NOT_SUPPORTED` (4): unknown container, a
  *   container the pipeline cannot transmux to fMP4, or a codec/MIME the
  *   platform's MSE does not accept.
+ * - `device` → `MEDIA_ERR_SRC_NOT_SUPPORTED` (4): the runtime has no usable
+ *   MSE at all (device too old), so nothing Sia can stream is playable.
  * - `decode` → `MEDIA_ERR_DECODE` (3): remux failure, or SourceBuffer
  *   creation/append failure.
  * - `network` → `MEDIA_ERR_NETWORK` (2): SDK/WebTransport/stream failures.
@@ -30,12 +32,14 @@ export interface WorkerErrorMessage {
  */
 export const MEDIA_ERROR_CODES: Readonly<Record<WorkerErrorCode, number>> = {
   decode: MediaError.MEDIA_ERR_DECODE,
+  device: MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED,
   network: MediaError.MEDIA_ERR_NETWORK,
   unsupported: MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED,
 };
 
 export const DEFAULT_ERROR_MESSAGES: Readonly<Record<WorkerErrorCode, string>> = {
   decode: 'Playback failed while preparing Sia data for rendering.',
+  device: 'This device or browser is too old to stream this video. Update to iOS 17.1+ or use a recent desktop browser.',
   network: 'The Sia network connection failed.',
   unsupported: 'This Sia object is not playable in this browser.',
 };

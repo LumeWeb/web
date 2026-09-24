@@ -39,6 +39,15 @@ export {
   capabilityVerdictForCodec,
   type CodecId,
 } from './capabilities/codec-verdict.ts';
+export {
+  constructMseMediaSource,
+  detectMseRuntime,
+  type MseCtorLike,
+  type MseImplementation,
+  mseImplementation,
+  type MseRuntimeSnapshot,
+  prepareMediaElementForMse,
+} from './capabilities/mse-runtime.ts';
 export { DEFAULT_ERROR_MESSAGES, MEDIA_ERROR_CODES, mediaErrorEvent, mediaErrorFromWorkerMessage } from './errors.ts';
 export {
   createConsoleLogger,
