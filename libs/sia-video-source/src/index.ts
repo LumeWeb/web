@@ -5,9 +5,12 @@
  * and feeds MSE (inside the worker where supported, on the main thread
  * otherwise).
  *
- * Main-thread entry: the `SiaVideoSource` host element and the shared wire
- * types. The worker entry lives behind the `/worker` subpath; a React wrapper
- * behind `/react`.
+ * Main-thread entry: the `SiaVideoSource` host element, the shared wire
+ * types, and the Video.js v10 recovery player feature (`siaRecoveryFeature`)
+ * that mirrors the host's typed `sia-recovery-change` event into a player
+ * store (read via `selectSiaRecovery`, or the React `useSiaRecovery` hook
+ * behind `/react`). The worker entry lives behind the `/worker` subpath; a
+ * React wrapper behind `/react`.
  *
  * Logging is pluggable through the dependency-free `Logger` interface: pass a
  * `logger` to the host (or the React wrapper's `logger` prop) and re-level it
@@ -130,6 +133,11 @@ export {
   type WorkerMseRootOptions,
 } from './session/worker-mse-root.ts';
 export { isSiaShareUrl, parseSiaShareUrl, type SiaShareUrl } from './share-url.ts';
+export {
+  selectSiaRecovery,
+  siaRecoveryFeature,
+  type SiaRecoveryState,
+} from './sia-recovery-feature.ts';
 export {
   forwardWorkerLog,
   logThresholdFor,

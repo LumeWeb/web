@@ -127,6 +127,56 @@ sia.attach(document.querySelector('video'));
 sia.src = pinnedObjectHexKey;
 ```
 
+### Video.js v10 recovery state
+
+The host announces playback recovery through the typed `sia-recovery-change`
+DOM event. A minimal custom Video.js v10 **player feature**
+(`@lumeweb/sia-video-source` root) mirrors that event into the player store so
+any store consumer — non-React or React — reads the same recovery facts.
+Generic playback state (paused/started/waiting/… and errors) stays owned by the
+packaged video.js features; this feature only surfaces the Sia recovery window.
+
+```ts
+// Non-React Video.js: combine the feature into a player store and read the
+// selected slice. No React or React bindings are required for this entrypoint.
+import { combine, createStore } from '@videojs/store';
+import { siaRecoveryFeature, selectSiaRecovery } from '@lumeweb/sia-video-source';
+
+const store = createStore()(combine(siaRecoveryFeature));
+const detach = store.attach({ media: siaMedia, container: elem.parentElement });
+const { active, reason, resumeSeconds, wantsPlay } = selectSiaRecovery(store.state) ?? {};
+detach();
+```
+
+The root feature depends only on the non-React video.js peer packages
+(`@videojs/core`, `@videojs/store`, `@videojs/media`); a non-React consumer
+does not need React or the React bindings installed.
+
+```tsx
+// React: add the feature to the player and use the hook. One feature drives
+// both consumers — no separate controller or duplicated store.
+import { createPlayer } from '@videojs/react';
+import { SiaVideo, useSiaRecovery } from '@lumeweb/sia-video-source/react';
+import { siaRecoveryFeature } from '@lumeweb/sia-video-source';
+
+const { Player } = createPlayer({ features: [siaRecoveryFeature] });
+
+function RecoveryBadge() {
+  const recovery = useSiaRecovery(); // { active, reason?, resumeSeconds?, wantsPlay? } | undefined
+  return recovery?.active ? <span>recovering ({recovery.reason})</span> : null;
+}
+
+<Player>
+  <SiaVideo src={pinnedObjectKey} />
+  <RecoveryBadge />
+</Player>
+```
+
+State carries no transient `reason`/`resumeSeconds`/`wantsPlay` while inactive:
+the host's `active: false` close detail clears them, and detach/reattach resets
+the slice to its inert initial state, so a stale window can never leak across
+sources or players.
+
 ### The worker
 
 The engine runs in a dedicated worker; its entry is exported so the app's

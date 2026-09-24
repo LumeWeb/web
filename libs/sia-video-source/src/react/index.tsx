@@ -25,9 +25,13 @@
  */
 
 import { forwardRef, type ReactNode, type VideoHTMLAttributes } from 'react';
-import { useAttachMedia, useComposedRefs, useMediaInstance } from '@videojs/react';
+import { useAttachMedia, useComposedRefs, useMediaInstance, usePlayer } from '@videojs/react';
 import { type AppKeySeedProvider } from '../app-key-handshake.ts';
 import type { Logger } from '../log/logger.ts';
+import {
+  selectSiaRecovery,
+  type SiaRecoveryState,
+} from '../sia-recovery-feature.ts';
 import { siaVideoDefaultProps, SiaVideoSource } from '../sia-video-source.ts';
 import type { WorkerConfig } from '../protocol.ts';
 
@@ -147,3 +151,20 @@ export const SiaVideo = forwardRef<HTMLVideoElement, SiaVideoProps>(function Sia
 
   return <video ref={composedRef} {...htmlProps}>{children}</video>;
 });
+
+/**
+ * Subscribes to the Sia recovery state of the nearest `<Player>`.
+ *
+ * Reads the same `selectSiaRecovery` slice the non-React store consumers use
+ * (via `usePlayer(selectSiaRecovery)`), so one feature/store drives both. The
+ * store must be built with `siaRecoveryFeature`; only the absence of that
+ * configured feature makes this yield `undefined`.
+ *
+ * @returns The Sia recovery state for the attached media, or `undefined` when
+ *   the player store was built without `siaRecoveryFeature`.
+ * @throws If called outside a `<Player>` — `usePlayer` requires the player
+ *   context.
+ */
+export function useSiaRecovery(): SiaRecoveryState | undefined {
+  return usePlayer(selectSiaRecovery);
+}
