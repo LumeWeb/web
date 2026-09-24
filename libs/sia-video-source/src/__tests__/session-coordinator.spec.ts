@@ -201,6 +201,7 @@ function permissiveCapabilities(): PlaybackCapabilities {
   return {
     canConstructWorkerMse: () => false,
     mayDecode: () => ({ decodable: true } as never),
+    mseImpl: () => ({ canConstructInDedicatedWorker: false, impl: 'standard', managed: false }),
     mseSupported: () => true,
     webCodecsAvailable: () => false,
     workerHandleAvailable: () => false,
@@ -323,6 +324,23 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
     const errors = driver.message(WorkerToMainMessageType.ERROR);
     expect(errors).toHaveLength(1);
     expect(errors[0].context).toBe('format-unreadable: no moov box');
+  });
+
+  it('a runtime with no MSE impl fails a SOURCE with a device ERROR before any source creation', async () => {
+    const driver = makeDriver({
+      capabilities: {
+        ...permissiveCapabilities(),
+        mseImpl: () => ({ canConstructInDedicatedWorker: false, impl: 'none' as const, managed: false }),
+      },
+    });
+    await driver.say({ preload: 'auto', requestId: 21, src: 'whatever', type: MainToWorkerMessageType.SOURCE });
+    await settle();
+
+    expect(driver.message(WorkerToMainMessageType.SOURCE_OK)).toEqual([]);
+    const errors = driver.message(WorkerToMainMessageType.ERROR);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toMatchObject({ context: 'no-mse', kind: workerErrorCode.device, requestId: 21 });
+    expect(driver.pipeline.calls).toHaveLength(0);
   });
 
   it('maps a cancelled verdict to silence and releases the source', async () => {

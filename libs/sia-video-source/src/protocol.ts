@@ -195,9 +195,17 @@ export interface WorkerConfig {
   workerMse?: WorkerMsePreference;
 }
 
-/** Failure kinds the worker reports; see `errors.ts` for the MediaError mapping. */
+/**
+ * Failure kinds the worker (or the host, for the `device` kind) report; see
+ * `errors.ts` for the MediaError mapping.
+ *
+ * - `device` → "device too old": the runtime has no usable MSE (all iPhone
+ *   Safari pre-17.1, or any runtime with only legacy
+ *   `WebKitMediaSource`-prefixed MSE).
+ */
 export const workerErrorCode = {
   decode: 'decode',
+  device: 'device',
   network: 'network',
   unsupported: 'unsupported',
 } as const;

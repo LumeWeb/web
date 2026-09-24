@@ -6,6 +6,8 @@ describe('MEDIA_ERROR_CODES', () => {
   it('maps worker kinds onto the HTMLMediaError codes', () => {
     expect(MEDIA_ERROR_CODES.unsupported).toBe(MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED);
     expect(MEDIA_ERROR_CODES.unsupported).toBe(4);
+    expect(MEDIA_ERROR_CODES.device).toBe(MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED);
+    expect(MEDIA_ERROR_CODES.device).toBe(4);
     expect(MEDIA_ERROR_CODES.decode).toBe(MediaError.MEDIA_ERR_DECODE);
     expect(MEDIA_ERROR_CODES.decode).toBe(3);
     expect(MEDIA_ERROR_CODES.network).toBe(MediaError.MEDIA_ERR_NETWORK);
@@ -25,6 +27,17 @@ describe('mediaErrorFromWorkerMessage', () => {
     const error = mediaErrorFromWorkerMessage({ kind: 'network' });
     expect(error.code).toBe(2);
     expect(error.message).toBe(DEFAULT_ERROR_MESSAGES.network);
+  });
+
+  it('maps a device-too-old report to MEDIA_ERR_SRC_NOT_SUPPORTED with the too-old message', () => {
+    const error = mediaErrorFromWorkerMessage({ context: 'no-mse', kind: 'device' });
+    expect(error.code).toBe(MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED);
+    expect(error.fatal).toBe(true);
+    expect(error.message).toBe('no-mse');
+
+    const fallback = mediaErrorFromWorkerMessage({ kind: 'device' });
+    expect(fallback.message).toBe(DEFAULT_ERROR_MESSAGES.device);
+    expect(DEFAULT_ERROR_MESSAGES.device).toMatch(/iOS 17\.1/);
   });
 
   it('reports SourceBuffer failures as MEDIA_ERR_DECODE', () => {

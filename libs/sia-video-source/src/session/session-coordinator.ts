@@ -33,6 +33,7 @@
 
 import type { PlaybackCapabilities } from '../capabilities/browser-capabilities.ts';
 import { detectBrowserCapabilities } from '../capabilities/browser-capabilities.ts';
+import { mseImplementation, resolveMseCtor } from '../capabilities/mse-runtime.ts';
 import {
   decryptAppKeyEnvelope,
   exportWorkerPublicKey,
@@ -251,6 +252,7 @@ export class WorkerComposition implements SessionCoordinator {
     return this.#mode;
   }
 
+  readonly #capabilities: PlaybackCapabilities;
   readonly #createSource: (src: string, requestId?: null | RequestId) => Promise<ByteSource>;
   #destroyed = false;
   readonly #errorReporter: ErrorReporter;
@@ -279,6 +281,7 @@ export class WorkerComposition implements SessionCoordinator {
 
   constructor(deps: SessionCoordinatorDeps) {
     const capabilities = deps.capabilities ?? detectBrowserCapabilities();
+    this.#capabilities = capabilities;
     this.#createSource = deps.createSource;
     this.#handshake = deps.handshake ?? createSessionHandshake();
     this.#supportsWorkerMse = deps.supportsWorkerMse ?? defaultSupportsWorkerMse;
@@ -464,8 +467,6 @@ export class WorkerComposition implements SessionCoordinator {
     // it down, which the composition distinguishes from a DETACH/DESTROY stop.
     this.#abandonLoad('replace');
     this.#requestId = requestId;
-    const loadAbortController = new AbortController();
-    this.#loadAbortController = loadAbortController;
 
     // A genuine load failure clears the intent recorded on this attempt: a
     // seek or play that targeted a failed object must not auto-start a later,
@@ -476,6 +477,19 @@ export class WorkerComposition implements SessionCoordinator {
       this.#pendingSeekTime = undefined;
       this.#postError(kind, requestId, context);
     };
+
+    // A runtime with no usable MSE (all iPhone Safari pre-17.1, or any
+    // runtime exposing only WebKit-prefixed legacy MSE) cannot play Sia video
+    // at all. Fail fast with the honest `device` kind before any source
+    // creation or pipeline run; no abort controller exists for this attempt
+    // yet (`#abandonLoad` above already cleared the previous one).
+    if (this.#capabilities.mseImpl().impl === mseImplementation.none) {
+      failed(workerErrorCode.device, 'no-mse');
+      this.#loadAbortController = null;
+      return;
+    }
+    const loadAbortController = new AbortController();
+    this.#loadAbortController = loadAbortController;
 
     let source: ByteSource;
     try {
@@ -771,12 +785,16 @@ export function createSessionHandshake(): SessionHandshake {
   };
 }
 
-/** Default worker-MSE capability: true only where the platform can construct MSE in a dedicated worker. */
+/**
+ * Default worker-MSE capability: true only where the platform can construct
+ * MSE in a dedicated worker. Probes through the shared resolution so an
+ * MMS-only runtime still reports `true` — iPhone Safari 18.1+ can construct
+ * `ManagedMediaSource` in a dedicated worker (its `canConstructInDedicatedWorker`
+ * is `true`), which is exactly the story this default exists to serve.
+ */
 export function defaultSupportsWorkerMse(): boolean {
-  return (
-    typeof MediaSource !== 'undefined' &&
-    (MediaSource as { canConstructInDedicatedWorker?: boolean }).canConstructInDedicatedWorker === true
-  );
+  const resolved = resolveMseCtor(globalThis);
+  return resolved !== null && resolved.ctor.canConstructInDedicatedWorker === true;
 }
 
 /** Byte equality over two decapsulated seeds (or nulls); scrubbed buffers read as "changed". */
