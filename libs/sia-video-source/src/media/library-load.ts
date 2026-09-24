@@ -283,9 +283,9 @@ function createMediaPlayback(options: {
   // The single in-flight restart driver; a restart while it runs only parks a
   // newer target for its next pass.
   let restartDriver: null | Promise<void> = null;
-  // The media's true end (largest sample end across tracks), computed once on
-  // the first restart and reused: the restart driver clamps every seek target
-  // against it, and the shared input's sample tables give it without decoding.
+  // The media's true end (largest sample end across tracks), resolved once per
+  // load and reused: the restart driver clamps every seek target against it,
+  // and the shared input's sample tables give it without decoding.
   let servableEnd: null | Promise<null | number> = null;
 
   const cancel = (): void => {
@@ -301,9 +301,12 @@ function createMediaPlayback(options: {
   };
 
   /**
-   * Resolves the media's true end timestamp once and reuses it for every
-   * restart. A duration query that fails (disposed input, format quirk) yields
-   * null so the driver leaves the target unclamped rather than guessing.
+   * Resolves the media's true end timestamp once per load and reuses it for
+   * every restart. A duration query that fails (disposed input, format quirk)
+   * yields null so the driver leaves the target unclamped rather than
+   * guessing. The query is invoked lazily from the restart driver, which runs
+   * it alongside the replacement preparation instead of awaiting it before
+   * the replacement can start being armed.
    */
   const servableEndSeconds = (): Promise<null | number> => {
     servableEnd ??= input.computeDuration().catch(() => null);
@@ -365,8 +368,16 @@ function createMediaPlayback(options: {
         // reachable fragment instead of trimming every sample out. The sink
         // already applied the seek's timestamp offset, so the clamped content
         // still lands on the element near the requested position.
-        const end = await servableEndSeconds();
-        const trimStart = end === null ? target : clampSeekTarget(target, end);
+        //
+        // The true-end query is deferred, not awaited up front: the replacement
+        // is armed at the requested target while the (once-per-load) query runs
+        // alongside it, so a first seek to a position well inside the media is
+        // not gated on interrogating the sample tables. The clamp is applied
+        // lazily, only when the resolved end shows it would change the target:
+        // a raw run prepared at an overshooting target is discarded and a
+        // clamped replacement armed in its place. A target the compute proves
+        // to be inside the media keeps the already-armed raw run.
+        const endPromise = servableEndSeconds();
         // Arming the replacement first bumps the run ordinal, so the pending
         // run's callbacks go stale before its conversion is cancelled; its
         // cancellation can then never assemble boxes into the sink or report.
@@ -374,13 +385,29 @@ function createMediaPlayback(options: {
           assembly,
           audioTrack,
           input,
-          trimStart,
+          trimStart: target,
           videoTrack,
         });
         cancelConversion(previous);
         let replacement: ConversionRun;
         try {
-          replacement = await replacementPromise;
+          const [end, raw] = await Promise.all([endPromise, replacementPromise]);
+          const trimStart = end === null ? target : clampSeekTarget(target, end);
+          if (trimStart === target) {
+            replacement = raw;
+          } else {
+            // The requested target cleared the media's true end: the raw run
+            // would trim every sample out, so arm one trimmed into the last
+            // reachable fragment instead of starting the raw one.
+            cancelConversion(raw);
+            replacement = await prepareConversion({
+              assembly,
+              audioTrack,
+              input,
+              trimStart,
+              videoTrack,
+            });
+          }
         } catch (error) {
           // A canceled/disposed preparation is not a restart failure; consume
           // whichever newer target parked during it on the next pass.

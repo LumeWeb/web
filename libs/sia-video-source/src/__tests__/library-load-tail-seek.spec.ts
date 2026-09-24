@@ -188,4 +188,42 @@ describe('tail/far seek restart serves the containing fragment instead of failin
 
     playback.dispose();
   });
+
+  it('a restart well inside the media keeps the run armed at the requested target', async () => {
+    const { durationSeconds, playback } = await loadPlayback();
+    const sink = new RecordingSink();
+    const errors: unknown[] = [];
+    let completed = 0;
+
+    playback.start(sink, 4, {
+      onComplete: () => {
+        completed += 1;
+      },
+      onError: (error) => {
+        errors.push(error);
+      },
+    });
+    await waitFor(() => sink.eos.length >= 1);
+
+    // A target deep inside the media cannot clear the true end, so the driver
+    // must keep the already-armed raw replacement (the deferred true-end query
+    // is a no-op clamp) and never fall back to a re-armed clamped run.
+    const inside = FIXTURE_SECONDS / 4;
+    expect(inside).toBeLessThan(durationSeconds);
+    expect(playback.restart?.(inside)).toBe(true);
+    await waitFor(() => sink.eos.length >= 2);
+
+    expect(errors).toEqual([]);
+    expect(completed).toBeGreaterThanOrEqual(1);
+    expect(sink.eos.length).toBeGreaterThanOrEqual(2);
+
+    const initIndices: number[] = [];
+    sink.units.forEach((unit, index) => {
+      if (unit.kind === 'init') initIndices.push(index);
+    });
+    expect(initIndices.length).toBe(2);
+    expect(unitsAfterInit(sink.units, initIndices[1]).some((unit) => unit.kind === 'media')).toBe(true);
+
+    playback.dispose();
+  });
 });
