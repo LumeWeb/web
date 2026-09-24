@@ -1,32 +1,31 @@
 /**
- * MSE-level seek re-anchor contract, end to end: a real mediabunny conversion
- * over the package's progressive MP4 fixture streams into a real
- * `MseAppendPipe` through the `MseAdapter` surface, and a
- * `StreamController.seek()` re-anchors the pipeline while the ORIGINAL
- * position's conversion output is still queueing. The seek must (i) reach the
- * shared pipe as exactly one extra parser reset, (ii) lead the bytes queued
- * for the new position with a fresh init segment, and (iii) leave the session
- * `playing` through the re-anchor boundary (the seek transitions no state; the
- * restarted run's eventual completion ends the session only afterwards).
+ * MSE-level seek behavior, end to end: a real mediabunny conversion over the
+ * package's progressive MP4 fixture streams into a real `MseAppendPipe`
+ * through the `MseAdapter` surface, and a `StreamController.seek()` moves the
+ * pipeline to the new position while the ORIGINAL position's conversion output
+ * is still queueing. The seek must (i) reach the shared pipe as exactly one
+ * extra parser reset, (ii) lead the bytes queued for the new position with a
+ * fresh init segment, and (iii) leave the session `playing` through the
+ * restart boundary (the seek changes no state; the restarted run's eventual
+ * completion ends the session only afterwards).
  *
- * Two scenario groups cover both MSE plumbing roles:
+ * Two scenario groups cover both MSE wiring roles:
  *
  * - `worker-MSE`: the `createWorkerMseRoot` composition opens a fresh
  *   per-load worker `MediaSource` (SourceBuffer deferred to `sourceopen`) and
  *   hands the controller a `MseAdapter` sink;
  * - `main-thread MSE`: a single shared main `MediaSource` + `MseAppendPipe`
- *   wrapped in a `MseAdapter`, mirroring the host's main-thread fallback.
+ *   wrapped in a `MseAdapter`, matching the host's main-thread fallback.
  *
  * Neither group fakes the load or the bytes: the committed progressive fixture
  * is inspected with `inspectMediaLibrary`, so the seek is a real
  * `playback.restart` over mediabunny. The fixture's eager single-range read
  * would finish the whole conversion before a test callback could observe it,
- * so the transport is a gated test seam that serves the SAME fixture bytes
- * across macrotask gaps — the conversion then builds a genuine in-flight
- * window where output for the original position is still queueing. The
- * re-anchor is observed at the SourceBuffer level through the fakes' recorded
- * append order and `abort()` calls (the same fake MSE lifecycle the
- * composition specs use).
+ * so the transport paces the SAME fixture bytes across macrotask gaps — the
+ * conversion then builds a genuine in-flight window where output for the
+ * original position is still queueing. The seek is observed at the
+ * SourceBuffer level through the fakes' recorded append order and `abort()`
+ * calls (the same fake MSE primitives the composition specs use).
  */
 import { describe, expect, it } from 'vitest';
 import type { PlaybackCapabilities } from '../capabilities/browser-capabilities.ts';
@@ -43,16 +42,16 @@ import { progressiveMp4Fixture } from './fixtures/progressive-mp4-fixture.ts';
  * builds a real in-flight window when its source is served incrementally. */
 const SEEKABLE_SECONDS = 60;
 
-/** Mid-timeline timestamp the seek re-anchors at. */
+/** Mid-timeline timestamp the seek restarts at. */
 const TARGET_SECONDS = 30;
 
 /** Macrotask gap between served source chunks; keeps the conversion yieldable. */
 const SOURCE_CHUNK_GAP_MS = 12;
 
-/** Bytes served per gated chunk; small enough to spread the conversion out. */
+/** Bytes served per paced chunk; small enough to spread the conversion out. */
 const SOURCE_CHUNK_SIZE = 64 * 1024;
 
-// ---- fake MSE lifecycle (mirrors the composition/pipe specs) -----------------
+// ---- fake MSE primitives (same fakes as the composition/pipe specs) ----------
 
 interface MseHarness {
   destroy(): void;
@@ -163,11 +162,11 @@ class FakeMediaSource extends EventTarget {
  * Serves the same committed fixture bytes over MANY macrotask gaps, so the
  * real mediabunny conversion stays yieldable and builds an observable in-flight
  * window: output for a position is still being queued while the session is
- * `playing`, which is exactly the state a mid-stream seek must re-anchor.
+ * `playing`, which is exactly the state a mid-stream seek must restart from.
  * Test machinery only — the media bytes themselves come from the committed
  * `progressiveMp4Fixture`.
  */
-class GatedByteSource implements ByteSource {
+class PacedByteSource implements ByteSource {
   get size(): number {
     return this.#bytes.byteLength;
   }
@@ -219,14 +218,14 @@ function appendsBefore(log: readonly string[], beforeIndex: number): number {
 }
 
 /**
- * The shared re-anchor proof, driven through `StreamController.seek()`:
+ * The shared seek-proof, driven through `StreamController.seek()`:
  * (i) exactly one extra parser reset reaches the shared MseAppendPipe,
  * (ii) the first append after that reset is the fresh init segment, and
- * (iii) the session stays `playing` through the re-anchor boundary — the seek
- * itself transitions no state, so the session is still `playing` with the
+ * (iii) the session stays `playing` through the restart boundary — the seek
+ * itself changes no state, so the session is still `playing` with the
  * restarted run in flight (its eventual completion legitimately ends it).
  */
-async function assertSeekReanchor(config: {
+async function assertSeekRestart(config: {
   load: StreamLoad;
   sourceBuffer: FakeSourceBuffer;
   targetSeconds: number;
@@ -249,8 +248,8 @@ async function assertSeekReanchor(config: {
   await waitFor(() => sourceBuffer.appended.length >= 2);
   expect(controller.state).toBe('playing');
 
-  // The START reset is target-less: a load start re-anchors nothing, so the
-  // offset stays untouched until a seek parks one.
+  // The START reset is target-less: a load start repoints nothing, so the
+  // timestamp offset stays untouched until a seek sets one.
   expect(sourceBuffer.timestampOffsets).toEqual([]);
 
   const appendedBefore = sourceBuffer.appended.length;
@@ -260,26 +259,26 @@ async function assertSeekReanchor(config: {
   // and has the sink reset its parser so the fresh init segment lands clean.
   controller.seek(targetSeconds);
 
-  // (iii) The re-anchor leaves the session playing: the seek transitions no
-  // state, and the restarted run is still in flight (gated transport spreads
+  // (iii) The reset leaves the session playing: the seek changes no state,
+  // and the restarted run is still in flight (the paced transport spreads
   // its read across macrotasks), so a synchronous check right after the seek
-  // and again once the seek's parser abort lands is deterministic.
+  // and again once the seek's parser abort lands is stable.
   expect(controller.state).toBe('playing');
 
   // (i) Wait for the seek's parser abort, then assert exactly one extra reset
-  // on the shared MseAppendPipe per accepted re-anchor — observed as exactly
+  // on the shared MseAppendPipe per accepted seek — observed as exactly
   // one additional SourceBuffer `abort()` (the START reset is the baseline).
   await waitFor(() => sourceBuffer.abortCalls >= abortsBefore + 1);
   expect(sourceBuffer.abortCalls).toBe(abortsBefore + 1);
   expect(controller.state).toBe('playing');
 
-  // The seek re-anchors the SourceBuffer to the target: the trimmed conversion
+  // The seek restarts the SourceBuffer at the target: the trimmed conversion
   // rebases its output timestamps to zero, so the buffer must be told the new
   // position before the fresh init/media lands — else the buffered window
   // collapses to [0, fragment duration] and the element seeks forever.
   expect(sourceBuffer.timestampOffsets).toEqual([targetSeconds]);
 
-  // (ii) The bytes queued after the re-anchor start with an init segment:
+  // (ii) The bytes queued after the restart start with an init segment:
   // wait until the first append after the SEEK's parser abort is the fresh
   // init (the aborted SourceBuffer cannot accept the fresh moof before the
   // reset lands). The `>= appendedBefore` guard keeps the predicate from
@@ -303,7 +302,7 @@ async function assertSeekReanchor(config: {
   expect(isFtypLed(sourceBuffer.appended[firstAppendAfterAbort])).toBe(true);
 
   // Strict ordering at the SourceBuffer: the parser abort, then the timestamp
-  // re-anchor to the seek target, then the fresh init segment.
+  // reset to the seek target, then the fresh init segment.
   const timestampOffsetIndex = sourceBuffer.eventLog.indexOf(`timestampOffset:${targetSeconds}`);
   const freshAppendIndex = sourceBuffer.eventLog.findIndex(
     (entry, index) => index > seekAbortIndex && entry.startsWith('append:'),
@@ -324,7 +323,7 @@ function isFtypLed(bytes: Uint8Array | undefined): boolean {
 /** Loads the real progressive fixture and returns its ready playback + metadata. */
 async function loadRealPlayback(): Promise<ReadyMediaLoad> {
   const result = await inspectMediaLibrary(
-    new GatedByteSource(progressiveMp4Fixture({ seconds: SEEKABLE_SECONDS })),
+    new PacedByteSource(progressiveMp4Fixture({ seconds: SEEKABLE_SECONDS })),
     { capabilities: permissiveCapabilities() },
   );
   expect(result.status).toBe('ready');
@@ -353,7 +352,7 @@ function mainMseHarness(ready: ReadyMediaLoad): MseHarness {
   };
 }
 
-/** Fast, permissive capability snapshot matching the other seam specs. */
+/** Fast, permissive capability snapshot matching the other pipeline specs. */
 function permissiveCapabilities(): PlaybackCapabilities {
   return {
     canConstructWorkerMse: () => false,
@@ -406,13 +405,13 @@ function workerMseHarness(ready: ReadyMediaLoad): MseHarness {
 
 // ---- scenario groups ---------------------------------------------------------
 
-describe('MSE seek re-anchor (worker-MSE composition)', () => {
-  it('runs seek-reanchor over the real pipeline through the worker root', async () => {
+describe('MSE seek timestamp reset (worker-MSE composition)', () => {
+  it('runs a real seek over the pipeline through the worker root', async () => {
     const ready = await loadRealPlayback();
     const harness = workerMseHarness(ready);
     const playback: MediaPlayback = ready.playback;
     try {
-      await assertSeekReanchor({
+      await assertSeekRestart({
         load: { loadGeneration: 1, playback, sink: harness.sink },
         sourceBuffer: harness.sourceBuffer,
         targetSeconds: TARGET_SECONDS,
@@ -423,13 +422,13 @@ describe('MSE seek re-anchor (worker-MSE composition)', () => {
   });
 });
 
-describe('MSE seek re-anchor (main-thread MSE fallback)', () => {
-  it('runs seek-reanchor over the real pipeline through the shared main pipe', async () => {
+describe('MSE seek timestamp reset (main-thread MSE fallback)', () => {
+  it('runs a real seek over the pipeline through the shared main pipe', async () => {
     const ready = await loadRealPlayback();
     const harness = mainMseHarness(ready);
     const playback: MediaPlayback = ready.playback;
     try {
-      await assertSeekReanchor({
+      await assertSeekRestart({
         load: { loadGeneration: 1, playback, sink: harness.sink },
         sourceBuffer: harness.sourceBuffer,
         targetSeconds: TARGET_SECONDS,

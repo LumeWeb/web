@@ -1,19 +1,21 @@
 /**
- * Fixture contract for the browser-decode requirement.
+ * The browser-decode fixture: the committed AVC/AAC progressive-MP4 bytes
+ * (`browser-decodable-avc-aac.mp4`) and the pinned facts that keep the
+ * normalized-MSE decode-acceptance suite honest.
  *
  * These tests pin the committed state: a genuinely browser-decodable AVC/AAC
- * progressive-MP4 fixture (`browser-decodable-avc-aac.mp4`) is committed, its
- * sha256 is pinned in `src/__tests__/fixtures/browser-decodable-fixture.ts`,
- * and the normalized-MSE decode-acceptance suite runs against it. The contract
- * (what the fixture must be, its pinned sha256, and its regeneration path)
- * lives in `src/__tests__/fixtures/browser-decodable-fixture.ts` and is
- * reproduced by `src/__fixtures__/media/generate-browser-decodable-fixture.mjs`.
+ * progressive-MP4 fixture is committed, its sha256 is pinned in
+ * `src/__tests__/fixtures/browser-decodable-fixture.ts`, and the
+ * normalized-MSE decode-acceptance suite runs against it. What the fixture
+ * must be, its pinned sha256, and its regeneration path live in
+ * `src/__tests__/fixtures/browser-decodable-fixture.ts` and are reproduced by
+ * `src/__fixtures__/media/generate-browser-decodable-fixture.mjs`.
  *
- * The node-only half locks the integrity facts: (a) the bytes returned by the
+ * The node-only half checks the integrity facts: (a) the bytes returned by the
  * browser-safe module hash to the pinned sha256 AND match the committed
  * `.mp4` on disk byte-for-byte; (b) the returned bytes are structurally the
  * 2-track avc+mp4a moov-first progressive file with a complete `mdat`; (c) the
- * tracked demo BBB fixtures remain DISQUALIFIED (single video track, truncated
+ * tracked demo BBB fixtures stay DISQUALIFIED (single video track, truncated
  * `mdat`), so substituting a demo fixture fails RED here first.
  */
 import { describe, expect, it } from 'vitest';
@@ -25,9 +27,9 @@ import {
 
 const IN_NODE = typeof document === 'undefined';
 
-describe('browser-decodable AVC/AAC fixture contract', () => {
+describe('browser-decodable AVC/AAC fixture', () => {
   it('a real fixture is committed: the availability flag is on, sha pinned, bytes resolvable (browser-safe)', () => {
-    // The fixture generation contract has been fulfilled: HAS is true and the
+    // The fixture generation requirement is fulfilled: HAS is true and the
     // sha is a pinned 64-hex hash (not the '<pending' sentinel).
     expect(HAS_BROWSER_DECODABLE_FIXTURE).toBe(true);
     expect(BROWSER_DECODABLE_FIXTURE_SHA256).not.toContain('<pending');
@@ -37,13 +39,12 @@ describe('browser-decodable AVC/AAC fixture contract', () => {
     expect(bytes.byteLength).toBeGreaterThan(0);
   });
 
-  it('a committed fixture must flip the availability flag AND pin its sha256 (contract lock)', () => {
-    // This is the contract tripwire: flipping HAS_BROWSER_DECODABLE_FIXTURE to
-    // true while the sha256 sentinel is still un-pinned is always a contract
-    // violation, because the acceptance tests would run without committed bytes.
-    // `Boolean(...)` widens the literal-typed const so the open/pinned
-    // cross-check below stays type-legal while the flag value can still
-    // change — the comparison is the tripwire.
+  it('a committed fixture must flip the availability flag AND pin its sha256', () => {
+    // Flipping HAS_BROWSER_DECODABLE_FIXTURE to true while the sha256 sentinel
+    // is still un-pinned is a mistake: the acceptance tests would run without
+    // committed bytes. `Boolean(...)` widens the literal-typed const so the
+    // open/pinned cross-check below stays type-legal while the flag value can
+    // still change — the comparison catches the mismatch.
     const flagOpen = Boolean(HAS_BROWSER_DECODABLE_FIXTURE);
     const hashPinned = !BROWSER_DECODABLE_FIXTURE_SHA256.includes('<pending');
     expect(flagOpen ? hashPinned : true).toBe(true);
@@ -66,7 +67,7 @@ describe('browser-decodable AVC/AAC fixture contract', () => {
       expect(Array.from(embedded)).toEqual(Array.from(committed));
     });
 
-    it('the committed fixture satisfies the structural contract: 2 tracks, avc+mp4a, distinct ids, complete mdat', () => {
+    it('the committed fixture is structurally 2 tracks, avc+mp4a, distinct ids, complete mdat', () => {
       const bytes = browserDecodableFixtureBytes();
       const profile = structuralProfile(bytes);
       // Find duplicate ids / sample counts like the generator's validator:
@@ -79,7 +80,7 @@ describe('browser-decodable AVC/AAC fixture contract', () => {
       expect(profile.reason).not.toContain('truncated');
     });
 
-    it('the tracked demo BBB fixtures do not satisfy the contract (single video track, truncated mdat)', async (ctx) => {
+    it('the tracked demo BBB fixtures stay disqualified (single video track, truncated mdat)', async (ctx) => {
       const { fs, path, url } = await Promise.all([
         import('node:fs'),
         import('node:path'),
