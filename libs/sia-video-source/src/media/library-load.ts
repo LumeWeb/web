@@ -47,6 +47,30 @@ import { mediaLibrarySource } from './library-source.ts';
 /** Minimum media-fragment duration in seconds; fragments break on keyframes. */
 const DEFAULT_FRAGMENT_SECONDS = 1;
 
+/**
+ * How far inside the media's true end a seek may still point. A trimmed
+ * conversion serves the fragment that CONTAINS the target, which starts at the
+ * keyframe at-or-before it and ends at the final sample; a target at or past
+ * that final sample leaves the run nothing to emit and it completes as an
+ * "incomplete CMAF stream". The guard keeps the clamped target inside the last
+ * reachable fragment while still letting the user land as close to the tail as
+ * the media allows.
+ */
+const SEEK_TAIL_GUARD_SECONDS = 0.25;
+
+/**
+ * Clamps a seek target to a position the trimmed conversion can actually
+ * serve. `servableEndSeconds` is the media's true end (the largest sample end
+ * timestamp across tracks, from the shared input's sample tables — not the
+ * metadata duration, which can overshoot the real content). A request beyond
+ * that extent would trim every sample out and come through as a broken
+ * stream, so the target is pulled back inside the last reachable fragment
+ * instead.
+ */
+export function clampSeekTarget(trimStart: number, servableEndSeconds: number): number {
+  return Math.max(0, Math.min(trimStart, servableEndSeconds - SEEK_TAIL_GUARD_SECONDS));
+}
+
 /** MSE-output audio preference: AAC first, then Opus, then MP3. */
 const AUDIO_CODEC_PREFERENCE: readonly MediaCodec[] = ['aac', 'opus', 'mp3'];
 
@@ -259,6 +283,10 @@ function createMediaPlayback(options: {
   // The single in-flight restart driver; a restart while it runs only parks a
   // newer target for its next pass.
   let restartDriver: null | Promise<void> = null;
+  // The media's true end (largest sample end across tracks), computed once on
+  // the first restart and reused: the restart driver clamps every seek target
+  // against it, and the shared input's sample tables give it without decoding.
+  let servableEnd: null | Promise<null | number> = null;
 
   const cancel = (): void => {
     const run = current;
@@ -270,6 +298,16 @@ function createMediaPlayback(options: {
     assembly.disposed = true;
     cancel();
     input.dispose();
+  };
+
+  /**
+   * Resolves the media's true end timestamp once and reuses it for every
+   * restart. A duration query that fails (disposed input, format quirk) yields
+   * null so the driver leaves the target unclamped rather than guessing.
+   */
+  const servableEndSeconds = (): Promise<null | number> => {
+    servableEnd ??= input.computeDuration().catch(() => null);
+    return servableEnd;
   };
 
   /** Executes one armed run, reporting only while it is the current run. */
@@ -289,7 +327,10 @@ function createMediaPlayback(options: {
         return;
       }
       // The run ends cleanly only when init arrived and every moof/mdat pair
-      // was completed during execution.
+      // was completed during execution. A legitimate tail trim never gets
+      // here: the restart driver clamps the seek target inside the last
+      // reachable fragment, so an empty or dangling tail run means the media
+      // genuinely cannot be serviced, not just that the target overshot.
       if (!assembly.initEmitted || assembly.moof !== null || !assembly.mediaEmitted) {
         onError?.(new Error('conversion ended with an incomplete CMAF stream'));
         return;
@@ -318,6 +359,14 @@ function createMediaPlayback(options: {
         if (target === null) return;
         pendingSeekTarget = null;
         const previous = current;
+        // The seek is a request for the newest position, never a demand to
+        // break: a target past the media's true end (the metadata duration can
+        // overshoot the real samples) must clamp back inside the last
+        // reachable fragment instead of trimming every sample out. The sink
+        // already applied the seek's timestamp offset, so the clamped content
+        // still lands on the element near the requested position.
+        const end = await servableEndSeconds();
+        const trimStart = end === null ? target : clampSeekTarget(target, end);
         // Arming the replacement first bumps the run ordinal, so the pending
         // run's callbacks go stale before its conversion is cancelled; its
         // cancellation can then never assemble boxes into the sink or report.
@@ -325,7 +374,7 @@ function createMediaPlayback(options: {
           assembly,
           audioTrack,
           input,
-          trimStart: target,
+          trimStart,
           videoTrack,
         });
         cancelConversion(previous);
