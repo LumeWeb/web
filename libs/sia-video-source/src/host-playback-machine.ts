@@ -141,15 +141,15 @@ export type HostReportKind = (typeof hostReportKind)[keyof typeof hostReportKind
 
 /**
  * The recovery/restart reasons the machine records in decisions and context.
- * Includes `unsupported` (a terminal `load.failed` records a repairable repair
- * with its own kind) alongside the restart triggers.
+ * A terminal `load.failed` keeps a repair owed only for the transport failure
+ * kind (`network`), the one a user action can repair; an unsupported container
+ * is not repairable and records no reason.
  */
 export const recoveryReason = {
   decode: 'decode',
   native: 'native',
   network: 'network',
   seek: 'seek',
-  unsupported: 'unsupported',
 } as const;
 
 /** A recovery/restart reason; see {@link recoveryReason}. */
@@ -400,7 +400,7 @@ function activeLoadTransitions(
 
   // A transport/fatal failure never reloads a healthy load; it surfaces now.
   // Network stays repairable by user action; an unsupported container is not.
-  const recordFatal = (repairable: boolean) =>
+  const recordFatal = () =>
     reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
       const kind = event.type === hostPlaybackEvent.loadFailed ? event.kind : hostReportKind.decode;
       const resumeSeconds = resumeOf(event);
@@ -409,7 +409,7 @@ function activeLoadTransitions(
         ...ctx,
         attempt: 0,
         recovery: null,
-        repairOwed: repairable ? { reason: kind, seconds: resumeSeconds } : null,
+        repairOwed: kind === hostReportKind.network ? { reason: kind, seconds: resumeSeconds } : null,
       };
     });
 
@@ -446,7 +446,7 @@ function activeLoadTransitions(
     transition(hostPlaybackEvent.seekResolved, self),
 
     // Transport and fatal failures surface immediately; they never reload.
-    transition(hostPlaybackEvent.loadFailed, hostPlaybackState.failed, guard(isTerminalFailure), recordFatal(true)),
+    transition(hostPlaybackEvent.loadFailed, hostPlaybackState.failed, guard(isTerminalFailure), recordFatal()),
     transition(
       hostPlaybackEvent.loadFailed,
       hostPlaybackState.failed,
@@ -617,7 +617,7 @@ function pausePendingTransitions(decisions: HostDecision[]): Transition<string>[
         ...ctx,
         attempt: 0,
         recovery: null,
-        repairOwed: { reason: kind, seconds: resumeSeconds },
+        repairOwed: kind === hostReportKind.network ? { reason: kind, seconds: resumeSeconds } : null,
       };
     });
 
@@ -727,7 +727,7 @@ function recoveringTransitions(decisions: HostDecision[]): Transition<string>[] 
         ...ctx,
         attempt: 0,
         recovery: null,
-        repairOwed: { reason: kind, seconds: resumeSeconds },
+        repairOwed: kind === hostReportKind.network ? { reason: kind, seconds: resumeSeconds } : null,
       };
     });
 

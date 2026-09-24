@@ -424,6 +424,32 @@ describe('transport failure', () => {
   });
 });
 
+describe('an unsupported container', () => {
+  it('is terminal: the error surfaces, no repair is owed, and an explicit play stays failed', () => {
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+
+    const decisions = machine.send({
+      kind: hostReportKind.unsupported,
+      resumeSeconds: 8,
+      type: hostPlaybackEvent.loadFailed,
+    });
+    expect(decisions).toEqual([{ error: hostReportKind.unsupported, kind: hostDecisionKind.reportError }]);
+    expect(machine.current).toBe(hostPlaybackState.failed);
+    expect(machine.attempt).toBe(0);
+    expect(machine.repairOwed).toBeNull();
+
+    // An unsupported container cannot be repaired, so an explicit play must
+    // not restart the identical source: no decision and the state stays failed.
+    expect(machine.send({ type: hostPlaybackEvent.play })).toEqual([]);
+    expect(machine.current).toBe(hostPlaybackState.failed);
+
+    // The same for an explicit seek: no fresh load attempt.
+    expect(machine.send({ seconds: 30, type: hostPlaybackEvent.seek })).toEqual([]);
+    expect(machine.current).toBe(hostPlaybackState.failed);
+  });
+});
+
 describe('moving between sources', () => {
   it('a fresh source drops every trace of the previous recovery', () => {
     const machine = readyMachine();
