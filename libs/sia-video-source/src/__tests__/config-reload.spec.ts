@@ -39,6 +39,7 @@ import {
   type MainToWorkerMessage,
   MainToWorkerMessageType,
   PROTOCOL_VERSION,
+  type WorkerMode,
   type WorkerToMainMessage,
   WorkerToMainMessageType,
 } from '../protocol.ts';
@@ -88,7 +89,7 @@ function appMetadata(): AppMetadata {
   return { appId: 'test-app-id', callbackUrl: '', description: 'test', logoUrl: '', name: 'app', serviceUrl: 'https://app.example' };
 }
 
-/** attach + HELLO_OK (seed-less) → a ready, main-mode host. */
+/** attach + HELLO_OK + ATTACH_OK (seed-less) → a ready, main-mode host. */
 function attachAndHandshake(): { host: SiaVideoSource; target: HTMLVideoElement; worker: FakeWorker } {
   const worker = new FakeWorker();
   const host = new SiaVideoSource({
@@ -98,6 +99,7 @@ function attachAndHandshake(): { host: SiaVideoSource; target: HTMLVideoElement;
   const target = document.createElement('video');
   host.attach(target);
   replyHelloOk(worker);
+  replyAttachOk(worker);
   return { host, target, worker };
 }
 
@@ -128,6 +130,11 @@ function newestAttach(worker: FakeWorker): { requestId: number; type: MainToWork
   const attach = worker.sent.filter((m) => m.type === MainToWorkerMessageType.ATTACH).at(-1);
   if (!attach || !('requestId' in attach)) throw new Error('no ATTACH on the wire');
   return attach;
+}
+
+/** Replies an ATTACH_OK echoing the newest posted ATTACH's request id. */
+function replyAttachOk(worker: FakeWorker, mode: WorkerMode = 'main'): void {
+  worker.reply({ mode, requestId: newestAttach(worker).requestId, type: WorkerToMainMessageType.ATTACH_OK });
 }
 
 /** Replies a HELLO_OK echoing the newest HELLO, with optional field overrides. */
@@ -631,5 +638,208 @@ describe('SiaVideoSource.reloadConfiguration', () => {
     await settle();
     expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.APP_KEY)).toHaveLength(0);
     expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.ATTACH)).toHaveLength(0);
+  });
+
+  it.skipIf(!IN_BROWSER)('seek/play/playhead issued mid-reload never reach the superseded session', () => {
+    const { host, target, worker } = attachAndHandshake();
+    const oldLoadId = loadAndAcknowledge(host, worker, 'k');
+    // A genuinely playing element: the machine records the playback choice and
+    // the pre-reload session forwards the ordinary PLAY scoped to the old load.
+    target.dispatchEvent(new Event('play'));
+    worker.sent.length = 0;
+
+    // The reload opens a NOT-ready window; a seek, a play, and a playhead tick
+    // landing inside it must be held (SEEK buffered, PLAY/PLAYHEAD dropped),
+    // never posted against the stale session's request id.
+    host.reloadConfiguration();
+    target.currentTime = 12.5;
+    target.dispatchEvent(new Event('seeking'));
+    target.dispatchEvent(new Event('play'));
+    target.dispatchEvent(new Event('timeupdate'));
+
+    // Only the handshake control flow has gone out; no SEEK/PLAY/PLAYHEAD is on
+    // the wire, and in particular nothing carries the superseded load's id.
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.HELLO)).toHaveLength(1);
+    for (const type of [
+      MainToWorkerMessageType.SEEK,
+      MainToWorkerMessageType.PLAY,
+      MainToWorkerMessageType.PLAYHEAD,
+    ]) {
+      expect(worker.sent.filter((m) => m.type === type)).toEqual([]);
+    }
+    expect(
+      worker.sent.filter((m) => 'requestId' in m && m.requestId === oldLoadId),
+    ).toEqual([]);
+
+    // The intent only lands after the fresh load replays on ATTACH_OK.
+    replyHelloOk(worker);
+    const attach = newestAttach(worker);
+    worker.sent.length = 0;
+    worker.reply({ mode: 'main', requestId: attach.requestId, type: WorkerToMainMessageType.ATTACH_OK });
+    const source = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE);
+    expect(source).toHaveLength(1);
+    expect(source[0].requestId).not.toBe(oldLoadId);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('replays a fresh SOURCE before the buffered SEEK and a single scoped PLAY', () => {
+    const { host, target, worker } = attachAndHandshake();
+    const oldLoadId = loadAndAcknowledge(host, worker, 'k');
+    target.dispatchEvent(new Event('play')); // preserved playing intent
+    worker.sent.length = 0;
+
+    host.reloadConfiguration();
+    target.currentTime = 12.5;
+    target.dispatchEvent(new Event('seeking')); // buffered mid-reload
+    replyHelloOk(worker);
+    const attach = newestAttach(worker);
+    worker.sent.length = 0;
+    worker.reply({ mode: 'main', requestId: attach.requestId, type: WorkerToMainMessageType.ATTACH_OK });
+
+    // Fresh SOURCE first, then the buffered SEEK rebased to the fresh load, and
+    // exactly one PLAY scoped to it — never the stale session's id.
+    const types = worker.sent.map((m) => m.type);
+    expect(types).toEqual([
+      MainToWorkerMessageType.SOURCE,
+      MainToWorkerMessageType.SEEK,
+      MainToWorkerMessageType.PLAY,
+    ]);
+    const source = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE);
+    const seeks = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK);
+    const plays = worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY);
+    expect(source).toHaveLength(1);
+    expect(source[0].requestId).not.toBe(oldLoadId);
+    expect(seeks).toHaveLength(1);
+    expect(seeks[0]).toMatchObject({ time: 12.5, type: MainToWorkerMessageType.SEEK });
+    expect(seeks[0].requestId).toBe(source[0].requestId);
+    expect(plays).toHaveLength(1);
+    expect(plays[0].requestId).toBe(source[0].requestId);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('a paused mid-reload intent produces no PLAY on the replayed load', () => {
+    const { host, target, worker } = attachAndHandshake();
+    loadAndAcknowledge(host, worker, 'k');
+    expect(targetPaused(host)).toBe(true); // the user never asked to play
+    worker.sent.length = 0;
+
+    host.reloadConfiguration();
+    target.currentTime = 12.5;
+    target.dispatchEvent(new Event('seeking')); // buffered mid-reload
+    replyHelloOk(worker);
+    const attach = newestAttach(worker);
+    worker.sent.length = 0;
+    worker.reply({ mode: 'main', requestId: attach.requestId, type: WorkerToMainMessageType.ATTACH_OK });
+
+    // The rebuilt load replays with the buffered seek rebased, but nothing
+    // re-states PLAY for a user who never asked for it.
+    const types = worker.sent.map((m) => m.type);
+    expect(types).toEqual([MainToWorkerMessageType.SOURCE, MainToWorkerMessageType.SEEK]);
+    const source = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE);
+    const seeks = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK);
+    expect(seeks[0]).toMatchObject({ time: 12.5 });
+    expect(seeks[0].requestId).toBe(source[0].requestId);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('ignores an ATTACH_OK that answers a superseded reload', () => {
+    const { host, target, worker } = attachAndHandshake();
+    loadAndAcknowledge(host, worker, 'k');
+    target.dispatchEvent(new Event('play'));
+    worker.sent.length = 0;
+
+    host.reloadConfiguration(); // reload #1
+    replyHelloOk(worker); // HELLO_OK #1 → ATTACH #1
+    const firstAttach = newestAttach(worker);
+
+    // A second reload supersedes #1 (generation bump) before #1's ATTACH_OK
+    // is answered.
+    host.reloadConfiguration();
+    const secondHelloId = latestHelloRequestId(worker);
+    worker.sent.length = 0;
+
+    // The superseded reload's ATTACH_OK arrives: it must not replay a source.
+    worker.reply({ mode: 'main', requestId: firstAttach.requestId, type: WorkerToMainMessageType.ATTACH_OK });
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+
+    // The CURRENT handshake completes normally and replays exactly once.
+    worker.reply({
+      features: { workerMse: false },
+      publicKey: new Uint8Array(32),
+      requestId: secondHelloId,
+      type: WorkerToMainMessageType.HELLO_OK,
+      version: PROTOCOL_VERSION,
+    });
+    const secondAttach = newestAttach(worker);
+    worker.sent.length = 0;
+    worker.reply({ mode: 'main', requestId: secondAttach.requestId, type: WorkerToMainMessageType.ATTACH_OK });
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('detaching mid-reload posts teardown and flushes no pending traffic', () => {
+    const { host, target, worker } = attachAndHandshake();
+    loadAndAcknowledge(host, worker, 'k');
+    worker.sent.length = 0;
+
+    // Seek + play land inside the reload's NOT-ready window and buffer.
+    host.reloadConfiguration();
+    target.currentTime = 12.5;
+    target.dispatchEvent(new Event('seeking'));
+    target.dispatchEvent(new Event('play'));
+
+    // Detaching mid-reload must post the teardown DIRECTLY (the host is not
+    // ready, so a buffering #send would have swallowed it) and must not flush
+    // the buffered intent into the parting session.
+    host.detach();
+    const types = worker.sent.map((m) => m.type);
+    expect(types.at(-1)).toBe(MainToWorkerMessageType.DETACH);
+    expect(
+      types.filter((t) =>
+        t === MainToWorkerMessageType.SEEK ||
+        t === MainToWorkerMessageType.PLAY ||
+        t === MainToWorkerMessageType.PLAYHEAD,
+      ),
+    ).toEqual([]);
+
+    // A late HELLO_OK for the abandoned reload must not ATTACH or flush.
+    replyHelloOk(worker);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.ATTACH)).toHaveLength(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
+  });
+
+  it.skipIf(!IN_BROWSER)('a repeated reload drops intent buffered during the first reload window', () => {
+    const { host, target, worker } = attachAndHandshake();
+    const oldLoadId = loadAndAcknowledge(host, worker, 'k');
+    target.dispatchEvent(new Event('play')); // preserved playing intent
+    worker.sent.length = 0;
+
+    // First reload: a seek during its window is buffered and must never reach
+    // the stale session.
+    host.reloadConfiguration();
+    target.currentTime = 12.5;
+    target.dispatchEvent(new Event('seeking'));
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(0);
+    expect(worker.sent.filter((m) => 'requestId' in m && m.requestId === oldLoadId)).toEqual([]);
+
+    // A second reload before anything returns supersedes it: the first window's
+    // buffered SEEK is scrapped, never flushed by the newest handshake.
+    host.reloadConfiguration();
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(0);
+    replyHelloOk(worker); // answers the NEWEST HELLO
+    const attach = newestAttach(worker);
+    worker.sent.length = 0;
+    worker.reply({ mode: 'main', requestId: attach.requestId, type: WorkerToMainMessageType.ATTACH_OK });
+
+    // Fresh load + re-stated PLAY (the preserved choice), with NO buffered seek.
+    const sources = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE);
+    expect(sources).toHaveLength(1);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(0);
+    const plays = worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY);
+    expect(plays).toHaveLength(1);
+    expect(plays[0].requestId).toBe(sources[0].requestId);
+    host.destroy();
   });
 });

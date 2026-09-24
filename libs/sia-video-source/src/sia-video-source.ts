@@ -371,6 +371,15 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // prove it was superseded and drop its APP_KEY/ATTACH instead of applying a
   // stale configuration to the worker.
   #attachGeneration = 0;
+  // The requestId of the most recently posted ATTACH and the handshake
+  // generation it was posted under. Together they correlate an ATTACH_OK to
+  // the ATTACH it answers: the requestId alone would still let a superseded
+  // reload's ATTACH_OK match if a newer reload had posted a HELLO but not yet
+  // its own ATTACH, so the generation must also be current. Cleared at every
+  // handshake start and on detach/destroy, so an in-flight ATTACH_OK from a
+  // dead handshake can never gate the session.
+  #attachGenerationAtAttach: null | number = null;
+  #attachRequestId: null | RequestId = null;
 
   // A recoverable decode/network error on the ACTIVE load while the user is
   // explicitly paused never reloads behind them; the machine stores the resume
@@ -565,12 +574,20 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#destroyed = true;
     // A destroy invalidates any pending handshake work: bumping the generation
     // makes an async seed/encryption chain captured under an older generation
-    // drop itself, and clearing the correlation id makes a late HELLO_OK gate
-    // nothing (the override `detach` runs through `super.destroy` too, so this
-    // is defense-in-depth for the instant before that).
+    // drop itself, and clearing the correlation ids makes a late HELLO_OK or
+    // ATTACH_OK gate nothing (the override `detach` runs through `super.destroy`
+    // too, so this is defense-in-depth for the instant before that). The host
+    // is not-ready and the handshake buffer is emptied: there is no session
+    // left to flush into.
     this.#attachGeneration += 1;
     this.#helloRequestId = null;
-    this.#send({ type: MainToWorkerMessageType.DESTROY });
+    this.#attachRequestId = null;
+    this.#attachGenerationAtAttach = null;
+    this.#ready = false;
+    this.#pending = [];
+    // Teardown is posted DIRECTLY (never through #send's not-ready gate): a
+    // destroy arriving mid-reload must still reach the worker.
+    this.#post({ type: MainToWorkerMessageType.DESTROY });
     const worker = this.#worker;
     this.#worker = null;
 
@@ -602,10 +619,16 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   detach(): void {
     // A detach is a handshake boundary: an async seed/encryption chain from a
     // reload still in flight must not apply into the detached session (the
-    // generation bump drops it), and a late HELLO_OK must not gate anything
-    // (the correlation id is cleared).
+    // generation bump drops it), and a late HELLO_OK or ATTACH_OK must not gate
+    // anything (the correlation ids are cleared). The host is left not-ready
+    // with an empty handshake buffer: a detach mid-reload must not flush the
+    // buffered intent into the parting session.
     this.#attachGeneration += 1;
     this.#helloRequestId = null;
+    this.#attachRequestId = null;
+    this.#attachGenerationAtAttach = null;
+    this.#ready = false;
+    this.#pending = [];
     // A detached host's recovery window is over: close any open observation
     // (a re-attach replay re-announces if it recovers again).
     this.#closeRecoveryObservation();
@@ -620,7 +643,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.target?.removeEventListener('play', this.#onPlay);
     this.target?.removeEventListener('pause', this.#onPause);
     this.target?.removeEventListener('ended', this.#onEnded);
-    this.#send({ type: MainToWorkerMessageType.DETACH });
+    // Teardown is posted DIRECTLY (never through #send's not-ready gate): a
+    // detach arriving mid-reload must still reach the worker.
+    this.#post({ type: MainToWorkerMessageType.DETACH });
     super.detach();
   }
   /** Reloads the current source through the engine, clearing any stored error. */
@@ -947,10 +972,21 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     void this.#appendPipe?.evictBackBuffer();
   }
 
-  #flushPending(): void {
+  // Replays the ONE host intent a rebuilt load honors from the handshake
+  // buffer: a user SEEK, rebased onto the fresh SOURCE's request id (it was
+  // buffered while the host was not-ready, under the request id of the
+  // superseded session). PLAY is never replayed from the buffer — it is
+  // re-stated from the machine's playback choice at the ATTACH_OK boundary —
+  // and PLAYHEAD of the superseded session was dropped outright while the host
+  // was not-ready (see `#send`).
+  #flushBufferedSeek(): void {
     const pending = this.#pending;
     this.#pending = [];
-    for (const message of pending) this.#post(message);
+    const requestId = this.#requestId ?? nextRequestId();
+    for (const message of pending) {
+      if (message.type !== MainToWorkerMessageType.SEEK) continue;
+      this.#post({ ...message, requestId });
+    }
   }
 
   // Pauses and repositions an element stranded mid-`seeking` back onto
@@ -1093,6 +1129,23 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     const message = event.data;
     switch (message.type) {
       case WorkerToMainMessageType.ATTACH_OK:
+        // Correlation: an ATTACH_OK echoes the requestId of the ATTACH it
+        // answers, and that ATTACH must have been posted by the CURRENT
+        // handshake generation. A reply still in flight from a SUPERSEDED
+        // reload carries an older id and/or an older generation — principally
+        // after a newer reload started (generation bump) but before its own
+        // ATTACH was posted, where the requestId alone could still match — so
+        // it must not gate the session nor replay a source.
+        if (
+          message.requestId !== this.#attachRequestId ||
+          this.#attachGenerationAtAttach !== this.#attachGeneration
+        ) {
+          return;
+        }
+        // Consumed: a second ATTACH_OK answering the same ATTACH must not
+        // replay the source again.
+        this.#attachRequestId = null;
+        this.#attachGenerationAtAttach = null;
         this.#mode = message.mode;
         // The worker accepted our HELLO; `version` is the protocol we spoke,
         // `mode` is the MSE construction site the worker picked for the session.
@@ -1111,13 +1164,28 @@ export class SiaVideoSource extends HTMLVideoElementHost {
           // resets but the playback choice survives it.
           this.#machine.send({ type: hostPlaybackEvent.sourceAttach });
           this.#resetLoadState();
+          // The fresh SOURCE goes out FIRST, while the host is still not-ready
+          // (`#ready` flips only below): that order is what makes the reload
+          // atomic — the rebuilt load is on the wire before any buffered intent
+          // is re-applied, so the rebased SEEK and the re-stated PLAY below are
+          // scoped to THIS load's request id, never the superseded session's.
           this.#sendSource();
+          this.#ready = true;
+          // Release the ONE surviving intent of the handshake window: a user
+          // SEEK, rebased onto the fresh load. PLAY is never replayed from the
+          // buffer (it is re-stated below from the machine's current choice),
+          // and PLAYHEAD was dropped while not-ready.
+          this.#flushBufferedSeek();
           if (shouldPlay) {
-            // Aimed at the fresh SOURCE's request id, so the worker honors it
-            // when that load completes (SEEK/PLAY are already request-scoped;
-            // this one must be too or a later load could mis-read it).
-            this.#send({ requestId: this.#requestId ?? nextRequestId(), type: MainToWorkerMessageType.PLAY });
+            // Re-stated SOLELY from the current machine playback choice (and
+            // the element's live paused state), aimed at the fresh SOURCE's
+            // request id so the worker honors it when that load completes —
+            // a PLAY the user buffered mid-reload is never resurrected here.
+            this.#post({ requestId: this.#requestId ?? nextRequestId(), type: MainToWorkerMessageType.PLAY });
           }
+        } else {
+          // With no source to replay, the session is simply ready.
+          this.#ready = true;
         }
         return;
       case WorkerToMainMessageType.CHUNK:
@@ -1204,7 +1272,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
           this.#reportError(workerErrorCode.unsupported, `worker protocol ${message.version}`);
           return;
         }
-        this.#ready = true;
+        // The session stays NOT-ready through HELLO_OK: host-originated intent
+        // buffered since `#startHandshake` is only released once the following
+        // ATTACH_OK has rebuilt the load (fresh SOURCE first), so nothing can
+        // reach the worker between HELLO and ATTACH_OK except the handshake
+        // control flow. Readiness flips in the ATTACH_OK handler.
         // The worker's handshake public key is not secret — only enough to
         // address the APP_KEY envelopes to this worker instance. It is
         // re-published with every HELLO_OK, so a re-attach re-handshakes with
@@ -1217,30 +1289,30 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         if ((this.#appKeySeedProvider || this.#sharingKeySeedProvider) && this.#workerPublicKey) {
           // #encryptAndSendSeeds only postMessages the APP_KEY envelopes after
           // awaiting the seed suppliers and the worker-key encryption, so
-          // posting ATTACH (and any queued SOURCE) synchronously here would
-          // reach the FIFO worker before the envelopes — the first load would
-          // then fail #ensureSdk with "No Sia SDK is available". Chain the
-          // ATTACH + flush on the envelope posts instead. That promise cannot
-          // reject: supplier/encryption failures are already reported as
-          // network errors inside #encryptAndSendSeed, so the session still
-          // proceeds and SOURCE fails the same way it would without a seed.
+          // posting ATTACH synchronously here would reach the FIFO worker
+          // before the envelopes — the first load would then fail #ensureSdk
+          // with "No Sia SDK is available". Chain the ATTACH on the envelope
+          // posts instead. That promise cannot reject: supplier/encryption
+          // failures are already reported as network errors inside
+          // #encryptAndSendSeed, so the session still proceeds and SOURCE
+          // fails the same way it would without a seed. The buffered intent is
+          // NOT flushed here — ATTACH_OK owns that release.
           void this.#encryptAndSendSeeds(this.#workerPublicKey, generation).then(() => {
             // A handshake superseded while its chain ran must not ATTACH: the
             // worker would re-attach under a stale configuration. (Each seed
             // envelope inside the chain is already generation-guarded too.)
             if (generation !== this.#attachGeneration) return;
-            this.#post({ requestId: nextRequestId(), type: MainToWorkerMessageType.ATTACH });
-            this.#flushPending();
+            this.#postAttach();
           });
           return;
         }
-        // Injected-SDK path: no APP_KEY envelope is ever exchanged, so
-        // ATTACH + the pending flush go straight out — there is nothing to
-        // order them behind, and they must not wait on an async chain that
-        // does not exist for this configuration. The stale-HELLO_OK exclusion
-        // above already guarantees this is the current handshake.
-        this.#post({ requestId: nextRequestId(), type: MainToWorkerMessageType.ATTACH });
-        this.#flushPending();
+        // Injected-SDK path: no APP_KEY envelope is ever exchanged, so ATTACH
+        // goes straight out — there is nothing to order it behind, and it must
+        // not wait on an async chain that does not exist for this
+        // configuration. The stale-HELLO_OK exclusion above already guarantees
+        // this is the current handshake. As in the seed path, the buffered
+        // intent is released only at the ATTACH_OK boundary.
+        this.#postAttach();
         return;
       }
       case WorkerToMainMessageType.LOG:
@@ -1475,6 +1547,19 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#logRequest(message);
   }
 
+  // Posts the session's ATTACH and records the correlation a valid ATTACH_OK
+  // must match: the ATTACH's requestId AND the handshake generation it was
+  // posted under. The generation half is essential — after a newer reload
+  // starts (generation bump) its ATTACH may not be posted yet, so a stale
+  // ATTACH_OK could still echo the newest requestId for a window; the
+  // generation check closes that race.
+  #postAttach(): void {
+    const requestId = nextRequestId();
+    this.#attachRequestId = requestId;
+    this.#attachGenerationAtAttach = this.#attachGeneration;
+    this.#post({ requestId, type: MainToWorkerMessageType.ATTACH });
+  }
+
   #reportError(kind: WorkerErrorCode, context?: string): void {
     if (this.#destroyed) return;
     // A fatal error ends all recovery ambitions: no unresolved seek needs a
@@ -1637,6 +1722,13 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   #send(message: MainToWorkerMessage): void {
     if (!this.#worker) return;
     if (!this.#ready) {
+      // While the session is negotiating (initial attach / re-attach / reload
+      // window, i.e. between HELLO and ATTACH_OK) host-originated intent must
+      // not leak into the stale session's request flow. SEEK is buffered (the
+      // ATTACH_OK boundary rebases it onto the fresh load), while PLAYHEAD
+      // belongs to a playhead that is NOT the current load's and is dropped
+      // outright so a rebuilt session never replays a stale position.
+      if (message.type === MainToWorkerMessageType.PLAYHEAD) return;
       this.#pending.push(message);
       return;
     }
@@ -1664,9 +1756,22 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   //   - remembers the HELLO's requestId as `#helloRequestId`, so only the
   //     HELLO_OK that actually answers THIS HELLO can act (HELLO_OK echoes the
   //     HELLO's requestId; a reply still in flight from an older HELLO carries
-  //     an older id and is discarded, never misattributed to this handshake).
+  //     an older id and is discarded, never misattributed to this handshake);
+  //   - re-opens a NOT-ready window: host-originated traffic is held back
+  //     (SEEK buffered, PLAYHEAD dropped, see `#send`) until the ATTACH_OK that
+  //     re-establishes the session, so a reload is atomic — nothing issued
+  //     mid-handshake reaches the worker before the rebuilt load exists;
+  //   - clears the previous handshake's ATTACH correlation and any intent still
+  //     buffered from a SUPERSEDED handshake's window — a repeated reload can
+  //     never resurrect the prior window's traffic (only the newest handshake's
+  //     buffer survives to its own ATTACH_OK).
   #startHandshake(): void {
     this.#attachGeneration += 1;
+    this.#ready = false;
+    this.#pending = [];
+    this.#attachRequestId = null;
+    this.#attachGenerationAtAttach = null;
+    this.#helloRequestId = null;
     const hello = this.#helloMessage();
     this.#helloRequestId = hello.requestId;
     this.#post(hello);

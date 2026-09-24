@@ -62,6 +62,18 @@ function helloRequestId(worker: FakeWorker): number {
   return hello.requestId;
 }
 
+/** The newest ATTACH the host posted — what an ATTACH_OK must echo. */
+function newestAttach(worker: FakeWorker): { requestId: number; type: MainToWorkerMessageType.ATTACH } {
+  const attach = worker.sent.filter((m) => m.type === MainToWorkerMessageType.ATTACH).at(-1);
+  if (!attach || !('requestId' in attach)) throw new Error('no ATTACH on the wire');
+  return attach;
+}
+
+/** Replies an ATTACH_OK echoing the newest posted ATTACH's request id. */
+function replyAttachOk(worker: FakeWorker, mode: 'main' | 'worker' = 'main'): void {
+  worker.reply({ mode, requestId: newestAttach(worker).requestId, type: WorkerToMainMessageType.ATTACH_OK });
+}
+
 /** Main-mode SOURCE_OK info (the host builds an object URL for it). */
 const mainInfo = {
   container: 'fmp4',
@@ -124,7 +136,7 @@ function mainSession(): { host: SiaVideoSource; target: HTMLVideoElement; worker
     type: WorkerToMainMessageType.HELLO_OK,
     version: PROTOCOL_VERSION,
   });
-  worker.reply({ mode: 'main', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
+  replyAttachOk(worker);
   return { host, target, worker };
 }
 
@@ -170,7 +182,7 @@ function workerSession(): { host: SiaVideoSource; target: HTMLVideoElement; work
     type: WorkerToMainMessageType.HELLO_OK,
     version: PROTOCOL_VERSION,
   });
-  worker.reply({ mode: 'worker', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
+  replyAttachOk(worker, 'worker');
   return { host, target, worker };
 }
 
@@ -299,11 +311,11 @@ describe('replaced-media-resource events (worker mode)', () => {
     worker.reply({
       features: { workerMse: true },
       publicKey: new Uint8Array(32),
-      requestId: 1,
+      requestId: helloRequestId(worker),
       type: WorkerToMainMessageType.HELLO_OK,
       version: PROTOCOL_VERSION,
     });
-    worker.reply({ mode: 'worker', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
+    replyAttachOk(worker, 'worker');
 
     const oldHandle = new MediaStream();
     host.src = 'k';
@@ -524,11 +536,11 @@ describe('replaced-media-resource events (main mode)', () => {
     worker.reply({
       features: { workerMse: false },
       publicKey: new Uint8Array(32),
-      requestId: 1,
+      requestId: helloRequestId(worker),
       type: WorkerToMainMessageType.HELLO_OK,
       version: PROTOCOL_VERSION,
     });
-    worker.reply({ mode: 'main', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
+    replyAttachOk(worker);
     host.src = 'k';
     const idA = newestSourceId(worker);
     worker.reply({ info: mainInfo, requestId: idA, type: WorkerToMainMessageType.SOURCE_OK });
