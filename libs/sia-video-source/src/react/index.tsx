@@ -37,6 +37,10 @@ import {
   type SiaLoadState,
 } from '../sia-load-feature.ts';
 import {
+  selectSiaProgress,
+  type SiaProgressState,
+} from '../sia-progress-feature.ts';
+import {
   selectSiaSourceInfo,
   type SiaSourceInfoState,
 } from '../sia-source-info-feature.ts';
@@ -237,6 +241,32 @@ export const SiaVideo = forwardRef<HTMLVideoElement, SiaVideoProps>(function Sia
  */
 export function useSiaLoad(): SiaLoadState | undefined {
   return usePlayer(selectSiaLoad);
+}
+
+/**
+ * Subscribes to the Sia reader-progress state of the nearest `<Player>`.
+ *
+ * Reads the same `selectSiaProgress` state the non-React store consumers use
+ * (via `usePlayer(selectSiaProgress)`), so one feature/store drives both. The
+ * store must explicitly configure the opt-in `siaProgressFeature`
+ * (`features: [...videoFeatures, ...siaFeatures, siaProgressFeature]`), which
+ * is deliberately not part of `siaFeatures`, and the host logger must be at
+ * `debug` for reader milestones to be forwarded and derived; a louder logger
+ * yields an inert state without errors.
+ *
+ * `retrying: true` means the worker is retrying the current read window
+ * (show `(retrying)`); `reading`/`reads` show `loading… (N fetches)`;
+ * `bytesRead` is the cumulative whole-MiB count of the current load. All
+ * counters reset at every load boundary.
+ *
+ * @returns The Sia reader-progress state for the attached media, or
+ *   `undefined` when the player store was built without
+ *   `siaProgressFeature`.
+ * @throws If called outside a `<Player>` (`usePlayer` requires the player
+ *   context).
+ */
+export function useSiaProgress(): SiaProgressState | undefined {
+  return usePlayer(selectSiaProgress);
 }
 
 /**

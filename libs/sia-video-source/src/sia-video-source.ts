@@ -55,6 +55,7 @@ import {
   type WorkerConfig,
   workerErrorCode,
   type WorkerErrorCode,
+  workerLogEventName,
   workerLogLevel,
   type WorkerLogLevel,
   workerMode,
@@ -152,6 +153,46 @@ export const siaSourceInfoChange = 'sia-source-info-change' as const;
 export type SiaSourceInfoChangeDetail =
   | { active: false }
   | { active: true; info: SourceInfo };
+
+/**
+ * The typed DOM event `SiaVideoSource` dispatches for every worker milestone
+ * `LOG` it receives: each accepted `LOG` message on the wire is surfaced with
+ * its own `detail`, verbatim: milestone (`name`), severity (`level`),
+ * owning load (`requestId`), the worker's scalar-only `detail` fields, and a
+ * per-host monotonic `sequence`. A diagnostic/progress consumer can derive
+ * reader state from real worker milestones instead of parsing log text. The
+ * host dispatches it on the attached `<video>` element (the same
+ * element-to-host forwarding pattern as `siaRecoveryChange`/`siaLoadChange`/
+ * `siaSourceInfoChange`), once per `LOG`: no extra worker messages, no
+ * protocol change, and entries may log/forward independently.
+ *
+ * Reader milestones (`read.*` / `bytes.*`) are debug-severity, so they only
+ * arrive when the host logger's level maps to a `debug` HELLO `log` threshold
+ * (see `logThresholdFor`); a host set louder than that sees only the
+ * info/warn/error lifecycle milestones. The existing
+ * `logger.child('worker')` console forwarding is unchanged; this event is
+ * the structured sibling of those log lines, additive to them.
+ */
+export const siaWorkerMilestoneChange = 'sia-worker-milestone-change' as const;
+
+/**
+ * The `siaWorkerMilestoneChange` payload: the wire `LOG` facts plus the
+ * host-side `sequence`. `detail` is the worker's scalar-only payload (never
+ * bytes, object references, or key material), defaulted to `{}` so field
+ * presence never depends on the wire's optional `detail` member.
+ */
+export interface SiaWorkerMilestoneDetail {
+  /** Scalar-only worker payload for the milestone; `{}` when the wire carried none. */
+  readonly detail: Readonly<Record<string, unknown>>;
+  /** Severity the worker assigned (see `workerLogLevel`). */
+  readonly level: WorkerLogLevel;
+  /** Coarse milestone name (see `WORKER_LOG_EVENT_NAMES`). */
+  readonly name: string;
+  /** Owning load, or `null` for connection-level events. */
+  readonly requestId: null | RequestId;
+  /** Per-host monotonic counter: 1 for the first milestone, +1 for each next. */
+  readonly sequence: number;
+}
 
 /**
  * Friendly names for the host→worker messages that carry a request identity,
@@ -280,6 +321,9 @@ export interface SiaVideoSourceOptions {
  * @fires progress - The worker delivered more bytes / buffered more media.
  * @fires emptied - The source was replaced or cleared and the stored error was
  *   dropped with it.
+ * @fires sia-worker-milestone-change - One accepted worker `LOG` milestone,
+ *   surfaced with its structured `SiaWorkerMilestoneDetail` for consumers that
+ *   derive diagnostic/progress state (see `siaProgressFeature`).
  */
 export class SiaVideoSource extends HTMLVideoElementHost {
   get engine(): null | Worker {
@@ -484,6 +528,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   readonly #machine = new HostPlaybackMachine();
 
   #mediaSource: MediaSource | null = null;
+
+  // Monotonic counter for the typed `sia-worker-milestone-change` event: bumps
+  // once per accepted worker LOG, never reset (consumers order milestones by
+  // it within one host instance's lifetime).
+  #milestoneSequence = 0;
 
   #mimeType: string | undefined;
 
@@ -919,7 +968,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       // optional).
       onDiag: (name, detail) => {
         const sink = this.#logger.child('host');
-        if (name === 'mse.evict') sink.debug(name, detail);
+        if (name === workerLogEventName.mseEvict) sink.debug(name, detail);
         else sink.warn(name, detail);
       },
       onError: (error) => this.#reportError(workerErrorCode.decode, errorDescription(error)),
@@ -1005,6 +1054,25 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // `#emitRecoveryDetail`.
   #emitLoadDetail(detail: SiaLoadChangeDetail): void {
     this.target?.dispatchEvent(new CustomEvent<SiaLoadChangeDetail>(siaLoadChange, { detail }));
+  }
+
+  // Emits the typed milestone event for one accepted worker LOG: same element
+  // dispatch path as the other typed events. The sequence counter increments
+  // per forwarded LOG, so consumers can order/dedupe milestones from a host
+  // that reloads multiple times across one session.
+  #emitMilestone(message: Parameters<typeof forwardWorkerLog>[1]): void {
+    this.#milestoneSequence += 1;
+    this.target?.dispatchEvent(
+      new CustomEvent<SiaWorkerMilestoneDetail>(siaWorkerMilestoneChange, {
+        detail: {
+          detail: message.detail ?? {},
+          level: message.level,
+          name: message.name,
+          requestId: message.requestId,
+          sequence: this.#milestoneSequence,
+        },
+      }),
+    );
   }
 
   // Emits the typed recovery-change event through the attached <video>
@@ -1478,6 +1546,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // and never carries key material); forwarded onto the host logger's
         // `worker` scope. Unknown severities are dropped silently inside.
         forwardWorkerLog(this.#logger, message);
+        // The structured sibling: the same LOG facts as a typed DOM event for
+        // diagnostic/progress consumers (an opt-in player feature mirrors it
+        // into store state). Console forwarding is unaffected.
+        this.#emitMilestone(message);
         return;
       case WorkerToMainMessageType.PROGRESS:
         if (message.requestId !== this.#requestId) return;

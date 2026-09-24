@@ -28,6 +28,7 @@
  * fatal failures from `onError`, mapping them onto their own `ERROR`
  * messaging.
  */
+import { workerLogEventName } from './protocol.ts';
 import { appendSegment, flushBuffer } from '@videojs/spf/dom';
 
 export interface MseAppendPipeOptions {
@@ -185,7 +186,7 @@ export class MseAppendPipe {
     } catch (error) {
       // Best-effort parser reset; nothing further to recover. The queued bytes
       // are dropped regardless, so this must never fail the pipeline.
-      this.#diag('mse.parser-reset-failed', { message: errorMessage(error) });
+      this.#diag(workerLogEventName.mseParserResetFailed, { message: errorMessage(error) });
     }
   }
 
@@ -207,7 +208,7 @@ export class MseAppendPipe {
       } catch (error) {
         // Best-effort timestamp assignment; nothing further to recover, but
         // reported.
-        this.#diag('mse.parser-reset-failed', { message: errorMessage(error) });
+        this.#diag(workerLogEventName.mseParserResetFailed, { message: errorMessage(error) });
       }
     }
   }
@@ -239,12 +240,12 @@ export class MseAppendPipe {
         // knows only TimeRanges, so `start`/`end` and the flushed span length
         // are ALL seconds — the field is named `seconds`, never a fabricated
         // byte count for what the browser discarded.
-        this.#diag('mse.evict', { end, seconds: end - start, start });
+        this.#diag(workerLogEventName.mseEvict, { end, seconds: end - start, start });
       } catch (error) {
         // SourceBuffer state can change between the range read and the remove;
         // eviction is a best-effort trim and must never fail the pipeline.
         // The swallow is unchanged, but the failed trim is now reported.
-        this.#diag('mse.evict-failed', { message: errorMessage(error) });
+        this.#diag(workerLogEventName.mseEvictFailed, { message: errorMessage(error) });
       }
       return true;
     }
@@ -281,7 +282,7 @@ export class MseAppendPipe {
       // endOfStream requires readyState 'open' and no in-flight updates; the
       // guards above cover both, so a racing platform rejection is a no-op
       // here. The swallow is unchanged, but that rejected EOS is now reported.
-      this.#diag('mse.eos-failed', { message: errorMessage(error) });
+      this.#diag(workerLogEventName.mseEosFailed, { message: errorMessage(error) });
     }
     this.#eosRequested = false;
   }

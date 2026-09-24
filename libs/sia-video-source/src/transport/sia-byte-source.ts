@@ -29,7 +29,7 @@ import {
   type SiaSdkLike,
 } from '../ranged-reader.ts';
 import { isSiaShareUrl, parseSiaShareUrl } from '../share-url.ts';
-import type { RequestId } from '../protocol.ts';
+import { type RequestId, workerLogEventName } from '../protocol.ts';
 
 /**
  * Construction options shared across every source one factory creates. A
@@ -246,7 +246,7 @@ export function createSiaByteSourceFactory(
     // owning SOURCE requestId rides the milestone (null when the factory is
     // driven without one) so `object.resolved` keeps its load affiliation.
     if (onMilestone !== undefined) {
-      onMilestone('object.resolved', requestId ?? null, { share: isSiaShareUrl(src), size: objectSize(object) });
+      onMilestone(workerLogEventName.objectResolved, requestId ?? null, { share: isSiaShareUrl(src), size: objectSize(object) });
     }
     return new SiaByteSource({ ...options, cache, object, requestId, sdk });
   };

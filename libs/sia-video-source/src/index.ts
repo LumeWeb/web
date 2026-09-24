@@ -156,6 +156,11 @@ export {
   type SiaLoadState,
 } from './sia-load-feature.ts';
 export {
+  selectSiaProgress,
+  siaProgressFeature,
+  type SiaProgressState,
+} from './sia-progress-feature.ts';
+export {
   selectSiaRecovery,
   siaRecoveryFeature,
   type SiaRecoveryState,
@@ -177,6 +182,8 @@ export {
   siaVideoDefaultProps,
   SiaVideoSource,
   type SiaVideoSourceOptions,
+  siaWorkerMilestoneChange,
+  type SiaWorkerMilestoneDetail,
 } from './sia-video-source.ts';
 export { type AppendSink } from './sink/append-sink.ts';
 export {
