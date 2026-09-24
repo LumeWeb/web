@@ -14,6 +14,8 @@ import {
   siaRecoveryChange,
   siaSourceInfoChange,
   type SiaSourceInfoChangeDetail,
+  siaWorkerMilestoneChange,
+  type SiaWorkerMilestoneDetail,
 } from '../../sia-video-source.ts';
 
 export class FakeSiaMedia {
@@ -40,6 +42,12 @@ export class FakeSiaMedia {
   emitLoad(detail: SiaLoadChangeDetail): void {
     for (const listener of this.listeners.get(siaLoadChange) ?? []) {
       listener({ detail, type: siaLoadChange });
+    }
+  }
+
+  emitMilestone(detail: SiaWorkerMilestoneDetail): void {
+    for (const listener of this.listeners.get(siaWorkerMilestoneChange) ?? []) {
+      listener({ detail, type: siaWorkerMilestoneChange });
     }
   }
 

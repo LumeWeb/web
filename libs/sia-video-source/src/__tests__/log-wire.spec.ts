@@ -25,7 +25,7 @@ import {
   WorkerToMainMessageType,
 } from '../protocol.ts';
 import type { SiaObjectLike } from '../ranged-reader.ts';
-import { MAX_WORKER_LOG_MESSAGES } from '../session/sia-composition.ts';
+import { MAX_WORKER_LOG_MESSAGES, milestoneLevel } from '../session/sia-composition.ts';
 import { forwardWorkerLog, logThresholdFor } from '../sia-video-source.ts';
 import type { SiaByteSourceSdk } from '../transport/sia-byte-source.ts';
 import { createDefaultWorkerComposition } from '../worker.ts';
@@ -285,6 +285,33 @@ describe('host-side: threshold mapper + console-logger forwarding', () => {
       position: 0,
       requestId: 7,
     });
+  });
+});
+
+// ---- composition milestone severity mapping ----------------------------------------
+
+describe('the composition milestone level mapping', () => {
+  it('forwards read.retry at debug (the retry wire bug: a retry is now on the wire)', () => {
+    // A retrying read is a debug-severity diagnostic, alongside the window
+    // bookends. The mapping must never drop it on the floor (a host opted
+    // into debug still sees every retry attempt).
+    expect(milestoneLevel('read.retry')).toBe(workerLogLevel.debug);
+  });
+
+  it('keeps the documented severities for every other reader/source milestone', () => {
+    expect(milestoneLevel('object.resolved')).toBe(workerLogLevel.info);
+    expect(milestoneLevel('read.stalled')).toBe(workerLogLevel.error);
+    expect(milestoneLevel('read.error')).toBe(workerLogLevel.error);
+    expect(milestoneLevel('read.window-start')).toBe(workerLogLevel.debug);
+    expect(milestoneLevel('read.window-complete')).toBe(workerLogLevel.debug);
+    expect(milestoneLevel('bytes.read')).toBe(workerLogLevel.debug);
+    expect(milestoneLevel('read.budget-wait')).toBe(workerLogLevel.debug);
+    expect(milestoneLevel('read.cache-hit')).toBe(workerLogLevel.debug);
+  });
+
+  it('drops unknown reader milestones rather than guessing a severity', () => {
+    expect(milestoneLevel('read.something-new')).toBeUndefined();
+    expect(milestoneLevel('totally-unknown')).toBeUndefined();
   });
 });
 
