@@ -240,6 +240,52 @@ never in `workerConfig`; each `HELLO` additionally carries `appSeed` /
 slot whose provider the app removed. See ADR
 [0008](decisions/0008-share-link-streaming-via-sharedsdk.md).
 
+## Re-applying configuration (reload)
+
+Configuration that the host only reads at handshake time — `workerConfig`
+(presence/indexerUrl identity), `workerMse`, swapped seed suppliers, the HELLO
+`log` threshold — is otherwise inert until the next attach. `SiaVideoSource`
+exposes an explicit in-place reload for exactly that:
+
+```ts
+source.workerConfig = { ...source.workerConfig, indexerUrl: 'https://new.example' };
+source.reloadConfiguration(); // re-handshakes against the CURRENT config
+```
+
+`reloadConfiguration()` re-runs the same flow a re-attach performs — a fresh
+`HELLO` (current `workerConfig` + seed-presence flags), the current seed
+suppliers re-read into fresh encrypted `APP_KEY` envelopes, an `ATTACH`, and the
+current `src` replayed with its preserved play/pause intent — on the SAME
+worker and element (no remount, no new worker). The rebuilt load starts fresh
+(buffered state / stored error / recovery observation reset, playhead back to
+0) while a genuinely playing element's playback choice survives.
+
+The reload is always-forced and idempotent, and it is concurrency-safe: each
+handshake carries a generation, and `HELLO_OK` echoes the `HELLO`'s requestId,
+so an older async supplier/encryption chain (or an in-flight `HELLO_OK`) can
+never apply after a newer reload, detach, or destroy — a stale chain drops its
+envelope instead of winning the wire. Calling it on a host that was never
+attached, is currently detached, or was destroyed is a no-op.
+
+### React
+
+```tsx
+<SiaVideo
+  reloadKey={mode}             // changes → exactly one in-place reload
+  sia={{ indexerUrl, ... }}
+  getAppKeySeed={fetchSeed}
+/>
+```
+
+The `<SiaVideo>` wrapper reloads automatically, after the element has attached
+and props have been assigned, whenever the structural HELLO inputs change:
+`reloadKey`, worker-config presence/`indexerUrl`, `workerMse`, and seed-supplier
+**presence** booleans. The first render never double-HELLOs (the mount attach
+already handshakes with the initial props), and only value facts are compared —
+never supplier function refs (inline arrows change every render), never nested
+app metadata, never the logger identity. Any other prop (e.g. `src`, `mimeType`,
+`preload`) applies without a handshake.
+
 ## Logging
 
 Logging is pluggable through a small dependency-free `Logger` interface:

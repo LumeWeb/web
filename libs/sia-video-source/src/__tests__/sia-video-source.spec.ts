@@ -6,7 +6,7 @@ import {
   generateWorkerKeyPair,
 } from '../app-key-handshake.ts';
 import { MseAppendPipe } from '../mse-pipe.ts';
-import { type AppKeyEnvelope, DEFAULT_FMP4_MIME, isAppKeyEnvelope, type MainToWorkerMessage, MainToWorkerMessageType, PROTOCOL_VERSION, WORKER_PUBLIC_KEY_LENGTH, type WorkerToMainMessage, WorkerToMainMessageType } from '../protocol.ts';
+import { type AppKeyEnvelope, DEFAULT_FMP4_MIME, isAppKeyEnvelope, type MainToWorkerMessage, MainToWorkerMessageType, PROTOCOL_VERSION, WORKER_PUBLIC_KEY_LENGTH, type WorkerMode, type WorkerToMainMessage, WorkerToMainMessageType } from '../protocol.ts';
 import {
   type RecoveryChangeDetail,
   siaRecoveryChange,
@@ -44,6 +44,25 @@ function appMetadata(): AppMetadata {
   return { appId: 'test-app-id', callbackUrl: '', description: 'test', logoUrl: '', name: 'app', serviceUrl: 'https://app.example' };
 }
 
+/** The requestId of the newest HELLO the host posted — what a HELLO_OK must echo. */
+function helloRequestId(worker: FakeWorker): number {
+  const hello = worker.sent.filter((m) => m.type === MainToWorkerMessageType.HELLO).at(-1);
+  if (!hello || !('requestId' in hello)) throw new Error('no HELLO posted to echo');
+  return hello.requestId;
+}
+
+/** The newest ATTACH the host posted — what an ATTACH_OK must echo. */
+function newestAttach(worker: FakeWorker): { requestId: number; type: MainToWorkerMessageType.ATTACH } {
+  const attach = worker.sent.filter((m) => m.type === MainToWorkerMessageType.ATTACH).at(-1);
+  if (!attach || !('requestId' in attach)) throw new Error('no ATTACH on the wire');
+  return attach;
+}
+
+/** Replies an ATTACH_OK echoing the newest posted ATTACH's request id. */
+function replyAttachOk(worker: FakeWorker, mode: WorkerMode = 'main'): void {
+  worker.reply({ mode, requestId: newestAttach(worker).requestId, type: WorkerToMainMessageType.ATTACH_OK });
+}
+
 function workerConfig(indexerUrl = 'https://sia.storage') {
   return { app: appMetadata(), indexerUrl };
 }
@@ -70,11 +89,11 @@ describe('SiaVideoSource (host state machine)', () => {
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     host.attach(document.createElement('video'));
 
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: 999 });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: 999 });
     expect(worker.sent.some((m) => m.type === MainToWorkerMessageType.ATTACH)).toBe(false);
     expect(host.error?.code).toBe(4);
 
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 2, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     expect(worker.sent.some((m) => m.type === MainToWorkerMessageType.ATTACH)).toBe(true);
     host.destroy();
   });
@@ -85,7 +104,7 @@ describe('SiaVideoSource (host state machine)', () => {
     const target = document.createElement('video');
     host.attach(target);
 
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     expect(worker.sent.some((m) => m.type === MainToWorkerMessageType.ATTACH)).toBe(true);
 
     host.src = 'k';
@@ -111,7 +130,20 @@ describe('SiaVideoSource (host state machine)', () => {
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    // The session is not ready until ATTACH_OK. Load a main-mode source so the
+    // replayed load establishes the current-resource identity (object URL) a
+    // playhead tick must pass before it is forwarded — with no current load,
+    // native events are no longer trusted by default.
+    replyAttachOk(worker);
+    host.src = 'event-forwarding';
+    const loaded = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).at(-1);
+    if (!loaded || !('requestId' in loaded)) throw new Error('SOURCE was not sent');
+    worker.reply({
+      info: { container: 'fmp4', durationSeconds: null, mime: 'video/mp4', mode: 'main', tracks: [] },
+      requestId: loaded.requestId,
+      type: WorkerToMainMessageType.SOURCE_OK,
+    });
     worker.sent.length = 0;
 
     target.currentTime = 12.5;
@@ -133,7 +165,7 @@ describe('SiaVideoSource (host state machine)', () => {
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
 
     host.src = 'k';
     // A superseded load's error must not surface.
@@ -153,7 +185,7 @@ describe('SiaVideoSource (host state machine)', () => {
     let errorEvents = 0;
     host.addEventListener('error', () => errorEvents++);
     host.attach(target);
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
 
     host.src = 'k';
     const loadId = (worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as undefined | { requestId: number; })?.requestId ?? 0;
@@ -242,8 +274,8 @@ describe('SiaVideoSource (host state machine)', () => {
     const target = document.createElement('video');
     host.attach(target);
 
-    worker.reply({ features: { workerMse: true }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
-    worker.reply({ mode: 'worker', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
+    worker.reply({ features: { workerMse: true }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    replyAttachOk(worker, 'worker');
 
     host.src = 'k';
     const source = worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as
@@ -287,7 +319,7 @@ describe('SiaVideoSource (host state machine)', () => {
     });
     host.attach(document.createElement('video'));
 
-    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey, requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     // The seed→envelope chain is async; let it settle.
     await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -338,7 +370,7 @@ describe('SiaVideoSource (host state machine)', () => {
       return seed;
     };
     host.attach(document.createElement('video'));
-    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey, requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     // The setter-supplied supplier reached the HELLO_OK handler: the APP_KEY
@@ -367,13 +399,13 @@ describe('SiaVideoSource (host state machine)', () => {
       workerConfig: workerConfig(),
     });
     host.attach(document.createElement('video'));
-    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey, requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     await new Promise((resolve) => setTimeout(resolve, 0));
     worker.sent.length = 0;
 
     host.detach();
     host.attach(document.createElement('video'));
-    worker.reply({ features: { workerMse: false }, publicKey, requestId: 2, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey, requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     // A second envelope was delivered for the second handshake.
@@ -416,7 +448,7 @@ describe('SiaVideoSource (host state machine)', () => {
     target.dispatchEvent(new Event('play'));
     expect(worker.sent.map((m) => m.type)).toEqual([MainToWorkerMessageType.HELLO]);
 
-    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey, requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     // Let the async seed→envelope chain (and whatever is chained behind it)
     // settle; the ordering is only observable after it drains.
     await new Promise((resolve) => setTimeout(resolve, 0));
@@ -426,11 +458,22 @@ describe('SiaVideoSource (host state machine)', () => {
     // load hits the worker-side seed requirement and fails with a spurious
     // "No Sia SDK is available" network error at playback start.
     const sentTypes = worker.sent.map((m) => m.type);
-    expect(sentTypes).toEqual([MainToWorkerMessageType.HELLO, MainToWorkerMessageType.APP_KEY, MainToWorkerMessageType.ATTACH, MainToWorkerMessageType.SEEK, MainToWorkerMessageType.PLAY]);
+    expect(sentTypes).toEqual([MainToWorkerMessageType.HELLO, MainToWorkerMessageType.APP_KEY, MainToWorkerMessageType.ATTACH]);
+
+    // The handshake window's queued intent (SEEK then PLAY) is released only
+    // after ATTACH_OK resyncs the session — fresh SOURCE first, then the SEEK
+    // (rebased) and the re-stated PLAY, all scoped to the replayed load's
+    // request id rather than the stale handshake's.
+    const attach = newestAttach(worker);
+    worker.sent.length = 0;
+    worker.reply({ mode: 'main', requestId: attach.requestId, type: WorkerToMainMessageType.ATTACH_OK });
+    expect(worker.sent.map((m) => m.type)).toEqual([MainToWorkerMessageType.SOURCE, MainToWorkerMessageType.SEEK, MainToWorkerMessageType.PLAY]);
+    const replaySource = worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as undefined | { requestId: number; type: MainToWorkerMessageType.SOURCE; };
+    expect(worker.sent.find((m) => m.type === MainToWorkerMessageType.SEEK)?.requestId).toBe(replaySource?.requestId);
+    expect(worker.sent.find((m) => m.type === MainToWorkerMessageType.PLAY)?.requestId).toBe(replaySource?.requestId);
 
     // Playback still proceeds: the ATTACH round trip replays the stored
     // source and the load acknowledges without any spurious error event.
-    worker.reply({ mode: 'main', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
     const source = worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as
       | undefined
       | { preload: string; requestId: number; src: string; type: MainToWorkerMessageType.SOURCE; };
@@ -464,7 +507,7 @@ describe('SiaVideoSource (host state machine)', () => {
       workerConfig: workerConfig(),
     });
     host.attach(document.createElement('video'));
-    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey, requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     // Exactly one APP_KEY, tagged sharing, posted before ATTACH.
@@ -502,7 +545,7 @@ describe('SiaVideoSource (host state machine)', () => {
       workerConfig: workerConfig(),
     });
     host.attach(document.createElement('video'));
-    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey, requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     // App first, then sharing — both envelopes precede ATTACH.
@@ -537,13 +580,14 @@ describe('SiaVideoSource (host state machine)', () => {
     host.attach(target);
     target.dispatchEvent(new Event('play'));
 
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
-    // No seed supplier → ATTACH goes out synchronously and the queued PLAY is
-    // flushed behind it, matching the live player's first-load ordering.
-    expect(worker.sent.map((m) => m.type)).toEqual([MainToWorkerMessageType.HELLO, MainToWorkerMessageType.ATTACH, MainToWorkerMessageType.PLAY]);
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    // No seed supplier → ATTACH goes out synchronously, but the queued PLAY
+    // stays HELD: the host is not ready until ATTACH_OK resyncs the session.
+    expect(worker.sent.map((m) => m.type)).toEqual([MainToWorkerMessageType.HELLO, MainToWorkerMessageType.ATTACH]);
+    const attach = newestAttach(worker);
 
     worker.sent.length = 0;
-    worker.reply({ mode: 'main', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
+    worker.reply({ mode: 'main', requestId: attach.requestId, type: WorkerToMainMessageType.ATTACH_OK });
 
     // The fresh SOURCE alone would start deferred (preload defaults to
     // 'metadata') and the pipeline would stall at byte 0 forever — nothing
@@ -577,11 +621,12 @@ describe('SiaVideoSource (host state machine)', () => {
     // task — the ATTACH_OK replay must read it as the user's stopped choice.
     await settle();
 
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
-    expect(worker.sent.map((m) => m.type)).toEqual([MainToWorkerMessageType.HELLO, MainToWorkerMessageType.ATTACH, MainToWorkerMessageType.PLAY]);
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    expect(worker.sent.map((m) => m.type)).toEqual([MainToWorkerMessageType.HELLO, MainToWorkerMessageType.ATTACH]);
+    const attach = newestAttach(worker);
 
     worker.sent.length = 0;
-    worker.reply({ mode: 'main', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
+    worker.reply({ mode: 'main', requestId: attach.requestId, type: WorkerToMainMessageType.ATTACH_OK });
 
     expect(target.paused).toBe(true);
     // The fresh SOURCE replays the current source, but the user's pause won:
@@ -598,9 +643,10 @@ describe('SiaVideoSource (host state machine)', () => {
     host.attach(target);
     target.dispatchEvent(new Event('play'));
 
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    const attach = newestAttach(worker);
     worker.sent.length = 0;
-    worker.reply({ mode: 'main', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
+    worker.reply({ mode: 'main', requestId: attach.requestId, type: WorkerToMainMessageType.ATTACH_OK });
 
     // The harness element reports paused (synthetic play is not a real play),
     // so only the sticky intent can drive the re-stated PLAY — clearing it on
@@ -621,9 +667,10 @@ describe('SiaVideoSource (host state machine)', () => {
     target.dispatchEvent(new Event('pause'));
     target.dispatchEvent(new Event('play'));
 
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    const attach = newestAttach(worker);
     worker.sent.length = 0;
-    worker.reply({ mode: 'main', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
+    worker.reply({ mode: 'main', requestId: attach.requestId, type: WorkerToMainMessageType.ATTACH_OK });
 
     const sentTypes = worker.sent.map((m) => m.type);
     expect(sentTypes.filter((t) => t === MainToWorkerMessageType.SOURCE || t === MainToWorkerMessageType.PLAY)).toEqual([MainToWorkerMessageType.SOURCE, MainToWorkerMessageType.PLAY]);
@@ -636,7 +683,7 @@ describe('SiaVideoSource (host state machine)', () => {
     const publicKey = exportWorkerPublicKey(keyPair);
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     host.attach(document.createElement('video'));
-    worker.reply({ features: { workerMse: false }, publicKey, requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey, requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     // Apps injecting their own SDK factory have no handshake to perform.
@@ -649,10 +696,10 @@ describe('SiaVideoSource (host state machine)', () => {
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     // The host only acts on main-mode CHUNK/ENDED once the mode is known, so
     // complete the ATTACH round trip before the load starts.
-    worker.reply({ mode: 'main', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
+    replyAttachOk(worker);
 
     host.src = 'k';
     const source = worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as
@@ -691,7 +738,7 @@ describe('SiaVideoSource (host state machine)', () => {
     const worker = new FakeWorker();
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     host.attach(document.createElement('video'));
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
 
     host.src = 'k';
     const source = worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as
@@ -717,8 +764,8 @@ describe('SiaVideoSource (host state machine)', () => {
     const worker = new FakeWorker();
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     host.attach(document.createElement('video'));
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
-    worker.reply({ mode: 'main', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    replyAttachOk(worker);
 
     host.src = 'k';
     const source = worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as
@@ -747,8 +794,8 @@ describe('SiaVideoSource (host state machine)', () => {
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
-    worker.reply({ mode: 'main', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    replyAttachOk(worker);
 
     host.src = 'seek-object';
     const source = worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as
@@ -813,8 +860,8 @@ describe('SiaVideoSource (host state machine)', () => {
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
-    worker.reply({ mode: 'main', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    replyAttachOk(worker);
 
     host.src = 'k';
     const source = worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as
@@ -872,8 +919,8 @@ describe('SiaVideoSource (host state machine)', () => {
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
-    worker.reply({ mode: 'main', requestId: 2, type: WorkerToMainMessageType.ATTACH_OK });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    replyAttachOk(worker);
 
     host.src = 'k';
     const source = worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as
@@ -928,7 +975,8 @@ describe('decode failure recovery', () => {
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    replyAttachOk(worker);
     return { host, target, worker };
   }
 
@@ -1634,7 +1682,8 @@ describe('native media element error handling', () => {
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    replyAttachOk(worker);
     return { host, target, worker };
   }
 
@@ -1898,7 +1947,8 @@ describe('out-of-window seek recovery', () => {
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    replyAttachOk(worker);
     return { host, target, worker };
   }
 
@@ -2153,7 +2203,8 @@ describe('the typed recovery-change event', () => {
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
-    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: 1, type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    replyAttachOk(worker);
     return { host, target, worker };
   }
 
