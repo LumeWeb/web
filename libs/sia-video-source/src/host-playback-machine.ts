@@ -447,21 +447,22 @@ function activeLoadTransitions(
 
     // Transport and fatal failures surface immediately; they never reload.
     transition(hostPlaybackEvent.loadFailed, hostPlaybackState.failed, guard(isTerminalFailure), recordFatal()),
-    transition(
-      hostPlaybackEvent.loadFailed,
-      hostPlaybackState.failed,
-      guard(decodeFailureWhen(spentBudget)),
-      recordExhausted(recoveryReason.decode, hostReportKind.decode),
-    ),
-
-    // A decode failure on a healthy load: paused defers; otherwise retry-capped
-    // restart at the watch position (resuming only when the choice is
-    // playing).
+    // A decode failure on a healthy load: paused defers (deferral never
+    // spends budget, so a paused load with a drained budget still records a
+    // repair); otherwise an exhausted budget surfaces the decode error, and a
+    // spendable run restarts at the watch position (resuming only when the
+    // choice is playing).
     transition(
       hostPlaybackEvent.loadFailed,
       self,
       guard(decodeFailureWhen(isPaused)),
       recordDefer(recoveryReason.decode),
+    ),
+    transition(
+      hostPlaybackEvent.loadFailed,
+      hostPlaybackState.failed,
+      guard(decodeFailureWhen(spentBudget)),
+      recordExhausted(recoveryReason.decode, hostReportKind.decode),
     ),
     transition(
       hostPlaybackEvent.loadFailed,
@@ -759,22 +760,22 @@ function recoveringTransitions(decisions: HostDecision[]): Transition<string>[] 
     // A seek-restart whose repositioning seek resolves closes the window too.
     transition(hostPlaybackEvent.seekResolved, hostPlaybackState.ready, guard(isSeekRecovery), resetRecovery),
 
-    // Another decode failure on the reloaded load: an exhausted budget
-    // reports no matter the choice; a paused choice defers; otherwise a
-    // retry-capped restart — the same precedence as a failure on a healthy
-    // load.
+    // Another decode failure on the reloaded load: a paused choice always
+    // defers a repair (even on a drained budget); otherwise an exhausted
+    // budget reports, or a retry-capped restart — the same precedence as a
+    // failure on a healthy load.
     transition(hostPlaybackEvent.loadFailed, hostPlaybackState.recovering, guard(isTerminalFailure), recordFatal()),
-    transition(
-      hostPlaybackEvent.loadFailed,
-      hostPlaybackState.failed,
-      guard(decodeFailureWhen(spentBudget)),
-      recordExhausted(recoveryReason.decode, hostReportKind.decode),
-    ),
     transition(
       hostPlaybackEvent.loadFailed,
       hostPlaybackState.recovering,
       guard(decodeFailureWhen(isPaused)),
       recordDefer(recoveryReason.decode),
+    ),
+    transition(
+      hostPlaybackEvent.loadFailed,
+      hostPlaybackState.failed,
+      guard(decodeFailureWhen(spentBudget)),
+      recordExhausted(recoveryReason.decode, hostReportKind.decode),
     ),
     transition(
       hostPlaybackEvent.loadFailed,

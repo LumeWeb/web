@@ -203,6 +203,43 @@ describe('decode failure while paused', () => {
     expect(machine.current).toBe(hostPlaybackState.recovering);
   });
 
+  it('defers a decode repair on a paused load with a drained budget instead of surfacing it', () => {
+    // The paused contract holds even after the shared recovery budget is
+    // spent: a decode failure records a deferred repair — never a
+    // MEDIA_ERR_DECODE — and it leaves the attempt budget intact so an
+    // explicit play can repair it on a fresh source. A drained budget only
+    // lives in `recovering` (any exit to `ready` restores it), so the paused
+    // preference is retained through the out-of-window restarts that exhaust
+    // it.
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.pause });
+
+    // Two paused restarts drain the budget to its cap while the paused choice
+    // survives: the out-of-window scrub restarts (attempt 1), the recovery
+    // load re-opens without spending, and the watchdog stall restarts again
+    // (attempt 2).
+    machine.send({ seconds: 120, type: hostPlaybackEvent.seekOutOfWindow });
+    machine.send({ type: hostPlaybackEvent.sourceReady });
+    machine.send({ seconds: 120, type: hostPlaybackEvent.stalledSeek });
+    expect(machine.current).toBe(hostPlaybackState.recovering);
+    expect(machine.attempt).toBe(2);
+    expect(machine.preference).toBe(playbackPreference.paused);
+
+    const decisions = machine.send({
+      kind: hostReportKind.decode,
+      resumeSeconds: 12.5,
+      type: hostPlaybackEvent.loadFailed,
+    });
+    expect(decisions).toEqual([
+      { kind: hostDecisionKind.deferRepair, reason: recoveryReason.decode, resumeSeconds: 12.5 },
+    ]);
+    // No reportError: the machine stays in the load with the repair parked and
+    // the budget untouched.
+    expect(machine.current).toBe(hostPlaybackState.recovering);
+    expect(machine.attempt).toBe(2);
+    expect(machine.repairOwed).toEqual({ reason: recoveryReason.decode, seconds: 12.5 });
+  });
+
   it('a scrub while a repair is owed repairs at the new position without starting playback', () => {
     const machine = readyMachine();
     machine.send({ type: hostPlaybackEvent.play });
