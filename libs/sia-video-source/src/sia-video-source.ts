@@ -927,13 +927,15 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     const target = this.target;
     if (!target || this.#mediaSource) return;
 
-    // A runtime with no usable MSE (all iPhone Safari pre-17.1, or any
-    // runtime exposing only WebKit-prefixed legacy MSE) cannot play Sia video
-    // at all: fail with the honest `device` kind instead of grinding toward a
-    // generic unsupported error. (The same gate already ran at `#sendSource`
-    // on the main path; this backstops a worker-mode session that degrades to
-    // main-mode posting.)
-    if (this.#mseSnapshot.impl === mseImplementation.none) {
+    // Only a standard or managed-implementing MSE runtime can play Sia video:
+    // anything else — no MSE at all (all iPhone Safari pre-17.1) or only the
+    // legacy WebKit-prefixed surface — is device-too-old, and fails with the
+    // honest `device` kind instead of grinding toward a generic unsupported
+    // error. (The same gate already ran at `#sendSource` on the main path;
+    // this backstops a worker-mode session that degrades to main-mode
+    // posting.)
+    const impl = this.#mseSnapshot.impl;
+    if (impl === mseImplementation.none || impl === mseImplementation.webkitLegacy) {
       this.#reportError(workerErrorCode.device, 'no-mse');
       return;
     }
@@ -1935,11 +1937,14 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
   // Every SOURCE posts through here — a fresh `src`, an explicit `load()`,
   // an ATTACH_OK replay, and a recovery restart — so it is the single choke
-  // point for the fail-fast device gate: a runtime with no usable MSE reports
-  // the honest `device` error immediately instead of paying a worker roundtrip
-  // that can only end in a generic unsupported error.
+  // point for the fail-fast device gate: a runtime whose MSE surface is not
+  // standard or managed-implementing (no MSE at all, or only the legacy
+  // WebKit-prefixed one) is device-too-old and reports the honest `device`
+  // error immediately instead of paying a worker roundtrip that can only end
+  // in a generic unsupported error.
   #sendSource(): void {
-    if (this.#mseSnapshot.impl === mseImplementation.none) {
+    const impl = this.#mseSnapshot.impl;
+    if (impl === mseImplementation.none || impl === mseImplementation.webkitLegacy) {
       this.#reportError(workerErrorCode.device, 'no-mse');
       return;
     }

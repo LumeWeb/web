@@ -478,12 +478,14 @@ export class WorkerComposition implements SessionCoordinator {
       this.#postError(kind, requestId, context);
     };
 
-    // A runtime with no usable MSE (all iPhone Safari pre-17.1, or any
-    // runtime exposing only WebKit-prefixed legacy MSE) cannot play Sia video
-    // at all. Fail fast with the honest `device` kind before any source
-    // creation or pipeline run; no abort controller exists for this attempt
-    // yet (`#abandonLoad` above already cleared the previous one).
-    if (this.#capabilities.mseImpl().impl === mseImplementation.none) {
+    // Only a standard or managed-implementing MSE runtime can play Sia video:
+    // anything else — no MSE at all (all iPhone Safari pre-17.1) or only the
+    // legacy WebKit-prefixed surface — is device-too-old. Fail fast with the
+    // honest `device` kind before any source creation or pipeline run; no
+    // abort controller exists for this attempt yet (`#abandonLoad` above
+    // already cleared the previous one).
+    const impl = this.#capabilities.mseImpl().impl;
+    if (impl === mseImplementation.none || impl === mseImplementation.webkitLegacy) {
       failed(workerErrorCode.device, 'no-mse');
       this.#loadAbortController = null;
       return;

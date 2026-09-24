@@ -343,6 +343,28 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
     expect(driver.pipeline.calls).toHaveLength(0);
   });
 
+  // The legacy WebKit-prefixed surface (webkit-legacy) is device-too-old too:
+  // it must hit the SAME fail-fast device error as `none`, never fall through
+  // to constructing/attaching the prefixed source. This mirrors the host-side
+  // `#sendSource` / `#beginMainThreadMse` broadening: only standard or
+  // managed-implementing runtimes may proceed.
+  it('a runtime exposing only legacy WebKit-prefixed MSE also fails a SOURCE with a device ERROR before any source creation', async () => {
+    const driver = makeDriver({
+      capabilities: {
+        ...permissiveCapabilities(),
+        mseImpl: () => ({ canConstructInDedicatedWorker: false, impl: 'webkit-legacy' as const, managed: false }),
+      },
+    });
+    await driver.say({ preload: 'auto', requestId: 21, src: 'whatever', type: MainToWorkerMessageType.SOURCE });
+    await settle();
+
+    expect(driver.message(WorkerToMainMessageType.SOURCE_OK)).toEqual([]);
+    const errors = driver.message(WorkerToMainMessageType.ERROR);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toMatchObject({ context: 'no-mse', kind: workerErrorCode.device, requestId: 21 });
+    expect(driver.pipeline.calls).toHaveLength(0);
+  });
+
   it('maps a cancelled verdict to silence and releases the source', async () => {
     const driver = makeDriver();
     driver.pipeline.results.push({ status: 'cancelled' });
