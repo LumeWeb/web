@@ -36,6 +36,10 @@ import {
   selectSiaLoad,
   type SiaLoadState,
 } from '../sia-load-feature.ts';
+import {
+  selectSiaSourceInfo,
+  type SiaSourceInfoState,
+} from '../sia-source-info-feature.ts';
 import { siaVideoDefaultProps, SiaVideoSource } from '../sia-video-source.ts';
 import type { WorkerConfig } from '../protocol.ts';
 
@@ -250,4 +254,28 @@ export function useSiaLoad(): SiaLoadState | undefined {
  */
 export function useSiaRecovery(): SiaRecoveryState | undefined {
   return usePlayer(selectSiaRecovery);
+}
+
+/**
+ * Subscribes to the Sia source-info state of the nearest `<Player>`.
+ *
+ * Reads the same `selectSiaSourceInfo` slice the non-React store consumers use
+ * (via `usePlayer(selectSiaSourceInfo)`), so one feature/store drives both.
+ * The store must be built with `siaSourceInfoFeature`; only the absence of
+ * that configured feature makes this yield `undefined`.
+ *
+ * The whole window nests under the single collision-safe `sourceInfo` key:
+ * `{ sourceInfo: { active: false } }` closed, `{ sourceInfo: { active: true,
+ * info } }` open. `sourceInfo.active: true` means the current load's worker
+ * pipeline accepted the source and vouched for `info` at the host's SOURCE_OK
+ * — the exact `SourceInfo` (`durationSeconds` may be `null`), not a
+ * playable/ready signal, and `info` is read-only.
+ *
+ * @returns The Sia source-info state for the attached media, or `undefined`
+ *   when the player store was built without `siaSourceInfoFeature`.
+ * @throws If called outside a `<Player>` — `usePlayer` requires the player
+ *   context.
+ */
+export function useSiaSourceInfo(): SiaSourceInfoState | undefined {
+  return usePlayer(selectSiaSourceInfo);
 }

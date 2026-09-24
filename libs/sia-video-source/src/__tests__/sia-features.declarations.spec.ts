@@ -13,7 +13,7 @@
  *
  * 1. The emitted root d.ts text must never mention `@videojs/react`.
  * 2. `SiaFeatures` must be an explicitly typed MUTABLE tuple of the exact
- *    ordered feature pair — not a readonly `as const` literal — so non-React
+ *    ordered feature triple — not a readonly `as const` literal — so non-React
  *    `combine(...siaFeatures)` AND React `createPlayer({ features: siaFeatures })`
  *    both accept it. Real TypeScript programs prove this three ways: a
  *    non-React consumer compiles with `@videojs/react` deliberately
@@ -201,9 +201,9 @@ void composedPlayer;
 
       const consumer = `
 import { createPlayer } from '@videojs/react';
-import { siaRecoveryFeature, siaLoadFeature } from ${JSON.stringify(entry)};
+import { siaRecoveryFeature, siaLoadFeature, siaSourceInfoFeature } from ${JSON.stringify(entry)};
 
-const frozen = [siaRecoveryFeature, siaLoadFeature] as const;
+const frozen = [siaRecoveryFeature, siaLoadFeature, siaSourceInfoFeature] as const;
 void createPlayer({ features: frozen });
 `;
 

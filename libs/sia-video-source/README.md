@@ -227,12 +227,72 @@ function LoadGate() {
 The same natural `SiaVideoSource` consumers can of course subscribe to the raw
 `sia-load-change` DOM event on the element or host.
 
+### Video.js v10 source information
+
+The host also exposes the typed `SourceInfo` it already receives on the
+current request's `SOURCE_OK` through the `sia-source-info-change` DOM event,
+mirrored into the player store by the `siaSourceInfoFeature` player feature —
+the same store/selector mechanism as recovery and load acceptance, with **no
+protocol change** (it surfaces the existing wire payload, not a new shape).
+`{ active: true, info }` opens at the current `SOURCE_OK` with the exact
+`SourceInfo` the worker vouched for — `container`, `mime`, `mode`, the track
+codecs, and `durationSeconds`, which **may be `null`** when the worker cannot
+name a duration. `{ active: false }` closes the window at every load boundary
+(fresh source/load, `reloadConfiguration`/reattach replay, recovery restart,
+detach/destroy), so a stale `info` can never leak across sources or players.
+Like load acceptance, an open window means the worker pipeline **accepted** the
+source with those facts — it does **not** mean the load is playable/ready.
+
+```ts
+// Non-React Video.js: same combine/selector pattern as recovery/load.
+import { combine, createStore } from '@videojs/store';
+import { siaSourceInfoFeature, selectSiaSourceInfo } from '@lumeweb/sia-video-source';
+
+const store = createStore()(combine(siaSourceInfoFeature));
+const detach = store.attach({ media: siaMedia, container: elem.parentElement });
+const sourceInfo = selectSiaSourceInfo(store.state)?.sourceInfo; // { active: false } | { active: true, info }
+if (sourceInfo?.active && sourceInfo.info.durationSeconds != null) { /* known duration */ }
+detach();
+```
+
+The whole window is published under ONE collision-safe store key —
+`sourceInfo: { active: false } | { active: true; info }` — rather than putting a
+flat `active`/promiscuous `info` on the store top level. That keeps it
+coexistent with `siaRecoveryFeature` (which already owns the flat `active`
+key) and any future feature, because the flat player store is ONE object and
+combine/flattening would collide on shared keys; the nested discriminant also
+means TypeScript narrows `sourceInfo` to a non-optional `SourceInfo` when it
+tests `.active`. Like the other root features, it depends only on the
+non-React video.js peer packages (`@videojs/core`, `@videojs/store`,
+`@videojs/media`), and React consumers read the exact same slice through
+`useSiaSourceInfo()`:
+
+```tsx
+import { createPlayer } from '@videojs/react';
+import { SiaVideo, useSiaSourceInfo } from '@lumeweb/sia-video-source/react';
+import { siaSourceInfoFeature } from '@lumeweb/sia-video-source';
+
+const { Player } = createPlayer({ features: [siaSourceInfoFeature] });
+
+function SourceInfoBadge() {
+  const sourceInfo = useSiaSourceInfo()?.sourceInfo; // { active: false } | { active: true, info } | undefined
+  if (!sourceInfo?.active) return null;
+  return <span>{sourceInfo.info.durationSeconds ?? 'unknown'}s · {sourceInfo.info.container}</span>;
+}
+
+<Player>
+  <SiaVideo src={pinnedObjectKey} />
+  <SourceInfoBadge />
+</Player>
+```
+
 ### The shared `siaFeatures` tuple
 
-Both Sia features are also published as one annotated **mutable** tuple
-(`siaFeatures: SiaFeatures` = `[siaRecoveryFeature, siaLoadFeature]`), mirroring
-the packaged `videoFeatures` pattern. Pass it to either consumption API and you
-get both slices in one store — no separate vanilla/React systems:
+All three Sia features are also published as one annotated **mutable** tuple
+(`siaFeatures: SiaFeatures` = `[siaRecoveryFeature, siaLoadFeature,
+siaSourceInfoFeature]`), mirroring the packaged `videoFeatures` pattern. Pass
+it to either consumption API and you get all three slices in one store — no
+separate vanilla/React systems:
 
 ```ts
 // Non-React Video.js: combine the tuple into a player store.
@@ -247,7 +307,7 @@ const store = createStore()(combine(...siaFeatures));
 // packaged video features. The React hooks and selectors read the same store.
 import { createPlayer } from '@videojs/react';
 import { videoFeatures } from '@videojs/core/dom';
-import { SiaVideo, useSiaRecovery, useSiaLoad } from '@lumeweb/sia-video-source/react';
+import { SiaVideo, useSiaRecovery, useSiaLoad, useSiaSourceInfo } from '@lumeweb/sia-video-source/react';
 import { siaFeatures } from '@lumeweb/sia-video-source';
 
 const { Player } = createPlayer({ features: siaFeatures });
@@ -256,7 +316,11 @@ const { Player } = createPlayer({ features: siaFeatures });
 function SiaStatus() {
   const recovery = useSiaRecovery(); // { active, reason?, resumeSeconds?, wantsPlay? } | undefined
   const load = useSiaLoad(); // { accepted } | undefined
-  return recovery?.active ? <span>recovering ({recovery.reason})</span> : load?.accepted ? <span>source accepted</span> : null;
+  const sourceInfo = useSiaSourceInfo()?.sourceInfo; // { active: false } | { active: true, info } | undefined
+  if (recovery?.active) return <span>recovering ({recovery.reason})</span>;
+  if (!load?.accepted) return null;
+  const duration = sourceInfo?.active ? sourceInfo.info.durationSeconds : null;
+  return <span>source accepted · {duration ?? 'unknown'}s</span>;
 }
 
 <Player>
@@ -268,10 +332,10 @@ function SiaStatus() {
 `SiaFeatures` must stay an explicitly typed mutable tuple (not `as const`):
 React `createPlayer` requires mutable feature arrays (`Features extends
 AnyPlayerFeature[]`), rejecting a readonly literal with TS2769; `combine(...)`
-accepts either. The individual `siaRecoveryFeature`/`siaLoadFeature` exports
-remain available unchanged for override/custom composition, and the tuple only
-depends on the non-React video.js peer packages — importing it from the root
-never pulls in `@videojs/react`.
+accepts either. The individual `siaRecoveryFeature`/`siaLoadFeature`/
+`siaSourceInfoFeature` exports remain available unchanged for override/custom
+composition, and the tuple only depends on the non-React video.js peer packages
+— importing it from the root never pulls in `@videojs/react`.
 
 ### The worker
 
