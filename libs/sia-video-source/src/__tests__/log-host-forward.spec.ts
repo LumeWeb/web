@@ -1,9 +1,9 @@
 /**
- * Host-element logging plug-in contract: the exported `logThresholdFor` HELLO
- * threshold mapper and `forwardWorkerLog` worker-event forwarder that wire
- * the host logger (`SiaVideoSource.logger`) to the worker `LOG` seam, plus
- * the cheap non-browser host-surface checks (getter/setter, option default —
- * the full host state machine stays browser-only in `sia-video-source.spec.ts`).
+ * Host-element logging: the exported `logThresholdFor` HELLO threshold mapper
+ * and `forwardWorkerLog` worker-event forwarder that wire the host logger
+ * (`SiaVideoSource.logger`) to the worker `LOG` channel, plus the cheap
+ * non-browser host-surface checks (getter/setter, option default — the full
+ * host state machine stays browser-only in `sia-video-source.spec.ts`).
  *
  * Pure functions and construction only — no DOM, no MediaSource — so these
  * run under the node vitest environment (`SIA_TEST_ENV=node`).
@@ -129,7 +129,7 @@ describe('forwardWorkerLog', () => {
     );
   });
 
-  it('drops an unknown severity silently — no throw, no emitted line', () => {
+  it('drops an unknown severity silently (no throw, no emitted line)', () => {
     // `'trace'` is the library's finest level but never forwardable on the
     // wire; a foreign/draft worker posting it (or any other junk) must be
     // ignored: nothing is emitted and nothing throws.
@@ -154,7 +154,7 @@ describe('logThresholdFor', () => {
     expect(logThresholdFor('debug')).toBe(workerLogLevel.debug);
   });
 
-  it("maps info onto the wire's 'info' threshold — lifecycle milestones only, no debug reader noise", () => {
+  it("maps info onto the wire's 'info' threshold (lifecycle milestones only, no debug reader noise)", () => {
     expect(logThresholdFor('info')).toBe(workerLogLevel.info);
   });
 
@@ -196,7 +196,7 @@ describe('SiaVideoSource logger surface', () => {
     host.destroy();
   });
 
-  it('per-render setter stores the reference and the getter re-reads it', () => {
+  it('the setter stores the reference and the getter re-reads it', () => {
     const host = new SiaVideoSource();
     const customLogger: Logger = {
       child: (): Logger => nullLogger,

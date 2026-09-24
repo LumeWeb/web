@@ -1,15 +1,14 @@
 /**
- * Contract for the generic ranged-byte transport: consumers read generic
- * bytes through `ByteSource`, never the Sia SDK or `RangedReader` directly.
+ * The generic ranged-byte transport: consumers read bytes through
+ * `ByteSource`, never the Sia SDK or `RangedReader` directly.
  *
- * The same contract runs against both concrete sources:
+ * The same surface runs against both concrete sources:
  *
  * - `MemoryByteSource` — deterministic in-memory source for tests that must
  *   not require the SDK;
  * - `SiaByteSource` — a thin adapter over the existing `RangedReader` +
- *   `LruChunkCache` + `ReadBudget` (whose internals are intentionally not
- *   rewritten here) so range concurrency, cache, and watchdog behavior stay
- *   unchanged.
+ *   `LruChunkCache` + `ReadBudget` (whose internals are not rewritten here)
+ *   so range concurrency, cache, and watchdog behavior stay unchanged.
  *
  * Covered behaviors: exact ranges, EOF, cancellation, stale load generations,
  * short reads, and stalled reads.
@@ -51,12 +50,6 @@ function fakeSdk(payload: Uint8Array): SiaSdkLike {
   };
 }
 
-/**
- * SDK whose downloads stay parked until explicitly released, and which records
- * the offsets of streams that get cancelled (by the byte source aborting a
- * superseded/cancelled read). An enqueue that lands on an already-cancelled
- * stream is swallowed — the cancelled read must never deliver.
- */
 /** SDK that records every (offset, length) download, slicing payload per request. */
 function recordingSdk(payload: Uint8Array): { requests: { length: number; offset: number }[]; sdk: SiaSdkLike } {
   const requests: { length: number; offset: number }[] = [];
@@ -78,6 +71,7 @@ function recordingSdk(payload: Uint8Array): { requests: { length: number; offset
   return { requests, sdk };
 }
 
+/** SDK whose downloads stay held until explicitly released, and which records the offsets of streams cancelled (by the byte source aborting a superseded/cancelled read). An enqueue that lands on an already-cancelled stream is swallowed — the cancelled read must never deliver. */
 function releaseableSdk(payload: Uint8Array): {
   cancelled: number[];
   release(index: number): void;
@@ -188,7 +182,7 @@ async function settle(): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, 0));
 }
 
-describe('ByteSource contract', () => {
+describe('ByteSource', () => {
   it('is implemented by MemoryByteSource and SiaByteSource', () => {
     const memory: ByteSource = new MemoryByteSource(PAYLOAD);
     const sia: ByteSource = newSiaSource(PAYLOAD, fakeSdk(PAYLOAD));
@@ -461,7 +455,7 @@ describe('SiaByteSource', () => {
 
     await reader.cancel();
     await settle();
-    // Let the parked SDK stream unwind so its cancel reaches the source.
+    // Let the held SDK stream unwind so its cancel reaches the source.
     releaseable.releaseAll();
     await settle();
     await settle();

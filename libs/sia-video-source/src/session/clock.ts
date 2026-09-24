@@ -1,7 +1,6 @@
 /**
- * Clock contract: the injected time surface the session seams (StreamController,
- * LoadPipeline) use for throughput estimates, stall watchdogs, and eviction
- * windows.
+ * Clock: the injected time source StreamController and LoadPipeline use for
+ * throughput estimates, stall watchdogs, and eviction windows.
  *
  * `Clock` is injectable so those timing decisions are deterministic in tests
  * (`clock?: Clock` in the coordinator's constructor bag):
@@ -13,11 +12,11 @@
  *   sent its first `PLAYHEAD` message).
  *
  * `wallClock()` is the production default (monotonic `performance.now()` plus
- * an optional media-playhead provider wired to the player element); `ManualClock`
+ * an optional media-playhead provider tied to the player element); `ManualClock`
  * is the deterministic test double whose time only advances when the test says so.
  */
 
-/** The injectable time surface for session orchestration. */
+/** The injectable time source used by the session path. */
 export interface Clock {
   /** Current media playhead in seconds when one is known, else `null`. */
   mediaTime(): null | number;

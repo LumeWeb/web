@@ -1,7 +1,7 @@
 /**
- * Worker-runtime helper tests (`src/worker-runtime.ts`): the SDK `dispose`
- * cleanup contract (`withDisposal`) shipped with `createDefaultSdk`'s default
- * registration flow.
+ * Worker-runtime helpers (`src/worker-runtime.ts`): `withDisposal` attaches an
+ * SDK `dispose` hook that releases the WASM-backed Sia SDK, shipped with
+ * `createDefaultSdk`'s default registration flow.
  */
 import { describe, expect, it } from 'vitest';
 import { type SiaVideoSdk, withDisposal } from '../worker-runtime.ts';
@@ -129,10 +129,10 @@ describe('withDisposal', () => {
   });
 
   it('releases exactly once when both disposal entry points are invoked', () => {
-    // Mirrors the real sia-storage WASM SDK, whose [Symbol.dispose] aliases
-    // free(): the proxy synthesizes both hooks over one native release, so
-    // a teardown path invoking dispose() and then [Symbol.dispose] must not
-    // double-free the (possibly shared) WASM object.
+    // The real sia-storage WASM SDK's [Symbol.dispose] aliases free(): the
+    // proxy synthesizes both hooks over one native release, so a teardown
+    // path invoking dispose() and then [Symbol.dispose] must not double-free
+    // the (possibly shared) WASM object.
     let released = 0;
     const release = () => {
       released++;
@@ -171,7 +171,7 @@ describe('withDisposal', () => {
     await expect(wrapped.object('k')).resolves.toBeDefined();
   });
 
-  it('passes an SDK with no release hooks through unharmed', async () => {
+  it('passes an SDK with no release hooks through unchanged', async () => {
     const sdk = fakeSiaSdk(new Uint8Array(8)).sdk as SiaVideoSdk;
     const wrapped = withDisposal(sdk);
     expect(wrapped.dispose).toBeUndefined();

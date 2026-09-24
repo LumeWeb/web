@@ -17,10 +17,10 @@ import type { RequestId } from './protocol.ts';
 const MIB = 1024 * 1024;
 
 /**
- * Total attempts a read window gets (the original download plus bounded
- * retries) before a transient transport failure is surfaced as `read.error`.
- * A single blipped ranged `sdk.download()` (0 bytes delivered, early close,
- * or a failed stream) previously aborted the whole normalization conversion;
+ * Total attempts a read window gets (the original download plus retries)
+ * before a transient transport failure is reported as `read.error`. A single
+ * blipped ranged `sdk.download()` (0 bytes delivered, early close, or a
+ * failed stream) previously aborted the whole normalization conversion;
  * retrying the same window keeps a blip from killing the session.
  */
 const DEFAULT_MAX_ATTEMPTS = 3;
@@ -35,11 +35,11 @@ const DEFAULT_RETRY_BACKOFF_MS: readonly number[] = [250, 500];
 
 export interface RangedReaderOptions {
   /**
-   * Shared bounded-dispatch permit (see {@link ReadBudget}). When set, the
-   * reader waits for a free permit before opening its SDK download, so every
-   * reader sharing a budget — the independent concurrent reads mediabunny can
-   * issue share one — is guaranteed never to exceed the budget's concurrency
-   * limit. Unset (the default) opens downloads without a cap.
+   * Shared concurrency permit (see {@link ReadBudget}). When set, the reader
+   * waits for a free permit before opening its SDK download, so every reader
+   * sharing a budget — the independent concurrent reads mediabunny can issue
+   * share one — is guaranteed never to exceed the budget's concurrency limit.
+   * Unset (the default) opens downloads without a cap.
    */
   budget?: ReadBudget;
   cache?: LruChunkCache;
@@ -49,13 +49,13 @@ export interface RangedReaderOptions {
   downloadOptions?: { maxBufferedChunks?: number };
   /**
    * Total download attempts for one read window: the original download plus
-   * bounded retries on a transient failure (a download-open throw, a stream
-   * error, or a short/dropped read that delivered < expected including zero
-   * bytes). Defaults to 3 (`DEFAULT_MAX_ATTEMPTS`, i.e. two retries). A run
-   * superseded by a seek/stop, the stall watchdog (which has its own
-   * semantics), or a throwing `onChunk` (the caller's own handler, never a
-   * transport blip) is never retried; after the budget is exhausted the
-   * failure surfaces exactly as before.
+   * retries on a transient failure (a download-open throw, a stream error, or
+   * a short/dropped read that delivered < expected including zero bytes).
+   * Defaults to 3 (`DEFAULT_MAX_ATTEMPTS`, i.e. two retries). A run superseded
+   * by a seek/stop, the stall watchdog (which has its own semantics), or a
+   * throwing `onChunk` (the caller's own handler, never a transport blip) is
+   * never retried; after the budget is exhausted the failure is reported
+   * exactly as before.
    */
   maxAttempts?: number;
   object: SiaObjectLike;
@@ -64,7 +64,7 @@ export interface RangedReaderOptions {
   onComplete?: () => void;
   onError?: (error: unknown) => void;
   /**
-   * Optional milestone listener for the windowed-read observability seam:
+   * Optional milestone listener for windowed-read progress:
    * `'read.window-start'` when an SDK download opens, `'read.window-complete'`
    * when it completes successfully, `'bytes.read'` each time cumulative
    * delivery to `onChunk` crosses a whole 1 MiB boundary, `'read.cache-hit'`
@@ -72,7 +72,7 @@ export interface RangedReaderOptions {
    * download), `'read.budget-wait'` (once per blocking `ReadBudget.acquire`,
    * i.e. when a permit wait begins behind the concurrency cap), `'read.stalled'`
    * when the stall watchdog aborts a read that yielded no bytes, `'read.retry'`
-   * once per bounded retry of a failed download (carrying the attempt number,
+   * once per retry of a failed download (carrying the attempt number,
    * the window's position/length, and the previous attempt's error message),
    * and `'read.error'` when a run fails for any other reason after the retry
    * budget is exhausted (short read / SDK stream error; the stall error is
@@ -99,7 +99,7 @@ export interface RangedReaderOptions {
   sdk: SiaSdkLike;
   /**
    * Stall watchdog: maximum milliseconds a single SDK read may yield no bytes
-   * before the stream is aborted and `onError` surfaces a descriptive error.
+   * before the stream is aborted and `onError` receives a descriptive error.
    * A real SDK read that stalls forever (e.g. every WebTransport session is
    * pending and the browser drops new ones) otherwise hangs the caller and the
    * media element stays `seeking` indefinitely. Unset (undefined) disables the
@@ -340,8 +340,8 @@ export class RangedReader {
    * Fires one milestone, tagged with the owning SOURCE requestId (null when
    * the reader has none). The listener is untrusted host code (it may feed a
    * logger or telemetry), so a throw is silently swallowed: it must never
-   * abort the read or surface an error that belongs to the stream, which the
-   * caller owns, not this hint seam.
+   * abort the read or report an error that belongs to the stream, which the
+   * caller owns, not this hint hook.
    */
   #milestone(name: string, detail: Readonly<Record<string, unknown>>): void {
     const onMilestone = this.#options.onMilestone;
@@ -358,8 +358,8 @@ export class RangedReader {
    * One `reader.read()`, raced against a stall watchdog. When no bytes arrive
    * within `stallTimeoutMs` the stalled stream is aborted (freeing its SDK
    * sessions) and the promise rejects with a descriptive error, so a
-   * WebTransport-session-exhausted read surfaces through `onError` instead of
-   * hanging the caller forever. The watchdog always settles the awaited
+   * WebTransport-session-exhausted read is reported through `onError` instead
+   * of hanging the caller forever. The watchdog always settles the awaited
    * promise — even for an already-superseded run — so the run unwinds and
    * releases its budget permit; whether an error is actually emitted is
    * decided by `#run`'s load-generation guard. The abort side effects are
@@ -403,7 +403,7 @@ export class RangedReader {
   async #run(loadGeneration: number): Promise<void> {
     const { budget, chunkSize, maxAttempts, object, onComplete, onError, retryBackoffMs, sdk, stallTimeoutMs } = this.#options;
     // Total attempts for the read window, capped at the configured budget
-    // (default: original download + two bounded retries).
+    // (default: original download + two retries).
     const attempts = maxAttempts === undefined ? DEFAULT_MAX_ATTEMPTS : Math.max(1, Math.floor(maxAttempts));
 
     // Hoisted so the failure milestone below can report the read window even
@@ -614,7 +614,7 @@ export class RangedReader {
         // exits silently — a stale failure must not reach onError.
         if (failure !== null && this.#loadGeneration === loadGeneration) {
           // A transport/ranged-read failure that exhausted the budget is
-          // wrapped so the stream chain (and the host's recovery gate) can
+          // wrapped so the stream chain (and the host's recovery handling) can
           // classify it: the message names the read window it gave up on,
           // `cause` keeps the SDK/short-read error, and the window facts ride
           // as fields. A throwing onChunk (the caller's own handler) and the

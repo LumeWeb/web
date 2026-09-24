@@ -39,7 +39,7 @@
  * generation must be carried into:
  *   - `src/__tests__/fixtures/browser-decodable-fixture.ts`
  *     (`HAS_BROWSER_DECODABLE_FIXTURE = true` + `BROWSER_DECODABLE_FIXTURE_SHA256`);
- *   - the `browser-decodable-fixture-contract.spec.ts` manifest.
+ *   - the `browser-decodable-fixture.spec.ts` manifest.
  * and the `.mp4` bytes committed under this directory so the browser tests can
  * pick them up.
  *

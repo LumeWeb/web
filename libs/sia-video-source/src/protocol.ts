@@ -114,7 +114,7 @@ export type MainToWorkerMessage =
        */
       readonly log?: WorkerLogLevel;
       readonly requestId: RequestId;
-      /** Mirror of `appSeed` for the sharing-key seed slot (`APP_KEY` tagged `keyType: 'sharing'`). */
+      /** Counterpart of `appSeed` for the sharing-key seed slot (`APP_KEY` tagged `keyType: 'sharing'`). */
       readonly sharingSeed?: boolean;
       readonly type: MainToWorkerMessageType.HELLO;
     }

@@ -1,7 +1,7 @@
 /**
- * Worker-entry (`src/worker.ts`) seam tests: `installSiaVideoSourceWorker`
- * installs the default Sia composition root (`createDefaultWorkerComposition`,
- * a `createSiaWorkerComposition`-built `SessionCoordinator`) by default, and
+ * Worker entry (`src/worker.ts`): `installSiaVideoSourceWorker` installs the
+ * default Sia composition root (`createDefaultWorkerComposition`, a
+ * `createSiaWorkerComposition`-built `SessionCoordinator`) by default, and
  * lets a caller inject any `WorkerCompositionHost` via `createCompositionRoot`
  * — all behind the same validated-message listener. The host-side `workerMse`
  * preference is exercised through the ACTUAL installed worker root (not a
@@ -34,7 +34,7 @@ import {
   type WorkerScopeRuntime,
 } from '../worker.ts';
 
-/** Node-only: the seam mounts a fake worker `self`, which a browser page owns. */
+/** Node-only: the fake worker `self` is mounted here; a browser page owns the real one. */
 const IN_NODE = typeof document === 'undefined';
 
 /** Browser-only: real DOM, where the default root can open a fake MediaSource. */
@@ -78,7 +78,7 @@ const WORKER_CONFIG: WorkerConfig = {
 
 const posted: WorkerToMainMessage[] = [];
 
-// ---- MSE fakes (mirror sia-composition.spec.ts) ------------------------------
+// ---- MSE fakes (same fakes as sia-composition.spec.ts) ------------------------
 
 class FakeSourceBuffer extends EventTarget {
   abortCalls = 0;
@@ -206,7 +206,7 @@ describe('installSiaVideoSourceWorker (default Sia composition root)', () => {
     posted.length = 0;
   });
 
-  it.skipIf(!IN_NODE)('default install honors a host main preference in HELLO config: forced main-thread CHUNK', async () => {
+  it.skipIf(!IN_NODE)('default install uses main-thread CHUNK when the host sets workerMse: main in HELLO', async () => {
     const mount = mountWorkerSelf();
     try {
       // The runtime claims worker-MSE support, but the host asked the worker
@@ -253,7 +253,7 @@ describe('installSiaVideoSourceWorker (default Sia composition root)', () => {
     }
   });
 
-  it.skipIf(!IN_NODE)('default install keeps worker mode when the host prefers auto on a capable runtime', async () => {
+  it.skipIf(!IN_NODE)('default install stays in worker mode when the host sets workerMse: auto on a capable runtime', async () => {
     const mount = mountWorkerSelf();
     try {
       installSiaVideoSourceWorker({
@@ -306,8 +306,8 @@ describe('installSiaVideoSourceWorker (default Sia composition root)', () => {
       mount.fire({ envelope, requestId: 2, type: MainToWorkerMessageType.APP_KEY });
       // APP_KEY decryption is async and the entry fires messages without
       // awaiting each handleMessage, so let the handshake settle before the
-      // SOURCE that lazily binds the SDK (mirrors a host awaiting its own
-      // handshake round-trips).
+      // SOURCE that lazily binds the SDK (a host awaiting its own handshake
+      // round-trips waits here too).
       await flush();
       mount.fire({ requestId: 3, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
 
@@ -328,7 +328,7 @@ describe('installSiaVideoSourceWorker (default Sia composition root)', () => {
     }
   });
 
-  it.skipIf(!IN_NODE)('default install preserves the main-thread CHUNK fallback when worker MSE is unsupported', async () => {
+  it.skipIf(!IN_NODE)('default install keeps the main-thread CHUNK fallback when worker MSE is unsupported', async () => {
     const mount = mountWorkerSelf();
     try {
       // Node has no MediaSource, so the worker-side default composition's
@@ -375,7 +375,7 @@ describe('createDefaultWorkerComposition (actual installed default root, browser
     posted.length = 0;
   });
 
-  it.skipIf(!IN_BROWSER)('honors a host main preference: CHUNK and no HANDLE even with a root on a capable runtime', async () => {
+  it.skipIf(!IN_BROWSER)('uses main-thread CHUNK with no HANDLE when the host sets workerMse: main on a capable runtime', async () => {
     const payload = boundedIndexedFmp4Payload();
     const { sdk } = fakeSiaSdk(payload);
     const mediaSources: FakeMediaSource[] = [];
@@ -408,7 +408,7 @@ describe('createDefaultWorkerComposition (actual installed default root, browser
     expect(messages.find((m) => m.type === WorkerToMainMessageType.SOURCE_OK)).toMatchObject({ info: { mode: 'main' } });
   });
 
-  it.skipIf(!IN_BROWSER)('keeps worker mode for auto on a capable runtime: HANDLE transfer, MSE appends, no CHUNK', async () => {
+  it.skipIf(!IN_BROWSER)('stays in worker mode for workerMse: auto on a capable runtime: HANDLE transfer, MSE appends, no CHUNK', async () => {
     const payload = boundedIndexedFmp4Payload();
     const { sdk } = fakeSiaSdk(payload);
     const mediaSources: FakeMediaSource[] = [];

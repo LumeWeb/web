@@ -1,6 +1,6 @@
 /**
- * The append-sink seam: the stream controller has ONE sink surface regardless
- * of worker vs main-thread MSE role. `MseAdapter` is the thin façade over the
+ * The append sink: the stream controller has ONE sink surface regardless
+ * of worker vs main-thread MSE role. `MseAdapter` is the thin wrapper over the
  * existing, already-tested `MseAppendPipe` (whose SPF-backed internals are
  * unchanged); this spec drives it through the same fake SourceBuffer async
  * `updateend` / `error` model the pipe spec uses.
@@ -13,7 +13,7 @@ import type { AppendUnit } from '../sink/append-sink.ts';
 import { MseAppendPipe } from '../mse-pipe.ts';
 import { MseAdapter } from '../sink/mse-adapter.ts';
 
-// ---- fake MSE primitives (mirrors mse-pipe.spec.ts) --------------------------
+// ---- fake MSE primitives (same fakes as mse-pipe.spec.ts) --------------------
 
 interface Harness {
   adapter: MseAdapter;
@@ -186,7 +186,7 @@ describe('MseAdapter (AppendSink)', () => {
     expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([1, 2]);
   });
 
-  it('resetParser forwards the seek target so the pipe re-anchors the SourceBuffer', async () => {
+  it('resetParser forwards the seek target so the pipe points the SourceBuffer at that time', async () => {
     const { adapter, fakeSourceBuffer } = createHarness();
 
     adapter.append(unit(1));
@@ -197,7 +197,7 @@ describe('MseAdapter (AppendSink)', () => {
     await settle();
 
     expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([1, 2]);
-    // The target crosses the adapter and reaches the pipe's re-anchor.
+    // The target passes through the adapter to the pipe's parser reset.
     expect(fakeSourceBuffer.timestampOffsets).toEqual([37]);
   });
 
@@ -206,7 +206,7 @@ describe('MseAdapter (AppendSink)', () => {
 
     adapter.resetParser(3, 15);
     adapter.append(unit(1));
-    adapter.resetParser(1, 45); // stale: must not bump the generation or re-anchor again
+    adapter.resetParser(1, 45); // stale: must not bump the generation or reset again
 
     await settle();
 
@@ -253,7 +253,7 @@ describe('MseAdapter (AppendSink)', () => {
     expect(fakeSourceBuffer.removed).toEqual([[0, 10]]);
   });
 
-  it('abort permanently stops appends and EOS', async () => {
+  it('abort permanently stops appends and end-of-stream', async () => {
     const { adapter, fakeMediaSource, fakeSourceBuffer } = createHarness();
 
     adapter.abort(new Error('teardown'));

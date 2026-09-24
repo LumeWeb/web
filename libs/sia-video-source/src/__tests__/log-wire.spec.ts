@@ -1,14 +1,14 @@
 /**
- * End-to-end worker→main `LOG` wire integration across the REAL default
- * composition root, driven HELLO→ATTACH→SOURCE like the sibling composition
- * specs (fake SDK/object/pipeline — no media bytes, no MediaSource). The host
- * HELLO `log` opt-in threshold gates whether derived milestones ever reach the
- * post channel as `LOG` messages: an opted-in stream is wire-guard-valid and
+ * End-to-end worker→main `LOG` wire across the REAL default composition root,
+ * driven HELLO→ATTACH→SOURCE like the sibling composition specs (fake
+ * SDK/object/pipeline — no media bytes, no MediaSource). The host HELLO `log`
+ * opt-in threshold decides whether derived milestones ever reach the post
+ * channel as `LOG` messages: an opted-in stream is wire-guard-valid and
  * scalar-only (a share-URL decryption key never leaks), a threshold-less HELLO
  * keeps the channel fully silent, a `warn` threshold still passes the
  * error-severity `session.error`, and the per-sink 256-message cap holds
  * across bursty reloads. The `SiaVideoSource`-level HELLO host path is
- * browser-only, so the host-side contract here is the threshold mapper plus
+ * browser-only, so the host-side work here is the threshold mapper plus
  * `forwardWorkerLog` rendering onto a console-logger spy (the mapper's full
  * table stays unit-tested in `log-host-forward.spec.ts`).
  */
@@ -116,11 +116,10 @@ describe('opting in (HELLO log: debug) collects the LOG stream end-to-end', () =
     await driveSource(root, 'debug');
 
     const logs = logsOf(messages);
-    // Actual emission order (verified by running): ATTACH is processed before
-    // SOURCE, so `session.attach` leads; the lazy SDK build, object
-    // resolution, and load acceptance follow on the SOURCE. The fake ready
-    // pipeline never reads the byte source, so no read.window-*/bytes.read
-    // milestones appear on this path.
+    // Emission order: ATTACH is processed before SOURCE, so `session.attach`
+    // leads; the lazy SDK build, object resolution, and load acceptance follow
+    // on the SOURCE. The fake ready pipeline never reads the byte source, so
+    // no read.window-*/bytes.read milestones appear on this path.
     expect(logs.map((log) => log.name)).toEqual([
       'session.attach',
       'sdk.built',
@@ -209,7 +208,7 @@ describe('a HELLO without a log threshold keeps the post channel LOG-silent', ()
   });
 });
 
-// ---- threshold semantics ----------------------------------------------------------
+// ---- threshold behavior -----------------------------------------------------------
 
 describe('HELLO log: warn suppresses info/debug but still surfaces a failing load', () => {
   it('posts only the error-severity session.error for an unreadable object', async () => {
@@ -251,9 +250,9 @@ describe('HELLO log: warn suppresses info/debug but still surfaces a failing loa
   });
 });
 
-// ---- host-side contract ------------------------------------------------------------
+// ---- host-side threshold mapping + forwarding -------------------------------------
 
-describe('host-side contract: threshold mapper + console-logger forwarding', () => {
+describe('host-side: threshold mapper + console-logger forwarding', () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -296,8 +295,8 @@ describe('the composition sink enforces the LOG cap across the lifetime', () => 
     const { messages, root } = loggedRoot();
     await root.handleMessage({ config: WORKER_CONFIG, log: 'debug', requestId: 1, type: MainToWorkerMessageType.HELLO });
     await root.handleMessage({ requestId: 2, type: MainToWorkerMessageType.ATTACH });
-    // 300 sequential loads attempt far more milestones than the budget (attach
-    // + sdk.built once + object.resolved + stream.started per accepted load);
+    // 300 sequential loads attempt far more milestones than the cap (attach +
+    // sdk.built once + object.resolved + stream.started per accepted load);
     // the per-sink cap must withhold everything past 256.
     for (let requestId = 3; requestId < 303; requestId++) {
       await root.handleMessage({ preload: 'auto', requestId, src: 'pin-key', type: MainToWorkerMessageType.SOURCE });
@@ -308,7 +307,7 @@ describe('the composition sink enforces the LOG cap across the lifetime', () => 
     // Every load still succeeded, proving the suppression is the cap alone.
     expect(messages.filter((message) => message.type === WorkerToMainMessageType.SOURCE_OK)).toHaveLength(300);
     // At most 256 LOG posts total across the lifetime; the oversupply above
-    // proves the sink engaged at exactly the budget.
+    // proves the cap engaged at exactly its limit.
     expect(logs).toHaveLength(MAX_WORKER_LOG_MESSAGES);
     expect(logs.length).toBeLessThanOrEqual(MAX_WORKER_LOG_MESSAGES);
     // The first milestone still arrived and every posted LOG is well-formed.

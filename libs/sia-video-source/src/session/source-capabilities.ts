@@ -1,7 +1,7 @@
 /**
  * Session capability reporting: the pure mapping from one ready load's facts —
  * container, duration, MSE MIME, and track codecs — plus the session's MSE
- * construction site into the `SOURCE_OK.info` wire shape.
+ * construction mode, into the `SOURCE_OK.info` wire shape.
  *
  * The module stays generic: it imports no Sia SDK, no MSE internals, and no
  * worker routing, so `sourceInfoFor` is defined (and tested) here exactly once

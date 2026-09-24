@@ -73,23 +73,23 @@ export interface WorkerScopeRuntime {
 
 /**
  * The worker-side default Sia composition root that
- * `installSiaVideoSourceWorker` installs by default. Wires the coordinator to
- * the browser-side surfaces only: `self.postMessage` as the outbound
+ * `installSiaVideoSourceWorker` installs by default. It binds the coordinator
+ * to the browser environment only: `self.postMessage` as the outbound
  * channel, the worker-local SDK factory (`createSdk`, defaulting to
  * the HELLO/APP_KEY registration flow) for the lazily bound transport, and
- * the worker-side MSE root (`createWorkerMseRoot`) that owns one fresh worker
- * `MediaSource` per load and transfers its `MediaSourceHandle` to the host as
- * a `HANDLE` message. Where the runtime cannot construct MSE in a dedicated
- * worker (Firefox), the composition never opens the root and keeps the
- * protocol-safe main-mode CHUNK posting sink — the host owns MSE in that
+ * the worker-side MSE root (`createWorkerMseRoot`) that creates one fresh
+ * worker `MediaSource` per load and transfers its `MediaSourceHandle` to the
+ * host as a `HANDLE` message. Where the runtime cannot construct MSE in a
+ * dedicated worker (Firefox), the composition never opens the root and keeps
+ * the protocol-safe main-mode CHUNK posting sink — the host owns MSE in that
  * case. No Node-vs-browser branch exists here: this entry is browser-only, so
  * the browser globals (`self`) are used directly.
  *
- * The worker LOG seam: a host that opts in via the HELLO `log` forwarding
+ * The worker LOG path: a host that opts in via the HELLO `log` forwarding
  * threshold receives worker `LOG` milestones (session attach/detach, sdk
  * built, stream started/ended, session errors) forwarded by this root's
- * `logSink` over the same `post` channel, each gated by the live HELLO
- * threshold and the per-sink 256-message cap inside the composition.
+ * `logSink` over the same `post` channel, each one checked against the live
+ * HELLO threshold and the per-sink 256-message cap inside the composition.
  */
 export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = {}): WorkerCompositionHost {
   const post = options.post ?? defaultPost;
@@ -101,9 +101,9 @@ export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = 
   // The real worker `logSink`: forwards `LOG` messages back over the same
   // outbound `post` channel the coordinator uses. It only ever receives
   // threshold-compliant, cap-allowed messages — the composition's `emitLog`
-  // gates every milestone against the live HELLO `log` threshold and the 256
-  // sink cap before invoking it — and stays dumb and total so a log line can
-  // never block the wire.
+  // checks every milestone against the live HELLO `log` threshold and the 256
+  // sink cap before invoking it — and posts without side effects or throw, so
+  // a log line can never block the wire.
   const logSink: WorkerLogSink = (message) => post(message);
   const workerMseRoot = createWorkerMseRoot({
     backBufferSeconds: MSE_BACK_BUFFER_SECONDS,
@@ -118,18 +118,19 @@ export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = 
       });
     },
     // Worker-MSE open facts (`session.mse-open` / `session.mse-open-failed`)
-    // forward into the composition's single gated emitLog path (same sink,
+    // forward into the composition's single emitLog path (same sink,
     // same live threshold, same 256 cap) — no parallel logging system.
     onLog: (name, level, requestId, detail) => emitLog(logSink, handshake.log, level, name, detail, requestId),
     post,
   });
   const coordinator = createSiaWorkerComposition({
-    // One shared bounded-dispatch permit for every SDK ranged download the
+    // One shared concurrency permit for every SDK ranged download the
     // worker's sources open (unless the host injects its own). Without it, a
-    // batch of concurrent library reads opens unbounded renter WebTransport
-    // sessions and exhausts the browser's 64 pending-session cap, storming the
-    // pool with `Too many pending WebTransport sessions (64)` — the same budget
-    // the coordinator forwards into each `SiaByteSource` it creates.
+    // batch of concurrent library reads opens up to one renter WebTransport
+    // session per read and exhausts the browser's 64 pending-session cap,
+    // failing later reads with `Too many pending WebTransport sessions (64)` —
+    // the same budget the coordinator forwards into each `SiaByteSource` it
+    // creates.
     byteSource: {
       budget: options.budget ?? new ReadBudget(DEFAULT_SDK_READ_CONCURRENCY),
       ...(options.cache ? { cache: options.cache } : {}),
@@ -143,13 +144,13 @@ export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = 
     supportsWorkerMse: options.supportsWorkerMse,
     workerMseRoot,
   });
-  // The default root owns the handshake + logSink, so a main→worker payload
-  // the entry's guard drops in `installSiaVideoSourceWorker` can still be
-  // reported through the same gated emitLog — one threshold, one cap. The
+  // The default root creates the handshake + logSink, so a main→worker
+  // payload the entry's guard drops in `installSiaVideoSourceWorker` can
+  // still be reported through the same emitLog — one threshold, one cap. The
   // `direction` names the wire half; no `type` rides along here because the
   // guard never parsed the foreign envelope. A rejected payload is rare, so
-  // this never crowds the 256 cap; a custom injected root without this seam
-  // simply skips the line.
+  // this never crowds the 256 cap; a custom injected root without this path
+  // skips the line.
   return Object.assign(coordinator, {
     logProtocolReject: (): void => {
       emitLog(logSink, handshake.log, workerLogLevel.debug, 'protocol.rejected', {
@@ -166,11 +167,11 @@ export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = 
  * (`createDefaultWorkerComposition`, a `createSiaWorkerComposition`-built
  * `SessionCoordinator`) behind the validated-message listener: it binds the
  * real Sia transport lazily from the HELLO config + decrypted APP_KEY seed,
- * owns worker MSE through the worker-side root where the runtime allows it,
- * honors a host `workerMse: 'main'` preference in the HELLO config, and keeps
- * the protocol-safe main-thread CHUNK fallback otherwise. A caller can inject
- * any {@link WorkerCompositionHost} via `options.createCompositionRoot`, which
- * takes precedence and replaces the default root entirely.
+ * drives worker MSE through the worker-side root where the runtime allows it,
+ * applies a host `workerMse: 'main'` preference from the HELLO config, and
+ * keeps the protocol-safe main-thread CHUNK fallback otherwise. A caller can
+ * inject any {@link WorkerCompositionHost} via `options.createCompositionRoot`,
+ * which takes precedence and replaces the default root entirely.
  */
 export function installSiaVideoSourceWorker(options: SiaVideoWorkerOptions = {}): void {
   const host: WorkerCompositionHost = options.createCompositionRoot
@@ -179,9 +180,9 @@ export function installSiaVideoSourceWorker(options: SiaVideoWorkerOptions = {})
   (self as unknown as { addEventListener(type: 'message', listener: (event: MessageEvent) => void): void })
     .addEventListener('message', (event) => {
       // Malformed or foreign payloads must not reach the state machine. The
-      // default root's guard-seam surfaces the dropped envelope through the
-      // gated worker LOG path (debug, direction main-to-worker); an injected
-      // root without the seam stays silent — behavior otherwise unchanged.
+      // default root reports the dropped envelope through the worker LOG path
+      // (debug, direction main-to-worker); an injected root without that path
+      // stays silent — behavior otherwise unchanged.
       if (!isMainToWorkerMessage(event.data)) {
         try {
           host.logProtocolReject?.();

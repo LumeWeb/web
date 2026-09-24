@@ -1,5 +1,5 @@
 /**
- * ErrorReporter contract: the injected fatal-failure path StreamController /
+ * ErrorReporter: the injected fatal-failure path StreamController /
  * SessionCoordinator use to surface a structured {@link PlaybackFailure} as
  * the host's protocol ERROR.
  *
@@ -15,9 +15,8 @@
  *   to `unsupported` so the host's decode-recovery reload is never triggered by
  *   a failed trim — only genuine `mse` decode/append failures retry;
  * - transport (a ranged-read failure that exhausted its retry budget) maps to
- *   `network`, which the host surfaces as `MEDIA_ERR_NETWORK` with no
- *   auto-reload — an explicit play/seek restarts the source (repair
- *   deferred) for a genuinely broken/unreachable transport;
+ *   `network`, so the HOST can run its own reload recovery for a genuinely
+ *   broken/unreachable transport;
  * - sequential fallback is a mode, not an error (nothing here emits it);
  * - no raw secret-bearing SDK object or URL is included in a message.
  *
@@ -66,7 +65,7 @@ export const failureCode = {
   'unsupported-route': 'unsupported-route',
 } as const;
 
-/** The seam SurfaceController / SessionCoordinator report fatal failures through. */
+/** The fatal-failure channel StreamController / SessionCoordinator report through. */
 export interface ErrorReporter {
   /**
    * Reports a fatal failure. Adapters MUST drop `condition: 'cancelled'` failures
@@ -159,7 +158,8 @@ function errorKindForFailure(failure: PlaybackFailure): null | WorkerErrorCode {
       // A normalization failure (a trim/seek restart that cannot be serviced,
       // or a load whose conversion broke) is a pipeline/seek-servicing
       // failure, not a media decode failure. Mapping it to 'decode' makes the
-      // host run its bounded full-reload recovery — tearing the pipeline down
+      // host run its retry-capped full-reload recovery — tearing the pipeline
+      // down
       // mid-seek when the only real problem is the requested position. Surface
       // it as 'unsupported' (fatal, no auto-reload) instead so genuine
       // decode/append failures (`mse`) keep the decode-recovery path to

@@ -2,8 +2,8 @@
  * Leveled, dependency-free logging for `@lumeweb/sia-video-source`.
  *
  * Consumers opt into verbosity: every internal call site goes through a
- * `Logger`, and the library gates its own output on the configured level.
- * Defaults keep development builds informative (lifecycle milestones, with no
+ * `Logger`, and the library filters its own output by the configured level.
+ * Defaults keep development builds informative (session milestones, with no
  * per-read debug noise) and production quiet without any application
  * configuration, and nothing in this module can throw or touch globals that
  * browsers lack.
@@ -19,7 +19,7 @@ export const LOG_LEVELS = ['trace', 'debug', 'info', 'warn', 'error'] as const;
 export type LogFields = Readonly<Record<string, unknown>>;
 
 /**
- * Leveled logging seam.
+ * Leveled logging interface.
  *
  * Implementations must never receive credential material: the library keeps
  * keys and secrets out of every message and `fields` object it logs, so a
@@ -116,9 +116,9 @@ export function createConsoleLogger(
 /**
  * Numeric severity, strictly increasing from `'trace'` (0) to `'error'` (4).
  * `'silent'` ranks below `'trace'` (-1) so it is the bottom of every ordering.
- * Emit gating is a single `>=` comparison of a level's rank against the
+ * Emit filtering is a single `>=` comparison of a level's rank against the
  * filter's; `'silent'` is short-circuited separately because its below-trace
- * rank would otherwise pass every level through the gate.
+ * rank would otherwise let every level through the filter.
  */
 export function logLevelRank(level: LogLevelFilter): number {
   return level === 'silent' ? -1 : LOG_LEVELS.indexOf(level);
@@ -126,7 +126,7 @@ export function logLevelRank(level: LogLevelFilter): number {
 
 /**
  * Production emits only `'warn'` (a shipping app should not be spammed by
- * library internals); everything else gets `'info'`. `'info'` keeps lifecycle
+ * library internals); everything else gets `'info'`. `'info'` keeps session
  * milestones in the dev console — attach, sdk.built, object.resolved, stream
  * events — while swallowing the chatty debug-level per-read milestones
  * (`bytes.read` every MiB, `read.window-*`) whose audience is a developer

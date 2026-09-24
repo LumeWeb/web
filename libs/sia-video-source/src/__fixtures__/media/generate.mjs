@@ -271,7 +271,7 @@ function progressiveTail() {
 
 /**
  * Top-level sidx with three 30 s RAP references of `segmentLength` bytes.
- * Mirrors the pixel-for-pixel proven layout of `boundedIndexedFmp4Payload`.
+ * Matches the pixel-for-pixel proven layout of `boundedIndexedFmp4Payload`.
  */
 function sidxBox(segmentLength) {
   const entry = [...u32(segmentLength), ...u32(30_000), 0x80, 0, 0, 0];

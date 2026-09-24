@@ -1,7 +1,7 @@
 /**
- * Append-sink contract: the MSE append/evict/EOS surface the stream
- * controller talks to, regardless of whether MSE lives in the worker or on
- * the main thread.
+ * Append-sink contract: the MSE append/evict/EOS operations the stream
+ * controller calls, regardless of whether MSE lives in the worker or on the
+ * main thread.
  *
  * `MseAppendPipe` *is* this contract today; `MseAdapter` (see `mse-adapter.ts`)
  * is the thin façade that hands the controller one `AppendSink` for either
@@ -28,8 +28,7 @@ export interface AppendSink {
   /**
    * Trims the back-buffer behind `playheadSeconds`. Resolves `true` when
    * media was actually removed. The concrete MSE adapter derives the exact
-   * boundary from its playhead provider, so this argument is informational at
-   * the seam.
+   * boundary from its playhead provider, so this argument does not set it.
    */
   evictBackBuffer(playheadSeconds: number): Promise<boolean>;
   /**
@@ -39,10 +38,10 @@ export interface AppendSink {
    */
   requestEndOfStream(loadGeneration: number): void;
   /**
-   * Drops queued appends belonging to a superseded position and arms a
-   * SourceBuffer parser reset for when it next quiesces (seek), re-anchoring
-   * the buffer at `targetTimeSeconds` when a re-anchor target is given. Stale
-   * load generations are ignored.
+   * Drops queued appends belonging to a superseded position and sets up a
+   * SourceBuffer parser reset for when it next quiesces (seek), applying
+   * `targetTimeSeconds` as the buffer's new timestamp offset when a target is
+   * given. Stale load generations are ignored.
    */
   resetParser(loadGeneration: number, targetTimeSeconds?: number): void;
 }

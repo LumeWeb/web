@@ -33,8 +33,8 @@ export type PostMessage = (message: WorkerToMainMessage, transfer?: Transferable
  * share URL through its own `objectFromShareUrl`, while the keyless
  * `SharedSdk` (ADR 0008) is wrapped by an adapter whose `objectFromShareUrl`
  * routes through `SharedSdk.object(parseSiaShareUrl(url).objectKey)` — the
- * underlying primitive is object-id based, not URL based. The seam is optional
- * so SDKs predating share support can still be injected.
+ * underlying primitive is object-id based, not URL based. The field is
+ * optional so SDKs predating share support can still be injected.
  */
 export type SiaVideoSdk = {
   /**
@@ -52,7 +52,7 @@ export type SiaVideoSdk = {
 
 export interface SiaVideoWorkerOptions {
   /**
-   * Shared bounded-dispatch permit for SDK ranged downloads (see
+   * Shared concurrency permit for SDK ranged downloads (see
    * {@link ReadBudget}). Defaults to one shared `ReadBudget` at
    * `DEFAULT_SDK_READ_CONCURRENCY` (4) for the default composition root, so a
    * batch of concurrent library reads can never open more renter WebTransport
@@ -102,8 +102,8 @@ export interface SiaVideoWorkerOptions {
     sharingSeed: null | Uint8Array,
   ) => Promise<SiaVideoSdk>;
   /**
-   * Injected load-pipeline seam for package-owned tests; production defaults to
-   * the real media-library pipeline owned by the composition root.
+   * Injected load pipeline for package-owned tests; production defaults to
+   * the real media-library pipeline the composition root creates.
    */
   loadPipeline?: LoadPipeline;
   /** Overrides message delivery; useful when the caller wires its own channel. */
@@ -125,11 +125,11 @@ export interface WorkerCompositionHost {
   /** Processes one validated main→worker message. */
   handleMessage(message: MainToWorkerMessage): Promise<void>;
   /**
-   * Optional guard-seam: reports a main→worker payload the entry's message
-   * guard dropped (a foreign or malformed envelope), on the composition's own
-   * gated `LOG` path when one exists. The default Sia composition root
-   * provides it so `protocol.rejected` reaches an opted-in host; an injected
-   * root that has no log path simply omits it.
+   * Optional reject-reporting hook: reports a main→worker payload the entry's
+   * message guard dropped (a foreign or malformed envelope), on the
+   * composition's own `LOG` path when one exists. The default Sia composition
+   * root provides it so `protocol.rejected` reaches an opted-in host; an
+   * injected root that has no log path omits it.
    */
   logProtocolReject?(): void;
 }
@@ -187,15 +187,14 @@ export function defaultPost(message: WorkerToMainMessage, transfer?: Transferabl
 }
 
 /**
- * Exposes the worker's `dispose` cleanup contract on a WASM SDK whose own
- * lifecycle API is `free()`/`[Symbol.dispose]`, so every "abandon this SDK"
- * path releases the native (WASM/WebTransport) resources it holds.
+ * Exposes a `dispose` entry point on a WASM SDK whose own release API is
+ * `free()`/`[Symbol.dispose]`, so every "abandon this SDK" path releases the
+ * native (WASM/WebTransport) resources it holds.
  */
 export function withDisposal(sdk: SiaVideoSdk): SiaVideoSdk {
   // Non-mutating: the WASM SDK object (and any shared injected instance) is
-  // left untouched; the wrapper forwards to it and exposes the release
-  // contract (`dispose` and [Symbol.dispose]) over the SDK's own lifecycle
-  // API, with both entry points sharing one release-once latch.
+  // left untouched; the wrapper forwards to it and exposes both `dispose` and
+  // `[Symbol.dispose]`, sharing one release-once latch across the two.
   const underlying = sdk as unknown as {
     [Symbol.dispose]?: () => unknown;
     dispose?: () => unknown;
@@ -262,9 +261,9 @@ function bytesToHex(bytes: Uint8Array): string {
 
 /**
  * Builds the app-key SDK (ADR 0006): `Builder.connected` over the registered
- * app key, wrapped in `withDisposal` so the WASM object's lifecycle hook is
- * released exactly once by the worker's disposal contract. Throws when the app
- * key is not registered with the indexer.
+ * app key, wrapped in `withDisposal` so the WASM object is released exactly
+ * once by the worker's disposal path. Throws when the app key is not
+ * registered with the indexer.
  */
 async function connectAppKeySdk(config: WorkerConfig, appKeySeed: Uint8Array): Promise<SiaVideoSdk> {
   const builder = new Builder(config.indexerUrl, config.app);
@@ -314,11 +313,11 @@ async function connectSharedSdk(config: WorkerConfig, sharingSeed: Uint8Array): 
  * rejection clears that route's memo so a later call reattempts — a retry must
  * not inherit a dead promise.
  *
- * Disposal mirrors `withDisposal`'s release-once latch, but releases only the
- * SDKs that actually exist. An in-flight first-use creation is awaited so its
- * SDK is captured and released too; an untouched route is NEVER connected by
- * dispose — cleaning up must not pay the very connection cost this design
- * removes.
+ * Disposal uses the same release-once latch as `withDisposal`, but releases
+ * only the SDKs that actually exist. An in-flight first-use creation is
+ * awaited so its SDK is captured and released too; an untouched route is
+ * never connected by dispose — cleaning up must not pay the very connection
+ * cost this design removes.
  */
 function createDualSourceSdk(
   connectAppKey: () => Promise<SiaVideoSdk>,
@@ -417,13 +416,13 @@ function createDualSourceSdk(
 }
 
 /**
- * Wraps a WASM `SharedSdk` into the worker's `SiaVideoSdk` seam. `SharedSdk`
+ * Wraps a WASM `SharedSdk` into the worker's `SiaVideoSdk` type. `SharedSdk`
  * resolves objects by *id* (`object(id)`) rather than by URL, so the share-URL
- * path is bridged here: `objectFromShareUrl` extracts the `objectKey` via
+ * path is mapped here: `objectFromShareUrl` extracts the `objectKey` via
  * `parseSiaShareUrl` (the same 64-hex id `SharedSdk.object` fetches) and
- * routes through it. `download` is structurally identical to the app-key SDK's
+ * passes it through. `download` is structurally identical to the app-key SDK's
  * (`DownloadOptions`, same `PinnedObject`), so downstream streaming code is
- * untouched. `dispose` comes from `withDisposal` over the WASM lifecycle.
+ * untouched. `dispose` comes from `withDisposal` over the WASM release hooks.
  */
 function toSiaVideoSdk(sharedSdk: SharedSdk): SiaVideoSdk {
   const wrapped = withDisposal(sharedSdk);

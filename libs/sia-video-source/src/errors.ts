@@ -5,7 +5,7 @@
  *
  * Modeled on the `HlsJsErrorsMixin` in video.js v10's hls-js media: the engine
  * reports structured failures, the host stores a single fatal `MediaError` and
- * surfaces it through the `error` getter plus an `error` event, and the stored
+ * exposes it through the `error` getter plus an `error` event, and the stored
  * error is dropped on the next load.
  */
 

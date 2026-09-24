@@ -9,7 +9,7 @@
  * types. The worker entry lives behind the `/worker` subpath; a React wrapper
  * behind `/react`.
  *
- * Logging is pluggable through the dependency-free `Logger` seam: pass a
+ * Logging is pluggable through the dependency-free `Logger` interface: pass a
  * `logger` to the host (or the React wrapper's `logger` prop) and re-level it
  * at runtime, and opt in to coarse worker milestone `LOG` events over the
  * `/worker` wire via the host's HELLO log threshold.

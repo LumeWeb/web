@@ -1,18 +1,18 @@
 /**
- * `SessionCoordinator` / `WorkerComposition`: the worker composition-root seam
- * that wires the session pieces into one protocol-compatible adapter:
+ * `SessionCoordinator` / `WorkerComposition`: the worker composition-root
+ * adapter that binds the session pieces into one protocol-compatible whole:
  *
  *   `LoadPipeline` (one mediabunny Input: discover + convert)
  *     → `StreamController` (start/seek/playhead, EOS)
  *     → `AppendSink` (default: main-mode CHUNK poster)
  *   plus `Clock`, `ErrorReporter` (protocol ERROR mapping), and the handshake
- *   seam (`HELLO`/`APP_KEY`), all behind injected interfaces.
+ *   (`HELLO`/`APP_KEY`), all behind injected interfaces.
  *
  * Responsibilities: protocol validation via the existing
- * `MainToWorkerMessage` types, handshake/app-key lifecycle, request IDs and
- * source replacement (load-generation discipline), attach/detach/destroy, and creating
- * and disposing one load/session graph (one `StreamController` per accepted
- * load).
+ * `MainToWorkerMessage` types, handshake/app-key handling, request IDs and
+ * source replacement (load-generation discipline), attach/detach/destroy, and
+ * creating and disposing one load/session graph (one `StreamController` per
+ * accepted load).
  *
  * The coordinator is Sia-free: everything below runs against injected fakes
  * with no SDK and no MSE. `createSource` is where a call site binds the real
@@ -89,7 +89,7 @@ export interface HelloSeedPresence {
 /** Outbound protocol channel (same shape as the worker's `PostMessage`). */
 export type PostMessage = (message: WorkerToMainMessage, transfer?: Transferable[]) => void;
 
-/** The seam the worker entry will eventually install (`handleMessage` FSM). */
+/** The coordinator the worker entry installs behind its message listener. */
 export interface SessionCoordinator {
   /** Permanently stops the coordinator; later messages are ignored. */
   destroy(): void;
@@ -101,7 +101,7 @@ export interface SessionCoordinator {
 
 /**
  * Everything the composition root needs to build a coordinator. Concrete
- * implementations of the seams are defaults (registered here), so only
+ * implementations of the dependencies are defaults (registered here), so only
  * `createSource` and `post` are truly required; tests inject fakes.
  */
 export interface SessionCoordinatorDeps {
@@ -119,8 +119,8 @@ export interface SessionCoordinatorDeps {
   /** Handshake for `HELLO`/`APP_KEY` (default: `createSessionHandshake()`). */
   readonly handshake?: SessionHandshake;
   /**
-   * Injected load-pipeline seam for package-owned tests; production defaults
-   * to `createLoadPipeline({ capabilities })`.
+   * Injected load pipeline for package-owned tests; production defaults to
+   * `createLoadPipeline({ capabilities })`.
    */
   readonly loadPipeline?: LoadPipeline;
   /**
@@ -157,9 +157,9 @@ export interface SessionCoordinatorDeps {
 }
 
 /**
- * The `HELLO`/`APP_KEY` handshake seam. The coordinator routes those two
- * protocol messages here and posts `HELLO_OK`/`ERROR` around the result, so
- * handshake crypto stays isolated and tests inject a fake.
+ * The `HELLO`/`APP_KEY` handshake. The coordinator routes those two protocol
+ * messages here and posts `HELLO_OK`/`ERROR` around the result, so handshake
+ * crypto stays isolated and tests inject a fake.
  */
 export interface SessionHandshake {
   /**
@@ -416,7 +416,7 @@ export class WorkerComposition implements SessionCoordinator {
 
   // PLAYHEAD is only meaningful for the ACTIVE load at a valid clock position:
   // a stale request id (a previous load's straggler) or a malformed time must
-  // not drive eviction/lookahead on the current session. This mirrors the
+  // not drive eviction/lookahead on the current session. This matches the
   // current worker's `#handlePlayhead` guard exactly.
   #handlePlayhead(requestId: RequestId, time: number): void {
     if (requestId !== this.#requestId || !Number.isFinite(time) || time < 0) return;
@@ -426,14 +426,15 @@ export class WorkerComposition implements SessionCoordinator {
 
   // SEEK with an active session: bind the load if streaming has not begun yet
   // (the synchronous seek supersedes that initial run), then record the seek
-  // position. A malformed time is dropped before it can park intent or re-pump
-  // the controller, matching the current worker's `#handleSeek` guard.
+  // position. A malformed time is dropped before it can record intent or
+  // re-pump the controller, matching the current worker's `#handleSeek` guard.
   #handleSeek(timeSeconds: number): void {
     if (!Number.isFinite(timeSeconds) || timeSeconds < 0) return;
     this.#onPlayhead?.(timeSeconds);
     const session = this.#session;
     if (!session) {
-      // Parked seek: start streaming once the deferred load resolves.
+      // Seek before a session exists: keep the target and start streaming once
+      // the load resolves.
       this.#pendingSeekTime = timeSeconds;
       this.#startStreaming();
       return;
@@ -455,7 +456,7 @@ export class WorkerComposition implements SessionCoordinator {
     const loadGeneration = ++this.#loadGeneration;
     // Play intent is scoped to ONE load attempt (matches the current worker):
     // a stray PLAY that outlived a previous load must not auto-start a later
-    // unrelated one. A parked seek survives source supersession.
+    // unrelated one. A recorded seek survives source supersession.
     this.#playRequested = false;
     // `#abandonLoad` clears the previous load's request id; the new load's id
     // is bound AFTER the teardown so the session sink/reporter use THIS one.
@@ -466,10 +467,10 @@ export class WorkerComposition implements SessionCoordinator {
     const loadAbortController = new AbortController();
     this.#loadAbortController = loadAbortController;
 
-    // A genuine load failure kills the intent parked on this attempt: a seek
-    // or play that targeted a failed object must not auto-start a later,
-    // unrelated SOURCE. Superseded returns skip this, so a seek parked during
-    // a replaced load survives to the replacement load.
+    // A genuine load failure clears the intent recorded on this attempt: a
+    // seek or play that targeted a failed object must not auto-start a later,
+    // unrelated SOURCE. Superseded returns skip this, so a seek recorded
+    // during a replaced load survives to the replacement load.
     const failed = (kind: WorkerErrorCode, context: string): void => {
       this.#playRequested = false;
       this.#pendingSeekTime = undefined;
@@ -581,19 +582,19 @@ export class WorkerComposition implements SessionCoordinator {
       type: WorkerToMainMessageType.SOURCE_OK,
     });
 
-    // The parked seek this load carried is consumed when the load resolves:
-    // it repositions streaming to its floor, and clearing it here keeps the
+    // The seek this load carried is consumed when the load resolves: it
+    // repositions streaming to its floor, and clearing it here keeps the
     // intent scoped to THIS load (a later, unrelated SOURCE must not
-    // auto-start from a stale flag). A deferred resolve keeps it parked so a
+    // auto-start from a stale flag). A deferred resolve keeps it set so a
     // later seek/play intent still finds it — though once the session exists
-    // a live seek routes through the session path, not the park flags.
+    // a live seek routes through the session path, not these flags.
     const parkedSeek = this.#pendingSeekTime;
     if (preload === 'auto' || this.#playRequested || parkedSeek !== undefined) {
       this.#playRequested = false;
       this.#pendingSeekTime = undefined;
       this.#startStreaming();
       // start() binds the session's controller synchronously; seek() records
-      // the parked position so playback resumes from it once MSE buffers.
+      // the held position so playback resumes from it once MSE buffers.
       if (parkedSeek !== undefined) {
         this.#session?.controller?.seek(parkedSeek);
       }
@@ -633,8 +634,9 @@ export class WorkerComposition implements SessionCoordinator {
     this.#mode = this.#supportsWorkerMse() ? workerMode.worker : workerMode.main;
   }
 
-  // Begins streaming the accepted load (PLAY / preload auto / parked seek).
-  // Re-binds the session when the previous controller reached a terminal state.
+  // Begins streaming the accepted load (PLAY / preload auto / a seek recorded
+  // before the session). Re-binds the session when the previous controller
+  // reached a terminal state.
   #startStreaming(): void {
     const session = this.#session;
     if (!session || this.#destroyed) return;
@@ -647,7 +649,7 @@ export class WorkerComposition implements SessionCoordinator {
 
 /**
  * Composition-root factory: builds a {@link WorkerComposition} over the
- * injected seams. Exporting the factory keeps callers on the interface.
+ * injected dependencies. Exporting the factory keeps callers on the interface.
  */
 export function createSessionCoordinator(deps: SessionCoordinatorDeps): SessionCoordinator {
   return new WorkerComposition(deps);
@@ -811,7 +813,7 @@ function createPostingSink(post: PostMessage, requestId: RequestId): AppendSink 
       // the coordinator's ENDED; a posting sink owns no SourceBuffer.
     },
     resetParser(_loadGeneration: number, _targetTimeSeconds?: number): void {
-      // No SourceBuffer parser to reset (or re-anchor) on a posting sink.
+      // No SourceBuffer parser to reset (or timestamp rebase) on a posting sink.
     },
   };
 }

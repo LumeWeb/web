@@ -1,8 +1,8 @@
 /**
- * Contract for `wrapLoglevel`, the bridge between an external loglevel-style
- * logger and the library's `Logger` seam. Plain `vi.fn()` stubs stand in for
- * the wrapped instance so every call the adapter forwards is observable, with
- * one console-like stub covering the non-mock path.
+ * `wrapLoglevel` adapts an external loglevel-style logger to the library's
+ * `Logger` surface. Plain `vi.fn()` stubs stand in for the wrapped instance so
+ * every call the adapter makes is observable, with one console-like stub
+ * covering the non-mock path.
  */
 
 import { describe, expect, it, vi } from 'vitest';
@@ -37,7 +37,7 @@ function makeStubLog(includeTrace = true): StubLogger {
 }
 
 describe('wrapLoglevel', () => {
-  it('forwards msg and fields unmodified to the matching method at each level', () => {
+  it('sends msg and fields unmodified to the matching method at each level', () => {
     const underlying = makeStubLog(false);
     const log = wrapLoglevel(underlying);
 
@@ -67,7 +67,7 @@ describe('wrapLoglevel', () => {
     expect(underlying.info).toHaveBeenCalledWith('with fields', { one: 1, two: 2 });
   });
 
-  it('uses trace when the wrapped instance provides it and falls back to debug otherwise', () => {
+  it('uses trace when the wrapped instance provides it and debug otherwise', () => {
     const withTrace = makeStubLog(true);
     wrapLoglevel(withTrace).trace('t', { n: 1 });
     expect(withTrace.trace).toHaveBeenCalledWith('t', { n: 1 });
@@ -85,7 +85,7 @@ describe('wrapLoglevel', () => {
     expect(wrapLoglevel(makeStubLog(false), { level: 'silent' }).level).toBe('silent');
   });
 
-  it('calls through regardless of the recorded level, leaving gating to the wrapped instance', () => {
+  it('calls through regardless of the recorded level, leaving filtering to the wrapped instance', () => {
     const underlying = makeStubLog(false);
     const log = wrapLoglevel(underlying, { level: 'error' });
 

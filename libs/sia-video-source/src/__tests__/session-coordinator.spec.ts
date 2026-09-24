@@ -1,11 +1,11 @@
 /**
- * Protocol behavior spec for the `SessionCoordinator` (WorkerComposition),
- * driven with an injected fake `LoadPipeline` so no real media bytes or
- * mediabunny objects are needed. One load turns into `SOURCE_OK` (exactly five
- * info fields built from the ready result), streamed units reach the posting
- * sink or an injected MSE sink, unsupported/cancelled verdicts map to one
- * error or silence, and source replacement / detach / destroy tear the
- * previous load down (abort signal first, then its resources).
+ * The `SessionCoordinator` (WorkerComposition) protocol behavior, driven with
+ * an injected fake `LoadPipeline` so no real media bytes or mediabunny objects
+ * are needed. One load turns into `SOURCE_OK` (exactly five info fields built
+ * from the ready result), streamed units reach the posting sink or an injected
+ * MSE sink, unsupported/cancelled verdicts map to one error or silence, and
+ * source replacement / detach / destroy tear the previous load down (abort
+ * signal first, then its resources).
  */
 import { describe, expect, it } from 'vitest';
 import { encryptToWorker } from '../app-key-handshake.ts';
@@ -91,7 +91,7 @@ class FakeLoadPipeline implements LoadPipeline {
   }
 
   /**
-   * Mirrors inspectMediaLibrary: a non-ready verdict disposes its Input,
+   * Same as inspectMediaLibrary: a non-ready verdict disposes its Input,
    * whose CustomSource disposal cancels the byte source — so the coordinator
    * never calls `source.cancel()` a second time for the same load.
    */
@@ -113,9 +113,9 @@ class FakePlayback implements MediaPlayback {
   started = 0;
   #disposed = false;
   #onComplete: (() => void) | null = null;
-  // Mirrors the production Input/CustomSource disposal path: an accepted
+  // Matches the production Input/CustomSource disposal path: an accepted
   // load's `dispose()` cancels its byte source. Wired by tests that abandon a
-  // ready session so source release stays observable at the coordinator seam.
+  // ready session so source release stays observable at the coordinator.
   readonly #onDispose: (() => void) | undefined;
   #onError: ((error: unknown) => void) | null = null;
 
@@ -351,7 +351,7 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
     expect(playback.started).toBe(1);
   });
 
-  it('parks a SEEK while the load is in flight and applies it when the load resolves', async () => {
+  it('a SEEK arriving mid-load still leaves the playback running once the load resolves', async () => {
     const driver = makeDriver();
     const playback = new FakePlayback();
     // The pipeline holds the SOURCE's verdict so a SEEK arrives mid-load.
@@ -392,7 +392,7 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
     expect(driver.message(WorkerToMainMessageType.ENDED)[0].requestId).toBe(14);
   });
 
-  it('a superseded load completion disposes its own resources and posts nothing', async () => {
+  it('a load already replaced by a newer one disposes its own resources and posts nothing', async () => {
     const driver = makeDriver();
     const stale = new FakePlayback(() => driver.cancelSource('stale'));
     // Both loads resolve through held runs so their order is explicit: the
@@ -550,6 +550,9 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
   });
 
   it('reports one playback failure as an unsupported error scoped to the load', async () => {
+    // A playback run that fails normalization is a pipeline failure, not a
+    // decode failure: it must surface as `unsupported` (fatal, no decode-
+    // recovery reload) and still be scoped to its request.
     const driver = makeDriver();
     const playback = new FakePlayback();
     driver.pipeline.results.push(readyLoad(playback));

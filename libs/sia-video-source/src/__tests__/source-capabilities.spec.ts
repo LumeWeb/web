@@ -1,7 +1,7 @@
 /**
- * Contract for the session capability-report module: the pure mapping from one
- * ready load's facts — container, duration, MIME, and track codecs — plus the
- * session's MSE construction site into the `SOURCE_OK.info` wire shape.
+ * The session capability-report module maps one ready load's facts — container,
+ * duration, MIME, and track codecs — plus the session's MSE construction site
+ * into the `SOURCE_OK.info` wire shape.
  *
  * The module carries no Sia SDK, no MSE internals, and no worker routing, so
  * the mapping is tested here once instead of inline.

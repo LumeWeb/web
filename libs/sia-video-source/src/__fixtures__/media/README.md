@@ -63,7 +63,7 @@ this directory, each with a pinned sha256 that the suite's contract holds.
 
 | Fixture | Bytes | sha256 | Produced by | Contract pin |
 |---|---|---|---|---|
-| `browser-decodable-avc-aac.mp4` | 102940 | `d8d8db6b4b73d1c96c3d8eba636f441d68e83ff820ddc84dde5be8aea388f55a` | `generate-browser-decodable-fixture.mjs` | `browser-decodable-fixture.ts` + `browser-decodable-fixture-contract.spec.ts` |
+| `browser-decodable-avc-aac.mp4` | 102940 | `d8d8db6b4b73d1c96c3d8eba636f441d68e83ff820ddc84dde5be8aea388f55a` | `generate-browser-decodable-fixture.mjs` | `browser-decodable-fixture.ts` + `browser-decodable-fixture.spec.ts` |
 | `browser-decodable-frag-avc-aac.mp4` | 114917 | `24e79f7d5aff821abc91ec972a53101b2e6066ad01cca0e702c7e2c616aec00c` | `generate-browser-decodable-frag-fixture.mjs` | generator `--check` |
 
 - `browser-decodable-avc-aac.mp4` — 2 s, 320x240@30 x264 High@5.0

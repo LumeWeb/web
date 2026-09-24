@@ -3,9 +3,9 @@
  *
  * Consumers — the media library and any other layer that reads an object's
  * bytes — must read through `ByteSource`, never the Sia SDK or `RangedReader`
- * directly. This file carries the interface plus the small
- * load-generation/read-lifecycle bookkeeping shared by the concrete in-memory
- * and Sia sources, so their supersede/cancel semantics never diverge.
+ * directly. This file carries the interface plus the small load-generation
+ * and read bookkeeping shared by the concrete in-memory and Sia sources, so
+ * their supersede/cancel semantics never diverge.
  */
 
 /** One explicit byte window to read from an object. */
@@ -29,7 +29,7 @@ export interface ByteRange {
 export interface ByteSource {
   /** Abort everything in flight and forget the load-generation state (e.g. source change). */
   cancel(reason?: unknown): void;
-  /** Cancellable, bounded, byte-exact ranged read. */
+  /** Cancellable, byte-exact ranged read. */
   read(range: ByteRange, options: ReadOptions): ReadableStream<Uint8Array>;
   /** Object payload size in bytes. */
   readonly size: number;

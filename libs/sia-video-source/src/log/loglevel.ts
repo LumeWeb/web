@@ -1,12 +1,12 @@
 /**
  * `loglevel` adapter: exposes an external loglevel-style logger behind the
- * library's dependency-free `Logger` seam.
+ * library's dependency-free `Logger` interface.
  *
  * Every internal call site only ever speaks `Logger` (`createConsoleLogger`,
- * `nullLogger`, or a wrapped third-party logger). `wrapLoglevel` is the bridge
- * for embedding contexts that already own a `loglevel` instance — or any object
+ * `nullLogger`, or a wrapped third-party logger). `wrapLoglevel` bridges
+ * embedding contexts that already own a `loglevel` instance — or any object
  * with the same method shape, including a plain `console`. It forwards each
- * line straight through to that instance's own methods, so level gating,
+ * line straight through to that instance's own methods, so level filtering,
  * formatting, and transport all stay the wrapped instance's business; the
  * adapter never re-implements them.
  */
@@ -16,11 +16,11 @@ import type { LogFields, Logger, LogLevelFilter } from './logger.ts';
 /**
  * Minimal structural shape of a loglevel-style logger.
  *
- * Deliberately mirrors the `loglevel` package's `Logger` surface (every method
- * takes a payload plus varargs) without importing that package, so this module
- * carries no dependency on it: any real `loglevel` instance or any
- * console-like object qualifies. `trace` is optional because console-like
- * objects do not always distinguish it from `debug`.
+ * Uses the `loglevel` package's `Logger` method shape (every method takes a
+ * payload plus varargs) without importing that package, so this module carries
+ * no dependency on it: any real `loglevel` instance or any console-like object
+ * qualifies. `trace` is optional because console-like objects do not always
+ * distinguish it from `debug`.
  */
 export interface LoglevelLike {
   debug(payload: unknown, ...rest: unknown[]): void;
@@ -40,7 +40,7 @@ const DEFAULT_LEVEL: LogLevelFilter = 'debug';
  * structured fields through unmodified as the payload plus one trailing
  * argument: `debug`/`info`/`warn`/`error` call the same-named method, and
  * `trace` calls `underlying.trace` when present, falling back to
- * `underlying.debug` otherwise. Loglevel already gates on its own internal
+ * `underlying.debug` otherwise. Loglevel already filters by its own internal
  * level, so the wrapper always calls through and never filters itself; the
  * returned `level` merely records `options.level` (default `'debug'`) for the
  * caller.

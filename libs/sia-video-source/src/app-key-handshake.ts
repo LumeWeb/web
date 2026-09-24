@@ -2,11 +2,11 @@
  * X25519 + AEAD encapsulation of a Sia credential seed (app-key or
  * sharing-key) for the worker handshake ("box"-style layering over X25519).
  *
- * The worker owns a static X25519 key pair and only ever publishes its raw
+ * The worker holds a static X25519 key pair and only ever publishes its raw
  * public key (inside `HELLO_OK`). When the host has a plaintext seed, it
  * generates a fresh ephemeral X25519 key pair, computes ECDH against the
  * worker's public key, derives a 256-bit AES-GCM key with HKDF-SHA-256, and
- * sends an `AppKeyEnvelope`. The worker performs the mirror ECDH with its
+ * sends an `AppKeyEnvelope`. The worker performs the matching ECDH with its
  * private key and decrypts internally; the private key and the decrypted
  * seed never leave the worker isolate, and no protocol message can carry
  * either one back out.
@@ -64,7 +64,7 @@ export interface WorkerKeyPair {
 }
 
 /**
- * Worker side: mirror-decapsulates the envelope with the static private key
+ * Worker side: decapsulates the envelope with the static private key
  * and returns the seed bytes for in-isolate use. Any integrity failure
  * (tampered ciphertext, wrong ephemeral key, wrong protocol context, bad key
  * lengths) rejects — the caller must treat a rejection as "no seed" and never
@@ -73,7 +73,7 @@ export interface WorkerKeyPair {
 export async function decryptAppKeyEnvelope(workerKeyPair: WorkerKeyPair, envelope: AppKeyEnvelope): Promise<Uint8Array> {
   const ephemeralPublicKey = validatePublicKey(envelope.ephemeralPublicKey);
   const aeadKey = await deriveAeadKey(workerKeyPair.privateKey, ephemeralPublicKey);
-  // A rejected AEAD tag surfaces as a thrown error with no partial plaintext:
+  // A rejected AEAD tag comes through as a thrown error with no partial plaintext:
   // noble's GCM decrypt authenticates the full ciphertext (AAD included)
   // before any output is produced. The throw is the contract — never a
   // best-effort guess at the plaintext.

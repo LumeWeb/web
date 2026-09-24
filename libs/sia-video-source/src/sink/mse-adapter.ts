@@ -1,11 +1,10 @@
 /**
  * MSE `AppendSink` adapter: a thin, role-agnostic façade over the existing
- * `MseAppendPipe`, whose SPF-backed append/evict/EOS internals are
- * deliberately unchanged. The controller gets
- * one `AppendSink` surface whether MSE runs in the worker (the pipe the
- * worker already builds) or on the main thread (the pipe `SiaVideoSource`
- * builds), so container-specific append branches never need to live in the
- * controller.
+ * `MseAppendPipe`, whose SPF-backed append/evict/EOS internals are unchanged.
+ * The controller gets one `AppendSink` interface whether MSE runs in the
+ * worker (the pipe the worker already builds) or on the main thread (the pipe
+ * `SiaVideoSource` builds), so container-specific append branches never need
+ * to live in the controller.
  *
  * The adapter adds only the contract's load-generation scoping on top of the
  * pipe: load-generation-tagged `resetParser`/`requestEndOfStream` calls from
@@ -31,7 +30,7 @@ export interface MseAdapterOptions {
 
 /**
  * Live worker MediaSource state the worker-mode sink factory binds one
- * per-load `MseAppendPipe` to, mirroring the pipe the worker already builds.
+ * per-load `MseAppendPipe` to, matching the pipe the worker already builds.
  * The getters read the worker's live state so the pipe serializes appends
  * into whatever SourceBuffer the (possibly still-opening) MediaSource yields,
  * and `onError` reports fatal append failures onto the load's request id.
@@ -47,7 +46,7 @@ export interface WorkerMseSinkFactoryDeps {
   getSourceBuffer(): null | SourceBuffer;
   /**
    * Optional MSE-pipe diagnostics (eviction / parser-reset / EOS breadcrumbs),
-   * forwarded straight from the pipe's own `onDiag` seam.
+   * forwarded straight from the pipe's own `onDiag` hook.
    */
   onDiag?(name: string, detail: Readonly<Record<string, unknown>>): void;
   /** Fatal MSE append failure; fires at most once per pipe lifetime. */
@@ -64,8 +63,8 @@ export class MseAdapter implements AppendSink {
   }
 
   abort(_reason?: unknown): void {
-    // The pipe's own load-generation/teardown state dominates; `reason` is informational
-    // at the seam (the pipe stops permanently regardless).
+    // The pipe's own load-generation/teardown state dominates; `reason` carries
+    // no behavior (the pipe stops permanently regardless).
     this.#pipe.abort();
   }
 
@@ -94,12 +93,11 @@ export class MseAdapter implements AppendSink {
 }
 
 /**
- * Worker-mode MSE `sinkFactory` seam: builds one fresh `AppendSink` per call —
- * a `MseAdapter` over a fresh `MseAppendPipe` for the worker MediaSource — so
- * every load owns its own append queue/load generation while sharing the live
- * worker MSE
- * state behind the injected getters. This is the production composition-root
- * binding the coordinator's `sinkFactory` seam defers to.
+ * Worker-mode MSE `sinkFactory`: builds one fresh `AppendSink` per call — a
+ * `MseAdapter` over a fresh `MseAppendPipe` for the worker MediaSource — so
+ * every load gets its own append queue/load generation while sharing the live
+ * worker MSE state behind the injected getters. This is the production
+ * composition-root binding the coordinator's `sinkFactory` connects to.
  */
 export function createWorkerMseSinkFactory(deps: WorkerMseSinkFactoryDeps): () => AppendSink {
   return () =>

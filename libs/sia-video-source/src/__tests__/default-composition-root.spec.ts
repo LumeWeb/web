@@ -1,15 +1,15 @@
 /**
- * Real default composition-root end-to-end lifecycle tests: the ACTUAL root
+ * Real default composition-root end-to-end tests: the ACTUAL root
  * `createDefaultWorkerComposition` installs (the `createSiaWorkerComposition`
  * binding), driven over its real handshake + lazy SDK transport + worker-side
  * MSE root / main-mode CHUNK fallback — not a directly-built coordinator.
  *
- * Focus: SDK transport + worker-MSE/main fallback lifecycle, cancellation,
- * teardown, and no stale handles. Two cases — `DETACH` and `DESTROY` must
- * release the worker MediaSource / SourceBuffer a load opened — drive the
- * `onAbandon` teardown seam on the composition root; the rest validate that a
- * superseded load's handle is dropped immediately and that neither
- * worker-MSE nor main-mode CHUNK delivery can outlive its load.
+ * Focus: SDK transport + worker-MSE/main fallback teardown, cancellation, and
+ * no stale handles. Two cases — `DETACH` and `DESTROY` must release the
+ * worker MediaSource / SourceBuffer a load opened — drive the `onAbandon`
+ * teardown on the composition root; the rest validate that a superseded
+ * load's handle is dropped immediately and that neither worker-MSE nor
+ * main-mode CHUNK delivery can outlive its load.
  *
  * Browser-only surfaces are marked `it.skipIf(!IN_BROWSER)`; the lazy SDK
  * transport rebuild (node-safe) is marked `it.skipIf(!IN_NODE)`. Scope: the
@@ -48,7 +48,7 @@ const WORKER_CONFIG: WorkerConfig = {
   indexerUrl: 'https://indexer.example',
 };
 
-// ---- MSE fakes (mirror worker-entry.spec.ts) --------------------------------
+// ---- MSE fakes (same fakes as worker-entry.spec.ts) --------------------------
 
 class FakeSourceBuffer extends EventTarget {
   abortCalls = 0;
@@ -149,11 +149,11 @@ describe('createDefaultWorkerComposition worker-MSE lifecycle (browser)', () => 
     vi.restoreAllMocks();
   });
 
-  it.skipIf(!IN_BROWSER)('DETACH releases the worker MediaSource + SourceBuffer the load opened (no stale handle)', async () => {
+  it.skipIf(!IN_BROWSER)('DETACH releases the worker MediaSource + SourceBuffer the load opened', async () => {
     const messages: WorkerToMainMessage[] = [];
     const { mediaSources, root } = workerModeRoot(messages);
     await openWorkerLoad(root, messages, 3);
-    // Worker load owns one MediaSource with a live SourceBuffer.
+    // Worker load opens one MediaSource with a live SourceBuffer.
     expect(messages.find((m) => m.type === WorkerToMainMessageType.ATTACH_OK)).toMatchObject({ mode: 'worker' });
     expect(mediaSources).toHaveLength(1);
     expect(messages.filter((m) => m.type === WorkerToMainMessageType.HANDLE)).toHaveLength(1);
@@ -202,7 +202,7 @@ describe('createDefaultWorkerComposition worker-MSE lifecycle (browser)', () => 
 
     // Exactly one HANDLE per accepted load, scoped to its request id; the old
     // pipeline's SourceBuffer is released and receives no stale appends, and
-    // the new load owns the one live pipeline that streams.
+    // the new load runs the one live pipeline that streams.
     expect(messages.filter((m) => m.type === WorkerToMainMessageType.HANDLE).map((m) => (m.type === WorkerToMainMessageType.HANDLE ? m.requestId : null))).toEqual([
       3, 4,
     ]);
@@ -214,7 +214,7 @@ describe('createDefaultWorkerComposition worker-MSE lifecycle (browser)', () => 
     expect(delivered.byteLength).toBeGreaterThan(0);
   });
 
-  it.skipIf(!IN_BROWSER)('a fatal worker-MSE append error posts a request-scoped decode ERROR and releases the SourceBuffer immediately (no stale handle on the errored pipeline)', async () => {
+  it.skipIf(!IN_BROWSER)('a fatal worker-MSE append error posts a request-scoped decode ERROR and releases the SourceBuffer immediately', async () => {
     const messages: WorkerToMainMessage[] = [];
     const { mediaSources, root } = workerModeRoot(messages);
     // Build the pipeline WITHOUT streaming (preload none): the worker MediaSource
@@ -301,7 +301,7 @@ describe('createDefaultWorkerComposition worker-MSE lifecycle (browser)', () => 
 });
 
 describe('createDefaultWorkerComposition main-mode CHUNK fallback lifecycle (browser)', () => {
-  it.skipIf(!IN_BROWSER)('DETACH stops CHUNK delivery from the cancelled load (fallback cancellation)', async () => {
+  it.skipIf(!IN_BROWSER)('DETACH stops CHUNK delivery from the cancelled load', async () => {
     const payload = boundedIndexedFmp4Payload();
     const { sdk } = fakeSiaSdk(payload);
     const messages: WorkerToMainMessage[] = [];
