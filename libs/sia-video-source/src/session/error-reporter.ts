@@ -15,8 +15,9 @@
  *   to `unsupported` so the host's decode-recovery reload is never triggered by
  *   a failed trim — only genuine `mse` decode/append failures retry;
  * - transport (a ranged-read failure that exhausted its retry budget) maps to
- *   `network`, so the HOST can run its own bounded reload recovery for a
- *   genuinely broken/unreachable transport;
+ *   `network`, which the host surfaces as `MEDIA_ERR_NETWORK` with no
+ *   auto-reload — an explicit play/seek restarts the source (repair
+ *   deferred) for a genuinely broken/unreachable transport;
  * - sequential fallback is a mode, not an error (nothing here emits it);
  * - no raw secret-bearing SDK object or URL is included in a message.
  *

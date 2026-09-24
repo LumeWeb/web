@@ -133,6 +133,8 @@ export { isSiaShareUrl, parseSiaShareUrl, type SiaShareUrl } from './share-url.t
 export {
   forwardWorkerLog,
   logThresholdFor,
+  type RecoveryChangeDetail,
+  siaRecoveryChange,
   siaVideoDefaultProps,
   SiaVideoSource,
   type SiaVideoSourceOptions,
