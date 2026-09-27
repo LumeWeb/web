@@ -27,20 +27,32 @@ export interface WorkerErrorMessage {
  *   MSE at all (device too old), so nothing Sia can stream is playable.
  * - `decode` → `MEDIA_ERR_DECODE` (3): remux failure, or SourceBuffer
  *   creation/append failure.
+ * - `quota` → `MEDIA_ERR_DECODE` (3) (backward-compatible: the DOM-facing code
+ *   is unchanged for existing consumers): a persistent SourceBuffer quota
+ *   refusal. It is a distinct kind so the recovery machine never treats
+ *   memory pressure as a decode restart, even though the surfaced MediaError
+ *   keeps the same decode code MSE append failures use.
  * - `network` → `MEDIA_ERR_NETWORK` (2): SDK/WebTransport/stream failures.
- * - Anything unrecognized falls back to `MEDIA_ERR_CUSTOM` (100).
+ * - `unavailable` → unmapped by design: the reserved seek-target
+ *   data-unavailable kind is never turned into a MediaError; the host routes
+ *   it nonfatally on its own, so it never reaches a DOM error. If one is ever
+ *   built for it anyway, it degrades like any unrecognized kind below.
+ * - Anything unrecognized (including unmapped kinds) falls back to
+ *   `MEDIA_ERR_CUSTOM` (100).
  */
-export const MEDIA_ERROR_CODES: Readonly<Record<WorkerErrorCode, number>> = {
+export const MEDIA_ERROR_CODES: Readonly<Partial<Record<WorkerErrorCode, number>>> = {
   decode: MediaError.MEDIA_ERR_DECODE,
   device: MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED,
   network: MediaError.MEDIA_ERR_NETWORK,
+  quota: MediaError.MEDIA_ERR_DECODE,
   unsupported: MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED,
 };
 
-export const DEFAULT_ERROR_MESSAGES: Readonly<Record<WorkerErrorCode, string>> = {
+export const DEFAULT_ERROR_MESSAGES: Readonly<Partial<Record<WorkerErrorCode, string>>> = {
   decode: 'Playback failed while preparing Sia data for rendering.',
   device: 'This device or browser is too old to stream this video. Update to iOS 17.1+ or use a recent desktop browser.',
   network: 'The Sia network connection failed.',
+  quota: 'Playback ran out of buffering memory while preparing Sia data for rendering.',
   unsupported: 'This Sia object is not playable in this browser.',
 };
 
