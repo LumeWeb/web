@@ -11,6 +11,7 @@ import {
   PROTOCOL_VERSION,
   WORKER_PUBLIC_KEY_LENGTH,
   type WorkerConfig,
+  workerErrorCode,
   type WorkerToMainMessage,
   WorkerToMainMessageType,
 } from '../protocol.ts';
@@ -24,6 +25,38 @@ describe('protocol', () => {
     const first = nextRequestId();
     const second = nextRequestId();
     expect(second).toBeGreaterThan(first);
+  });
+
+  it('keeps the worker error-code catalog closed, self-named, and unchanged in protocol version', () => {
+    // Every catalog member is its own lowercase wire string; the closed set is
+    // the established five kinds plus the reserved `unavailable` kind (a
+    // nonfatal, seek-target data-unavailable outcome with no current runtime
+    // producer). The vocabulary is additive; PROTOCOL_VERSION stays 0.
+    expect(Object.keys(workerErrorCode)).toEqual([...Object.keys(workerErrorCode)].sort());
+    for (const [name, wire] of Object.entries(workerErrorCode)) {
+      expect(wire, name).toBe(name.toLowerCase());
+    }
+    expect(Object.values(workerErrorCode).sort()).toEqual(['decode', 'device', 'network', 'quota', 'unavailable', 'unsupported']);
+    expect(PROTOCOL_VERSION).toBe(0);
+  });
+
+  it('accepts an ERROR message carrying the reserved unavailable kind', () => {
+    // The worker→main guard stays a string check on `kind`, so the reserved
+    // kind passes the wire boundary exactly like the established kinds.
+    const message: WorkerToMainMessage = { context: 'seek-target:data-unavailable', kind: 'unavailable', requestId: null, type: WorkerToMainMessageType.ERROR };
+    expect(isWorkerToMainMessage(message)).toBe(true);
+  });
+
+  it('validates the optional failed seek-target time on an unavailable ERROR message', () => {
+    const withTime: WorkerToMainMessage = { context: 'seek-target:data-unavailable', kind: workerErrorCode.unavailable, requestId: 12, time: 42.5, type: WorkerToMainMessageType.ERROR };
+    expect(isWorkerToMainMessage(withTime)).toBe(true);
+    // Absent time stays accepted (the field is additive; old workers never post it).
+    expect(isWorkerToMainMessage({ context: 'seek-target:data-unavailable', kind: workerErrorCode.unavailable, requestId: 12, type: WorkerToMainMessageType.ERROR })).toBe(true);
+    // A present but nonfinite time is a malformed wire value: rejected, never a silent default.
+    expect(isWorkerToMainMessage({ ...withTime, time: Number.NaN })).toBe(false);
+    expect(isWorkerToMainMessage({ ...withTime, time: Number.POSITIVE_INFINITY })).toBe(false);
+    expect(isWorkerToMainMessage({ ...withTime, time: Number.NEGATIVE_INFINITY })).toBe(false);
+    expect(isWorkerToMainMessage({ ...withTime, time: '42.5' })).toBe(false);
   });
 
   it('survives a structured-clone round trip (postMessage semantics)', () => {
@@ -67,6 +100,73 @@ describe('protocol', () => {
     for (const sample of samples) {
       expect(isWorkerToMainMessage(sample), sample.type).toBe(true);
     }
+  });
+
+  it('recognizes every declared main→worker discriminator', () => {
+    const samples: MainToWorkerMessage[] = [
+      { appSeed: false, config: { app: { appId: 'x', callbackUrl: '', description: 'test', logoUrl: '', name: 'test', serviceUrl: 'https://app.example' }, indexerUrl: 'https://sia.storage' }, requestId: 1, sharingSeed: false, type: MainToWorkerMessageType.HELLO },
+      { requestId: 1, type: MainToWorkerMessageType.ATTACH },
+      { requestId: 1, type: MainToWorkerMessageType.PLAY },
+      { requestId: 1, time: 12.5, type: MainToWorkerMessageType.PLAYHEAD },
+      { requestId: 1, time: 12.5, type: MainToWorkerMessageType.SEEK },
+      { buffered: [{ end: 30, start: 0 }], pendingBytes: 1024, playhead: 5, requestId: 1, type: MainToWorkerMessageType.BUFFERED_STATE },
+      { mimeType: 'video/mp4', preload: 'auto', requestId: 1, src: 'k', type: MainToWorkerMessageType.SOURCE },
+      { type: MainToWorkerMessageType.DETACH },
+      { type: MainToWorkerMessageType.DESTROY },
+    ];
+    for (const sample of samples) {
+      expect(isMainToWorkerMessage(sample), sample.type).toBe(true);
+    }
+  });
+
+  it('validates the BUFFERED_STATE variant (host-reported SourceBuffer state)', () => {
+    const valid: MainToWorkerMessage = {
+      buffered: [{ end: 30, start: 0 }, { end: 60, start: 40 }],
+      pendingBytes: 1024,
+      playhead: 5,
+      requestId: 7,
+      type: MainToWorkerMessageType.BUFFERED_STATE,
+    };
+    expect(isMainToWorkerMessage(valid)).toBe(true);
+    // Fragmented/empty ranges and a zero pending count are all legitimate.
+    expect(
+      isMainToWorkerMessage({ ...valid, buffered: [], pendingBytes: 0 }),
+    ).toBe(true);
+    // A non-numeric playhead / pending count, a malformed window, or a missing
+    // request id is a malformed BUFFERED_STATE; the guard rejects it, never a
+    // silent default.
+    expect(isMainToWorkerMessage({ ...valid, playhead: Number.NaN })).toBe(false);
+    expect(isMainToWorkerMessage({ ...valid, pendingBytes: -1 })).toBe(false);
+    expect(isMainToWorkerMessage({ ...valid, buffered: [{ end: 30 }] })).toBe(false);
+    expect(isMainToWorkerMessage({ ...valid, buffered: 'x' })).toBe(false);
+    expect(isMainToWorkerMessage({ buffered: [], pendingBytes: 0, playhead: 0, type: MainToWorkerMessageType.BUFFERED_STATE })).toBe(false);
+    expect(isWorkerToMainMessage(valid)).toBe(false);
+  });
+
+  it('rejects a BUFFERED_STATE message whose window slot is null', () => {
+    expect(
+      isMainToWorkerMessage({
+        buffered: [null],
+        pendingBytes: 1024,
+        playhead: 5,
+        requestId: 7,
+        type: MainToWorkerMessageType.BUFFERED_STATE,
+      }),
+    ).toBe(false);
+  });
+
+  it('survives a structured-clone round trip as a BUFFERED_STATE message', () => {
+    const message: MainToWorkerMessage = {
+      buffered: [{ end: 30, start: 0 }],
+      pendingBytes: 2048,
+      playhead: 12,
+      requestId: 9,
+      type: MainToWorkerMessageType.BUFFERED_STATE,
+    };
+    const clone = structuredClone(message) as MainToWorkerMessage;
+    expect(clone).toEqual(message);
+    if (clone.type !== MainToWorkerMessageType.BUFFERED_STATE) throw new Error('expected BUFFERED_STATE');
+    expect(clone.buffered).toEqual([{ end: 30, start: 0 }]);
   });
 
   it('validates the HANDSHAKE variant shapes at both boundaries', () => {

@@ -15,6 +15,40 @@ describe('MEDIA_ERROR_CODES', () => {
   });
 });
 
+describe('browser mapping stability', () => {
+  it('keeps every existing worker-kind → MediaError mapping intact', () => {
+    // The established five kinds map exactly as they always have (including
+    // quota's backward-compatible decode code and per-kind default messages);
+    // the new reserved kind does not alter any of them.
+    expect(MEDIA_ERROR_CODES.decode).toBe(MediaError.MEDIA_ERR_DECODE); // 3
+    expect(MEDIA_ERROR_CODES.device).toBe(MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED); // 4
+    expect(MEDIA_ERROR_CODES.network).toBe(MediaError.MEDIA_ERR_NETWORK); // 2
+    expect(MEDIA_ERROR_CODES.quota).toBe(MediaError.MEDIA_ERR_DECODE); // 3
+    expect(MEDIA_ERROR_CODES.unsupported).toBe(MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED); // 4
+    for (const kind of ['decode', 'device', 'network', 'quota', 'unsupported'] as const) {
+      expect(DEFAULT_ERROR_MESSAGES[kind], kind).toBeTruthy();
+    }
+  });
+
+  it('leaves the reserved unavailable kind unmapped until its host routing arrives', () => {
+    // No MediaError code or default message exists yet for the reserved
+    // `unavailable` wire kind: until its host routing arrives, a
+    // seek-target data-unavailable report degrades like any unrecognized kind,
+    // mapping to MEDIA_ERR_CUSTOM (100) plus the generic fallback.
+    expect(MEDIA_ERROR_CODES.unavailable).toBeUndefined();
+    expect(DEFAULT_ERROR_MESSAGES.unavailable).toBeUndefined();
+
+    const error = mediaErrorFromWorkerMessage({ context: 'seek-target:data-unavailable', kind: 'unavailable' });
+    expect(error.code).toBe(MediaError.MEDIA_ERR_CUSTOM);
+    expect(error.fatal).toBe(true);
+    expect(error.message).toBe('seek-target:data-unavailable');
+
+    const fallback = mediaErrorFromWorkerMessage({ kind: 'unavailable' });
+    expect(fallback.code).toBe(MediaError.MEDIA_ERR_CUSTOM);
+    expect(fallback.message).toBe('Playback failed.');
+  });
+});
+
 describe('mediaErrorFromWorkerMessage', () => {
   it('maps an unsupported-container report to MEDIA_ERR_SRC_NOT_SUPPORTED', () => {
     const error = mediaErrorFromWorkerMessage({ context: 'container: unknown', kind: 'unsupported' });

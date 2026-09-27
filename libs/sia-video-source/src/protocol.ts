@@ -30,6 +30,7 @@ export const DEFAULT_FMP4_MIME = 'video/mp4; codecs="avc1.640028,mp4a.40.2"';
 export enum MainToWorkerMessageType {
   APP_KEY = 'APP_KEY',
   ATTACH = 'ATTACH',
+  BUFFERED_STATE = 'BUFFERED_STATE',
   DESTROY = 'DESTROY',
   DETACH = 'DETACH',
   HELLO = 'HELLO',
@@ -119,6 +120,21 @@ export type MainToWorkerMessage =
       readonly type: MainToWorkerMessageType.HELLO;
     }
   | {
+      /**
+       * Live main-thread SourceBuffer state the host reports so a main-mode
+       * posting sink can run the same buffered-ahead + capacity producer gates
+       * as worker-mode MSE: the buffered range windows, the playhead they are
+       * measured against, and the host append pipe's queued + in-flight
+       * payload. Request-id-scoped so a superseded load's report can never
+       * gate the current session. The host reports on `updateend` / `timeupdate`.
+       */
+      readonly buffered: readonly BufferWindow[];
+      readonly pendingBytes: number;
+      readonly playhead: number;
+      readonly requestId: RequestId;
+      readonly type: MainToWorkerMessageType.BUFFERED_STATE;
+    }
+  | {
       /** The `type` field from the v10 `MediaSourceCapability` source contract; named to avoid the discriminator. */
       readonly mimeType?: string;
       /** Whether full-stream delivery may start immediately; see `preload` on the native element. */
@@ -202,11 +218,26 @@ export interface WorkerConfig {
  * - `device` → "device too old": the runtime has no usable MSE (all iPhone
  *   Safari pre-17.1, or any runtime with only legacy
  *   `WebKitMediaSource`-prefixed MSE).
+ * - `quota` → a persistent SourceBuffer quota refusal (memory pressure the
+ *   pipe's bounded eviction retries could not clear): a transient append class,
+ *   never a decode contract failure.
+ * - `unavailable` → a requested seek target whose data cannot be served
+ *   (nonfatal data-unavailable: the session stays alive and playback from the
+ *   remaining buffer is unaffected). It is deliberately distinct from
+ *   `network` (a broken transport), `decode` (a media failure), and
+ *   `unsupported` (an unplayable source). The worker posts it when a
+ *   seek-restart run cannot serve its target (a raw shard shortage); the
+ *   session then stays alive, and a follow-up `SEEK` restarts the conversion
+ *   into the same sink. The host routes it nonfatally on its own instead of
+ *   through the machine, and `errors.ts` intentionally holds no MediaError
+ *   mapping for it, since it is not a machine `loadFailed` kind.
  */
 export const workerErrorCode = {
   decode: 'decode',
   device: 'device',
   network: 'network',
+  quota: 'quota',
+  unavailable: 'unavailable',
   unsupported: 'unsupported',
 } as const;
 
@@ -354,6 +385,14 @@ export type WorkerToMainMessage =
       readonly kind: WorkerErrorCode;
       /** `RequestId | null` for errors that belong to no single request. */
       readonly requestId: null | RequestId;
+      /**
+       * Optional failed seek-target time in seconds: the requested seek
+       * position whose data could not be served. Present only on the
+       * `unavailable` kind and only when the worker can name it; absent
+       * otherwise (additive: old workers never post it). A present but
+       * nonfinite value is a malformed message, rejected by the guard.
+       */
+      readonly time?: number;
       readonly type: WorkerToMainMessageType.ERROR;
     }
   | {
@@ -381,6 +420,22 @@ export function isMainToWorkerMessage(message: unknown): message is MainToWorker
     case MainToWorkerMessageType.ATTACH:
     case MainToWorkerMessageType.PLAY:
       return typeof typed.requestId === 'number';
+    case MainToWorkerMessageType.BUFFERED_STATE:
+      return (
+        typeof typed.requestId === 'number' &&
+        Number.isFinite(typed.playhead) &&
+        typeof typed.pendingBytes === 'number' &&
+        Number.isFinite(typed.pendingBytes) &&
+        typed.pendingBytes >= 0 &&
+        Array.isArray(typed.buffered) &&
+        typed.buffered.every(
+          (win: BufferWindow) =>
+            win !== null &&
+            typeof win === 'object' &&
+            Number.isFinite(win.start) &&
+            Number.isFinite(win.end),
+        )
+      );
     case MainToWorkerMessageType.HELLO:
       // The additive seed-presence flags are optional booleans (wire metadata;
       // a non-boolean value is a malformed HELLO, never a silent default).
@@ -419,7 +474,13 @@ export function isWorkerToMainMessage(message: unknown): message is WorkerToMain
     case WorkerToMainMessageType.ENDED:
       return typeof typed.requestId === 'number';
     case WorkerToMainMessageType.ERROR:
-      return typeof typed.kind === 'string';
+      // The optional failed seek-target time is additive: absent stays
+      // accepted (old workers never post it); a present but nonfinite value
+      // is malformed and rejected, never a silent default.
+      return (
+        typeof typed.kind === 'string' &&
+        (typed.time === undefined || Number.isFinite(typed.time))
+      );
     case WorkerToMainMessageType.HANDLE:
       return typeof typed.requestId === 'number' && typeof typed.handle !== 'undefined';
     case WorkerToMainMessageType.HELLO_OK:
