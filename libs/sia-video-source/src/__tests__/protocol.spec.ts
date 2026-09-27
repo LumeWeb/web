@@ -143,6 +143,18 @@ describe('protocol', () => {
     expect(isWorkerToMainMessage(valid)).toBe(false);
   });
 
+  it('rejects a BUFFERED_STATE message whose window slot is null', () => {
+    expect(
+      isMainToWorkerMessage({
+        buffered: [null],
+        pendingBytes: 1024,
+        playhead: 5,
+        requestId: 7,
+        type: MainToWorkerMessageType.BUFFERED_STATE,
+      }),
+    ).toBe(false);
+  });
+
   it('survives a structured-clone round trip as a BUFFERED_STATE message', () => {
     const message: MainToWorkerMessage = {
       buffered: [{ end: 30, start: 0 }],

@@ -428,7 +428,13 @@ export function isMainToWorkerMessage(message: unknown): message is MainToWorker
         Number.isFinite(typed.pendingBytes) &&
         typed.pendingBytes >= 0 &&
         Array.isArray(typed.buffered) &&
-        typed.buffered.every((win: BufferWindow) => Number.isFinite(win.start) && Number.isFinite(win.end))
+        typed.buffered.every(
+          (win: BufferWindow) =>
+            win !== null &&
+            typeof win === 'object' &&
+            Number.isFinite(win.start) &&
+            Number.isFinite(win.end),
+        )
       );
     case MainToWorkerMessageType.HELLO:
       // The additive seed-presence flags are optional booleans (wire metadata;
