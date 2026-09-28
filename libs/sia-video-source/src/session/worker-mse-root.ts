@@ -23,7 +23,7 @@
  */
 
 import { constructMseMediaSource } from '../capabilities/mse-runtime.ts';
-import { MseAppendPipe } from '../mse-pipe.ts';
+import { DEFAULT_MSE_AHEAD_TARGET_SECONDS, DEFAULT_MSE_APPEND_CAPACITY_BYTES, MseAppendPipe } from '../mse-pipe.ts';
 import { type RequestId, workerLogEventName, workerLogLevel, type WorkerLogLevel, WorkerToMainMessageType } from '../protocol.ts';
 import { MseAdapter, type WorkerMseSinkFactoryDeps } from '../sink/mse-adapter.ts';
 import type { AppendSink } from '../sink/append-sink.ts';
@@ -50,8 +50,27 @@ export interface WorkerMseRoot {
 }
 
 export interface WorkerMseRootOptions {
+  /**
+   * The primary producer ahead-duration target in seconds handed to each
+   * per-load sink's `MseAppendPipe` (`aheadTargetSeconds`): how many seconds of
+   * playable media the worker SourceBuffer may hold ahead of the playhead
+   * before the media library's reads park. Defaults to
+   * `DEFAULT_MSE_AHEAD_TARGET_SECONDS`, so the worker-mode pipeline waits on
+   * the real buffered window unless a caller explicitly overrides it.
+   * `setPlayhead` reflects live PLAYHEAD updates into that wait (see below).
+   */
+  aheadTargetSeconds?: number;
   /** Seconds of media kept buffered behind the playhead before eviction. */
   backBufferSeconds: number;
+  /**
+   * The secondary transient-backlog bound in bytes handed to each per-load
+   * sink's `MseAppendPipe` (`capacityBytes`). Defaults to
+   * `DEFAULT_MSE_APPEND_CAPACITY_BYTES`, so the worker-mode pipeline is
+   * bounded unless a caller explicitly overrides it; pass a larger budget for
+   * very high-bitrate objects or a smaller one for memory-tight workers. It
+   * caps the remux backlog; the buffered-ahead duration wait protects quota.
+   */
+  capacityBytes?: number;
   /**
    * Creates the worker MediaSource (default resolves the runtime's MSE
    * implementation, so on MMS-only runtimes the worker MediaSource is a
@@ -112,7 +131,9 @@ export function createWorkerMseRoot(options: WorkerMseRootOptions): WorkerMseRoo
   // (the same shape `createWorkerMseSinkFactory` binds), so EOS waiting, quota
   // retry, and back-buffer eviction read the current worker state.
   const deps: WorkerMseSinkFactoryDeps = {
+    aheadTargetSeconds: options.aheadTargetSeconds ?? DEFAULT_MSE_AHEAD_TARGET_SECONDS,
     backBufferSeconds: options.backBufferSeconds,
+    capacityBytes: options.capacityBytes ?? DEFAULT_MSE_APPEND_CAPACITY_BYTES,
     getMediaSource: () => mediaSource,
     getPlayheadSeconds: () => playheadSeconds,
     getSourceBuffer: () => sourceBuffer,
@@ -229,6 +250,12 @@ export function createWorkerMseRoot(options: WorkerMseRootOptions): WorkerMseRoo
 
     setPlayhead(timeSeconds) {
       playheadSeconds = timeSeconds;
+      // A live PLAYHEAD update re-evaluates the buffered-ahead condition: as
+      // the element advances, the ahead window (`buffered.end - playhead`)
+      // shrinks and a parked producer may resume. The kick also re-runs a
+      // stalled pump for any state the pipe's getters observe, a cheap no-op
+      // when idle.
+      pipe?.kick();
     },
 
     teardown() {

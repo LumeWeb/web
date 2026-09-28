@@ -177,6 +177,35 @@ describe('createWorkerMseRoot (worker MSE composition root)', () => {
     expect(root.deps.getPlayheadSeconds()).toBe(0);
   });
 
+  it('setPlayhead (a live PLAYHEAD update) releases a producer parked on the buffered-ahead wait', async () => {
+    const mediaSource = new FakeMediaSource();
+    const root = rootOf(mediaSource, { aheadTargetSeconds: 30 });
+    const sink = root.createSink({ durationSeconds: 90, mime: DEFAULT_FMP4_MIME, requestId: 6 });
+    mediaSource.open();
+    await flush();
+
+    // The real worker SourceBuffer has 60s buffered while the playhead is held
+    // at 0: with a 30s ahead target the source-side producer must park.
+    const sourceBuffer = mediaSource.sourceBuffers[0];
+    sourceBuffer.ranges = [[0, 60]];
+    let released = false;
+    // The worker-mode sink (an `MseAdapter`) always implements the wait; the
+    // optional-call type is a contract-level allowance for sinks without one.
+    const gate = sink.waitForBufferedAhead!().then(() => {
+      released = true;
+    });
+    await flush();
+    expect(released).toBe(false);
+
+    // The host's PLAYHEAD reflects an advancing element: the root forwards it
+    // into the pipe, the buffered-ahead condition re-evaluates, and the
+    // producer resumes (ahead = 60 - 45 = 15 < 30).
+    root.setPlayhead(45);
+    await flush();
+    expect(released).toBe(true);
+    await gate;
+  });
+
   it('ends its own MediaSource on requestEndOfStream (worker-mode end-of-stream)', async () => {
     const mediaSource = new FakeMediaSource();
     const root = rootOf(mediaSource);

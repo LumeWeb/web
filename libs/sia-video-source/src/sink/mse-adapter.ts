@@ -14,7 +14,7 @@
  * generation-aware media playback that fed the bytes and by the pipe's own
  * reset.
  */
-import { MseAppendPipe } from '../mse-pipe.ts';
+import { DEFAULT_MSE_AHEAD_TARGET_SECONDS, DEFAULT_MSE_APPEND_CAPACITY_BYTES, MseAppendPipe } from '../mse-pipe.ts';
 import type { AppendSink, AppendUnit } from './append-sink.ts';
 
 export interface MseAdapterOptions {
@@ -36,8 +36,35 @@ export interface MseAdapterOptions {
  * and `onError` reports fatal append failures onto the load's request id.
  */
 export interface WorkerMseSinkFactoryDeps {
+  /**
+   * The primary producer ahead-duration target in seconds handed to each
+   * load's `MseAppendPipe` (`aheadTargetSeconds`): how many seconds of playable
+   * media
+   * the real SourceBuffer may hold ahead of the playhead before
+   * `waitForBufferedAhead()` parks the media library's reads. Defaults to
+   * `DEFAULT_MSE_AHEAD_TARGET_SECONDS`, so the worker-mode pipeline waits on
+   * the real buffered window unless a caller explicitly overrides it. (A
+   * direct `MseAppendPipe` constructor without `aheadTargetSeconds` leaves the
+   * wait open, so the option stays opt-in, which preserves the pipe's own
+   * contract.)
+   */
+  aheadTargetSeconds?: number;
   /** Seconds of media kept buffered behind the playhead before eviction. */
   backBufferSeconds: number;
+  /**
+   * The secondary transient-backlog bound in bytes handed to each load's
+   * `MseAppendPipe` (`capacityBytes`): the maximum queued + in-flight append
+   * payload the media library may hand the sink before `waitForCapacity()`
+   * parks its reads. Defaults to `DEFAULT_MSE_APPEND_CAPACITY_BYTES`, so the
+   * worker-mode pipeline is bounded unless a caller explicitly overrides it;
+   * pass a larger budget for very high-bitrate objects or a smaller one for
+   * memory-tight workers. It caps the remux backlog while the SourceBuffer is
+   * slow to absorb; the buffered-ahead duration wait is the quota protection.
+   * (A direct `MseAppendPipe` constructor without `capacityBytes` stays
+   * unbounded, the wait never blocks, which preserves the pipe's own opt-in
+   * contract.)
+   */
+  capacityBytes?: number;
   /** The worker MediaSource the sink appends into (EOS deferral). */
   getMediaSource(): MediaSource | null;
   /** Current playhead seconds; the eviction boundary derives from it. */
@@ -90,6 +117,14 @@ export class MseAdapter implements AppendSink {
     this.#loadGeneration = Math.max(this.#loadGeneration, loadGeneration);
     this.#pipe.reset(targetTimeSeconds);
   }
+
+  waitForBufferedAhead(): Promise<void> {
+    return this.#pipe.waitForBufferedAhead();
+  }
+
+  waitForCapacity(): Promise<void> {
+    return this.#pipe.waitForCapacity();
+  }
 }
 
 /**
@@ -103,7 +138,9 @@ export function createWorkerMseSinkFactory(deps: WorkerMseSinkFactoryDeps): () =
   return () =>
     new MseAdapter({
       pipe: new MseAppendPipe({
+        aheadTargetSeconds: deps.aheadTargetSeconds ?? DEFAULT_MSE_AHEAD_TARGET_SECONDS,
         backBufferSeconds: deps.backBufferSeconds,
+        capacityBytes: deps.capacityBytes ?? DEFAULT_MSE_APPEND_CAPACITY_BYTES,
         getMediaSource: () => deps.getMediaSource(),
         getPlayheadSeconds: () => deps.getPlayheadSeconds(),
         getSourceBuffer: () => deps.getSourceBuffer(),
