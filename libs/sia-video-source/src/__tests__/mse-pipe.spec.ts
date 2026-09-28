@@ -763,22 +763,20 @@ describe('MseAppendPipe', () => {
       await expect(pipe.waitForBufferedAhead()).resolves.toBeUndefined();
     });
 
-    it('judges fragmented TimeRanges by their last range end (the ahead extent)', async () => {
+    it('keeps the producer eligible when a disjoint future window extends past the target', async () => {
       const { fakeSourceBuffer, pipe, setPlayhead } = createHarness({ aheadTargetSeconds: 30 });
+      setPlayhead(0);
       fakeSourceBuffer.ranges = [
         [0, 5],
         [20, 100],
       ];
+
       let released = false;
       const gate = pipe.waitForBufferedAhead().then(() => {
         released = true;
       });
       await settle(1);
-      expect(released).toBe(false); // last range ends at 100: ahead 100 >= 30
 
-      setPlayhead(80); // buffered ahead = 100 - 80 = 20 < 30
-      pipe.kick();
-      await settle(1);
       expect(released).toBe(true);
       await gate;
     });

@@ -24,8 +24,8 @@
  *   source is still `open`, and never on a failed pipeline,
  * - buffered-ahead backpressure (`aheadTargetSeconds` +
  *   `waitForBufferedAhead()`): the primary quota protection. The pipe parks
- *   the media library's reads on the real SourceBuffer's buffered-ahead
- *   duration, `buffered.end(last) - playhead`. Once the playable media ahead
+ *   the media library's reads on the buffered window covering the playhead.
+ *   Once the playable media ahead
  *   of the live playhead reaches the target, the reads park (the worker stops
  *   downloading / remuxing) and resume when playback advances, the buffer is
  *   trimmed, or the pipeline changes state. This is what actually bounds the
@@ -50,12 +50,11 @@ export interface MseAppendPipeOptions {
   /**
    * The primary quota-protection target: how many seconds of playable media
    * the real SourceBuffer may hold ahead of the live playhead before
-   * `waitForBufferedAhead()` parks the producer's reads
-   * (`buffered.end(last) - playhead` reaching this many seconds). Undefined
-   * (the default) leaves the wait open, so callers that do not opt in see
-   * zero behavior change. Absent, empty, or fragmented TimeRanges also leave
-   * it open, so an initial or oversized segment is never deadlocked. Nonpositive
-   * or nonfinite values disable this wait.
+   * `waitForBufferedAhead()` parks the producer's reads. The pipe measures
+   * only the buffered window covering the playhead. Undefined (the default)
+   * leaves the wait open. Absent or empty TimeRanges also leave it open, so an
+   * initial or oversized segment is never deadlocked. Nonpositive or nonfinite
+   * values disable this wait.
    */
   aheadTargetSeconds?: number;
   /** Seconds of media to keep buffered behind the playhead before eviction. */
@@ -292,13 +291,10 @@ export class MseAppendPipe {
   }
 
   /**
-   * The primary producer backpressure wait: resolves once the real
-   * SourceBuffer holds less than `aheadTargetSeconds` of playable media ahead
-   * of the live playhead (`buffered.end(last) - playhead <
-   * aheadTargetSeconds`), or immediately when no ahead target is configured,
-   * no SourceBuffer or buffered range exists yet, or the pipe stopped/failed.
-   * Absent, empty, or fragmented TimeRanges leave the wait open (nothing to
-   * judge), so an initial or oversized segment is never deadlocked. A
+   * The primary producer backpressure wait: resolves once the buffered window
+   * covering the playhead holds less than `aheadTargetSeconds` of playable
+   * media ahead, or immediately when no ahead target is configured, no
+   * buffered window covers the playhead, or the pipe stopped/failed. A
    * producer (the mediabunny conversion's reads) awaits this before pulling,
    * so the worker stops downloading / remuxing once the browser-side buffer
    * is ahead enough and resumes when playback advances, the buffer is
@@ -308,22 +304,7 @@ export class MseAppendPipe {
   waitForBufferedAhead(): Promise<void> {
     if (this.#stopped || this.#failed) return Promise.resolve();
     if (this.#aheadTargetSeconds === undefined) return Promise.resolve();
-    let ahead: null | number = null;
-    const sourceBuffer = this.#options.getSourceBuffer();
-    if (sourceBuffer) {
-      try {
-        const ranges = sourceBuffer.buffered;
-        if (ranges.length > 0) {
-          // buffered.end(last) is the far edge of playback ahead of / at the
-          // playhead; fragmented TimeRanges are judged by that last range.
-          ahead = ranges.end(ranges.length - 1) - this.#options.getPlayheadSeconds();
-        }
-      } catch {
-        // A SourceBuffer whose buffered state cannot be read must never
-        // deadlock the producer: report room (the next check re-tries).
-        ahead = null;
-      }
-    }
+    const ahead = this.#bufferedAheadSeconds();
     if (ahead === null || ahead < this.#aheadTargetSeconds) return Promise.resolve();
     return new Promise((resolve) => {
       this.#aheadWaiters.push(resolve);
@@ -387,6 +368,20 @@ export class MseAppendPipe {
         // reported.
         this.#diag(workerLogEventName.mseParserResetFailed, { message: errorMessage(error) });
       }
+    }
+  }
+
+  // Reads only the window covering the playhead. A stale range left after a
+  // seek does not describe media available from the current position.
+  #bufferedAheadSeconds(): null | number {
+    const sourceBuffer = this.#options.getSourceBuffer();
+    if (!sourceBuffer) return null;
+    try {
+      return bufferedAheadInContainingWindow(sourceBuffer.buffered, this.#options.getPlayheadSeconds());
+    } catch {
+      // A SourceBuffer whose buffered state cannot be read must never
+      // deadlock the producer: report room and retry on the next check.
+      return null;
     }
   }
 
@@ -459,31 +454,16 @@ export class MseAppendPipe {
    * SourceBuffer state and releases parked producers that now have room.
    * Called from `#kick()` (so a playhead update reflected by `setPlayhead`
    * into `pipe.kick()`, and any SourceBuffer `updateend`, re-runs the check),
-   * after a back-buffer trim, and after each absorbed append. Absent, empty,
-   * or fragmented TimeRanges release the waiters: a range that cannot be read
-   * means no producer is held.
+   * after a back-buffer trim, and after each absorbed append. A missing window
+   * covering the playhead releases the waiters.
    */
   #evaluateBufferedAhead(): void {
     if (this.#stopped || this.#failed || this.#aheadTargetSeconds === undefined) {
       this.#releaseAheadWaiters();
       return;
     }
-    const sourceBuffer = this.#options.getSourceBuffer();
-    if (!sourceBuffer) {
-      this.#releaseAheadWaiters();
-      return;
-    }
-    try {
-      const ranges = sourceBuffer.buffered;
-      if (ranges.length === 0) {
-        this.#releaseAheadWaiters();
-        return;
-      }
-      const ahead = ranges.end(ranges.length - 1) - this.#options.getPlayheadSeconds();
-      if (ahead < this.#aheadTargetSeconds) this.#releaseAheadWaiters();
-    } catch {
-      this.#releaseAheadWaiters();
-    }
+    const ahead = this.#bufferedAheadSeconds();
+    if (ahead === null || ahead < this.#aheadTargetSeconds) this.#releaseAheadWaiters();
   }
 
   #fail(error: unknown): void {
@@ -635,6 +615,25 @@ export class MseAppendPipe {
     this.#aheadWaiters = [];
     for (const resolve of waiters) resolve();
   }
+}
+
+// currentTime can fall just before a range start after an eviction or timestamp
+// rebase. Keep that rounding error in the same playable window.
+const PLAYHEAD_WINDOW_TOLERANCE_SECONDS = 0.1;
+
+/**
+ * Returns playable seconds from the buffered window covering the playhead.
+ * Disjoint future ranges cannot satisfy the producer's ahead target.
+ */
+function bufferedAheadInContainingWindow(ranges: TimeRanges, playhead: number): null | number {
+  for (let index = 0; index < ranges.length; index += 1) {
+    const start = ranges.start(index);
+    const end = ranges.end(index);
+    if (playhead >= start - PLAYHEAD_WINDOW_TOLERANCE_SECONDS && playhead <= end) {
+      return end - playhead;
+    }
+  }
+  return null;
 }
 
 /** Scalar message of a caught best-effort failure (DOMException or Error alike). */
