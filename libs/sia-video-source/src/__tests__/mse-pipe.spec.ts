@@ -593,4 +593,327 @@ describe('MseAppendPipe', () => {
       expect(fakeMediaSource.endOfStreamCalls).toBe(0);
     });
   });
+
+  describe('capacity backpressure (waitForCapacity)', () => {
+    it('blocks while queued + in-flight bytes meet the capacity and resolves once the pipe drains', async () => {
+      const { fakeSourceBuffer, pipe } = createHarness({ capacityBytes: 48 });
+      // Hold the head in flight so nothing can drain yet: with the head retained
+      // in the queue, all three 16-byte units stay pending (48 = capacity) and
+      // the wait must hold the producer.
+      fakeSourceBuffer.holdNextAppend = true;
+      pipe.append(bytes(1));
+      pipe.append(bytes(2));
+      pipe.append(bytes(3));
+      await settle(1);
+
+      let released = false;
+      const gate = pipe.waitForCapacity().then(() => {
+        released = true;
+      });
+      await settle(1);
+      expect(released).toBe(false); // full sink: the reader must stay parked
+
+      // The in-flight head drains: pending drops below capacity and the wait resolves.
+      fakeSourceBuffer.releaseHeldAppend();
+      await settle();
+      expect(released).toBe(true);
+      await gate;
+      expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([1, 2, 3]);
+    });
+
+    it('resolves immediately for a producer read between drains once room exists', async () => {
+      const { fakeSourceBuffer, pipe } = createHarness({ capacityBytes: 48 });
+      fakeSourceBuffer.holdNextAppend = true;
+      pipe.append(bytes(1)); // 16 pending < 48: room for more
+      await settle(1);
+
+      // A producer probing for room while the pipe is below capacity must never
+      // block (the reader keeps the pipe fed up to the bound).
+      await expect(pipe.waitForCapacity()).resolves.toBeUndefined();
+
+      fakeSourceBuffer.releaseHeldAppend();
+      await settle();
+    });
+
+    it('abort (teardown) unblocks capacity waiters instead of hanging them', async () => {
+      const { fakeSourceBuffer, pipe } = createHarness({ capacityBytes: 48 });
+      fakeSourceBuffer.holdNextAppend = true;
+      pipe.append(bytes(1));
+      pipe.append(bytes(2));
+      pipe.append(bytes(3));
+      await settle(1);
+
+      let released = false;
+      const gate = pipe.waitForCapacity().then(() => {
+        released = true;
+      });
+      await settle(1);
+      expect(released).toBe(false);
+
+      // A torn-down pipeline drops its queue and must release every waiter so
+      // no reader is stranded awaiting capacity on a dead sink.
+      pipe.abort();
+      await settle(1);
+      expect(released).toBe(true);
+      await gate;
+    });
+
+    it('reset (a seek) unblocks capacity waiters by dropping the superseded queue', async () => {
+      const { fakeSourceBuffer, pipe } = createHarness({ capacityBytes: 48 });
+      fakeSourceBuffer.holdNextAppend = true;
+      pipe.append(bytes(1));
+      pipe.append(bytes(2));
+      pipe.append(bytes(3));
+      await settle(1);
+
+      let released = false;
+      const gate = pipe.waitForCapacity().then(() => {
+        released = true;
+      });
+      await settle(1);
+      expect(released).toBe(false);
+
+      // A seek resets the sink: the superseded queued appends die with the old
+      // load generation, which frees the capacity the reader was waiting on.
+      pipe.reset();
+      await settle(1);
+      expect(released).toBe(true);
+      await gate;
+    });
+
+    it('treats an unconfigured capacity as unbounded (no behavior change)', async () => {
+      const { fakeSourceBuffer, pipe } = createHarness();
+      pipe.append(bytes(1));
+      pipe.append(bytes(2));
+      // No capacityBytes: waitForCapacity must never block the producer.
+      await expect(pipe.waitForCapacity()).resolves.toBeUndefined();
+      await settle();
+      expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([1, 2]);
+    });
+
+    it('does not deadlock when a single segment exceeds the capacity', async () => {
+      const { fakeSourceBuffer, pipe } = createHarness({ capacityBytes: 32 });
+      fakeSourceBuffer.holdNextAppend = true;
+      // One 64-byte segment is twice the 32-byte capacity: the producer is
+      // parked while it is queued/in flight, and the wait resolves only once
+      // it drains, instead of hanging on a `pending < capacity` check that a
+      // segment too large for the capacity can never satisfy.
+      pipe.append(bytes(9, 64));
+      await settle(1);
+
+      let released = false;
+      const gate = pipe.waitForCapacity().then(() => {
+        released = true;
+      });
+      await settle(1);
+      expect(released).toBe(false);
+
+      fakeSourceBuffer.releaseHeldAppend(); // the oversized head drains
+      await settle();
+      expect(released).toBe(true);
+      await gate;
+      expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([9]);
+    });
+  });
+
+  describe('buffered-ahead producer wait (waitForBufferedAhead)', () => {
+    it('blocks once buffered-end minus playhead reaches the ahead target and releases on playhead advance', async () => {
+      const { fakeSourceBuffer, pipe, setPlayhead } = createHarness({ aheadTargetSeconds: 30 });
+      // 60s already buffered ahead of a 0s playhead: 60 >= 30, so the producer
+      // must park and never pull another window.
+      fakeSourceBuffer.ranges = [[0, 60]];
+      let released = false;
+      const gate = pipe.waitForBufferedAhead().then(() => {
+        released = true;
+      });
+      await settle(1);
+      expect(released).toBe(false);
+
+      // Playback advances to 45s: buffered ahead is now 15s < 30, so the wait
+      // resolves; the root's setPlayhead and kick is exactly this.
+      setPlayhead(45);
+      pipe.kick();
+      await settle(1);
+      expect(released).toBe(true);
+      await gate;
+    });
+
+    it('resolves immediately when buffered ahead is below the target', async () => {
+      const { fakeSourceBuffer, pipe } = createHarness({ aheadTargetSeconds: 30 });
+      fakeSourceBuffer.ranges = [[0, 10]]; // ahead 10 < 30: room to read
+      await expect(pipe.waitForBufferedAhead()).resolves.toBeUndefined();
+    });
+
+    it('resolves when no SourceBuffer exists yet (a load start must never park)', async () => {
+      const sb: FakeSourceBuffer | null = null;
+      const pipe = new MseAppendPipe({
+        aheadTargetSeconds: 30,
+        backBufferSeconds: 30,
+        getMediaSource: () => ({} as MediaSource),
+        getPlayheadSeconds: () => 0,
+        getSourceBuffer: () => (sb) ?? null,
+        onError: vi.fn(),
+      });
+      await expect(pipe.waitForBufferedAhead()).resolves.toBeUndefined();
+    });
+
+    it('resolves on an empty TimeRanges so the initial segment is never deadlocked', async () => {
+      const { fakeSourceBuffer, pipe } = createHarness({ aheadTargetSeconds: 30 });
+      fakeSourceBuffer.ranges = []; // nothing buffered yet
+      await expect(pipe.waitForBufferedAhead()).resolves.toBeUndefined();
+    });
+
+    it('judges fragmented TimeRanges by their last range end (the ahead extent)', async () => {
+      const { fakeSourceBuffer, pipe, setPlayhead } = createHarness({ aheadTargetSeconds: 30 });
+      fakeSourceBuffer.ranges = [
+        [0, 5],
+        [20, 100],
+      ];
+      let released = false;
+      const gate = pipe.waitForBufferedAhead().then(() => {
+        released = true;
+      });
+      await settle(1);
+      expect(released).toBe(false); // last range ends at 100: ahead 100 >= 30
+
+      setPlayhead(80); // buffered ahead = 100 - 80 = 20 < 30
+      pipe.kick();
+      await settle(1);
+      expect(released).toBe(true);
+      await gate;
+    });
+
+    it('releases parked producers when the buffer is trimmed below the target', async () => {
+      const { fakeSourceBuffer, pipe } = createHarness({ aheadTargetSeconds: 30 });
+      fakeSourceBuffer.ranges = [[0, 60]];
+      let released = false;
+      const gate = pipe.waitForBufferedAhead().then(() => {
+        released = true;
+      });
+      await settle(1);
+      expect(released).toBe(false);
+
+      // A trim shrinks the ahead extent: the last range now ends at 45.
+      fakeSourceBuffer.ranges = [[0, 45]];
+      pipe.kick();
+      await settle(1);
+      expect(released).toBe(true);
+      await gate;
+    });
+
+    it('abort (teardown) releases buffered-ahead waiters instead of hanging them', async () => {
+      const { fakeSourceBuffer, pipe } = createHarness({ aheadTargetSeconds: 30 });
+      fakeSourceBuffer.ranges = [[0, 60]];
+      let released = false;
+      const gate = pipe.waitForBufferedAhead().then(() => {
+        released = true;
+      });
+      await settle(1);
+      expect(released).toBe(false);
+
+      pipe.abort();
+      await settle(1);
+      expect(released).toBe(true);
+      await gate;
+    });
+
+    it('reset (a seek / load start) releases buffered-ahead waiters', async () => {
+      const { fakeSourceBuffer, pipe } = createHarness({ aheadTargetSeconds: 30 });
+      fakeSourceBuffer.ranges = [[0, 60]];
+      let released = false;
+      const gate = pipe.waitForBufferedAhead().then(() => {
+        released = true;
+      });
+      await settle(1);
+      expect(released).toBe(false);
+
+      pipe.reset();
+      await settle(1);
+      expect(released).toBe(true);
+      await gate;
+    });
+
+    it('a fatal append failure releases buffered-ahead waiters', async () => {
+      const { fakeSourceBuffer, onError, pipe } = createHarness({ aheadTargetSeconds: 30 });
+      fakeSourceBuffer.ranges = [[0, 60]];
+      let released = false;
+      const gate = pipe.waitForBufferedAhead().then(() => {
+        released = true;
+      });
+      await settle(1);
+      expect(released).toBe(false);
+
+      // A synchronous non-quota throw is a fatal append failure: the pipe dies
+      // and every producer parked on the ahead wait must be released.
+      fakeSourceBuffer.failNextAppendWithThrow = new Error('decode exploded');
+      pipe.append(bytes(9));
+      await settle(2);
+      expect(onError).toHaveBeenCalledTimes(1);
+      expect(released).toBe(true);
+      await gate;
+    });
+
+    it('treats an unconfigured ahead target as unbounded (no behavior change)', async () => {
+      const { fakeSourceBuffer, pipe } = createHarness();
+      fakeSourceBuffer.ranges = [[0, 600]];
+      await expect(pipe.waitForBufferedAhead()).resolves.toBeUndefined();
+    });
+
+    it('an oversized first segment that overruns the target parks the next read, and playhead advance releases it', async () => {
+      const { fakeSourceBuffer, pipe, setPlayhead } = createHarness({ aheadTargetSeconds: 5 });
+      setPlayhead(0);
+      // A single oversized segment lands 30s of buffer in one append: ahead
+      // 30 >= 5, so the producer must park (never deadlock) until playback
+      // advances enough to shrink the ahead window.
+      fakeSourceBuffer.ranges = [[0, 30]];
+      let released = false;
+      const gate = pipe.waitForBufferedAhead().then(() => {
+        released = true;
+      });
+      await settle(1);
+      expect(released).toBe(false);
+
+      setPlayhead(28); // buffered ahead = 2 < 5
+      pipe.kick();
+      await settle(1);
+      expect(released).toBe(true);
+      await gate;
+    });
+  });
+
+  describe('invalid backpressure option values', () => {
+    const invalidValues = [0, -16, Number.NaN, Number.POSITIVE_INFINITY];
+
+    it.each(invalidValues)('treats capacityBytes %s as disabled', async (capacityBytes) => {
+      const { fakeSourceBuffer, pipe } = createHarness({ capacityBytes });
+      fakeSourceBuffer.holdNextAppend = true;
+      pipe.append(bytes(1));
+      pipe.append(bytes(2));
+      pipe.append(bytes(3));
+      await settle(1);
+
+      let released = false;
+      void pipe.waitForCapacity().then(() => {
+        released = true;
+      });
+      await settle(1);
+      expect(released).toBe(true);
+
+      fakeSourceBuffer.releaseHeldAppend();
+      await settle();
+      expect(fakeSourceBuffer.appended.map((append) => append[0])).toEqual([1, 2, 3]);
+    });
+
+    it.each(invalidValues)('treats aheadTargetSeconds %s as disabled', async (aheadTargetSeconds) => {
+      const { fakeSourceBuffer, pipe } = createHarness({ aheadTargetSeconds });
+      fakeSourceBuffer.ranges = [[0, 60]];
+
+      let released = false;
+      void pipe.waitForBufferedAhead().then(() => {
+        released = true;
+      });
+      await settle(1);
+      expect(released).toBe(true);
+    });
+  });
 });

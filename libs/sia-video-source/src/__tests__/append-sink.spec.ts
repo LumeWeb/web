@@ -36,6 +36,8 @@ class FakeSourceBuffer extends EventTarget {
   appended: Uint8Array[] = [];
   /** Chronological record of `abort` and successful `append:<firstByte>`. */
   eventLog: string[] = [];
+  /** Hold the next append in-flight (updating) until `releaseHeldAppend`. */
+  holdNextAppend = false;
   ranges: [number, number][] = [];
   removed: [number, number][] = [];
   /** Chronological record of every assigned `timestampOffset`, in order. */
@@ -57,6 +59,7 @@ class FakeSourceBuffer extends EventTarget {
     this.eventLog.push(`timestampOffset:${value}`);
   }
   #timestampOffset = 0;
+  private heldCommit: (() => void) | null = null;
 
   abort(): void {
     this.abortCalls += 1;
@@ -71,12 +74,26 @@ class FakeSourceBuffer extends EventTarget {
     if (this.updating) throw new DOMException('updating', 'InvalidStateError');
     const bytes = data instanceof Uint8Array ? data : new Uint8Array(data as ArrayBuffer);
     this.updating = true;
-    queueMicrotask(() => {
+    const commit = () => {
       this.updating = false;
       this.appended.push(bytes);
       this.eventLog.push(`append:${bytes[0]}`);
       this.dispatchEvent(new Event('updateend'));
-    });
+    };
+    if (this.holdNextAppend) {
+      this.holdNextAppend = false;
+      this.heldCommit = commit;
+      return;
+    }
+    queueMicrotask(commit);
+  }
+
+  /** Resolves a held append; SPF sees the same `updateend` the browser fires. */
+  releaseHeldAppend(): void {
+    if (!this.heldCommit) return;
+    const commit = this.heldCommit;
+    this.heldCommit = null;
+    commit();
   }
 
   remove(start: number, end: number): void {
@@ -102,12 +119,14 @@ class FakeSourceBuffer extends EventTarget {
 
 // ---- fixtures -----------------------------------------------------------------
 
-function createHarness(backBufferSeconds = 30): Harness {
+function createHarness(backBufferSeconds = 30, capacityBytes?: number, aheadTargetSeconds?: number): Harness {
   const fakeMediaSource = new FakeMediaSource();
   const fakeSourceBuffer = new FakeSourceBuffer();
   let playhead = 30;
   const pipe = new MseAppendPipe({
+    aheadTargetSeconds,
     backBufferSeconds,
+    capacityBytes,
     getMediaSource: () => fakeMediaSource as unknown as MediaSource,
     getPlayheadSeconds: () => playhead,
     getSourceBuffer: () => fakeSourceBuffer as unknown as SourceBuffer,
@@ -120,6 +139,10 @@ function createHarness(backBufferSeconds = 30): Harness {
     fakeSourceBuffer,
     setPlayhead: (seconds: number) => {
       playhead = seconds;
+      // The production root reflects playhead updates into the pipe by
+      // calling kick on it; the fixture mirrors that contract so a
+      // parked buffered-ahead producer is released on playhead advance.
+      pipe.kick();
     },
   };
 }
@@ -264,5 +287,49 @@ describe('MseAdapter (AppendSink)', () => {
 
     expect(fakeSourceBuffer.appended).toEqual([]);
     expect(fakeMediaSource.endOfStreamCalls).toBe(0);
+  });
+
+  it('waitForCapacity holds producers while the pipe backlog reaches capacity', async () => {
+    const { adapter, fakeSourceBuffer } = createHarness(30, 48);
+    // Hold the head so nothing drains: three 16-byte units keep the pipe full
+    // (48 = capacity) and the sink's capacity wait must hold the producer.
+    fakeSourceBuffer.holdNextAppend = true;
+    adapter.append(unit(1));
+    adapter.append(unit(2));
+    adapter.append(unit(3));
+    await settle(1);
+
+    let released = false;
+    const gate = adapter.waitForCapacity().then(() => {
+      released = true;
+    });
+    await settle(1);
+    expect(released).toBe(false);
+
+    // The pipe drains: the same wait the media library consults resolves.
+    fakeSourceBuffer.releaseHeldAppend();
+    await settle();
+    expect(released).toBe(true);
+    await gate;
+  });
+
+  it('waitForBufferedAhead parks producers on the pipe ahead-duration wait', async () => {
+    const { adapter, fakeSourceBuffer, setPlayhead } = createHarness(30, undefined, 30);
+    // 60s buffered ahead of a 0s playhead with a 30s ahead target: the sink's
+    // ahead wait must hold the producer even though the pipe is otherwise empty.
+    fakeSourceBuffer.ranges = [[0, 60]];
+    let released = false;
+    const gate = adapter.waitForBufferedAhead().then(() => {
+      released = true;
+    });
+    await settle(1);
+    expect(released).toBe(false);
+
+    // Playback advances (setPlayhead kicks the pipe, as the worker root does):
+    // buffered ahead 15s < 30: the same wait the media library consults resolves.
+    setPlayhead(45);
+    await settle(1);
+    expect(released).toBe(true);
+    await gate;
   });
 });

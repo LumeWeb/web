@@ -178,6 +178,20 @@ interface FragmentAssembly {
 }
 
 /**
+ * Mutable producer backpressure waits shared by the conversion's reads and the
+ * sink binding. `mediaLibrarySource` dereferences both on every read, so these
+ * holders can be no-ops while the load is being inspected (no sink exists yet)
+ * and be re-pointed at the bound `AppendSink`'s waits the moment `start` runs,
+ * so nothing runs before a sink is bound that could block a read.
+ */
+interface ProducerGate {
+  /** Primary: park until the real SourceBuffer holds less than the ahead target. */
+  waitForBufferedAhead: () => Promise<void> | void;
+  /** Secondary: park until the pipe's queued + in-flight append bytes drain. */
+  waitForCapacity: () => Promise<void> | void;
+}
+
+/**
  * Discovers and validates one load through a shared mediabunny `Input` and
  * prepares its conversion before reporting `ready`. Returns `unsupported`
  * with a stable reason for an object with no video or audio track, with
@@ -190,11 +204,23 @@ export async function inspectMediaLibrary(
   options: InspectMediaLibraryOptions,
 ): Promise<MediaLoadResult> {
   const { capabilities, loadGeneration, signal } = options;
-  const customSource = mediaLibrarySource(source, { loadGeneration, signal });
+  // The producer waits are no-ops while the load is inspected (no sink exists
+  // yet, so reads must never block before playback starts) and are re-pointed
+  // at the bound sink's waits when the playback's `start` runs.
+  const producerGate: ProducerGate = {
+    waitForBufferedAhead: () => undefined,
+    waitForCapacity: () => undefined,
+  };
+  const customSource = mediaLibrarySource(source, {
+    loadGeneration,
+    signal,
+    waitForBufferedAhead: () => producerGate.waitForBufferedAhead(),
+    waitForCapacity: () => producerGate.waitForCapacity(),
+  });
   const input = new Input({ formats: ALL_FORMATS, source: customSource });
   let result: MediaLoadResult;
   try {
-    result = await prepareLoad(input, capabilities);
+    result = await prepareLoad(input, capabilities, producerGate);
   } catch (error) {
     result = isCancelledError(error)
       ? { status: 'cancelled' }
@@ -269,9 +295,10 @@ function createMediaPlayback(options: {
   readonly audioTrack: InputAudioTrack;
   readonly initial: ConversionRun;
   readonly input: Input;
+  readonly producerGate: ProducerGate;
   readonly videoTrack: InputVideoTrack;
 }): MediaPlayback {
-  const { assembly, audioTrack, initial, input, videoTrack } = options;
+  const { assembly, audioTrack, initial, input, producerGate, videoTrack } = options;
   let current: ConversionRun | null = initial;
   let generation = 0;
   let onComplete: (() => void) | null = null;
@@ -450,6 +477,14 @@ function createMediaPlayback(options: {
     if (assembly.disposed || started) return;
     started = true;
     assembly.sink = sink;
+    // The conversion's reads now park on the real MSE sink's waits, the
+    // primary buffered-ahead one (the SourceBuffer holds less than the ahead
+    // target) and the secondary transient-backlog one. Both are optional on
+    // the AppendSink contract, so a sink without one (e.g. the main-mode
+    // posting sink) leaves the corresponding producer wait open (a no-op)
+    // instead of parking.
+    producerGate.waitForBufferedAhead = () => sink.waitForBufferedAhead?.();
+    producerGate.waitForCapacity = () => sink.waitForCapacity?.();
     onComplete = callbacks.onComplete;
     onError = callbacks.onError;
     generation = loadGeneration;
@@ -581,7 +616,11 @@ async function prepareConversion(options: {
  * before the load is accepted, so forced-copy failures surface as
  * `copy-unavailable` instead of at playback start.
  */
-async function prepareLoad(input: Input, capabilities: PlaybackCapabilities): Promise<MediaLoadResult> {
+async function prepareLoad(
+  input: Input,
+  capabilities: PlaybackCapabilities,
+  producerGate: ProducerGate,
+): Promise<MediaLoadResult> {
   const tracks = await input.getTracks();
   const videoTracks = tracks.filter((track) => track.isVideoTrack());
   const audioTracks = tracks.filter((track) => track.isAudioTrack());
@@ -632,7 +671,7 @@ async function prepareLoad(input: Input, capabilities: PlaybackCapabilities): Pr
     container: containerFromFormat(await input.getFormat()),
     durationSeconds,
     mime,
-    playback: createMediaPlayback({ assembly, audioTrack, initial, input, videoTrack }),
+    playback: createMediaPlayback({ assembly, audioTrack, initial, input, producerGate, videoTrack }),
     status: 'ready',
     tracks: [
       { codec: videoCodec, kind: 'video' },

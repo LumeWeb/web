@@ -21,7 +21,22 @@
  *   and every later append is dropped,
  * - end-of-stream deferral (`requestEndOfStream()`): `MediaSource.endOfStream`
  *   fires only after the queue drains, the SourceBuffer quiesces, and the
- *   source is still `open` — never on a failed pipeline.
+ *   source is still `open`, and never on a failed pipeline,
+ * - buffered-ahead backpressure (`aheadTargetSeconds` +
+ *   `waitForBufferedAhead()`): the primary quota protection. The pipe parks
+ *   the media library's reads on the real SourceBuffer's buffered-ahead
+ *   duration, `buffered.end(last) - playhead`. Once the playable media ahead
+ *   of the live playhead reaches the target, the reads park (the worker stops
+ *   downloading / remuxing) and resume when playback advances, the buffer is
+ *   trimmed, or the pipeline changes state. This is what actually bounds the
+ *   browser quota: unlike a queue-byte cap, it holds even when the
+ *   SourceBuffer absorbs appends instantly while the playhead stays put,
+ * - transient-backlog backpressure (`capacityBytes` + `waitForCapacity()`):
+ *   the secondary bound. The pipe also counts queued + in-flight append bytes
+ *   so the producer parks while the SourceBuffer is slow to absorb (the pipe
+ *   never piles a huge remux backlog ahead of what has actually landed);
+ *   alone it cannot protect the quota under fast-append, which is the
+ *   buffered-ahead wait's job.
  *
  * Sia-specific layers (WASM transport, app-key handshake, mediabunny remux)
  * live outside this module; the worker and host feed it plain bytes and read
@@ -32,8 +47,33 @@ import { workerLogEventName } from './protocol.ts';
 import { appendSegment, flushBuffer } from '@videojs/spf/dom';
 
 export interface MseAppendPipeOptions {
+  /**
+   * The primary quota-protection target: how many seconds of playable media
+   * the real SourceBuffer may hold ahead of the live playhead before
+   * `waitForBufferedAhead()` parks the producer's reads
+   * (`buffered.end(last) - playhead` reaching this many seconds). Undefined
+   * (the default) leaves the wait open, so callers that do not opt in see
+   * zero behavior change. Absent, empty, or fragmented TimeRanges also leave
+   * it open, so an initial or oversized segment is never deadlocked. Nonpositive
+   * or nonfinite values disable this wait.
+   */
+  aheadTargetSeconds?: number;
   /** Seconds of media to keep buffered behind the playhead before eviction. */
   backBufferSeconds: number;
+  /**
+   * The secondary transient-backlog bound in bytes: the maximum queued +
+   * in-flight append payload `waitForCapacity()` lets a producer accept before
+   * it blocks. It limits how large a remux backlog can pile up while the
+   * SourceBuffer is slow to absorb, but it does not bound the buffered-ahead
+   * duration: a fast absorbing SourceBuffer never fills it, and that is
+   * exactly what `aheadTargetSeconds` covers. Undefined (the default) keeps
+   * the pipe unbounded, `waitForCapacity()` never blocks, and callers that do
+   * not opt in see zero behavior change. A single unit larger than the bound
+   * is still appended (it drains and then re-opens the wait), so the bound
+   * never deadlocks the producer. Nonpositive or nonfinite values disable this
+   * wait.
+   */
+  capacityBytes?: number;
   /** The MediaSource the appended SourceBuffer belongs to (for EOS deferral). */
   getMediaSource(): MediaSource | null;
   /** Current playhead time in seconds; the eviction boundary is derived from it. */
@@ -66,7 +106,56 @@ export interface MseAppendPipeOptions {
   onError(error: unknown): void;
 }
 
+/**
+ * Default secondary transient-backlog bound (`capacityBytes`) the worker-mode
+ * MSE composition roots commit to: the maximum queued + in-flight CMAF append
+ * bytes the media library may hand the sink before `waitForCapacity()` parks
+ * its reads. Sized to mediabunny's `network` prefetch cap (its sequential
+ * extension grows to at most 8 MiB per read worker), so the wait re-opens as
+ * each window drains without stalling the pipeline, and the worker can never
+ * remux more than one window of media ahead of what the SourceBuffer has
+ * absorbed. The buffered-ahead duration target
+ * (`DEFAULT_MSE_AHEAD_TARGET_SECONDS`) is the primary quota protection; a
+ * per-load override still wins.
+ */
+export const DEFAULT_MSE_APPEND_CAPACITY_BYTES = 8 * 1024 * 1024;
+
+/**
+ * Default buffered-ahead target (`aheadTargetSeconds`) the worker-mode MSE
+ * composition roots commit to: how many seconds of playable media the real
+ * SourceBuffer may hold ahead of the playhead before the media library's reads
+ * park. Symmetric with the 30-second back-buffer, so a normal player's
+ * steady-state buffer stays on the order of a minute of playback instead of
+ * the worker converting an entire object while the playhead is seconds in,
+ * the pattern that exhausts the browser's SourceBuffer quota. A per-load
+ * override still wins; a direct `MseAppendPipe` without `aheadTargetSeconds`
+ * leaves the wait open (opt-in).
+ */
+export const DEFAULT_MSE_AHEAD_TARGET_SECONDS = 30;
+
 export class MseAppendPipe {
+  /**
+   * Bytes the source-side producer has handed the sink but the SourceBuffer
+   * has not absorbed yet: every queued append unit plus the in-flight head
+   * retained in the queue while its async append settles (exactly what the
+   * `capacityBytes` bound measures). Reads 0 only at rest.
+   */
+  get pendingBytes(): number {
+    return this.#pendingBytes;
+  }
+
+  // The primary quota target: how many seconds of playable media the real
+  // SourceBuffer may hold ahead of the playhead before `waitForBufferedAhead()`
+  // parks the producer's reads. See `DEFAULT_MSE_AHEAD_TARGET_SECONDS`.
+  readonly #aheadTargetSeconds: number | undefined;
+  // Producers parked on `waitForBufferedAhead()`; `#evaluateBufferedAhead()`
+  // resolves them FIFO when the real buffered-ahead drops below the target
+  // (playhead advance / buffer trim), or the pipe stops.
+  #aheadWaiters: (() => void)[] = [];
+  readonly #capacityBytes: number | undefined;
+  // Producers parked on `waitForCapacity()`; `#drainCapacity()` resolves them
+  // FIFO when pending drops below the bound (or the pipe stops).
+  #capacityWaiters: (() => void)[] = [];
   #eosRequested = false;
   #errorReported = false;
   // Single-flight eviction so rapid playhead updates coalesce onto one removal.
@@ -82,6 +171,11 @@ export class MseAppendPipe {
   // starts a fresh fragment instead of continuing the truncated one that the
   // seek cut off (Chromium's RunSegmentParserLoop append failure).
   #parserResetPending = false;
+  // Sum of the byteLength of every queued append unit, including the in-flight
+  // head retained in the queue while its async append settles. This is exactly
+  // the "queued/pending" payload the source-side producer has handed the sink
+  // but the SourceBuffer has not absorbed yet.
+  #pendingBytes = 0;
   // Timestamp a seek's `reset(target)` holds until the owed parser reset runs:
   // the trimmed conversion rebases its output timestamps to zero, so the
   // buffer must be told the sought position (`timestampOffset`) before its
@@ -93,24 +187,39 @@ export class MseAppendPipe {
   #stopped = false;
 
   constructor(options: MseAppendPipeOptions) {
+    this.#aheadTargetSeconds = normalizeBound(options.aheadTargetSeconds);
+    this.#capacityBytes = normalizeBound(options.capacityBytes);
     this.#options = options;
   }
 
   /**
    * Permanently stops the pipe (pipeline teardown). Nothing further appends,
-   * evicts, or ends; the owner is discarding the whole MediaSource.
+   * evicts, or ends; the owner is discarding the whole MediaSource. Waiters
+   * parked on `waitForCapacity()` are released (a torn-down sink has no
+   * capacity to offer, and a teardown must never hang a producer).
    */
   abort(): void {
     this.#stopped = true;
     this.#loadGeneration += 1;
     this.#queue.length = 0;
+    this.#pendingBytes = 0;
     this.#eosRequested = false;
+    this.#drainCapacity();
+    this.#releaseAheadWaiters();
   }
 
-  /** Queues bytes for the SourceBuffer; the pump drains it in FIFO order. */
+  /**
+   * Queues bytes for the SourceBuffer; the pump drains it in FIFO order. The
+   * unit is counted against `capacityBytes` whether it is queued or, once the
+   * pump starts it, retained as the in-flight head, so a producer parked on
+   * `waitForCapacity()` sees the whole backlog it has handed to the sink. A
+   * unit larger than the bound is still accepted; it re-opens the wait once
+   * it drains, so the bound can never drop or deadlock a real segment.
+   */
   append(bytes: Uint8Array): void {
     if (this.#stopped || this.#failed) return;
     this.#queue.push(bytes);
+    this.#pendingBytes += bytes.byteLength;
     this.#kick();
   }
 
@@ -165,6 +274,13 @@ export class MseAppendPipe {
   reset(targetTimeSeconds?: number): void {
     this.#loadGeneration += 1;
     this.#queue.length = 0;
+    this.#pendingBytes = 0;
+    this.#drainCapacity();
+    // A seek / load start supersedes the buffered-ahead position: parked
+    // producers from the old position must never wait on a buffer about to be
+    // reset, so they are released now; the fresh run's reads park again on
+    // the new position.
+    this.#releaseAheadWaiters();
     this.#eosRequested = false;
     // Hold the seek target for the owed parser reset. Each reset stores its
     // own value, so a newer reset supersedes an older held target and a
@@ -173,6 +289,67 @@ export class MseAppendPipe {
     this.#pendingTargetOffset = targetTimeSeconds ?? null;
     this.#parserResetPending = true;
     this.#kick();
+  }
+
+  /**
+   * The primary producer backpressure wait: resolves once the real
+   * SourceBuffer holds less than `aheadTargetSeconds` of playable media ahead
+   * of the live playhead (`buffered.end(last) - playhead <
+   * aheadTargetSeconds`), or immediately when no ahead target is configured,
+   * no SourceBuffer or buffered range exists yet, or the pipe stopped/failed.
+   * Absent, empty, or fragmented TimeRanges leave the wait open (nothing to
+   * judge), so an initial or oversized segment is never deadlocked. A
+   * producer (the mediabunny conversion's reads) awaits this before pulling,
+   * so the worker stops downloading / remuxing once the browser-side buffer
+   * is ahead enough and resumes when playback advances, the buffer is
+   * trimmed, or the pipeline changes state: `#kick()`, `abort()`, `reset()`,
+   * and `#fail()` all re-evaluate or release waiters. Always settles.
+   */
+  waitForBufferedAhead(): Promise<void> {
+    if (this.#stopped || this.#failed) return Promise.resolve();
+    if (this.#aheadTargetSeconds === undefined) return Promise.resolve();
+    let ahead: null | number = null;
+    const sourceBuffer = this.#options.getSourceBuffer();
+    if (sourceBuffer) {
+      try {
+        const ranges = sourceBuffer.buffered;
+        if (ranges.length > 0) {
+          // buffered.end(last) is the far edge of playback ahead of / at the
+          // playhead; fragmented TimeRanges are judged by that last range.
+          ahead = ranges.end(ranges.length - 1) - this.#options.getPlayheadSeconds();
+        }
+      } catch {
+        // A SourceBuffer whose buffered state cannot be read must never
+        // deadlock the producer: report room (the next check re-tries).
+        ahead = null;
+      }
+    }
+    if (ahead === null || ahead < this.#aheadTargetSeconds) return Promise.resolve();
+    return new Promise((resolve) => {
+      this.#aheadWaiters.push(resolve);
+    });
+  }
+
+  /**
+   * The secondary producer backpressure wait: resolves once queued +
+   * in-flight append bytes drop below `capacityBytes` (room for the next
+   * unit), or immediately when no capacity is configured. A producer (the
+   * mediabunny conversion's reads) awaits this before pulling, so the
+   * pipeline stops reading far ahead when the sink's backlog is full and
+   * resumes when the pipe drains. Always settles: a stopped/failed pipe
+   * releases every waiter, and a single oversized unit re-opens the wait
+   * once it drains.
+   */
+  waitForCapacity(): Promise<void> {
+    if (this.#stopped || this.#failed) return Promise.resolve();
+    if (this.#capacityBytes === undefined || this.#pendingBytes < this.#capacityBytes) {
+      return Promise.resolve();
+    }
+    return new Promise((resolve) => {
+      this.#capacityWaiters.push(() => {
+        resolve();
+      });
+    });
   }
 
   // Resets the SourceBuffer's segment parser so the next appendBuffer begins
@@ -241,6 +418,10 @@ export class MseAppendPipe {
         // are ALL seconds — the field is named `seconds`, never a fabricated
         // byte count for what the browser discarded.
         this.#diag(workerLogEventName.mseEvict, { end, seconds: end - start, start });
+        // A trim changed the buffered state: a parked buffered-ahead producer
+        // may now have room again (the ahead extent shrank), so the
+        // buffered-ahead check re-runs after the removal settles.
+        this.#evaluateBufferedAhead();
       } catch (error) {
         // SourceBuffer state can change between the range read and the remove;
         // eviction is a best-effort trim and must never fail the pipeline.
@@ -252,11 +433,70 @@ export class MseAppendPipe {
     return false;
   }
 
+  /**
+   * Releases every producer parked on `waitForCapacity()` once the pipe has
+   * room again: queued + in-flight dropped below the bound, or the pipeline
+   * stopped/failed, in which case there is no capacity to wait for and a
+   * teardown must never strand a reader. FIFO, so parked producers cannot
+   * overtake each other.
+   */
+  #drainCapacity(): void {
+    if (
+      !this.#stopped &&
+      !this.#failed &&
+      this.#capacityBytes !== undefined &&
+      this.#pendingBytes >= this.#capacityBytes
+    ) {
+      return;
+    }
+    const waiters = this.#capacityWaiters;
+    this.#capacityWaiters = [];
+    for (const resolve of waiters) resolve();
+  }
+
+  /**
+   * Re-checks the buffered-ahead condition against the current real
+   * SourceBuffer state and releases parked producers that now have room.
+   * Called from `#kick()` (so a playhead update reflected by `setPlayhead`
+   * into `pipe.kick()`, and any SourceBuffer `updateend`, re-runs the check),
+   * after a back-buffer trim, and after each absorbed append. Absent, empty,
+   * or fragmented TimeRanges release the waiters: a range that cannot be read
+   * means no producer is held.
+   */
+  #evaluateBufferedAhead(): void {
+    if (this.#stopped || this.#failed || this.#aheadTargetSeconds === undefined) {
+      this.#releaseAheadWaiters();
+      return;
+    }
+    const sourceBuffer = this.#options.getSourceBuffer();
+    if (!sourceBuffer) {
+      this.#releaseAheadWaiters();
+      return;
+    }
+    try {
+      const ranges = sourceBuffer.buffered;
+      if (ranges.length === 0) {
+        this.#releaseAheadWaiters();
+        return;
+      }
+      const ahead = ranges.end(ranges.length - 1) - this.#options.getPlayheadSeconds();
+      if (ahead < this.#aheadTargetSeconds) this.#releaseAheadWaiters();
+    } catch {
+      this.#releaseAheadWaiters();
+    }
+  }
+
   #fail(error: unknown): void {
     if (this.#errorReported || this.#stopped || this.#failed) return;
     this.#errorReported = true;
     this.#failed = true;
     this.#queue.length = 0;
+    this.#pendingBytes = 0;
+    this.#drainCapacity();
+    // A fatal failure leaves no pipeline left to fill a buffer: every parked
+    // buffered-ahead producer must be released so it can observe the failure,
+    // never hang awaiting room on a dead sink.
+    this.#releaseAheadWaiters();
     this.#eosRequested = false;
     this.#options.onError(error);
   }
@@ -264,8 +504,13 @@ export class MseAppendPipe {
   #kick(): void {
     // Defer so multiple synchronous kicks coalesce into one pump run and so a
     // caller can never observe a synchronous side effect — in particular an
-    // endOfStream fired from inside requestEndOfStream.
+    // endOfStream fired from inside requestEndOfStream. The buffered-ahead
+    // condition is re-checked on the same turn, so a playhead update
+    // reflected by `setPlayhead` into `pipe.kick()` (or any SourceBuffer
+    // `updateend`) releases a parked producer the moment its ahead window
+    // shrinks.
     queueMicrotask(() => {
+      this.#evaluateBufferedAhead();
       void this.#pump();
     });
   }
@@ -358,6 +603,15 @@ export class MseAppendPipe {
         }
         if (this.#stopped || this.#loadGeneration !== loadGeneration) return;
         this.#queue.shift();
+        // The drained unit is no longer pending: a producer parked on
+        // `waitForCapacity()` may resume (an oversize head re-opens it too).
+        this.#pendingBytes -= head.byteLength;
+        this.#drainCapacity();
+        // An absorbed append changed the real buffered state, so re-check the
+        // buffered-ahead condition against the fresh ranges: a SourceBuffer
+        // that just absorbed everything is now judgeable, and a directly
+        // driven pipe (no root kicking on `updateend`) still gets the check.
+        this.#evaluateBufferedAhead();
       }
       this.#maybeEndOfStream();
     } finally {
@@ -368,6 +622,19 @@ export class MseAppendPipe {
       }
     }
   }
+
+  /**
+   * Releases every producer parked on `waitForBufferedAhead()`: the pipe
+   * stopped/failed, or a state change (reset/abort) superseded the buffered
+   * position, in which case there is nothing worth waiting on and a teardown
+   * must never strand a reader. FIFO, so parked producers cannot overtake
+   * each other.
+   */
+  #releaseAheadWaiters(): void {
+    const waiters = this.#aheadWaiters;
+    this.#aheadWaiters = [];
+    for (const resolve of waiters) resolve();
+  }
 }
 
 /** Scalar message of a caught best-effort failure (DOMException or Error alike). */
@@ -377,6 +644,11 @@ function errorMessage(error: unknown): string {
 
 function isQuotaExceeded(error: unknown): boolean {
   return error instanceof DOMException && error.name === 'QuotaExceededError';
+}
+
+/** Keeps finite positive backpressure bounds; all other values disable the wait. */
+function normalizeBound(value: number | undefined): number | undefined {
+  return value !== undefined && Number.isFinite(value) && value > 0 ? value : undefined;
 }
 
 /**

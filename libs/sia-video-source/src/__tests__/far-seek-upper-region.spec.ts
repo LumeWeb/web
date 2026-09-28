@@ -194,15 +194,13 @@ describe('far seek requests bytes from the target region', () => {
     controller.start({ loadGeneration: 1, playback: baselineLoad.playback, sink: baselineSink });
     await waitFor(() => baselineSink.eos.length === 1);
 
-    // Without a seek a full run streams the object strictly sequentially from
-    // the front: the reads tile the whole object contiguously, offset 0 to EOF,
-    // with no jumps and no out-of-order reads.
-    let covered = 0;
+    // The baseline begins at the front. The file-system prefetch profile can
+    // omit ranges the parser does not need, so its reads need not tile the
+    // object; each request still stays within the object bounds.
+    expect(baselineSource.reads[0]?.offset).toBe(0);
     for (const read of baselineSource.reads) {
-      expect(read.offset).toBe(covered);
-      covered = read.offset + read.length;
+      expect(read.offset + read.length).toBeLessThanOrEqual(baselineSource.size);
     }
-    expect(covered).toBe(baselineSource.size);
 
     // --- reset: a fresh identical load through the same controller -----------
     const source = new PacedRecordingByteSource(fixture);
