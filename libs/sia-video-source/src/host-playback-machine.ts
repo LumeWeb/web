@@ -134,6 +134,8 @@ export const hostReportKind = {
   decode: 'decode',
   device: 'device',
   network: 'network',
+  quota: 'quota',
+  unavailable: 'unavailable',
   unsupported: 'unsupported',
 } as const;
 

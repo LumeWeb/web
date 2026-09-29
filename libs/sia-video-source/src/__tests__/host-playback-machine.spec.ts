@@ -15,6 +15,7 @@ import {
   playbackPreference,
   recoveryReason,
 } from '../host-playback-machine.ts';
+import { workerErrorCode } from '../protocol.ts';
 
 /** A fresh machine with no source set. */
 function fresh(): HostPlaybackMachine {
@@ -28,6 +29,15 @@ function readyMachine(): HostPlaybackMachine {
   machine.send({ type: hostPlaybackEvent.sourceReady });
   return machine;
 }
+
+describe('the load-failure vocabulary', () => {
+  it('keeps hostReportKind the same set as the wire WorkerErrorCode', () => {
+    // A load-failure kind travels worker to host: the worker posts it as the
+    // wire's WorkerErrorCode, the host records it as a hostReportKind. Keeping
+    // the sets equal means a posted kind always fits the host kind type.
+    expect(Object.values(hostReportKind).sort()).toEqual(Object.values(workerErrorCode).sort());
+  });
+});
 
 describe('a source without playback', () => {
   const idle = () => fresh();
