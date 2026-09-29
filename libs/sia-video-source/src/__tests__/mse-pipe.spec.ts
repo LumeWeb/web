@@ -15,8 +15,10 @@
  */
 import { describe, expect, it, vi } from 'vitest';
 import {
+  bufferedAheadInContainingWindow,
   MseAppendPipe,
   type MseAppendPipeOptions,
+  PLAYHEAD_WINDOW_TOLERANCE_SECONDS,
 } from '../mse-pipe.ts';
 
 // ---- fake MSE primitives -----------------------------------------------------
@@ -192,6 +194,15 @@ function settle(rounds = 12): Promise<void> {
 }
 
 const bytes = (marker: number, length = 16) => new Uint8Array(length).fill(marker);
+
+/** A TimeRanges backed by a plain range list, the shape the fake SourceBuffer's `buffered` reports. */
+function makeRanges(ranges: [number, number][]): TimeRanges {
+  return {
+    end: (index: number) => ranges[index][1],
+    length: ranges.length,
+    start: (index: number) => ranges[index][0],
+  };
+}
 
 describe('MseAppendPipe', () => {
   describe('append serialization', () => {
@@ -913,5 +924,53 @@ describe('MseAppendPipe', () => {
       await settle(1);
       expect(released).toBe(true);
     });
+  });
+});
+
+describe('bufferedAheadInContainingWindow', () => {
+  it('returns the seconds between the playhead and the end of its own window', () => {
+    expect(bufferedAheadInContainingWindow(makeRanges([[10, 40]]), 25)).toBe(15);
+  });
+
+  it('counts the window when the playhead sits on its start', () => {
+    expect(bufferedAheadInContainingWindow(makeRanges([[10, 40]]), 10)).toBe(30);
+  });
+
+  it('keeps the window when the playhead falls 0.1s before its start', () => {
+    expect(bufferedAheadInContainingWindow(makeRanges([[10, 40]]), 9.9)).toBeCloseTo(30.1);
+  });
+
+  it('returns null when the playhead falls beyond the 0.1s tolerance', () => {
+    expect(bufferedAheadInContainingWindow(makeRanges([[10, 40]]), 9.8)).toBeNull();
+  });
+
+  it('keeps the later window when the playhead falls 0.1s before its start', () => {
+    expect(bufferedAheadInContainingWindow(makeRanges([[0, 5], [20, 100]]), 19.95)).toBeCloseTo(
+      80.05,
+    );
+  });
+
+  it('finds the covering window among disjoint ranges', () => {
+    expect(bufferedAheadInContainingWindow(makeRanges([[0, 10], [30, 50]]), 35)).toBe(15);
+  });
+
+  it('returns null when the playhead sits between disjoint windows', () => {
+    expect(bufferedAheadInContainingWindow(makeRanges([[0, 5], [20, 100]]), 12)).toBeNull();
+  });
+
+  it('returns zero when the playhead reaches the end of its window', () => {
+    expect(bufferedAheadInContainingWindow(makeRanges([[0, 5]]), 5)).toBe(0);
+  });
+
+  it('returns null when the playhead is past every window', () => {
+    expect(bufferedAheadInContainingWindow(makeRanges([[0, 5]]), 5.05)).toBeNull();
+  });
+
+  it('returns null for an empty TimeRanges', () => {
+    expect(bufferedAheadInContainingWindow(makeRanges([]), 0)).toBeNull();
+  });
+
+  it('exposes the 0.1s start-boundary tolerance as a fixed constant', () => {
+    expect(PLAYHEAD_WINDOW_TOLERANCE_SECONDS).toBe(0.1);
   });
 });

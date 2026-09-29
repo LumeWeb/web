@@ -18,8 +18,11 @@ export default defineConfig({
           browser: {
             enabled: true,
             provider: playwright(),
+            // Firefox cannot construct a MediaSource in a dedicated worker,
+            // so it runs the main-thread MSE path that Chromium does not.
             instances: [
               { browser: "chromium" as const, headless: true },
+              { browser: "firefox" as const, headless: true },
             ],
           },
           hookTimeout: 60000,

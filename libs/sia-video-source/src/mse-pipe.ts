@@ -619,13 +619,13 @@ export class MseAppendPipe {
 
 // currentTime can fall just before a range start after an eviction or timestamp
 // rebase. Keep that rounding error in the same playable window.
-const PLAYHEAD_WINDOW_TOLERANCE_SECONDS = 0.1;
+export const PLAYHEAD_WINDOW_TOLERANCE_SECONDS = 0.1;
 
 /**
  * Returns playable seconds from the buffered window covering the playhead.
  * Disjoint future ranges cannot satisfy the producer's ahead target.
  */
-function bufferedAheadInContainingWindow(ranges: TimeRanges, playhead: number): null | number {
+export function bufferedAheadInContainingWindow(ranges: TimeRanges, playhead: number): null | number {
   for (let index = 0; index < ranges.length; index += 1) {
     const start = ranges.start(index);
     const end = ranges.end(index);

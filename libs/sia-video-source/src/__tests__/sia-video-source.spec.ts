@@ -691,6 +691,72 @@ describe('SiaVideoSource (host state machine)', () => {
     host.destroy();
   });
 
+  it.skipIf(!IN_BROWSER)('reports main-thread buffered state when the SourceBuffer opens, updates, and playhead changes', async () => {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const target = document.createElement('video');
+    let sourceBuffer: SourceBuffer | undefined;
+    const addSourceBuffer = Reflect.get(MediaSource.prototype, 'addSourceBuffer');
+    const addSourceBufferSpy = vi.spyOn(MediaSource.prototype, 'addSourceBuffer').mockImplementation(function (
+      this: MediaSource,
+      mime: string,
+    ) {
+      sourceBuffer = Reflect.apply(addSourceBuffer, this, [mime]);
+      return sourceBuffer;
+    });
+    const bufferedGetter = vi.spyOn(SourceBuffer.prototype, 'buffered', 'get').mockReturnValue({
+      end: (index: number) => [4, 18][index],
+      length: 2,
+      start: (index: number) => [1, 9][index],
+    });
+
+    host.attach(target);
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    replyAttachOk(worker);
+    host.src = 'buffered-state-object';
+    const source = worker.sent.filter((message) => message.type === MainToWorkerMessageType.SOURCE).at(-1);
+    if (!source || !('requestId' in source)) throw new Error('SOURCE was not sent');
+    worker.reply({
+      info: { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main', tracks: [] },
+      requestId: source.requestId,
+      type: WorkerToMainMessageType.SOURCE_OK,
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(worker.sent).toContainEqual({
+      buffered: [{ end: 4, start: 1 }, { end: 18, start: 9 }],
+      pendingBytes: 0,
+      playhead: 0,
+      requestId: source.requestId,
+      type: MainToWorkerMessageType.BUFFERED_STATE,
+    });
+
+    worker.sent.length = 0;
+    target.currentTime = 12;
+    target.dispatchEvent(new Event('timeupdate'));
+    expect(worker.sent).toContainEqual({
+      buffered: [{ end: 4, start: 1 }, { end: 18, start: 9 }],
+      pendingBytes: 0,
+      playhead: 12,
+      requestId: source.requestId,
+      type: MainToWorkerMessageType.BUFFERED_STATE,
+    });
+
+    worker.sent.length = 0;
+    sourceBuffer?.dispatchEvent(new Event('updateend'));
+    expect(worker.sent).toContainEqual({
+      buffered: [{ end: 4, start: 1 }, { end: 18, start: 9 }],
+      pendingBytes: 0,
+      playhead: 12,
+      requestId: source.requestId,
+      type: MainToWorkerMessageType.BUFFERED_STATE,
+    });
+
+    bufferedGetter.mockRestore();
+    addSourceBufferSpy.mockRestore();
+    host.destroy();
+  });
+
   it.skipIf(!IN_BROWSER)('calls MediaSource.endOfStream after ENDED once appends drain (main mode)', async () => {
     const worker = new FakeWorker();
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });

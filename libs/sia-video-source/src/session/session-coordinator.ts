@@ -35,6 +35,11 @@ import type { PlaybackCapabilities } from '../capabilities/browser-capabilities.
 import { detectBrowserCapabilities } from '../capabilities/browser-capabilities.ts';
 import { mseImplementation, resolveMseCtor } from '../capabilities/mse-runtime.ts';
 import {
+  bufferedAheadInContainingWindow,
+  DEFAULT_MSE_AHEAD_TARGET_SECONDS,
+  DEFAULT_MSE_APPEND_CAPACITY_BYTES,
+} from '../mse-pipe.ts';
+import {
   decryptAppKeyEnvelope,
   exportWorkerPublicKey,
   generateWorkerKeyPair,
@@ -85,6 +90,45 @@ export interface HelloSeedPresence {
   readonly app?: boolean;
   /** Sharing-key seed slot declaration (`false` scrubs a held sharing seed). */
   readonly sharing?: boolean;
+}
+
+/** Main-mode append sink with a host-fed buffered-ahead producer gate. */
+export interface PostingSink extends AppendSink {
+  /** Accepts a host buffer report when it belongs to this load. */
+  setBufferedState(state: {
+    readonly buffered: readonly { readonly end: number; readonly start: number }[];
+    readonly pendingBytes: number;
+    readonly playhead: number;
+    readonly requestId: RequestId;
+  }): void;
+  /** Waits until the reported playable buffer falls below the ahead target. */
+  waitForBufferedAhead(): Promise<void>;
+  /** Waits until host pending append bytes fall below the capacity bound. */
+  waitForCapacity(): Promise<void>;
+}
+
+/** Main-mode producer gate driven by host state for one load request. */
+export interface PostingSinkSession {
+  /** Releases producers waiting on this session's buffered-ahead or capacity state. */
+  release(): void;
+  /** Accepts a host buffer report when it belongs to this load. */
+  setBufferedState(state: {
+    readonly buffered: readonly { readonly end: number; readonly start: number }[];
+    readonly pendingBytes: number;
+    readonly playhead: number;
+    readonly requestId: RequestId;
+  }): void;
+  /** Waits until the reported playable buffer falls below the ahead target. */
+  waitForBufferedAhead(): Promise<void>;
+  /** Waits until host pending append bytes fall below the capacity bound. */
+  waitForCapacity(): Promise<void>;
+}
+
+/** Options for one request-scoped main-mode producer gate. */
+export interface PostingSinkSessionDeps {
+  readonly aheadTargetSeconds?: number;
+  readonly capacityBytes?: number;
+  readonly requestId: RequestId;
 }
 
 /** Outbound protocol channel (same shape as the worker's `PostMessage`). */
@@ -273,6 +317,7 @@ export class WorkerComposition implements SessionCoordinator {
   #pendingSeekTime: number | undefined = undefined;
   #playRequested = false;
   readonly #post: PostMessage;
+  #postingSink: null | PostingSink = null;
   #requestId: null | RequestId = null;
   #session: CompositionSession | null = null;
   readonly #sinkFactory: (context: SinkFactoryContext) => AppendSink;
@@ -323,6 +368,9 @@ export class WorkerComposition implements SessionCoordinator {
           return;
         case MainToWorkerMessageType.ATTACH:
           this.#post({ mode: this.#mode, requestId: message.requestId, type: WorkerToMainMessageType.ATTACH_OK });
+          return;
+        case MainToWorkerMessageType.BUFFERED_STATE:
+          if (message.requestId === this.#requestId) this.#postingSink?.setBufferedState(message);
           return;
         case MainToWorkerMessageType.DESTROY:
           this.destroy();
@@ -387,6 +435,7 @@ export class WorkerComposition implements SessionCoordinator {
   // directly — the pipeline's own Input disposal, when it runs, is a second
   // idempotent stop of the same source.
   #abandonLoad(reason?: WorkerAbandonReason): void {
+    this.#postingSink = null;
     this.#loadAbortController?.abort();
     this.#loadAbortController = null;
 
@@ -565,14 +614,18 @@ export class WorkerComposition implements SessionCoordinator {
     // sink. Main mode — including a host `workerMse: 'main'` preference that
     // overrides a capable runtime — always uses the protocol-compatible CHUNK
     // posting sink, never the worker MediaSource root.
-    const sink =
-      this.#mode === workerMode.main
-        ? createPostingSink(this.#post, requestId)
-        : this.#sinkFactory({
-            durationSeconds: result.durationSeconds,
-            mime: result.mime,
-            requestId,
-          });
+    let sink: AppendSink;
+    if (this.#mode === workerMode.main) {
+      const postingSink = createPostingSink(this.#post, requestId);
+      this.#postingSink = postingSink;
+      sink = postingSink;
+    } else {
+      sink = this.#sinkFactory({
+        durationSeconds: result.durationSeconds,
+        mime: result.mime,
+        requestId,
+      });
+    }
     const session: CompositionSession = {
       controller: null,
       load: { loadGeneration, playback: result.playback, sink },
@@ -661,6 +714,124 @@ export class WorkerComposition implements SessionCoordinator {
     session.started = true;
     controller.start(session.load);
   }
+}
+
+/**
+ * Main-mode `AppendSink`: posts each append unit as a protocol `CHUNK`
+ * (kind init/media) under the load's request id. Worker mode supplies a real
+ * MSE-backed sink through `sinkFactory` instead.
+ */
+export function createPostingSink(post: PostMessage, requestId: RequestId): PostingSink {
+  const session = createPostingSinkSession({
+    aheadTargetSeconds: DEFAULT_MSE_AHEAD_TARGET_SECONDS,
+    capacityBytes: DEFAULT_MSE_APPEND_CAPACITY_BYTES,
+    requestId,
+  });
+  let active = true;
+  return {
+    abort(): void {
+      active = false;
+      session.release();
+    },
+    append(unit: AppendUnit): void {
+      if (!active) return;
+      const { message, transfer } = chunkForPost(unit, requestId);
+      post(message, transfer);
+    },
+    evictBackBuffer(): Promise<boolean> {
+      return Promise.resolve(false);
+    },
+    requestEndOfStream(): void {
+      // Main-thread MSE: the host ends its own MediaSource when it receives
+      // the coordinator's ENDED; a posting sink owns no SourceBuffer.
+    },
+    resetParser(_loadGeneration: number, _targetTimeSeconds?: number): void {
+      session.release();
+    },
+    setBufferedState(state): void {
+      session.setBufferedState(state);
+    },
+    waitForBufferedAhead(): Promise<void> {
+      return session.waitForBufferedAhead();
+    },
+    waitForCapacity(): Promise<void> {
+      return session.waitForCapacity();
+    },
+  };
+}
+
+/**
+ * Creates request-scoped buffered-ahead and capacity waits for a main-mode posting sink.
+ * Reports without the session request ID cannot change either producer wait.
+ */
+export function createPostingSinkSession({
+  aheadTargetSeconds,
+  capacityBytes,
+  requestId,
+}: PostingSinkSessionDeps): PostingSinkSession {
+  let buffered: readonly { readonly end: number; readonly start: number }[] | undefined;
+  let playhead: number | undefined;
+  let pendingBytes = 0;
+  let aheadWaiters: (() => void)[] = [];
+  let capacityWaiters: (() => void)[] = [];
+  const capacity = capacityBytes !== undefined && Number.isFinite(capacityBytes) && capacityBytes > 0 ? capacityBytes : undefined;
+
+  const releaseAheadWaiters = (): void => {
+    const pending = aheadWaiters;
+    aheadWaiters = [];
+    for (const resolve of pending) resolve();
+  };
+
+  const releaseCapacityWaiters = (): void => {
+    const pending = capacityWaiters;
+    capacityWaiters = [];
+    for (const resolve of pending) resolve();
+  };
+
+  const isBelowAheadTarget = (): boolean => {
+    const currentBuffered = buffered;
+    const ahead =
+      currentBuffered === undefined || playhead === undefined
+        ? null
+        : bufferedAheadInContainingWindow(
+            {
+              end: (index: number) => currentBuffered[index].end,
+              length: currentBuffered.length,
+              start: (index: number) => currentBuffered[index].start,
+            },
+            playhead,
+          );
+    return ahead === null || aheadTargetSeconds === undefined || ahead < aheadTargetSeconds;
+  };
+
+  const hasCapacity = (): boolean => capacity === undefined || pendingBytes < capacity;
+
+  return {
+    release(): void {
+      releaseAheadWaiters();
+      releaseCapacityWaiters();
+    },
+    setBufferedState(state): void {
+      if (state.requestId !== requestId) return;
+      buffered = state.buffered;
+      pendingBytes = state.pendingBytes;
+      playhead = state.playhead;
+      if (isBelowAheadTarget()) releaseAheadWaiters();
+      if (hasCapacity()) releaseCapacityWaiters();
+    },
+    waitForBufferedAhead(): Promise<void> {
+      if (isBelowAheadTarget()) return Promise.resolve();
+      return new Promise((resolve) => {
+        aheadWaiters.push(resolve);
+      });
+    },
+    waitForCapacity(): Promise<void> {
+      if (hasCapacity()) return Promise.resolve();
+      return new Promise((resolve) => {
+        capacityWaiters.push(resolve);
+      });
+    },
+  };
 }
 
 /**
@@ -811,30 +982,18 @@ function appKeySeedsEqual(a: null | Uint8Array, b: null | Uint8Array): boolean {
 }
 
 /**
- * Main-mode `AppendSink`: posts each append unit as a protocol `CHUNK`
- * (kind init/media) under the load's request id. Worker mode supplies a real
- * MSE-backed sink through `sinkFactory` instead.
+ * Prepares a CHUNK for structured-clone transfer. A full ArrayBuffer view is
+ * safe to transfer directly; a subview first copies its visible bytes.
  */
-function createPostingSink(post: PostMessage, requestId: RequestId): AppendSink {
-  let active = true;
+function chunkForPost(
+  unit: AppendUnit,
+  requestId: RequestId,
+): { readonly message: WorkerToMainMessage; readonly transfer: Transferable[] } {
+  const { buffer, byteLength, byteOffset } = unit.bytes;
+  const bytes = byteOffset === 0 && byteLength === buffer.byteLength && buffer instanceof ArrayBuffer ? unit.bytes : unit.bytes.slice();
   return {
-    abort(): void {
-      active = false;
-    },
-    append(unit: AppendUnit): void {
-      if (!active) return;
-      post({ bytes: unit.bytes.slice(), kind: unit.kind, requestId, type: WorkerToMainMessageType.CHUNK });
-    },
-    evictBackBuffer(): Promise<boolean> {
-      return Promise.resolve(false);
-    },
-    requestEndOfStream(): void {
-      // Main-thread MSE: the host ends its own MediaSource when it receives
-      // the coordinator's ENDED; a posting sink owns no SourceBuffer.
-    },
-    resetParser(_loadGeneration: number, _targetTimeSeconds?: number): void {
-      // No SourceBuffer parser to reset (or timestamp rebase) on a posting sink.
-    },
+    message: { bytes, kind: unit.kind, requestId, type: WorkerToMainMessageType.CHUNK },
+    transfer: [bytes.buffer],
   };
 }
 
