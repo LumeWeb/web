@@ -851,9 +851,13 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       // The pipe waits on `updateend` internally; the kick here (and on the
       // event) only re-runs the pump for state the option getters observe —
       // above all the SourceBuffer appearing after bytes were already queued.
-      sourceBuffer.addEventListener('updateend', () => this.#appendPipe?.kick());
+      sourceBuffer.addEventListener('updateend', () => {
+        this.#appendPipe?.kick();
+        this.#reportMainBufferedState();
+      });
       this.#sourceBuffer = sourceBuffer;
       this.#appendPipe?.kick();
+      this.#reportMainBufferedState();
       // The main-thread SourceBuffer opened (counterpart of the worker's
       // `session.mse-open`): scalar MIME + duration facts only.
       this.#logger.child('host').info(
@@ -1755,6 +1759,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // repositions the reloaded source back here.
     this.#lastPlayheadSeconds = now;
     this.#evictMainBuffer();
+    this.#reportMainBufferedState();
     this.#send({
       requestId: this.#requestId ?? nextRequestId(),
       time: now,
@@ -1830,6 +1835,34 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     const error = mediaErrorFromWorkerMessage({ context, kind });
     this.#error = error;
     this.dispatchEvent(mediaErrorEvent(error));
+  }
+
+  // Reports the main-thread SourceBuffer state the worker cannot inspect when
+  // MSE remains on the host (Firefox's fallback path).
+  #reportMainBufferedState(): void {
+    if (this.#mode !== workerMode.main) return;
+    const appendPipe = this.#appendPipe;
+    const requestId = this.#requestId;
+    const sourceBuffer = this.#sourceBuffer;
+    const target = this.target;
+    if (!appendPipe || requestId === null || !sourceBuffer || !target) return;
+
+    try {
+      const buffered = sourceBuffer.buffered;
+      const windows = Array.from({ length: buffered.length }, (_, index) => ({
+        end: buffered.end(index),
+        start: buffered.start(index),
+      }));
+      this.#post({
+        buffered: windows,
+        pendingBytes: appendPipe.pendingBytes,
+        playhead: target.currentTime,
+        requestId,
+        type: MainToWorkerMessageType.BUFFERED_STATE,
+      });
+    } catch {
+      // A SourceBuffer being removed can reject a range read; wait for its next state.
+    }
   }
 
   // Resets the announced load-acceptance to false exactly once (the "no

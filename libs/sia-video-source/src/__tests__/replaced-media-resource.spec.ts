@@ -33,6 +33,8 @@ import { type RecoveryChangeDetail, siaRecoveryChange, SiaVideoSource } from '..
  */
 const IN_BROWSER = typeof document !== 'undefined' && typeof MediaSource !== 'undefined';
 
+const IS_FIREFOX = typeof navigator !== 'undefined' && /firefox/i.test(navigator.userAgent);
+
 /** Records what the host posts and lets specs inject worker replies. */
 class FakeWorker {
   listener: ((event: { data: unknown }) => void) | null = null;
@@ -358,7 +360,11 @@ describe('replaced-media-resource events (worker mode)', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('closes recovery exactly once on the fresh handle advance and restores the budget', () => {
+  // Skipped on Firefox: its 0-track MediaStream stand-in leaves the element in
+  // HAVE_NOTHING, where `currentTime` reads back 0, so the playhead advance
+  // that closes recovery never occurs (production Firefox never runs this
+  // worker-mode path).
+  it.skipIf(!IN_BROWSER || IS_FIREFOX)('closes recovery exactly once on the fresh handle advance and restores the budget', () => {
     const { host, target, worker } = workerSession();
     const oldHandle = new MediaStream();
     const idA = loadWorkerSource(host, worker, 'k', oldHandle);
@@ -411,7 +417,11 @@ describe('replaced-media-resource events (worker mode)', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('a genuine ended on the current handle latches end-of-stream', () => {
+  // Skipped on Firefox: its 0-track MediaStream stand-in leaves the element in
+  // HAVE_NOTHING, where `currentTime` reads back 0, so the far seek registers
+  // as in-window and no source restart is posted (production Firefox never
+  // runs this worker-mode path).
+  it.skipIf(!IN_BROWSER || IS_FIREFOX)('a genuine ended on the current handle latches end-of-stream', () => {
     const { host, target, worker } = workerSession();
     const oldHandle = new MediaStream();
     const idA = loadWorkerSource(host, worker, 'k', oldHandle);

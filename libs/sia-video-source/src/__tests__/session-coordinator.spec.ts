@@ -283,6 +283,49 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
     expect(driver.message(WorkerToMainMessageType.ENDED)[0].requestId).toBe(4);
   });
 
+  it('parks on the active buffered state and ignores a stale state report', async () => {
+    const driver = makeDriver();
+    const playback = new FakePlayback();
+    driver.pipeline.results.push(readyLoad(playback));
+    await driver.say({ preload: 'auto', requestId: 4, src: 'playable', type: MainToWorkerMessageType.SOURCE });
+    await waitForMessage(driver, WorkerToMainMessageType.SOURCE_OK);
+
+    await driver.say({
+      buffered: [{ end: 60, start: 0 }],
+      pendingBytes: 0,
+      playhead: 0,
+      requestId: 4,
+      type: MainToWorkerMessageType.BUFFERED_STATE,
+    });
+    if (!playback.sink?.waitForBufferedAhead) throw new Error('expected a main-mode buffered-ahead gate');
+    let released = false;
+    const wait = playback.sink.waitForBufferedAhead().then(() => {
+      released = true;
+    });
+    await Promise.resolve();
+    expect(released).toBe(false);
+
+    await driver.say({
+      buffered: [],
+      pendingBytes: 0,
+      playhead: 0,
+      requestId: 999,
+      type: MainToWorkerMessageType.BUFFERED_STATE,
+    });
+    await Promise.resolve();
+    expect(released).toBe(false);
+
+    await driver.say({
+      buffered: [],
+      pendingBytes: 0,
+      playhead: 0,
+      requestId: 4,
+      type: MainToWorkerMessageType.BUFFERED_STATE,
+    });
+    await wait;
+    expect(released).toBe(true);
+  });
+
   it('passes the load generation and one abort signal into the pipeline, aborting on teardown', async () => {
     const driver = makeDriver();
     driver.pipeline.results.push(readyLoad());
