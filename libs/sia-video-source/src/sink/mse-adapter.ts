@@ -14,7 +14,12 @@
  * generation-aware media playback that fed the bytes and by the pipe's own
  * reset.
  */
-import { DEFAULT_MSE_AHEAD_TARGET_SECONDS, DEFAULT_MSE_APPEND_CAPACITY_BYTES, MseAppendPipe } from '../mse-pipe.ts';
+import {
+  DEFAULT_MSE_AHEAD_TARGET_SECONDS,
+  DEFAULT_MSE_APPEND_CAPACITY_BYTES,
+  type MseAppendFailureKind,
+  MseAppendPipe,
+} from '../mse-pipe.ts';
 import type { AppendSink, AppendUnit } from './append-sink.ts';
 
 export interface MseAdapterOptions {
@@ -77,7 +82,7 @@ export interface WorkerMseSinkFactoryDeps {
    */
   onDiag?(name: string, detail: Readonly<Record<string, unknown>>): void;
   /** Fatal MSE append failure; fires at most once per pipe lifetime. */
-  onError(error: unknown): void;
+  onError(error: unknown, kind: MseAppendFailureKind): void;
 }
 
 export class MseAdapter implements AppendSink {
@@ -145,7 +150,7 @@ export function createWorkerMseSinkFactory(deps: WorkerMseSinkFactoryDeps): () =
         getPlayheadSeconds: () => deps.getPlayheadSeconds(),
         getSourceBuffer: () => deps.getSourceBuffer(),
         onDiag: (name, detail) => deps.onDiag?.(name, detail),
-        onError: (error) => deps.onError(error),
+        onError: (error, kind) => deps.onError(error, kind),
       }),
     });
 }

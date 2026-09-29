@@ -309,6 +309,63 @@ describe('MseAppendPipe', () => {
     });
   });
 
+  describe('quota wait/retry before fatal escalation', () => {
+    it('waits through a not-yet-evictable quota failure and recovers once space frees', async () => {
+      vi.useFakeTimers();
+      try {
+        const { fakeSourceBuffer, onError, pipe, setPlayhead } = createHarness();
+        // No back-buffer behind the playhead is evictable (the eviction
+        // boundary is negative), so the first quota failure cannot free memory
+        // immediately; the pipe must wait/retry before escalating.
+        setPlayhead(0);
+        fakeSourceBuffer.ranges = [[0, 120]];
+        fakeSourceBuffer.failNextAppendWithThrow = new DOMException('quota', 'QuotaExceededError');
+
+        pipe.append(bytes(7));
+        // Let the pump hit the quota and start its bounded eviction re-checks.
+        await vi.advanceTimersByTimeAsync(0);
+
+        // While the pipe waits, the back-buffer becomes evictable (the playhead
+        // moved on, a seek trimmed, etc.).
+        setPlayhead(60);
+
+        await vi.advanceTimersByTimeAsync(1000);
+
+        // The same head is retried after the eviction frees memory; no fatal
+        // escalation and no loss of the append.
+        expect(onError).not.toHaveBeenCalled();
+        expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([7]);
+        expect(fakeSourceBuffer.removed).toEqual([[0, 30]]);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('escalates a persistent quota failure, classified as quota, after bounded retries', async () => {
+      vi.useFakeTimers();
+      try {
+        const { fakeSourceBuffer, onError, pipe, setPlayhead } = createHarness();
+        // Nothing behind the playhead can ever be evicted, so every quota
+        // retry finds nothing to free: the pipe must eventually escalate,
+        // classifying the failure as the transient `quota` kind rather than
+        // the generic decode/append class.
+        setPlayhead(0);
+        fakeSourceBuffer.ranges = [[0, 120]];
+        fakeSourceBuffer.failNextAppendWithThrow = new DOMException('quota', 'QuotaExceededError');
+
+        pipe.append(bytes(7));
+        await vi.advanceTimersByTimeAsync(10_000);
+
+        expect(onError).toHaveBeenCalledTimes(1);
+        expect((onError.mock.calls[0][0] as Error).name).toBe('QuotaExceededError');
+        expect(onError.mock.calls[0][1]).toBe('quota');
+        expect(fakeSourceBuffer.appended).toEqual([]);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+  });
+
   describe('stale seek / load-generation cancellation', () => {
     it('drops queued appends when the load generation is reset (new source/load)', async () => {
       const { fakeSourceBuffer, pipe } = createHarness();
@@ -724,6 +781,28 @@ describe('MseAppendPipe', () => {
       expect(released).toBe(true);
       await gate;
       expect(fakeSourceBuffer.appended.map((a) => a[0])).toEqual([9]);
+    });
+
+    it('a persistent quota failure still escalates as the quota class when capacity is bound', async () => {
+      vi.useFakeTimers();
+      try {
+        const { fakeSourceBuffer, onError, pipe } = createHarness({ capacityBytes: 48 });
+        // Nothing behind the playhead can ever be evicted: the quota retries
+        // exhaust and the failure must escalate with the `quota` kind, and the
+        // active capacity bound must not fold that class into the generic
+        // append/decode class.
+        fakeSourceBuffer.ranges = [[0, 120]];
+        fakeSourceBuffer.failNextAppendWithThrow = new DOMException('quota', 'QuotaExceededError');
+
+        pipe.append(bytes(7));
+        await vi.advanceTimersByTimeAsync(10_000);
+
+        expect(onError).toHaveBeenCalledTimes(1);
+        expect(onError.mock.calls[0][1]).toBe('quota');
+        expect(fakeSourceBuffer.appended).toEqual([]);
+      } finally {
+        vi.useRealTimers();
+      }
     });
   });
 
