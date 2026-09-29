@@ -57,6 +57,14 @@
  *    again (or its repositioning seek resolves): a reloaded load that merely
  *    re-opens and fails again is the same broken object consuming the same
  *    attempts.
+ *  - A consecutive in-session churn guard sits beside the shared budget: no
+ *    more than `MAX_CONSECUTIVE_AUTO_RECOVERIES` automatic restarts while
+ *    failures keep recurring within `AUTO_RECOVERY_STABLE_RESET_MS`. Once
+ *    saturated, the next automatic decode/native failure surfaces instead of
+ *    restarting, so a flappy load, failing and being repaired (and briefly
+ *    playing) within the session, cannot churn an endlessly restored budget,
+ *    while genuinely sparse recoveries, each followed by sustained stable
+ *    playback, reset the session and keep being repaired.
  *  - A fresh source, a re-attach, or an explicit load() drops all recovery
  *    state; a re-attach keeps the playback choice.
  */
@@ -78,6 +86,25 @@ interface HostPlaybackService {
 }
 
 export const MAX_RECOVERY_ATTEMPTS = 2;
+
+// Consecutive in-session churn guard. The ordinary recovery budget restores
+// every time a recovery load genuinely plays again, so a flappy object that
+// keeps failing, being repaired, and briefly playing could otherwise be
+// auto-recovered without end. A fixed wall-clock window cannot bound that:
+// the gap between two incidents is a full recovery cycle (reload, genuine
+// playback, death), so each incident ages out of any comparable window before
+// the next one arrives. These values instead bound a *session*: no more than
+// `MAX_CONSECUTIVE_AUTO_RECOVERIES` automatic restarts while failures keep
+// recurring inside `AUTO_RECOVERY_STABLE_RESET_MS`; once saturated, the next
+// automatic-restart-eligible failure surfaces instead of spending yet another
+// restored budget. A session only ends when a recovery is followed by
+// sustained stable playback (no automatic failure for
+// `AUTO_RECOVERY_STABLE_RESET_MS`), or a fresh source drops all state (see
+// `resetAll`). Genuinely sparse recoveries, each followed by that long,
+// healthy stretch, reset the session and keep being repaired.
+export const MAX_CONSECUTIVE_AUTO_RECOVERIES = 3;
+/** Sustained stable playback (ms) that resets an in-session churn streak. */
+export const AUTO_RECOVERY_STABLE_RESET_MS = 5 * 60_000;
 
 /**
  * Sentinel for a recovery restart's `wantsPlay` signal: resolve the boolean
@@ -202,6 +229,10 @@ export type HostPlaybackEvent =
   | { type: typeof hostPlaybackEvent.sourceSet };
 export interface HostPlaybackState {
   attempt: number;
+  /** Consecutive automatic restarts inside the current recovery session (see `churnSaturated`). */
+  autoRecoveryStreak: number;
+  /** Timestamp (ms) of the most recent automatic restart; null before the first one. */
+  lastAutoIncidentAt: null | number;
   preference: PlaybackPreference;
   recovery: null | RecoveryRequest;
   repairOwed: null | RepairOwed;
@@ -225,6 +256,8 @@ type MachineEvent = HostPlaybackEvent;
 function initialContext(): HostPlaybackState {
   return {
     attempt: 0,
+    autoRecoveryStreak: 0,
+    lastAutoIncidentAt: null,
     preference: playbackPreference['never-started'],
     recovery: null,
     repairOwed: null,
@@ -269,6 +302,24 @@ const isDecodeFailure = (_ctx: HostPlaybackState, event: MachineEvent): boolean 
   event.type === hostPlaybackEvent.loadFailed && event.kind === hostReportKind.decode;
 const isTerminalFailure = (_ctx: HostPlaybackState, event: MachineEvent): boolean =>
   event.type === hostPlaybackEvent.loadFailed && event.kind !== hostReportKind.decode;
+/**
+ * The consecutive in-session incident count the next automatic restart would
+ * carry: it restarts at 1 when this is the first incident or the previous one
+ * was followed by sustained stable playback (`AUTO_RECOVERY_STABLE_RESET_MS`
+ * with no other automatic failure), otherwise it continues the running session
+ * count.
+ */
+const nextAutoIncidentStreak = (ctx: HostPlaybackState, nowMs: number): number =>
+  ctx.lastAutoIncidentAt === null || nowMs - ctx.lastAutoIncidentAt > AUTO_RECOVERY_STABLE_RESET_MS
+    ? 1
+    : ctx.autoRecoveryStreak + 1;
+// True when the next automatic incident would exceed the consecutive in-session
+// budget: a flappy load, failing and being repaired (and briefly playing)
+// within the session, surfaces instead of auto-recovering on an endlessly
+// restored budget, while an incident that follows sustained stable playback
+// resets the session and keeps being repaired.
+const churnSaturated = (ctx: HostPlaybackState): boolean =>
+  nextAutoIncidentStreak(ctx, Date.now()) > MAX_CONSECUTIVE_AUTO_RECOVERIES;
 
 /** ANDs a state predicate onto the decode-failure recognition guard. */
 const decodeFailureWhen =
@@ -367,14 +418,21 @@ function activeLoadTransitions(
     };
   });
 
-  const recordRestart = (reason: RecoveryReason, wantsPlay: boolean | typeof AS_PREFERENCE) =>
+  // `incident` marks an AUTOMATIC recovery restart for the recovery-session
+  // churn ledger (decode / native failures of a broken load); user-initiated
+  // repairs (consumeOwedOnPlay/OnSeek) and user far-seek restarts are never
+  // incidents.
+  const recordRestart = (reason: RecoveryReason, wantsPlay: boolean | typeof AS_PREFERENCE, incident = false) =>
     reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
       const resumeSeconds = resumeOf(event);
       const play = wantsPlay === AS_PREFERENCE ? ctx.preference === playbackPreference.playing : wantsPlay;
       decisions.push({ kind: hostDecisionKind.restartSource, reason, resumeSeconds, wantsPlay: play });
+      const nowMs = incident ? Date.now() : 0;
       return {
         ...ctx,
         attempt: ctx.attempt + 1,
+        autoRecoveryStreak: incident ? nextAutoIncidentStreak(ctx, nowMs) : ctx.autoRecoveryStreak,
+        lastAutoIncidentAt: incident ? nowMs : ctx.lastAutoIncidentAt,
         recovery: { reason, resumeSeconds, wantsPlay: play },
         repairOwed: null,
       };
@@ -469,9 +527,15 @@ function activeLoadTransitions(
     ),
     transition(
       hostPlaybackEvent.loadFailed,
+      hostPlaybackState.failed,
+      guard(decodeFailureWhen(churnSaturated)),
+      recordExhausted(recoveryReason.decode, hostReportKind.decode),
+    ),
+    transition(
+      hostPlaybackEvent.loadFailed,
       hostPlaybackState.recovering,
       guard(decodeFailureWhen(canRetry)),
-      recordRestart(recoveryReason.decode, AS_PREFERENCE),
+      recordRestart(recoveryReason.decode, AS_PREFERENCE, true),
     ),
 
     // Native element failure from a dead/replaced resource: an already-owed
@@ -487,7 +551,8 @@ function activeLoadTransitions(
       guard(spentBudget),
       recordExhausted(recoveryReason.native, hostReportKind.decode),
     ),
-    transition(hostPlaybackEvent.nativeError, hostPlaybackState.recovering, recordRestart(recoveryReason.native, AS_PREFERENCE)),
+    transition(hostPlaybackEvent.nativeError, hostPlaybackState.failed, guard(churnSaturated), recordExhausted(recoveryReason.native, hostReportKind.decode)),
+    transition(hostPlaybackEvent.nativeError, hostPlaybackState.recovering, recordRestart(recoveryReason.native, AS_PREFERENCE, true)),
   ];
 }
 
@@ -592,14 +657,21 @@ function failedTransitions(decisions: HostDecision[]): Transition<string>[] {
 function pausePendingTransitions(decisions: HostDecision[]): Transition<string>[] {
   // A restart inside the window records the retained (playing) choice, so an
   // out-of-window scrub preserves playback.
-  const recordRestart = (reason: RecoveryReason, wantsPlay: boolean | typeof AS_PREFERENCE) =>
+  // `incident` marks an AUTOMATIC recovery restart for the recovery-session
+  // churn ledger (decode / native failures of a broken load); user-initiated
+  // repairs (consumeOwedOnPlay/OnSeek) and user far-seek restarts are never
+  // incidents.
+  const recordRestart = (reason: RecoveryReason, wantsPlay: boolean | typeof AS_PREFERENCE, incident = false) =>
     reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
       const resumeSeconds = resumeOf(event);
       const play = wantsPlay === AS_PREFERENCE ? ctx.preference === playbackPreference.playing : wantsPlay;
       decisions.push({ kind: hostDecisionKind.restartSource, reason, resumeSeconds, wantsPlay: play });
+      const nowMs = incident ? Date.now() : 0;
       return {
         ...ctx,
         attempt: ctx.attempt + 1,
+        autoRecoveryStreak: incident ? nextAutoIncidentStreak(ctx, nowMs) : ctx.autoRecoveryStreak,
+        lastAutoIncidentAt: incident ? nowMs : ctx.lastAutoIncidentAt,
         recovery: { reason, resumeSeconds, wantsPlay: play },
         repairOwed: null,
       };
@@ -676,7 +748,8 @@ function pausePendingTransitions(decisions: HostDecision[]): Transition<string>[
       guard(spentBudget),
       recordExhausted(recoveryReason.native, hostReportKind.decode),
     ),
-    transition(hostPlaybackEvent.nativeError, hostPlaybackState.recovering, recordRestart(recoveryReason.native, AS_PREFERENCE)),
+    transition(hostPlaybackEvent.nativeError, hostPlaybackState.failed, guard(churnSaturated), recordExhausted(recoveryReason.native, hostReportKind.decode)),
+    transition(hostPlaybackEvent.nativeError, hostPlaybackState.recovering, recordRestart(recoveryReason.native, AS_PREFERENCE, true)),
     transition(hostPlaybackEvent.loadFailed, hostPlaybackState.failed, guard(isTerminalFailure), recordFatal()),
     transition(
       hostPlaybackEvent.loadFailed,
@@ -686,23 +759,36 @@ function pausePendingTransitions(decisions: HostDecision[]): Transition<string>[
     ),
     transition(
       hostPlaybackEvent.loadFailed,
+      hostPlaybackState.failed,
+      guard(decodeFailureWhen(churnSaturated)),
+      recordExhausted(recoveryReason.decode, hostReportKind.decode),
+    ),
+    transition(
+      hostPlaybackEvent.loadFailed,
       hostPlaybackState.recovering,
       guard(decodeFailureWhen(canRetry)),
-      recordRestart(recoveryReason.decode, AS_PREFERENCE),
+      recordRestart(recoveryReason.decode, AS_PREFERENCE, true),
     ),
   ];
 }
 
 /** Transitions for the recovery-in-flight state. */
 function recoveringTransitions(decisions: HostDecision[]): Transition<string>[] {
-  const recordRestart = (reason: RecoveryReason, wantsPlay: boolean | typeof AS_PREFERENCE) =>
+  // `incident` marks an AUTOMATIC recovery restart for the recovery-session
+  // churn ledger (decode / native failures of a broken load); user-initiated
+  // repairs (consumeOwedOnPlay/OnSeek) and user far-seek restarts are never
+  // incidents.
+  const recordRestart = (reason: RecoveryReason, wantsPlay: boolean | typeof AS_PREFERENCE, incident = false) =>
     reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
       const resumeSeconds = resumeOf(event);
       const play = wantsPlay === AS_PREFERENCE ? ctx.preference === playbackPreference.playing : wantsPlay;
       decisions.push({ kind: hostDecisionKind.restartSource, reason, resumeSeconds, wantsPlay: play });
+      const nowMs = incident ? Date.now() : 0;
       return {
         ...ctx,
         attempt: ctx.attempt + 1,
+        autoRecoveryStreak: incident ? nextAutoIncidentStreak(ctx, nowMs) : ctx.autoRecoveryStreak,
+        lastAutoIncidentAt: incident ? nowMs : ctx.lastAutoIncidentAt,
         recovery: { reason, resumeSeconds, wantsPlay: play },
         repairOwed: null,
       };
@@ -782,9 +868,15 @@ function recoveringTransitions(decisions: HostDecision[]): Transition<string>[] 
     ),
     transition(
       hostPlaybackEvent.loadFailed,
+      hostPlaybackState.failed,
+      guard(decodeFailureWhen(churnSaturated)),
+      recordExhausted(recoveryReason.decode, hostReportKind.decode),
+    ),
+    transition(
+      hostPlaybackEvent.loadFailed,
       hostPlaybackState.recovering,
       guard(decodeFailureWhen(canRetry)),
-      recordRestart(recoveryReason.decode, AS_PREFERENCE),
+      recordRestart(recoveryReason.decode, AS_PREFERENCE, true),
     ),
   ];
 }

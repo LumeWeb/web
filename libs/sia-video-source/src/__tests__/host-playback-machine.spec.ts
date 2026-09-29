@@ -5,8 +5,9 @@
  * names may appear in the describe blocks; the individual tests name behavior
  * a user sees or an engineer relies on.
  */
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
+  type HostDecision,
   hostDecisionKind,
   hostPlaybackEvent,
   HostPlaybackMachine,
@@ -485,6 +486,112 @@ describe('a transient MSE append/quota failure (quota kind)', () => {
     expect(machine.current).toBe(hostPlaybackState.failed);
     expect(machine.attempt).toBe(0);
     expect(machine.repairOwed).toBeNull();
+  });
+});
+
+describe('the churn guard on repeating auto recovery incidents', () => {
+  it('stops auto-recovering a load that keeps failing-and-playing within a short burst', () => {
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+
+    // A flappy load: the recovery genuinely plays each time (so the ordinary
+    // budget restores), but the same incident keeps repeating within seconds.
+    // Each cycle is an automatic decode restart followed by a genuine play.
+    const fail = (): HostDecision[] =>
+      machine.send({ kind: hostReportKind.decode, resumeSeconds: 42.5, type: hostPlaybackEvent.loadFailed });
+    const recoverAndPlay = (): void => {
+      machine.send({ type: hostPlaybackEvent.sourceReady });
+      machine.send({ type: hostPlaybackEvent.recoverPlayed });
+    };
+
+    expect(fail().at(0)).toMatchObject({ kind: hostDecisionKind.restartSource });
+    recoverAndPlay();
+    expect(fail().at(0)).toMatchObject({ kind: hostDecisionKind.restartSource });
+    recoverAndPlay();
+    expect(fail().at(0)).toMatchObject({ kind: hostDecisionKind.restartSource });
+    recoverAndPlay();
+
+    // Within the session, the automatic recoveries exhaust: the next failure
+    // surfaces instead of spending yet another restored budget on the same
+    // broken object.
+    const exhausted = fail();
+    expect(exhausted).toEqual([{ error: hostReportKind.decode, kind: hostDecisionKind.reportError }]);
+    expect(machine.current).toBe(hostPlaybackState.failed);
+  });
+
+  it('bounds recurring automatic restarts spaced 50 to 51s apart (cadence regression)', () => {
+    vi.useFakeTimers();
+    try {
+      // Both an automatic decode restart and a native-element restart of the
+      // same broken load must stay bounded while the incidents recur on a
+      // recovery cycle inside the session reset, whatever cadence the cycle
+      // takes.
+      const triggers: ((machine: HostPlaybackMachine) => HostDecision[])[] = [
+        (machine) =>
+          machine.send({ kind: hostReportKind.decode, resumeSeconds: 42.5, type: hostPlaybackEvent.loadFailed }),
+        (machine) => machine.send({ resumeSeconds: 42.5, type: hostPlaybackEvent.nativeError }),
+      ];
+      // The cadence steps the test exercises: 50s and 51s apart.
+      const cadences = [50_000, 50_500, 51_000];
+
+      for (const cadenceMs of cadences) {
+        for (const trigger of triggers) {
+          const machine = readyMachine();
+          machine.send({ type: hostPlaybackEvent.play });
+          vi.setSystemTime(1_000_000);
+
+          const recoverAndPlay = (): void => {
+            machine.send({ type: hostPlaybackEvent.sourceReady });
+            machine.send({ type: hostPlaybackEvent.recoverPlayed });
+          };
+
+          // Three automatic recoveries at the cadence are allowed...
+          for (let cycle = 0; cycle < 3; cycle += 1) {
+            expect(trigger(machine).at(0)).toMatchObject({ kind: hostDecisionKind.restartSource });
+            recoverAndPlay();
+            vi.setSystemTime(1_000_000 + (cycle + 1) * cadenceMs);
+          }
+          // ...but the fourth, still inside the same sick session, surfaces
+          // instead of auto-recovering yet again. A sliding window shorter
+          // than the gap between incidents lets each one age out before the
+          // next arrives and could never bound this; a session that only
+          // resets after sustained stable playback must.
+          const exhausted = trigger(machine);
+          expect(exhausted).toEqual([{ error: hostReportKind.decode, kind: hostDecisionKind.reportError }]);
+          expect(machine.current).toBe(hostPlaybackState.failed);
+        }
+      }
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('keeps recovering genuinely sparse incidents that are each followed by sustained stable playback', () => {
+    vi.useFakeTimers();
+    try {
+      const machine = readyMachine();
+      machine.send({ type: hostPlaybackEvent.play });
+      vi.setSystemTime(1_000_000);
+
+      const cycles = (): boolean =>
+        machine.send({ kind: hostReportKind.decode, resumeSeconds: 42.5, type: hostPlaybackEvent.loadFailed }).some(
+          (decision) => decision.kind === hostDecisionKind.restartSource,
+        );
+
+      // Genuinely sparse recoveries, each followed by a healthy stretch of
+      // stable playback far beyond the session reset, must keep being
+      // repaired: every incident starts a fresh session of one, so the
+      // budget never exhausts no matter how many sparse events arrive.
+      for (let index = 0; index < 4; index += 1) {
+        expect(cycles()).toBe(true);
+        machine.send({ type: hostPlaybackEvent.sourceReady });
+        machine.send({ type: hostPlaybackEvent.recoverPlayed });
+        vi.setSystemTime(1_000_000 + (index + 1) * 10 * 60_000);
+      }
+      expect(cycles()).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 
