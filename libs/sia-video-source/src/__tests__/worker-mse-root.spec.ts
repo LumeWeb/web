@@ -11,7 +11,7 @@
  * attachment to a video element), so a real `MediaSourceHandle` is not
  * constructible in a unit test page.
  */
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { DEFAULT_FMP4_MIME, type WorkerToMainMessage, WorkerToMainMessageType } from '../protocol.ts';
 import { createWorkerMseRoot, type WorkerMseRoot } from '../session/worker-mse-root.ts';
 
@@ -267,5 +267,37 @@ describe('createWorkerMseRoot (worker MSE composition root)', () => {
     expect(errors).toHaveLength(1);
     expect(errors[0].requestId).toBe(9);
     expect(errors[0].error).toBeInstanceOf(Error);
+  });
+
+  it('threads the transient quota classification through onError with the active request id', async () => {
+    vi.useFakeTimers();
+    try {
+      const failures: { error: unknown; kind: unknown; requestId: null | number }[] = [];
+      const mediaSource = new FakeMediaSource();
+      mediaSource.addSourceBuffer = () => {
+        const sourceBuffer = new FakeSourceBuffer();
+        sourceBuffer.appendBuffer = () => {
+          throw new DOMException('quota', 'QuotaExceededError');
+        };
+        return sourceBuffer;
+      };
+      const root = rootOf(mediaSource, {
+        onError: (requestId, error, kind) => failures.push({ error, kind, requestId }),
+      });
+
+      const sink = root.createSink({ durationSeconds: 90, mime: DEFAULT_FMP4_MIME, requestId: 9 });
+      mediaSource.open();
+      sink.append({ bytes: new Uint8Array(4).fill(1), kind: 'init' });
+      // Nothing is evictable, so the pipe's bounded quota retries all fail and
+      // the failure escalates with the `quota` kind, which the host must not
+      // mistake for a decode contract failure.
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      expect(failures).toHaveLength(1);
+      expect(failures[0].requestId).toBe(9);
+      expect(failures[0].kind).toBe('quota');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

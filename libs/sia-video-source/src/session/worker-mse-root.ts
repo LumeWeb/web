@@ -23,7 +23,13 @@
  */
 
 import { constructMseMediaSource } from '../capabilities/mse-runtime.ts';
-import { DEFAULT_MSE_AHEAD_TARGET_SECONDS, DEFAULT_MSE_APPEND_CAPACITY_BYTES, MseAppendPipe } from '../mse-pipe.ts';
+import {
+  DEFAULT_MSE_AHEAD_TARGET_SECONDS,
+  DEFAULT_MSE_APPEND_CAPACITY_BYTES,
+  mseAppendFailureKind,
+  type MseAppendFailureKind,
+  MseAppendPipe,
+} from '../mse-pipe.ts';
 import { type RequestId, workerLogEventName, workerLogLevel, type WorkerLogLevel, WorkerToMainMessageType } from '../protocol.ts';
 import { MseAdapter, type WorkerMseSinkFactoryDeps } from '../sink/mse-adapter.ts';
 import type { AppendSink } from '../sink/append-sink.ts';
@@ -82,10 +88,13 @@ export interface WorkerMseRootOptions {
   createMediaSource?: () => MediaSource;
   /**
    * Fatal MSE append failure reporter; the active load's request id is
-   * supplied so the caller can post a request-scoped decode ERROR. Called at
-   * most once per pipe lifetime (the pipe suppresses repeats).
+   * supplied so the caller can post a request-scoped ERROR, and the pipe's
+   * failure classification (`mseAppendFailureKind`) rides along so the caller
+   * can map a transient quota (memory pressure) differently from the generic
+   * decode/append class. Called at most once per pipe lifetime (the pipe
+   * suppresses repeats).
    */
-  onError?: (requestId: null | RequestId, error: unknown) => void;
+  onError?: (requestId: null | RequestId, error: unknown, kind: MseAppendFailureKind) => void;
   /**
    * Optional milestone hook in the `onError` style: receives worker MSE open
    * facts — `session.mse-open` (info) once the per-load MediaSource opens and
@@ -122,8 +131,12 @@ export function createWorkerMseRoot(options: WorkerMseRootOptions): WorkerMseRoo
   // the dead pipeline held — same immediate teardown as an abandoned load, so
   // an errored pipeline never leaves a stale handle waiting for a later
   // DETACH/supersede to release it.
-  function reportFatal(failureRequestId: null | RequestId, error: unknown): void {
-    options.onError?.(failureRequestId, error);
+  function reportFatal(
+    failureRequestId: null | RequestId,
+    error: unknown,
+    kind: MseAppendFailureKind = mseAppendFailureKind.append,
+  ): void {
+    options.onError?.(failureRequestId, error, kind);
     teardown();
   }
 
@@ -147,7 +160,7 @@ export function createWorkerMseRoot(options: WorkerMseRootOptions): WorkerMseRoo
       const level = name === 'mse.evict' ? workerLogLevel.debug : workerLogLevel.warn;
       options.onLog?.(name, level, requestId, detail);
     },
-    onError: (error) => reportFatal(requestId, error),
+    onError: (error, kind) => reportFatal(requestId, error, kind),
   };
 
   // Creates the worker-side SourceBuffer once the MediaSource opens, deferring

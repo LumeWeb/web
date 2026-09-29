@@ -15,6 +15,7 @@ import {
   workerLogLevel,
   WorkerToMainMessageType,
 } from './protocol.ts';
+import { mseAppendFailureKind } from './mse-pipe.ts';
 import { createSiaWorkerComposition, createWorkerMseRoot, emitLog, type WorkerLogSink } from './session/sia-composition.ts';
 import { createSessionHandshake } from './session/session-coordinator.ts';
 import {
@@ -110,11 +111,16 @@ export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = 
   const workerMseRoot = createWorkerMseRoot({
     backBufferSeconds: MSE_BACK_BUFFER_SECONDS,
     createMediaSource: options.createMediaSource,
-    onError: (requestId, error) => {
+    onError: (requestId, error, kind) => {
       if (requestId === null) return;
       post({
         context: error instanceof Error ? error.message.slice(0, 240) : String(error).slice(0, 240),
-        kind: workerErrorCode.decode,
+        // A transient quota refusal (memory pressure the pipe's bounded
+        // eviction retries could not clear) is reported as its honest `quota`
+        // kind, not the `decode` kind; the host must not treat memory
+        // pressure as a decode contract failure.
+        kind:
+          kind === mseAppendFailureKind.quota ? workerErrorCode.quota : workerErrorCode.decode,
         requestId,
         type: WorkerToMainMessageType.ERROR,
       });

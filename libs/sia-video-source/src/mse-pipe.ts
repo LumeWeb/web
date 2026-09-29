@@ -12,7 +12,10 @@
  *   SourceBuffer's async `updateend` / `error` contract),
  * - back-buffer eviction behind the playhead (`backBufferSeconds`), retried
  *   after a `QuotaExceededError` so the failing head is re-appended once
- *   memory is freed,
+ *   memory is freed; a transient quota (an in-flight update still settling,
+ *   or no immediately evictable range) is waited out across a bounded number
+ *   of re-checks before it is reported as the `quota` class rather than the
+ *   generic `append`/decode class,
  * - stale-load-generation cancellation (`reset()`): appends queued for a
  *   superseded load die with their load generation, so a torn-down pipeline
  *   can never append into the next source's buffer,
@@ -99,11 +102,37 @@ export interface MseAppendPipeOptions {
   onDiag?(name: string, detail: Readonly<Record<string, unknown>>): void;
   /**
    * Fatal append failure. Invoked at most once per pipe lifetime (a SourceBuffer
-   * `error` event or a synchronous non-quota append throw). After it fires,
-   * further appends and end-of-stream are suppressed.
+   * `error` event, a synchronous non-quota append throw, or a quota failure the
+   * bounded eviction retries could not recover). After it fires, further
+   * appends and end-of-stream are suppressed. The second argument classifies the
+   * failure so the owner can thread a meaningful MSE failure kind to its host:
+   * `mseAppendFailureKind.quota` for an exhausted `QuotaExceededError`,
+   * `mseAppendFailureKind.append` for every other fatal append failure.
    */
-  onError(error: unknown): void;
+  onError(error: unknown, kind: MseAppendFailureKind): void;
 }
+
+/** The MSE append failure classes the pipe can distinguish (see `onError`). */
+export const mseAppendFailureKind = {
+  /** Any fatal append/`error`-event failure that is not a quota refusal. */
+  append: 'append',
+  /** A `QuotaExceededError` the bounded eviction wait/retry could not recover. */
+  quota: 'quota',
+} as const;
+
+/** A fatal MSE append failure class; see {@link mseAppendFailureKind}. */
+export type MseAppendFailureKind = (typeof mseAppendFailureKind)[keyof typeof mseAppendFailureKind];
+
+// Bounded quota-recovery budget: after a `QuotaExceededError`, the pipe waits
+// for an in-flight SourceBuffer update to settle and re-checks the back-buffer
+// for an evictable range up to this many times (with a short turn between
+// checks) before treating the quota as persistent and escalating through
+// `onError`. The retries give a transient quota (nothing evictable yet, or the
+// browser freeing memory asynchronously) a chance to clear without collapsing
+// into a fatal decode failure; the bound keeps a genuinely exhausted buffer
+// from spinning forever.
+export const MAX_QUOTA_RECOVERY_ATTEMPTS = 2;
+export const QUOTA_RETRY_WAIT_MS = 50;
 
 /**
  * Default secondary transient-backlog bound (`capacityBytes`) the worker-mode
@@ -466,7 +495,7 @@ export class MseAppendPipe {
     if (ahead === null || ahead < this.#aheadTargetSeconds) this.#releaseAheadWaiters();
   }
 
-  #fail(error: unknown): void {
+  #fail(error: unknown, kind: MseAppendFailureKind = mseAppendFailureKind.append): void {
     if (this.#errorReported || this.#stopped || this.#failed) return;
     this.#errorReported = true;
     this.#failed = true;
@@ -478,7 +507,7 @@ export class MseAppendPipe {
     // never hang awaiting room on a dead sink.
     this.#releaseAheadWaiters();
     this.#eosRequested = false;
-    this.#options.onError(error);
+    this.#options.onError(error, kind);
   }
 
   #kick(): void {
@@ -560,13 +589,16 @@ export class MseAppendPipe {
         } catch (error) {
           if (this.#stopped || this.#loadGeneration !== loadGeneration) return;
           if (isQuotaExceeded(error)) {
-            // Free the back-buffer window, then retry the SAME head (it was
-            // never dequeued). If nothing could be freed the pipeline cannot
-            // recover — report once and stop instead of looping forever.
-            const evicted = await this.evictBackBuffer();
+            // Transient quota: wait for an in-flight update to settle and free
+            // the back-buffer window across a bounded number of re-checks, then
+            // retry the SAME head (it was never dequeued). Only once the
+            // eviction retries are spent does the pipeline report the failure,
+            // classified as the quota (transient) class so the host does not
+            // mistake memory pressure for a real decode contract failure.
+            const recovered = await this.#recoverQuota(sourceBuffer);
             if (this.#stopped || this.#loadGeneration !== loadGeneration) return;
-            if (!evicted) {
-              this.#fail(error);
+            if (!recovered) {
+              this.#fail(error, mseAppendFailureKind.quota);
               return;
             }
             continue;
@@ -601,6 +633,30 @@ export class MseAppendPipe {
         void this.#pump();
       }
     }
+  }
+
+  /**
+   * Tries to free memory for a `QuotaExceededError` without escalating. First
+   * any in-flight SourceBuffer update is allowed to settle (a completing
+   * remove/append can free memory, and eviction cannot run mid-update), then
+   * the back-buffer is evicted. If nothing is immediately evictable (the
+   * buffer is still updating, or the eviction boundary has not reached a range
+   * yet), the pipe yields a short turn (letting the browser free memory or the
+   * playhead advance, which moves the boundary) and re-checks, a bounded
+   * number of times. Resolves `true` once an eviction freed a window (the
+   * caller retries the same head), `false` once the bound is spent (the
+   * caller escalates).
+   */
+  async #recoverQuota(sourceBuffer: SourceBuffer): Promise<boolean> {
+    if (sourceBuffer.updating) await waitForUpdateEnd(sourceBuffer);
+    for (let attempt = 0; attempt < MAX_QUOTA_RECOVERY_ATTEMPTS; attempt += 1) {
+      if (await this.evictBackBuffer()) return true;
+      // Nothing evictable yet: yield a turn, then give a settling in-flight
+      // update its chance before the next eviction re-check.
+      await sleep(QUOTA_RETRY_WAIT_MS);
+      if (sourceBuffer.updating) await waitForUpdateEnd(sourceBuffer);
+    }
+    return false;
   }
 
   /**
@@ -648,6 +704,11 @@ function isQuotaExceeded(error: unknown): boolean {
 /** Keeps finite positive backpressure bounds; all other values disable the wait. */
 function normalizeBound(value: number | undefined): number | undefined {
   return value !== undefined && Number.isFinite(value) && value > 0 ? value : undefined;
+}
+
+/** Short bounded yield for the quota-recovery retry loop. */
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**

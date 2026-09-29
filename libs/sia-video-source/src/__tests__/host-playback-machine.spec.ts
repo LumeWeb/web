@@ -422,6 +422,72 @@ describe('out-of-window seek recovery', () => {
   });
 });
 
+describe('a transient MSE append/quota failure (quota kind)', () => {
+  it('is terminal while playing: surfaces immediately, never a decode-style restart or budget spend', () => {
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+    expect(machine.attempt).toBe(0);
+
+    // A quota refusal (memory pressure the pipe's bounded eviction retries
+    // could not clear) must not collapse into the decode recovery: no
+    // reposition-and-resume reload, and no recovery budget consumed.
+    const decisions = machine.send({
+      kind: hostReportKind.quota,
+      resumeSeconds: 42.5,
+      type: hostPlaybackEvent.loadFailed,
+    });
+    expect(decisions).toEqual([{ error: hostReportKind.quota, kind: hostDecisionKind.reportError }]);
+    expect(machine.current).toBe(hostPlaybackState.failed);
+    expect(machine.attempt).toBe(0);
+
+    // Quota leaves nothing owed (a terminal, non-repairable incident like an
+    // unsupported container): an explicit play cannot conjure a fresh load.
+    expect(machine.send({ type: hostPlaybackEvent.play })).toEqual([]);
+    expect(machine.current).toBe(hostPlaybackState.failed);
+
+    // A fresh source restarts everything; a genuine decode failure then spends
+    // the budget from zero, proving quota never consumed a decode attempt.
+    machine.send({ type: hostPlaybackEvent.sourceSet });
+    machine.send({ type: hostPlaybackEvent.sourceReady });
+    machine.send({ type: hostPlaybackEvent.play });
+    expect(machine.attempt).toBe(0);
+    const restart = machine.send({
+      kind: hostReportKind.decode,
+      resumeSeconds: 42.5,
+      type: hostPlaybackEvent.loadFailed,
+    });
+    expect(restart).toEqual([
+      {
+        kind: hostDecisionKind.restartSource,
+        reason: recoveryReason.decode,
+        resumeSeconds: 42.5,
+        wantsPlay: true,
+      },
+    ]);
+    expect(machine.attempt).toBe(1);
+  });
+
+  it('is terminal even on a paused or never-started source (unlike decode, which defers)', () => {
+    // Paused: a decode failure would defer a repair. A quota refusal stays
+    // terminal: there is no load to repair behind a paused user, and the pipe
+    // already exhausted its own memory recovery.
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+    machine.send({ type: hostPlaybackEvent.pause });
+    machine.send({ type: hostPlaybackEvent.pauseConfirmed });
+
+    const decisions = machine.send({
+      kind: hostReportKind.quota,
+      resumeSeconds: 12.5,
+      type: hostPlaybackEvent.loadFailed,
+    });
+    expect(decisions).toEqual([{ error: hostReportKind.quota, kind: hostDecisionKind.reportError }]);
+    expect(machine.current).toBe(hostPlaybackState.failed);
+    expect(machine.attempt).toBe(0);
+    expect(machine.repairOwed).toBeNull();
+  });
+});
+
 describe('transport failure', () => {
   it('surfaces a network error without reloading, then a fresh source starts on explicit play', () => {
     const machine = readyMachine();
