@@ -1010,6 +1010,47 @@ function recoveringTransitions(decisions: HostDecision[]): Transition<string>[] 
       };
     });
 
+  // An explicit play while a plain repair is owed (e.g. deferred by a decode
+  // failure on a never-started source in recovering): restart from the owed
+  // position with playback, spending one attempt.
+  const consumeOwedOnPlay = reduce<HostPlaybackState, MachineEvent>((ctx) => {
+    const owed = ctx.repairOwed;
+    if (!owed) return ctx;
+    decisions.push({
+      kind: hostDecisionKind.restartSource,
+      reason: owed.reason,
+      resumeSeconds: owed.seconds,
+      wantsPlay: true,
+    });
+    return {
+      ...ctx,
+      attempt: ctx.attempt + 1,
+      preference: playbackPreference.playing,
+      recovery: { reason: owed.reason, resumeSeconds: owed.seconds, wantsPlay: true },
+      repairOwed: null,
+    };
+  });
+
+  // A play on a repair parked for the visibility return: the restart stays
+  // owed to the visibility return, not to the play, because the worker may
+  // be throttled. The action only re-records the parked repair and flips
+  // the preference.
+  const reParkOwed = reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
+    const owed = ctx.repairOwed;
+    if (!owed || !owed.resumeOnVisible) return ctx;
+    const seconds = event.type === hostPlaybackEvent.play ? owed.seconds : resumeOf(event);
+    const wantsPlay =
+      event.type === hostPlaybackEvent.play
+        ? true
+        : ctx.preference === playbackPreference.playing;
+    decisions.push({ kind: hostDecisionKind.deferRepair, reason: owed.reason, resumeSeconds: seconds });
+    return {
+      ...ctx,
+      preference: event.type === hostPlaybackEvent.play ? playbackPreference.playing : ctx.preference,
+      repairOwed: { reason: owed.reason, resumeOnVisible: true, seconds, wantsPlay },
+    };
+  });
+
   const recordDefer = (reason: RecoveryReason) =>
     reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
       const resumeSeconds = resumeOf(event);
@@ -1088,6 +1129,11 @@ function recoveringTransitions(decisions: HostDecision[]): Transition<string>[] 
     // never user input: pause, ended, seeking, and native errors are ignored
     // here. A watchdog stall, however, is not incidental: it re-enters the
     // retry-capped seek restart (or reports) exactly like the first attempt.
+    // A play on a hidden-parked repair re-parks it (the restart stays owed to
+    // the visibility return); a play on a plain repair consumes it (the
+    // explicit user action owns it); a play with nothing owed is engine noise.
+    transition(hostPlaybackEvent.play, hostPlaybackState.recovering, guard(isHiddenParked), reParkOwed),
+    transition(hostPlaybackEvent.play, hostPlaybackState.recovering, guard(isOwed), consumeOwedOnPlay),
     transition(hostPlaybackEvent.play, hostPlaybackState.recovering),
     transition(hostPlaybackEvent.pause, hostPlaybackState.recovering),
     transition(hostPlaybackEvent.seek, hostPlaybackState.recovering),
