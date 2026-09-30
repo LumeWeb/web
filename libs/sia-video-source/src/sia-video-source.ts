@@ -603,6 +603,12 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
   #src = '';
 
+  // True when the document-level `visibilitychange` listener is registered
+  // (guarded: only in a DOM environment, i.e. a real page, never in a bare
+  // node test). The document's visibility is the worker-throttle signal the
+  // machine uses to defer automatic recovery restarts.
+  #visibilityListenerAttached = false;
+
   #worker: null | Worker = null;
 
   // Highest buffered end the worker reported (`PROGRESS`) for the active load;
@@ -626,6 +632,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#logger = options.logger ?? createConsoleLogger();
     this.#mimeType = options.mimeType;
     this.#workerMse = options.workerMse;
+    // The machine must start knowing whether the document is hidden (a load
+    // started on a hidden tab must not spend retry budget on throttled
+    // workers), and must keep learning as visibility changes.
+    this.#syncVisibility();
   }
 
   /**
@@ -748,6 +758,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#resetSourceInfo();
     this.#cancelPauseConfirm();
     this.#cancelSeekWatchdog();
+    // A destroyed host must stop reacting to the document's visibility: no
+    // pending automatic recovery may fire on a dead machine.
+    this.#teardownVisibilityListener();
     super.destroy();
   }
 
@@ -1767,6 +1780,21 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     });
   };
 
+  // Document `visibilitychange`: forwards the current visibility to the
+  // machine. Becoming visible can also consume a parked automatic recovery,
+  // whose restart decision `#applyDecisions` performs like any other.
+  #onVisibilityChange = (): void => {
+    if (this.#destroyed) return;
+    const hidden = typeof document === 'undefined' || document.visibilityState === 'hidden';
+    this.#applyDecisions(
+      this.#machine.send({
+        type: hidden
+          ? hostPlaybackEvent.visibilityHidden
+          : hostPlaybackEvent.visibilityVisible,
+      }),
+    );
+  };
+
   // A worker isolate crash or top-level error never arrives as a protocol
   // message, so it is surfaced only here — logged, never thrown; the worker
   // is left for the existing teardown paths to reap.
@@ -2111,6 +2139,25 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#post(hello);
   }
 
+  // Syncs the machine to the CURRENT document visibility (used at construction,
+  // so a load that starts on an already-hidden document defers its first
+  // automatic restart until the document is visible). Also registers the
+  // `visibilitychange` listener once for the host's lifetime (attached or not),
+  // so later visibility changes keep the machine in sync.
+  #syncVisibility(): void {
+    if (typeof document === 'undefined' || this.#visibilityListenerAttached) return;
+    const hidden = document.visibilityState === 'hidden';
+    this.#applyDecisions(
+      this.#machine.send({
+        type: hidden
+          ? hostPlaybackEvent.visibilityHidden
+          : hostPlaybackEvent.visibilityVisible,
+      }),
+    );
+    document.addEventListener('visibilitychange', this.#onVisibilityChange);
+    this.#visibilityListenerAttached = true;
+  }
+
   #teardownMainThreadMse(): void {
     // Permanently stop the shared pipe: the whole MediaSource is being
     // discarded, so nothing further may append, evict, or end through it.
@@ -2122,6 +2169,12 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     }
     this.#mediaSource = null;
     this.#sourceBuffer = null;
+  }
+
+  #teardownVisibilityListener(): void {
+    if (!this.#visibilityListenerAttached) return;
+    document.removeEventListener('visibilitychange', this.#onVisibilityChange);
+    this.#visibilityListenerAttached = false;
   }
 }
 

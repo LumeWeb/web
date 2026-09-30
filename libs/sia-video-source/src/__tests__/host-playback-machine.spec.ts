@@ -793,3 +793,164 @@ describe('a pause that starts a seek is provisional, not a user stop', () => {
     expect(machine.preference).toBe(playbackPreference.paused);
   });
 });
+
+describe('document visibility deferring automatic recovery', () => {
+  it('tracks document visibility from the visibility events', () => {
+    const machine = readyMachine();
+    expect(machine.visible).toBe(true);
+    machine.send({ type: hostPlaybackEvent.visibilityHidden });
+    expect(machine.visible).toBe(false);
+    machine.send({ type: hostPlaybackEvent.visibilityVisible });
+    expect(machine.visible).toBe(true);
+  });
+
+  it('defers a playing decode recovery while hidden and spends no budget; visibility returning consumes it once', () => {
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+    machine.send({ type: hostPlaybackEvent.visibilityHidden });
+
+    const decisions = machine.send({
+      kind: hostReportKind.decode,
+      resumeSeconds: 42.5,
+      type: hostPlaybackEvent.loadFailed,
+    });
+    // No restart while the worker may be throttled: the repair is recorded and
+    // the budget is untouched.
+    expect(decisions).toEqual([
+      { kind: hostDecisionKind.deferRepair, reason: recoveryReason.decode, resumeSeconds: 42.5 },
+    ]);
+    expect(machine.current).toBe(hostPlaybackState.ready);
+    expect(machine.attempt).toBe(0);
+    expect(machine.repairOwed).toEqual({
+      reason: recoveryReason.decode,
+      resumeOnVisible: true,
+      seconds: 42.5,
+      wantsPlay: true,
+    });
+
+    // Visibility returns: the automatic recovery is consumed exactly once.
+    const visibleDecisions = machine.send({ type: hostPlaybackEvent.visibilityVisible });
+    expect(visibleDecisions).toEqual([
+      {
+        kind: hostDecisionKind.restartSource,
+        reason: recoveryReason.decode,
+        resumeSeconds: 42.5,
+        wantsPlay: true,
+      },
+    ]);
+    expect(machine.current).toBe(hostPlaybackState.recovering);
+    expect(machine.attempt).toBe(1);
+    expect(machine.repairOwed).toBeNull();
+
+    // A repeated visibility event must not restart a second time.
+    expect(machine.send({ type: hostPlaybackEvent.visibilityVisible })).toEqual([]);
+  });
+
+  it('does not consume a user-paused repair when visibility returns', () => {
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+    machine.send({ type: hostPlaybackEvent.pause });
+    machine.send({ type: hostPlaybackEvent.pauseConfirmed });
+    machine.send({ kind: hostReportKind.decode, resumeSeconds: 12.5, type: hostPlaybackEvent.loadFailed });
+    expect(machine.repairOwed).toEqual({ reason: recoveryReason.decode, seconds: 12.5 });
+
+    // The paused user's repair is not an automatic recovery: visibility
+    // returning must leave it parked for the explicit play/seek that owns it.
+    expect(machine.send({ type: hostPlaybackEvent.visibilityVisible })).toEqual([]);
+    expect(machine.repairOwed).toEqual({ reason: recoveryReason.decode, seconds: 12.5 });
+    expect(machine.current).toBe(hostPlaybackState.ready);
+  });
+
+  it('repeated hidden decode failures never spend budget and one visibility consumes the latest repair only', () => {
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+    machine.send({ type: hostPlaybackEvent.visibilityHidden });
+
+    machine.send({ kind: hostReportKind.decode, resumeSeconds: 1, type: hostPlaybackEvent.loadFailed });
+    expect(machine.attempt).toBe(0);
+    machine.send({ kind: hostReportKind.decode, resumeSeconds: 2, type: hostPlaybackEvent.loadFailed });
+    expect(machine.attempt).toBe(0);
+    expect(machine.repairOwed?.seconds).toBe(2);
+
+    // Exactly one consume on visible.
+    machine.send({ type: hostPlaybackEvent.visibilityVisible });
+    expect(machine.attempt).toBe(1);
+    expect(machine.current).toBe(hostPlaybackState.recovering);
+    expect(machine.repairOwed).toBeNull();
+  });
+
+  it('an out-of-window seek while hidden defers and restarts on visible with the stored play choice', () => {
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+    machine.send({ type: hostPlaybackEvent.visibilityHidden });
+
+    machine.send({ seconds: 120, type: hostPlaybackEvent.seekOutOfWindow });
+    expect(machine.attempt).toBe(0);
+    expect(machine.current).toBe(hostPlaybackState.ready);
+
+    const decisions = machine.send({ type: hostPlaybackEvent.visibilityVisible });
+    expect(decisions).toEqual([
+      {
+        kind: hostDecisionKind.restartSource,
+        reason: recoveryReason.seek,
+        resumeSeconds: 120,
+        wantsPlay: true,
+      },
+    ]);
+    expect(machine.attempt).toBe(1);
+  });
+
+  it('a hidden phase never lifts the budget cap that visible-phase restarts already drained', () => {
+    // Two visible-phase decode restarts drain the budget; the third failure
+    // surfaces even while hidden again: hidden phases never spend, but a
+    // budget drained while visible still caps the run (no indefinite loop).
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+    machine.send({ kind: hostReportKind.decode, resumeSeconds: 5, type: hostPlaybackEvent.loadFailed }); // 1
+    machine.send({ type: hostPlaybackEvent.sourceReady });
+    machine.send({ kind: hostReportKind.decode, resumeSeconds: 5, type: hostPlaybackEvent.loadFailed }); // 2
+    expect(machine.attempt).toBe(2);
+
+    machine.send({ type: hostPlaybackEvent.visibilityHidden });
+    const decisions = machine.send({
+      kind: hostReportKind.decode,
+      resumeSeconds: 5,
+      type: hostPlaybackEvent.loadFailed,
+    });
+    expect(decisions).toEqual([{ error: hostReportKind.decode, kind: hostDecisionKind.reportError }]);
+  });
+
+  it('a fresh source while hidden keeps the hidden visibility instead of resetting it', () => {
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+    machine.send({ type: hostPlaybackEvent.visibilityHidden });
+
+    machine.send({ type: hostPlaybackEvent.sourceSet });
+    expect(machine.visible).toBe(false);
+    expect(machine.preference).toBe(playbackPreference['never-started']);
+    expect(machine.attempt).toBe(0);
+  });
+
+  it('a paused machine whose far seek was parked while hidden restarts paused on visible', () => {
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+    machine.send({ type: hostPlaybackEvent.pause });
+    machine.send({ type: hostPlaybackEvent.pauseConfirmed });
+    machine.send({ type: hostPlaybackEvent.visibilityHidden });
+
+    machine.send({ seconds: 120, type: hostPlaybackEvent.seekOutOfWindow });
+    expect(machine.attempt).toBe(0);
+    expect(machine.preference).toBe(playbackPreference.paused);
+
+    const decisions = machine.send({ type: hostPlaybackEvent.visibilityVisible });
+    // The parked restore keeps the paused user's choice: no auto-play.
+    expect(decisions).toEqual([
+      {
+        kind: hostDecisionKind.restartSource,
+        reason: recoveryReason.seek,
+        resumeSeconds: 120,
+        wantsPlay: false,
+      },
+    ]);
+  });
+});
