@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Slab } from '@siafoundation/sia-storage';
-import { isTransportReadError, LruChunkCache, RangedReader, ReadBudget, ReadTransportError, type SiaObjectLike, type SiaSdkLike } from '../ranged-reader.ts';
+import { isShardShortageError, isTransportReadError, LruChunkCache, RangedReader, ReadBudget, ReadTransportError, type SiaObjectLike, type SiaSdkLike } from '../ranged-reader.ts';
 
 /**
  * SDK that resembles the lazy dual-seed adapter: `download()` returns a
@@ -841,6 +841,170 @@ describe('RangedReader retries on transient read failure', () => {
     expect(errors).toHaveLength(1);
     expect((errors[0] as Error).message).toBe('consumer aborted playback');
     expect(reader.active).toBe(false);
+  });
+});
+
+// A shard shortage (the renter set has too few live shards to serve the
+// requested range) is a persistent capacity condition: re-requesting the same
+// range cannot change the answer, so the reader ends the retry loop on the
+// first attempt and surfaces the SDK's original error unwrapped, never a
+// ReadTransportError.
+describe('RangedReader does not retry persistent shard-shortage errors', () => {
+  it('tries once and surfaces the original download-open shortage error unwrapped', async () => {
+    const original = new Error('not enough shards');
+    const requests: { length: number; offset: number }[] = [];
+    const errors: unknown[] = [];
+    const sdk: SiaSdkLike = {
+      download: (_object, options) => {
+        requests.push({ length: options?.length ?? PAYLOAD.length, offset: options?.offset ?? 0 });
+        throw original;
+      },
+    };
+    const reader = new RangedReader({
+      chunkSize: CHUNK_SIZE,
+      object: fakeObject(PAYLOAD.length),
+      onChunk: () => {
+        /* a failing read delivers nothing */
+      },
+      onError: (error) => errors.push(error),
+      retryBackoffMs: 0,
+      sdk,
+    });
+
+    reader.start(0, PAYLOAD.length);
+    await settle();
+    await settle();
+
+    // Persistent: exactly one download attempt, no retry, and onError receives
+    // the SDK's own error instance by identity, not a ReadTransportError wrap.
+    expect(requests).toHaveLength(1);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toBe(original);
+    expect(isTransportReadError(errors[0])).toBe(false);
+    expect(reader.active).toBe(false);
+  });
+
+  it('recognizes a shortage buried in the cause chain, trying once and unwrapped', async () => {
+    const original = new Error('download failed', { cause: new Error('insufficient shards: 3 of 4 live') });
+    const requests: { length: number; offset: number }[] = [];
+    const errors: unknown[] = [];
+    const sdk: SiaSdkLike = {
+      download: (_object, options) => {
+        requests.push({ length: options?.length ?? PAYLOAD.length, offset: options?.offset ?? 0 });
+        throw original;
+      },
+    };
+    const reader = new RangedReader({
+      chunkSize: CHUNK_SIZE,
+      object: fakeObject(PAYLOAD.length),
+      onChunk: () => {
+        /* a failing read delivers nothing */
+      },
+      onError: (error) => errors.push(error),
+      retryBackoffMs: 0,
+      sdk,
+    });
+
+    reader.start(0, PAYLOAD.length);
+    await settle();
+    await settle();
+
+    // The classifier must find the shortage through the wrapper's `cause`;
+    // the run still makes one attempt and surfaces the wrapper raw.
+    expect(requests).toHaveLength(1);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toBe(original);
+    expect(isTransportReadError(errors[0])).toBe(false);
+  });
+
+  it('surfaces a shortage that arrives from an opened download stream raw, after one attempt', async () => {
+    const original = new Error('Not Enough Shards');
+    const requests: { length: number; offset: number }[] = [];
+    const errors: unknown[] = [];
+    const sdk: SiaSdkLike = {
+      download: (_object, options) => {
+        requests.push({ length: options?.length ?? PAYLOAD.length, offset: options?.offset ?? 0 });
+        // The stream opens, then rejects: the shortage arrives as a stream
+        // read error, not a download-open throw.
+        return new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.error(original);
+          },
+        });
+      },
+    };
+    const reader = new RangedReader({
+      chunkSize: CHUNK_SIZE,
+      object: fakeObject(PAYLOAD.length),
+      onChunk: () => {
+        /* a failing read delivers nothing */
+      },
+      onError: (error) => errors.push(error),
+      retryBackoffMs: 0,
+      sdk,
+    });
+
+    reader.start(0, PAYLOAD.length);
+    await settle();
+    await settle();
+
+    // The stream-rejection path is no more retryable than a download-open
+    // throw: one attempt, the original instance by identity, no transport wrap.
+    expect(requests).toHaveLength(1);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toBe(original);
+    expect(isTransportReadError(errors[0])).toBe(false);
+  });
+
+  it('still retries an ordinary transient short read three times', async () => {
+    const errors: unknown[] = [];
+    const flaky = flakySdk(PAYLOAD, 3); // every attempt: zero-byte short read
+    const reader = new RangedReader({
+      chunkSize: CHUNK_SIZE,
+      maxAttempts: 3,
+      object: fakeObject(PAYLOAD.length),
+      onChunk: () => {
+        /* a failing read delivers nothing */
+      },
+      onError: (error) => errors.push(error),
+      retryBackoffMs: 0,
+      sdk: flaky.sdk,
+    });
+
+    reader.start(0, PAYLOAD.length);
+    await settle();
+    await settle();
+
+    // Ordinary transient behavior is unchanged: three attempts, then the
+    // failure wrapped as a ReadTransportError.
+    expect(flaky.requests).toHaveLength(3);
+    expect(errors).toHaveLength(1);
+    expect(isTransportReadError(errors[0])).toBe(true);
+  });
+});
+
+describe('isShardShortageError', () => {
+  it('matches the SDK shortage messages case-insensitively', () => {
+    expect(isShardShortageError(new Error('not enough shards'))).toBe(true);
+    expect(isShardShortageError(new Error('NOT ENOUGH SHARDS'))).toBe(true);
+    expect(isShardShortageError(new Error('insufficient shards'))).toBe(true);
+    expect(isShardShortageError(new Error('Insufficient SHARDS'))).toBe(true);
+  });
+
+  it('walks the cause chain and rejects ordinary failures, non-errors, and a finite cause cycle', () => {
+    const wrapped = new Error('download failed', { cause: new Error('insufficient shards') });
+    const doubleWrapped = new Error('outer failure', { cause: wrapped });
+    expect(isShardShortageError(wrapped)).toBe(true);
+    expect(isShardShortageError(doubleWrapped)).toBe(true);
+
+    expect(isShardShortageError(new Error('normal failure'))).toBe(false);
+    expect(isShardShortageError('not enough shards')).toBe(false);
+    expect(isShardShortageError(null)).toBe(false);
+
+    // A corrupted cause graph must terminate, not loop.
+    const cyclic = new Error('self-referential');
+    (cyclic as { cause: unknown }).cause = cyclic;
+    expect(isShardShortageError(cyclic)).toBe(false);
   });
 });
 
