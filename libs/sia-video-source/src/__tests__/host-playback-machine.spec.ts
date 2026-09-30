@@ -402,6 +402,40 @@ describe('decode failure on a never-started source', () => {
     );
     expect(rules).toMatch(/decode failure[\s\S]*never-started/);
   });
+
+  it('an explicit play consumes a deferred repair while the machine is recovering', () => {
+    const machine = readyMachine();
+    // No play: the source is attached but never started.
+    expect(machine.preference).toBe(playbackPreference['never-started']);
+
+    // The explicit scrub is out of window: one restart at the target, no
+    // playback requested, one attempt spent.
+    machine.send({ seconds: 120, type: hostPlaybackEvent.seekOutOfWindow });
+    expect(machine.current).toBe(hostPlaybackState.recovering);
+    expect(machine.attempt).toBe(1);
+
+    // The reloaded load fails to decode: a never-started source defers a
+    // plain repair at the failure position (no second restart, no budget).
+    machine.send({ kind: hostReportKind.decode, resumeSeconds: 120, type: hostPlaybackEvent.loadFailed });
+    expect(machine.current).toBe(hostPlaybackState.recovering);
+    expect(machine.attempt).toBe(1);
+    expect(machine.repairOwed).toEqual({ reason: recoveryReason.decode, seconds: 120 });
+
+    // The explicit play consumes the deferred repair: exactly one restart
+    // with wantsPlay true, and no remaining repair.
+    const playDecisions = machine.send({ type: hostPlaybackEvent.play });
+    expect(playDecisions).toEqual([
+      {
+        kind: hostDecisionKind.restartSource,
+        reason: recoveryReason.decode,
+        resumeSeconds: 120,
+        wantsPlay: true,
+      },
+    ]);
+    expect(machine.repairOwed).toBeNull();
+    expect(machine.attempt).toBe(2);
+    expect(machine.current).toBe(hostPlaybackState.recovering);
+  });
 });
 
 describe('recovery completion', () => {
@@ -1397,5 +1431,49 @@ describe('a repair parked while the document is hidden', () => {
       type: hostPlaybackEvent.loadFailed,
     });
     expect(decisions.at(0)).toMatchObject({ kind: hostDecisionKind.deferRepair });
+  });
+
+  it('a hidden parked repair in recovering remains deferred on an explicit play', () => {
+    // A decode failure that parks a repair while the document is hidden and
+    // the machine is already recovering must not be consumed by an explicit
+    // play: the restart stays owed to the visibility return.
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+
+    // A decode failure starts a recovery restart (attempt 1).
+    machine.send({ kind: hostReportKind.decode, resumeSeconds: 42.5, type: hostPlaybackEvent.loadFailed });
+    expect(machine.current).toBe(hostPlaybackState.recovering);
+    expect(machine.attempt).toBe(1);
+
+    // The document hides while the recovery is in flight.
+    machine.send({ type: hostPlaybackEvent.visibilityHidden });
+    expect(machine.visible).toBe(false);
+
+    // A second decode failure while hidden in recovering parks a hidden
+    // repair (resumeOnVisible: true) instead of spending more budget.
+    machine.send({ kind: hostReportKind.decode, resumeSeconds: 42.5, type: hostPlaybackEvent.loadFailed });
+    expect(machine.current).toBe(hostPlaybackState.recovering);
+    expect(machine.attempt).toBe(1);
+    expect(machine.repairOwed).toEqual({
+      reason: recoveryReason.decode,
+      resumeOnVisible: true,
+      seconds: 42.5,
+      wantsPlay: true,
+    });
+
+    // An explicit play while the hidden-parked repair is in place must NOT
+    // consume it: the restart stays owed to the visibility return.
+    const playDecisions = machine.send({ type: hostPlaybackEvent.play });
+    expect(playDecisions).toEqual([
+      { kind: hostDecisionKind.deferRepair, reason: recoveryReason.decode, resumeSeconds: 42.5 },
+    ]);
+    expect(machine.current).toBe(hostPlaybackState.recovering);
+    expect(machine.attempt).toBe(1);
+    expect(machine.repairOwed).toEqual({
+      reason: recoveryReason.decode,
+      resumeOnVisible: true,
+      seconds: 42.5,
+      wantsPlay: true,
+    });
   });
 });
