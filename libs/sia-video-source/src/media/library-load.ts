@@ -78,6 +78,15 @@ export interface CancelledMediaLoad {
   readonly status: 'cancelled';
 }
 
+/**
+ * Which conversion run a failure reported by the playback's error callback
+ * came from: the initial sequential conversion (the run prepared during
+ * inspection) or a replacement armed by a seek restart. Derived from the run
+ * ordinal at the playback's seam, never inferred from the error itself, so a
+ * consumer can distinguish the two failure paths.
+ */
+export type ConversionRunOrigin = 'initial' | 'seek-restart';
+
 export interface InspectMediaLibraryOptions {
   /** MSE/codec capability snapshot used for the startup validation. */
   readonly capabilities: PlaybackCapabilities;
@@ -106,7 +115,13 @@ export interface MediaPlayback {
     loadGeneration: number,
     callbacks: {
       readonly onComplete: () => void;
-      readonly onError: (error: unknown) => void;
+      /**
+       * Carries the failed run's origin alongside the error, and — for a
+       * seek-restart run — the trim target (seconds) that run was prepared
+       * at; the initial sequential run has none (absent), never a value
+       * derived from the error itself.
+       */
+      readonly onError: (error: unknown, origin: ConversionRunOrigin, targetSeconds?: number) => void;
     },
   ): void;
 }
@@ -148,10 +163,19 @@ export type UnsupportedReason =
  * One armed conversion attempt. `run` matches `assembly.run` at arm time and
  * guards the attempt's callbacks and completion, so a superseded run can
  * neither assemble boxes into the sink nor report against a newer run.
+ * `origin` is derived from the run's ordinal: the first armed run is the
+ * initial sequential conversion, every later one a seek-restart conversion.
+ * `targetSeconds` is the trim target the run was prepared at (the clamped
+ * one, when a far seek was pulled back inside the media): the initial
+ * sequential run has none, so a reported failure names a position only when
+ * the run itself was trimmed at one.
  */
 interface ConversionRun {
   readonly conversion: Conversion;
+  readonly origin: ConversionRunOrigin;
   readonly run: number;
+  /** Trim target in seconds the conversion was prepared at; undefined for the initial sequential run. */
+  readonly targetSeconds: number | undefined;
 }
 
 /**
@@ -302,7 +326,7 @@ function createMediaPlayback(options: {
   let current: ConversionRun | null = initial;
   let generation = 0;
   let onComplete: (() => void) | null = null;
-  let onError: ((error: unknown) => void) | null = null;
+  let onError: ((error: unknown, origin: ConversionRunOrigin, targetSeconds?: number) => void) | null = null;
   let started = false;
   // Newest accepted seek target not yet consumed by the driver; a rapid seek
   // parks over an older one, so no valid intent is ever dropped.
@@ -348,12 +372,12 @@ function createMediaPlayback(options: {
       } catch (error) {
         // A cancellation or a disposal supersedes the run; neither is a
         // failure and a superseded run must not report against an older run.
-        if (!assembly.disposed && assembly.run === run.run && !isCancelledError(error)) onError?.(error);
+        if (!assembly.disposed && assembly.run === run.run && !isCancelledError(error)) onError?.(error, run.origin, run.targetSeconds);
         return;
       }
       if (assembly.disposed || assembly.run !== run.run) return;
       if (assembly.fault !== null) {
-        onError?.(assembly.fault);
+        onError?.(assembly.fault, run.origin, run.targetSeconds);
         return;
       }
       // The run ends cleanly only when init arrived and every moof/mdat pair
@@ -362,7 +386,7 @@ function createMediaPlayback(options: {
       // reachable fragment, so an empty or dangling tail run means the media
       // genuinely cannot be serviced, not just that the target overshot.
       if (!assembly.initEmitted || assembly.moof !== null || !assembly.mediaEmitted) {
-        onError?.(new Error('conversion ended with an incomplete CMAF stream'));
+        onError?.(new Error('conversion ended with an incomplete CMAF stream'), run.origin, run.targetSeconds);
         return;
       }
       const sink = assembly.sink;
@@ -437,8 +461,11 @@ function createMediaPlayback(options: {
           }
         } catch (error) {
           // A canceled/disposed preparation is not a restart failure; consume
-          // whichever newer target parked during it on the next pass.
-          if (!assembly.disposed && !isCancelledError(error)) onError?.(error);
+          // whichever newer target parked during it on the next pass. The
+          // failed preparation already consumed its ordinal, so its origin is
+          // derivable from the current assembly ordinal (always a seek-restart
+          // one: the initial run is armed before any restart exists).
+          if (!assembly.disposed && !isCancelledError(error)) onError?.(error, originForRun(assembly.run), target);
           continue;
         }
         // A newer seek (or teardown) landed while this replacement was being
@@ -472,7 +499,10 @@ function createMediaPlayback(options: {
   const start = (
     sink: AppendSink,
     loadGeneration: number,
-    callbacks: { readonly onComplete: () => void; readonly onError: (error: unknown) => void },
+    callbacks: {
+      readonly onComplete: () => void;
+      readonly onError: (error: unknown, origin: ConversionRunOrigin, targetSeconds?: number) => void;
+    },
   ): void => {
     if (assembly.disposed || started) return;
     started = true;
@@ -515,6 +545,11 @@ function isCancelledError(error: unknown): boolean {
 /** `video/mp4` MIME carrying the chosen video and audio codec parameters. */
 function mseMime(videoCodec: string, audioCodec: string): string {
   return `video/mp4; codecs="${videoCodec},${audioCodec}"`;
+}
+
+/** Derives a run's origin from its ordinal: the first run is the initial one. */
+function originForRun(run: number): ConversionRunOrigin {
+  return run === 1 ? 'initial' : 'seek-restart';
 }
 
 /**
@@ -607,7 +642,7 @@ async function prepareConversion(options: {
     video: (track: InputVideoTrack) => (track === videoTrack ? {} : { discard: true }),
   });
 
-  return { conversion, run };
+  return { conversion, origin: originForRun(run), run, targetSeconds: trimStart };
 }
 
 /**

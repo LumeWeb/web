@@ -6,7 +6,7 @@
  * so the play path is testable without Sia or a real MediaSource.
  */
 import { describe, expect, it } from 'vitest';
-import type { MediaPlayback } from '../media/library-load.ts';
+import type { ConversionRunOrigin, MediaPlayback } from '../media/library-load.ts';
 import { ReadTransportError } from '../ranged-reader.ts';
 import { type ErrorReporter, type PlaybackFailure } from '../session/error-reporter.ts';
 import {
@@ -42,7 +42,7 @@ class FakePlayback implements MediaPlayback {
   sink: AppendSink | null = null;
   startInvocations = 0;
   #onComplete: (() => void) | null = null;
-  #onError: ((error: unknown) => void) | null = null;
+  #onError: ((error: unknown, origin: ConversionRunOrigin, targetSeconds?: number) => void) | null = null;
 
   complete(): void {
     this.#onComplete?.();
@@ -52,8 +52,8 @@ class FakePlayback implements MediaPlayback {
     this.disposed += 1;
   }
 
-  fail(error: unknown): void {
-    this.#onError?.(error);
+  fail(error: unknown, origin: ConversionRunOrigin = 'initial', targetSeconds?: number): void {
+    this.#onError?.(error, origin, targetSeconds);
   }
 
   restart(fromSeconds: number): boolean {
@@ -68,7 +68,7 @@ class FakePlayback implements MediaPlayback {
   start(
     sink: AppendSink,
     loadGeneration: number,
-    callbacks: { readonly onComplete: () => void; readonly onError: (error: unknown) => void },
+    callbacks: { readonly onComplete: () => void; readonly onError: (error: unknown, origin: ConversionRunOrigin, targetSeconds?: number) => void },
   ): void {
     this.startInvocations += 1;
     this.sink = sink;
@@ -387,5 +387,40 @@ describe('StreamController', () => {
 
     h.controller.destroy();
     expect(h.playback.restart(30)).toBe(false);
+  });
+
+  it('reports an initial run failure with origin initial and no target', () => {
+    const h = harness();
+    h.controller.start(h.load());
+
+    h.playback.fail(new Error('conversion broke'), 'initial');
+
+    expect(h.errors).toHaveLength(1);
+    expect(h.errors[0].condition).toBe('normalization');
+    expect(h.controller.state).toBe('failed');
+  });
+
+  it('reports a seek-restart failure with origin seek-restart and the trim target', () => {
+    const h = harness();
+    h.controller.start(h.load());
+    h.controller.seek(5.5);
+
+    h.playback.fail(new Error('restart conversion broke'), 'seek-restart', 5.5);
+
+    expect(h.errors).toHaveLength(1);
+    expect(h.errors[0].condition).toBe('normalization');
+    expect(h.controller.state).toBe('failed');
+  });
+
+  it('preserves existing fatal failure behavior for an initial run', () => {
+    const h = harness();
+    h.controller.start(h.load());
+
+    h.playback.fail(new Error('fatal'), 'initial');
+
+    expect(h.controller.state).toBe('failed');
+    expect(h.errors).toHaveLength(1);
+    expect(h.sink.aborts).toHaveLength(1);
+    expect(h.states).toContain('failed');
   });
 });
