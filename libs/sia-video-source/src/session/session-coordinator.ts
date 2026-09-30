@@ -774,6 +774,13 @@ export function createPostingSinkSession({
   let pendingBytes = 0;
   let aheadWaiters: (() => void)[] = [];
   let capacityWaiters: (() => void)[] = [];
+  // A non-finite or non-positive target would make `ahead < target` never
+  // true for a non-negative ahead, parking the producer with no report able
+  // to release it; disable the wait for those values.
+  const aheadTarget =
+    aheadTargetSeconds !== undefined && Number.isFinite(aheadTargetSeconds) && aheadTargetSeconds > 0
+      ? aheadTargetSeconds
+      : undefined;
   const capacity = capacityBytes !== undefined && Number.isFinite(capacityBytes) && capacityBytes > 0 ? capacityBytes : undefined;
 
   const releaseAheadWaiters = (): void => {
@@ -801,7 +808,7 @@ export function createPostingSinkSession({
             },
             playhead,
           );
-    return ahead === null || aheadTargetSeconds === undefined || ahead < aheadTargetSeconds;
+    return ahead === null || aheadTarget === undefined || ahead < aheadTarget;
   };
 
   const hasCapacity = (): boolean => capacity === undefined || pendingBytes < capacity;
