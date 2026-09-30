@@ -493,9 +493,10 @@ export class RangedReader {
         // budget is `maxAttempts` (default 3 = two retries); `read.window-start`
         // is not re-emitted per attempt and `read.error` fires only once, after
         // the final attempt. Never retried: a run superseded by a seek/stop,
-        // the stall watchdog (own semantics, `read.stalled` already fired), or
-        // a throwing `onChunk` (the caller's own handler, never a transport
-        // blip).
+        // the stall watchdog (own semantics, `read.stalled` already fired), a
+        // throwing `onChunk` (the caller's own handler, never a transport
+        // blip), or a shard shortage (persistent: re-requesting the same
+        // range cannot change the answer).
         let attempt = 0;
         // `consumer` records whether the failed attempt was the caller's own
         // throwing onChunk (never a transport blip, never retried) so the
@@ -587,9 +588,11 @@ export class RangedReader {
           } catch (error) {
             failure = { consumer: consumerError !== null, delivered: Math.max(0, this.#position - start), error };
             // The stall watchdog has its own semantics (read.stalled already
-            // fired) and a throwing onChunk is the caller's failure — neither
-            // is a retryable transport blip, so both end the retry loop now.
-            if (isStallWatchdogError(error) || consumerError !== null) break;
+            // fired), a throwing onChunk is the caller's failure, and a shard
+            // shortage is a persistent capacity condition the SDK cannot fix
+            // by re-requesting the same range: none is a retryable transport
+            // blip, so all three end the retry loop now.
+            if (isStallWatchdogError(error) || consumerError !== null || isShardShortageError(error)) break;
           } finally {
             // The attempt ended (delivered, dropped, or failed): cancel the
             // stream it still owns before the next attempt or the final
@@ -617,11 +620,14 @@ export class RangedReader {
           // wrapped so the stream chain (and the host's recovery handling) can
           // classify it: the message names the read window it gave up on,
           // `cause` keeps the SDK/short-read error, and the window facts ride
-          // as fields. A throwing onChunk (the caller's own handler) and the
-          // stall watchdog are never transport failures and keep their
-          // original identity — and the wrapped message below, not a bare SDK
-          // string, is what describes the failure to the wire.
-          if (!failure.consumer && !isStallWatchdogError(failure.error)) {
+          // as fields. Three failures keep their original identity instead: a
+          // throwing onChunk (the caller's own handler), the stall watchdog
+          // (already reported as read.stalled), and a persistent shard
+          // shortage (the SDK's own error is the diagnosis; wrapping it as a
+          // transport blip would mislead the host's recovery). The wrapped
+          // message below, not a bare SDK string, is what describes a real
+          // transport failure to the wire.
+          if (!failure.consumer && !isStallWatchdogError(failure.error) && !isShardShortageError(failure.error)) {
             throw new ReadTransportError(
               `Sia SDK ranged read failed after ${attempts} attempts (expected ${Math.max(0, end - start)} bytes at ${start})`,
               {
@@ -794,6 +800,26 @@ export class ReadTransportError extends Error {
     this.expectedBytes = options.expectedBytes;
     this.position = options.position;
   }
+}
+
+/**
+ * True when `error` is (or is wrapped around) a shard-shortage failure: the
+ * SDK reports that the renter set has too few live shards to serve the
+ * requested range. Re-requesting the same range cannot change the answer, so
+ * the retry loop ends on it and surfaces the original error unwrapped.
+ * Matches the SDK's shortage messages case-insensitively, walking the `cause`
+ * chain defensively (cycle-safe: a corrupted cause graph can never loop).
+ */
+export function isShardShortageError(error: unknown): boolean {
+  const shortage = /not enough shards|insufficient shards/i;
+  let current: unknown = error;
+  const seen = new Set<unknown>();
+  while (current !== null && current !== undefined && !seen.has(current)) {
+    if (current instanceof Error && shortage.test(current.message)) return true;
+    seen.add(current);
+    current = current instanceof Error ? current.cause : undefined;
+  }
+  return false;
 }
 
 /**
