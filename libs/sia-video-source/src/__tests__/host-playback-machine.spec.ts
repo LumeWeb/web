@@ -353,6 +353,55 @@ describe('decode failure on a never-started source', () => {
     // A second play while recovering is ignored (incidental engine event).
     expect(machine.send({ type: hostPlaybackEvent.play })).toEqual([]);
   });
+
+  it('defers the repair while in recovery after an explicit seek, without a second recovery attempt', async () => {
+    const machine = readyMachine();
+    // No play: the source is attached but never started.
+    expect(machine.preference).toBe(playbackPreference['never-started']);
+
+    // The explicit scrub is out of window: one restart at the target, no
+    // playback requested, one attempt spent.
+    const seekDecisions = machine.send({ seconds: 120, type: hostPlaybackEvent.seekOutOfWindow });
+    expect(seekDecisions).toEqual([
+      {
+        kind: hostDecisionKind.restartSource,
+        reason: recoveryReason.seek,
+        resumeSeconds: 120,
+        wantsPlay: false,
+      },
+    ]);
+    expect(machine.current).toBe(hostPlaybackState.recovering);
+    expect(machine.attempt).toBe(1);
+
+    // The reloaded load fails to decode again: a never-started source has no
+    // play intent, so the failure defers a repair at the failure position
+    // instead of a second restart; nothing is surfaced and the budget stays
+    // where the seek restart left it.
+    const decisions = machine.send({
+      kind: hostReportKind.decode,
+      resumeSeconds: 120,
+      type: hostPlaybackEvent.loadFailed,
+    });
+    expect(decisions).toEqual([
+      { kind: hostDecisionKind.deferRepair, reason: recoveryReason.decode, resumeSeconds: 120 },
+    ]);
+    expect(machine.current).toBe(hostPlaybackState.recovering);
+    expect(machine.attempt).toBe(1);
+    expect(machine.repairOwed).toEqual({ reason: recoveryReason.decode, seconds: 120 });
+
+    // The module's behaviour-rules summary documents this deferral; the
+    // source read needs node:fs, which the browser suite lacks.
+    if (typeof document !== 'undefined') return;
+    const { readFileSync } = await import('node:fs');
+    const { fileURLToPath } = await import('node:url');
+    const sourcePath = fileURLToPath(new URL('../host-playback-machine.ts', import.meta.url));
+    const source = readFileSync(sourcePath, 'utf8');
+    const rules = source.slice(
+      source.indexOf('Behaviour rules'),
+      source.indexOf('*/', source.indexOf('Behaviour rules')),
+    );
+    expect(rules).toMatch(/decode failure[\s\S]*never-started/);
+  });
 });
 
 describe('recovery completion', () => {

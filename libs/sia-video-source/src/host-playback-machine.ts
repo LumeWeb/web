@@ -42,9 +42,11 @@
  *    already exhausted its retries on arrives as `load.failed`.
  *  - A decode failure while playing restarts at the watch position, at most
  *    `MAX_RECOVERY_ATTEMPTS` times; exhaustion surfaces a decode error.
- *  - A decode failure while explicitly paused never reloads: it records a
- *    repair. The next explicit play restarts once and resumes; the next
- *    explicit seek restarts at the target and stays paused.
+ *  - A decode failure while explicitly paused, or on a never-started source,
+ *    never reloads: it records a repair without spending recovery budget, in
+ *    a healthy load and on a load already in recovery. The next explicit
+ *    play restarts once and resumes; the next explicit seek restarts at the
+ *    target and stays paused.
  *  - A native element error from a dead/replaced resource is ignored while a
  *    recovery is in flight or a repair is already owed; paused with nothing
  *    owed it records a repair; actively playing it gets the retry-capped
