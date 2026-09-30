@@ -295,6 +295,66 @@ describe('decode failure while paused', () => {
   });
 });
 
+describe('decode failure on a never-started source', () => {
+  it('defers the repair and leaves the recovery budget untouched', () => {
+    const machine = readyMachine();
+    // No play — the source is attached but never started.
+    expect(machine.preference).toBe(playbackPreference['never-started']);
+
+    const decisions = machine.send({
+      kind: hostReportKind.decode,
+      resumeSeconds: 12.5,
+      type: hostPlaybackEvent.loadFailed,
+    });
+    expect(decisions).toEqual([
+      { kind: hostDecisionKind.deferRepair, reason: recoveryReason.decode, resumeSeconds: 12.5 },
+    ]);
+    // The repair is parked, the budget is untouched, and the machine stays
+    // in the ready load.
+    expect(machine.current).toBe(hostPlaybackState.ready);
+    expect(machine.attempt).toBe(0);
+    expect(machine.repairOwed).toEqual({ reason: recoveryReason.decode, seconds: 12.5 });
+  });
+
+  it('an explicit play consumes the deferred repair with one restart and wantsPlay true', () => {
+    const machine = readyMachine();
+    machine.send({
+      kind: hostReportKind.decode,
+      resumeSeconds: 12.5,
+      type: hostPlaybackEvent.loadFailed,
+    });
+    expect(machine.repairOwed).toEqual({ reason: recoveryReason.decode, seconds: 12.5 });
+    expect(machine.attempt).toBe(0);
+
+    const playDecisions = machine.send({ type: hostPlaybackEvent.play });
+    expect(playDecisions).toEqual([
+      {
+        kind: hostDecisionKind.restartSource,
+        reason: recoveryReason.decode,
+        resumeSeconds: 12.5,
+        wantsPlay: true,
+      },
+    ]);
+    expect(machine.repairOwed).toBeNull();
+    expect(machine.attempt).toBe(1);
+    expect(machine.current).toBe(hostPlaybackState.recovering);
+  });
+
+  it('a second play after the deferred repair is consumed is a no-op', () => {
+    const machine = readyMachine();
+    machine.send({
+      kind: hostReportKind.decode,
+      resumeSeconds: 12.5,
+      type: hostPlaybackEvent.loadFailed,
+    });
+    machine.send({ type: hostPlaybackEvent.play });
+    expect(machine.current).toBe(hostPlaybackState.recovering);
+
+    // A second play while recovering is ignored (incidental engine event).
+    expect(machine.send({ type: hostPlaybackEvent.play })).toEqual([]);
+  });
+});
+
 describe('recovery completion', () => {
   it('a load that genuinely plays again restores the recovery budget', () => {
     const machine = readyMachine();

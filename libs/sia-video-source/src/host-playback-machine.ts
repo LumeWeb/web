@@ -326,6 +326,8 @@ const resetRecovery = reduce<HostPlaybackState, MachineEvent>((ctx) => ({
 const isOwed = (ctx: HostPlaybackState): boolean => ctx.repairOwed !== null;
 const isPaused = (ctx: HostPlaybackState): boolean => ctx.preference === playbackPreference.paused;
 const isPlaying = (ctx: HostPlaybackState): boolean => ctx.preference === playbackPreference.playing;
+const isNeverStarted = (ctx: HostPlaybackState): boolean =>
+  ctx.preference === playbackPreference['never-started'];
 // The document is hidden: the worker is likely throttled, so automatic
 // recovery restarts must not spend retry budget until it returns.
 const isHidden = (ctx: HostPlaybackState): boolean => ctx.visible === false;
@@ -646,17 +648,23 @@ function activeLoadTransitions(
 
     // Transport and fatal failures surface immediately; they never reload.
     transition(hostPlaybackEvent.loadFailed, hostPlaybackState.failed, guard(isTerminalFailure), recordFatal()),
-    // A decode failure on a healthy load: paused defers (deferral never
-    // spends budget, so a paused load with a drained budget still records a
-    // repair); a saturated session surfaces, a hidden document parks the
-    // automatic restart (no budget spent on a throttled worker, and the
-    // parking counts against the churn ledger), and a spendable visible run
-    // restarts at the watch position (resuming only when the choice is
-    // playing).
+    // A decode failure on a healthy load: paused or never-started defers
+    // (deferral never spends budget, so a paused or never-started load with a
+    // drained budget still records a repair); a saturated session surfaces, a
+    // hidden document parks the automatic restart (no budget spent on a
+    // throttled worker, and the parking counts against the churn ledger), and
+    // a spendable visible run restarts at the watch position (resuming only
+    // when the choice is playing).
     transition(
       hostPlaybackEvent.loadFailed,
       self,
       guard(decodeFailureWhen(isPaused)),
+      recordDefer(recoveryReason.decode),
+    ),
+    transition(
+      hostPlaybackEvent.loadFailed,
+      self,
+      guard(decodeFailureWhen(isNeverStarted)),
       recordDefer(recoveryReason.decode),
     ),
     transition(
@@ -1106,6 +1114,12 @@ function recoveringTransitions(decisions: HostDecision[]): Transition<string>[] 
       hostPlaybackEvent.loadFailed,
       hostPlaybackState.recovering,
       guard(decodeFailureWhen(isPaused)),
+      recordDefer(recoveryReason.decode),
+    ),
+    transition(
+      hostPlaybackEvent.loadFailed,
+      hostPlaybackState.recovering,
+      guard(decodeFailureWhen(isNeverStarted)),
       recordDefer(recoveryReason.decode),
     ),
     transition(
