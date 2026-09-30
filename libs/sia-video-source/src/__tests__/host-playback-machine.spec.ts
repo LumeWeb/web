@@ -954,3 +954,339 @@ describe('document visibility deferring automatic recovery', () => {
     ]);
   });
 });
+
+describe('a repair parked while the document is hidden', () => {
+  /** The common parked-repair setup: a playing load with the document hidden. */
+  function hiddenPlaying(): HostPlaybackMachine {
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+    machine.send({ type: hostPlaybackEvent.visibilityHidden });
+    return machine;
+  }
+
+  it('a user pause that settles after the park keeps the load paused on the visible restart', () => {
+    // The park-time snapshot said playing, but the user's deliberate pause
+    // (the two-phase one) settled while the repair was parked: the restart
+    // on visible must resolve the play choice from the current preference,
+    // not from that snapshot, or it would auto-play against the user pause.
+    const machine = hiddenPlaying();
+    machine.send({ kind: hostReportKind.decode, resumeSeconds: 42.5, type: hostPlaybackEvent.loadFailed });
+    expect(machine.repairOwed).toEqual({
+      reason: recoveryReason.decode,
+      resumeOnVisible: true,
+      seconds: 42.5,
+      wantsPlay: true,
+    });
+
+    machine.send({ type: hostPlaybackEvent.pause });
+    machine.send({ type: hostPlaybackEvent.pauseConfirmed });
+    expect(machine.preference).toBe(playbackPreference.paused);
+    expect(machine.current).toBe(hostPlaybackState.ready);
+
+    const decisions = machine.send({ type: hostPlaybackEvent.visibilityVisible });
+    expect(decisions).toEqual([
+      {
+        kind: hostDecisionKind.restartSource,
+        reason: recoveryReason.decode,
+        resumeSeconds: 42.5,
+        wantsPlay: false,
+      },
+    ]);
+    expect(machine.current).toBe(hostPlaybackState.recovering);
+    expect(machine.attempt).toBe(1);
+  });
+
+  it('a hidden load that keeps failing surfaces once its recovery session saturates', () => {
+    // Each hidden failure parks (spending no budget), and each park must
+    // count against the in-session churn ledger exactly like the visible
+    // restart it replaces: the consume on visible, the brief play, and the
+    // budget restore must not let a flapping hidden load loop past
+    // MAX_CONSECUTIVE_AUTO_RECOVERIES.
+    const triggers: ((machine: HostPlaybackMachine) => HostDecision[])[] = [
+      (machine) =>
+        machine.send({ kind: hostReportKind.decode, resumeSeconds: 42.5, type: hostPlaybackEvent.loadFailed }),
+      (machine) => machine.send({ resumeSeconds: 42.5, type: hostPlaybackEvent.nativeError }),
+    ];
+
+    for (const trigger of triggers) {
+      const machine = hiddenPlaying();
+
+      for (let cycle = 0; cycle < 3; cycle += 1) {
+        const parked = trigger(machine);
+        expect(parked.at(0)).toMatchObject({ kind: hostDecisionKind.deferRepair });
+        expect(machine.attempt).toBe(0);
+        expect(machine.current).toBe(hostPlaybackState.ready);
+
+        // The park is consumed on visible, the load plays, the budget
+        // restores, and the document hides again: one sick session.
+        expect(machine.send({ type: hostPlaybackEvent.visibilityVisible }).at(0)).toMatchObject({
+          kind: hostDecisionKind.restartSource,
+        });
+        machine.send({ type: hostPlaybackEvent.sourceReady });
+        machine.send({ type: hostPlaybackEvent.recoverPlayed });
+        expect(machine.attempt).toBe(0);
+        machine.send({ type: hostPlaybackEvent.visibilityHidden });
+      }
+
+      // The fourth incident inside the session saturates it: the hidden
+      // failure surfaces instead of parking for a restart the throttled
+      // worker would never finish.
+      const decisions = trigger(machine);
+      expect(decisions).toEqual([{ error: hostReportKind.decode, kind: hostDecisionKind.reportError }]);
+      expect(machine.current).toBe(hostPlaybackState.failed);
+    }
+  });
+
+  it('a saturated session surfaces a hidden failure before the hidden park catches it', () => {
+    // Three visible flaps saturate the session.
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+    for (let index = 0; index < 3; index += 1) {
+      machine.send({ kind: hostReportKind.decode, resumeSeconds: 42.5, type: hostPlaybackEvent.loadFailed });
+      machine.send({ type: hostPlaybackEvent.sourceReady });
+      machine.send({ type: hostPlaybackEvent.recoverPlayed });
+    }
+
+    machine.send({ type: hostPlaybackEvent.visibilityHidden });
+    const decisions = machine.send({
+      kind: hostReportKind.decode,
+      resumeSeconds: 42.5,
+      type: hostPlaybackEvent.loadFailed,
+    });
+    // Parking a saturated session would let it run on, so the failure
+    // surfaces even with the document hidden.
+    expect(decisions).toEqual([{ error: hostReportKind.decode, kind: hostDecisionKind.reportError }]);
+    expect(machine.current).toBe(hostPlaybackState.failed);
+  });
+
+  it('a hidden play while a repair is parked records the choice without spending an attempt', () => {
+    // A play that lands while the document is hidden (a lock-screen resume)
+    // must not restart on the throttled worker: the parked restart stays
+    // owed, the preference flips, and visibility returning is the only
+    // thing that spends the attempt.
+    const machine = hiddenPlaying();
+    machine.send({ kind: hostReportKind.decode, resumeSeconds: 42.5, type: hostPlaybackEvent.loadFailed });
+    expect(machine.repairOwed?.resumeOnVisible).toBe(true);
+
+    const decisions = machine.send({ type: hostPlaybackEvent.play });
+    expect(decisions).toEqual([
+      { kind: hostDecisionKind.deferRepair, reason: recoveryReason.decode, resumeSeconds: 42.5 },
+    ]);
+    expect(machine.current).toBe(hostPlaybackState.ready);
+    expect(machine.attempt).toBe(0);
+    expect(machine.preference).toBe(playbackPreference.playing);
+    expect(machine.repairOwed).toEqual({
+      reason: recoveryReason.decode,
+      resumeOnVisible: true,
+      seconds: 42.5,
+      wantsPlay: true,
+    });
+
+    const visibleDecisions = machine.send({ type: hostPlaybackEvent.visibilityVisible });
+    expect(visibleDecisions).toEqual([
+      {
+        kind: hostDecisionKind.restartSource,
+        reason: recoveryReason.decode,
+        resumeSeconds: 42.5,
+        wantsPlay: true,
+      },
+    ]);
+    expect(machine.attempt).toBe(1);
+    expect(machine.repairOwed).toBeNull();
+  });
+
+  it('a hidden scrub while a repair is parked re-parks it at the scrub position', () => {
+    // A scrub in a hidden tab (media-session seeking) must not spend an
+    // attempt on the throttled worker either: the parked repair moves to
+    // the new position with the current play choice, and visibility
+    // returning restores the latest scrub, not the stale one.
+    const machine = hiddenPlaying();
+    machine.send({ kind: hostReportKind.decode, resumeSeconds: 42.5, type: hostPlaybackEvent.loadFailed });
+
+    const decisions = machine.send({ seconds: 100, type: hostPlaybackEvent.seek });
+    expect(decisions).toEqual([
+      { kind: hostDecisionKind.deferRepair, reason: recoveryReason.decode, resumeSeconds: 100 },
+    ]);
+    expect(machine.current).toBe(hostPlaybackState.ready);
+    expect(machine.attempt).toBe(0);
+    expect(machine.repairOwed).toEqual({
+      reason: recoveryReason.decode,
+      resumeOnVisible: true,
+      seconds: 100,
+      wantsPlay: true,
+    });
+
+    const visibleDecisions = machine.send({ type: hostPlaybackEvent.visibilityVisible });
+    expect(visibleDecisions).toEqual([
+      {
+        kind: hostDecisionKind.restartSource,
+        reason: recoveryReason.decode,
+        resumeSeconds: 100,
+        wantsPlay: true,
+      },
+    ]);
+    expect(machine.attempt).toBe(1);
+  });
+
+  it('a hidden out-of-window scrub while a repair is parked re-parks it without spending budget', () => {
+    const machine = hiddenPlaying();
+    machine.send({ kind: hostReportKind.decode, resumeSeconds: 42.5, type: hostPlaybackEvent.loadFailed });
+
+    const decisions = machine.send({ seconds: 120, type: hostPlaybackEvent.seekOutOfWindow });
+    expect(decisions).toEqual([
+      { kind: hostDecisionKind.deferRepair, reason: recoveryReason.decode, resumeSeconds: 120 },
+    ]);
+    expect(machine.current).toBe(hostPlaybackState.ready);
+    expect(machine.attempt).toBe(0);
+    expect(machine.repairOwed).toEqual({
+      reason: recoveryReason.decode,
+      resumeOnVisible: true,
+      seconds: 120,
+      wantsPlay: true,
+    });
+
+    const visibleDecisions = machine.send({ type: hostPlaybackEvent.visibilityVisible });
+    expect(visibleDecisions).toEqual([
+      {
+        kind: hostDecisionKind.restartSource,
+        reason: recoveryReason.decode,
+        resumeSeconds: 120,
+        wantsPlay: true,
+      },
+    ]);
+    expect(machine.attempt).toBe(1);
+  });
+
+  it('a hidden play on a paused-parked repair restarts playing when visibility returns', () => {
+    // The park-time snapshot said paused, but the user resumed while the
+    // document was hidden: the re-parked choice is the current one, so the
+    // visible restart plays.
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+    machine.send({ type: hostPlaybackEvent.pause });
+    machine.send({ type: hostPlaybackEvent.pauseConfirmed });
+    machine.send({ type: hostPlaybackEvent.visibilityHidden });
+
+    machine.send({ seconds: 120, type: hostPlaybackEvent.seekOutOfWindow });
+    expect(machine.repairOwed).toEqual({
+      reason: recoveryReason.seek,
+      resumeOnVisible: true,
+      seconds: 120,
+      wantsPlay: false,
+    });
+
+    const decisions = machine.send({ type: hostPlaybackEvent.play });
+    expect(decisions).toEqual([
+      { kind: hostDecisionKind.deferRepair, reason: recoveryReason.seek, resumeSeconds: 120 },
+    ]);
+    expect(machine.preference).toBe(playbackPreference.playing);
+    expect(machine.attempt).toBe(0);
+    expect(machine.repairOwed).toEqual({
+      reason: recoveryReason.seek,
+      resumeOnVisible: true,
+      seconds: 120,
+      wantsPlay: true,
+    });
+
+    const visibleDecisions = machine.send({ type: hostPlaybackEvent.visibilityVisible });
+    expect(visibleDecisions).toEqual([
+      {
+        kind: hostDecisionKind.restartSource,
+        reason: recoveryReason.seek,
+        resumeSeconds: 120,
+        wantsPlay: true,
+      },
+    ]);
+    expect(machine.attempt).toBe(1);
+  });
+
+  it('a hidden scrub on a paused-parked repair keeps the paused choice at the new position', () => {
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+    machine.send({ type: hostPlaybackEvent.pause });
+    machine.send({ type: hostPlaybackEvent.pauseConfirmed });
+    machine.send({ type: hostPlaybackEvent.visibilityHidden });
+
+    machine.send({ seconds: 120, type: hostPlaybackEvent.seekOutOfWindow });
+    expect(machine.attempt).toBe(0);
+
+    const decisions = machine.send({ seconds: 90, type: hostPlaybackEvent.seek });
+    expect(decisions).toEqual([
+      { kind: hostDecisionKind.deferRepair, reason: recoveryReason.seek, resumeSeconds: 90 },
+    ]);
+    expect(machine.current).toBe(hostPlaybackState.ready);
+    expect(machine.attempt).toBe(0);
+    expect(machine.repairOwed).toEqual({
+      reason: recoveryReason.seek,
+      resumeOnVisible: true,
+      seconds: 90,
+      wantsPlay: false,
+    });
+
+    // The user never chose to play, so the visible restart stays paused.
+    const visibleDecisions = machine.send({ type: hostPlaybackEvent.visibilityVisible });
+    expect(visibleDecisions).toEqual([
+      {
+        kind: hostDecisionKind.restartSource,
+        reason: recoveryReason.seek,
+        resumeSeconds: 90,
+        wantsPlay: false,
+      },
+    ]);
+    expect(machine.attempt).toBe(1);
+  });
+
+  it('an explicit play while hidden still consumes a user-paused repair', () => {
+    // The hidden-parked protection applies only to repairs parked FOR the
+    // visibility return: a repair recorded for a user-paused load (no
+    // resumeOnVisible mark) stays explicit-action-owned and is consumed by
+    // a play even while the document is hidden.
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+    machine.send({ type: hostPlaybackEvent.pause });
+    machine.send({ type: hostPlaybackEvent.pauseConfirmed });
+    machine.send({ type: hostPlaybackEvent.visibilityHidden });
+    machine.send({ kind: hostReportKind.decode, resumeSeconds: 12.5, type: hostPlaybackEvent.loadFailed });
+    expect(machine.repairOwed).toEqual({ reason: recoveryReason.decode, seconds: 12.5 });
+
+    const decisions = machine.send({ type: hostPlaybackEvent.play });
+    expect(decisions).toEqual([
+      {
+        kind: hostDecisionKind.restartSource,
+        reason: recoveryReason.decode,
+        resumeSeconds: 12.5,
+        wantsPlay: true,
+      },
+    ]);
+    expect(machine.current).toBe(hostPlaybackState.recovering);
+    expect(machine.attempt).toBe(1);
+  });
+
+  it('hidden far-seek parks do not count as churn incidents', () => {
+    // User far-seek restarts never feed the in-session churn ledger, and the
+    // hidden park of the same restart does not either: hidden far scrubs
+    // that each resolve on visibility must not saturate the session, or
+    // the first decode failure after them would surface instead of being
+    // repaired.
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+    machine.send({ type: hostPlaybackEvent.visibilityHidden });
+
+    for (let index = 0; index < 3; index += 1) {
+      machine.send({ seconds: 120, type: hostPlaybackEvent.seekOutOfWindow });
+      expect(machine.attempt).toBe(0);
+      machine.send({ type: hostPlaybackEvent.visibilityVisible });
+      machine.send({ type: hostPlaybackEvent.sourceReady });
+      machine.send({ type: hostPlaybackEvent.recoverPlayed });
+      expect(machine.current).toBe(hostPlaybackState.ready);
+      machine.send({ type: hostPlaybackEvent.visibilityHidden });
+    }
+
+    const decisions = machine.send({
+      kind: hostReportKind.decode,
+      resumeSeconds: 5,
+      type: hostPlaybackEvent.loadFailed,
+    });
+    expect(decisions.at(0)).toMatchObject({ kind: hostDecisionKind.deferRepair });
+  });
+});

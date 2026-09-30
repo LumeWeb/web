@@ -65,6 +65,13 @@
  *    playing) within the session, cannot churn an endlessly restored budget,
  *    while genuinely sparse recoveries, each followed by sustained stable
  *    playback, reset the session and keep being repaired.
+ *  - While the document is hidden, an automatic decode or native failure
+ *    parks a restart owed to the visibility return instead of spending retry
+ *    budget on a throttled worker; the park counts against the churn ledger
+ *    like the visible restart it replaces, a hidden play or scrub only
+ *    re-records the parked position and choice, and the visibility return
+ *    runs the restart once with the playback choice as it stands then, not
+ *    as recorded when the repair was parked.
  *  - A fresh source, a re-attach, or an explicit load() drops all recovery
  *    state; a re-attach keeps the playback choice.
  */
@@ -259,8 +266,10 @@ export interface RepairOwed {
    * restarts with the `wantsPlay` of the deferred restart. */
   resumeOnVisible?: boolean;
   seconds: number;
-  /** The play choice of the automatic recovery that was parked while hidden:
-   * true restarts playing, false stays paused. Meaningful only alongside
+  /** The play choice the parked restart will take: the current preference
+   * when the repair is parked, or when a hidden play or scrub re-records it.
+   * `consumeOwedOnVisible` re-checks it against the preference at the
+   * visibility return before spending an attempt. Meaningful only alongside
    * `resumeOnVisible`. */
   wantsPlay?: boolean;
 }
@@ -324,6 +333,11 @@ const isHidden = (ctx: HostPlaybackState): boolean => ctx.visible === false;
 // automatic recovery) and may therefore be consumed by visibility returning.
 const hasResumeOnVisible = (ctx: HostPlaybackState): boolean =>
   ctx.repairOwed?.resumeOnVisible === true;
+// The guard for the play/scrub re-park rows: an `isOwed`-only guard would
+// also match repairs of a user-paused load (no `resumeOnVisible` mark), the
+// ones an explicit action must still consume, so the mark is part of the
+// test.
+const isHiddenParked = (ctx: HostPlaybackState): boolean => isHidden(ctx) && hasResumeOnVisible(ctx);
 const canRetry = (ctx: HostPlaybackState): boolean => ctx.attempt < MAX_RECOVERY_ATTEMPTS;
 const spentBudget = (ctx: HostPlaybackState): boolean => !canRetry(ctx);
 const isSeekRecovery = (ctx: HostPlaybackState): boolean =>
@@ -453,12 +467,14 @@ function activeLoadTransitions(
   });
 
   // An automatic recovery parked while the document was hidden is consumed
-  // exactly once when the document becomes visible again: the deferred restart
-  // runs with the play choice recorded when it was parked.
+  // exactly once when the document becomes visible again. The play choice is
+  // re-resolved against the current preference instead of the park-time
+  // snapshot, because a deliberate pause (the two-phase one) can settle while
+  // the repair is parked: playing against that pause would override the user.
   const consumeOwedOnVisible = reduce<HostPlaybackState, MachineEvent>((ctx) => {
     const owed = ctx.repairOwed;
     if (!owed || !owed.resumeOnVisible) return ctx;
-    const wantsPlay = owed.wantsPlay ?? false;
+    const wantsPlay = (owed.wantsPlay ?? false) && ctx.preference === playbackPreference.playing;
     decisions.push({
       kind: hostDecisionKind.restartSource,
       reason: owed.reason,
@@ -503,18 +519,47 @@ function activeLoadTransitions(
 
   // An automatic recovery restart parked because the document is hidden: no
   // restart-source decision, no retry budget spent, and the repair is marked
-  // to be consumed once by visibility returning (with the play choice the
-  // deferred restart would have had).
-  const recordDeferWhileHidden = (reason: RecoveryReason) =>
+  // to be consumed once by visibility returning. `incident` marks the parking
+  // as an entry in the recovery-session churn ledger, exactly like the
+  // visible restart it replaces: the ledger is written here, when the failure
+  // happens, and not again when the parked restart is consumed on visible.
+  // User far-seek parks are never incidents, so their call sites pass
+  // `false`.
+  const recordDeferWhileHidden = (reason: RecoveryReason, incident = true) =>
     reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
       const resumeSeconds = resumeOf(event);
       const wantsPlay = ctx.preference === playbackPreference.playing;
       decisions.push({ kind: hostDecisionKind.deferRepair, reason, resumeSeconds });
+      const nowMs = incident ? Date.now() : 0;
       return {
         ...ctx,
+        autoRecoveryStreak: incident ? nextAutoIncidentStreak(ctx, nowMs) : ctx.autoRecoveryStreak,
+        lastAutoIncidentAt: incident ? nowMs : ctx.lastAutoIncidentAt,
         repairOwed: { reason, resumeOnVisible: true, seconds: resumeSeconds, wantsPlay },
       };
     });
+
+  // A play or scrub on a repair parked for the visibility return: consuming
+  // it would restart on a throttled worker, so the action only re-records the
+  // parked repair (a play also flips the stored choice to playing) and the
+  // restart stays owed to the visibility return, which spends the one
+  // attempt. The `deferRepair` decision is a log-only record on the host, so
+  // re-parking is side-effect free.
+  const reParkOwed = reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
+    const owed = ctx.repairOwed;
+    if (!owed || !owed.resumeOnVisible) return ctx;
+    const seconds = event.type === hostPlaybackEvent.play ? owed.seconds : resumeOf(event);
+    const wantsPlay =
+      event.type === hostPlaybackEvent.play
+        ? true
+        : ctx.preference === playbackPreference.playing;
+    decisions.push({ kind: hostDecisionKind.deferRepair, reason: owed.reason, resumeSeconds: seconds });
+    return {
+      ...ctx,
+      preference: event.type === hostPlaybackEvent.play ? playbackPreference.playing : ctx.preference,
+      repairOwed: { reason: owed.reason, resumeOnVisible: true, seconds, wantsPlay },
+    };
+  });
 
   // A failure surfaced after the budget drained: the load is finished, but a
   // repair stays owed so an explicit user action may start a fresh source.
@@ -560,7 +605,10 @@ function activeLoadTransitions(
     transition(hostPlaybackEvent.visibilityVisible, hostPlaybackState.recovering, guard(hasResumeOnVisible), consumeOwedOnVisible),
     transition(hostPlaybackEvent.visibilityVisible, self, setVisible(true)),
 
-    // User intent: play / pause record the choice in the current state.
+    // User intent: play / pause record the choice in the current state. A
+    // repair parked for the visibility return must not be consumed by a
+    // hidden play, so its re-park row precedes the consume one.
+    transition(hostPlaybackEvent.play, self, guard(isHiddenParked), reParkOwed),
     transition(hostPlaybackEvent.play, hostPlaybackState.recovering, guard(isOwed), consumeOwedOnPlay),
     transition(hostPlaybackEvent.play, self, setPreference(playbackPreference.playing)),
     // A pause on a PLAYING load is provisional: video.js emits a native pause
@@ -571,20 +619,28 @@ function activeLoadTransitions(
     transition(hostPlaybackEvent.pause, hostPlaybackState.pausePending, guard(isPlaying)),
     transition(hostPlaybackEvent.pause, self, setPreference(playbackPreference.paused)),
 
-    // An owed repair consumed by an explicit scrub at the new target, paused.
+    // An owed repair consumed by an explicit scrub at the new target,
+    // paused; a repair parked for the visibility return only moves to the
+    // new target while the document is hidden, so its re-park row precedes
+    // the consume one.
+    transition(hostPlaybackEvent.seek, self, guard(isHiddenParked), reParkOwed),
     transition(hostPlaybackEvent.seek, hostPlaybackState.recovering, guard(isOwed), consumeOwedOnSeek),
     // An ordinary in-window seek needs no decision from the machine.
     transition(hostPlaybackEvent.seek, self),
 
     // Out-of-window / unresolved seeks restart the source now, retry-capped;
-    // while the document is hidden the automatic restart is parked instead of
-    // spending budget on a throttled worker.
+    // while the document is hidden the restart parks instead of spending
+    // budget on a throttled worker (and never feeds the churn ledger: a far
+    // scrub is user work, not an incident on a broken load), and a repair
+    // parked for the visibility return re-records the new target instead of
+    // consuming, so its re-park row precedes the consume one.
+    transition(hostPlaybackEvent.seekOutOfWindow, self, guard(isHiddenParked), reParkOwed),
     transition(hostPlaybackEvent.seekOutOfWindow, hostPlaybackState.recovering, guard(isOwed), consumeOwedOnSeek),
     transition(hostPlaybackEvent.seekOutOfWindow, hostPlaybackState.failed, guard(spentBudget), recordExhausted(recoveryReason.seek, hostReportKind.decode)),
-    transition(hostPlaybackEvent.seekOutOfWindow, self, guard(isHidden), recordDeferWhileHidden(recoveryReason.seek)),
+    transition(hostPlaybackEvent.seekOutOfWindow, self, guard(isHidden), recordDeferWhileHidden(recoveryReason.seek, false)),
     transition(hostPlaybackEvent.seekOutOfWindow, hostPlaybackState.recovering, recordRestart(recoveryReason.seek, AS_PREFERENCE)),
     transition(hostPlaybackEvent.stalledSeek, hostPlaybackState.failed, guard(spentBudget), recordExhausted(recoveryReason.seek, hostReportKind.decode)),
-    transition(hostPlaybackEvent.stalledSeek, self, guard(isHidden), recordDeferWhileHidden(recoveryReason.seek)),
+    transition(hostPlaybackEvent.stalledSeek, self, guard(isHidden), recordDeferWhileHidden(recoveryReason.seek, false)),
     transition(hostPlaybackEvent.stalledSeek, hostPlaybackState.recovering, recordRestart(recoveryReason.seek, AS_PREFERENCE)),
     transition(hostPlaybackEvent.seekResolved, self),
 
@@ -592,10 +648,11 @@ function activeLoadTransitions(
     transition(hostPlaybackEvent.loadFailed, hostPlaybackState.failed, guard(isTerminalFailure), recordFatal()),
     // A decode failure on a healthy load: paused defers (deferral never
     // spends budget, so a paused load with a drained budget still records a
-    // repair); otherwise an exhausted budget surfaces the decode error, a
-    // hidden document parks the automatic restart (no budget spent on a
-    // throttled worker), and a spendable visible run restarts at the watch
-    // position (resuming only when the choice is playing).
+    // repair); a saturated session surfaces, a hidden document parks the
+    // automatic restart (no budget spent on a throttled worker, and the
+    // parking counts against the churn ledger), and a spendable visible run
+    // restarts at the watch position (resuming only when the choice is
+    // playing).
     transition(
       hostPlaybackEvent.loadFailed,
       self,
@@ -610,15 +667,15 @@ function activeLoadTransitions(
     ),
     transition(
       hostPlaybackEvent.loadFailed,
-      self,
-      guard(decodeFailureWhen(isHidden)),
-      recordDeferWhileHidden(recoveryReason.decode),
-    ),
-    transition(
-      hostPlaybackEvent.loadFailed,
       hostPlaybackState.failed,
       guard(decodeFailureWhen(churnSaturated)),
       recordExhausted(recoveryReason.decode, hostReportKind.decode),
+    ),
+    transition(
+      hostPlaybackEvent.loadFailed,
+      self,
+      guard(decodeFailureWhen(isHidden)),
+      recordDeferWhileHidden(recoveryReason.decode),
     ),
     transition(
       hostPlaybackEvent.loadFailed,
@@ -630,8 +687,9 @@ function activeLoadTransitions(
     // Native element failure from a dead/replaced resource: an already-owed
     // repair ignores the echo; paused records one repair (deferral never
     // spends budget, so a paused load with a drained budget still records a
-    // repair); otherwise a retry-capped restart, and a drained budget reports
-    // a decode error.
+    // repair); a saturated session surfaces, a hidden document parks the
+    // restart without spending budget, a drained budget reports a decode
+    // error, and a spendable visible run gets the retry-capped restart.
     transition(hostPlaybackEvent.nativeError, self, guard(isOwed)),
     transition(hostPlaybackEvent.nativeError, self, guard(isPaused), recordDefer(recoveryReason.native)),
     transition(
@@ -640,8 +698,8 @@ function activeLoadTransitions(
       guard(spentBudget),
       recordExhausted(recoveryReason.native, hostReportKind.decode),
     ),
-    transition(hostPlaybackEvent.nativeError, self, guard(isHidden), recordDeferWhileHidden(recoveryReason.native)),
     transition(hostPlaybackEvent.nativeError, hostPlaybackState.failed, guard(churnSaturated), recordExhausted(recoveryReason.native, hostReportKind.decode)),
+    transition(hostPlaybackEvent.nativeError, self, guard(isHidden), recordDeferWhileHidden(recoveryReason.native)),
     transition(hostPlaybackEvent.nativeError, hostPlaybackState.recovering, recordRestart(recoveryReason.native, AS_PREFERENCE, true)),
   ];
 }
@@ -796,13 +854,16 @@ function pausePendingTransitions(decisions: HostDecision[]): Transition<string>[
       };
     });
 
-  const recordDeferWhileHidden = (reason: RecoveryReason) =>
+  const recordDeferWhileHidden = (reason: RecoveryReason, incident = true) =>
     reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
       const resumeSeconds = resumeOf(event);
       const wantsPlay = ctx.preference === playbackPreference.playing;
       decisions.push({ kind: hostDecisionKind.deferRepair, reason, resumeSeconds });
+      const nowMs = incident ? Date.now() : 0;
       return {
         ...ctx,
+        autoRecoveryStreak: incident ? nextAutoIncidentStreak(ctx, nowMs) : ctx.autoRecoveryStreak,
+        lastAutoIncidentAt: incident ? nowMs : ctx.lastAutoIncidentAt,
         repairOwed: { reason, resumeOnVisible: true, seconds: resumeSeconds, wantsPlay },
       };
     });
@@ -810,7 +871,7 @@ function pausePendingTransitions(decisions: HostDecision[]): Transition<string>[
   const consumeOwedOnVisible = reduce<HostPlaybackState, MachineEvent>((ctx) => {
     const owed = ctx.repairOwed;
     if (!owed || !owed.resumeOnVisible) return ctx;
-    const wantsPlay = owed.wantsPlay ?? false;
+    const wantsPlay = (owed.wantsPlay ?? false) && ctx.preference === playbackPreference.playing;
     decisions.push({
       kind: hostDecisionKind.restartSource,
       reason: owed.reason,
@@ -866,7 +927,7 @@ function pausePendingTransitions(decisions: HostDecision[]): Transition<string>[
       guard(spentBudget),
       recordExhausted(recoveryReason.seek, hostReportKind.decode),
     ),
-    transition(hostPlaybackEvent.seekOutOfWindow, hostPlaybackState.pausePending, guard(isHidden), recordDeferWhileHidden(recoveryReason.seek)),
+    transition(hostPlaybackEvent.seekOutOfWindow, hostPlaybackState.pausePending, guard(isHidden), recordDeferWhileHidden(recoveryReason.seek, false)),
     transition(hostPlaybackEvent.seekOutOfWindow, hostPlaybackState.recovering, recordRestart(recoveryReason.seek, AS_PREFERENCE)),
     transition(
       hostPlaybackEvent.stalledSeek,
@@ -874,7 +935,7 @@ function pausePendingTransitions(decisions: HostDecision[]): Transition<string>[
       guard(spentBudget),
       recordExhausted(recoveryReason.seek, hostReportKind.decode),
     ),
-    transition(hostPlaybackEvent.stalledSeek, hostPlaybackState.pausePending, guard(isHidden), recordDeferWhileHidden(recoveryReason.seek)),
+    transition(hostPlaybackEvent.stalledSeek, hostPlaybackState.pausePending, guard(isHidden), recordDeferWhileHidden(recoveryReason.seek, false)),
     transition(hostPlaybackEvent.stalledSeek, hostPlaybackState.recovering, recordRestart(recoveryReason.seek, AS_PREFERENCE)),
 
     // Failures during the fleeting window follow the playing-flavored
@@ -886,8 +947,8 @@ function pausePendingTransitions(decisions: HostDecision[]): Transition<string>[
       guard(spentBudget),
       recordExhausted(recoveryReason.native, hostReportKind.decode),
     ),
-    transition(hostPlaybackEvent.nativeError, hostPlaybackState.pausePending, guard(isHidden), recordDeferWhileHidden(recoveryReason.native)),
     transition(hostPlaybackEvent.nativeError, hostPlaybackState.failed, guard(churnSaturated), recordExhausted(recoveryReason.native, hostReportKind.decode)),
+    transition(hostPlaybackEvent.nativeError, hostPlaybackState.pausePending, guard(isHidden), recordDeferWhileHidden(recoveryReason.native)),
     transition(hostPlaybackEvent.nativeError, hostPlaybackState.recovering, recordRestart(recoveryReason.native, AS_PREFERENCE, true)),
     transition(hostPlaybackEvent.loadFailed, hostPlaybackState.failed, guard(isTerminalFailure), recordFatal()),
     transition(
@@ -898,15 +959,15 @@ function pausePendingTransitions(decisions: HostDecision[]): Transition<string>[
     ),
     transition(
       hostPlaybackEvent.loadFailed,
-      hostPlaybackState.pausePending,
-      guard(decodeFailureWhen(isHidden)),
-      recordDeferWhileHidden(recoveryReason.decode),
-    ),
-    transition(
-      hostPlaybackEvent.loadFailed,
       hostPlaybackState.failed,
       guard(decodeFailureWhen(churnSaturated)),
       recordExhausted(recoveryReason.decode, hostReportKind.decode),
+    ),
+    transition(
+      hostPlaybackEvent.loadFailed,
+      hostPlaybackState.pausePending,
+      guard(decodeFailureWhen(isHidden)),
+      recordDeferWhileHidden(recoveryReason.decode),
     ),
     transition(
       hostPlaybackEvent.loadFailed,
@@ -966,13 +1027,16 @@ function recoveringTransitions(decisions: HostDecision[]): Transition<string>[] 
       };
     });
 
-  const recordDeferWhileHidden = (reason: RecoveryReason) =>
+  const recordDeferWhileHidden = (reason: RecoveryReason, incident = true) =>
     reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
       const resumeSeconds = resumeOf(event);
       const wantsPlay = ctx.preference === playbackPreference.playing;
       decisions.push({ kind: hostDecisionKind.deferRepair, reason, resumeSeconds });
+      const nowMs = incident ? Date.now() : 0;
       return {
         ...ctx,
+        autoRecoveryStreak: incident ? nextAutoIncidentStreak(ctx, nowMs) : ctx.autoRecoveryStreak,
+        lastAutoIncidentAt: incident ? nowMs : ctx.lastAutoIncidentAt,
         repairOwed: { reason, resumeOnVisible: true, seconds: resumeSeconds, wantsPlay },
       };
     });
@@ -980,7 +1044,7 @@ function recoveringTransitions(decisions: HostDecision[]): Transition<string>[] 
   const consumeOwedOnVisible = reduce<HostPlaybackState, MachineEvent>((ctx) => {
     const owed = ctx.repairOwed;
     if (!owed || !owed.resumeOnVisible) return ctx;
-    const wantsPlay = owed.wantsPlay ?? false;
+    const wantsPlay = (owed.wantsPlay ?? false) && ctx.preference === playbackPreference.playing;
     decisions.push({
       kind: hostDecisionKind.restartSource,
       reason: owed.reason,
@@ -1024,7 +1088,7 @@ function recoveringTransitions(decisions: HostDecision[]): Transition<string>[] 
     // seek restart (parked while the document is hidden), or the shared budget
     // is spent and it reports.
     transition(hostPlaybackEvent.stalledSeek, hostPlaybackState.failed, guard(spentBudget), recordExhausted(recoveryReason.seek, hostReportKind.decode)),
-    transition(hostPlaybackEvent.stalledSeek, hostPlaybackState.recovering, guard(isHidden), recordDeferWhileHidden(recoveryReason.seek)),
+    transition(hostPlaybackEvent.stalledSeek, hostPlaybackState.recovering, guard(isHidden), recordDeferWhileHidden(recoveryReason.seek, false)),
     transition(hostPlaybackEvent.stalledSeek, hostPlaybackState.recovering, recordRestart(recoveryReason.seek, AS_PREFERENCE)),
 
     // The recovery load genuinely plays again: budget restores, window closes.
