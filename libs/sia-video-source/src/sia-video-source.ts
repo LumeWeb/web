@@ -1247,11 +1247,14 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // just re-stick). A load-level request id spans every seek of the load, so
   // a duplicate or late report survives the id filter: it is acted on only
   // while it names the seek the element is actually in (the target the host
-  // last forwarded, within tolerance; an unnamed report is that seek's own
-  // failure). A report naming some other target is a stale echo and is
-  // dropped before touching the in-flight seek's watchdog. A recovery's
-  // repositioning seek names no marker (its `seeking` is suppressed in
-  // `#onSeeking`), so the stall watchdog stays its only recovery there.
+  // last forwarded, within tolerance). A time-less report names no seek it
+  // can be matched against, and a report naming some other target is a stale
+  // echo; both are dropped before touching the in-flight seek's watchdog,
+  // which stays the only recovery for them. A snap-back to the position the
+  // element is already stuck on is a no-op write (no fresh `seeking` fires),
+  // so that watchdog is left armed to run the stalled-seek restart. A
+  // recovery's repositioning seek names no marker (its `seeking` is
+  // suppressed in `#onSeeking`), so the stall watchdog is its only recovery.
   // Never routes to the machine: no loadFailed, no restart.
   #handleSeekUnavailable(
     message: Extract<WorkerToMainMessage, { type: WorkerToMainMessageType.ERROR }>,
@@ -1259,16 +1262,26 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     const target = this.target;
     if (!target || !target.seeking) return;
     const inFlight = this.#lastForwardedSeekSeconds;
-    const namesInFlightSeek =
-      inFlight !== null &&
-      (message.time === undefined || Math.abs(inFlight - message.time) <= SEEK_DURATION_TOLERANCE_SECONDS);
-    if (inFlight === null || !namesInFlightSeek) return;
-    this.#cancelSeekWatchdog();
-    const seekTarget = message.time ?? inFlight;
+    // Only a report naming the in-flight target (within tolerance) is this
+    // seek's own failure. A time-less report matches no seek, and a foreign
+    // name is a stale echo of an older seek; dropping both keeps the
+    // in-flight seek's watchdog intact.
+    if (
+      inFlight === null ||
+      message.time === undefined ||
+      Math.abs(inFlight - message.time) > SEEK_DURATION_TOLERANCE_SECONDS
+    ) {
+      return;
+    }
     const snapBack =
-      Math.abs(this.#lastPlayheadSeconds - seekTarget) <= SEEK_DURATION_TOLERANCE_SECONDS
+      Math.abs(this.#lastPlayheadSeconds - message.time) <= SEEK_DURATION_TOLERANCE_SECONDS
         ? 0
         : this.#lastPlayheadSeconds;
+    // A snap-back to the position the element is already stuck on is a no-op
+    // write: the browser fires no fresh `seeking`, so the watchdog would
+    // never be re-armed. Leave it armed to run the stalled-seek restart.
+    if (Math.abs(target.currentTime - snapBack) <= SEEK_DURATION_TOLERANCE_SECONDS) return;
+    this.#cancelSeekWatchdog();
     target.currentTime = snapBack;
   }
 

@@ -2714,6 +2714,77 @@ describe('unavailable seek snap-back (host, nonfatal)', () => {
     vi.useRealTimers();
     host.destroy();
   });
+
+  it.skipIf(!IN_BROWSER)('leaves the watchdog armed for a same-position snap-back so the stall deadline still fires the restart', () => {
+    vi.useFakeTimers();
+    const { host, target, worker } = attachAndHandshake();
+    const activeId = loadWithDuration(host, worker, 'k', 60);
+
+    // The element played to t=0.2: the host recorded it as the last playhead.
+    target.currentTime = 0.2;
+    target.dispatchEvent(new Event('timeupdate'));
+    worker.sent.length = 0;
+
+    // The user seeks back to 0; the element enters seeking at 0 and the
+    // watchdog is armed for it.
+    target.currentTime = 0;
+    setSeeking(target, true);
+    target.dispatchEvent(new Event('seeking'));
+    worker.sent.length = 0;
+
+    // The worker reports the seek target (0) as unavailable. The playhead is
+    // within tolerance of the target, so the snap-back is 0: the element
+    // already sits there, the write is a no-op, and no fresh `seeking`
+    // re-arms anything.
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 0, type: WorkerToMainMessageType.ERROR });
+
+    // No snap occurred and no follow-up SEEK was issued.
+    expect(target.currentTime).toBe(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(0);
+
+    // The watchdog the original seek armed must survive the no-op write:
+    // past its deadline it fires the established stalled-seek recovery (a
+    // source restart at the target).
+    vi.advanceTimersByTime(6000);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+
+    vi.useRealTimers();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('drops a time-less unavailable report while a seek is in flight', () => {
+    vi.useFakeTimers();
+    const { host, target, worker } = attachAndHandshake();
+    const activeId = loadWithDuration(host, worker, 'k', 60);
+
+    target.currentTime = 30;
+    target.dispatchEvent(new Event('timeupdate'));
+    worker.sent.length = 0;
+
+    // The user seeks to 42; the element enters seeking and the watchdog is
+    // armed for the in-flight seek.
+    target.currentTime = 42;
+    setSeeking(target, true);
+    target.dispatchEvent(new Event('seeking'));
+    worker.sent.length = 0;
+
+    // A time-less unavailable report (a stale echo that names no target)
+    // lands while the 42 seek is in flight. It cannot be matched to that
+    // seek, so it is dropped: no snap back, and the in-flight seek's
+    // watchdog left untouched.
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, type: WorkerToMainMessageType.ERROR });
+
+    expect(target.currentTime).toBe(42);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(0);
+
+    // The in-flight seek's watchdog must survive the dropped report: past
+    // its deadline it fires the stalled-seek restart.
+    vi.advanceTimersByTime(6000);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+
+    vi.useRealTimers();
+    host.destroy();
+  });
 });
 
 /** Depth-first walk collecting every Uint8Array embedded in a message. */
