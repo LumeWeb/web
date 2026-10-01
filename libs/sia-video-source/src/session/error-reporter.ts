@@ -17,23 +17,31 @@
  * - transport (a ranged-read failure that exhausted its retry budget) maps to
  *   `network`, so the HOST can run its own reload recovery for a genuinely
  *   broken/unreachable transport;
- * - seek-target (a seek-restart the renter set cannot serve, e.g. a shard
- *   shortage) maps to `unsupported` with the prepared target seconds in the
- *   context: the condition is persistent, so a network-recovery reload would
- *   re-seek the same position and fail again;
+ * - seek-target (a requested seek position whose data cannot be served) is a
+ *   NONFATAL data-unavailable outcome: it maps to the reserved `unavailable`
+ *   wire kind, never `network`/`decode`/`unsupported`, so host handling of
+ *   it never triggers a transport-recovery reload. StreamController reports
+ *   it when a seek-restart run hits a raw shard-shortage failure. When the
+ *   failure names the failed seek target time (`time`), the report carries
+ *   it onto the ERROR wire message; this layer only forwards a value the
+ *   producer supplied, never fabricates one.
  * - sequential fallback is a mode, not an error (nothing here emits it);
  * - no raw secret-bearing SDK object or URL is included in a message.
  *
- * `workerErrorForFailure` maps a domain failure onto the existing
- * `WorkerErrorCode` wire kinds (`network`/`unsupported`/`decode`) so the
- * coordinator's `post({ type: WorkerToMainMessageType.ERROR, … })` call site stays a one-liner, and
+ * `workerErrorForFailure` maps a domain failure onto the
+ * `WorkerErrorCode` wire kinds (`network`/`unsupported`/`decode`/`unavailable`)
+ * so the coordinator's `post({ type: WorkerToMainMessageType.ERROR, … })` call site stays a one-liner, and
  * `createErrorReporter` is the adapter that enforces the drop rule before a
  * failure ever reaches the host.
  */
 
 import { workerErrorCode, type WorkerErrorCode } from '../protocol.ts';
 
-/** The condition that rejected a load; the `PlaybackFailure` discriminant vocabulary. */
+/**
+ * The condition that rejected a load (or, for `seekTarget`, the condition
+ * that made a requested seek unserviceable); the `PlaybackFailure`
+ * discriminant vocabulary.
+ */
 export const failureCondition = {
   cancelled: 'cancelled',
   codec: 'codec',
@@ -41,7 +49,7 @@ export const failureCondition = {
   layout: 'layout',
   mse: 'mse',
   normalization: 'normalization',
-  'seek-target': 'seek-target',
+  seekTarget: 'seek-target',
   transport: 'transport',
 } as const;
 
@@ -51,7 +59,7 @@ export type FailureCondition = (typeof failureCondition)[keyof typeof failureCon
 /** A condition-specific failure code from the {@link PlaybackFailure} domain. */
 export const failureCode = {
   append: 'append',
-  'data-unavailable': 'data-unavailable',
+  dataUnavailable: 'data-unavailable',
   decode: 'decode',
   destroyed: 'destroyed',
   eos: 'eos',
@@ -83,13 +91,32 @@ export interface ErrorReporter {
 /** A condition-specific failure code; see {@link failureCode}. */
 export type FailureCode = (typeof failureCode)[keyof typeof failureCode];
 
-/** The condition-specific failure model the host's error mapping understands. */
+/**
+ * The condition-specific failure model the host's error mapping understands.
+ *
+ * The `seekTarget` variant is reserved on the wire: the host treats it as a
+ * nonfatal data-unavailable outcome (no auto-reload). StreamController is
+ * its only runtime producer, reporting it when a seek-restart run fails
+ * with a raw shard-shortage error.
+ */
 export type PlaybackFailure =
   | { readonly cause?: unknown; readonly code: typeof failureCode.append | typeof failureCode.decode | typeof failureCode.eos | typeof failureCode.quota; readonly condition: typeof failureCondition.mse }
+  | {
+      readonly cause?: unknown;
+      readonly code: typeof failureCode.dataUnavailable;
+      readonly condition: typeof failureCondition.seekTarget;
+      readonly detail?: string;
+      /**
+       * Optional failed seek-target time in seconds: the requested seek
+       * position whose data cannot be served. Supplied by the producer when
+       * it can name one; this layer forwards it (only for this variant) and
+       * never invents it.
+       */
+      readonly time?: number;
+    }
   | { readonly cause?: unknown; readonly code: typeof failureCode.failed; readonly condition: typeof failureCondition.transport; readonly detail?: string }
   | { readonly cause?: unknown; readonly code: typeof failureCode.failed | typeof failureCode['unsupported-route']; readonly condition: typeof failureCondition.normalization; readonly detail?: string }
   | { readonly cause?: unknown; readonly code: typeof failureCode.timeout | typeof failureCode.unauthorized | typeof failureCode.unreachable; readonly condition: typeof failureCondition.transport; readonly detail?: string }
-  | { readonly cause?: unknown; readonly code: typeof failureCode['data-unavailable']; readonly condition: typeof failureCondition['seek-target']; readonly targetSeconds: number }
   | { readonly code: typeof failureCode.destroyed | typeof failureCode.superseded; readonly condition: typeof failureCondition.cancelled }
   | { readonly code: typeof failureCode.malformed | typeof failureCode.unknown | typeof failureCode['limits-exceeded']; readonly condition: typeof failureCondition.container; readonly detail?: string }
   | { readonly code: typeof failureCode.unsupported; readonly codec: string; readonly condition: typeof failureCondition.codec; readonly mime?: string }
@@ -102,6 +129,13 @@ export type PlaybackFailure =
 export interface WorkerErrorReport {
   readonly context?: string;
   readonly kind: WorkerErrorCode;
+  /**
+   * Optional failed seek-target time in seconds: present only when the
+   * failure is a seek-target data-unavailable outcome that names its target
+   * (`PlaybackFailure` `time`). Absent for every other kind; this layer
+   * forwards a producer-supplied value and never fabricates one.
+   */
+  readonly time?: number;
 }
 
 /**
@@ -126,7 +160,14 @@ export function createErrorReporter(emit: (report: WorkerErrorReport) => void): 
 export function workerErrorForFailure(failure: PlaybackFailure): null | WorkerErrorReport {
   const kind = errorKindForFailure(failure);
   if (kind === null) return null;
-  return { context: describeFailure(failure), kind };
+  // The optional failed seek-target time rides the wire only for the
+  // seek-target data-unavailable variant, and only when the producer named
+  // one; every other report carries no `time`.
+  return {
+    context: describeFailure(failure),
+    kind,
+    ...(failure.condition === failureCondition.seekTarget && failure.time !== undefined ? { time: failure.time } : {}),
+  };
 }
 
 function describeFailure(failure: PlaybackFailure): string {
@@ -138,6 +179,7 @@ function describeFailure(failure: PlaybackFailure): string {
     case failureCondition.container:
     case failureCondition.layout:
     case failureCondition.normalization:
+    case failureCondition.seekTarget:
     case failureCondition.transport: {
       // A transport failure (including the StreamController's
       // `transport:failed` with the SDK/short-read cause as `detail`) carries
@@ -148,10 +190,6 @@ function describeFailure(failure: PlaybackFailure): string {
     }
     case failureCondition.mse:
       return `${failure.condition}:${failure.code}`;
-    case failureCondition['seek-target']:
-      // The prepared target seconds ride the context so the wire names the
-      // position the renter set cannot serve, not just that a seek failed.
-      return `${failure.condition}:${failure.code} (target ${failure.targetSeconds})`;
   }
 }
 
@@ -162,12 +200,6 @@ function errorKindForFailure(failure: PlaybackFailure): null | WorkerErrorCode {
     case failureCondition.codec:
     case failureCondition.container:
     case failureCondition.layout:
-    case failureCondition['seek-target']:
-      // A position the renter set cannot serve (a shard shortage) is
-      // persistent: the host's network-recovery reload would re-seek the same
-      // position and hit the same shortage. Surface it as 'unsupported'
-      // (fatal, no auto-reload) so only genuine transport failures trigger
-      // reloads, exactly like normalization.
       return workerErrorCode.unsupported;
     case failureCondition.mse:
       return workerErrorCode.decode;
@@ -182,6 +214,12 @@ function errorKindForFailure(failure: PlaybackFailure): null | WorkerErrorCode {
       // decode/append failures (`mse`) keep the decode-recovery path to
       // themselves.
       return workerErrorCode.unsupported;
+    case failureCondition.seekTarget:
+      // A seek target whose data cannot be served is a NONFATAL
+      // data-unavailable outcome, not a broken transport; it maps to the
+      // reserved `unavailable` wire kind so host handling runs neither the
+      // `network` reload recovery nor the fatal `decode`/`unsupported` paths.
+      return workerErrorCode.unavailable;
     case failureCondition.transport:
       return workerErrorCode.network;
   }

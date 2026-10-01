@@ -339,7 +339,7 @@ export class WorkerComposition implements SessionCoordinator {
     this.#errorReporter = createErrorReporter((report) => {
       // Failures are scoped to the load that produced them; cancelled drops
       // never reach here (createErrorReporter filters them).
-      this.#postError(report.kind, this.#requestId, report.context);
+      this.#postError(report.kind, this.#requestId, report.context, report.time);
     });
 
     this.#loadPipeline = deps.loadPipeline ?? createLoadPipeline({ capabilities });
@@ -688,8 +688,14 @@ export class WorkerComposition implements SessionCoordinator {
     return controller;
   }
 
-  #postError(kind: WorkerErrorCode, requestId: null | RequestId, context?: string): void {
-    this.#post({ context, kind, requestId, type: WorkerToMainMessageType.ERROR });
+  #postError(kind: WorkerErrorCode, requestId: null | RequestId, context?: string, time?: number): void {
+    // The `time` field is set only when the report carries one, so every
+    // other ERROR message is unchanged.
+    this.#post(
+      time === undefined
+        ? { context, kind, requestId, type: WorkerToMainMessageType.ERROR }
+        : { context, kind, requestId, time, type: WorkerToMainMessageType.ERROR },
+    );
   }
 
   // Selects the session MSE site from the latest HELLO config + runtime
