@@ -412,6 +412,66 @@ describe('StreamController', () => {
     expect(h.controller.state).toBe('failed');
   });
 
+  it('reports a seek-restart shard shortage as a seek-target data-unavailable failure with the prepared target', () => {
+    // A shard shortage is a persistent capacity condition at the requested
+    // position: the host must be told which position is unservable, not just
+    // that a conversion failed. The failure carries the prepared target
+    // seconds and keeps the existing fatal behavior (failed state, one sink
+    // abort).
+    const shortage = new Error('not enough shards to serve the range');
+
+    const h = harness();
+    h.controller.start(h.load());
+
+    h.playback.fail(shortage, 'seek-restart', 45);
+
+    expect(h.controller.state).toBe('failed');
+    expect(h.errors).toHaveLength(1);
+    const reported = h.errors[0];
+    if (reported.condition === 'seek-target') {
+      expect(reported.code).toBe('data-unavailable');
+      expect(reported.targetSeconds).toBe(45);
+      expect(reported.cause).toBe(shortage);
+    } else {
+      throw new Error(`expected a seek-target failure, got ${reported.condition}`);
+    }
+    expect(h.sink.aborts).toHaveLength(1);
+  });
+
+  it('classifies a wrapped seek-restart shard shortage as seek-target through the cause chain', () => {
+    // A layer that wraps the SDK shortage error in its own Error must not
+    // hide the shortage: the cause-walk reaches it and the failure is still
+    // the typed seek-target one, not a generic normalization failure.
+    const h = harness();
+    h.controller.start(h.load());
+
+    h.playback.fail(new Error('conversion failed', { cause: new Error('not enough shards') }), 'seek-restart', 12.25);
+
+    expect(h.errors).toHaveLength(1);
+    const reported = h.errors[0];
+    if (reported.condition === 'seek-target') {
+      expect(reported.code).toBe('data-unavailable');
+      expect(reported.targetSeconds).toBe(12.25);
+    } else {
+      throw new Error(`expected a seek-target failure, got ${reported.condition}`);
+    }
+  });
+
+  it('keeps an initial-origin shard shortage on the existing normalization fatal path', () => {
+    // An initial run has no prepared seek target, so its shortage stays on
+    // the existing fatal classification: normalization:failed, exactly as
+    // before this distinction existed.
+    const h = harness();
+    h.controller.start(h.load());
+
+    h.playback.fail(new Error('insufficient shards'), 'initial');
+
+    expect(h.controller.state).toBe('failed');
+    expect(h.errors).toHaveLength(1);
+    expect(h.errors[0].condition).toBe('normalization');
+    expect(h.errors[0].code).toBe('failed');
+  });
+
   it('preserves existing fatal failure behavior for an initial run', () => {
     const h = harness();
     h.controller.start(h.load());
