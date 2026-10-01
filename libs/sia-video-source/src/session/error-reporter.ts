@@ -17,6 +17,10 @@
  * - transport (a ranged-read failure that exhausted its retry budget) maps to
  *   `network`, so the HOST can run its own reload recovery for a genuinely
  *   broken/unreachable transport;
+ * - seek-target (a seek-restart the renter set cannot serve, e.g. a shard
+ *   shortage) maps to `unsupported` with the prepared target seconds in the
+ *   context: the condition is persistent, so a network-recovery reload would
+ *   re-seek the same position and fail again;
  * - sequential fallback is a mode, not an error (nothing here emits it);
  * - no raw secret-bearing SDK object or URL is included in a message.
  *
@@ -37,6 +41,7 @@ export const failureCondition = {
   layout: 'layout',
   mse: 'mse',
   normalization: 'normalization',
+  'seek-target': 'seek-target',
   transport: 'transport',
 } as const;
 
@@ -46,6 +51,7 @@ export type FailureCondition = (typeof failureCondition)[keyof typeof failureCon
 /** A condition-specific failure code from the {@link PlaybackFailure} domain. */
 export const failureCode = {
   append: 'append',
+  'data-unavailable': 'data-unavailable',
   decode: 'decode',
   destroyed: 'destroyed',
   eos: 'eos',
@@ -83,6 +89,7 @@ export type PlaybackFailure =
   | { readonly cause?: unknown; readonly code: typeof failureCode.failed; readonly condition: typeof failureCondition.transport; readonly detail?: string }
   | { readonly cause?: unknown; readonly code: typeof failureCode.failed | typeof failureCode['unsupported-route']; readonly condition: typeof failureCondition.normalization; readonly detail?: string }
   | { readonly cause?: unknown; readonly code: typeof failureCode.timeout | typeof failureCode.unauthorized | typeof failureCode.unreachable; readonly condition: typeof failureCondition.transport; readonly detail?: string }
+  | { readonly cause?: unknown; readonly code: typeof failureCode['data-unavailable']; readonly condition: typeof failureCondition['seek-target']; readonly targetSeconds: number }
   | { readonly code: typeof failureCode.destroyed | typeof failureCode.superseded; readonly condition: typeof failureCondition.cancelled }
   | { readonly code: typeof failureCode.malformed | typeof failureCode.unknown | typeof failureCode['limits-exceeded']; readonly condition: typeof failureCondition.container; readonly detail?: string }
   | { readonly code: typeof failureCode.unsupported; readonly codec: string; readonly condition: typeof failureCondition.codec; readonly mime?: string }
@@ -141,6 +148,10 @@ function describeFailure(failure: PlaybackFailure): string {
     }
     case failureCondition.mse:
       return `${failure.condition}:${failure.code}`;
+    case failureCondition['seek-target']:
+      // The prepared target seconds ride the context so the wire names the
+      // position the renter set cannot serve, not just that a seek failed.
+      return `${failure.condition}:${failure.code} (target ${failure.targetSeconds})`;
   }
 }
 
@@ -151,6 +162,12 @@ function errorKindForFailure(failure: PlaybackFailure): null | WorkerErrorCode {
     case failureCondition.codec:
     case failureCondition.container:
     case failureCondition.layout:
+    case failureCondition['seek-target']:
+      // A position the renter set cannot serve (a shard shortage) is
+      // persistent: the host's network-recovery reload would re-seek the same
+      // position and hit the same shortage. Surface it as 'unsupported'
+      // (fatal, no auto-reload) so only genuine transport failures trigger
+      // reloads, exactly like normalization.
       return workerErrorCode.unsupported;
     case failureCondition.mse:
       return workerErrorCode.decode;
