@@ -601,6 +601,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // target instead of stranding it at 0 with the worker buffering elsewhere.
   #pendingReanchorSeconds: null | number = null;
 
+  // Set by a restart decision whose `wantsPlay` is true; applied exactly once
+  // at the fresh attach point (after reanchor) so the new resource plays
+  // natively. Cleared at the load boundary so a later attach never replays.
+  #pendingResumePlay = false;
+
   #preload: MediaPreloadType = siaVideoDefaultProps.preload;
 
   #ready = false;
@@ -975,6 +980,18 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     }
   }
 
+  // Applies the pending wants-play intent exactly once, after the fresh
+  // resource is attached and re-anchored. A rejected `play()` (e.g.
+  // NotAllowedError on a not-yet-ready element) is swallowed — the recovery
+  // budgets + stall watchdog bound the failure if this never plays.
+  #applyPendingResumePlay(target: HTMLVideoTargetLike | null): void {
+    if (!this.#pendingResumePlay || !target) return;
+    this.#pendingResumePlay = false;
+    void target.play().catch(() => {
+      // Expected on a not-yet-ready or policy-blocked element.
+    });
+  }
+
   // Setting/clearing for the unresolved-seek watchdog. When `seeking` is
   // still latched (no `seeked` has resolved it) past the stall interval, the
   // seek is judged stuck and the machine runs the same retry-capped seek
@@ -1069,6 +1086,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // HAVE_NOTHING for it); a recovery's recorded position applies here, the
     // same HAVE_NOTHING position the worker-MSE path gets on HANDLE.
     this.#applyPendingReanchor(target);
+    this.#applyPendingResumePlay(target);
   }
 
   // Setting/clearing for the provisional-pause confirmation (see `#pauseConfirm`).
@@ -1671,6 +1689,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // recorded position (see `#pendingReanchorSeconds`) belongs HERE, in
         // HAVE_NOTHING, not on the dead pipeline it was written before.
         this.#applyPendingReanchor(target);
+        this.#applyPendingResumePlay(target);
         return;
       }
       case WorkerToMainMessageType.HELLO_OK: {
@@ -2133,6 +2152,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // position from the old load may reach the new one (the restart helper
     // sets its own position again AFTER this reset).
     this.#pendingReanchorSeconds = null;
+    this.#pendingResumePlay = false;
     // Per-load window facts are gone until the next SOURCE_OK / PROGRESS.
     this.#endedReached = false;
     this.#durationSeconds = null;
@@ -2240,6 +2260,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // above); `#onSeeking` re-entrance from the eventual native seek is
     // suppressed while the machine is recovering.
     this.#pendingReanchorSeconds = decision.resumeSeconds;
+    this.#pendingResumePlay = decision.wantsPlay;
     const requestId = this.#requestId ?? nextRequestId();
     // The fresh source is positioned at the position the user was watching —
     // position 0 for a source the host never played yet — and only resumed
