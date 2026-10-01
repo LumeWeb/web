@@ -92,6 +92,22 @@ describe('ErrorReporter', () => {
     expect(report?.kind).toBe(workerErrorCode.unsupported);
   });
 
+  it('maps a seek-target data-unavailable failure to unsupported with the prepared target in the context', () => {
+    // A seek-restart the renter set cannot serve (a shard shortage) is a
+    // persistent condition at the requested position: the host's
+    // network-recovery reload would re-seek the same position and fail
+    // again, so the failure surfaces as fatal `unsupported` (no auto-reload)
+    // like normalization, and the context names the prepared target seconds.
+    const report = workerErrorForFailure({
+      code: failureCode['data-unavailable'],
+      condition: failureCondition['seek-target'],
+      targetSeconds: 45,
+    });
+    expect(report?.kind).toBe(workerErrorCode.unsupported);
+    expect(report?.kind).not.toBe(workerErrorCode.network);
+    expect(report?.context).toBe('seek-target:data-unavailable (target 45)');
+  });
+
   it('drops cancelled failures so stale load generations never surface', () => {
     expect(workerErrorForFailure({ code: failureCode.superseded, condition: failureCondition.cancelled })).toBeNull();
     expect(workerErrorForFailure({ code: failureCode.destroyed, condition: failureCondition.cancelled })).toBeNull();
