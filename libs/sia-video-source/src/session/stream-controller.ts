@@ -7,8 +7,16 @@
  * - start/seek/playhead trigger semantics;
  * - starting and tearing down the library conversion (one per play session);
  * - back-buffer eviction on `playhead()`;
- * - restarting the conversion through the playback's `restart` on `seek()`;
- * - fatal-error reporting.
+ * - failure reporting, which receives the failed run's origin (initial
+ *   sequential vs seek-restart) and, for a seek-restart run, the trim
+ *   target the run was prepared at: a raw shard-shortage failure from a
+ *   seek-restart run reports the reserved seek-target/data-unavailable
+ *   failure (`unavailable` wire kind, carrying the trim target as `time`
+ *   when the run names one) and stays NONFATAL; the session keeps its
+ *   `playing` state and its live sink, so the host's follow-up seek can
+ *   restart the conversion into the same sink. From the initial run, and
+ *   every other condition, the fatal mapping applies (state `failed`,
+ *   sink aborted, playback disposed on teardown).
  *
  * The conversion drives its own reads through the transport and requests
  * end-of-stream itself once its final fragment appends; the controller only
@@ -29,9 +37,9 @@
 import type { ConversionRunOrigin, MediaPlayback } from '../media/library-load.ts';
 import { isShardShortageError, isTransportReadError } from '../ranged-reader.ts';
 import type { AppendSink } from '../sink/append-sink.ts';
-import { type ErrorReporter, failureCode, failureCondition } from './error-reporter.ts';
+import { type ErrorReporter, failureCode, failureCondition, type PlaybackFailure } from './error-reporter.ts';
 
-/** Fatal-failure + state-change surface the coordinator observes. */
+/** Failure + state-change surface the coordinator observes. */
 export interface StreamController {
   /** Permanently stops the session, disposes the playback, aborts the sink. */
   destroy(reason?: unknown): void;
@@ -44,8 +52,10 @@ export interface StreamController {
    * then restarts the conversion from the requested timestamp via the
    * playback's `restart` and has the sink reset its parser — passing the
    * target so the fresh init segment lands in a clean SourceBuffer at the
-   * sought position. When the playback exposes no restart (or refuses the
-   * timestamp) the seek only reports the playhead.
+   * sought position. An accepted restart clears the nonfatal seek-fault
+   * latch so the replacement run's own failure reports again. When the
+   * playback exposes no restart (or refuses the timestamp) the seek only
+   * reports the playhead.
    */
   seek(timeSeconds: number): void;
   /** Binds one load and starts its conversion. */
@@ -56,7 +66,7 @@ export interface StreamController {
 
 /** Constructor bag for {@link createStreamController}. */
 export interface StreamControllerOptions {
-  /** Injectable fatal-failure reporting (maps to protocol ERROR). */
+  /** Injectable failure reporting (maps to protocol ERROR). */
   readonly errorReporter: ErrorReporter;
 }
 
@@ -99,6 +109,10 @@ class GenericStreamController implements StreamController {
   #load: null | StreamLoad = null;
   #loadGeneration = 0;
   readonly #onStateChange = new Set<(state: StreamState) => void>();
+  // Latches one nonfatal seek-target report per failed run so a repeat
+  // failure from the same dead run is not re-posted before the follow-up
+  // seek restarts the conversion (which clears the latch).
+  #seekFaultReported = false;
   #state: StreamState = streamState.idle;
 
   constructor(options: StreamControllerOptions) {
@@ -139,6 +153,8 @@ class GenericStreamController implements StreamController {
     // and no second playback is started; a playback that exposes no restart
     // only reports the playhead.
     if (load.playback.restart?.(timeSeconds) === true) {
+      // The replacement run is fresh: allow its own failure to report.
+      this.#seekFaultReported = false;
       load.sink.resetParser(load.loadGeneration, timeSeconds);
     }
   }
@@ -149,6 +165,8 @@ class GenericStreamController implements StreamController {
     this.#load = load;
     const loadGeneration = load.loadGeneration;
     this.#loadGeneration = loadGeneration;
+    // A new load is a new run: any earlier seek-fault report is stale.
+    this.#seekFaultReported = false;
     load.sink.resetParser(loadGeneration);
     this.#setState(streamState.starting);
     load.playback.start(load.sink, loadGeneration, {
@@ -156,6 +174,51 @@ class GenericStreamController implements StreamController {
       onError: (error, origin, targetSeconds) => this.#onError(loadGeneration, error, origin, targetSeconds),
     });
     this.#setState(streamState.playing);
+  }
+
+  /**
+   * Classifies a failed run's error into the `PlaybackFailure` domain:
+   *
+   * - a transport/ranged-read failure (a `ReadTransportError` that already
+   *   exhausted its retry budget, possibly wrapped by an intermediate layer)
+   *   is a distinct condition, not a normalization slip; error-reporter maps
+   *   it to the `network` wire kind so the HOST can run its reload recovery,
+   *   regardless of which run produced it;
+   * - a raw shard-shortage failure (ranged-reader surfaces it unwrapped: a
+   *   data-availability gap no retry can close) is the one case where the
+   *   run's origin matters. From a seek-restart run the requested seek
+   *   target cannot be serviced, so it reports the reserved `seekTarget` /
+   *   `data-unavailable` failure (the `unavailable` wire kind, nonfatal)
+   *   naming the run's trim target as `time` when the run has one; that
+   *   value is the position the failed conversion was trimmed at, never one
+   *   read out of the error. From the initial run there is no seek target to
+   *   name, so it maps through `normalization` to `unsupported` (fatal, no
+   *   auto-reload) and carries no `time`;
+   * - everything else is a genuine conversion failure, reported as
+   *   `normalization`, which maps to `unsupported`.
+   *
+   * The underlying cause's message rides as `detail` either way, so the wire
+   * context (via error-reporter's describeFailure) names the real failure
+   * instead of a bare `normalization:failed` / `transport:failed` /
+   * `seek-target:data-unavailable`.
+   *
+   * `targetSeconds` is the trim target the failed run was prepared at (only
+   * seek-restart runs have one); it reaches the seek-target failure as
+   * `time` when present and never reaches the transport or normalization
+   * variants.
+   */
+  #failureFor(error: unknown, origin: ConversionRunOrigin, targetSeconds?: number): PlaybackFailure {
+    const detail = error instanceof Error ? error.message : String(error);
+    if (isTransportReadError(error)) {
+      return { cause: error, code: failureCode.failed, condition: failureCondition.transport, detail };
+    }
+    if (origin === 'seek-restart' && isShardShortageError(error)) {
+      if (targetSeconds === undefined) {
+        return { cause: error, code: failureCode.dataUnavailable, condition: failureCondition.seekTarget, detail };
+      }
+      return { cause: error, code: failureCode.dataUnavailable, condition: failureCondition.seekTarget, detail, time: targetSeconds };
+    }
+    return { cause: error, code: failureCode.failed, condition: failureCondition.normalization, detail };
   }
 
   #onComplete(loadGeneration: number): void {
@@ -167,40 +230,22 @@ class GenericStreamController implements StreamController {
     if (this.#destroyed || loadGeneration !== this.#loadGeneration || this.#state === streamState.ended || this.#state === streamState.failed) return;
     const load = this.#load;
     if (!load) return;
-    this.#setState(streamState.failed);
-    if (origin === 'seek-restart' && targetSeconds !== undefined && isShardShortageError(error)) {
-      // A seek-restart the renter set cannot serve (a shard shortage,
-      // possibly wrapped by an intermediate layer) is a persistent condition
-      // at the requested position: report it as the typed seek-target
-      // data-unavailable failure carrying the prepared target, so the host
-      // can name the unservable position. error-reporter maps it to fatal
-      // `unsupported` (no auto-reload): a network-recovery reload would
-      // re-seek the same position and fail again. An initial-run shortage
-      // has no prepared target and falls through to the classification
-      // below, unchanged.
-      this.#errorReporter.report({
-        cause: error,
-        code: failureCode['data-unavailable'],
-        condition: failureCondition['seek-target'],
-        targetSeconds,
-      });
-    } else {
-      // A transport/ranged-read failure (a `ReadTransportError` that already
-      // exhausted its retry budget, possibly wrapped by an intermediate layer)
-      // is a distinct condition, not a normalization slip: error-reporter maps
-      // it to the `network` wire kind so the HOST runs its retry-capped reload
-      // recovery, while a genuine conversion failure stays `normalization` →
-      // `unsupported` (fatal, no auto-reload). Carry the underlying cause's
-      // message as `detail` either way so the wire context (via error-reporter's
-      // describeFailure) names the real failure instead of a bare
-      // `normalization:failed` / `transport:failed`.
-      this.#errorReporter.report({
-        cause: error,
-        code: failureCode.failed,
-        condition: isTransportReadError(error) ? failureCondition.transport : failureCondition.normalization,
-        detail: error instanceof Error ? error.message : String(error),
-      });
+    const failure = this.#failureFor(error, origin, targetSeconds);
+    if (failure.condition === failureCondition.seekTarget) {
+      // The session stays live on this outcome (no `failed` transition,
+      // sink and playback untouched) so the host's follow-up seek restarts
+      // the conversion into the same sink. One report per failed run; the
+      // latch clears on the next accepted restart (or new load).
+      if (this.#seekFaultReported) return;
+      this.#seekFaultReported = true;
+      this.#errorReporter.report(failure);
+      return;
     }
+    // Fatal path: the session fails, the sink is aborted, and the playback
+    // is released by the coordinator's teardown.
+    this.#seekFaultReported = false;
+    this.#setState(streamState.failed);
+    this.#errorReporter.report(failure);
     load.sink.abort(error);
   }
 

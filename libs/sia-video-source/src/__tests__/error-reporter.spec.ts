@@ -92,20 +92,91 @@ describe('ErrorReporter', () => {
     expect(report?.kind).toBe(workerErrorCode.unsupported);
   });
 
-  it('maps a seek-target data-unavailable failure to unsupported with the prepared target in the context', () => {
-    // A seek-restart the renter set cannot serve (a shard shortage) is a
-    // persistent condition at the requested position: the host's
-    // network-recovery reload would re-seek the same position and fail
-    // again, so the failure surfaces as fatal `unsupported` (no auto-reload)
-    // like normalization, and the context names the prepared target seconds.
+  it('maps an unavailable seek target to its own wire kind, distinct from network, decode, and unsupported', () => {
+    // A seek target whose data cannot be served is a nonfatal data-unavailable
+    // outcome — not a broken transport (`network`), a media decode/append
+    // failure (`decode`), or an unsupported source (`unsupported`). It maps
+    // deterministically onto its own reserved kind so a later host-routing
+    // step can treat it without triggering transport-recovery reloads.
     const report = workerErrorForFailure({
-      code: failureCode['data-unavailable'],
-      condition: failureCondition['seek-target'],
-      targetSeconds: 45,
-    });
-    expect(report?.kind).toBe(workerErrorCode.unsupported);
+      code: failureCode.dataUnavailable,
+      condition: failureCondition.seekTarget,
+    } satisfies PlaybackFailure);
+    expect(report?.kind).toBe(workerErrorCode.unavailable);
     expect(report?.kind).not.toBe(workerErrorCode.network);
-    expect(report?.context).toBe('seek-target:data-unavailable (target 45)');
+    expect(report?.kind).not.toBe(workerErrorCode.decode);
+    expect(report?.kind).not.toBe(workerErrorCode.unsupported);
+    expect(report?.context).toBe('seek-target:data-unavailable');
+  });
+
+  it('names the cause on the unavailable seek-target context', () => {
+    const report = workerErrorForFailure({
+      cause: new Error('range past end of object'),
+      code: failureCode.dataUnavailable,
+      condition: failureCondition.seekTarget,
+      detail: 'requested seek offset exceeds the object size',
+    } satisfies PlaybackFailure);
+    expect(report?.kind).toBe(workerErrorCode.unavailable);
+    expect(report?.context).toBe('seek-target:data-unavailable (requested seek offset exceeds the object size)');
+  });
+
+  it('carries an optional failed seek-target time on the unavailable report, and nowhere else', () => {
+    // A later producer supplies the failed seek target time; this layer only
+    // forwards what the failure already identifies — it never invents one.
+    const withTime = workerErrorForFailure({
+      code: failureCode.dataUnavailable,
+      condition: failureCondition.seekTarget,
+      time: 37.25,
+    } satisfies PlaybackFailure);
+    expect(withTime).toEqual({ context: 'seek-target:data-unavailable', kind: workerErrorCode.unavailable, time: 37.25 });
+
+    // The time coexists with the detail-based context (the message is unchanged).
+    const withDetail = workerErrorForFailure({
+      code: failureCode.dataUnavailable,
+      condition: failureCondition.seekTarget,
+      detail: 'requested seek offset exceeds the object size',
+      time: 37.25,
+    } satisfies PlaybackFailure);
+    expect(withDetail).toEqual({ context: 'seek-target:data-unavailable (requested seek offset exceeds the object size)', kind: workerErrorCode.unavailable, time: 37.25 });
+
+    // Absent on the failure → absent on the wire (no fabricated key).
+    expect(workerErrorForFailure({ code: failureCode.dataUnavailable, condition: failureCondition.seekTarget } satisfies PlaybackFailure)).toEqual({
+      context: 'seek-target:data-unavailable',
+      kind: workerErrorCode.unavailable,
+    });
+
+    // Every other condition maps exactly as before — no time key appears.
+    const transport = workerErrorForFailure({ code: failureCode.timeout, condition: failureCondition.transport });
+    expect(transport).toEqual({ context: 'transport:timeout', kind: workerErrorCode.network });
+    expect(transport).not.toHaveProperty('time');
+    expect(workerErrorForFailure({ code: failureCode.failed, condition: failureCondition.normalization, detail: 'mux' })).toEqual({
+      context: 'normalization:failed (mux)',
+      kind: workerErrorCode.unsupported,
+    });
+    expect(workerErrorForFailure({ code: failureCode.quota, condition: failureCondition.mse })).toEqual({ context: 'mse:quota', kind: workerErrorCode.decode });
+  });
+
+  it('adapter forwards the failed seek-target time on the emitted report (and not on other failures)', () => {
+    const emitted: WorkerErrorReport[] = [];
+    const reporter: ErrorReporter = createErrorReporter((report) => emitted.push(report));
+
+    reporter.report({ code: failureCode.dataUnavailable, condition: failureCondition.seekTarget, time: 37.25 } satisfies PlaybackFailure);
+    reporter.report({ code: failureCode.timeout, condition: failureCondition.transport } satisfies PlaybackFailure);
+
+    expect(emitted).toHaveLength(2);
+    expect(emitted[0]).toEqual({ context: 'seek-target:data-unavailable', kind: workerErrorCode.unavailable, time: 37.25 });
+    expect(emitted[1]).toEqual({ context: 'transport:timeout', kind: workerErrorCode.network });
+    expect(emitted[1]).not.toHaveProperty('time');
+  });
+
+  it('adapter surfaces an unavailable seek-target failure (it is never dropped like cancelled)', () => {
+    const emitted: WorkerErrorReport[] = [];
+    const reporter: ErrorReporter = createErrorReporter((report) => emitted.push(report));
+
+    reporter.report({ code: failureCode.dataUnavailable, condition: failureCondition.seekTarget } satisfies PlaybackFailure);
+
+    expect(emitted).toHaveLength(1);
+    expect(emitted[0]).toMatchObject({ kind: workerErrorCode.unavailable });
   });
 
   it('drops cancelled failures so stale load generations never surface', () => {

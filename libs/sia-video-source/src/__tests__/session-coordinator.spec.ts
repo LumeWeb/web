@@ -10,7 +10,7 @@
 import { describe, expect, it } from 'vitest';
 import { encryptToWorker } from '../app-key-handshake.ts';
 import type { PlaybackCapabilities } from '../capabilities/browser-capabilities.ts';
-import type { MediaLoadResult, MediaPlayback } from '../media/library-load.ts';
+import type { ConversionRunOrigin, MediaLoadResult, MediaPlayback } from '../media/library-load.ts';
 import {
   type MainToWorkerMessage,
   MainToWorkerMessageType,
@@ -20,6 +20,7 @@ import {
   type WorkerToMainMessage,
   WorkerToMainMessageType,
 } from '../protocol.ts';
+import { ReadTransportError } from '../ranged-reader.ts';
 import type { LoadPipeline, LoadRequest } from '../session/load-pipeline.ts';
 import {
   createSessionCoordinator,
@@ -109,6 +110,11 @@ class FakeLoadPipeline implements LoadPipeline {
 class FakePlayback implements MediaPlayback {
   disposed = 0;
   generation: null | number = null;
+  /**
+   * Which run the fake reports the next failure from: the initial sequential
+   * run by default, a seek-restart run after an accepted restart.
+   */
+  origin: ConversionRunOrigin = 'initial';
   sink: AppendSink | null = null;
   started = 0;
   #disposed = false;
@@ -117,7 +123,12 @@ class FakePlayback implements MediaPlayback {
   // load's `dispose()` cancels its byte source. Wired by tests that abandon a
   // ready session so source release stays observable at the coordinator.
   readonly #onDispose: (() => void) | undefined;
-  #onError: ((error: unknown) => void) | null = null;
+  #onError: ((error: unknown, origin: ConversionRunOrigin, targetSeconds?: number) => void) | null = null;
+  // The trim target the armed (seek-restart) run was prepared at, like the
+  // production run's `targetSeconds`: only an accepted restart names one, and
+  // it rides that run's failure as the third callback argument — never a
+  // value derived from the error itself.
+  #target: null | number = null;
 
   constructor(onDispose?: () => void) {
     this.#onDispose = onDispose;
@@ -139,13 +150,26 @@ class FakePlayback implements MediaPlayback {
   }
 
   fail(error: unknown): void {
-    this.#onError?.(error);
+    this.#onError?.(error, this.origin, this.#target ?? undefined);
+  }
+
+  restart(fromSeconds: number): boolean {
+    if (this.disposed > 0 || this.started === 0) return false;
+    // An accepted restart arms a replacement run prepared at the requested
+    // position, so failures from here on originate from a seek-restart run
+    // that names that trim target.
+    this.#target = fromSeconds;
+    this.origin = 'seek-restart';
+    return true;
   }
 
   start(
     sink: AppendSink,
     loadGeneration: number,
-    callbacks: { readonly onComplete: () => void; readonly onError: (error: unknown) => void },
+    callbacks: {
+      readonly onComplete: () => void;
+      readonly onError: (error: unknown, origin: ConversionRunOrigin, targetSeconds?: number) => void;
+    },
   ): void {
     this.started += 1;
     this.generation = loadGeneration;
@@ -676,6 +700,176 @@ describe('SessionCoordinator (WorkerComposition adapter)', () => {
     const errors = driver.message(WorkerToMainMessageType.ERROR);
     expect(errors.length).toBeGreaterThan(0);
     expect(errors[0].kind).toBe(workerErrorCode.network);
+  });
+});
+
+// ---- Shard-shortage failure routing through the session graph --------------
+
+describe('shard-shortage failure routing through the session coordinator', () => {
+  // A raw shard-shortage SDK failure as ranged-reader surfaces it: unwrapped,
+  // raw identity, and one of the two recognized wordings.
+  const shortage = (): Error => new Error('not enough shards to fulfill the requested range');
+
+  it('a seek-restart shard-shortage failure posts exactly one unavailable ERROR for the current request', async () => {
+    const driver = makeDriver();
+    const playback = new FakePlayback();
+    driver.pipeline.results.push(readyLoad(playback));
+    await driver.say({ preload: 'auto', requestId: 26, src: 'playable', type: MainToWorkerMessageType.SOURCE });
+    await waitForMessage(driver, WorkerToMainMessageType.SOURCE_OK);
+    expect(playback.started).toBe(1);
+    expect(playback.origin).toBe('initial');
+
+    // An accepted seek arms a replacement run on the fake, like the real
+    // conversion does, so the next failure reports from a seek-restart run.
+    await driver.say({ requestId: 26, time: 3.5, type: MainToWorkerMessageType.SEEK });
+    expect(playback.origin).toBe('seek-restart');
+
+    const failure = shortage();
+    playback.fail(failure);
+    // A second failure after the session already failed posts nothing.
+    playback.fail(shortage());
+
+    // End-to-end proof through the coordinator's stream controller and
+    // error reporter: the seek-restart shortage lands on the reserved
+    // nonfatal `unavailable` wire kind, scoped to the current request,
+    // posted exactly once.
+    const errors = driver.message(WorkerToMainMessageType.ERROR);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toMatchObject({ kind: workerErrorCode.unavailable, requestId: 26 });
+    expect(errors[0].context).toContain('seek-target:data-unavailable');
+    expect(errors[0].context).toContain(failure.message);
+  });
+
+  it('a shard-shortage failure from the initial run stays unsupported (no seek target to name)', async () => {
+    const driver = makeDriver();
+    const playback = new FakePlayback();
+    driver.pipeline.results.push(readyLoad(playback));
+    await driver.say({ preload: 'auto', requestId: 27, src: 'playable', type: MainToWorkerMessageType.SOURCE });
+    await waitForMessage(driver, WorkerToMainMessageType.SOURCE_OK);
+    expect(playback.origin).toBe('initial');
+
+    playback.fail(new Error('insufficient shards to fulfill the requested range'));
+
+    const errors = driver.message(WorkerToMainMessageType.ERROR);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toMatchObject({ kind: workerErrorCode.unsupported, requestId: 27 });
+    expect(errors[0].kind).not.toBe(workerErrorCode.unavailable);
+    // No seek target to name: the wire message carries no time field at all.
+    expect(errors[0].time).toBeUndefined();
+    expect(errors[0].context).toContain('normalization:failed');
+  });
+
+  it('a seek-restart shard shortage at 45.5 posts an unavailable ERROR carrying the failed target as time for the current request', async () => {
+    const driver = makeDriver();
+    const playback = new FakePlayback();
+    driver.pipeline.results.push(readyLoad(playback));
+    await driver.say({ preload: 'auto', requestId: 29, src: 'playable', type: MainToWorkerMessageType.SOURCE });
+    await waitForMessage(driver, WorkerToMainMessageType.SOURCE_OK);
+    expect(playback.origin).toBe('initial');
+
+    // The accepted seek arms the replacement run at 45.5; when that run's
+    // data cannot be served, the failure names the run's own trim target,
+    // and the coordinator forwards that producer-supplied value onto the
+    // wire — it never invents one.
+    await driver.say({ requestId: 29, time: 45.5, type: MainToWorkerMessageType.SEEK });
+    expect(playback.origin).toBe('seek-restart');
+
+    playback.fail(shortage());
+
+    const errors = driver.message(WorkerToMainMessageType.ERROR);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toMatchObject({ kind: workerErrorCode.unavailable, requestId: 29, time: 45.5 });
+    expect(errors[0].time).toBe(45.5);
+    expect(errors[0].context).toContain('seek-target:data-unavailable');
+  });
+
+  it('a transport read failure posts a network ERROR with no time, even from a named seek-restart run', async () => {
+    const driver = makeDriver();
+    const playback = new FakePlayback();
+    driver.pipeline.results.push(readyLoad(playback));
+    await driver.say({ preload: 'auto', requestId: 30, src: 'playable', type: MainToWorkerMessageType.SOURCE });
+    await waitForMessage(driver, WorkerToMainMessageType.SOURCE_OK);
+
+    // Even with an armed 45.5 seek-restart run, the transport variant never
+    // carries a time — the trim target only rides the seek-target variant.
+    await driver.say({ requestId: 30, time: 45.5, type: MainToWorkerMessageType.SEEK });
+    playback.fail(
+      new ReadTransportError('ranged read failed after 3 attempts (expected 65536 bytes at 0)', {
+        attempts: 3,
+        cause: new Error('Sia SDK read ended before the requested range was delivered'),
+        expectedBytes: 65536,
+        position: 0,
+      }),
+    );
+
+    const errors = driver.message(WorkerToMainMessageType.ERROR);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toMatchObject({ kind: workerErrorCode.network, requestId: 30 });
+    expect(errors[0].time).toBeUndefined();
+    expect(errors[0].context).toContain('transport:failed');
+  });
+
+  it('an inbound SEEK after an unavailable failure restarts the conversion on the existing playback and session (no new SOURCE)', async () => {
+    const resets: { generation: number; target?: number }[] = [];
+    const aborts: unknown[] = [];
+    const driver = makeDriver({
+      sinkFactory: () => ({
+        abort: (reason?: unknown) => {
+          aborts.push(reason);
+        },
+        append: (_unit: AppendUnit) => undefined,
+        evictBackBuffer: () => Promise.resolve(false),
+        requestEndOfStream: () => undefined,
+        resetParser: (generation: number, target?: number) => {
+          resets.push(target === undefined ? { generation } : { generation, target });
+        },
+        waitForBufferedAhead: () => Promise.resolve(),
+        waitForCapacity: () => Promise.resolve(),
+      }),
+      supportsWorkerMse: () => true,
+    });
+    const playback = new FakePlayback();
+    driver.pipeline.results.push(readyLoad(playback));
+    await driver.say({ preload: 'auto', requestId: 28, src: 'playable', type: MainToWorkerMessageType.SOURCE });
+    await waitForMessage(driver, WorkerToMainMessageType.SOURCE_OK);
+    expect(playback.started).toBe(1);
+
+    // An accepted seek arms a replacement run on the fake.
+    await driver.say({ requestId: 28, time: 3.5, type: MainToWorkerMessageType.SEEK });
+    expect(playback.origin).toBe('seek-restart');
+
+    // The follow-up seek target's data cannot be served: the coordinator
+    // reports the nonfatal unavailable failure, but the session stays live.
+    playback.fail(shortage());
+    const errors = driver.message(WorkerToMainMessageType.ERROR);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toMatchObject({ kind: workerErrorCode.unavailable, requestId: 28 });
+    expect(errors[0].context).toContain('seek-target:data-unavailable');
+    expect(aborts).toEqual([]);
+    expect(playback.disposed).toBe(0);
+
+    // The host's follow-up SEEK arrives inbound: it must restart the
+    // conversion on the SAME playback/session — sink re-anchored on the
+    // same load generation, no second playback start, no new SOURCE load.
+    await driver.say({ requestId: 28, time: 1.25, type: MainToWorkerMessageType.SEEK });
+    expect(playback.started).toBe(1);
+    expect(driver.pipeline.calls).toHaveLength(1);
+    expect(driver.message(WorkerToMainMessageType.SOURCE_OK)).toHaveLength(1);
+    expect(resets).toEqual([
+      { generation: 1 },
+      { generation: 1, target: 3.5 },
+      { generation: 1, target: 1.25 },
+    ]);
+    expect(driver.message(WorkerToMainMessageType.ERROR)).toHaveLength(1);
+
+    // The restarted run is fresh: a second shortage reports again on the
+    // same session.
+    playback.fail(shortage());
+    const errors2 = driver.message(WorkerToMainMessageType.ERROR);
+    expect(errors2).toHaveLength(2);
+    expect(errors2[1]).toMatchObject({ kind: workerErrorCode.unavailable, requestId: 28 });
+    expect(aborts).toEqual([]);
+    expect(playback.disposed).toBe(0);
   });
 });
 
