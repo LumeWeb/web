@@ -5,7 +5,7 @@
  * serves the fragment that CONTAINS it, instead of erroring and surfacing a
  * decode-class failure to the host.
  *
- * Two layers:
+ * Three layers:
  *
  * - `clampSeekTarget` — a pure function: a target past the servable end is
  *   pulled back inside the last fragment (still as close to the tail as the
@@ -18,13 +18,52 @@
  *   the containing tail media fragment and a clean completion — never an
  *   "incomplete CMAF stream" error — so the clamp keeps the seek serviceable
  *   end to end.
+ *
+ * - A clamped restart whose second (clamped) preparation fails reports the
+ *   clamped trim target to the playback's error callback, not the raw seek
+ *   target the clamp pulled back.
  */
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PlaybackCapabilities } from '../capabilities/browser-capabilities.ts';
-import { clampSeekTarget, inspectMediaLibrary, type ReadyMediaLoad } from '../media/library-load.ts';
+import {
+  clampSeekTarget,
+  type ConversionRunOrigin,
+  inspectMediaLibrary,
+  type ReadyMediaLoad,
+} from '../media/library-load.ts';
 import type { AppendSink, AppendUnit } from '../sink/append-sink.ts';
 import { MemoryByteSource } from '../transport/memory-byte-source.ts';
 import { progressiveMp4Fixture } from './fixtures/progressive-mp4-fixture.ts';
+
+/**
+ * Fault injection for `Conversion.init`, counted by call. The shared input
+ * caches every range it has read, so a restart's preparations never touch the
+ * ByteSource again and a source-level fault cannot reach the clamped prepare;
+ * failing the Nth init is the only seam that lands on a chosen preparation.
+ */
+const initFault = vi.hoisted(() => ({ calls: 0, failAtCall: 0 }));
+
+vi.mock('mediabunny', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('mediabunny')>();
+  return {
+    ...actual,
+    Conversion: {
+      ...actual.Conversion,
+      init: (options: Parameters<typeof actual.Conversion.init>[0]) => {
+        initFault.calls += 1;
+        if (initFault.failAtCall > 0 && initFault.calls === initFault.failAtCall) {
+          throw new Error('injected clamped-prepare failure');
+        }
+        return actual.Conversion.init(options);
+      },
+    },
+  };
+});
+
+beforeEach(() => {
+  initFault.calls = 0;
+  initFault.failAtCall = 0;
+});
 
 /** Seconds of media in the built fixture. */
 const FIXTURE_SECONDS = 120;
@@ -224,6 +263,43 @@ describe('tail/far seek restart serves the containing fragment instead of failin
     });
     expect(initIndices.length).toBe(2);
     expect(unitsAfterInit(sink.units, initIndices[1]).some((unit) => unit.kind === 'media')).toBe(true);
+
+    playback.dispose();
+  });
+
+  it('a clamped restart whose second prepare fails reports the clamped target, not the raw seek target', async () => {
+    // Fail the third Conversion.init: the first is the initial run, the
+    // second the raw replacement armed at the requested target, the third the
+    // clamped re-arm the driver arms after the true-end query resolves.
+    initFault.failAtCall = 3;
+    const { durationSeconds, playback } = await loadPlayback();
+    const sink = new RecordingSink();
+    const errors: {
+      readonly error: unknown;
+      readonly origin: ConversionRunOrigin;
+      readonly targetSeconds: number | undefined;
+    }[] = [];
+
+    playback.start(sink, 5, {
+      onComplete: () => undefined,
+      onError: (error, origin, targetSeconds) => {
+        errors.push({ error, origin, targetSeconds });
+      },
+    });
+    await waitFor(() => sink.eos.length >= 1);
+
+    const raw = durationSeconds + 500;
+    expect(playback.restart?.(raw)).toBe(true);
+    await waitFor(() => errors.length >= 1);
+
+    // The failed run is the clamped re-arm: a seek-restart origin and the
+    // clamped trim target the run was prepared at, not the raw request that
+    // cleared the media's true end.
+    expect(errors.length).toBe(1);
+    expect((errors[0].error as Error).message).toBe('injected clamped-prepare failure');
+    expect(errors[0].origin).toBe('seek-restart');
+    expect(errors[0].targetSeconds).toBe(durationSeconds - SEEK_TAIL_GUARD_SECONDS);
+    expect(errors[0].targetSeconds).not.toBe(raw);
 
     playback.dispose();
   });

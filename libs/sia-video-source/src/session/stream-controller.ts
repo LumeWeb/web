@@ -26,7 +26,7 @@
  * can never end or fail a newer load.
  */
 
-import type { MediaPlayback } from '../media/library-load.ts';
+import type { ConversionRunOrigin, MediaPlayback } from '../media/library-load.ts';
 import { isTransportReadError } from '../ranged-reader.ts';
 import type { AppendSink } from '../sink/append-sink.ts';
 import { type ErrorReporter, failureCode, failureCondition } from './error-reporter.ts';
@@ -153,7 +153,7 @@ class GenericStreamController implements StreamController {
     this.#setState(streamState.starting);
     load.playback.start(load.sink, loadGeneration, {
       onComplete: () => this.#onComplete(loadGeneration),
-      onError: (error) => this.#onError(loadGeneration, error),
+      onError: (error, origin, targetSeconds) => this.#onError(loadGeneration, error, origin, targetSeconds),
     });
     this.#setState(streamState.playing);
   }
@@ -163,7 +163,7 @@ class GenericStreamController implements StreamController {
     this.#setState(streamState.ended);
   }
 
-  #onError(loadGeneration: number, error: unknown): void {
+  #onError(loadGeneration: number, error: unknown, _origin: ConversionRunOrigin, _targetSeconds?: number): void {
     if (this.#destroyed || loadGeneration !== this.#loadGeneration || this.#state === streamState.ended || this.#state === streamState.failed) return;
     const load = this.#load;
     if (!load) return;
