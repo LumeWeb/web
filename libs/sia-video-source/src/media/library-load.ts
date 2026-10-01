@@ -440,6 +440,10 @@ function createMediaPlayback(options: {
           videoTrack,
         });
         cancelConversion(previous);
+        // The trim target the in-flight preparation was armed with, so a
+        // preparation failure reports the position its run was prepared at,
+        // not the raw request a clamp may have pulled back.
+        let preparedTrim = target;
         let replacement: ConversionRun;
         try {
           const [end, raw] = await Promise.all([endPromise, replacementPromise]);
@@ -451,6 +455,7 @@ function createMediaPlayback(options: {
             // would trim every sample out, so arm one trimmed into the last
             // reachable fragment instead of starting the raw one.
             cancelConversion(raw);
+            preparedTrim = trimStart;
             replacement = await prepareConversion({
               assembly,
               audioTrack,
@@ -465,7 +470,7 @@ function createMediaPlayback(options: {
           // failed preparation already consumed its ordinal, so its origin is
           // derivable from the current assembly ordinal (always a seek-restart
           // one: the initial run is armed before any restart exists).
-          if (!assembly.disposed && !isCancelledError(error)) onError?.(error, originForRun(assembly.run), target);
+          if (!assembly.disposed && !isCancelledError(error)) onError?.(error, originForRun(assembly.run), preparedTrim);
           continue;
         }
         // A newer seek (or teardown) landed while this replacement was being
