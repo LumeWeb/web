@@ -1100,17 +1100,18 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // Immediately detaches the media resource the element currently exposes for
   // the load being replaced, so the old frame/end/seek cannot stay live while
   // the fresh source resolves (see the `src` setter). Worker mode: clear the
-  // transferred MediaSourceHandle (the element's srcObject). Main mode / any
-  // pre-mode element still holding a stale src: remove the element `src`
-  // attribute (the object URL was revoked by the load reset). A no-op when the
-  // host is not attached or nothing is live — a plain first arm on an empty
-  // element is not a replacement. The element is left HAVE_NOTHING, the exact
-  // state the fresh HANDLE / object URL attaches into, so the new attach
-  // semantics (reanchor/resume + event identity) are preserved.
+  // element's srcObject directly (the transferred MediaSourceHandle may
+  // outlive #activeHandle after a load() reset). Main mode / any pre-mode
+  // element still holding a stale src: remove the element `src` attribute
+  // (the object URL was revoked by the load reset). A no-op when the host is
+  // not attached or nothing is live — a plain first arm on an empty element
+  // is not a replacement. The element is left HAVE_NOTHING, the exact state
+  // the fresh HANDLE / object URL attaches into, so the new attach semantics
+  // (reanchor/resume + event identity) are preserved.
   #detachCurrentResource(): void {
     const target = this.target;
     if (!target) return;
-    if (this.#mode === workerMode.worker && this.#activeHandle !== null) {
+    if (this.#mode === workerMode.worker) {
       const element = target as unknown as { srcObject: unknown };
       if (element.srcObject !== null) element.srcObject = null;
       return;

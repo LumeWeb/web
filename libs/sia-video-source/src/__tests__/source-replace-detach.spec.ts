@@ -164,6 +164,29 @@ describe('immediate source-replacement detach (worker mode)', () => {
     host.destroy();
   });
 
+  it.skipIf(!IN_BROWSER)('clears the stale srcObject when a distinct src is set after host.load() reset the active handle', () => {
+    const { host, target, worker } = workerSession();
+    const oldHandle = new MediaStream();
+
+    host.src = 'a';
+    const idA = newestSourceId(worker);
+    worker.reply({ info: workerInfo, requestId: idA, type: WorkerToMainMessageType.SOURCE_OK });
+    worker.reply({ handle: oldHandle, requestId: idA, type: WorkerToMainMessageType.HANDLE } as unknown as WorkerToMainMessage);
+    expect(srcObjectOf(target)).toBe(oldHandle);
+
+    // An explicit load() resets the active handle (load-boundary bookkeeping)
+    // without detaching the element's srcObject: the old resource stays live.
+    host.load();
+    expect(srcObjectOf(target)).toBe(oldHandle);
+
+    // A distinct src must clear the stale srcObject NOW, even though
+    // #activeHandle was already nulled by load(): the element still exposes
+    // the old MediaSourceHandle.
+    host.src = 'b';
+    expect(srcObjectOf(target)).toBeNull();
+    host.destroy();
+  });
+
   it.skipIf(!IN_BROWSER)('leaves the element untouched when the same src is re-assigned', () => {
     const { host, target, worker } = workerSession();
     const oldHandle = new MediaStream();
