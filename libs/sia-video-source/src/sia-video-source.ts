@@ -61,6 +61,7 @@ import {
   workerMode,
   type WorkerMode,
   type WorkerMsePreference,
+  type WorkerToMainMessage,
   WorkerToMainMessageType,
 } from './protocol.ts';
 
@@ -505,6 +506,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // an older id and is discarded. Cleared on detach/destroy so a late reply
   // never gates anything for a host with no live handshake.
   #helloRequestId: null | RequestId = null;
+  // The seek target the host last forwarded while the element entered
+  // `seeking` (`#onSeeking`), cleared on `seeked` and at load boundaries. A
+  // load-level request id spans every seek of the load, so this is the only
+  // identity a late `unavailable` report can be matched against.
+  #lastForwardedSeekSeconds: null | number = null;
   // Most recent playhead the host forwarded via PLAYHEAD; decode/seek recovery
   // repositions the reloaded load here. Starts at 0 until the first
   // timeupdate.
@@ -1232,6 +1238,53 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     }
   }
 
+  // A worker `unavailable` ERROR means the seek target's data cannot be
+  // served (nonfatal). The element is stuck in `seeking` at an unreachable
+  // position; snap it back to the last playable position so the normal
+  // seeking path (triggered by the currentTime setter) issues a fresh SEEK
+  // to a position the worker CAN serve. Falls back to 0 when the playhead
+  // and target are within tolerance (snapping "back" to the same spot would
+  // just re-stick). A load-level request id spans every seek of the load, so
+  // a duplicate or late report survives the id filter: it is acted on only
+  // while it names the seek the element is actually in (the target the host
+  // last forwarded, within tolerance). A time-less report names no seek it
+  // can be matched against, and a report naming some other target is a stale
+  // echo; both are dropped before touching the in-flight seek's watchdog,
+  // which stays the only recovery for them. A snap-back to the position the
+  // element is already stuck on is a no-op write (no fresh `seeking` fires),
+  // so that watchdog is left armed to run the stalled-seek restart. A
+  // recovery's repositioning seek names no marker (its `seeking` is
+  // suppressed in `#onSeeking`), so the stall watchdog is its only recovery.
+  // Never routes to the machine: no loadFailed, no restart.
+  #handleSeekUnavailable(
+    message: Extract<WorkerToMainMessage, { type: WorkerToMainMessageType.ERROR }>,
+  ): void {
+    const target = this.target;
+    if (!target || !target.seeking) return;
+    const inFlight = this.#lastForwardedSeekSeconds;
+    // Only a report naming the in-flight target (within tolerance) is this
+    // seek's own failure. A time-less report matches no seek, and a foreign
+    // name is a stale echo of an older seek; dropping both keeps the
+    // in-flight seek's watchdog intact.
+    if (
+      inFlight === null ||
+      message.time === undefined ||
+      Math.abs(inFlight - message.time) > SEEK_DURATION_TOLERANCE_SECONDS
+    ) {
+      return;
+    }
+    const snapBack =
+      Math.abs(this.#lastPlayheadSeconds - message.time) <= SEEK_DURATION_TOLERANCE_SECONDS
+        ? 0
+        : this.#lastPlayheadSeconds;
+    // A snap-back to the position the element is already stuck on is a no-op
+    // write: the browser fires no fresh `seeking`, so the watchdog would
+    // never be re-armed. Leave it armed to run the stalled-seek restart.
+    if (Math.abs(target.currentTime - snapBack) <= SEEK_DURATION_TOLERANCE_SECONDS) return;
+    this.#cancelSeekWatchdog();
+    target.currentTime = snapBack;
+  }
+
   // HELLO config: the connection metadata plus the host's worker-MSE
   // preference. The preference is only forwarded when the app explicitly set
   // it (default `'auto'` leaves the wire payload byte-identical to before),
@@ -1455,6 +1508,15 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // request id) — stand.
         if (message.requestId !== null) {
           if (this.#requestId === null || message.requestId !== this.#requestId) return;
+        }
+        // An unavailable seek target is nonfatal: the data at that position
+        // cannot be served, but the rest of the source is fine. Snap the
+        // element back to the last playable position (the normal seeking path
+        // then issues the follow-up SEEK) instead of routing to the machine,
+        // which would treat it as a load failure and reset the playhead.
+        if (message.kind === workerErrorCode.unavailable) {
+          this.#handleSeekUnavailable(message);
+          return;
         }
         // The worker already exhausted its own reader retries before posting
         // this ERROR. The machine routes the failure by kind: a decode/seek
@@ -1688,6 +1750,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     if (!target || event.target !== target) return;
     this.#cancelPauseConfirm();
     this.#cancelSeekWatchdog();
+    this.#lastForwardedSeekSeconds = null;
     // If the machine was mid-recovery as a seek restart, its repositioning
     // seek resolving closes the window and restores the budget; a decode
     // recovery's incidental repositioning seek resolving changes nothing (the
@@ -1738,6 +1801,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // The reset carries the target so the main-thread buffer is repositioned
     // to the sought position (the trimmed output's timestamps rebase to zero).
     this.#appendPipe?.reset(seekSeconds);
+    // Name the in-flight seek so a late `unavailable` report can be matched
+    // against it (the load-level request id spans every seek of the load).
+    this.#lastForwardedSeekSeconds = seekSeconds;
     this.#send({
       requestId: this.#requestId ?? nextRequestId(),
       time: seekSeconds,
@@ -1929,8 +1995,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#durationSeconds = null;
     this.#workerBufferEndSeconds = 0;
     // No load is seeking after a boundary; a stale watchdog must not fire into
-    // the fresh pipeline.
+    // the fresh pipeline, and a stale in-flight-seek marker must not name a
+    // target to a late `unavailable` report.
     this.#cancelSeekWatchdog();
+    this.#lastForwardedSeekSeconds = null;
     // Position memory belongs to the old source too: a fresh load starts at 0
     // and must never seek back to the previous playhead on its own recovery.
     this.#lastPlayheadSeconds = 0;

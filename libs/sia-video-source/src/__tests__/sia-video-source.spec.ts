@@ -6,7 +6,7 @@ import {
   generateWorkerKeyPair,
 } from '../app-key-handshake.ts';
 import { MseAppendPipe } from '../mse-pipe.ts';
-import { type AppKeyEnvelope, DEFAULT_FMP4_MIME, isAppKeyEnvelope, type MainToWorkerMessage, MainToWorkerMessageType, PROTOCOL_VERSION, WORKER_PUBLIC_KEY_LENGTH, type WorkerMode, type WorkerToMainMessage, WorkerToMainMessageType } from '../protocol.ts';
+import { type AppKeyEnvelope, DEFAULT_FMP4_MIME, isAppKeyEnvelope, type MainToWorkerMessage, MainToWorkerMessageType, PROTOCOL_VERSION, WORKER_PUBLIC_KEY_LENGTH, workerErrorCode, type WorkerMode, type WorkerToMainMessage, WorkerToMainMessageType } from '../protocol.ts';
 import {
   type RecoveryChangeDetail,
   siaRecoveryChange,
@@ -2430,6 +2430,359 @@ describe('the typed recovery-change event', () => {
       { active: true, reason: 'seek', resumeSeconds: 120, wantsPlay: true },
       { active: false },
     ]);
+    host.destroy();
+  });
+});
+
+describe('unavailable seek snap-back (host, nonfatal)', () => {
+  // A worker `unavailable` ERROR on a seek target means the data at that
+  // position cannot be served. The host snaps the element back to the last
+  // playable position (falling back to 0 when the playhead and the target are
+  // within tolerance), letting the normal seeking path issue the follow-up
+  // SEEK. It does NOT report a fatal error, send loadFailed to the machine,
+  // or restart the source.
+
+  function attachAndHandshake(): { host: SiaVideoSource; target: HTMLVideoElement; worker: FakeWorker; } {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const target = document.createElement('video');
+    host.attach(target);
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    replyAttachOk(worker);
+    return { host, target, worker };
+  }
+
+  const mainInfo = { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main', tracks: [] } as const;
+
+  function loadWithDuration(host: SiaVideoSource, worker: FakeWorker, src: string, durationSeconds: number): number {
+    host.src = src;
+    const source = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).at(-1);
+    if (!source) throw new Error('SOURCE was not sent');
+    worker.reply({
+      info: { ...mainInfo, durationSeconds },
+      requestId: source.requestId,
+      type: WorkerToMainMessageType.SOURCE_OK,
+    });
+    return source.requestId;
+  }
+
+  /** Simulate the element being in a seeking state (jsdom never sets this natively). */
+  function setSeeking(target: HTMLVideoElement, value: boolean): void {
+    Object.defineProperty(target, 'seeking', { configurable: true, get: () => value });
+  }
+
+  it.skipIf(!IN_BROWSER)('snaps a stuck seek back to the last playable position and sends a follow-up SEEK', () => {
+    vi.useFakeTimers();
+    const { host, target, worker } = attachAndHandshake();
+    const activeId = loadWithDuration(host, worker, 'k', 60);
+
+    // The element played to t=30: the host recorded it as the last playhead.
+    target.currentTime = 30;
+    target.dispatchEvent(new Event('timeupdate'));
+    worker.sent.length = 0;
+
+    // The user seeks to 42; the element enters seeking.
+    target.currentTime = 42;
+    setSeeking(target, true);
+    target.dispatchEvent(new Event('seeking'));
+    worker.sent.length = 0;
+
+    // The worker reports the seek target as unavailable (nonfatal).
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 42, type: WorkerToMainMessageType.ERROR });
+
+    // The element snapped back to 30 (the last playable position).
+    expect(target.currentTime).toBe(30);
+
+    // In a real browser the currentTime setter triggers a fresh `seeking`
+    // event; simulate that to exercise the normal seeking path.
+    target.dispatchEvent(new Event('seeking'));
+
+    // A follow-up SEEK was sent to the snap-back position via the normal
+    // seeking path.
+    const seeks = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK);
+    expect(seeks).toHaveLength(1);
+    expect(seeks[0]).toMatchObject({ time: 30, type: MainToWorkerMessageType.SEEK });
+
+    // No source restart, no PLAY, no fatal error.
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
+
+    vi.useRealTimers();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('falls back to 0 when the last playhead is within tolerance of the seek target', () => {
+    vi.useFakeTimers();
+    const { host, target, worker } = attachAndHandshake();
+    const activeId = loadWithDuration(host, worker, 'k', 60);
+
+    // Played to t=30.
+    target.currentTime = 30;
+    target.dispatchEvent(new Event('timeupdate'));
+    worker.sent.length = 0;
+
+    // Seeks to 30.1 (within 0.25 s of the playhead).
+    target.currentTime = 30.1;
+    setSeeking(target, true);
+    target.dispatchEvent(new Event('seeking'));
+    worker.sent.length = 0;
+
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 30.1, type: WorkerToMainMessageType.ERROR });
+
+    // Within tolerance → snap to 0 instead of 30.
+    expect(target.currentTime).toBe(0);
+
+    vi.useRealTimers();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('ignores an unavailable error when the element is not seeking', () => {
+    const { host, target, worker } = attachAndHandshake();
+    const activeId = loadWithDuration(host, worker, 'k', 60);
+
+    target.currentTime = 30;
+    target.dispatchEvent(new Event('timeupdate'));
+    worker.sent.length = 0;
+
+    // Element is NOT in a seeking state.
+    setSeeking(target, false);
+
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 42, type: WorkerToMainMessageType.ERROR });
+
+    // Nothing changes: no snap, no seek, no restart.
+    expect(target.currentTime).toBe(30);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('ignores a stale unavailable error with a mismatched request id', () => {
+    const { host, target, worker } = attachAndHandshake();
+    loadWithDuration(host, worker, 'k', 60);
+
+    target.currentTime = 30;
+    target.dispatchEvent(new Event('timeupdate'));
+    worker.sent.length = 0;
+
+    target.currentTime = 42;
+    setSeeking(target, true);
+    target.dispatchEvent(new Event('seeking'));
+    worker.sent.length = 0;
+
+    // The request id does not match the active load.
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: 9999, time: 42, type: WorkerToMainMessageType.ERROR });
+
+    // Dropped by the request filter: no snap, no seek, no restart.
+    expect(target.currentTime).toBe(42);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('preserves the pause preference during snap-back', () => {
+    vi.useFakeTimers();
+    const { host, target, worker } = attachAndHandshake();
+    const activeId = loadWithDuration(host, worker, 'k', 60);
+
+    // Element is paused (no play intent).
+    target.dispatchEvent(new Event('pause'));
+
+    target.currentTime = 30;
+    target.dispatchEvent(new Event('timeupdate'));
+    worker.sent.length = 0;
+
+    target.currentTime = 42;
+    setSeeking(target, true);
+    target.dispatchEvent(new Event('seeking'));
+    worker.sent.length = 0;
+
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 42, type: WorkerToMainMessageType.ERROR });
+
+    expect(target.currentTime).toBe(30);
+
+    // No PLAY was sent (the user is paused).
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+
+    vi.useRealTimers();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('cancels the seek watchdog so the original stall deadline does not fire a restart', () => {
+    vi.useFakeTimers();
+    const { host, target, worker } = attachAndHandshake();
+    const activeId = loadWithDuration(host, worker, 'k', 60);
+
+    target.currentTime = 30;
+    target.dispatchEvent(new Event('timeupdate'));
+    worker.sent.length = 0;
+
+    // Start a seek at t=0; the watchdog is armed for 6000 ms.
+    target.currentTime = 42;
+    setSeeking(target, true);
+    target.dispatchEvent(new Event('seeking'));
+    worker.sent.length = 0;
+
+    // At t=1000 the worker reports unavailable; the watchdog must be cancelled.
+    vi.advanceTimersByTime(1000);
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 42, type: WorkerToMainMessageType.ERROR });
+
+    // Advance past the original 6 s deadline: no restart.
+    vi.advanceTimersByTime(6000);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
+
+    vi.useRealTimers();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('drops a duplicate unavailable report before the snap-back seek has resolved', () => {
+    vi.useFakeTimers();
+    const { host, target, worker } = attachAndHandshake();
+    const activeId = loadWithDuration(host, worker, 'k', 60);
+
+    target.currentTime = 30;
+    target.dispatchEvent(new Event('timeupdate'));
+    worker.sent.length = 0;
+
+    target.currentTime = 42;
+    setSeeking(target, true);
+    target.dispatchEvent(new Event('seeking'));
+    worker.sent.length = 0;
+
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 42, type: WorkerToMainMessageType.ERROR });
+    expect(target.currentTime).toBe(30);
+    // The snap-back's own native `seeking` re-enters the normal path: a
+    // fresh SEEK at 30 and a watchdog re-armed for the snap-back.
+    target.dispatchEvent(new Event('seeking'));
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(1);
+
+    // A duplicate of the ORIGINAL report (same request id, same target)
+    // lands before the snap-back emits `seeked`. It names a target the
+    // element is no longer seeking, so it must be dropped: no extra SEEK,
+    // and the snap-back's watchdog left alone.
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 42, type: WorkerToMainMessageType.ERROR });
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(1);
+
+    // The snap-back is still unresolved: its watchdog must still fire the
+    // stalled-seek restart, proving the duplicate did not cancel it.
+    vi.advanceTimersByTime(6000);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+
+    vi.useRealTimers();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('drops a stale unavailable report while a newer seek is in flight', () => {
+    vi.useFakeTimers();
+    const { host, target, worker } = attachAndHandshake();
+    const activeId = loadWithDuration(host, worker, 'k', 60);
+
+    target.currentTime = 30;
+    target.dispatchEvent(new Event('timeupdate'));
+    worker.sent.length = 0;
+
+    target.currentTime = 42;
+    setSeeking(target, true);
+    target.dispatchEvent(new Event('seeking'));
+    worker.sent.length = 0;
+
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 42, type: WorkerToMainMessageType.ERROR });
+    expect(target.currentTime).toBe(30);
+    target.dispatchEvent(new Event('seeking')); // the snap-back's native re-fire
+    target.dispatchEvent(new Event('seeked')); // the snap-back resolves
+    worker.sent.length = 0;
+
+    // The user starts a newer scrub to 50: fresh SEEK, fresh watchdog.
+    target.currentTime = 50;
+    target.dispatchEvent(new Event('seeking'));
+
+    // A LATE echo of the original 42 report (same request id) arrives while
+    // the 50 seek is in flight. It must not cancel the 50 seek's watchdog
+    // or drag the element back to 30.
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 42, type: WorkerToMainMessageType.ERROR });
+
+    expect(target.currentTime).toBe(50);
+    const seeks = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK);
+    expect(seeks).toHaveLength(1);
+    expect(seeks[0]).toMatchObject({ time: 50, type: MainToWorkerMessageType.SEEK });
+
+    // The 50 seek's watchdog must survive the stale echo.
+    vi.advanceTimersByTime(6000);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+
+    vi.useRealTimers();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('leaves the watchdog armed for a same-position snap-back so the stall deadline still fires the restart', () => {
+    vi.useFakeTimers();
+    const { host, target, worker } = attachAndHandshake();
+    const activeId = loadWithDuration(host, worker, 'k', 60);
+
+    // The element played to t=0.2: the host recorded it as the last playhead.
+    target.currentTime = 0.2;
+    target.dispatchEvent(new Event('timeupdate'));
+    worker.sent.length = 0;
+
+    // The user seeks back to 0; the element enters seeking at 0 and the
+    // watchdog is armed for it.
+    target.currentTime = 0;
+    setSeeking(target, true);
+    target.dispatchEvent(new Event('seeking'));
+    worker.sent.length = 0;
+
+    // The worker reports the seek target (0) as unavailable. The playhead is
+    // within tolerance of the target, so the snap-back is 0: the element
+    // already sits there, the write is a no-op, and no fresh `seeking`
+    // re-arms anything.
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 0, type: WorkerToMainMessageType.ERROR });
+
+    // No snap occurred and no follow-up SEEK was issued.
+    expect(target.currentTime).toBe(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(0);
+
+    // The watchdog the original seek armed must survive the no-op write:
+    // past its deadline it fires the established stalled-seek recovery (a
+    // source restart at the target).
+    vi.advanceTimersByTime(6000);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+
+    vi.useRealTimers();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('drops a time-less unavailable report while a seek is in flight', () => {
+    vi.useFakeTimers();
+    const { host, target, worker } = attachAndHandshake();
+    const activeId = loadWithDuration(host, worker, 'k', 60);
+
+    target.currentTime = 30;
+    target.dispatchEvent(new Event('timeupdate'));
+    worker.sent.length = 0;
+
+    // The user seeks to 42; the element enters seeking and the watchdog is
+    // armed for the in-flight seek.
+    target.currentTime = 42;
+    setSeeking(target, true);
+    target.dispatchEvent(new Event('seeking'));
+    worker.sent.length = 0;
+
+    // A time-less unavailable report (a stale echo that names no target)
+    // lands while the 42 seek is in flight. It cannot be matched to that
+    // seek, so it is dropped: no snap back, and the in-flight seek's
+    // watchdog left untouched.
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, type: WorkerToMainMessageType.ERROR });
+
+    expect(target.currentTime).toBe(42);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(0);
+
+    // The in-flight seek's watchdog must survive the dropped report: past
+    // its deadline it fires the stalled-seek restart.
+    vi.advanceTimersByTime(6000);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+
+    vi.useRealTimers();
     host.destroy();
   });
 });
