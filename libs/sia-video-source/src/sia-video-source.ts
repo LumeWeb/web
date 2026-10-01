@@ -1920,6 +1920,16 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // budget, or announce a recovery end.
     if (!this.#eventIsFromCurrentResource(target)) return;
     const now = target.currentTime;
+    // A playhead that has advanced past a late retarget's restored position
+    // proves that run is serving (a dead run never advances): the echo latch
+    // is cleared, or it would keep demoting proven-servable positions to 0
+    // in #snapBackPosition for the rest of the load.
+    if (
+      this.#lastRetargetSeconds !== null &&
+      now > this.#lastRetargetSeconds + SEEK_DURATION_TOLERANCE_SECONDS
+    ) {
+      this.#lastRetargetSeconds = null;
+    }
     // A recovery reload that is genuinely playing advances the playhead again;
     // only that proves "the load actually played", so the machine restores the
     // consecutive-recovery budget. A stalled reload emits no advancing
@@ -2280,9 +2290,12 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // The position an unavailable `time` snaps the element back to: the last
   // playable playhead, except when it sits within tolerance of the dead
   // target (snapping "back" there would re-stick) or on a position a late
-  // retarget already marked dead (dragging the element back onto it would
-  // re-stick, and its echo would drag it back again). Both cases fall back
-  // to 0.
+  // retarget marked dead (dragging the element back onto it would re-stick,
+  // and its echo would drag it back again). Both cases fall back to 0. The
+  // retarget latch is transient: #onTimeUpdate clears it the moment the
+  // playhead advances past the restored position, the proof the restored
+  // run serves, so a proven-servable position is not demoted for the
+  // load's lifetime.
   #snapBackPosition(deadSeconds: number): number {
     let position =
       Math.abs(this.#lastPlayheadSeconds - deadSeconds) <= SEEK_DURATION_TOLERANCE_SECONDS

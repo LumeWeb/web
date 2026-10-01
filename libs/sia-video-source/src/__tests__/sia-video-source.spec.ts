@@ -3041,6 +3041,53 @@ describe('late unavailable seek retarget (host, nonfatal)', () => {
     host.destroy();
   });
 
+  it.skipIf(!IN_BROWSER)('snaps a later unavailable seek to the live playhead, not 0, once the retarget run proves it serves', () => {
+    const { host, target, worker } = attachAndHandshake();
+    const activeId = loadWithDuration(host, worker, 'k', 60);
+
+    // Played to 30; the seek to 42 resolved natively and the worker's
+    // replacement run for 42 then failed: the late report retargets to 30.
+    resolveSeekTo(target, worker, 30, 42);
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 42, type: WorkerToMainMessageType.ERROR });
+    expect(target.currentTime).toBe(30);
+
+    // The restored run serves: the restored seek resolves and the playhead
+    // advances past 30 + tolerance, which a dead restored run never does.
+    setSeeking(target, false);
+    target.dispatchEvent(new Event('seeked'));
+    target.currentTime = 30.3;
+    target.dispatchEvent(new Event('timeupdate'));
+
+    // The user scrubs back to 30.2 (serving) and then on to 30.5; both
+    // resolve natively, so no in-flight marker remains for the late report.
+    target.currentTime = 30.2;
+    setSeeking(target, true);
+    target.dispatchEvent(new Event('seeking'));
+    setSeeking(target, false);
+    target.dispatchEvent(new Event('seeked'));
+    target.dispatchEvent(new Event('timeupdate'));
+    target.currentTime = 30.5;
+    setSeeking(target, true);
+    target.dispatchEvent(new Event('seeking'));
+    setSeeking(target, false);
+    target.dispatchEvent(new Event('seeked'));
+    worker.sent.length = 0;
+
+    // The run for 30.5 fails on a persistent gap and reports it late.
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 30.5, type: WorkerToMainMessageType.ERROR });
+
+    // The snap-back lands on the live, serving playhead 30.2, not on 0:
+    // 30.2 is within tolerance of the retarget position 30, but that
+    // position has since proven it serves, so it is not the known-dead
+    // ground the snap-back must avoid.
+    expect(target.currentTime).toBe(30.2);
+    const seeks = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK);
+    expect(seeks).toHaveLength(1);
+    expect(seeks[0]).toMatchObject({ requestId: activeId, time: 30.2, type: MainToWorkerMessageType.SEEK });
+
+    host.destroy();
+  });
+
   it.skipIf(!IN_BROWSER)('does not retarget on a late report while a stalled seek restart is in flight', () => {
     vi.useFakeTimers();
     const { host, target, worker } = attachAndHandshake();
