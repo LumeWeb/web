@@ -414,6 +414,19 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     } else {
       this.#machine.send({ type: hostPlaybackEvent.sourceReset });
     }
+
+    // A DISTINCT source replaces the element's live resource: detach the old
+    // MediaSource resource NOW — before the load-boundary bookkeeping — so the
+    // superseded frame, its advancing `timeupdate`, its `ended`, and a stuck
+    // `seek` cannot stay live on the element while the replacement resolves.
+    // `#resetLoadState` would already have nulled `#activeHandle` and revoked
+    // the object URL by the time it runs, so the detach must precede it. The
+    // element enters HAVE_NOTHING for the fresh resource exactly as a
+    // recovery restart does, so the new attach semantics (reanchor/resume and
+    // event identity) are unchanged. A no-op when nothing is live (a plain
+    // first arm on an empty element).
+    this.#detachCurrentResource();
+
     this.#resetLoadState();
 
     if (!value) return;
@@ -1082,6 +1095,28 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     if (!this.#recoveryNotified) return;
     this.#recoveryNotified = false;
     this.#emitRecoveryDetail({ active: false });
+  }
+
+  // Immediately detaches the media resource the element currently exposes for
+  // the load being replaced, so the old frame/end/seek cannot stay live while
+  // the fresh source resolves (see the `src` setter). Worker mode: clear the
+  // transferred MediaSourceHandle (the element's srcObject). Main mode / any
+  // pre-mode element still holding a stale src: remove the element `src`
+  // attribute (the object URL was revoked by the load reset). A no-op when the
+  // host is not attached or nothing is live — a plain first arm on an empty
+  // element is not a replacement. The element is left HAVE_NOTHING, the exact
+  // state the fresh HANDLE / object URL attaches into, so the new attach
+  // semantics (reanchor/resume + event identity) are preserved.
+  #detachCurrentResource(): void {
+    const target = this.target;
+    if (!target) return;
+    if (this.#mode === workerMode.worker && this.#activeHandle !== null) {
+      const element = target as unknown as { srcObject: unknown };
+      if (element.srcObject !== null) element.srcObject = null;
+      return;
+    }
+    const element = target as unknown as { getAttribute(name: string): null | string; removeAttribute(name: string): void };
+    if (element.getAttribute('src') !== null) element.removeAttribute('src');
   }
 
   // Emits the typed load-change event through the attached <video> element,
