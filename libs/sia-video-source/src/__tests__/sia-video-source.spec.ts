@@ -2787,6 +2787,291 @@ describe('unavailable seek snap-back (host, nonfatal)', () => {
   });
 });
 
+describe('late unavailable seek retarget (host, nonfatal)', () => {
+  // An `unavailable` report can land AFTER the element's native seek already
+  // resolved (`seeked` cleared the in-flight marker): the target sat inside
+  // buffered data, so the seek resolved, but the worker's replacement run for
+  // it then fails on a persistent shard shortage. No in-flight seek remains
+  // to match against, so the host retargets on its own: it names the
+  // in-flight seek, posts an explicit SEEK for the last playable position,
+  // repositions the element there, and arms the seek watchdog for the
+  // restored target. The reposition's native `seeking` is the retarget's
+  // own echo: `#onSeeking` matches it against the marker the retarget set
+  // and drops it, so the restored seek posts exactly one SEEK. An unnamed report
+  // names no position to restore and is ignored; a report naming the
+  // restored target is an echo of the host's own retarget and is ignored
+  // too, or the recovery would seek the same position forever. The
+  // retarget stays nonfatal: no machine loadFailed, no source restart.
+
+  function attachAndHandshake(): { host: SiaVideoSource; target: HTMLVideoElement; worker: FakeWorker; } {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const target = document.createElement('video');
+    host.attach(target);
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    replyAttachOk(worker);
+    return { host, target, worker };
+  }
+
+  const mainInfo = { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main', tracks: [] } as const;
+
+  function loadWithDuration(host: SiaVideoSource, worker: FakeWorker, src: string, durationSeconds: number): number {
+    host.src = src;
+    const source = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).at(-1);
+    if (!source) throw new Error('SOURCE was not sent');
+    worker.reply({
+      info: { ...mainInfo, durationSeconds },
+      requestId: source.requestId,
+      type: WorkerToMainMessageType.SOURCE_OK,
+    });
+    return source.requestId;
+  }
+
+  /** Simulate the element being in a seeking state (jsdom never sets this natively). */
+  function setSeeking(target: HTMLVideoElement, value: boolean): void {
+    Object.defineProperty(target, 'seeking', { configurable: true, get: () => value });
+  }
+
+  /** Play to `playedSeconds`, seek to `seekSeconds`, let the native seek
+   * resolve, then clear the wire log so the test counts only later traffic. */
+  function resolveSeekTo(target: HTMLVideoElement, worker: FakeWorker, playedSeconds: number, seekSeconds: number): void {
+    target.currentTime = playedSeconds;
+    target.dispatchEvent(new Event('timeupdate'));
+    target.currentTime = seekSeconds;
+    setSeeking(target, true);
+    target.dispatchEvent(new Event('seeking'));
+    setSeeking(target, false);
+    target.dispatchEvent(new Event('seeked'));
+    worker.sent.length = 0;
+  }
+
+  it.skipIf(!IN_BROWSER)('retargets to the last playhead on a named late report after the native seek resolved', () => {
+    const { host, target, worker } = attachAndHandshake();
+    const activeId = loadWithDuration(host, worker, 'k', 60);
+
+    // Played to 30; the seek to 42 resolved natively (target inside buffered
+    // data), clearing the in-flight marker.
+    resolveSeekTo(target, worker, 30, 42);
+
+    // Late: the worker's replacement run for 42 finally fails, naming 42.
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 42, type: WorkerToMainMessageType.ERROR });
+
+    // The element is repositioned to the last playable position.
+    expect(target.currentTime).toBe(30);
+
+    // And an explicit SEEK names it to the worker, aimed at the active load.
+    const seeks = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK);
+    expect(seeks).toHaveLength(1);
+    expect(seeks[0]).toMatchObject({ requestId: activeId, time: 30, type: MainToWorkerMessageType.SEEK });
+
+    // Nonfatal: no source restart, no PLAY, no machine loadFailed.
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
+
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('sends exactly one SEEK when the retarget reposition fires a native seeking', () => {
+    const { host, target, worker } = attachAndHandshake();
+    const activeId = loadWithDuration(host, worker, 'k', 60);
+
+    // Played to 30; the seek to 42 resolved natively (target inside buffered
+    // data), clearing the in-flight marker.
+    resolveSeekTo(target, worker, 30, 42);
+
+    // Late: the worker's replacement run for 42 finally fails, naming 42.
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 42, type: WorkerToMainMessageType.ERROR });
+    expect(target.currentTime).toBe(30);
+
+    // In a real browser the retarget's reposition write puts the element
+    // back in `seeking` and fires a native `seeking` for it.
+    setSeeking(target, true);
+    target.dispatchEvent(new Event('seeking'));
+
+    // The wire must carry exactly one SEEK: the retarget's explicit one. A
+    // second, identical SEEK from the native echo is the double-send bug.
+    const seeks = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK);
+    expect(seeks).toHaveLength(1);
+    expect(seeks[0]).toMatchObject({ requestId: activeId, time: 30, type: MainToWorkerMessageType.SEEK });
+
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('arms the seek watchdog for the restored target on a late retarget', () => {
+    vi.useFakeTimers();
+    const { host, target, worker } = attachAndHandshake();
+    const activeId = loadWithDuration(host, worker, 'k', 60);
+
+    resolveSeekTo(target, worker, 30, 42);
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 42, type: WorkerToMainMessageType.ERROR });
+    expect(target.currentTime).toBe(30);
+
+    // The reposition write puts the element back into seeking. If the
+    // restored seek never resolves, its watchdog must run the stalled-seek
+    // restart at the deadline.
+    setSeeking(target, true);
+    worker.sent.length = 0;
+    vi.advanceTimersByTime(6000);
+
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+
+    vi.useRealTimers();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('ignores an unnamed late report after the native seek resolved', () => {
+    const { host, target, worker } = attachAndHandshake();
+    const activeId = loadWithDuration(host, worker, 'k', 60);
+
+    resolveSeekTo(target, worker, 30, 42);
+
+    // No `time`: names no position the host can restore.
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, type: WorkerToMainMessageType.ERROR });
+
+    expect(target.currentTime).toBe(42);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('ignores an echo late report that names the restored target', () => {
+    const { host, target, worker } = attachAndHandshake();
+    const activeId = loadWithDuration(host, worker, 'k', 60);
+
+    resolveSeekTo(target, worker, 30, 42);
+
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 42, type: WorkerToMainMessageType.ERROR });
+    expect(target.currentTime).toBe(30);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(1);
+
+    // The restored run at 30 reports unavailable too: an echo of the host's
+    // own retarget. Acting on it would seek the same position again and
+    // loop, so it is ignored.
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 30, type: WorkerToMainMessageType.ERROR });
+
+    expect(target.currentTime).toBe(30);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(1);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('drops an echo naming the restored target while the restored seek is in flight', () => {
+    vi.useFakeTimers();
+    const { host, target, worker } = attachAndHandshake();
+    const activeId = loadWithDuration(host, worker, 'k', 60);
+
+    resolveSeekTo(target, worker, 30, 42);
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 42, type: WorkerToMainMessageType.ERROR });
+    expect(target.currentTime).toBe(30);
+
+    // The reposition's native `seeking` is the echo of the retarget's own
+    // post: `#onSeeking` matches it against the marker the retarget set and
+    // drops it, so the wire carries exactly one SEEK for the restored
+    // position.
+    setSeeking(target, true);
+    target.dispatchEvent(new Event('seeking'));
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(1);
+
+    // The restored run at 30 fails and reports it, naming 30 while that very
+    // seek is in flight. It is an echo of the host's own retarget, not the
+    // in-flight seek's failure to act on: dropped, with the restored seek's
+    // watchdog left armed.
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 30, type: WorkerToMainMessageType.ERROR });
+    expect(target.currentTime).toBe(30);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(1);
+
+    // The restored seek's watchdog still fires the stalled-seek restart.
+    vi.advanceTimersByTime(6000);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+
+    vi.useRealTimers();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('a late retarget falls back to 0 when the playhead is within tolerance of the dead target', () => {
+    const { host, target, worker } = attachAndHandshake();
+    const activeId = loadWithDuration(host, worker, 'k', 60);
+
+    resolveSeekTo(target, worker, 30, 30.1);
+
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 30.1, type: WorkerToMainMessageType.ERROR });
+
+    // 30 is within tolerance of the dead 30.1: restoring back there would
+    // re-stick, so the restore falls back to 0.
+    expect(target.currentTime).toBe(0);
+    const seeks = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK);
+    expect(seeks).toHaveLength(1);
+    expect(seeks[0]).toMatchObject({ requestId: activeId, time: 0, type: MainToWorkerMessageType.SEEK });
+
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('never snaps back onto the known-dead retarget position', () => {
+    vi.useFakeTimers();
+    const { host, target, worker } = attachAndHandshake();
+    const activeId = loadWithDuration(host, worker, 'k', 60);
+
+    resolveSeekTo(target, worker, 30, 42);
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 42, type: WorkerToMainMessageType.ERROR });
+    expect(target.currentTime).toBe(30);
+
+    // The user now deliberately seeks to 0.
+    worker.sent.length = 0;
+    target.currentTime = 0;
+    setSeeking(target, true);
+    target.dispatchEvent(new Event('seeking'));
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(1);
+
+    // The 0 run fails, naming 0. The last playhead is 30, which the host
+    // already knows is dead (it is the retarget position): the snap-back
+    // must not drag the element back onto it.
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 0, type: WorkerToMainMessageType.ERROR });
+
+    expect(target.currentTime).toBe(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(1);
+
+    // The in-flight seek's watchdog survives: it fires the stalled-seek
+    // restart at the deadline.
+    vi.advanceTimersByTime(6000);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+
+    vi.useRealTimers();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('does not retarget on a late report while a stalled seek restart is in flight', () => {
+    vi.useFakeTimers();
+    const { host, target, worker } = attachAndHandshake();
+    const activeId = loadWithDuration(host, worker, 'k', 60);
+
+    target.currentTime = 30;
+    target.dispatchEvent(new Event('timeupdate'));
+
+    // A seek to 42 that never resolves: at the deadline the machine restarts
+    // the source at 42 and the old load is superseded.
+    target.currentTime = 42;
+    setSeeking(target, true);
+    target.dispatchEvent(new Event('seeking'));
+    worker.sent.length = 0;
+    vi.advanceTimersByTime(6000);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+    worker.sent.length = 0;
+
+    // A late unavailable report for the superseded load must not add a
+    // second restart on top of the in-flight recovery.
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 42, type: WorkerToMainMessageType.ERROR });
+
+    expect(target.currentTime).toBe(42);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(0);
+
+    vi.useRealTimers();
+    host.destroy();
+  });
+});
+
 /** Depth-first walk collecting every Uint8Array embedded in a message. */
 function* byteArraysOf(value: unknown): Generator<Uint8Array> {
   if (value instanceof Uint8Array) {
