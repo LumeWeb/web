@@ -22,6 +22,7 @@ import {
   type MainToWorkerMessage,
   MainToWorkerMessageType,
   PROTOCOL_VERSION,
+  type SourceInfo,
   type WorkerToMainMessage,
   WorkerToMainMessageType,
 } from '../protocol.ts';
@@ -186,6 +187,75 @@ function workerSession(): { host: SiaVideoSource; target: HTMLVideoElement; work
   });
   replyAttachOk(worker, 'worker');
   return { host, target, worker };
+}
+
+/**
+ * Duration-bearing SOURCE_OK infos. A vouched `durationSeconds` is what lets
+ * `#isOutOfWindowSeek` prove a far seek unreachable (seek > duration), which
+ * the resume-play recovery specs use to drive a seek restart deterministically.
+ */
+const workerInfoWithDuration: SourceInfo = {
+  container: 'fmp4',
+  durationSeconds: 100,
+  mime: DEFAULT_FMP4_MIME,
+  mode: 'worker',
+  tracks: [],
+};
+
+const mainInfoWithDuration: SourceInfo = {
+  container: 'fmp4',
+  durationSeconds: 100,
+  mime: DEFAULT_FMP4_MIME,
+  mode: 'main',
+  tracks: [],
+};
+
+/** Loads `src` in main mode with a duration-bearing info. Returns its id. */
+function loadMainSourceInfo(host: SiaVideoSource, worker: FakeWorker, src: string, info: SourceInfo): number {
+  host.src = src;
+  const requestId = newestSourceId(worker);
+  worker.reply({ info, requestId, type: WorkerToMainMessageType.SOURCE_OK });
+  return requestId;
+}
+
+/** Loads `src` in worker mode with a duration-bearing info and attaches `handle`. */
+function loadWorkerSourceInfo(
+  host: SiaVideoSource,
+  worker: FakeWorker,
+  src: string,
+  handle: MediaStream,
+  info: SourceInfo,
+): number {
+  host.src = src;
+  const requestId = newestSourceId(worker);
+  worker.reply({ info, requestId, type: WorkerToMainMessageType.SOURCE_OK });
+  worker.reply({ handle, requestId, type: WorkerToMainMessageType.HANDLE } as unknown as WorkerToMainMessage);
+  return requestId;
+}
+
+/** Drives the element into the paused choice at `seconds`. */
+async function markPaused(target: HTMLVideoElement, seconds: number): Promise<void> {
+  markPlaying(target, seconds);
+  target.dispatchEvent(new Event('pause'));
+  await settle();
+}
+
+/** Drives the element into the playing choice at `seconds`. */
+function markPlaying(target: HTMLVideoElement, seconds: number): void {
+  target.dispatchEvent(new Event('play'));
+  target.currentTime = seconds;
+  target.dispatchEvent(new Event('timeupdate'));
+}
+
+/** Scrubs past the vouched duration (100s) so `#onSeeking` restarts the source. */
+function seekOutOfWindow(target: HTMLVideoElement): void {
+  target.currentTime = 200;
+  target.dispatchEvent(new Event('seeking'));
+}
+
+/** Spies the native `play` so a spec can count fresh-attach resume calls. */
+function spyPlay(target: HTMLVideoElement) {
+  return vi.spyOn(target, 'play').mockResolvedValue(undefined);
 }
 
 describe('replaced-media-resource events (worker mode)', () => {
@@ -570,6 +640,150 @@ describe('replaced-media-resource events (main mode)', () => {
     target.dispatchEvent(new Event('timeupdate'));
     target.dispatchEvent(new Event('ended'));
     expect(endedObserver).toHaveBeenCalledTimes(1);
+    host.destroy();
+  });
+});
+
+
+describe('recovery native resume-play after a fresh resource attach', () => {
+  // A recovery restart repairs the load but swaps in a fresh resource
+  // (worker-MSE `srcObject` / main-MSE object URL) that lands the element
+  // PAUSED at the resume position. Without an explicit resume the recovered
+  // load would sit still and the user would press Play again. The host records
+  // the restart's `wantsPlay` and applies a single native `play()` exactly
+  // when the FRESH resource attaches. The counter-cases pin the boundary: a
+  // paused, never-started, seek-driven, or rejected resume never starts
+  // playback the user did not ask for.
+  //
+  // A decode failure is the one recovery trigger the machine restarts
+  // deterministically from a healthy load, so it drives every case below; a
+  // far (out-of-window) seek on a healthy load is a machine no-op and is kept
+  // as a boundary guard that it must not resume either.
+
+  it.skipIf(!IN_BROWSER)('worker: a decode recovery while playing resumes native play exactly once on the fresh handle', () => {
+    const { host, target, worker } = workerSession();
+    const oldHandle = new MediaStream();
+    const idA = loadWorkerSourceInfo(host, worker, 'k', oldHandle, workerInfoWithDuration);
+    markPlaying(target, 12.5);
+    worker.sent.length = 0;
+
+    const playSpy = spyPlay(target);
+    worker.reply(decodeError(idA));
+    const idB = newestSourceId(worker);
+    // The recovery restarts WITH playback (the load was playing).
+    expect(plays(worker)).toHaveLength(1);
+
+    const freshHandle = new MediaStream();
+    worker.reply({ handle: freshHandle, requestId: idB, type: WorkerToMainMessageType.HANDLE } as unknown as WorkerToMainMessage);
+    expect(srcObjectOf(target)).toBe(freshHandle);
+    // The recovered load resumes natively the moment the fresh handle is live.
+    expect(playSpy).toHaveBeenCalledTimes(1);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('worker: a decode failure while paused does not resume native play', async () => {
+    const { host, target, worker } = workerSession();
+    const oldHandle = new MediaStream();
+    const idA = loadWorkerSourceInfo(host, worker, 'k', oldHandle, workerInfoWithDuration);
+    await markPaused(target, 12.5); // finalise the two-phase pause (preference is truly paused)
+    worker.sent.length = 0;
+
+    const playSpy = spyPlay(target);
+    worker.reply(decodeError(idA));
+    // A paused load never resumes: no wire PLAY and no native play, whatever
+    // the machine does with the owed repair (defers, or restarts without play).
+    expect(plays(worker)).toHaveLength(0);
+    expect(playSpy).not.toHaveBeenCalled();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('worker: a decode failure on a never-started load does not resume native play', () => {
+    const { host, target, worker } = workerSession();
+    const oldHandle = new MediaStream();
+    const idA = loadWorkerSourceInfo(host, worker, 'k', oldHandle, workerInfoWithDuration);
+    worker.sent.length = 0; // never started: no markPlaying
+
+    const playSpy = spyPlay(target);
+    worker.reply(decodeError(idA));
+    expect(plays(worker)).toHaveLength(0);
+    expect(playSpy).not.toHaveBeenCalled();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('worker: a rejected resume play on the fresh handle is swallowed, not thrown', () => {
+    const { host, target, worker } = workerSession();
+    const oldHandle = new MediaStream();
+    const idA = loadWorkerSourceInfo(host, worker, 'k', oldHandle, workerInfoWithDuration);
+    markPlaying(target, 12.5);
+    worker.sent.length = 0;
+
+    const playSpy = vi
+      .spyOn(target, 'play')
+      .mockRejectedValue(new DOMException('play() rejected', 'NotAllowedError'));
+    let unhandled = 0;
+    const onUnhandled = (e: Event) => {
+      e.preventDefault();
+      unhandled += 1;
+    };
+    window.addEventListener('error', onUnhandled);
+    window.addEventListener('unhandledrejection', onUnhandled);
+
+    worker.reply(decodeError(idA));
+    const idB = newestSourceId(worker);
+    const freshHandle = new MediaStream();
+    worker.reply({ handle: freshHandle, requestId: idB, type: WorkerToMainMessageType.HANDLE } as unknown as WorkerToMainMessage);
+    void settle(); // let a stray rejection surface if the host failed to catch it
+
+    expect(playSpy).toHaveBeenCalledTimes(1);
+    expect(unhandled).toBe(0);
+    window.removeEventListener('error', onUnhandled);
+    window.removeEventListener('unhandledrejection', onUnhandled);
+    playSpy.mockRestore();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('worker: a far (out-of-window) seek on a healthy load does not resume native play', () => {
+    const { host, target, worker } = workerSession();
+    const oldHandle = new MediaStream();
+    loadWorkerSourceInfo(host, worker, 'k', oldHandle, workerInfoWithDuration);
+    worker.sent.length = 0;
+
+    const playSpy = spyPlay(target);
+    seekOutOfWindow(target);
+    // A far seek is not a recovery that begins playback; attaching whatever
+    // the seek produces must not start a load the user did not ask to play.
+    expect(playSpy).not.toHaveBeenCalled();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('main: a decode recovery while playing resumes native play exactly once on the fresh object URL', () => {
+    const { host, target, worker } = mainSession();
+    const idA = loadMainSourceInfo(host, worker, 'k', mainInfoWithDuration);
+    markPlaying(target, 12.5);
+    worker.sent.length = 0;
+
+    const playSpy = spyPlay(target);
+    worker.reply(decodeError(idA));
+    const idB = newestSourceId(worker);
+    expect(plays(worker)).toHaveLength(1);
+
+    // The fresh object URL attaches synchronously with the SOURCE_OK; the
+    // recovered load resumes natively at that point.
+    worker.reply({ info: mainInfoWithDuration, requestId: idB, type: WorkerToMainMessageType.SOURCE_OK });
+    expect(playSpy).toHaveBeenCalledTimes(1);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('main: a decode failure while paused does not resume native play', async () => {
+    const { host, target, worker } = mainSession();
+    const idA = loadMainSourceInfo(host, worker, 'k', mainInfoWithDuration);
+    await markPaused(target, 12.5); // finalise the two-phase pause
+    worker.sent.length = 0;
+
+    const playSpy = spyPlay(target);
+    worker.reply(decodeError(idA));
+    expect(plays(worker)).toHaveLength(0);
+    expect(playSpy).not.toHaveBeenCalled();
     host.destroy();
   });
 });
