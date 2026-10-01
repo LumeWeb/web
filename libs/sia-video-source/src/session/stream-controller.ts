@@ -27,7 +27,7 @@
  */
 
 import type { ConversionRunOrigin, MediaPlayback } from '../media/library-load.ts';
-import { isTransportReadError } from '../ranged-reader.ts';
+import { isShardShortageError, isTransportReadError } from '../ranged-reader.ts';
 import type { AppendSink } from '../sink/append-sink.ts';
 import { type ErrorReporter, failureCode, failureCondition } from './error-reporter.ts';
 
@@ -163,26 +163,44 @@ class GenericStreamController implements StreamController {
     this.#setState(streamState.ended);
   }
 
-  #onError(loadGeneration: number, error: unknown, _origin: ConversionRunOrigin, _targetSeconds?: number): void {
+  #onError(loadGeneration: number, error: unknown, origin: ConversionRunOrigin, targetSeconds?: number): void {
     if (this.#destroyed || loadGeneration !== this.#loadGeneration || this.#state === streamState.ended || this.#state === streamState.failed) return;
     const load = this.#load;
     if (!load) return;
     this.#setState(streamState.failed);
-    // A transport/ranged-read failure (a `ReadTransportError` that already
-    // exhausted its retry budget, possibly wrapped by an intermediate layer)
-    // is a distinct condition, not a normalization slip: error-reporter maps
-    // it to the `network` wire kind so the HOST runs its retry-capped reload
-    // recovery, while a genuine conversion failure stays `normalization` →
-    // `unsupported` (fatal, no auto-reload). Carry the underlying cause's
-    // message as `detail` either way so the wire context (via error-reporter's
-    // describeFailure) names the real failure instead of a bare
-    // `normalization:failed` / `transport:failed`.
-    this.#errorReporter.report({
-      cause: error,
-      code: failureCode.failed,
-      condition: isTransportReadError(error) ? failureCondition.transport : failureCondition.normalization,
-      detail: error instanceof Error ? error.message : String(error),
-    });
+    if (origin === 'seek-restart' && targetSeconds !== undefined && isShardShortageError(error)) {
+      // A seek-restart the renter set cannot serve (a shard shortage,
+      // possibly wrapped by an intermediate layer) is a persistent condition
+      // at the requested position: report it as the typed seek-target
+      // data-unavailable failure carrying the prepared target, so the host
+      // can name the unservable position. error-reporter maps it to fatal
+      // `unsupported` (no auto-reload): a network-recovery reload would
+      // re-seek the same position and fail again. An initial-run shortage
+      // has no prepared target and falls through to the classification
+      // below, unchanged.
+      this.#errorReporter.report({
+        cause: error,
+        code: failureCode['data-unavailable'],
+        condition: failureCondition['seek-target'],
+        targetSeconds,
+      });
+    } else {
+      // A transport/ranged-read failure (a `ReadTransportError` that already
+      // exhausted its retry budget, possibly wrapped by an intermediate layer)
+      // is a distinct condition, not a normalization slip: error-reporter maps
+      // it to the `network` wire kind so the HOST runs its retry-capped reload
+      // recovery, while a genuine conversion failure stays `normalization` →
+      // `unsupported` (fatal, no auto-reload). Carry the underlying cause's
+      // message as `detail` either way so the wire context (via error-reporter's
+      // describeFailure) names the real failure instead of a bare
+      // `normalization:failed` / `transport:failed`.
+      this.#errorReporter.report({
+        cause: error,
+        code: failureCode.failed,
+        condition: isTransportReadError(error) ? failureCondition.transport : failureCondition.normalization,
+        detail: error instanceof Error ? error.message : String(error),
+      });
+    }
     load.sink.abort(error);
   }
 
