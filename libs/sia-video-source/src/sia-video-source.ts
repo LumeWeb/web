@@ -506,15 +506,26 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // an older id and is discarded. Cleared on detach/destroy so a late reply
   // never gates anything for a host with no live handshake.
   #helloRequestId: null | RequestId = null;
-  // The seek target the host last forwarded while the element entered
-  // `seeking` (`#onSeeking`), cleared on `seeked` and at load boundaries. A
-  // load-level request id spans every seek of the load, so this is the only
-  // identity a late `unavailable` report can be matched against.
+  // The seek target the host last forwarded while the element is in
+  // `seeking`: `#onSeeking` sets it for a native seek, the late `unavailable`
+  // retarget for its explicit post; `seeked` and load boundaries clear it.
+  // A load-level request id spans every seek of the load, so this is the
+  // only identity a late `unavailable` report can be matched against;
+  // `#onSeeking` also uses it to drop the native `seeking` echo of the
+  // retarget's own post, so that seek reaches the worker once, not twice.
   #lastForwardedSeekSeconds: null | number = null;
   // Most recent playhead the host forwarded via PLAYHEAD; decode/seek recovery
   // repositions the reloaded load here. Starts at 0 until the first
   // timeupdate.
   #lastPlayheadSeconds = 0;
+  // The position a late `unavailable` retarget last restored the element to.
+  // A report naming it (within tolerance) is an echo of the retarget's own
+  // run failing, and is dropped instead of re-seeked (which would loop).
+  // Deliberately NOT cleared in `#onSeeking` or `#onSeeked`: the retarget's
+  // own repositioning seek fires both before the echo can land. Cleared at
+  // load boundaries and destroy, when a fresh source can make the position
+  // servable again.
+  #lastRetargetSeconds: null | number = null;
   // Whether the ACTIVE load's acceptance is currently announced as
   // `accepted: true`. Set exactly once per SOURCE_OK; reset (and announced
   // `accepted: false`, exactly once) at every load boundary, detach, and
@@ -745,6 +756,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // of past positions and any pending re-attach die with it; the Robot3
     // machine instance dies with the host.
     this.#lastPlayheadSeconds = 0;
+    this.#lastRetargetSeconds = null;
     this.#pendingReanchorSeconds = null;
     // The resource identity dies with the host: no later native event is
     // trusted.
@@ -1239,50 +1251,121 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   }
 
   // A worker `unavailable` ERROR means the seek target's data cannot be
-  // served (nonfatal). The element is stuck in `seeking` at an unreachable
-  // position; snap it back to the last playable position so the normal
-  // seeking path (triggered by the currentTime setter) issues a fresh SEEK
-  // to a position the worker CAN serve. Falls back to 0 when the playhead
-  // and target are within tolerance (snapping "back" to the same spot would
-  // just re-stick). A load-level request id spans every seek of the load, so
-  // a duplicate or late report survives the id filter: it is acted on only
-  // while it names the seek the element is actually in (the target the host
-  // last forwarded, within tolerance). A time-less report names no seek it
-  // can be matched against, and a report naming some other target is a stale
-  // echo; both are dropped before touching the in-flight seek's watchdog,
-  // which stays the only recovery for them. A snap-back to the position the
-  // element is already stuck on is a no-op write (no fresh `seeking` fires),
-  // so that watchdog is left armed to run the stalled-seek restart. A
-  // recovery's repositioning seek names no marker (its `seeking` is
-  // suppressed in `#onSeeking`), so the stall watchdog is its only recovery.
-  // Never routes to the machine: no loadFailed, no restart.
+  // served (nonfatal). Two shapes arrive:
+  //
+  // 1. While the element is still in `seeking`: the element is stuck at an
+  //    unreachable position; snap it back to the last playable position so
+  //    the normal seeking path (triggered by the currentTime setter) issues
+  //    a fresh SEEK to a position the worker CAN serve. A load-level request
+  //    id spans every seek of the load, so a duplicate or late report
+  //    survives the id filter: it is acted on only while it names the seek
+  //    the element is actually in (the target the host last forwarded,
+  //    within tolerance). A time-less report names no seek it can be matched
+  //    against, and a report naming some other target is a stale echo; both
+  //    are dropped before touching the in-flight seek's watchdog, which stays
+  //    the only recovery for them. A snap-back to the position the element
+  //    is already stuck on is a no-op write (no fresh `seeking` fires), so
+  //    that watchdog is left armed to run the stalled-seek restart. A
+  //    recovery's repositioning seek names no marker (its `seeking` is
+  //    suppressed in `#onSeeking`), so the stall watchdog is its only
+  //    recovery.
+  //
+  // 2. After the native seek already resolved (`seeked` cleared the
+  //    in-flight marker): the target sat inside buffered data, so the seek
+  //    resolved, but the worker's replacement run for it then failed on a
+  //    persistent shortage. No in-flight seek remains to match, so the host
+  //    retargets on its own: it names the in-flight seek, posts an explicit
+  //    SEEK for the last playable position, repositions the element there,
+  //    and arms the seek watchdog for the restored target. The reposition
+  //    fires a native `seeking` in a real browser; `#onSeeking` matches it
+  //    against the marker the retarget set and drops it, so the restored
+  //    seek posts exactly one SEEK. The same loop protection applies:
+  //    an unnamed report names no position to restore, and a report naming
+  //    the position a retarget already restored to is an echo of that
+  //    retarget's own run; both are ignored.
+  //
+  // Neither shape routes to the machine: no loadFailed, no restart.
   #handleSeekUnavailable(
     message: Extract<WorkerToMainMessage, { type: WorkerToMainMessageType.ERROR }>,
   ): void {
     const target = this.target;
-    if (!target || !target.seeking) return;
-    const inFlight = this.#lastForwardedSeekSeconds;
-    // Only a report naming the in-flight target (within tolerance) is this
-    // seek's own failure. A time-less report matches no seek, and a foreign
-    // name is a stale echo of an older seek; dropping both keeps the
-    // in-flight seek's watchdog intact.
+    // A time-less report names no position to match or restore, in either
+    // shape: it is dropped here before anything else runs.
+    if (!target || message.time === undefined) return;
+    if (target.seeking) {
+      const inFlight = this.#lastForwardedSeekSeconds;
+      // Only a report naming the in-flight target (within tolerance) is this
+      // seek's own failure. A foreign name is a stale echo of an older seek;
+      // dropping it keeps the in-flight seek's watchdog intact.
+      if (
+        inFlight === null ||
+        Math.abs(inFlight - message.time) > SEEK_DURATION_TOLERANCE_SECONDS
+      ) {
+        return;
+      }
+      // A report naming the position a late retarget restored the element to
+      // is an echo of THAT run failing, not the in-flight seek's failure:
+      // acting would snap the element off the restored position. The
+      // in-flight (restored) seek's watchdog is its recovery.
+      if (
+        this.#lastRetargetSeconds !== null &&
+        Math.abs(this.#lastRetargetSeconds - message.time) <= SEEK_DURATION_TOLERANCE_SECONDS
+      ) {
+        return;
+      }
+      const snapBack = this.#snapBackPosition(message.time);
+      // A snap-back to the position the element is already stuck on is a
+      // no-op write: the browser fires no fresh `seeking`, so the watchdog
+      // would never be re-armed. Leave it armed to run the stalled-seek
+      // restart.
+      if (Math.abs(target.currentTime - snapBack) <= SEEK_DURATION_TOLERANCE_SECONDS) return;
+      this.#cancelSeekWatchdog();
+      target.currentTime = snapBack;
+      return;
+    }
+    // The native seek already resolved before this report landed, so no
+    // in-flight marker remains to match: the host retargets on its own.
+    // With no active load there is nothing to retarget into.
+    const requestId = this.#requestId;
+    if (requestId === null) return;
+    // A recovery owns the element right now (a stalled-seek restart is in
+    // flight, or a repair is owed to a paused user): the machine's
+    // retry-capped path is the recovery, and a parallel host retarget would
+    // fight it and overwrite a paused user's position choice.
+    if (this.#machine.isRecovering || this.#machine.repairOwed !== null) return;
+    // An echo of the host's own retarget: the restored run failed and
+    // reported the position the host restored to. Seeking it again would
+    // loop; the restored seek's watchdog is the recovery.
     if (
-      inFlight === null ||
-      message.time === undefined ||
-      Math.abs(inFlight - message.time) > SEEK_DURATION_TOLERANCE_SECONDS
+      this.#lastRetargetSeconds !== null &&
+      Math.abs(this.#lastRetargetSeconds - message.time) <= SEEK_DURATION_TOLERANCE_SECONDS
     ) {
       return;
     }
-    const snapBack =
-      Math.abs(this.#lastPlayheadSeconds - message.time) <= SEEK_DURATION_TOLERANCE_SECONDS
-        ? 0
-        : this.#lastPlayheadSeconds;
-    // A snap-back to the position the element is already stuck on is a no-op
-    // write: the browser fires no fresh `seeking`, so the watchdog would
-    // never be re-armed. Leave it armed to run the stalled-seek restart.
-    if (Math.abs(target.currentTime - snapBack) <= SEEK_DURATION_TOLERANCE_SECONDS) return;
-    this.#cancelSeekWatchdog();
-    target.currentTime = snapBack;
+    const restored = this.#snapBackPosition(message.time);
+    // Already sitting on the restored position: nothing to do.
+    if (Math.abs(target.currentTime - restored) <= SEEK_DURATION_TOLERANCE_SECONDS) return;
+    // A retarget is a seek: drop chunks still queued for the dead position
+    // so the restored run's fresh fragment parses clean.
+    this.#appendPipe?.reset(restored);
+    // Name the in-flight seek BEFORE posting: the reposition write below
+    // puts the element in `seeking`, and a real browser fires a native
+    // `seeking` for it. `#onSeeking` matches that echo against this marker
+    // and drops it, so the worker receives one SEEK for the restored
+    // position, not two.
+    this.#lastForwardedSeekSeconds = restored;
+    this.#send({
+      requestId,
+      time: restored,
+      type: MainToWorkerMessageType.SEEK,
+    });
+    target.currentTime = restored;
+    // The restored seek may itself never resolve (the position can be dead
+    // too); the watchdog is its recovery.
+    this.#armSeekWatchdog();
+    // Remember the restored position so a report naming it is recognized as
+    // this retarget's echo.
+    this.#lastRetargetSeconds = restored;
   }
 
   // HELLO config: the connection metadata plus the host's worker-MSE
@@ -1794,6 +1877,20 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       );
       return;
     }
+    // A native `seeking` at the position the host just forwarded explicitly
+    // is the echo of that post, not a new user seek: the late unavailable
+    // retarget posts its SEEK and then repositions the element, and the
+    // reposition's `seeking` lands here. Re-entering the send path would
+    // post a second, identical SEEK and replace the watchdog the retarget
+    // armed. Placed after the out-of-window check so a target the load
+    // provably cannot reach still restarts. A seek to a different position
+    // never matches: the tolerance keeps ordinary user scrubs flowing.
+    if (
+      this.#lastForwardedSeekSeconds !== null &&
+      Math.abs(this.#lastForwardedSeekSeconds - seekSeconds) <= SEEK_DURATION_TOLERANCE_SECONDS
+    ) {
+      return;
+    }
     // A seek supersedes the current position: drop chunks still queued for it
     // and (once quiesced) reset the SourceBuffer's segment parser so the
     // worker's fresh fragment parses clean instead of continuing the tail the
@@ -1823,6 +1920,16 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // budget, or announce a recovery end.
     if (!this.#eventIsFromCurrentResource(target)) return;
     const now = target.currentTime;
+    // A playhead that has advanced past a late retarget's restored position
+    // proves that run is serving (a dead run never advances): the echo latch
+    // is cleared, or it would keep demoting proven-servable positions to 0
+    // in #snapBackPosition for the rest of the load.
+    if (
+      this.#lastRetargetSeconds !== null &&
+      now > this.#lastRetargetSeconds + SEEK_DURATION_TOLERANCE_SECONDS
+    ) {
+      this.#lastRetargetSeconds = null;
+    }
     // A recovery reload that is genuinely playing advances the playhead again;
     // only that proves "the load actually played", so the machine restores the
     // consecutive-recovery budget. A stalled reload emits no advancing
@@ -1999,6 +2106,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // target to a late `unavailable` report.
     this.#cancelSeekWatchdog();
     this.#lastForwardedSeekSeconds = null;
+    // A fresh source can make a previously dead position servable again; a
+    // stale echo latch from the old load must not drop a real report.
+    this.#lastRetargetSeconds = null;
     // Position memory belongs to the old source too: a fresh load starts at 0
     // and must never seek back to the previous playhead on its own recovery.
     this.#lastPlayheadSeconds = 0;
@@ -2175,6 +2285,29 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // `pausepending` this settles the retained playing choice to paused;
     // anywhere else (already superseded by a seek/play) it is a no-op.
     this.#applyDecisions(this.#machine.send({ type: hostPlaybackEvent.pauseConfirmed }));
+  }
+
+  // The position an unavailable `time` snaps the element back to: the last
+  // playable playhead, except when it sits within tolerance of the dead
+  // target (snapping "back" there would re-stick) or on a position a late
+  // retarget marked dead (dragging the element back onto it would re-stick,
+  // and its echo would drag it back again). Both cases fall back to 0. The
+  // retarget latch is transient: #onTimeUpdate clears it the moment the
+  // playhead advances past the restored position, the proof the restored
+  // run serves, so a proven-servable position is not demoted for the
+  // load's lifetime.
+  #snapBackPosition(deadSeconds: number): number {
+    let position =
+      Math.abs(this.#lastPlayheadSeconds - deadSeconds) <= SEEK_DURATION_TOLERANCE_SECONDS
+        ? 0
+        : this.#lastPlayheadSeconds;
+    if (
+      this.#lastRetargetSeconds !== null &&
+      Math.abs(position - this.#lastRetargetSeconds) <= SEEK_DURATION_TOLERANCE_SECONDS
+    ) {
+      position = 0;
+    }
+    return position;
   }
 
   // Posts a fresh HELLO (the only message that re-negotiates the session) and
