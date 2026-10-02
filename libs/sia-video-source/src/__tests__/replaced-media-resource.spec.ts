@@ -787,3 +787,157 @@ describe('recovery native resume-play after a fresh resource attach', () => {
     host.destroy();
   });
 });
+
+describe('post-EOS replay before the retained buffer', () => {
+  /** Reports a retained buffer window whose front edge sits at `start`. */
+  function reportRetainedBuffer(worker: FakeWorker, requestId: number, start: number, end: number): void {
+    worker.reply({
+      buffered: [{ end, start }],
+      received: 0,
+      requestId,
+      type: WorkerToMainMessageType.PROGRESS,
+    });
+  }
+
+  it.skipIf(!IN_BROWSER)(
+    'worker mode: a replay seek before the retained buffer restarts the source, seeks to it, and plays',
+    () => {
+      const { host, target, worker } = workerSession();
+      const idA = loadWorkerSource(host, worker, 'k', new MediaStream());
+      // The user genuinely played (machine `playing`) and watched into the media.
+      target.dispatchEvent(new Event('play'));
+      target.currentTime = 12.5;
+      target.dispatchEvent(new Event('timeupdate'));
+
+      // The retained buffer's front edge sits at 30s (data below it was evicted).
+      reportRetainedBuffer(worker, idA, 30, 60);
+      // Genuine end-of-stream: nothing below the retained buffer will ever arrive.
+      target.dispatchEvent(new Event('ended'));
+      worker.sent.length = 0;
+
+      // User replays from zero, before the retained buffer. The ended pipeline
+      // cannot satisfy that position, so the source must restart and play.
+      target.currentTime = 0;
+      target.dispatchEvent(new Event('seeking'));
+
+      const restarts = sources(worker);
+      expect(restarts).toHaveLength(1);
+      expect(restarts[0]).toMatchObject({ src: 'k', type: MainToWorkerMessageType.SOURCE });
+      const requestId = newestSourceId(worker);
+      expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK).at(-1)).toMatchObject({
+        requestId,
+        time: 0,
+        type: MainToWorkerMessageType.SEEK,
+      });
+      expect(plays(worker).at(-1)).toMatchObject({ requestId, type: MainToWorkerMessageType.PLAY });
+      host.destroy();
+    },
+  );
+
+  it.skipIf(!IN_BROWSER)(
+    'main mode: a replay seek before the retained buffer restarts the source, seeks to it, and plays',
+    () => {
+      const { host, target, worker } = mainSession();
+      const idA = loadMainSource(host, worker, 'k');
+      target.dispatchEvent(new Event('play'));
+      target.currentTime = 12.5;
+      target.dispatchEvent(new Event('timeupdate'));
+
+      reportRetainedBuffer(worker, idA, 30, 60);
+      target.dispatchEvent(new Event('ended'));
+      worker.sent.length = 0;
+
+      target.currentTime = 0;
+      target.dispatchEvent(new Event('seeking'));
+
+      const restarts = sources(worker);
+      expect(restarts).toHaveLength(1);
+      const requestId = newestSourceId(worker);
+      expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK).at(-1)).toMatchObject({
+        requestId,
+        time: 0,
+        type: MainToWorkerMessageType.SEEK,
+      });
+      expect(plays(worker).at(-1)).toMatchObject({ requestId, type: MainToWorkerMessageType.PLAY });
+      host.destroy();
+    },
+  );
+
+  // A 40s target only exists while the element can hold it: on the empty
+  // test MediaSource Firefox clamps a mid-buffer seek to 0, so the host can
+  // never observe an in-buffer seek there (production Firefox never runs
+  // this worker-mode path).
+  it.skipIf(!IN_BROWSER || IS_FIREFOX)('a post-EOS seek inside the retained buffer stays an ordinary seek', () => {
+    const { host, target, worker } = workerSession();
+    const idA = loadWorkerSource(host, worker, 'k', new MediaStream());
+    target.dispatchEvent(new Event('play'));
+    target.currentTime = 12.5;
+    target.dispatchEvent(new Event('timeupdate'));
+
+    reportRetainedBuffer(worker, idA, 30, 60);
+    target.dispatchEvent(new Event('ended'));
+    worker.sent.length = 0;
+
+    // 40s is inside [30, 60], so this is a plain rewind within retained data:
+    // no source restart, no PLAY force.
+    target.currentTime = 40;
+    target.dispatchEvent(new Event('seeking'));
+    expect(sources(worker)).toHaveLength(0);
+    expect(plays(worker)).toHaveLength(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK).at(-1)).toMatchObject({
+      time: 40,
+      type: MainToWorkerMessageType.SEEK,
+    });
+    host.destroy();
+  });
+
+  it.skipIf(
+    !IN_BROWSER,
+  )('a deliberately paused machine never auto-plays a before-buffer EOS replay restart', async () => {
+    const { host, target, worker } = workerSession();
+    const idA = loadWorkerSource(host, worker, 'k', new MediaStream());
+    target.dispatchEvent(new Event('play'));
+    target.currentTime = 12.5;
+    target.dispatchEvent(new Event('timeupdate'));
+    target.dispatchEvent(new Event('pause'));
+    await settle(); // the deliberate pause settles the machine to `paused`.
+
+    reportRetainedBuffer(worker, idA, 30, 60);
+    target.dispatchEvent(new Event('ended'));
+    worker.sent.length = 0;
+
+    // Replay before the buffer still restarts (the position is unreachable),
+    // but the paused machine records no play intent: SOURCE + SEEK only.
+    target.currentTime = 0;
+    target.dispatchEvent(new Event('seeking'));
+    expect(sources(worker)).toHaveLength(1);
+    expect(plays(worker)).toHaveLength(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK).at(-1)).toMatchObject({
+      time: 0,
+      type: MainToWorkerMessageType.SEEK,
+    });
+    host.destroy();
+  });
+
+  it.skipIf(
+    !IN_BROWSER,
+  )('before EOS, a seek below the reported buffer start stays an ordinary seek', () => {
+    const { host, target, worker } = workerSession();
+    const idA = loadWorkerSource(host, worker, 'k', new MediaStream());
+    target.dispatchEvent(new Event('play'));
+    worker.sent.length = 0;
+
+    // The retained buffer starts at 30s but the source has NOT ended: a rewind
+    // below it is an ordinary in-window seek the live pipeline can satisfy by
+    // rebuffering. The before-buffer restart discriminator must not fire.
+    reportRetainedBuffer(worker, idA, 30, 60);
+    target.currentTime = 0;
+    target.dispatchEvent(new Event('seeking'));
+    expect(sources(worker)).toHaveLength(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK).at(-1)).toMatchObject({
+      time: 0,
+      type: MainToWorkerMessageType.SEEK,
+    });
+    host.destroy();
+  });
+});
