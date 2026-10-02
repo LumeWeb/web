@@ -588,6 +588,15 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // decision state.
   #pauseConfirm: null | ReturnType<typeof setTimeout> = null;
 
+  // The element's `currentTime` at the moment the provisional pause
+  // confirmation armed (`#schedulePauseConfirm` from `#onPause`): the
+  // position the pause LANDED on. `#settlePauseConfirmIfArmed` compares the
+  // playhead against it: a scrub's incidental prelude pause has the playhead
+  // moved beyond tolerance of it by the time the confirm runs, a genuine
+  // user pause has not. Cleared by `#cancelPauseConfirm`, so a stale
+  // position never outlives the confirmation window.
+  #pauseConfirmArmedPosition: null | number = null;
+
   #pending: MainToWorkerMessage[] = [];
 
   // Element position a recovery (decode reload / external-seek restart) wants
@@ -1105,6 +1114,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       clearTimeout(this.#pauseConfirm);
       this.#pauseConfirm = null;
     }
+    this.#pauseConfirmArmedPosition = null;
   }
 
   #cancelSeekWatchdog(): void {
@@ -1900,6 +1910,16 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // A play supersedes any outstanding provisional pause (the seek's resume,
     // or the user pressing play): playing wins without waiting for the confirm.
     this.#cancelPauseConfirm();
+    // A native `play` landing while a recovery reloads the pipeline may be the
+    // engine's own resume/teardown work rather than a fresh user instruction.
+    // The machine honors a play during a PAUSED recovery (wantsPlay=false) so a
+    // chained recovery resumes, and the engine never plays a paused recovery
+    // itself; so only a play that actually left the element unpaused counts as
+    // explicit intent mid-recovery. A teardown `play` that keeps the element
+    // paused is engine noise and must not flip the choice (a playing
+    // recovery's own resume play needs no special handling: the choice is
+    // already playing, so the guarded machine transition is a no-op).
+    if (this.#machine.isRecovering && target.paused) return;
     // The user asked to play. If a repair is owed the machine consumes it:
     // restart at the owed position with PLAY (the ONE recovery trigger that
     // may auto-resume, because the user asked to play). Otherwise the machine
@@ -2301,10 +2321,17 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     if (decision.wantsPlay) {
       this.#send({ requestId, type: MainToWorkerMessageType.PLAY });
     }
-    // A seek restart must re-buffer the target; the stall watchdog re-checks
+    // A seek restart re-arms the stall watchdog ONLY when it is resuming
+    // playback: the watchdog's job is to unstick an actively-sought element
+    // that never reaches its target. A PAUSED seek recovery (wantsPlay=false)
+    // never re-arms it, because its reposition seek belongs to a still-latched
+    // scrub: re-arming would let that stale latch, whose currentTime later
+    // drifts toward the newest far target, chain into a second restart the
+    // paused user never asked for (the observed far-target restart2). Active
+    // and playing seek recoveries keep the backstop: the watchdog re-checks
     // after a fresh interval and re-enters the machine (or its exhaust branch)
     // if the seek still has not resolved.
-    if (decision.reason === recoveryReason.seek) {
+    if (decision.reason === recoveryReason.seek && decision.wantsPlay) {
       this.#armSeekWatchdog();
     }
   }
@@ -2314,6 +2341,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // playing choice to paused unless a seek/play/load boundary cancels first.
   #schedulePauseConfirm(): void {
     this.#cancelPauseConfirm();
+    // Arm at the position the pause LANDED on: the settle rule compares the
+    // playhead against it to tell a nascent scrub from a deliberate stop.
+    this.#pauseConfirmArmedPosition = this.target?.currentTime ?? null;
     this.#pauseConfirm = setTimeout(() => this.#settlePauseConfirmIfArmed(), 0);
   }
 
@@ -2367,9 +2397,32 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // live pause (and letting a later recovery resurrect playback).
   #settlePauseConfirmIfArmed(): void {
     if (this.#pauseConfirm === null) return;
+    const armedPosition = this.#pauseConfirmArmedPosition;
     this.#cancelPauseConfirm();
-    // The window closed with no seek in between: the pause was deliberate. In
-    // `pausepending` this settles the retained playing choice to paused;
+    // Armed-position rule (not timer-task ordering): a scrub is already in
+    // flight the moment it begins, the element's `seeking` flag is set
+    // synchronously by the currentTime write, before the `seeking` EVENT
+    // even dispatches. If this confirmation fires while the element is
+    // seeking with the playhead moved beyond tolerance of the position the
+    // pause armed at, the pause is the nascent scrub's own engine work (its
+    // `seeking` event is still queued), not the user stopping, so it must
+    // NOT settle: leave the machine in `pausepending` and let the imminent
+    // `seeking` supersede it (a pause task settling before a delayed
+    // `seeking` never becomes the user's choice). A playhead still within
+    // tolerance of the armed position is where a GENUINE user pause lands
+    // (an in-window scrub buffering at the forwarded target), so it settles
+    // as the deliberate stop. The comparison is strict: a nascent scrub
+    // whose new target lands exactly at the tolerance boundary must still
+    // read as movement, not as the pause's own position. A non-seeking
+    // element always settles: the window closed with no scrub in between,
+    // so the pause was deliberate.
+    const target = this.target;
+    const atArmedPosition =
+      target !== null &&
+      armedPosition !== null &&
+      Math.abs(target.currentTime - armedPosition) < SEEK_DURATION_TOLERANCE_SECONDS;
+    if (target?.seeking && !atArmedPosition) return;
+    // In `pausepending` this settles the retained playing choice to paused;
     // anywhere else (already superseded by a seek/play) it is a no-op.
     this.#applyDecisions(this.#machine.send({ type: hostPlaybackEvent.pauseConfirmed }));
   }

@@ -566,6 +566,68 @@ describe('out-of-window seek recovery', () => {
   });
 });
 
+describe('an explicit play during an in-flight seek recovery', () => {
+  it('is honored on a paused seek recovery so a chained stalled-seek recovery resumes', () => {
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+    machine.send({ type: hostPlaybackEvent.pause });
+    machine.send({ type: hostPlaybackEvent.pauseConfirmed });
+    expect(machine.preference).toBe(playbackPreference.paused);
+
+    const first = machine.send({ seconds: 120, type: hostPlaybackEvent.seekOutOfWindow });
+    expect(first).toEqual([
+      {
+        kind: hostDecisionKind.restartSource,
+        reason: recoveryReason.seek,
+        resumeSeconds: 120,
+        wantsPlay: false,
+      },
+    ]);
+    expect(machine.current).toBe(hostPlaybackState.recovering);
+
+    // The user presses play while the recovery is still in flight. The
+    // recovering transition must record the fresh intent; a no-op here is
+    // exactly the loss the chained restart then repeats.
+    machine.send({ type: hostPlaybackEvent.play });
+    expect(machine.preference).toBe(playbackPreference.playing);
+
+    // The watchdog reports the reposition seek still unresolved: the chained
+    // recovery belongs to a user who now wants play, so it restarts playing.
+    const chained = machine.send({ seconds: 120, type: hostPlaybackEvent.stalledSeek });
+    expect(chained).toEqual([
+      {
+        kind: hostDecisionKind.restartSource,
+        reason: recoveryReason.seek,
+        resumeSeconds: 120,
+        wantsPlay: true,
+      },
+    ]);
+    expect(machine.current).toBe(hostPlaybackState.recovering);
+  });
+
+  it('leaves an already-playing recovery unchanged when another play lands', () => {
+    // A play during a recovery the engine is already resuming (wantsPlay=true)
+    // is the recovery's own resume: the choice is already playing, so the
+    // event must not disturb the in-flight decision.
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+    machine.send({ seconds: 120, type: hostPlaybackEvent.seekOutOfWindow });
+    expect(machine.current).toBe(hostPlaybackState.recovering);
+    expect(machine.preference).toBe(playbackPreference.playing);
+
+    machine.send({ type: hostPlaybackEvent.play });
+    expect(machine.preference).toBe(playbackPreference.playing);
+    expect(machine.send({ seconds: 120, type: hostPlaybackEvent.stalledSeek })).toEqual([
+      {
+        kind: hostDecisionKind.restartSource,
+        reason: recoveryReason.seek,
+        resumeSeconds: 120,
+        wantsPlay: true,
+      },
+    ]);
+  });
+});
+
 describe('a transient MSE append/quota failure (quota kind)', () => {
   it('is terminal while playing: surfaces immediately, never a decode-style restart or budget spend', () => {
     const machine = readyMachine();
