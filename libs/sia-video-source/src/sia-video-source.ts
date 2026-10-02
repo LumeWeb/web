@@ -649,6 +649,13 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // Highest buffered end the worker reported (`PROGRESS`) for the active load;
   // a seek far beyond it leaves the engine's window (see `#isOutOfWindowSeek`).
   #workerBufferEndSeconds = 0;
+  // Lowest buffered start the worker reported for the active load, the front
+  // edge of the retained buffer after back-buffer eviction. After
+  // end-of-stream nothing below it will ever arrive, so a replay seek before
+  // it must restart the source (see `#isOutOfWindowSeek`). 0 means "no window
+  // reported yet (or the buffer reaches the very front)"; both are safe
+  // non-events for the lower-bound check.
+  #workerBufferStartSeconds = 0;
 
   #workerConfig: undefined | WorkerConfig;
 
@@ -1466,12 +1473,16 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   }
 
   // True when the seek target can never be satisfied by the current load: past
-  // the worker-vouched duration, or past the delivered buffer once the source
-  // reached end-of-stream. These are the only positions the engine provably
-  // cannot reach — a far-but-valid forward seek stays on the ordinary SEEK path
-  // (the worker's restart repositions it), so common in-buffer seeks are
-  // unchanged.
-  #isOutOfWindowSeek(seekSeconds: number, bufferedEnd: number): boolean {
+  // the worker-vouched duration, past the delivered buffer once the source
+  // reached end-of-stream, or BELOW the retained buffer's front edge after
+  // end-of-stream. These are the positions the engine provably cannot reach —
+  // a far-but-valid forward seek stays on the ordinary SEEK path (the worker's
+  // restart repositions it), so common in-buffer seeks are unchanged. The
+  // lower bound is the EOS-replay case: once the source ended it can never
+  // rebuffer below what eviction kept, so a user replay to zero / before the
+  // retained buffer restarts the source instead of hanging the element in
+  // `seeking`, while a post-EOS seek INSIDE the retained buffer stays plain.
+  #isOutOfWindowSeek(seekSeconds: number, bufferedEnd: number, bufferedStart: number): boolean {
     if (
       this.#durationSeconds !== null &&
       seekSeconds > this.#durationSeconds + SEEK_DURATION_TOLERANCE_SECONDS
@@ -1483,6 +1494,14 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       this.#endedReached &&
       windowEnd > 0 &&
       seekSeconds > windowEnd + SEEK_DURATION_TOLERANCE_SECONDS
+    ) {
+      return true;
+    }
+    const windowStart = Math.max(bufferedStart, this.#workerBufferStartSeconds);
+    if (
+      this.#endedReached &&
+      windowStart > SEEK_DURATION_TOLERANCE_SECONDS &&
+      seekSeconds < windowStart - SEEK_DURATION_TOLERANCE_SECONDS
     ) {
       return true;
     }
@@ -1776,6 +1795,15 @@ export class SiaVideoSource extends HTMLVideoElementHost {
           (max, win) => (win.end > max ? win.end : max),
           this.#workerBufferEndSeconds,
         );
+        // And the LOWEST window start, the retained buffer's front edge. This
+        // is OVERWRITTEN each report (not accumulated): back-buffer eviction
+        // only ever RAISES the front edge, so the current report's lowest
+        // start is the authoritative retained boundary, and it is read only
+        // after end-of-stream, when no further report can change it.
+        this.#workerBufferStartSeconds = message.buffered.reduce(
+          (min, win) => (min === 0 || win.start < min ? win.start : min),
+          0,
+        );
         this.dispatchEvent(new Event('progress'));
         return;
       case WorkerToMainMessageType.SOURCE_OK:
@@ -1921,10 +1949,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       this.#applyDecisions(this.#machine.send({ seconds: seekSeconds, type: hostPlaybackEvent.seek }));
       return;
     }
-    if (this.#isOutOfWindowSeek(seekSeconds, nativeBufferedEnd(target))) {
+    if (this.#isOutOfWindowSeek(seekSeconds, nativeBufferedEnd(target), nativeBufferedStart(target))) {
       // The target can never be satisfied by this load (past the vouched
-      // duration, or past the delivered buffer once the source ended). A bare
-      // SEEK would leave the element in `seeking` / HAVE_METADATA forever, so
+      // duration, past the delivered buffer once the source ended, or before
+      // the retained buffer's front edge after end-of-stream). A bare SEEK
+      // would leave the element in `seeking` / HAVE_METADATA forever, so
       // restart the source at the target instead — the same remedy as decode
       // recovery, retry-capped, with the stall watchdog as backstop.
       this.#applyDecisions(
@@ -2157,6 +2186,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#endedReached = false;
     this.#durationSeconds = null;
     this.#workerBufferEndSeconds = 0;
+    this.#workerBufferStartSeconds = 0;
     // No load is seeking after a boundary; a stale watchdog must not fire into
     // the fresh pipeline, and a stale in-flight-seek marker must not name a
     // target to a late `unavailable` report.
@@ -2528,4 +2558,11 @@ function nativeBufferedEnd(target: HTMLVideoTargetLike): number {
   const buffered = target.buffered;
   if (buffered.length === 0) return 0;
   return buffered.end(buffered.length - 1);
+}
+
+/** Lowest start of the element's native buffered ranges; 0 when empty. */
+function nativeBufferedStart(target: HTMLVideoTargetLike): number {
+  const buffered = target.buffered;
+  if (buffered.length === 0) return 0;
+  return buffered.start(0);
 }
