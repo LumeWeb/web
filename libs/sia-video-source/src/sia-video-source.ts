@@ -460,6 +460,14 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   set workerMse(value: undefined | WorkerMsePreference) {
     this.#workerMse = value;
   }
+  // True from the moment the worker's repositioning `seeking` echo of a
+  // forwarded in-flight seek lands (the echo branch of `#onSeeking`), until
+  // the next seek forward, a late `unavailable` retarget, `seeked`, or a
+  // load boundary: it marks the element as genuinely buffering at an
+  // acknowledged target, the state where a pause confirm may settle while
+  // `seeking` (see `#settlePauseConfirmIfArmed`).
+  #acknowledgedSeekEchoSeen = false;
+
   // Identity of the media resource the CURRENT load attached, used to tell a
   // live native event from a dead one. Worker mode holds the request-scoped
   // MediaSourceHandle the worker transferred (the element's srcObject) for the
@@ -1413,7 +1421,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // puts the element in `seeking`, and a real browser fires a native
     // `seeking` for it. `#onSeeking` matches that echo against this marker
     // and drops it, so the worker receives one SEEK for the restored
-    // position, not two.
+    // position, not two. The retarget's own repositioning is a fresh seek:
+    // its echo, not a stale one, acknowledges the new in-flight target.
+    this.#acknowledgedSeekEchoSeen = false;
     this.#lastForwardedSeekSeconds = restored;
     this.#send({
       requestId,
@@ -1927,6 +1937,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#cancelPauseConfirm();
     this.#cancelSeekWatchdog();
     this.#lastForwardedSeekSeconds = null;
+    this.#acknowledgedSeekEchoSeen = false;
     // If the machine was mid-recovery as a seek restart, its repositioning
     // seek resolving closes the window and restores the budget; a decode
     // recovery's incidental repositioning seek resolving changes nothing (the
@@ -1983,6 +1994,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       this.#lastForwardedSeekSeconds !== null &&
       Math.abs(this.#lastForwardedSeekSeconds - seekSeconds) <= SEEK_DURATION_TOLERANCE_SECONDS
     ) {
+      // The worker repositioned the element to the forwarded target: the
+      // in-flight seek is now acknowledged, and a pause landing while the
+      // element buffers there is a genuine user pause (see
+      // `#settlePauseConfirmIfArmed`).
+      this.#acknowledgedSeekEchoSeen = true;
       return;
     }
     // A seek supersedes the current position: drop chunks still queued for it
@@ -1994,6 +2010,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#appendPipe?.reset(seekSeconds);
     // Name the in-flight seek so a late `unavailable` report can be matched
     // against it (the load-level request id spans every seek of the load).
+    // A new in-flight seek starts unacknowledged: only ITS echo marks the
+    // element as buffering at an acknowledged target.
+    this.#acknowledgedSeekEchoSeen = false;
     this.#lastForwardedSeekSeconds = seekSeconds;
     this.#send({
       requestId: this.#requestId ?? nextRequestId(),
@@ -2202,6 +2221,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // target to a late `unavailable` report.
     this.#cancelSeekWatchdog();
     this.#lastForwardedSeekSeconds = null;
+    this.#acknowledgedSeekEchoSeen = false;
     // A fresh source can make a previously dead position servable again; a
     // stale echo latch from the old load must not drop a real report.
     this.#lastRetargetSeconds = null;
@@ -2388,22 +2408,26 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // Robust state rule (not timer-task ordering): a scrub is already in
     // flight the moment it begins, the element's `seeking` flag is set
     // synchronously by the currentTime write, before the `seeking` EVENT even
-    // dispatches. If this confirmation fires while the element is seeking at a
-    // position the host has NOT acknowledged, the pause that armed it is the
-    // scrub's own engine work (its `seeking` event is still queued, or
-    // currentTime already left an old acknowledged target for a NEW nascent
+    // dispatches. If this confirmation fires while the element is seeking
+    // without sitting at an acknowledged in-flight seek target, the pause that
+    // armed it is a scrub's own engine work (its `seeking` event is still
+    // queued, or currentTime already left the old target for a NEW nascent
     // scrub), not the user stopping, so it must NOT settle: leave the machine
     // in `pausepending` and let the imminent `seeking` supersede it (a pause
     // task settling before a delayed `seeking` never becomes the user's
-    // choice). But an element seeking AT a host-acknowledged in-flight seek
-    // target (buffering the forwarded SEEK) is exactly where a GENUINE user
-    // pause lands, the seek's own prelude pause is the only engine pause, and
-    // it never reaches an acknowledged target, so it settles as the deliberate
-    // stop. A non-seeking element always settles: the window closed with no
-    // seek in between and the pause was deliberate.
+    // choice). The acknowledged-target test demands the worker's
+    // repositioning ECHO, not proximity alone: a new scrub's target can sit
+    // within tolerance of an in-flight target the host forwarded but the
+    // worker never acknowledged, and proximity alone would settle that
+    // scrub's prelude pause as the user stopping. With the echo seen, the
+    // element genuinely buffers at the acknowledged target, where a GENUINE
+    // user pause lands, so it settles as the deliberate stop. A non-seeking
+    // element always settles: the window closed with no seek in between and
+    // the pause was deliberate.
     const target = this.target;
     const atAcknowledgedSeek =
       target !== null &&
+      this.#acknowledgedSeekEchoSeen &&
       this.#lastForwardedSeekSeconds !== null &&
       Math.abs(target.currentTime - this.#lastForwardedSeekSeconds) <= SEEK_DURATION_TOLERANCE_SECONDS;
     if (target?.seeking && !atAcknowledgedSeek) return;

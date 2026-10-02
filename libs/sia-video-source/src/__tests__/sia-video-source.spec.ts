@@ -2242,11 +2242,14 @@ describe('out-of-window seek recovery', () => {
     target.dispatchEvent(new Event('play'));
     worker.sent.length = 0;
 
-    // An in-window scrub is in flight: the host acknowledged the target and
-    // the element reports `seeking` while it buffers.
+    // An in-window scrub is in flight: the host forwarded the target and the
+    // element reports `seeking` while it buffers; the worker's repositioning
+    // echo is what acknowledges the seek (the element genuinely buffers at
+    // the forwarded target).
     Object.defineProperty(target, 'seeking', { configurable: true, get: () => true });
     target.currentTime = 30;
     target.dispatchEvent(new Event('seeking'));
+    target.dispatchEvent(new Event('seeking')); // the worker's repositioning echo
     // The user genuinely pauses while the element is still seeking.
     target.dispatchEvent(new Event('pause'));
     await settle(); // next task confirms the pause, while the element is seeking
@@ -2267,6 +2270,70 @@ describe('out-of-window seek recovery', () => {
     expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
     expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
     expect(host.error).toBeNull();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('an incidental pause on an unacknowledged in-flight seek keeps the playing intent through the far scrub and its chained recovery', async () => {
+    // The far scrub's incidental `pause` can confirm while the element is
+    // still `seeking`, and its new target can sit within tolerance of the
+    // in-flight in-window seek the host forwarded. That proximity alone must
+    // not settle the pause: the worker never acknowledged the in-flight seek
+    // (its repositioning `seeking` echo never landed), so the element is not
+    // buffering at an acknowledged target. The pause is the new scrub's
+    // engine work, and the out-of-window restart, and the decode failure
+    // chaining on its fresh load, must keep the user playing.
+    const { host, target, worker } = attachAndHandshake();
+    loadWithDuration(host, worker, 'k', 60);
+    target.dispatchEvent(new Event('play'));
+    worker.sent.length = 0;
+
+    // An in-window scrub near the vouched duration is in flight: forwarded
+    // as a plain SEEK, the element `seeking` while it buffers. The worker's
+    // repositioning echo never lands (the fetch is still running), so the
+    // seek is NOT acknowledged.
+    Object.defineProperty(target, 'seeking', { configurable: true, get: () => true });
+    target.currentTime = 60.05;
+    target.dispatchEvent(new Event('seeking'));
+    expect(worker.sent.at(-1)).toMatchObject({ time: 60.05, type: MainToWorkerMessageType.SEEK });
+
+    // The far scrub begins: video.js fires the native `pause` first, then the
+    // new target (60.3, out of window) lands within tolerance of the
+    // in-flight 60.05. The confirm timer runs before the `seeking` event.
+    target.dispatchEvent(new Event('pause')); // incidental, engine work
+    target.currentTime = 60.3;
+    await settle(); // next task: the pause confirm must NOT settle
+    target.dispatchEvent(new Event('seeking')); // the delayed seeking lands
+
+    const restart1 = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE);
+    expect(restart1).toHaveLength(1);
+    expect(restart1[0]).toMatchObject({ src: 'k', type: MainToWorkerMessageType.SOURCE });
+    // The restart keeps the playing choice: it posts PLAY.
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY).at(-1)).toMatchObject({
+      requestId: restart1[0].requestId,
+      type: MainToWorkerMessageType.PLAY,
+    });
+
+    // The fresh load fails to decode: the chained recovery restarts again,
+    // still with the user's playing intent.
+    worker.reply({
+      info: { ...mainInfo, durationSeconds: 60 },
+      requestId: restart1[0].requestId,
+      type: WorkerToMainMessageType.SOURCE_OK,
+    });
+    worker.sent.length = 0;
+    worker.reply({
+      context: 'append failed',
+      kind: 'decode',
+      requestId: restart1[0].requestId,
+      type: WorkerToMainMessageType.ERROR,
+    });
+    const restart2 = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE);
+    expect(restart2).toHaveLength(1);
+    // The chained restart also keeps the playing choice: the trailing PLAY.
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY).at(-1)).toMatchObject({
+      requestId: restart2[0].requestId,
+      type: MainToWorkerMessageType.PLAY,
+    });
     host.destroy();
   });
 
