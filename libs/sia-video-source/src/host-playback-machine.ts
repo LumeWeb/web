@@ -346,6 +346,16 @@ const canRetry = (ctx: HostPlaybackState): boolean => ctx.attempt < MAX_RECOVERY
 const spentBudget = (ctx: HostPlaybackState): boolean => !canRetry(ctx);
 const isSeekRecovery = (ctx: HostPlaybackState): boolean =>
   ctx.recovery?.reason === recoveryReason.seek;
+// A play landing during an in-flight recovery is fresh user intent ONLY when
+// the recovery itself was a paused one (`wantsPlay` false): the engine never
+// plays a paused recovery by itself, so a play that reached the machine there
+// is external, an explicit user play worth honoring so a chained recovery
+// resumes. A playing recovery's own resume play is the engine's work and the
+// choice is already playing, so nothing flips there. The host additionally
+// filters element plays that never left `paused`, so engine teardown noise
+// cannot reach this transition.
+const isPausedRecovery = (ctx: HostPlaybackState): boolean =>
+  ctx.recovery?.wantsPlay === false;
 const isDecodeFailure = (_ctx: HostPlaybackState, event: MachineEvent): boolean =>
   event.type === hostPlaybackEvent.loadFailed && event.kind === hostReportKind.decode;
 const isTerminalFailure = (_ctx: HostPlaybackState, event: MachineEvent): boolean =>
@@ -1131,9 +1141,12 @@ function recoveringTransitions(decisions: HostDecision[]): Transition<string>[] 
     // retry-capped seek restart (or reports) exactly like the first attempt.
     // A play on a hidden-parked repair re-parks it (the restart stays owed to
     // the visibility return); a play on a plain repair consumes it (the
-    // explicit user action owns it); a play with nothing owed is engine noise.
+    // explicit user action owns it); a play during a paused recovery records
+    // the fresh intent so a chained restart resumes (see isPausedRecovery); a
+    // play with nothing owed and no paused recovery is engine noise.
     transition(hostPlaybackEvent.play, hostPlaybackState.recovering, guard(isHiddenParked), reParkOwed),
     transition(hostPlaybackEvent.play, hostPlaybackState.recovering, guard(isOwed), consumeOwedOnPlay),
+    transition(hostPlaybackEvent.play, hostPlaybackState.recovering, guard(isPausedRecovery), setPreference(playbackPreference.playing)),
     transition(hostPlaybackEvent.play, hostPlaybackState.recovering),
     transition(hostPlaybackEvent.pause, hostPlaybackState.recovering),
     transition(hostPlaybackEvent.seek, hostPlaybackState.recovering),

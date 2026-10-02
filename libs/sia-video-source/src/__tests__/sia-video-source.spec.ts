@@ -2195,9 +2195,186 @@ describe('out-of-window seek recovery', () => {
     host.destroy();
   });
 
+  it.skipIf(!IN_BROWSER)('keeps a provisional pause from becoming a user pause when its confirm settles before the delayed `seeking`', async () => {
+    // video.js fires a native `pause` before `seeking` on a far scrub. The
+    // pause-confirm task can settle BEFORE the delayed `seeking` event lands
+    // (event-pileup), so the robust rule must use element STATE: the element
+    // reports `seeking: true` from the moment its currentTime write begins the
+    // scrub, never the assumption that `seeking` outranks the confirm timer.
+    // Here the confirm runs while the element is already seeking, and the far
+    // scrub that follows must still restart with play: the incidental pause
+    // was never confirmed as the user stopping.
+    const { host, target, worker } = attachAndHandshake();
+    loadWithDuration(host, worker, 'k', 60);
+    target.dispatchEvent(new Event('play'));
+    worker.sent.length = 0;
+
+    // The scrub has begun (the flag is latched) but its `seeking` EVENT is
+    // still queued behind the next task, the confirm timer runs first.
+    Object.defineProperty(target, 'seeking', { configurable: true, get: () => true });
+    target.dispatchEvent(new Event('pause')); // incidental, engine work
+    await settle(); // next task: the pause confirm fires BEFORE the `seeking`
+    target.currentTime = 120;
+    target.dispatchEvent(new Event('seeking')); // the delayed seeking lands
+
+    const reloadSources = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE);
+    expect(reloadSources).toHaveLength(1);
+    expect(reloadSources[0]).toMatchObject({ src: 'k', type: MainToWorkerMessageType.SOURCE });
+    // The seek recovery keeps the playing choice: the restart posts PLAY.
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY).at(-1)).toMatchObject({
+      requestId: reloadSources[0].requestId,
+      type: MainToWorkerMessageType.PLAY,
+    });
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('a genuine user pause during an in-flight seek keeps the paused intent through a later recovery, never auto-resuming', async () => {
+    // The element-state rule must tell a scrub's OWN incidental pause (the
+    // `seeking` latch is held but its `seeking` EVENT has not been processed
+    // yet) from a GENUINE pause on top of a seek the host already
+    // acknowledged (an in-window scrub buffering at the forwarded target).
+    // Here the user pauses DURING the buffering seek: the next-task confirm
+    // must settle as a deliberate stop even though the element reports
+    // `seeking`, so when the seek resolves and a decode failure follows, the
+    // recovery defers instead of auto-resuming behind the paused user.
+    const { host, target, worker } = attachAndHandshake();
+    const loadId = loadWithDuration(host, worker, 'k', 60);
+    target.dispatchEvent(new Event('play'));
+    worker.sent.length = 0;
+
+    // An in-window scrub is in flight: the host acknowledged the target and
+    // the element reports `seeking` while it buffers.
+    Object.defineProperty(target, 'seeking', { configurable: true, get: () => true });
+    target.currentTime = 30;
+    target.dispatchEvent(new Event('seeking'));
+    // The user genuinely pauses while the element is still seeking.
+    target.dispatchEvent(new Event('pause'));
+    await settle(); // next task confirms the pause, while the element is seeking
+
+    // The scrub resolves.
+    Object.defineProperty(target, 'seeking', { configurable: true, get: () => false });
+    target.dispatchEvent(new Event('seeked'));
+    worker.sent.length = 0;
+
+    // A later decode failure must defer a repair (no reload, no PLAY): the
+    // user is paused, so the recovery never auto-resumes.
+    worker.reply({
+      context: 'append failed',
+      kind: 'decode',
+      requestId: loadId,
+      type: WorkerToMainMessageType.ERROR,
+    });
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
+    expect(host.error).toBeNull();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('never re-arms the stall watchdog for a paused seek recovery, so a stale latched far scrub cannot chain a second restart', async () => {
+    // A paused user's far scrub starts a wantsPlay=false seek recovery. The
+    // reposition seek there belongs to a still-latched scrub (the element's
+    // `seeking` flag never clears and the playhead drifts on), and re-arming
+    // the 6s stall watchdog would let that stale latch chain into a second
+    // restart the paused user never asked for. Paused restarts therefore do
+    // NOT re-arm the watchdog; only active/playing restarts get the backstop.
+    const SEEK_STALL_MS = 6000;
+    const { host, target, worker } = attachAndHandshake();
+    loadWithDuration(host, worker, 'k', 60);
+    target.dispatchEvent(new Event('play'));
+    target.dispatchEvent(new Event('pause')); // genuine: no seeking follows
+    await settle(); // the pause settles as deliberate
+    worker.sent.length = 0;
+
+    Object.defineProperty(target, 'seeking', { configurable: true, get: () => true });
+    vi.useFakeTimers();
+    try {
+      target.currentTime = 120;
+      target.dispatchEvent(new Event('seeking'));
+      const restart1 = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE);
+      expect(restart1).toHaveLength(1);
+      expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
+      // Acknowledge the restart so the replacement resource IS current, a
+      // (buggy) watchdog armed for it would be scoped to the fresh pipeline.
+      if (restart1[0] && 'requestId' in restart1[0]) {
+        worker.reply({
+          info: { ...mainInfo, durationSeconds: 60 },
+          requestId: restart1[0].requestId,
+          type: WorkerToMainMessageType.SOURCE_OK,
+        });
+      }
+      worker.sent.length = 0;
+
+      // The full stall interval elapses with the stale latch still held at the
+      // far target: no watchdog was re-armed, so no chained restart fires.
+      vi.advanceTimersByTime(SEEK_STALL_MS);
+      expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+      expect(host.error).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('honors an explicit play during a paused recovery but ignores a play that never actually started the element', async () => {
+    // A paused seek recovery never plays the element itself, so a `play` event
+    // whose element stayed `paused` is engine noise and must not flip the
+    // machine's choice; a `play` that genuinely left the element unpaused is
+    // the explicit user intent a chained recovery must honor (wantsPlay=true).
+    const { host, target, worker } = attachAndHandshake();
+    loadWithDuration(host, worker, 'k', 60);
+    target.dispatchEvent(new Event('play'));
+    target.dispatchEvent(new Event('pause')); // genuine user pause
+    await settle(); // settles as deliberate
+    worker.sent.length = 0;
+
+    // A paused far scrub starts a paused seek recovery in flight.
+    target.currentTime = 120;
+    target.dispatchEvent(new Event('seeking'));
+    const restart1 = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).at(-1);
+    expect(restart1).toBeDefined();
+    if (!restart1 || !('requestId' in restart1)) throw new Error('no paused seek restart SOURCE');
+    worker.reply({
+      info: { ...mainInfo, durationSeconds: 60 },
+      requestId: restart1.requestId,
+      type: WorkerToMainMessageType.SOURCE_OK,
+    });
+
+    // Engine noise: a `play` event that did not start the element (paused
+    // stays true in this harness) is teardown work, never user intent.
+    target.dispatchEvent(new Event('play'));
+    worker.sent.length = 0;
+    // A decode failure on the fresh load while the choice is still paused must
+    // defer a repair, no restart, no PLAY.
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: restart1.requestId, type: WorkerToMainMessageType.ERROR });
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
+    expect(host.error).toBeNull();
+
+    // A genuine play: the element actually left the paused state.
+    Object.defineProperty(target, 'paused', { configurable: true, get: () => false });
+    worker.sent.length = 0;
+    target.dispatchEvent(new Event('play'));
+    // The fresh load fails again while the user now wants play: the chained
+    // recovery must restart WITH play (the machine honored the mid-recovery
+    // play), not defer behind the stale paused choice.
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: restart1.requestId, type: WorkerToMainMessageType.ERROR });
+    const reload2 = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE);
+    expect(reload2).toHaveLength(1);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY).at(-1)).toMatchObject({
+      requestId: reload2[0] && 'requestId' in reload2[0] ? reload2[0].requestId : NaN,
+      type: MainToWorkerMessageType.PLAY,
+    });
+    host.destroy();
+  });
+
   it.skipIf(!IN_BROWSER)('surfaces a decode error once out-of-window seek restarts are exhausted', () => {
     const { host, target, worker } = attachAndHandshake();
     loadWithDuration(host, worker, 'k', 60);
+    // An OUT-OF-WINDOW seek recovery that is actively PLAYING keeps its stall
+    // watchdog backstop: only paused restarts drop it, so the exhaust path is
+    // exercised from the playing side.
+    target.dispatchEvent(new Event('play'));
+    worker.sent.length = 0;
 
     let errorEvents = 0;
     host.addEventListener('error', () => errorEvents++);
