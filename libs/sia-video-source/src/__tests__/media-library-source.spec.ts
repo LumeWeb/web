@@ -73,14 +73,14 @@ function streamOf(...chunks: Uint8Array[]): ReadableStream<Uint8Array> {
 }
 
 describe('mediaLibrarySource adapter', () => {
-  it('selects the file-system prefetch profile', () => {
+  it('selects the network prefetch profile', () => {
     const fake = fakeByteSource(() => streamOf());
     customSourceConstructor.mockClear();
 
     mediaLibrarySource(fake.source);
 
     expect(customSourceConstructor).toHaveBeenCalledOnce();
-    expect(customSourceConstructor).toHaveBeenCalledWith(expect.objectContaining({ prefetchProfile: 'fileSystem' }));
+    expect(customSourceConstructor).toHaveBeenCalledWith(expect.objectContaining({ prefetchProfile: 'network' }));
   });
 
   it('passes the requested range through unmodified and hands loadGeneration to the transport read', async () => {
@@ -309,6 +309,144 @@ describe('mediaLibrarySource read buffered-ahead backpressure (primary quota pro
     const adapter = mediaLibrarySource(fake.source);
 
     await expect(readFrom(adapter, 0, 3)).resolves.toHaveLength(3);
+    expect(fake.calls).toHaveLength(1);
+  });
+});
+
+/**
+ * A stream that enqueues 4 bytes, then pauses inside pull until `release()`
+ * is called, after which it enqueues the remaining `rest` bytes and closes.
+ * Models an in-flight multi-MiB drain that a second reader must not overlap.
+ */
+function heldStream(rest: number): { release: () => void; stream: ReadableStream<Uint8Array> } {
+  let releaseFn: () => void = () => undefined;
+  let done = false;
+  const stream = new ReadableStream<Uint8Array>({
+    async pull(controller) {
+      if (!done) {
+        done = true;
+        controller.enqueue(new Uint8Array(4));
+        await new Promise<void>((resolve) => {
+          releaseFn = resolve;
+        });
+      }
+      for (let i = 0; i < rest; i += 4) {
+        controller.enqueue(new Uint8Array(Math.min(4, rest - i)));
+      }
+      controller.close();
+    },
+  });
+  return { release: () => releaseFn(), stream };
+}
+
+describe('mediaLibrarySource read admission (concurrent prefetch windows)', () => {
+  it('serializes concurrent reads: a second prefetch window never opens a transport read while the first is draining', async () => {
+    const held = heldStream(6); // first read: 4 bytes, hold, then 6 more = 10
+    let call = 0;
+    const fake = fakeByteSource(() => {
+      call += 1;
+      return call === 1 ? held.stream : streamOf(new Uint8Array(10));
+    });
+    const adapter = mediaLibrarySource(fake.source);
+
+    const first = readFrom(adapter, 0, 10);
+    const second = readFrom(adapter, 10, 20);
+    await tick();
+
+    // The first window is still draining: the second must be queued, not
+    // opening a parallel transport read (the 2x8 MiB burst the gate must bound).
+    expect(fake.calls).toHaveLength(1);
+
+    held.release();
+    await expect(first).resolves.toHaveLength(10);
+    await expect(second).resolves.toHaveLength(10);
+    expect(fake.calls).toHaveLength(2);
+    expect(fake.calls[1].range).toEqual({ length: 10, offset: 10 });
+  });
+
+  it('spans the admission over the gate waits and the full drain, not just the entry check', async () => {
+    const held = heldStream(6);
+    let call = 0;
+    let releaseGate: () => void = () => undefined;
+    const fake = fakeByteSource(() => {
+      call += 1;
+      return call === 1 ? held.stream : streamOf(new Uint8Array(10));
+    });
+    const adapter = mediaLibrarySource(fake.source, {
+      waitForCapacity: () =>
+        call === 0
+          ? new Promise<void>((resolve) => {
+              releaseGate = resolve;
+            })
+          : Promise.resolve(),
+    });
+
+    const first = readFrom(adapter, 0, 10);
+    const second = readFrom(adapter, 10, 20);
+    await tick();
+
+    // First read parks at the gate; the second read must also stay out of
+    // the transport (a gate-only admission would already have admitted it).
+    expect(fake.calls).toHaveLength(0);
+
+    releaseGate(); // the first read may now pull, but must drain fully first
+    await tick();
+    expect(fake.calls).toHaveLength(1);
+    expect(fake.streams[0].locked).toBe(true);
+
+    held.release();
+    await expect(first).resolves.toHaveLength(10);
+    await expect(second).resolves.toHaveLength(10);
+    expect(fake.calls).toHaveLength(2);
+    expect(fake.calls[1].range).toEqual({ length: 10, offset: 10 });
+  });
+
+  it('releases the slot when the in-flight read fails, so a queued read proceeds', async () => {
+    let call = 0;
+    const fake = fakeByteSource(() => {
+      call += 1;
+      if (call === 1) {
+        return new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.error(new Error('transport failed'));
+          },
+        });
+      }
+      return streamOf(new Uint8Array(10));
+    });
+    const adapter = mediaLibrarySource(fake.source);
+
+    const first = readFrom(adapter, 0, 10);
+    const second = readFrom(adapter, 10, 20);
+    await expect(first).rejects.toThrow('transport failed');
+
+    // A leaked slot would hang the second read forever; it must proceed.
+    await expect(second).resolves.toHaveLength(10);
+    expect(fake.calls).toHaveLength(2);
+  });
+
+  it('an aborted queued read rejects with the signal reason and never opens a transport read', async () => {
+    const held = heldStream(6);
+    let call = 0;
+    const fake = fakeByteSource(() => {
+      call += 1;
+      return call === 1 ? held.stream : streamOf(new Uint8Array(10));
+    });
+    const controller = new AbortController();
+    const reason = new Error('load superseded');
+    const adapter = mediaLibrarySource(fake.source, { signal: controller.signal });
+
+    const first = readFrom(adapter, 0, 10);
+    const second = readFrom(adapter, 10, 20);
+    await tick();
+    expect(fake.calls).toHaveLength(1); // only the in-flight read
+
+    // The load is superseded while the second read is queued: it must reject
+    // with the abort reason without ever reaching the transport.
+    controller.abort(reason);
+    held.release();
+    await expect(first).resolves.toHaveLength(10);
+    await expect(second).rejects.toBe(reason);
     expect(fake.calls).toHaveLength(1);
   });
 });
