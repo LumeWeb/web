@@ -1294,14 +1294,20 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // superseded session). PLAY is never replayed from the buffer — it is
   // re-stated from the machine's playback choice at the ATTACH_OK boundary —
   // and PLAYHEAD of the superseded session was dropped outright while the host
-  // was not-ready (see `#send`).
+  // was not-ready (see `#send`). When multiple seeks were buffered (the user
+  // scrubbed during a reload), only the LATEST survives: an earlier seek in the
+  // same window was superseded and replaying it would make the worker seek to
+  // a stale position before the intended target.
   #flushBufferedSeek(): void {
     const pending = this.#pending;
     this.#pending = [];
     const requestId = this.#requestId ?? nextRequestId();
+    let lastSeek: Extract<MainToWorkerMessage, { type: MainToWorkerMessageType.SEEK }> | undefined;
     for (const message of pending) {
-      if (message.type !== MainToWorkerMessageType.SEEK) continue;
-      this.#post({ ...message, requestId });
+      if (message.type === MainToWorkerMessageType.SEEK) lastSeek = message;
+    }
+    if (lastSeek) {
+      this.#post({ ...lastSeek, requestId });
     }
   }
 

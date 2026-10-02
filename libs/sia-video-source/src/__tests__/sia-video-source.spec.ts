@@ -606,6 +606,45 @@ describe('SiaVideoSource (host state machine)', () => {
     host.destroy();
   });
 
+  it.skipIf(!IN_BROWSER)('flushes only the latest buffered seek when multiple seeks precede the handshake completion', () => {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const target = document.createElement('video');
+    host.src = 'multi-seek-object';
+    host.attach(target);
+
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    // The host is not-ready between ATTACH and ATTACH_OK; seeks land in the
+    // pending buffer and must not leak into the wire.
+    expect(worker.sent.map((m) => m.type)).toEqual([MainToWorkerMessageType.HELLO, MainToWorkerMessageType.ATTACH]);
+
+    // Three seeks during the handshake window — only the last one is
+    // meaningful; the earlier two were superseded.
+    target.currentTime = 10;
+    target.dispatchEvent(new Event('seeking'));
+    target.currentTime = 25;
+    target.dispatchEvent(new Event('seeking'));
+    target.currentTime = 42;
+    target.dispatchEvent(new Event('seeking'));
+
+    // All three are buffered; none reach the worker yet.
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(0);
+
+    const attach = newestAttach(worker);
+    worker.sent.length = 0;
+    worker.reply({ mode: 'main', requestId: attach.requestId, type: WorkerToMainMessageType.ATTACH_OK });
+
+    // Exactly ONE SEEK is flushed (the latest, to 42), rebased onto the
+    // fresh SOURCE's request id. The two earlier seeks are dropped.
+    const seeks = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK);
+    expect(seeks).toHaveLength(1);
+    const source = worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as undefined | { requestId: number; src: string };
+    expect(source?.src).toBe('multi-seek-object');
+    expect(seeks[0].time).toBe(42);
+    expect(seeks[0].requestId).toBe(source?.requestId);
+    host.destroy();
+  });
+
   it.skipIf(!IN_BROWSER)('does not resume a playback the user deliberately paused before the re-attach', async () => {
     const worker = new FakeWorker();
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
