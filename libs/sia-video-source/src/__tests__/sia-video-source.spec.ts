@@ -2198,23 +2198,25 @@ describe('out-of-window seek recovery', () => {
   it.skipIf(!IN_BROWSER)('keeps a provisional pause from becoming a user pause when its confirm settles before the delayed `seeking`', async () => {
     // video.js fires a native `pause` before `seeking` on a far scrub. The
     // pause-confirm task can settle BEFORE the delayed `seeking` event lands
-    // (event-pileup), so the robust rule must use element STATE: the element
-    // reports `seeking: true` from the moment its currentTime write begins the
-    // scrub, never the assumption that `seeking` outranks the confirm timer.
-    // Here the confirm runs while the element is already seeking, and the far
-    // scrub that follows must still restart with play: the incidental pause
-    // was never confirmed as the user stopping.
+    // (event-pileup), so the rule must use element STATE, never the
+    // assumption that `seeking` outranks the confirm timer. Here the
+    // scrub's currentTime write has moved the playhead to the far target
+    // before the confirm task runs: the confirm arms at the old playhead,
+    // finds the playhead far beyond tolerance of it, and must NOT settle,
+    // so the far scrub that follows still restarts with play: the incidental
+    // pause was never confirmed as the user stopping.
     const { host, target, worker } = attachAndHandshake();
     loadWithDuration(host, worker, 'k', 60);
     target.dispatchEvent(new Event('play'));
     worker.sent.length = 0;
 
-    // The scrub has begun (the flag is latched) but its `seeking` EVENT is
-    // still queued behind the next task, the confirm timer runs first.
+    // The scrub has begun: the `seeking` flag is latched and the playhead
+    // moved, but its `seeking` EVENT is still queued behind the next task,
+    // the confirm timer runs first.
     Object.defineProperty(target, 'seeking', { configurable: true, get: () => true });
-    target.dispatchEvent(new Event('pause')); // incidental, engine work
+    target.dispatchEvent(new Event('pause')); // incidental, engine work; arms at the old playhead
+    target.currentTime = 120; // the scrub's write lands before the confirm task
     await settle(); // next task: the pause confirm fires BEFORE the `seeking`
-    target.currentTime = 120;
     target.dispatchEvent(new Event('seeking')); // the delayed seeking lands
 
     const reloadSources = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE);
@@ -2229,10 +2231,10 @@ describe('out-of-window seek recovery', () => {
   });
 
   it.skipIf(!IN_BROWSER)('a genuine user pause during an in-flight seek keeps the paused intent through a later recovery, never auto-resuming', async () => {
-    // The element-state rule must tell a scrub's OWN incidental pause (the
-    // `seeking` latch is held but its `seeking` EVENT has not been processed
-    // yet) from a GENUINE pause on top of a seek the host already
-    // acknowledged (an in-window scrub buffering at the forwarded target).
+    // The armed-position rule must tell a scrub's OWN incidental pause (the
+    // playhead has moved on to the new scrub target by the time the confirm
+    // runs) from a GENUINE pause on top of an in-flight in-window seek (the
+    // playhead still sits where the pause landed, the forwarded target).
     // Here the user pauses DURING the buffering seek: the next-task confirm
     // must settle as a deliberate stop even though the element reports
     // `seeking`, so when the seek resolves and a decode failure follows, the
@@ -2243,14 +2245,12 @@ describe('out-of-window seek recovery', () => {
     worker.sent.length = 0;
 
     // An in-window scrub is in flight: the host forwarded the target and the
-    // element reports `seeking` while it buffers; the worker's repositioning
-    // echo is what acknowledges the seek (the element genuinely buffers at
-    // the forwarded target).
+    // element reports `seeking` while it buffers at that target.
     Object.defineProperty(target, 'seeking', { configurable: true, get: () => true });
     target.currentTime = 30;
     target.dispatchEvent(new Event('seeking'));
-    target.dispatchEvent(new Event('seeking')); // the worker's repositioning echo
-    // The user genuinely pauses while the element is still seeking.
+    // The user genuinely pauses while the element is still seeking, at the
+    // forwarded target: the pause lands where the playhead sits.
     target.dispatchEvent(new Event('pause'));
     await settle(); // next task confirms the pause, while the element is seeking
 
@@ -2273,32 +2273,31 @@ describe('out-of-window seek recovery', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('an incidental pause on an unacknowledged in-flight seek keeps the playing intent through the far scrub and its chained recovery', async () => {
+  it.skipIf(!IN_BROWSER)('an incidental pause on an in-flight in-window seek keeps the playing intent through the far scrub and its chained recovery', async () => {
     // The far scrub's incidental `pause` can confirm while the element is
-    // still `seeking`, and its new target can sit within tolerance of the
-    // in-flight in-window seek the host forwarded. That proximity alone must
-    // not settle the pause: the worker never acknowledged the in-flight seek
-    // (its repositioning `seeking` echo never landed), so the element is not
-    // buffering at an acknowledged target. The pause is the new scrub's
-    // engine work, and the out-of-window restart, and the decode failure
-    // chaining on its fresh load, must keep the user playing.
+    // still `seeking`, and its new target can land right at the tolerance
+    // boundary of the position the pause armed at (the in-flight in-window
+    // seek the host forwarded). A playhead that has moved at all by the time
+    // the confirm runs is a new nascent scrub, not the user stopping, so the
+    // pause must NOT settle. The out-of-window restart, and the decode
+    // failure chaining on its fresh load, must keep the user playing.
     const { host, target, worker } = attachAndHandshake();
     loadWithDuration(host, worker, 'k', 60);
     target.dispatchEvent(new Event('play'));
     worker.sent.length = 0;
 
     // An in-window scrub near the vouched duration is in flight: forwarded
-    // as a plain SEEK, the element `seeking` while it buffers. The worker's
-    // repositioning echo never lands (the fetch is still running), so the
-    // seek is NOT acknowledged.
+    // as a plain SEEK, the element `seeking` while it buffers at the
+    // forwarded target.
     Object.defineProperty(target, 'seeking', { configurable: true, get: () => true });
     target.currentTime = 60.05;
     target.dispatchEvent(new Event('seeking'));
     expect(worker.sent.at(-1)).toMatchObject({ time: 60.05, type: MainToWorkerMessageType.SEEK });
 
-    // The far scrub begins: video.js fires the native `pause` first, then the
-    // new target (60.3, out of window) lands within tolerance of the
-    // in-flight 60.05. The confirm timer runs before the `seeking` event.
+    // The far scrub begins: video.js fires the native `pause` first (the
+    // confirm arms at 60.05), then the new target (60.3, out of window)
+    // lands at the tolerance boundary. The confirm timer runs before the
+    // `seeking` event.
     target.dispatchEvent(new Event('pause')); // incidental, engine work
     target.currentTime = 60.3;
     await settle(); // next task: the pause confirm must NOT settle
