@@ -2472,6 +2472,40 @@ describe('out-of-window seek recovery', () => {
     host.destroy();
   });
 
+  it.skipIf(!IN_BROWSER)('starts a recovery seek watchdog only after the replacement source is ready', () => {
+    const { host, target, worker } = attachAndHandshake();
+    loadWithDuration(host, worker, 'k', 60);
+    target.dispatchEvent(new Event('play'));
+    Object.defineProperty(target, 'seeking', { configurable: true, get: () => true });
+    vi.useFakeTimers();
+    try {
+      target.currentTime = 120;
+      target.dispatchEvent(new Event('seeking'));
+      const restart = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).at(-1);
+      expect(restart).toBeDefined();
+      worker.sent.length = 0;
+
+      // A large remote object's metadata/index pass can exceed the normal seek
+      // timeout. It is still loading, so the pre-attach interval must not
+      // spend a recovery attempt and restart the source again.
+      vi.advanceTimersByTime(6000);
+      expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+
+      if (restart && 'requestId' in restart) {
+        worker.reply({ info: { ...mainInfo, durationSeconds: 60 }, requestId: restart.requestId, type: WorkerToMainMessageType.SOURCE_OK });
+      }
+      worker.sent.length = 0;
+
+      // Once the replacement resource is attached, a truly stuck seek still
+      // gets the same bounded recovery watchdog.
+      vi.advanceTimersByTime(6000);
+      expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+    } finally {
+      vi.useRealTimers();
+    }
+    host.destroy();
+  });
+
   it.skipIf(!IN_BROWSER)('surfaces a decode error once out-of-window seek restarts are exhausted', () => {
     const { host, target, worker } = attachAndHandshake();
     loadWithDuration(host, worker, 'k', 60);

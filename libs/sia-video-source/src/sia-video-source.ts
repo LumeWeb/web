@@ -987,12 +987,20 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   #applyPendingReanchor(target: HTMLVideoTargetLike | null): void {
     const reanchorSeconds = this.#pendingReanchorSeconds;
     if (reanchorSeconds === null || !target) return;
+    const recovery = this.#machine.recovery;
     this.#pendingReanchorSeconds = null;
     try {
       target.currentTime = reanchorSeconds;
     } catch {
       // A dead MediaSource mid-teardown can refuse the write; the recovery
       // budgets + stall watchdog still bound the failure if this never plays.
+    }
+    // A replacement source can spend several seconds reading its remote
+    // metadata/index before it attaches. Start the seek-stall clock only once
+    // that fresh resource exists; otherwise a healthy deep seek repeatedly
+    // tears itself down before its reanchor can resolve.
+    if (recovery?.reason === recoveryReason.seek && recovery.wantsPlay) {
+      this.#armSeekWatchdog();
     }
   }
 
@@ -2326,19 +2334,6 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#send({ requestId, time: decision.resumeSeconds, type: MainToWorkerMessageType.SEEK });
     if (decision.wantsPlay) {
       this.#send({ requestId, type: MainToWorkerMessageType.PLAY });
-    }
-    // A seek restart re-arms the stall watchdog ONLY when it is resuming
-    // playback: the watchdog's job is to unstick an actively-sought element
-    // that never reaches its target. A PAUSED seek recovery (wantsPlay=false)
-    // never re-arms it, because its reposition seek belongs to a still-latched
-    // scrub: re-arming would let that stale latch, whose currentTime later
-    // drifts toward the newest far target, chain into a second restart the
-    // paused user never asked for (the observed far-target restart2). Active
-    // and playing seek recoveries keep the backstop: the watchdog re-checks
-    // after a fresh interval and re-enters the machine (or its exhaust branch)
-    // if the seek still has not resolved.
-    if (decision.reason === recoveryReason.seek && decision.wantsPlay) {
-      this.#armSeekWatchdog();
     }
   }
 
