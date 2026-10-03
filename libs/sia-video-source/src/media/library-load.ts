@@ -43,6 +43,7 @@ import type { ByteSource } from '../transport/byte-source.ts';
 import { ByteSourceSupersededError } from '../transport/byte-source.ts';
 import type { ContainerKind, PlaybackTrack } from './types.ts';
 import { mediaLibrarySource } from './library-source.ts';
+import { describeError } from '../shared-helpers.ts';
 
 /** Minimum media-fragment duration in seconds; fragments break on keyframes. */
 const DEFAULT_FRAGMENT_SECONDS = 1;
@@ -528,10 +529,6 @@ function createMediaPlayback(options: {
   };
 
   return { dispose, restart, start };
-}
-
-function describeError(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
 }
 
 /** Whether an error means the work was cancelled rather than failed. */

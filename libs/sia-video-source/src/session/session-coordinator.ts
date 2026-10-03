@@ -46,6 +46,7 @@ import {
   scrub,
   type WorkerKeyPair,
 } from '../app-key-handshake.ts';
+import { appKeySeedsEqual, describeError, workerConfigsEqual } from '../shared-helpers.ts';
 import {
   type AppKeyEnvelope,
   type MainToWorkerMessage,
@@ -983,17 +984,6 @@ export function defaultSupportsWorkerMse(): boolean {
   return resolved !== null && resolved.ctor.canConstructInDedicatedWorker === true;
 }
 
-/** Byte equality over two decapsulated seeds (or nulls); scrubbed buffers read as "changed". */
-function appKeySeedsEqual(a: null | Uint8Array, b: null | Uint8Array): boolean {
-  if (a === b) return true;
-  if (!a || !b) return false;
-  if (a.byteLength !== b.byteLength) return false;
-  for (let i = 0; i < a.byteLength; i++) {
-    if (a[i] !== b[i]) return false;
-  }
-  return true;
-}
-
 /**
  * Prepares a CHUNK for structured-clone transfer. A full ArrayBuffer view is
  * safe to transfer directly; a subview first copies its visible bytes.
@@ -1008,19 +998,4 @@ function chunkForPost(
     message: { bytes, kind: unit.kind, requestId, type: WorkerToMainMessageType.CHUNK },
     transfer: [bytes.buffer],
   };
-}
-
-function describeError(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
-
-/**
- * True when two HELLO worker configs describe the same connection. App
- * metadata is descriptive only (not part of SDK auth), so identity is the
- * indexer endpoint.
- */
-function workerConfigsEqual(a: undefined | WorkerConfig, b: undefined | WorkerConfig): boolean {
-  if (a === b) return true;
-  if (!a || !b) return false;
-  return a.indexerUrl === b.indexerUrl;
 }
