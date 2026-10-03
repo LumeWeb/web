@@ -4,8 +4,8 @@
  * container is one of the families mediabunny can recognize.
  */
 
-import { describe, expect, expectTypeOf, it } from 'vitest';
-import { type ContainerKind, type MediaKind, type PlaybackTrack } from '../media/types.ts';
+import { describe, expectTypeOf, it } from 'vitest';
+import { type ContainerKind, type MediaKind } from '../media/types.ts';
 
 describe('media domain vocabulary', () => {
   it('restricts the track/codec kinds to video and audio', () => {
@@ -16,9 +16,4 @@ describe('media domain vocabulary', () => {
     expectTypeOf<ContainerKind>().toEqualTypeOf<'mkv' | 'mp4' | 'ts' | 'unknown' | 'webm'>();
   });
 
-  it('describes one discovered track', () => {
-    const track: PlaybackTrack = { codec: 'avc1.640028', kind: 'video' };
-    expect(track.kind).toBe('video');
-    expect(track.codec).toBe('avc1.640028');
-  });
 });

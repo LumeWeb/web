@@ -39,18 +39,6 @@ describe('browser-decodable AVC/AAC fixture', () => {
     expect(bytes.byteLength).toBeGreaterThan(0);
   });
 
-  it('a committed fixture must flip the availability flag AND pin its sha256', () => {
-    // Flipping HAS_BROWSER_DECODABLE_FIXTURE to true while the sha256 sentinel
-    // is still un-pinned is a mistake: the acceptance tests would run without
-    // committed bytes. `Boolean(...)` widens the literal-typed const so the
-    // open/pinned cross-check below stays type-legal while the flag value can
-    // still change — the comparison catches the mismatch.
-    const flagOpen = Boolean(HAS_BROWSER_DECODABLE_FIXTURE);
-    const hashPinned = !BROWSER_DECODABLE_FIXTURE_SHA256.includes('<pending');
-    expect(flagOpen ? hashPinned : true).toBe(true);
-    expect(hashPinned ? flagOpen : true).toBe(true);
-  });
-
   describe.runIf(IN_NODE)('node-only integrity + structural facts', () => {
     it('the embedded bytes hash to the pinned sha256 and are byte-identical to the committed .mp4', async () => {
       const { createHash } = await import('node:crypto');

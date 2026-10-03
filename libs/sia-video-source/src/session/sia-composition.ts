@@ -41,6 +41,7 @@ import {
   type SessionCoordinator,
   type WorkerAbandonReason,
 } from './session-coordinator.ts';
+import { appKeySeedsEqual, describeError, workerConfigsEqual } from '../shared-helpers.ts';
 import type { WorkerMseRoot } from './worker-mse-root.ts';
 import type { SiaByteSourceSdk } from '../transport/sia-byte-source.ts';
 import { createSiaByteSourceFactory, type SiaByteSourceFactoryOptions } from '../transport/sia-byte-source.ts';
@@ -364,16 +365,6 @@ export function milestoneLevel(name: string): undefined | WorkerLogLevel {
   }
 }
 
-function appKeySeedsEqual(a: null | Uint8Array, b: null | Uint8Array): boolean {
-  if (a === b) return true;
-  if (!a || !b) return false;
-  if (a.byteLength !== b.byteLength) return false;
-  for (let i = 0; i < a.byteLength; i++) {
-    if (a[i] !== b[i]) return false;
-  }
-  return true;
-}
-
 function connectionEquals(
   cached: {
     config: undefined | WorkerConfig;
@@ -432,7 +423,7 @@ function createLazySiaByteSourceFactory(deps: {
         // URL (which embeds the object decryption key), so URL-shaped runs are
         // scrubbed before they reach the LOG detail.
         emitLog(logSink, handshake.log, workerLogLevel.error, workerLogEventName.sdkBuildFailed, {
-          message: redactUrls(error instanceof Error ? error.message : String(error)),
+          message: redactUrls(describeError(error)),
         });
         throw error;
       }
@@ -475,11 +466,4 @@ function disposeSdk(sdk: unknown): void {
  */
 function redactUrls(text: string): string {
   return text.replace(/(?:https?|sia):\/\/\S+/g, '[redacted]');
-}
-
-/** True when two HELLO worker configs describe the same connection (indexer identity). */
-function workerConfigsEqual(a: undefined | WorkerConfig, b: undefined | WorkerConfig): boolean {
-  if (a === b) return true;
-  if (!a || !b) return false;
-  return a.indexerUrl === b.indexerUrl;
 }

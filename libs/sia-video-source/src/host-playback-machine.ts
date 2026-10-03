@@ -382,6 +382,205 @@ const decodeFailureWhen =
   (ctx: HostPlaybackState, event: MachineEvent): boolean =>
     isDecodeFailure(ctx, event) && pred(ctx);
 
+
+// ── Shared decision-recorder actions ─────────────────────────────────────────
+// Every state builder routes its events through the exact same effect logic,
+// so the recorders live here as factories over the per-machine decision ledger
+// (`decisions`); each returns the reduce action a transition attaches. The
+// wall-clock read (`Date.now()`) stays inside the reduce, so it is taken
+// exactly when the transition runs. `incident` on the automatic recorders
+// marks an AUTOMATIC recovery restart for the recovery-session churn ledger
+// (decode / native failures of a broken load); user-initiated repairs
+// (consumeOwedOnPlay/OnSeek) and user far-seek restarts are never incidents.
+
+/** An explicit user play repairs an owed load: restart from the owed position, resuming. */
+const makeConsumeOwedOnPlay = (
+  decisions: HostDecision[],
+  { resetAttempts = false }: { resetAttempts?: boolean } = {},
+) =>
+  reduce<HostPlaybackState, MachineEvent>((ctx) => {
+    const owed = ctx.repairOwed;
+    if (!owed) return ctx;
+    decisions.push({
+      kind: hostDecisionKind.restartSource,
+      reason: owed.reason,
+      resumeSeconds: owed.seconds,
+      wantsPlay: true,
+    });
+    return {
+      ...ctx,
+      // `failed` consumes on a fresh budget (the surfaced failure already
+      // spent it); healthy/recovering loads spend one more attempt.
+      attempt: resetAttempts ? 0 : ctx.attempt + 1,
+      preference: playbackPreference.playing,
+      recovery: { reason: owed.reason, resumeSeconds: owed.seconds, wantsPlay: true },
+      repairOwed: null,
+    };
+  });
+
+/** An explicit user seek repairs an owed load at the NEW target, staying paused. */
+const makeConsumeOwedOnSeek = (
+  decisions: HostDecision[],
+  { resetAttempts = false }: { resetAttempts?: boolean } = {},
+) =>
+  reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
+    const owed = ctx.repairOwed;
+    if (!owed) return ctx;
+    const resumeSeconds = resumeOf(event);
+    decisions.push({
+      kind: hostDecisionKind.restartSource,
+      reason: owed.reason,
+      resumeSeconds,
+      wantsPlay: false,
+    });
+    return {
+      ...ctx,
+      attempt: resetAttempts ? 0 : ctx.attempt + 1,
+      recovery: { reason: owed.reason, resumeSeconds, wantsPlay: false },
+      repairOwed: null,
+    };
+  });
+
+/**
+ * An automatic recovery parked while the document was hidden is consumed
+ * exactly once when the document becomes visible again. The play choice is
+ * re-resolved against the current preference instead of the park-time
+ * snapshot, because a deliberate pause (the two-phase one) can settle while
+ * the repair is parked: playing against that pause would override the user.
+ */
+const makeConsumeOwedOnVisible = (decisions: HostDecision[]) =>
+  reduce<HostPlaybackState, MachineEvent>((ctx) => {
+    const owed = ctx.repairOwed;
+    if (!owed || !owed.resumeOnVisible) return ctx;
+    const wantsPlay = (owed.wantsPlay ?? false) && ctx.preference === playbackPreference.playing;
+    decisions.push({
+      kind: hostDecisionKind.restartSource,
+      reason: owed.reason,
+      resumeSeconds: owed.seconds,
+      wantsPlay,
+    });
+    return {
+      ...ctx,
+      attempt: ctx.attempt + 1,
+      recovery: { reason: owed.reason, resumeSeconds: owed.seconds, wantsPlay },
+      repairOwed: null,
+      visible: true,
+    };
+  });
+
+/** An owed repair a user-paused load must not restart: recorded for later. */
+const makeRecordDefer = (decisions: HostDecision[]) =>
+  (reason: RecoveryReason) =>
+    reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
+      const resumeSeconds = resumeOf(event);
+      decisions.push({ kind: hostDecisionKind.deferRepair, reason, resumeSeconds });
+      return { ...ctx, repairOwed: { reason, seconds: resumeSeconds } };
+    });
+
+/**
+ * An automatic recovery restart parked because the document is hidden: no
+ * restart-source decision, no retry budget spent, and the repair is marked
+ * to be consumed once by visibility returning. `incident` marks the parking
+ * as an entry in the recovery-session churn ledger, exactly like the visible
+ * restart it replaces: the ledger is written here, when the failure happens,
+ * and not again when the parked restart is consumed on visible. User far-seek
+ * parks are never incidents, so their call sites pass `false`.
+ */
+const makeRecordDeferWhileHidden = (decisions: HostDecision[]) =>
+  (reason: RecoveryReason, incident = true) =>
+    reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
+      const resumeSeconds = resumeOf(event);
+      const wantsPlay = ctx.preference === playbackPreference.playing;
+      decisions.push({ kind: hostDecisionKind.deferRepair, reason, resumeSeconds });
+      const nowMs = incident ? Date.now() : 0;
+      return {
+        ...ctx,
+        autoRecoveryStreak: incident ? nextAutoIncidentStreak(ctx, nowMs) : ctx.autoRecoveryStreak,
+        lastAutoIncidentAt: incident ? nowMs : ctx.lastAutoIncidentAt,
+        repairOwed: { reason, resumeOnVisible: true, seconds: resumeSeconds, wantsPlay },
+      };
+    });
+
+/**
+ * A failure surfaced after the budget drained: the load is finished, but a
+ * repair stays owed so an explicit user action may start a fresh source.
+ */
+const makeRecordExhausted = (decisions: HostDecision[]) =>
+  (reason: RecoveryReason, kind: HostReportKind) =>
+    reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
+      const resumeSeconds = resumeOf(event);
+      decisions.push({ error: kind, kind: hostDecisionKind.reportError });
+      return {
+        ...ctx,
+        attempt: 0,
+        recovery: null,
+        repairOwed: { reason, seconds: resumeSeconds },
+      };
+    });
+
+/**
+ * A transport/fatal failure never reloads a healthy load; it surfaces now.
+ * Network stays repairable by user action; an unsupported container is not.
+ */
+const makeRecordFatal = (decisions: HostDecision[]) =>
+  () =>
+    reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
+      const kind = event.type === hostPlaybackEvent.loadFailed ? event.kind : hostReportKind.decode;
+      const resumeSeconds = resumeOf(event);
+      decisions.push({ error: kind, kind: hostDecisionKind.reportError });
+      return {
+        ...ctx,
+        attempt: 0,
+        recovery: null,
+        repairOwed: kind === hostReportKind.network ? { reason: kind, seconds: resumeSeconds } : null,
+      };
+    });
+
+/** A retry-capped restart: records the restart decision and spends one attempt. */
+const makeRecordRestart = (decisions: HostDecision[]) =>
+  (
+    reason: RecoveryReason,
+    wantsPlay: boolean | typeof AS_PREFERENCE,
+    incident = false,
+  ) =>
+    reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
+      const resumeSeconds = resumeOf(event);
+      const play = wantsPlay === AS_PREFERENCE ? ctx.preference === playbackPreference.playing : wantsPlay;
+      decisions.push({ kind: hostDecisionKind.restartSource, reason, resumeSeconds, wantsPlay: play });
+      const nowMs = incident ? Date.now() : 0;
+      return {
+        ...ctx,
+        attempt: ctx.attempt + 1,
+        autoRecoveryStreak: incident ? nextAutoIncidentStreak(ctx, nowMs) : ctx.autoRecoveryStreak,
+        lastAutoIncidentAt: incident ? nowMs : ctx.lastAutoIncidentAt,
+        recovery: { reason, resumeSeconds, wantsPlay: play },
+        repairOwed: null,
+      };
+    });
+
+/**
+ * A play or scrub on a repair parked for the visibility return: consuming
+ * it would restart on a throttled worker, so the action only re-records the
+ * parked repair (a play also flips the stored choice to playing) and the
+ * restart stays owed to the visibility return, which spends the one attempt.
+ * The `deferRepair` decision is a log-only record on the host, so re-parking
+ * is side-effect free.
+ */
+const makeReParkOwed = (decisions: HostDecision[]) =>
+  reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
+    const owed = ctx.repairOwed;
+    if (!owed || !owed.resumeOnVisible) return ctx;
+    const seconds = event.type === hostPlaybackEvent.play ? owed.seconds : resumeOf(event);
+    const wantsPlay =
+      event.type === hostPlaybackEvent.play ? true : ctx.preference === playbackPreference.playing;
+    decisions.push({ kind: hostDecisionKind.deferRepair, reason: owed.reason, resumeSeconds: seconds });
+    return {
+      ...ctx,
+      preference: event.type === hostPlaybackEvent.play ? playbackPreference.playing : ctx.preference,
+      repairOwed: { reason: owed.reason, resumeOnVisible: true, seconds, wantsPlay },
+    };
+  });
+
 /**
  * The Robot3 service for one SiaVideoSource instance. `send` hands the event
  * to the machine and returns any decision recorded during that transition;
@@ -442,168 +641,19 @@ function activeLoadTransitions(
   self: typeof hostPlaybackState.loading | typeof hostPlaybackState.ready,
   decisions: HostDecision[],
 ): Transition<string>[] {
-  // Explicit user play repairs an owed load: restart from the owed position,
-  // resuming, spending one attempt.
-  const consumeOwedOnPlay = reduce<HostPlaybackState, MachineEvent>((ctx) => {
-    const owed = ctx.repairOwed;
-    if (!owed) return ctx;
-    decisions.push({
-      kind: hostDecisionKind.restartSource,
-      reason: owed.reason,
-      resumeSeconds: owed.seconds,
-      wantsPlay: true,
-    });
-    return {
-      ...ctx,
-      attempt: ctx.attempt + 1,
-      preference: playbackPreference.playing,
-      recovery: { reason: owed.reason, resumeSeconds: owed.seconds, wantsPlay: true },
-      repairOwed: null,
-    };
-  });
+  // The shared decision-recorder actions (see the `make*` factories above)
+  // run against this machine's decision ledger; a play/seek on an owed load
+  // restarts from (or at) the owed position, spending one attempt.
+  const consumeOwedOnPlay = makeConsumeOwedOnPlay(decisions);
+  const consumeOwedOnSeek = makeConsumeOwedOnSeek(decisions);
+  const consumeOwedOnVisible = makeConsumeOwedOnVisible(decisions);
+  const recordRestart = makeRecordRestart(decisions);
+  const recordDefer = makeRecordDefer(decisions);
+  const recordDeferWhileHidden = makeRecordDeferWhileHidden(decisions);
+  const reParkOwed = makeReParkOwed(decisions);
+  const recordExhausted = makeRecordExhausted(decisions);
+  const recordFatal = makeRecordFatal(decisions);
 
-  // Explicit user seek repairs an owed load at the NEW target, staying paused.
-  const consumeOwedOnSeek = reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
-    const owed = ctx.repairOwed;
-    if (!owed) return ctx;
-    const resumeSeconds = resumeOf(event);
-    decisions.push({
-      kind: hostDecisionKind.restartSource,
-      reason: owed.reason,
-      resumeSeconds,
-      wantsPlay: false,
-    });
-    return {
-      ...ctx,
-      attempt: ctx.attempt + 1,
-      recovery: { reason: owed.reason, resumeSeconds, wantsPlay: false },
-      repairOwed: null,
-    };
-  });
-
-  // An automatic recovery parked while the document was hidden is consumed
-  // exactly once when the document becomes visible again. The play choice is
-  // re-resolved against the current preference instead of the park-time
-  // snapshot, because a deliberate pause (the two-phase one) can settle while
-  // the repair is parked: playing against that pause would override the user.
-  const consumeOwedOnVisible = reduce<HostPlaybackState, MachineEvent>((ctx) => {
-    const owed = ctx.repairOwed;
-    if (!owed || !owed.resumeOnVisible) return ctx;
-    const wantsPlay = (owed.wantsPlay ?? false) && ctx.preference === playbackPreference.playing;
-    decisions.push({
-      kind: hostDecisionKind.restartSource,
-      reason: owed.reason,
-      resumeSeconds: owed.seconds,
-      wantsPlay,
-    });
-    return {
-      ...ctx,
-      attempt: ctx.attempt + 1,
-      recovery: { reason: owed.reason, resumeSeconds: owed.seconds, wantsPlay },
-      repairOwed: null,
-      visible: true,
-    };
-  });
-
-  // `incident` marks an AUTOMATIC recovery restart for the recovery-session
-  // churn ledger (decode / native failures of a broken load); user-initiated
-  // repairs (consumeOwedOnPlay/OnSeek) and user far-seek restarts are never
-  // incidents.
-  const recordRestart = (reason: RecoveryReason, wantsPlay: boolean | typeof AS_PREFERENCE, incident = false) =>
-    reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
-      const resumeSeconds = resumeOf(event);
-      const play = wantsPlay === AS_PREFERENCE ? ctx.preference === playbackPreference.playing : wantsPlay;
-      decisions.push({ kind: hostDecisionKind.restartSource, reason, resumeSeconds, wantsPlay: play });
-      const nowMs = incident ? Date.now() : 0;
-      return {
-        ...ctx,
-        attempt: ctx.attempt + 1,
-        autoRecoveryStreak: incident ? nextAutoIncidentStreak(ctx, nowMs) : ctx.autoRecoveryStreak,
-        lastAutoIncidentAt: incident ? nowMs : ctx.lastAutoIncidentAt,
-        recovery: { reason, resumeSeconds, wantsPlay: play },
-        repairOwed: null,
-      };
-    });
-
-  const recordDefer = (reason: RecoveryReason) =>
-    reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
-      const resumeSeconds = resumeOf(event);
-      decisions.push({ kind: hostDecisionKind.deferRepair, reason, resumeSeconds });
-      return { ...ctx, repairOwed: { reason, seconds: resumeSeconds } };
-    });
-
-  // An automatic recovery restart parked because the document is hidden: no
-  // restart-source decision, no retry budget spent, and the repair is marked
-  // to be consumed once by visibility returning. `incident` marks the parking
-  // as an entry in the recovery-session churn ledger, exactly like the
-  // visible restart it replaces: the ledger is written here, when the failure
-  // happens, and not again when the parked restart is consumed on visible.
-  // User far-seek parks are never incidents, so their call sites pass
-  // `false`.
-  const recordDeferWhileHidden = (reason: RecoveryReason, incident = true) =>
-    reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
-      const resumeSeconds = resumeOf(event);
-      const wantsPlay = ctx.preference === playbackPreference.playing;
-      decisions.push({ kind: hostDecisionKind.deferRepair, reason, resumeSeconds });
-      const nowMs = incident ? Date.now() : 0;
-      return {
-        ...ctx,
-        autoRecoveryStreak: incident ? nextAutoIncidentStreak(ctx, nowMs) : ctx.autoRecoveryStreak,
-        lastAutoIncidentAt: incident ? nowMs : ctx.lastAutoIncidentAt,
-        repairOwed: { reason, resumeOnVisible: true, seconds: resumeSeconds, wantsPlay },
-      };
-    });
-
-  // A play or scrub on a repair parked for the visibility return: consuming
-  // it would restart on a throttled worker, so the action only re-records the
-  // parked repair (a play also flips the stored choice to playing) and the
-  // restart stays owed to the visibility return, which spends the one
-  // attempt. The `deferRepair` decision is a log-only record on the host, so
-  // re-parking is side-effect free.
-  const reParkOwed = reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
-    const owed = ctx.repairOwed;
-    if (!owed || !owed.resumeOnVisible) return ctx;
-    const seconds = event.type === hostPlaybackEvent.play ? owed.seconds : resumeOf(event);
-    const wantsPlay =
-      event.type === hostPlaybackEvent.play
-        ? true
-        : ctx.preference === playbackPreference.playing;
-    decisions.push({ kind: hostDecisionKind.deferRepair, reason: owed.reason, resumeSeconds: seconds });
-    return {
-      ...ctx,
-      preference: event.type === hostPlaybackEvent.play ? playbackPreference.playing : ctx.preference,
-      repairOwed: { reason: owed.reason, resumeOnVisible: true, seconds, wantsPlay },
-    };
-  });
-
-  // A failure surfaced after the budget drained: the load is finished, but a
-  // repair stays owed so an explicit user action may start a fresh source.
-  const recordExhausted = (reason: RecoveryReason, kind: HostReportKind) =>
-    reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
-      const resumeSeconds = resumeOf(event);
-      decisions.push({ error: kind, kind: hostDecisionKind.reportError });
-      return {
-        ...ctx,
-        attempt: 0,
-        recovery: null,
-        repairOwed: { reason, seconds: resumeSeconds },
-      };
-    });
-
-  // A transport/fatal failure never reloads a healthy load; it surfaces now.
-  // Network stays repairable by user action; an unsupported container is not.
-  const recordFatal = () =>
-    reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
-      const kind = event.type === hostPlaybackEvent.loadFailed ? event.kind : hostReportKind.decode;
-      const resumeSeconds = resumeOf(event);
-      decisions.push({ error: kind, kind: hostDecisionKind.reportError });
-      return {
-        ...ctx,
-        attempt: 0,
-        recovery: null,
-        repairOwed: kind === hostReportKind.network ? { reason: kind, seconds: resumeSeconds } : null,
-      };
-    });
 
   return [
     // Source boundaries: a fresh source drops all recovery state; a re-attach
@@ -766,41 +816,13 @@ function buildMachine(decisions: HostDecision[]) {
 
 /** Transitions for the surfaced-failure state. */
 function failedTransitions(decisions: HostDecision[]): Transition<string>[] {
-  const consumeOwedOnPlay = reduce<HostPlaybackState, MachineEvent>((ctx) => {
-    const owed = ctx.repairOwed;
-    if (!owed) return ctx;
-    decisions.push({
-      kind: hostDecisionKind.restartSource,
-      reason: owed.reason,
-      resumeSeconds: owed.seconds,
-      wantsPlay: true,
-    });
-    return {
-      ...ctx,
-      attempt: 0,
-      preference: playbackPreference.playing,
-      recovery: { reason: owed.reason, resumeSeconds: owed.seconds, wantsPlay: true },
-      repairOwed: null,
-    };
-  });
+  // The shared decision-recorder actions (see the `make*` factories above).
+  // A surfaced failure has already spent the recovery budget, so consuming
+  // the owed repair from `failed` restarts on a fresh budget: no attempt
+  // increment.
+  const consumeOwedOnPlay = makeConsumeOwedOnPlay(decisions, { resetAttempts: true });
+  const consumeOwedOnSeek = makeConsumeOwedOnSeek(decisions, { resetAttempts: true });
 
-  const consumeOwedOnSeek = reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
-    const owed = ctx.repairOwed;
-    if (!owed) return ctx;
-    const resumeSeconds = resumeOf(event);
-    decisions.push({
-      kind: hostDecisionKind.restartSource,
-      reason: owed.reason,
-      resumeSeconds,
-      wantsPlay: false,
-    });
-    return {
-      ...ctx,
-      attempt: 0,
-      recovery: { reason: owed.reason, resumeSeconds, wantsPlay: false },
-      repairOwed: null,
-    };
-  });
 
   return [
     transition(hostPlaybackEvent.sourceSet, hostPlaybackState.loading, resetAll),
@@ -830,80 +852,16 @@ function failedTransitions(decisions: HostDecision[]): Transition<string>[] {
  * retained until confirmation.
  */
 function pausePendingTransitions(decisions: HostDecision[]): Transition<string>[] {
-  // A restart inside the window records the retained (playing) choice, so an
-  // out-of-window scrub preserves playback.
-  // `incident` marks an AUTOMATIC recovery restart for the recovery-session
-  // churn ledger (decode / native failures of a broken load); user-initiated
-  // repairs (consumeOwedOnPlay/OnSeek) and user far-seek restarts are never
-  // incidents.
-  const recordRestart = (reason: RecoveryReason, wantsPlay: boolean | typeof AS_PREFERENCE, incident = false) =>
-    reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
-      const resumeSeconds = resumeOf(event);
-      const play = wantsPlay === AS_PREFERENCE ? ctx.preference === playbackPreference.playing : wantsPlay;
-      decisions.push({ kind: hostDecisionKind.restartSource, reason, resumeSeconds, wantsPlay: play });
-      const nowMs = incident ? Date.now() : 0;
-      return {
-        ...ctx,
-        attempt: ctx.attempt + 1,
-        autoRecoveryStreak: incident ? nextAutoIncidentStreak(ctx, nowMs) : ctx.autoRecoveryStreak,
-        lastAutoIncidentAt: incident ? nowMs : ctx.lastAutoIncidentAt,
-        recovery: { reason, resumeSeconds, wantsPlay: play },
-        repairOwed: null,
-      };
-    });
+  // The shared decision-recorder actions (see the `make*` factories above)
+  // run against this machine's decision ledger; a restart inside the window
+  // records the retained (playing) choice, so an out-of-window scrub
+  // preserves playback.
+  const recordRestart = makeRecordRestart(decisions);
+  const recordExhausted = makeRecordExhausted(decisions);
+  const recordFatal = makeRecordFatal(decisions);
+  const recordDeferWhileHidden = makeRecordDeferWhileHidden(decisions);
+  const consumeOwedOnVisible = makeConsumeOwedOnVisible(decisions);
 
-  const recordExhausted = (reason: RecoveryReason, kind: HostReportKind) =>
-    reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
-      const resumeSeconds = resumeOf(event);
-      decisions.push({ error: kind, kind: hostDecisionKind.reportError });
-      return { ...ctx, attempt: 0, recovery: null, repairOwed: { reason, seconds: resumeSeconds } };
-    });
-
-  const recordFatal = () =>
-    reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
-      const kind = event.type === hostPlaybackEvent.loadFailed ? event.kind : hostReportKind.decode;
-      const resumeSeconds = resumeOf(event);
-      decisions.push({ error: kind, kind: hostDecisionKind.reportError });
-      return {
-        ...ctx,
-        attempt: 0,
-        recovery: null,
-        repairOwed: kind === hostReportKind.network ? { reason: kind, seconds: resumeSeconds } : null,
-      };
-    });
-
-  const recordDeferWhileHidden = (reason: RecoveryReason, incident = true) =>
-    reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
-      const resumeSeconds = resumeOf(event);
-      const wantsPlay = ctx.preference === playbackPreference.playing;
-      decisions.push({ kind: hostDecisionKind.deferRepair, reason, resumeSeconds });
-      const nowMs = incident ? Date.now() : 0;
-      return {
-        ...ctx,
-        autoRecoveryStreak: incident ? nextAutoIncidentStreak(ctx, nowMs) : ctx.autoRecoveryStreak,
-        lastAutoIncidentAt: incident ? nowMs : ctx.lastAutoIncidentAt,
-        repairOwed: { reason, resumeOnVisible: true, seconds: resumeSeconds, wantsPlay },
-      };
-    });
-
-  const consumeOwedOnVisible = reduce<HostPlaybackState, MachineEvent>((ctx) => {
-    const owed = ctx.repairOwed;
-    if (!owed || !owed.resumeOnVisible) return ctx;
-    const wantsPlay = (owed.wantsPlay ?? false) && ctx.preference === playbackPreference.playing;
-    decisions.push({
-      kind: hostDecisionKind.restartSource,
-      reason: owed.reason,
-      resumeSeconds: owed.seconds,
-      wantsPlay,
-    });
-    return {
-      ...ctx,
-      attempt: ctx.attempt + 1,
-      recovery: { reason: owed.reason, resumeSeconds: owed.seconds, wantsPlay },
-      repairOwed: null,
-      visible: true,
-    };
-  });
 
   return [
     // Source boundaries — the same precedence as any healthy load.
@@ -990,126 +948,19 @@ function pausePendingTransitions(decisions: HostDecision[]): Transition<string>[
 
 /** Transitions for the recovery-in-flight state. */
 function recoveringTransitions(decisions: HostDecision[]): Transition<string>[] {
-  // `incident` marks an AUTOMATIC recovery restart for the recovery-session
-  // churn ledger (decode / native failures of a broken load); user-initiated
-  // repairs (consumeOwedOnPlay/OnSeek) and user far-seek restarts are never
-  // incidents.
-  const recordRestart = (reason: RecoveryReason, wantsPlay: boolean | typeof AS_PREFERENCE, incident = false) =>
-    reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
-      const resumeSeconds = resumeOf(event);
-      const play = wantsPlay === AS_PREFERENCE ? ctx.preference === playbackPreference.playing : wantsPlay;
-      decisions.push({ kind: hostDecisionKind.restartSource, reason, resumeSeconds, wantsPlay: play });
-      const nowMs = incident ? Date.now() : 0;
-      return {
-        ...ctx,
-        attempt: ctx.attempt + 1,
-        autoRecoveryStreak: incident ? nextAutoIncidentStreak(ctx, nowMs) : ctx.autoRecoveryStreak,
-        lastAutoIncidentAt: incident ? nowMs : ctx.lastAutoIncidentAt,
-        recovery: { reason, resumeSeconds, wantsPlay: play },
-        repairOwed: null,
-      };
-    });
+  // The shared decision-recorder actions (see the `make*` factories above)
+  // run against this machine's decision ledger; a play on a plain owed
+  // repair consumes it (the explicit user action owns it), a play on a
+  // hidden-parked repair only re-records the parked position.
+  const recordRestart = makeRecordRestart(decisions);
+  const consumeOwedOnPlay = makeConsumeOwedOnPlay(decisions);
+  const reParkOwed = makeReParkOwed(decisions);
+  const recordDefer = makeRecordDefer(decisions);
+  const recordExhausted = makeRecordExhausted(decisions);
+  const recordFatal = makeRecordFatal(decisions);
+  const recordDeferWhileHidden = makeRecordDeferWhileHidden(decisions);
+  const consumeOwedOnVisible = makeConsumeOwedOnVisible(decisions);
 
-  // An explicit play while a plain repair is owed (e.g. deferred by a decode
-  // failure on a never-started source in recovering): restart from the owed
-  // position with playback, spending one attempt.
-  const consumeOwedOnPlay = reduce<HostPlaybackState, MachineEvent>((ctx) => {
-    const owed = ctx.repairOwed;
-    if (!owed) return ctx;
-    decisions.push({
-      kind: hostDecisionKind.restartSource,
-      reason: owed.reason,
-      resumeSeconds: owed.seconds,
-      wantsPlay: true,
-    });
-    return {
-      ...ctx,
-      attempt: ctx.attempt + 1,
-      preference: playbackPreference.playing,
-      recovery: { reason: owed.reason, resumeSeconds: owed.seconds, wantsPlay: true },
-      repairOwed: null,
-    };
-  });
-
-  // A play on a repair parked for the visibility return: the restart stays
-  // owed to the visibility return, not to the play, because the worker may
-  // be throttled. The action only re-records the parked repair and flips
-  // the preference.
-  const reParkOwed = reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
-    const owed = ctx.repairOwed;
-    if (!owed || !owed.resumeOnVisible) return ctx;
-    const seconds = event.type === hostPlaybackEvent.play ? owed.seconds : resumeOf(event);
-    const wantsPlay =
-      event.type === hostPlaybackEvent.play
-        ? true
-        : ctx.preference === playbackPreference.playing;
-    decisions.push({ kind: hostDecisionKind.deferRepair, reason: owed.reason, resumeSeconds: seconds });
-    return {
-      ...ctx,
-      preference: event.type === hostPlaybackEvent.play ? playbackPreference.playing : ctx.preference,
-      repairOwed: { reason: owed.reason, resumeOnVisible: true, seconds, wantsPlay },
-    };
-  });
-
-  const recordDefer = (reason: RecoveryReason) =>
-    reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
-      const resumeSeconds = resumeOf(event);
-      decisions.push({ kind: hostDecisionKind.deferRepair, reason, resumeSeconds });
-      return { ...ctx, repairOwed: { reason, seconds: resumeSeconds } };
-    });
-
-  const recordExhausted = (reason: RecoveryReason, kind: HostReportKind) =>
-    reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
-      const resumeSeconds = resumeOf(event);
-      decisions.push({ error: kind, kind: hostDecisionKind.reportError });
-      return { ...ctx, attempt: 0, recovery: null, repairOwed: { reason, seconds: resumeSeconds } };
-    });
-
-  const recordFatal = () =>
-    reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
-      const kind = event.type === hostPlaybackEvent.loadFailed ? event.kind : hostReportKind.decode;
-      const resumeSeconds = resumeOf(event);
-      decisions.push({ error: kind, kind: hostDecisionKind.reportError });
-      return {
-        ...ctx,
-        attempt: 0,
-        recovery: null,
-        repairOwed: kind === hostReportKind.network ? { reason: kind, seconds: resumeSeconds } : null,
-      };
-    });
-
-  const recordDeferWhileHidden = (reason: RecoveryReason, incident = true) =>
-    reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
-      const resumeSeconds = resumeOf(event);
-      const wantsPlay = ctx.preference === playbackPreference.playing;
-      decisions.push({ kind: hostDecisionKind.deferRepair, reason, resumeSeconds });
-      const nowMs = incident ? Date.now() : 0;
-      return {
-        ...ctx,
-        autoRecoveryStreak: incident ? nextAutoIncidentStreak(ctx, nowMs) : ctx.autoRecoveryStreak,
-        lastAutoIncidentAt: incident ? nowMs : ctx.lastAutoIncidentAt,
-        repairOwed: { reason, resumeOnVisible: true, seconds: resumeSeconds, wantsPlay },
-      };
-    });
-
-  const consumeOwedOnVisible = reduce<HostPlaybackState, MachineEvent>((ctx) => {
-    const owed = ctx.repairOwed;
-    if (!owed || !owed.resumeOnVisible) return ctx;
-    const wantsPlay = (owed.wantsPlay ?? false) && ctx.preference === playbackPreference.playing;
-    decisions.push({
-      kind: hostDecisionKind.restartSource,
-      reason: owed.reason,
-      resumeSeconds: owed.seconds,
-      wantsPlay,
-    });
-    return {
-      ...ctx,
-      attempt: ctx.attempt + 1,
-      recovery: { reason: owed.reason, resumeSeconds: owed.seconds, wantsPlay },
-      repairOwed: null,
-      visible: true,
-    };
-  });
 
   return [
     transition(hostPlaybackEvent.sourceSet, hostPlaybackState.loading, resetAll),

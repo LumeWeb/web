@@ -68,6 +68,23 @@ function workerConfig(indexerUrl = 'https://sia.storage') {
 }
 
 describe('SiaVideoSource (host state machine)', () => {
+  it.skipIf(!IN_BROWSER)('a createWorker failure surfaces a fatal network error and never starts a handshake', () => {
+    const host = new SiaVideoSource({
+      createWorker: () => {
+        throw new Error('worker spawn failed');
+      },
+    });
+    const target = document.createElement('video');
+    host.attach(target);
+
+    // Spawning the worker failed before any wire traffic: the host reports a
+    // fatal network error (the transport never existed) and stays worker-less
+    // — no HELLO is ever posted and the element is left untouched.
+    expect(host.error?.code).toBe(2);
+    expect(host.error?.message).toBe('worker spawn failed');
+    host.destroy();
+  });
+
   it.skipIf(!IN_BROWSER)('sends HELLO with the configured SDK material on attach', () => {
     const worker = new FakeWorker();
     const host = new SiaVideoSource({
