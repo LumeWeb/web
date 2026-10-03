@@ -2375,13 +2375,11 @@ describe('out-of-window seek recovery', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('never re-arms the stall watchdog for a paused seek recovery, so a stale latched far scrub cannot chain a second restart', async () => {
+  it.skipIf(!IN_BROWSER)('re-arms the stall watchdog for a paused seek recovery once the replacement source attaches', async () => {
     // A paused user's far scrub starts a wantsPlay=false seek recovery. The
-    // reposition seek there belongs to a still-latched scrub (the element's
-    // `seeking` flag never clears and the playhead drifts on), and re-arming
-    // the 6s stall watchdog would let that stale latch chain into a second
-    // restart the paused user never asked for. Paused restarts therefore do
-    // NOT re-arm the watchdog; only active/playing restarts get the backstop.
+    // replacement source still needs a bounded recovery path when its own
+    // reanchor seek never resolves: #onSeeking suppresses the native event
+    // while recovery is active, leaving this watchdog as the only retry path.
     const SEEK_STALL_MS = 6000;
     const { host, target, worker } = attachAndHandshake();
     loadWithDuration(host, worker, 'k', 60);
@@ -2398,8 +2396,8 @@ describe('out-of-window seek recovery', () => {
       const restart1 = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE);
       expect(restart1).toHaveLength(1);
       expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
-      // Acknowledge the restart so the replacement resource IS current, a
-      // (buggy) watchdog armed for it would be scoped to the fresh pipeline.
+      // Acknowledge the restart so its reanchor seek is now on the fresh
+      // pipeline and can be observed by the watchdog.
       if (restart1[0] && 'requestId' in restart1[0]) {
         worker.reply({
           info: { ...mainInfo, durationSeconds: 60 },
@@ -2409,10 +2407,11 @@ describe('out-of-window seek recovery', () => {
       }
       worker.sent.length = 0;
 
-      // The full stall interval elapses with the stale latch still held at the
-      // far target: no watchdog was re-armed, so no chained restart fires.
+      // The full stall interval elapses with the reanchor still stuck. The
+      // watchdog retries the paused recovery without introducing playback.
       vi.advanceTimersByTime(SEEK_STALL_MS);
-      expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+      expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+      expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
       expect(host.error).toBeNull();
     } finally {
       vi.useRealTimers();
@@ -2469,6 +2468,40 @@ describe('out-of-window seek recovery', () => {
       requestId: reload2[0] && 'requestId' in reload2[0] ? reload2[0].requestId : NaN,
       type: MainToWorkerMessageType.PLAY,
     });
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('starts a recovery seek watchdog only after the replacement source is ready', () => {
+    const { host, target, worker } = attachAndHandshake();
+    loadWithDuration(host, worker, 'k', 60);
+    target.dispatchEvent(new Event('play'));
+    Object.defineProperty(target, 'seeking', { configurable: true, get: () => true });
+    vi.useFakeTimers();
+    try {
+      target.currentTime = 120;
+      target.dispatchEvent(new Event('seeking'));
+      const restart = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).at(-1);
+      expect(restart).toBeDefined();
+      worker.sent.length = 0;
+
+      // A large remote object's metadata/index pass can exceed the normal seek
+      // timeout. It is still loading, so the pre-attach interval must not
+      // spend a recovery attempt and restart the source again.
+      vi.advanceTimersByTime(6000);
+      expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+
+      if (restart && 'requestId' in restart) {
+        worker.reply({ info: { ...mainInfo, durationSeconds: 60 }, requestId: restart.requestId, type: WorkerToMainMessageType.SOURCE_OK });
+      }
+      worker.sent.length = 0;
+
+      // Once the replacement resource is attached, a truly stuck seek still
+      // gets the same bounded recovery watchdog.
+      vi.advanceTimersByTime(6000);
+      expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+    } finally {
+      vi.useRealTimers();
+    }
     host.destroy();
   });
 

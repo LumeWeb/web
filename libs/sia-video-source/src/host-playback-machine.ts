@@ -406,6 +406,10 @@ export class HostPlaybackMachine {
     return this.#service.context.preference;
   }
 
+  get recovery(): null | RecoveryRequest {
+    return this.#service.context.recovery;
+  }
+
   get repairOwed(): null | RepairOwed {
     return this.#service.context.repairOwed;
   }
