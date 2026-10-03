@@ -999,7 +999,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // metadata/index before it attaches. Start the seek-stall clock only once
     // that fresh resource exists; otherwise a healthy deep seek repeatedly
     // tears itself down before its reanchor can resolve.
-    if (recovery?.reason === recoveryReason.seek && recovery.wantsPlay) {
+    if (recovery?.reason === recoveryReason.seek) {
       this.#armSeekWatchdog();
     }
   }
