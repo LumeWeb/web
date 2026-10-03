@@ -214,26 +214,23 @@ describe('decode failure while paused', () => {
     expect(machine.current).toBe(hostPlaybackState.recovering);
   });
 
-  it('defers a decode repair on a paused load with a drained budget instead of surfacing it', () => {
-    // The paused contract holds even after the shared recovery budget is
-    // spent: a decode failure records a deferred repair — never a
+  it('defers a decode repair on a paused recovery load instead of surfacing it', () => {
+    // The paused contract holds across chained recovery: a decode failure on
+    // a paused recovery load records a deferred repair — never a
     // MEDIA_ERR_DECODE — and it leaves the attempt budget intact so an
-    // explicit play can repair it on a fresh source. A drained budget only
-    // lives in `recovering` (any exit to `ready` restores it), so the paused
-    // preference is retained through the out-of-window restarts that exhaust
-    // it.
+    // explicit play can repair it on a fresh source.
     const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
     machine.send({ type: hostPlaybackEvent.pause });
+    machine.send({ type: hostPlaybackEvent.pauseConfirmed });
+    expect(machine.preference).toBe(playbackPreference.paused);
 
-    // Two paused restarts drain the budget to its cap while the paused choice
-    // survives: the out-of-window scrub restarts (attempt 1), the recovery
-    // load re-opens without spending, and the watchdog stall restarts again
-    // (attempt 2).
+    // A paused out-of-window scrub starts the recovery (attempt 1); the
+    // recovery load re-opens without spending.
     machine.send({ seconds: 120, type: hostPlaybackEvent.seekOutOfWindow });
     machine.send({ type: hostPlaybackEvent.sourceReady });
-    machine.send({ seconds: 120, type: hostPlaybackEvent.stalledSeek });
     expect(machine.current).toBe(hostPlaybackState.recovering);
-    expect(machine.attempt).toBe(2);
+    expect(machine.attempt).toBe(1);
     expect(machine.preference).toBe(playbackPreference.paused);
 
     const decisions = machine.send({
@@ -244,10 +241,10 @@ describe('decode failure while paused', () => {
     expect(decisions).toEqual([
       { kind: hostDecisionKind.deferRepair, reason: recoveryReason.decode, resumeSeconds: 12.5 },
     ]);
-    // No reportError: the machine stays in the load with the repair parked and
-    // the budget untouched.
+    // No reportError: the machine stays in the load with the repair parked
+    // and the budget untouched.
     expect(machine.current).toBe(hostPlaybackState.recovering);
-    expect(machine.attempt).toBe(2);
+    expect(machine.attempt).toBe(1);
     expect(machine.repairOwed).toEqual({ reason: recoveryReason.decode, seconds: 12.5 });
   });
 
@@ -556,18 +553,18 @@ describe('out-of-window seek recovery', () => {
     machine.send({ kind: hostReportKind.decode, resumeSeconds: 5, type: hostPlaybackEvent.loadFailed });
     expect(machine.attempt).toBe(1);
 
-    // A stuck far seek restarts once more (budget 2), then exhausts and
+    // A stuck recovery load fails again (budget 2), then exhausts and
     // surfaces a decode-class error.
-    machine.send({ seconds: 120, type: hostPlaybackEvent.stalledSeek });
+    machine.send({ kind: hostReportKind.decode, resumeSeconds: 120, type: hostPlaybackEvent.loadFailed });
     expect(machine.attempt).toBe(2);
-    const decisions = machine.send({ seconds: 120, type: hostPlaybackEvent.stalledSeek });
+    const decisions = machine.send({ kind: hostReportKind.decode, resumeSeconds: 120, type: hostPlaybackEvent.loadFailed });
     expect(decisions).toEqual([{ error: hostReportKind.decode, kind: hostDecisionKind.reportError }]);
     expect(machine.current).toBe(hostPlaybackState.failed);
   });
 });
 
 describe('an explicit play during an in-flight seek recovery', () => {
-  it('is honored on a paused seek recovery so a chained stalled-seek recovery resumes', () => {
+  it('is honored on a paused seek recovery so a chained recovery resumes', () => {
     const machine = readyMachine();
     machine.send({ type: hostPlaybackEvent.play });
     machine.send({ type: hostPlaybackEvent.pause });
@@ -591,13 +588,13 @@ describe('an explicit play during an in-flight seek recovery', () => {
     machine.send({ type: hostPlaybackEvent.play });
     expect(machine.preference).toBe(playbackPreference.playing);
 
-    // The watchdog reports the reposition seek still unresolved: the chained
-    // recovery belongs to a user who now wants play, so it restarts playing.
-    const chained = machine.send({ seconds: 120, type: hostPlaybackEvent.stalledSeek });
+    // The replacement load fails while the user now wants play: the chained
+    // recovery must restart playing, not defer behind the stale paused choice.
+    const chained = machine.send({ kind: hostReportKind.decode, resumeSeconds: 120, type: hostPlaybackEvent.loadFailed });
     expect(chained).toEqual([
       {
         kind: hostDecisionKind.restartSource,
-        reason: recoveryReason.seek,
+        reason: recoveryReason.decode,
         resumeSeconds: 120,
         wantsPlay: true,
       },
@@ -617,10 +614,10 @@ describe('an explicit play during an in-flight seek recovery', () => {
 
     machine.send({ type: hostPlaybackEvent.play });
     expect(machine.preference).toBe(playbackPreference.playing);
-    expect(machine.send({ seconds: 120, type: hostPlaybackEvent.stalledSeek })).toEqual([
+    expect(machine.send({ kind: hostReportKind.decode, resumeSeconds: 120, type: hostPlaybackEvent.loadFailed })).toEqual([
       {
         kind: hostDecisionKind.restartSource,
-        reason: recoveryReason.seek,
+        reason: recoveryReason.decode,
         resumeSeconds: 120,
         wantsPlay: true,
       },
