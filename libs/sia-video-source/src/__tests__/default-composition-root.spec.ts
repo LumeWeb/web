@@ -16,7 +16,11 @@
  * root lifecycle (transport + MSE wiring) is the object under test.
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { MainToWorkerMessageType, WorkerToMainMessageType } from '../protocol.ts';
+import {
+  MainToWorkerMessageType,
+  workerLogEventName,
+  WorkerToMainMessageType,
+} from '../protocol.ts';
 import type { WorkerConfig } from '../protocol.ts';
 import type { WorkerToMainMessage } from '../protocol.ts';
 import type { SiaByteSourceSdk } from '../transport/sia-byte-source.ts';
@@ -363,6 +367,44 @@ describe('createDefaultWorkerComposition main-mode CHUNK fallback lifecycle (bro
     expect(buildCalls).toBe(2);
     expect(messages.filter((m) => m.type === WorkerToMainMessageType.ERROR)).toHaveLength(1);
     expect(chunkCount()).toBeGreaterThan(0);
+  });
+});
+
+describe('createDefaultWorkerComposition protocol reject logging (node)', () => {
+  it.skipIf(!IN_NODE)('posts a protocol.rejected LOG once the HELLO opts into log forwarding, and stays silent before', async () => {
+    const payload = boundedIndexedFmp4Payload();
+    const { sdk } = fakeSiaSdk(payload);
+    const messages: WorkerToMainMessage[] = [];
+    const root = createDefaultWorkerComposition({
+      capabilities: permissiveCapabilities(),
+      createSdk: () => Promise.resolve(sdk),
+      loadPipeline: new FakeLoadPipeline(),
+      post: (message) => messages.push(message),
+      supportsWorkerMse: () => false,
+    });
+
+    // oxlint-disable-next-line typescript/unbound-method — stored in a local so both calls share one reference
+    const rejectLog = root.logProtocolReject;
+    expect(rejectLog).toBeTypeOf('function');
+    // No HELLO `log` threshold adopted yet: a dropped main→worker payload
+    // must keep the wire fully silent (a host that never opted in hears no
+    // worker logs at all).
+    rejectLog?.();
+    expect(messages).toHaveLength(0);
+
+    // A HELLO opting into debug forwarding adopts the live threshold, after
+    // which the reject reporter posts the typed LOG message.
+    await root.handleMessage({ config: WORKER_CONFIG, log: 'debug', requestId: 1, type: MainToWorkerMessageType.HELLO });
+    rejectLog?.();
+    expect(messages.filter((m) => m.type === WorkerToMainMessageType.LOG)).toEqual([
+      {
+        detail: { direction: 'main-to-worker' },
+        level: 'debug',
+        name: workerLogEventName.protocolRejected,
+        requestId: null,
+        type: WorkerToMainMessageType.LOG,
+      },
+    ]);
   });
 });
 
