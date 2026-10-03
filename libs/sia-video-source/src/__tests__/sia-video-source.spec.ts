@@ -2375,12 +2375,11 @@ describe('out-of-window seek recovery', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('re-arms the stall watchdog for a paused seek recovery once the replacement source attaches', async () => {
-    // A paused user's far scrub starts a wantsPlay=false seek recovery. The
-    // replacement source still needs a bounded recovery path when its own
-    // reanchor seek never resolves: #onSeeking suppresses the native event
-    // while recovery is active, leaving this watchdog as the only retry path.
-    const SEEK_STALL_MS = 6000;
+  it.skipIf(!IN_BROWSER)('does not restart a paused seek recovery when its reanchor seek stays unresolved past the stall interval', async () => {
+    // A paused user's far scrub starts a wantsPlay=false seek recovery. Its
+    // reanchor seek may stay in `seeking` for as long as the remote metadata
+    // and index read takes: elapsed time alone is not a failure, so the
+    // host must not spend a recovery attempt on it.
     const { host, target, worker } = attachAndHandshake();
     loadWithDuration(host, worker, 'k', 60);
     target.dispatchEvent(new Event('play'));
@@ -2397,7 +2396,7 @@ describe('out-of-window seek recovery', () => {
       expect(restart1).toHaveLength(1);
       expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
       // Acknowledge the restart so its reanchor seek is now on the fresh
-      // pipeline and can be observed by the watchdog.
+      // pipeline.
       if (restart1[0] && 'requestId' in restart1[0]) {
         worker.reply({
           info: { ...mainInfo, durationSeconds: 60 },
@@ -2407,10 +2406,11 @@ describe('out-of-window seek recovery', () => {
       }
       worker.sent.length = 0;
 
-      // The full stall interval elapses with the reanchor still stuck. The
-      // watchdog retries the paused recovery without introducing playback.
-      vi.advanceTimersByTime(SEEK_STALL_MS);
-      expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+      // The reanchor seek is still latched well past the old fixed stall
+      // interval: the worker may still be delivering the remote target, so
+      // no restart and no error may be invented from elapsed time alone.
+      vi.advanceTimersByTime(6000);
+      expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
       expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
       expect(host.error).toBeNull();
     } finally {
@@ -2471,7 +2471,12 @@ describe('out-of-window seek recovery', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('starts a recovery seek watchdog only after the replacement source is ready', () => {
+  it.skipIf(!IN_BROWSER)('does not auto-restart a remote seek that stays native-seeking past six seconds', () => {
+    // The observed deep-seek failure: a far scrub on a large remote object
+    // leaves the element in `seeking` while the worker streams the remote
+    // index and target bytes — minutes, not seconds. Elapsed time alone is
+    // not a failure: no source restart may be invented from it, before OR
+    // after the replacement resource attaches.
     const { host, target, worker } = attachAndHandshake();
     loadWithDuration(host, worker, 'k', 60);
     target.dispatchEvent(new Event('play'));
@@ -2484,9 +2489,8 @@ describe('out-of-window seek recovery', () => {
       expect(restart).toBeDefined();
       worker.sent.length = 0;
 
-      // A large remote object's metadata/index pass can exceed the normal seek
-      // timeout. It is still loading, so the pre-attach interval must not
-      // spend a recovery attempt and restart the source again.
+      // A large remote object's metadata/index pass can exceed any fixed
+      // timeout while the worker is still reading: no restart.
       vi.advanceTimersByTime(6000);
       expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
 
@@ -2495,77 +2499,46 @@ describe('out-of-window seek recovery', () => {
       }
       worker.sent.length = 0;
 
-      // Once the replacement resource is attached, a truly stuck seek still
-      // gets the same bounded recovery watchdog.
+      // The replacement resource is attached and its reanchor seek is still
+      // loading: the same rule holds — time alone restarts nothing.
       vi.advanceTimersByTime(6000);
-      expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+      expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+      expect(host.error).toBeNull();
     } finally {
       vi.useRealTimers();
     }
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('surfaces a decode error once out-of-window seek restarts are exhausted', () => {
+  it.skipIf(!IN_BROWSER)('still restarts once an out-of-window seek recovery load fails for real', () => {
+    // With the elapsed-time watchdog gone, a stuck out-of-window seek recovery
+    // is bounded by the CONCRETE failure of the replacement load: the same
+    // decode-class error the exhausted stall path used to surface now comes
+    // from the worker reporting the reanchor load failed.
     const { host, target, worker } = attachAndHandshake();
     loadWithDuration(host, worker, 'k', 60);
-    // An OUT-OF-WINDOW seek recovery that is actively PLAYING keeps its stall
-    // watchdog backstop: only paused restarts drop it, so the exhaust path is
-    // exercised from the playing side.
     target.dispatchEvent(new Event('play'));
     worker.sent.length = 0;
 
     let errorEvents = 0;
     host.addEventListener('error', () => errorEvents++);
 
-    // The reposition seek after a restart must stay stuck (this is the case
-    // that keeps the element in HAVE_METADATA): the host's recovery restarts
-    // suppress re-entry from their own reposition seek via `#recovering`, so a
-    // second out-of-window attempt only ever comes from the stall watchdog —
-    // not from re-dispatching `seeking`, which `#recovering` now swallows.
-    // Model the unresolved seek with a `seeking` flag that never clears and
-    // drive the watchdog with fake timers.
-    //
-    // Keep SEEK_STALL_MS in sync with SEEK_STALL_TIMEOUT_MS in
-    // sia-video-source.ts; a drift makes the watchdog fire early or late.
-    const SEEK_STALL_MS = 6000;
     Object.defineProperty(target, 'seeking', { configurable: true, get: () => true });
     vi.useFakeTimers();
     try {
-      // First out-of-window seek (past the vouched 60s duration) → restart #1
-      // (one fresh SOURCE), stall watchdog on. Acknowledging the SOURCE_OK keeps
-      // the known duration restored the way a real load would.
-      const restartOnce = () => {
-        // Set currentTime past the vouched duration so `#onSeeking` classifies
-        // it as out-of-window (the recovery's own reposition keeps currentTime
-        // at 120 on subsequent watchdog-driven attempts).
-        target.currentTime = 120;
-        target.dispatchEvent(new Event('seeking'));
-        const restart = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).at(-1);
-        expect(restart).toBeDefined();
-        if (restart && 'requestId' in restart) {
-          worker.reply({ info: { ...mainInfo, durationSeconds: 60 }, requestId: restart.requestId, type: WorkerToMainMessageType.SOURCE_OK });
-        }
-      };
-      worker.sent.length = 0;
-      restartOnce();
-      expect(errorEvents).toBe(0);
+      target.currentTime = 120;
+      target.dispatchEvent(new Event('seeking'));
+      const restart = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).at(-1);
+      expect(restart).toBeDefined();
+      if (!restart || !('requestId' in restart)) throw new Error('no out-of-window restart SOURCE');
+      worker.reply({ info: { ...mainInfo, durationSeconds: 60 }, requestId: restart.requestId, type: WorkerToMainMessageType.SOURCE_OK });
       worker.sent.length = 0;
 
-      // The reposition seek never resolves → the stalled-seek watchdog fires →
-      // restart #2 (budget spent), still no error surfaced.
-      vi.advanceTimersByTime(SEEK_STALL_MS);
+      // The replacement load genuinely fails: the concrete worker error is
+      // what drives the bounded recovery, not elapsed seek time.
+      worker.reply({ context: 'append failed', kind: 'decode', requestId: restart.requestId, type: WorkerToMainMessageType.ERROR });
       expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
       expect(errorEvents).toBe(0);
-      restartOnce();
-      worker.sent.length = 0;
-
-      // Still stuck → watchdog fires again → MAX_EXTERNAL_SEEK_RESTARTS is
-      // exhausted: the failure surfaces as a decode-class error and no further
-      // SOURCE restart happens.
-      vi.advanceTimersByTime(SEEK_STALL_MS);
-      expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
-      expect(errorEvents).toBe(1);
-      expect(host.error?.code).toBe(3);
     } finally {
       vi.useRealTimers();
     }
@@ -2923,7 +2896,7 @@ describe('unavailable seek snap-back (host, nonfatal)', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('cancels the seek watchdog so the original stall deadline does not fire a restart', () => {
+  it.skipIf(!IN_BROWSER)('does not invent a restart for the snap-back once the original seek interval has passed', () => {
     vi.useFakeTimers();
     const { host, target, worker } = attachAndHandshake();
     const activeId = loadWithDuration(host, worker, 'k', 60);
@@ -2932,17 +2905,18 @@ describe('unavailable seek snap-back (host, nonfatal)', () => {
     target.dispatchEvent(new Event('timeupdate'));
     worker.sent.length = 0;
 
-    // Start a seek at t=0; the watchdog is armed for 6000 ms.
+    // Start a seek at t=0.
     target.currentTime = 42;
     setSeeking(target, true);
     target.dispatchEvent(new Event('seeking'));
     worker.sent.length = 0;
 
-    // At t=1000 the worker reports unavailable; the watchdog must be cancelled.
+    // At t=1000 the worker reports unavailable: the host snaps back.
     vi.advanceTimersByTime(1000);
     worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 42, type: WorkerToMainMessageType.ERROR });
 
-    // Advance past the original 6 s deadline: no restart.
+    // Advance past the old fixed stall deadline: elapsed time alone invents
+    // no source restart.
     vi.advanceTimersByTime(6000);
     expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
     expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
@@ -2968,21 +2942,19 @@ describe('unavailable seek snap-back (host, nonfatal)', () => {
     worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 42, type: WorkerToMainMessageType.ERROR });
     expect(target.currentTime).toBe(30);
     // The snap-back's own native `seeking` re-enters the normal path: a
-    // fresh SEEK at 30 and a watchdog re-armed for the snap-back.
+    // fresh SEEK at 30.
     target.dispatchEvent(new Event('seeking'));
     expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(1);
 
     // A duplicate of the ORIGINAL report (same request id, same target)
     // lands before the snap-back emits `seeked`. It names a target the
-    // element is no longer seeking, so it must be dropped: no extra SEEK,
-    // and the snap-back's watchdog left alone.
+    // element is no longer seeking, so it must be dropped: no extra SEEK.
     worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 42, type: WorkerToMainMessageType.ERROR });
     expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(1);
 
-    // The snap-back is still unresolved: its watchdog must still fire the
-    // stalled-seek restart, proving the duplicate did not cancel it.
+    // And nothing is invented from elapsed time: no source restart.
     vi.advanceTimersByTime(6000);
-    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
 
     vi.useRealTimers();
     host.destroy();
@@ -3008,13 +2980,12 @@ describe('unavailable seek snap-back (host, nonfatal)', () => {
     target.dispatchEvent(new Event('seeked')); // the snap-back resolves
     worker.sent.length = 0;
 
-    // The user starts a newer scrub to 50: fresh SEEK, fresh watchdog.
+    // The user starts a newer scrub to 50: fresh SEEK.
     target.currentTime = 50;
     target.dispatchEvent(new Event('seeking'));
 
     // A LATE echo of the original 42 report (same request id) arrives while
-    // the 50 seek is in flight. It must not cancel the 50 seek's watchdog
-    // or drag the element back to 30.
+    // the 50 seek is in flight. It must not drag the element back to 30.
     worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 42, type: WorkerToMainMessageType.ERROR });
 
     expect(target.currentTime).toBe(50);
@@ -3022,15 +2993,16 @@ describe('unavailable seek snap-back (host, nonfatal)', () => {
     expect(seeks).toHaveLength(1);
     expect(seeks[0]).toMatchObject({ time: 50, type: MainToWorkerMessageType.SEEK });
 
-    // The 50 seek's watchdog must survive the stale echo.
+    // The in-flight 50 seek stays put past the old stall interval: elapsed
+    // time invents no restart.
     vi.advanceTimersByTime(6000);
-    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
 
     vi.useRealTimers();
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('leaves the watchdog armed for a same-position snap-back so the stall deadline still fires the restart', () => {
+  it.skipIf(!IN_BROWSER)('does not restart on a no-op same-position snap-back past the old stall interval', () => {
     vi.useFakeTimers();
     const { host, target, worker } = attachAndHandshake();
     const activeId = loadWithDuration(host, worker, 'k', 60);
@@ -3040,8 +3012,7 @@ describe('unavailable seek snap-back (host, nonfatal)', () => {
     target.dispatchEvent(new Event('timeupdate'));
     worker.sent.length = 0;
 
-    // The user seeks back to 0; the element enters seeking at 0 and the
-    // watchdog is armed for it.
+    // The user seeks back to 0; the element enters seeking at 0.
     target.currentTime = 0;
     setSeeking(target, true);
     target.dispatchEvent(new Event('seeking'));
@@ -3049,19 +3020,17 @@ describe('unavailable seek snap-back (host, nonfatal)', () => {
 
     // The worker reports the seek target (0) as unavailable. The playhead is
     // within tolerance of the target, so the snap-back is 0: the element
-    // already sits there, the write is a no-op, and no fresh `seeking`
-    // re-arms anything.
+    // already sits there and the write is a no-op.
     worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 0, type: WorkerToMainMessageType.ERROR });
 
     // No snap occurred and no follow-up SEEK was issued.
     expect(target.currentTime).toBe(0);
     expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(0);
 
-    // The watchdog the original seek armed must survive the no-op write:
-    // past its deadline it fires the established stalled-seek recovery (a
-    // source restart at the target).
+    // The seek can stay latched as long as the remote read takes: elapsed
+    // time alone invents no source restart.
     vi.advanceTimersByTime(6000);
-    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
 
     vi.useRealTimers();
     host.destroy();
@@ -3076,8 +3045,7 @@ describe('unavailable seek snap-back (host, nonfatal)', () => {
     target.dispatchEvent(new Event('timeupdate'));
     worker.sent.length = 0;
 
-    // The user seeks to 42; the element enters seeking and the watchdog is
-    // armed for the in-flight seek.
+    // The user seeks to 42; the element enters seeking.
     target.currentTime = 42;
     setSeeking(target, true);
     target.dispatchEvent(new Event('seeking'));
@@ -3085,17 +3053,16 @@ describe('unavailable seek snap-back (host, nonfatal)', () => {
 
     // A time-less unavailable report (a stale echo that names no target)
     // lands while the 42 seek is in flight. It cannot be matched to that
-    // seek, so it is dropped: no snap back, and the in-flight seek's
-    // watchdog left untouched.
+    // seek, so it is dropped: no snap back.
     worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, type: WorkerToMainMessageType.ERROR });
 
     expect(target.currentTime).toBe(42);
     expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(0);
 
-    // The in-flight seek's watchdog must survive the dropped report: past
-    // its deadline it fires the stalled-seek restart.
+    // The in-flight seek stays put past the old stall interval: elapsed
+    // time invents no restart.
     vi.advanceTimersByTime(6000);
-    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
 
     vi.useRealTimers();
     host.destroy();
@@ -3109,10 +3076,9 @@ describe('late unavailable seek retarget (host, nonfatal)', () => {
   // it then fails on a persistent shard shortage. No in-flight seek remains
   // to match against, so the host retargets on its own: it names the
   // in-flight seek, posts an explicit SEEK for the last playable position,
-  // repositions the element there, and arms the seek watchdog for the
-  // restored target. The reposition's native `seeking` is the retarget's
-  // own echo: `#onSeeking` matches it against the marker the retarget set
-  // and drops it, so the restored seek posts exactly one SEEK. An unnamed report
+  // repositions the element there. The reposition's native `seeking` is the
+  // retarget's own echo: `#onSeeking` matches it against the marker the
+  // retarget set and drops it, so the restored seek posts exactly one SEEK. An unnamed report
   // names no position to restore and is ignored; a report naming the
   // restored target is an echo of the host's own retarget and is ignored
   // too, or the recovery would seek the same position forever. The
@@ -3212,7 +3178,7 @@ describe('late unavailable seek retarget (host, nonfatal)', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('arms the seek watchdog for the restored target on a late retarget', () => {
+  it.skipIf(!IN_BROWSER)('does not restart a late-retarget seek that stays unresolved past the old stall interval', () => {
     vi.useFakeTimers();
     const { host, target, worker } = attachAndHandshake();
     const activeId = loadWithDuration(host, worker, 'k', 60);
@@ -3222,13 +3188,13 @@ describe('late unavailable seek retarget (host, nonfatal)', () => {
     expect(target.currentTime).toBe(30);
 
     // The reposition write puts the element back into seeking. If the
-    // restored seek never resolves, its watchdog must run the stalled-seek
-    // restart at the deadline.
+    // restored seek never resolves, elapsed time alone must not restart the
+    // source — a concrete worker error is what does.
     setSeeking(target, true);
     worker.sent.length = 0;
     vi.advanceTimersByTime(6000);
 
-    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
 
     vi.useRealTimers();
     host.destroy();
@@ -3291,15 +3257,15 @@ describe('late unavailable seek retarget (host, nonfatal)', () => {
 
     // The restored run at 30 fails and reports it, naming 30 while that very
     // seek is in flight. It is an echo of the host's own retarget, not the
-    // in-flight seek's failure to act on: dropped, with the restored seek's
-    // watchdog left armed.
+    // in-flight seek's failure to act on: dropped.
     worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 30, type: WorkerToMainMessageType.ERROR });
     expect(target.currentTime).toBe(30);
     expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(1);
 
-    // The restored seek's watchdog still fires the stalled-seek restart.
+    // The in-flight restored seek stays put past the old stall interval:
+    // elapsed time invents no restart.
     vi.advanceTimersByTime(6000);
-    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
 
     vi.useRealTimers();
     host.destroy();
@@ -3347,10 +3313,10 @@ describe('late unavailable seek retarget (host, nonfatal)', () => {
     expect(target.currentTime).toBe(0);
     expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(1);
 
-    // The in-flight seek's watchdog survives: it fires the stalled-seek
-    // restart at the deadline.
+    // The in-flight seek stays put past the old stall interval: elapsed
+    // time invents no restart.
     vi.advanceTimersByTime(6000);
-    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
 
     vi.useRealTimers();
     host.destroy();
@@ -3403,33 +3369,30 @@ describe('late unavailable seek retarget (host, nonfatal)', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('does not retarget on a late report while a stalled seek restart is in flight', () => {
-    vi.useFakeTimers();
+  it.skipIf(!IN_BROWSER)('does not snap back on a late report while a seek recovery restart is in flight', () => {
     const { host, target, worker } = attachAndHandshake();
     const activeId = loadWithDuration(host, worker, 'k', 60);
 
     target.currentTime = 30;
     target.dispatchEvent(new Event('timeupdate'));
 
-    // A seek to 42 that never resolves: at the deadline the machine restarts
-    // the source at 42 and the old load is superseded.
-    target.currentTime = 42;
+    // An out-of-window seek to 120 restarts the source at 120: the recovery
+    // owns the element and the old load is superseded.
+    worker.sent.length = 0;
+    target.currentTime = 120;
     setSeeking(target, true);
     target.dispatchEvent(new Event('seeking'));
-    worker.sent.length = 0;
-    vi.advanceTimersByTime(6000);
     expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
     worker.sent.length = 0;
 
     // A late unavailable report for the superseded load must not add a
     // second restart on top of the in-flight recovery.
-    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 42, type: WorkerToMainMessageType.ERROR });
+    worker.reply({ kind: workerErrorCode.unavailable, requestId: activeId, time: 120, type: WorkerToMainMessageType.ERROR });
 
-    expect(target.currentTime).toBe(42);
+    expect(target.currentTime).toBe(120);
     expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
     expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(0);
 
-    vi.useRealTimers();
     host.destroy();
   });
 });

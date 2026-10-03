@@ -76,14 +76,6 @@ const MSE_BACK_BUFFER_SECONDS = 30;
 const SEEK_DURATION_TOLERANCE_SECONDS = 0.25;
 
 /**
- * How long an unresolved seek may hold the element in `seeking` before the
- * host assumes it will never resolve (the target is unreachable) and restarts
- * the source at that position. Slow-but-real remote reads retry with a fresh
- * attempt; only repeated failures surface an error.
- */
-const SEEK_STALL_TIMEOUT_MS = 6000;
-
-/**
  * The typed DOM event `SiaVideoSource` dispatches when the playback recovery
  * window opens (a `restart-source` decision starts) and closes (the recovered
  * load plays, the recovery exhausts, or a source reset / detach / destroy ends
@@ -553,8 +545,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // recovery attempt count, whether a repair is owed and at what position, and
   // the recovery requests that drive the host's restart effect. The host keeps
   // ordinary per-load facts outside it: playhead, duration, buffered end,
-  // request id, element/worker refs, pending re-attach seconds, and the seek
-  // watchdog timer handle.
+  // request id, element/worker refs, and pending re-attach seconds.
   readonly #machine = new HostPlaybackMachine();
 
   #mediaSource: MediaSource | null = null;
@@ -627,12 +618,6 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   #recoveryNotified = false;
 
   #requestId: null | RequestId = null;
-
-  // Watchdog for a `seeking` state that never resolves: set on every user
-  // seek, cleared when `seeked` / a load boundary arrives. On fire it treats
-  // the seek as stuck and restarts the source at the target position, so the
-  // element never hangs in HAVE_METADATA forever.
-  #seekWatchdog: null | ReturnType<typeof setTimeout> = null;
 
   #sharingKeySeedProvider: AppKeySeedProvider | undefined;
 
@@ -809,7 +794,6 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // already closed).
     this.#resetSourceInfo();
     this.#cancelPauseConfirm();
-    this.#cancelSeekWatchdog();
     // A destroyed host must stop reacting to the document's visibility: no
     // pending automatic recovery may fire on a dead machine.
     this.#teardownVisibilityListener();
@@ -987,53 +971,27 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   #applyPendingReanchor(target: HTMLVideoTargetLike | null): void {
     const reanchorSeconds = this.#pendingReanchorSeconds;
     if (reanchorSeconds === null || !target) return;
-    const recovery = this.#machine.recovery;
     this.#pendingReanchorSeconds = null;
     try {
       target.currentTime = reanchorSeconds;
     } catch {
-      // A dead MediaSource mid-teardown can refuse the write; the recovery
-      // budgets + stall watchdog still bound the failure if this never plays.
-    }
-    // A replacement source can spend several seconds reading its remote
-    // metadata/index before it attaches. Start the seek-stall clock only once
-    // that fresh resource exists; otherwise a healthy deep seek repeatedly
-    // tears itself down before its reanchor can resolve.
-    if (recovery?.reason === recoveryReason.seek) {
-      this.#armSeekWatchdog();
+      // A dead MediaSource mid-teardown can refuse the write; a concrete
+      // worker/native error on the replacement load drives the bounded retry
+      // path if this never plays.
     }
   }
 
   // Applies the pending wants-play intent exactly once, after the fresh
   // resource is attached and re-anchored. A rejected `play()` (e.g.
-  // NotAllowedError on a not-yet-ready element) is swallowed — the recovery
-  // budgets + stall watchdog bound the failure if this never plays.
+  // NotAllowedError on a not-yet-ready element) is swallowed — a concrete
+  // worker/native error on the replacement load bounds the failure if this
+  // never plays.
   #applyPendingResumePlay(target: HTMLVideoTargetLike | null): void {
     if (!this.#pendingResumePlay || !target) return;
     this.#pendingResumePlay = false;
     void target.play().catch(() => {
       // Expected on a not-yet-ready or policy-blocked element.
     });
-  }
-
-  // Setting/clearing for the unresolved-seek watchdog. When `seeking` is
-  // still latched (no `seeked` has resolved it) past the stall interval, the
-  // seek is judged stuck and the machine runs the same retry-capped seek
-  // restart (or, once exhausted, reports a decode-class error and force-clears
-  // the stuck flag).
-  #armSeekWatchdog(): void {
-    this.#cancelSeekWatchdog();
-    this.#seekWatchdog = setTimeout(() => {
-      this.#seekWatchdog = null;
-      const target = this.target as HTMLVideoElement | null;
-      if (!target || !target.seeking || this.#destroyed) return;
-      this.#logger.child('host').warn('seek unresolved — recovering', {
-        seekSeconds: target.currentTime,
-      });
-      this.#applyDecisions(
-        this.#machine.send({ seconds: target.currentTime, type: hostPlaybackEvent.stalledSeek }),
-      );
-    }, SEEK_STALL_TIMEOUT_MS);
   }
 
   #beginMainThreadMse(mime: string, durationSeconds: null | number): void {
@@ -1123,13 +1081,6 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       this.#pauseConfirm = null;
     }
     this.#pauseConfirmArmedPosition = null;
-  }
-
-  #cancelSeekWatchdog(): void {
-    if (this.#seekWatchdog !== null) {
-      clearTimeout(this.#seekWatchdog);
-      this.#seekWatchdog = null;
-    }
   }
 
   // Closes an open recovery observation exactly once (the "no duplicate
@@ -1347,27 +1298,22 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   //    the element is actually in (the target the host last forwarded,
   //    within tolerance). A time-less report names no seek it can be matched
   //    against, and a report naming some other target is a stale echo; both
-  //    are dropped before touching the in-flight seek's watchdog, which stays
-  //    the only recovery for them. A snap-back to the position the element
-  //    is already stuck on is a no-op write (no fresh `seeking` fires), so
-  //    that watchdog is left armed to run the stalled-seek restart. A
-  //    recovery's repositioning seek names no marker (its `seeking` is
-  //    suppressed in `#onSeeking`), so the stall watchdog is its only
-  //    recovery.
+  //    are dropped before the snap-back runs. A snap-back to the position the
+  //    element is already stuck on is a no-op write (no fresh `seeking`
+  //    fires), so it is skipped.
   //
   // 2. After the native seek already resolved (`seeked` cleared the
   //    in-flight marker): the target sat inside buffered data, so the seek
   //    resolved, but the worker's replacement run for it then failed on a
   //    persistent shortage. No in-flight seek remains to match, so the host
   //    retargets on its own: it names the in-flight seek, posts an explicit
-  //    SEEK for the last playable position, repositions the element there,
-  //    and arms the seek watchdog for the restored target. The reposition
-  //    fires a native `seeking` in a real browser; `#onSeeking` matches it
-  //    against the marker the retarget set and drops it, so the restored
-  //    seek posts exactly one SEEK. The same loop protection applies:
-  //    an unnamed report names no position to restore, and a report naming
-  //    the position a retarget already restored to is an echo of that
-  //    retarget's own run; both are ignored.
+  //    SEEK for the last playable position, and repositions the element
+  //    there. The reposition fires a native `seeking` in a real browser;
+  //    `#onSeeking` matches it against the marker the retarget set and drops
+  //    it, so the restored seek posts exactly one SEEK. The same loop
+  //    protection applies: an unnamed report names no position to restore,
+  //    and a report naming the position a retarget already restored to is an
+  //    echo of that retarget's own run; both are ignored.
   //
   // Neither shape routes to the machine: no loadFailed, no restart.
   #handleSeekUnavailable(
@@ -1381,7 +1327,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       const inFlight = this.#lastForwardedSeekSeconds;
       // Only a report naming the in-flight target (within tolerance) is this
       // seek's own failure. A foreign name is a stale echo of an older seek;
-      // dropping it keeps the in-flight seek's watchdog intact.
+      // dropping it keeps the snap-back aimed at the right position.
       if (
         inFlight === null ||
         Math.abs(inFlight - message.time) > SEEK_DURATION_TOLERANCE_SECONDS
@@ -1390,8 +1336,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       }
       // A report naming the position a late retarget restored the element to
       // is an echo of THAT run failing, not the in-flight seek's failure:
-      // acting would snap the element off the restored position. The
-      // in-flight (restored) seek's watchdog is its recovery.
+      // acting would snap the element off the restored position.
       if (
         this.#lastRetargetSeconds !== null &&
         Math.abs(this.#lastRetargetSeconds - message.time) <= SEEK_DURATION_TOLERANCE_SECONDS
@@ -1400,11 +1345,8 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       }
       const snapBack = this.#snapBackPosition(message.time);
       // A snap-back to the position the element is already stuck on is a
-      // no-op write: the browser fires no fresh `seeking`, so the watchdog
-      // would never be re-armed. Leave it armed to run the stalled-seek
-      // restart.
+      // no-op write: the browser fires no fresh `seeking`, so skip it.
       if (Math.abs(target.currentTime - snapBack) <= SEEK_DURATION_TOLERANCE_SECONDS) return;
-      this.#cancelSeekWatchdog();
       target.currentTime = snapBack;
       return;
     }
@@ -1413,14 +1355,14 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // With no active load there is nothing to retarget into.
     const requestId = this.#requestId;
     if (requestId === null) return;
-    // A recovery owns the element right now (a stalled-seek restart is in
-    // flight, or a repair is owed to a paused user): the machine's
-    // retry-capped path is the recovery, and a parallel host retarget would
-    // fight it and overwrite a paused user's position choice.
+    // A recovery owns the element right now (a seek restart is in flight, or
+    // a repair is owed to a paused user): the machine's retry-capped path is
+    // the recovery, and a parallel host retarget would fight it and overwrite
+    // a paused user's position choice.
     if (this.#machine.isRecovering || this.#machine.repairOwed !== null) return;
     // An echo of the host's own retarget: the restored run failed and
     // reported the position the host restored to. Seeking it again would
-    // loop; the restored seek's watchdog is the recovery.
+    // loop; the echo latch stops that.
     if (
       this.#lastRetargetSeconds !== null &&
       Math.abs(this.#lastRetargetSeconds - message.time) <= SEEK_DURATION_TOLERANCE_SECONDS
@@ -1445,9 +1387,6 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       type: MainToWorkerMessageType.SEEK,
     });
     target.currentTime = restored;
-    // The restored seek may itself never resolve (the position can be dead
-    // too); the watchdog is its recovery.
-    this.#armSeekWatchdog();
     // Remember the restored position so a report naming it is recognized as
     // this retarget's echo.
     this.#lastRetargetSeconds = restored;
@@ -1949,7 +1888,6 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     const target = this.target;
     if (!target || event.target !== target) return;
     this.#cancelPauseConfirm();
-    this.#cancelSeekWatchdog();
     this.#lastForwardedSeekSeconds = null;
     // If the machine was mid-recovery as a seek restart, its repositioning
     // seek resolving closes the window and restores the budget; a decode
@@ -1970,9 +1908,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // repositioning seek of an in-flight recovery also clears any stale handle.
     this.#cancelPauseConfirm();
     // A recovery reload positions the element at its target, which shows up as
-    // a native `seeking` here; the recovery already issued the SEEK + watchdog
-    // it needs, so re-entering the out-of-window check would only double-send
-    // and double-set (or worse, restart once more).
+    // a native `seeking` here; the recovery already issued the SEEK it needs,
+    // so re-entering the out-of-window check would only double-send and
+    // double-set (or worse, restart once more).
     if (this.#machine.isRecovering) return;
     const seekSeconds = target.currentTime;
     // The load's pipeline died while the user was paused and a repair is
@@ -1989,7 +1927,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       // the retained buffer's front edge after end-of-stream). A bare SEEK
       // would leave the element in `seeking` / HAVE_METADATA forever, so
       // restart the source at the target instead — the same remedy as decode
-      // recovery, retry-capped, with the stall watchdog as backstop.
+      // recovery, retry-capped.
       this.#applyDecisions(
         this.#machine.send({ seconds: seekSeconds, type: hostPlaybackEvent.seekOutOfWindow }),
       );
@@ -1999,9 +1937,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // is the echo of that post, not a new user seek: the late unavailable
     // retarget posts its SEEK and then repositions the element, and the
     // reposition's `seeking` lands here. Re-entering the send path would
-    // post a second, identical SEEK and replace the watchdog the retarget
-    // armed. Placed after the out-of-window check so a target the load
-    // provably cannot reach still restarts. A seek to a different position
+    // post a second, identical SEEK. Placed after the out-of-window check so
+    // a target the load provably cannot reach still restarts. A seek to a
+    // different position
     // never matches: the tolerance keeps ordinary user scrubs flowing.
     if (
       this.#lastForwardedSeekSeconds !== null &&
@@ -2024,9 +1962,6 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       time: seekSeconds,
       type: MainToWorkerMessageType.SEEK,
     });
-    // Watchdog for a seek that never resolves (e.g. an in-window target the
-    // engine silently refuses): cleared on `seeked` / a load boundary.
-    this.#armSeekWatchdog();
   };
 
   #onTimeUpdate = (event: Event) => {
@@ -2138,15 +2073,13 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
   #reportError(kind: WorkerErrorCode, context?: string): void {
     if (this.#destroyed) return;
-    // A fatal error ends all recovery ambitions: no unresolved seek needs a
-    // watchdog any longer and no fresh resource will arrive to apply a
-    // recorded position. (The machine, not the host, now owns the recovery
-    // window and has already moved to its `failed` state.)
+    // A fatal error ends all recovery ambitions: no fresh resource will
+    // arrive to apply a recorded position. (The machine, not the host, now
+    // owns the recovery window and has already moved to its `failed` state.)
     // A terminally-failed recovery leaves the window: echo the close to the
     // typed event (a fresh-network error outside a recovery is a no-op).
     this.#endRecoveryObservationIfMachineLeft();
     this.#pendingReanchorSeconds = null;
-    this.#cancelSeekWatchdog();
     // An errored pipeline is never ended: the pipe refuses end-of-stream once
     // it has failed, and the ENDED handler refuses on `#error` — either way a
     // failure is never masked by a clean end. `#error` is cleared at every
@@ -2206,9 +2139,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // pause on the new load. The machine's source events cover the choice.
     this.#cancelPauseConfirm();
     // This load-boundary helper only drops HOST-owned facts: error, per-load
-    // window (duration/buffered end/ended), seek watchdog, position memory,
-    // request id, and main-thread MSE state. Recovery bookkeeping (attempts,
-    // owed repair, playback choice) lives in the Robot3 machine, which the
+    // window (duration/buffered end/ended), position memory, request id, and
+    // main-thread MSE state. Recovery bookkeeping (attempts, owed repair,
+    // playback choice) lives in the Robot3 machine, which the
     // callers update with their own `source.set` / `source.attach` /
     // `source.ready` events.
     // A fresh/load/ATTACH_OK boundary supersedes any recovery: no recorded
@@ -2221,10 +2154,8 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#durationSeconds = null;
     this.#workerBufferEndSeconds = 0;
     this.#workerBufferStartSeconds = 0;
-    // No load is seeking after a boundary; a stale watchdog must not fire into
-    // the fresh pipeline, and a stale in-flight-seek marker must not name a
-    // target to a late `unavailable` report.
-    this.#cancelSeekWatchdog();
+    // A stale in-flight-seek marker must not name a target to a late
+    // `unavailable` report.
     this.#lastForwardedSeekSeconds = null;
     // A fresh source can make a previously dead position servable again; a
     // stale echo latch from the old load must not drop a real report.
@@ -2275,7 +2206,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   }
 
   // Shared body of an automatic reload/restart (decode recovery, an owed
-  // repair consumed by play/seek, or an out-of-window / stalled-seek restart):
+  // repair consumed by play/seek, or an out-of-window seek restart):
   // a fresh SOURCE (new request id) torn down like any new load, then the
   // worker-side SEEK that trims the fresh conversion at the resume point (the
   // worker records the target through its own `pendingSeekTarget` flow), and
@@ -2303,7 +2234,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       resumeSeconds: decision.resumeSeconds,
     });
     // Announce the recovery window exactly once: a continued restart of the
-    // SAME incident (e.g. a watchdog-stalled seek restart) does not re-open it.
+    // SAME incident does not re-open it.
     if (!this.#recoveryNotified) {
       this.#recoveryNotified = true;
       this.#emitRecoveryDetail({

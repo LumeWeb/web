@@ -159,7 +159,6 @@ export const hostPlaybackEvent = {
   sourceReady: 'source.ready',
   sourceReset: 'source.reset',
   sourceSet: 'source.set',
-  stalledSeek: 'stalled.seek',
   visibilityHidden: 'visibility.hidden',
   visibilityVisible: 'visibility.visible',
 } as const;
@@ -228,7 +227,6 @@ export type HostPlaybackEvent =
   | { resumeSeconds: number; type: typeof hostPlaybackEvent.nativeError }
   | { seconds: number; type: typeof hostPlaybackEvent.seekOutOfWindow }
   | { seconds: number; type: typeof hostPlaybackEvent.seek }
-  | { seconds: number; type: typeof hostPlaybackEvent.stalledSeek }
   | { type: typeof hostPlaybackEvent.pauseConfirmed }
   | { type: typeof hostPlaybackEvent.pause }
   | { type: typeof hostPlaybackEvent.play }
@@ -297,7 +295,6 @@ function resumeOf(event: MachineEvent): number {
       return event.resumeSeconds;
     case hostPlaybackEvent.seek:
     case hostPlaybackEvent.seekOutOfWindow:
-    case hostPlaybackEvent.stalledSeek:
       return event.seconds;
     default:
       return 0;
@@ -657,9 +654,6 @@ function activeLoadTransitions(
     transition(hostPlaybackEvent.seekOutOfWindow, hostPlaybackState.failed, guard(spentBudget), recordExhausted(recoveryReason.seek, hostReportKind.decode)),
     transition(hostPlaybackEvent.seekOutOfWindow, self, guard(isHidden), recordDeferWhileHidden(recoveryReason.seek, false)),
     transition(hostPlaybackEvent.seekOutOfWindow, hostPlaybackState.recovering, recordRestart(recoveryReason.seek, AS_PREFERENCE)),
-    transition(hostPlaybackEvent.stalledSeek, hostPlaybackState.failed, guard(spentBudget), recordExhausted(recoveryReason.seek, hostReportKind.decode)),
-    transition(hostPlaybackEvent.stalledSeek, self, guard(isHidden), recordDeferWhileHidden(recoveryReason.seek, false)),
-    transition(hostPlaybackEvent.stalledSeek, hostPlaybackState.recovering, recordRestart(recoveryReason.seek, AS_PREFERENCE)),
     transition(hostPlaybackEvent.seekResolved, self),
 
     // Transport and fatal failures surface immediately; they never reload.
@@ -953,14 +947,6 @@ function pausePendingTransitions(decisions: HostDecision[]): Transition<string>[
     ),
     transition(hostPlaybackEvent.seekOutOfWindow, hostPlaybackState.pausePending, guard(isHidden), recordDeferWhileHidden(recoveryReason.seek, false)),
     transition(hostPlaybackEvent.seekOutOfWindow, hostPlaybackState.recovering, recordRestart(recoveryReason.seek, AS_PREFERENCE)),
-    transition(
-      hostPlaybackEvent.stalledSeek,
-      hostPlaybackState.failed,
-      guard(spentBudget),
-      recordExhausted(recoveryReason.seek, hostReportKind.decode),
-    ),
-    transition(hostPlaybackEvent.stalledSeek, hostPlaybackState.pausePending, guard(isHidden), recordDeferWhileHidden(recoveryReason.seek, false)),
-    transition(hostPlaybackEvent.stalledSeek, hostPlaybackState.recovering, recordRestart(recoveryReason.seek, AS_PREFERENCE)),
 
     // Failures during the fleeting window follow the playing-flavored
     // healthy-load handling (the playing choice is retained until confirm).
@@ -1141,10 +1127,8 @@ function recoveringTransitions(decisions: HostDecision[]): Transition<string>[] 
 
     // Incidental native events from the replaced pipeline are engine work,
     // never user input: pause, ended, seeking, and native errors are ignored
-    // here. A watchdog stall, however, is not incidental: it re-enters the
-    // retry-capped seek restart (or reports) exactly like the first attempt.
-    // A play on a hidden-parked repair re-parks it (the restart stays owed to
-    // the visibility return); a play on a plain repair consumes it (the
+    // here. A play on a hidden-parked repair re-parks it (the restart stays
+    // owed to the visibility return); a play on a plain repair consumes it (the
     // explicit user action owns it); a play during a paused recovery records
     // the fresh intent so a chained restart resumes (see isPausedRecovery); a
     // play with nothing owed and no paused recovery is engine noise.
@@ -1156,13 +1140,6 @@ function recoveringTransitions(decisions: HostDecision[]): Transition<string>[] 
     transition(hostPlaybackEvent.seek, hostPlaybackState.recovering),
     transition(hostPlaybackEvent.seekOutOfWindow, hostPlaybackState.recovering),
     transition(hostPlaybackEvent.nativeError, hostPlaybackState.recovering),
-
-    // A watchdog stall while a recovery is in flight: another retry-capped
-    // seek restart (parked while the document is hidden), or the shared budget
-    // is spent and it reports.
-    transition(hostPlaybackEvent.stalledSeek, hostPlaybackState.failed, guard(spentBudget), recordExhausted(recoveryReason.seek, hostReportKind.decode)),
-    transition(hostPlaybackEvent.stalledSeek, hostPlaybackState.recovering, guard(isHidden), recordDeferWhileHidden(recoveryReason.seek, false)),
-    transition(hostPlaybackEvent.stalledSeek, hostPlaybackState.recovering, recordRestart(recoveryReason.seek, AS_PREFERENCE)),
 
     // The recovery load genuinely plays again: budget restores, window closes.
     transition(hostPlaybackEvent.recoverPlayed, hostPlaybackState.ready, resetRecovery),
