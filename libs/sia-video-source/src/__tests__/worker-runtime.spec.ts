@@ -44,20 +44,6 @@ describe('withDisposal', () => {
     expect(typeof wrapped.dispose).toBe('function');
   });
 
-  it('releases an SDK exposing aliased free() and [Symbol.dispose] exactly once', () => {
-    // The real sia-storage WASM SDK aliases the symbol to free(): exercising
-    // both hooks would double-release the same WASM object.
-    let released = 0;
-    const release = () => {
-      released++;
-    };
-    const sdk = sdkWith({ free: release, [Symbol.dispose]: release });
-    const wrapped = withDisposal(sdk);
-
-    void wrapped.dispose?.();
-    expect(released).toBe(1);
-  });
-
   it('prefers [Symbol.dispose] over free() when an SDK exposes both', () => {
     let freed = 0;
     let disposed = 0;

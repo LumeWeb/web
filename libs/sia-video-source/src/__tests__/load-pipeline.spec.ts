@@ -75,31 +75,20 @@ describe('load pipeline passes one verdict through', () => {
     expect(calls[0].options.signal).toBe(controller.signal);
   });
 
-  it('returns the ready verdict from the injected inspect call unchanged', async () => {
-    const fixture = readyVerdict();
-    const inspect: Inspect = () => Promise.resolve(fixture);
-    const pipeline = createLoadPipeline({ capabilities: permissiveCapabilities(), inspect });
-    const verdict = await pipeline.run({ loadGeneration: 1, signal: new AbortController().signal, source: stubSource() });
-
-    expect(verdict).toBe(fixture);
-  });
-
-  it('returns the unsupported verdict from the injected inspect call unchanged', async () => {
-    const fixture: MediaLoadResult = { reason: 'mime-unsupported', status: 'unsupported' };
-    const inspect: Inspect = () => Promise.resolve(fixture);
-    const pipeline = createLoadPipeline({ capabilities: permissiveCapabilities(), inspect });
-    const verdict = await pipeline.run({ loadGeneration: 2, signal: new AbortController().signal, source: stubSource() });
-
-    expect(verdict).toBe(fixture);
-  });
-
-  it('returns the cancelled verdict from the injected inspect call unchanged', async () => {
-    const fixture: MediaLoadResult = { status: 'cancelled' };
-    const inspect: Inspect = () => Promise.resolve(fixture);
-    const pipeline = createLoadPipeline({ capabilities: permissiveCapabilities(), inspect });
-    const verdict = await pipeline.run({ loadGeneration: 3, signal: new AbortController().signal, source: stubSource() });
-
-    expect(verdict).toBe(fixture);
+  it('returns each injected verdict from the inspect call unchanged', async () => {
+    // One pass-through check over every terminal verdict shape: the pipeline
+    // never rewrites, wraps, or rebuilds the inspect result.
+    const fixtures: MediaLoadResult[] = [
+      readyVerdict(),
+      { reason: 'mime-unsupported', status: 'unsupported' },
+      { status: 'cancelled' },
+    ];
+    for (const fixture of fixtures) {
+      const inspect: Inspect = () => Promise.resolve(fixture);
+      const pipeline = createLoadPipeline({ capabilities: permissiveCapabilities(), inspect });
+      const verdict = await pipeline.run({ loadGeneration: 1, signal: new AbortController().signal, source: stubSource() });
+      expect(verdict, fixture.status).toBe(fixture);
+    }
   });
 
   it('a rejected inspect call rejects the run', async () => {

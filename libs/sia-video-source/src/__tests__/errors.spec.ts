@@ -12,19 +12,18 @@ describe('MEDIA_ERROR_CODES', () => {
     expect(MEDIA_ERROR_CODES.decode).toBe(3);
     expect(MEDIA_ERROR_CODES.network).toBe(MediaError.MEDIA_ERR_NETWORK);
     expect(MEDIA_ERROR_CODES.network).toBe(2);
+    // quota is the one kind the original four-pin test missed: it maps to the
+    // backward-compatible decode code, not a distinct HTMLMediaError.
+    expect(MEDIA_ERROR_CODES.quota).toBe(MediaError.MEDIA_ERR_DECODE);
+    expect(MEDIA_ERROR_CODES.quota).toBe(3);
   });
 });
 
 describe('browser mapping stability', () => {
-  it('keeps every existing worker-kind → MediaError mapping intact', () => {
-    // The established five kinds map exactly as they always have (including
-    // quota's backward-compatible decode code and per-kind default messages);
-    // the new reserved kind does not alter any of them.
-    expect(MEDIA_ERROR_CODES.decode).toBe(MediaError.MEDIA_ERR_DECODE); // 3
-    expect(MEDIA_ERROR_CODES.device).toBe(MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED); // 4
-    expect(MEDIA_ERROR_CODES.network).toBe(MediaError.MEDIA_ERR_NETWORK); // 2
-    expect(MEDIA_ERROR_CODES.quota).toBe(MediaError.MEDIA_ERR_DECODE); // 3
-    expect(MEDIA_ERROR_CODES.unsupported).toBe(MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED); // 4
+  it('keeps every existing worker-kind default message intact', () => {
+    // The kind → MediaError mapping itself is pinned by the MEDIA_ERROR_CODES
+    // suite above; what this suite adds is that every established kind keeps
+    // a per-kind default message (quota included).
     for (const kind of ['decode', 'device', 'network', 'quota', 'unsupported'] as const) {
       expect(DEFAULT_ERROR_MESSAGES[kind], kind).toBeTruthy();
     }
