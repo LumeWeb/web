@@ -76,6 +76,16 @@ export {
   type PlaybackTrack,
 } from './media/types.ts';
 export {
+  createSiaNativeStreamProvider,
+  type SiaNativeStream,
+  type SiaNativeStreamFile,
+  type SiaNativeStreamProvider,
+  type SiaNativeStreamProviderDependencies,
+  SiaNativeStreamResolutionError,
+  type SiaNativeStreamSession,
+  SiaNativeStreamUnavailableError,
+} from './native-stream-provider.ts';
+export {
   type AppKeyEnvelope,
   type BufferWindow,
   GCM_IV_LENGTH,
