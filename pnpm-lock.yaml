@@ -2603,8 +2603,8 @@ importers:
         specifier: ^2.4.0
         version: 2.4.0
       '@siafoundation/sia-storage':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.3
+        version: 0.1.3
       mediabunny:
         specifier: 1.58.0
         version: 1.58.0
@@ -7712,33 +7712,34 @@ packages:
     engines: {node: '>= 8.0.0'}
     hasBin: true
 
-  '@siafoundation/sia-storage-darwin-arm64@0.1.0':
-    resolution: {integrity: sha512-vs7NSuOMeFEhz1K3sxdqnbfwWWHV0mj+ET9r4uGPkPEYj3ONZcYbMlcuJCgWBYm0HbfuAQdUqADUDD1CguFAdw==}
+  '@siafoundation/sia-storage-darwin-arm64@0.1.3':
+    resolution: {integrity: sha512-506DFuomWCXAhkyXaRPaAcwJAjsihden0UxGjGd84Y2yyeuZAlf+GLrYSK1VMKzL0W3DFoNOikV1SFNOTNkz3w==}
     cpu: [arm64]
     os: [darwin]
 
-  '@siafoundation/sia-storage-darwin-x64@0.1.0':
-    resolution: {integrity: sha512-qFx2uS2IUjhs6D6qzSLVPcwtYmkiAfSkKu4aaSMuKh7hkPsAdXX0JSXZn6lnSNAhd0K9L79Vxd1lOrcD21gnZw==}
+  '@siafoundation/sia-storage-darwin-x64@0.1.3':
+    resolution: {integrity: sha512-ETO3rcRd3b0hYFFcUpPzuI9uPB5cCVvchWww//eJX+L4nKKBzpeCEvuz4twXGR9/Cg/UaHB9vTuHfyHl+0Bp+Q==}
     cpu: [x64]
     os: [darwin]
 
-  '@siafoundation/sia-storage-linux-arm64-gnu@0.1.0':
-    resolution: {integrity: sha512-MUM3sBSC0Fj+FcYZ1al4I+nbGej0ppFOWj+sjvWsbnq11aAanVITN0HBcMCrTC5Srroh9UaOgQeQITRCGjz8TA==}
+  '@siafoundation/sia-storage-linux-arm64-gnu@0.1.3':
+    resolution: {integrity: sha512-N5XW2J3G4byjmSpY82YzZjhzy8FKHJhyKr+TRczdZyQQWgGoQ2WxCcpChq3s1eZPk4TBuHjgbBCQwbOReurJSQ==}
     cpu: [arm64]
     os: [linux]
 
-  '@siafoundation/sia-storage-linux-x64-gnu@0.1.0':
-    resolution: {integrity: sha512-k/WIpCEsUs0teYN0BOGU2N9DRSNf3YxfRWibBcj2xR7a5k7JFsdqewtdVGMJRJbeoedxDxeyNs3QTWth4T2EyQ==}
+  '@siafoundation/sia-storage-linux-x64-gnu@0.1.3':
+    resolution: {integrity: sha512-pqEpSu+qdNu9Qu986EXGAxgqlJLwwX7xFs4V/0IKmvLzT/RzQMfjX9CCsz99v9i/TK7dq9ssIiPm3xsImFf2Aw==}
     cpu: [x64]
     os: [linux]
 
-  '@siafoundation/sia-storage-win32-x64-msvc@0.1.0':
-    resolution: {integrity: sha512-hu/Q8Budr8W4tE7ucNsj0DIW1d61R3DhsVZftaryNqckvcwzoiNcsqBtkEyyZwzO6tZjizXvGc4flLXxS3yM2Q==}
+  '@siafoundation/sia-storage-win32-x64-msvc@0.1.3':
+    resolution: {integrity: sha512-O1kuZqYnvePyqfxgbNvwAN6Vm9g4Pz2c3eJB7CjYS0695uM4n5E2cLJQ+yAjSGYSKNufVlJOGm2+GgLqIuqJJA==}
     cpu: [x64]
     os: [win32]
 
-  '@siafoundation/sia-storage@0.1.0':
-    resolution: {integrity: sha512-nSQ0WqHNc1Zmcb0timiHFDF5BH3JnqkpkyvGdw82dXPZFAQZCdHqWxJ0P743NxwpOF8/fQgRI157/8Uepd6F3w==}
+  '@siafoundation/sia-storage@0.1.3':
+    resolution: {integrity: sha512-wolxyzEOgTJAcc0fRDcgIU23nDjcHQ7YTEKA2BBNMIwArgkyMCbl4oY59sNn/RcGHDRzob0bw5Zy5WwEMH/jMw==}
+    hasBin: true
 
   '@simple-git/args-pathspec@1.0.3':
     resolution: {integrity: sha512-ngJMaHlsWDTfjyq9F3VIQ8b7NXbBLq5j9i5bJ6XLYtD6qlDXT7fdKY2KscWWUF8t18xx052Y/PUO1K1TRc9yKA==}
@@ -22546,28 +22547,28 @@ snapshots:
       fflate: 0.7.4
       string.prototype.codepointat: 0.2.1
 
-  '@siafoundation/sia-storage-darwin-arm64@0.1.0':
+  '@siafoundation/sia-storage-darwin-arm64@0.1.3':
     optional: true
 
-  '@siafoundation/sia-storage-darwin-x64@0.1.0':
+  '@siafoundation/sia-storage-darwin-x64@0.1.3':
     optional: true
 
-  '@siafoundation/sia-storage-linux-arm64-gnu@0.1.0':
+  '@siafoundation/sia-storage-linux-arm64-gnu@0.1.3':
     optional: true
 
-  '@siafoundation/sia-storage-linux-x64-gnu@0.1.0':
+  '@siafoundation/sia-storage-linux-x64-gnu@0.1.3':
     optional: true
 
-  '@siafoundation/sia-storage-win32-x64-msvc@0.1.0':
+  '@siafoundation/sia-storage-win32-x64-msvc@0.1.3':
     optional: true
 
-  '@siafoundation/sia-storage@0.1.0':
+  '@siafoundation/sia-storage@0.1.3':
     optionalDependencies:
-      '@siafoundation/sia-storage-darwin-arm64': 0.1.0
-      '@siafoundation/sia-storage-darwin-x64': 0.1.0
-      '@siafoundation/sia-storage-linux-arm64-gnu': 0.1.0
-      '@siafoundation/sia-storage-linux-x64-gnu': 0.1.0
-      '@siafoundation/sia-storage-win32-x64-msvc': 0.1.0
+      '@siafoundation/sia-storage-darwin-arm64': 0.1.3
+      '@siafoundation/sia-storage-darwin-x64': 0.1.3
+      '@siafoundation/sia-storage-linux-arm64-gnu': 0.1.3
+      '@siafoundation/sia-storage-linux-x64-gnu': 0.1.3
+      '@siafoundation/sia-storage-win32-x64-msvc': 0.1.3
 
   '@simple-git/args-pathspec@1.0.3': {}
 
