@@ -1,3 +1,4 @@
+import { SIA_PLAYBACK_BACKENDS } from '../playback-backend.ts';
 import { MediaError } from '@videojs/media';
 import { describe, expect, it, vi } from 'vitest';
 import { DEFAULT_ERROR_MESSAGES } from '../errors.ts';
@@ -83,7 +84,7 @@ function forcedHost(provider: SiaNativeStreamProvider): {
 } {
   const createWorker = refusingCreateWorker();
   const host = new SiaVideoSource({
-    backend: 'service-worker',
+    backend: SIA_PLAYBACK_BACKENDS.SERVICE_WORKER,
     createWorker: createWorker as unknown as () => Worker,
     logger: nullLogger,
     nativeStreamProvider: provider,

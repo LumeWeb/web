@@ -27,7 +27,10 @@ import {
   encryptToWorker,
   scrub,
 } from "./app-key-handshake.ts";
-import { type SiaPlaybackBackend } from "./playback-backend.ts";
+import {
+  SIA_PLAYBACK_BACKENDS,
+  type SiaPlaybackBackend,
+} from "./playback-backend.ts";
 import {
   type SiaNativeStreamProvider,
   SiaNativeStreamUnavailableError,
@@ -359,6 +362,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     return this.#backend;
   }
   set backend(value: SiaPlaybackBackend) {
+    if (value === this.#backend) return;
+    if (value === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER && this.#worker) {
+      this.#mediaWorkerBackend.terminate();
+      this.#worker = null;
+    }
     this.#backend = value;
   }
   get nativeStreamProvider(): SiaNativeStreamProvider | undefined {
@@ -368,6 +376,13 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#nativeStreamProvider = value;
     this.#serviceWorkerBackend?.destroy();
     this.#serviceWorkerBackend = value ? new ServiceWorkerBackend(value) : null;
+    if (
+      this.#backend === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER &&
+      this.#src &&
+      this.target
+    ) {
+      this.#startServiceWorkerSource(this.#src);
+    }
   }
   get engine(): null | Worker {
     return this.#worker;
@@ -457,7 +472,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       this.#machine.send({ type: hostPlaybackEvent.sourceReset });
     }
 
-    if (this.#backend === "service-worker")
+    if (this.#backend === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER)
       this.#serviceWorkerBackend?.detach();
 
     // A DISTINCT source replaces the element's live resource: detach the old
@@ -476,7 +491,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
     if (!value) return;
 
-    if (this.#backend === "service-worker") {
+    if (this.#backend === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER) {
       this.#startServiceWorkerSource(value);
       return;
     }
@@ -713,7 +728,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#logger = options.logger ?? createConsoleLogger();
     this.#mimeType = options.mimeType;
     this.#workerMse = options.workerMse;
-    this.#backend = options.backend ?? "auto";
+    this.#backend = options.backend ?? SIA_PLAYBACK_BACKENDS.AUTO;
     this.#nativeStreamProvider = options.nativeStreamProvider;
     this.#serviceWorkerBackend = this.#nativeStreamProvider
       ? new ServiceWorkerBackend(this.#nativeStreamProvider)
@@ -773,7 +788,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     target.addEventListener("play", this.#onPlay);
     target.addEventListener("pause", this.#onPause);
 
-    if (this.#backend === "service-worker") {
+    if (this.#backend === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER) {
       if (this.#src) this.#startServiceWorkerSource(this.#src);
       return;
     }
@@ -908,7 +923,8 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   }
   /** Reloads the current source through the engine, clearing any stored error. */
   override load(): void {
-    if (this.#backend === "service-worker" && this.#src) {
+    if (this.#backend === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER && this.#src) {
+      this.#resetLoadState();
       this.#startServiceWorkerSource(this.#src);
       return;
     }
@@ -946,7 +962,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
    */
   reloadConfiguration(): void {
     if (this.#destroyed || !this.target) return;
-    if (this.#backend === "service-worker") {
+    if (this.#backend === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER) {
       this.#attachGeneration += 1;
       this.#mediaWorkerBackend.resetQueue();
       this.#attachRequestId = null;

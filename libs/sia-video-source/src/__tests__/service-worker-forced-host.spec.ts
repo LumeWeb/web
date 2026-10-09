@@ -1,3 +1,4 @@
+import { SIA_PLAYBACK_BACKENDS } from "../playback-backend.ts";
 import { MediaError } from "@videojs/media";
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -71,7 +72,7 @@ function forcedHost(options: {
 } {
   const createWorker = refusingCreateWorker();
   const host = new SiaVideoSource({
-    backend: "service-worker",
+    backend: SIA_PLAYBACK_BACKENDS.SERVICE_WORKER,
     createWorker: createWorker as unknown as () => Worker,
     logger: nullLogger,
     nativeStreamProvider: options.nativeStreamProvider,
@@ -102,7 +103,7 @@ describe("forced service-worker playback", () => {
       },
     };
     const host = new SiaVideoSource({
-      backend: "auto",
+      backend: SIA_PLAYBACK_BACKENDS.AUTO,
       createWorker: () => worker as unknown as Worker,
       logger: nullLogger,
     });
@@ -110,7 +111,7 @@ describe("forced service-worker playback", () => {
     host.attach(target as unknown as HTMLVideoElement);
     expect(sent).toHaveLength(1);
 
-    host.backend = "service-worker";
+    host.backend = SIA_PLAYBACK_BACKENDS.SERVICE_WORKER;
     host.reloadConfiguration();
 
     expect(terminated).toBe(1);

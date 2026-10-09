@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  SIA_PLAYBACK_BACKENDS,
+  type SiaPlaybackBackend,
+} from '../playback-backend.ts';
+import {
   type SiaNativeStream,
   type SiaNativeStreamProvider,
   SiaNativeStreamUnavailableError,
@@ -59,6 +63,18 @@ function makeTarget(): ServiceWorkerStreamTarget {
 }
 
 const tick = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+describe('Sia playback backend policies', () => {
+  it('keeps the public backend policy values stable', () => {
+    const policies: SiaPlaybackBackend[] = [
+      SIA_PLAYBACK_BACKENDS.AUTO,
+      SIA_PLAYBACK_BACKENDS.MEDIA_WORKER,
+      SIA_PLAYBACK_BACKENDS.SERVICE_WORKER,
+    ];
+
+    expect(policies).toEqual(['auto', 'media-worker', 'service-worker']);
+  });
+});
 
 describe('ServiceWorkerBackend', () => {
   it('rejects the load without calling open when the provider is unavailable', async () => {
