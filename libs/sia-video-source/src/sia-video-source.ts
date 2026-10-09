@@ -380,6 +380,21 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       this.#teardownMainThreadMse();
     }
     this.#backend = value;
+    this.#activeBackend = null;
+    this.#autoSelectionGeneration += 1;
+    if (this.target && this.#src) {
+      this.#resetLoadState();
+      if (value === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER) {
+        this.#activeBackend = value;
+        this.#startServiceWorkerSource(this.#src);
+      } else if (value === SIA_PLAYBACK_BACKENDS.AUTO) {
+        this.#selectAutoBackend();
+      } else {
+        this.#activeBackend = SIA_PLAYBACK_BACKENDS.MEDIA_WORKER;
+        this.#startWorkerBackend();
+        if (this.#worker) this.#sendSource();
+      }
+    }
   }
   get nativeStreamProvider(): SiaNativeStreamProvider | undefined {
     return this.#nativeStreamProvider;
@@ -393,13 +408,15 @@ export class SiaVideoSource extends HTMLVideoElementHost {
           onSourceAttached: () => this.#applyPendingServiceWorkerResume(),
         })
       : null;
-    if (
-      this.#backend === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER &&
-      this.#src &&
-      this.target
-    ) {
+    if (this.#src && this.target) {
       this.#resetLoadState();
-      this.#startServiceWorkerSource(this.#src);
+      if (this.#backend === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER) {
+        this.#activeBackend = SIA_PLAYBACK_BACKENDS.SERVICE_WORKER;
+        this.#startServiceWorkerSource(this.#src);
+      } else if (this.#backend === SIA_PLAYBACK_BACKENDS.AUTO) {
+        this.#activeBackend = null;
+        this.#selectAutoBackend();
+      }
     }
   }
   get engine(): null | Worker {
@@ -511,9 +528,15 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     if (!value) return;
 
     if (this.#backend === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER) {
+      this.#activeBackend = SIA_PLAYBACK_BACKENDS.SERVICE_WORKER;
       this.#startServiceWorkerSource(value);
       return;
     }
+    if (this.#backend === SIA_PLAYBACK_BACKENDS.AUTO) {
+      this.#selectAutoBackend();
+      return;
+    }
+    this.#activeBackend = SIA_PLAYBACK_BACKENDS.MEDIA_WORKER;
     if (this.#worker) {
       this.#sendSource();
       return;
@@ -634,6 +657,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
   readonly #mediaWorkerBackend: MediaWorkerBackend;
   #backend: SiaPlaybackBackend;
+  #activeBackend: Exclude<SiaPlaybackBackend, "auto"> | null = null;
+  #autoSelectionGeneration = 0;
+  #autoFallbackUsed = false;
   #serviceWorkerBackend: null | ServiceWorkerBackend;
 
   // Forced reloads capture this before detaching the native resource. The
@@ -814,9 +840,15 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     target.addEventListener("pause", this.#onPause);
 
     if (this.#backend === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER) {
+      this.#activeBackend = SIA_PLAYBACK_BACKENDS.SERVICE_WORKER;
       if (this.#src) this.#startServiceWorkerSource(this.#src);
       return;
     }
+    if (this.#backend === SIA_PLAYBACK_BACKENDS.AUTO) {
+      this.#selectAutoBackend();
+      return;
+    }
+    this.#activeBackend = SIA_PLAYBACK_BACKENDS.MEDIA_WORKER;
     if (this.#worker) {
       // An already-attached host re-negotiates with a fresh HELLO (the same
       // path `reloadConfiguration` uses), so a re-attach also re-reads the
@@ -950,7 +982,13 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   override load(): void {
     if (this.#backend === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER && this.#src) {
       this.#resetLoadState();
+      this.#activeBackend = SIA_PLAYBACK_BACKENDS.SERVICE_WORKER;
       this.#startServiceWorkerSource(this.#src);
+      return;
+    }
+    if (this.#backend === SIA_PLAYBACK_BACKENDS.AUTO) {
+      this.#resetLoadState();
+      this.#selectAutoBackend();
       return;
     }
     if (this.#src && this.#worker) {
@@ -1007,6 +1045,75 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     });
   }
 
+  #selectAutoBackend(): void {
+    if (!this.target || this.#backend !== SIA_PLAYBACK_BACKENDS.AUTO) return;
+    if (!this.#nativeStreamProvider) {
+      this.#activeBackend = SIA_PLAYBACK_BACKENDS.MEDIA_WORKER;
+      this.#startWorkerBackend();
+      return;
+    }
+    const generation = ++this.#autoSelectionGeneration;
+    void this.#nativeStreamProvider.available().then(
+      (available) => {
+        if (
+          generation !== this.#autoSelectionGeneration ||
+          this.#backend !== SIA_PLAYBACK_BACKENDS.AUTO ||
+          !this.target
+        )
+          return;
+        this.#activeBackend = available
+          ? SIA_PLAYBACK_BACKENDS.SERVICE_WORKER
+          : SIA_PLAYBACK_BACKENDS.MEDIA_WORKER;
+        if (available && this.#src) this.#startServiceWorkerSource(this.#src);
+        else {
+          this.#startWorkerBackend();
+          if (this.#worker) this.#sendSource();
+        }
+      },
+      () => {
+        if (
+          generation !== this.#autoSelectionGeneration ||
+          this.#backend !== SIA_PLAYBACK_BACKENDS.AUTO
+        )
+          return;
+        this.#activeBackend = SIA_PLAYBACK_BACKENDS.MEDIA_WORKER;
+        this.#startWorkerBackend();
+        if (this.#worker) this.#sendSource();
+      },
+    );
+  }
+
+  #startWorkerBackend(): void {
+    if (this.#worker || !this.target) return;
+    try {
+      this.#worker = this.#mediaWorkerBackend.spawn();
+    } catch (error) {
+      this.#worker = null;
+      this.#logger.child("host").error("worker.spawn-failed", {
+        message: errorDescription(error),
+      });
+      this.#reportError(workerErrorCode.network, errorDescription(error));
+      return;
+    }
+    this.#startHandshake();
+  }
+
+  #fallbackAutoToWorker(): void {
+    if (this.#backend !== SIA_PLAYBACK_BACKENDS.AUTO || this.#autoFallbackUsed)
+      return;
+    this.#autoFallbackUsed = true;
+    const target = this.target;
+    const shouldPlay = Boolean(target && !target.paused);
+    this.#serviceWorkerBackend?.detach();
+    this.#activeBackend = SIA_PLAYBACK_BACKENDS.MEDIA_WORKER;
+    this.#pendingResumePlay = shouldPlay;
+    this.#resetLoadState();
+    this.#pendingResumePlay = shouldPlay;
+    this.#startWorkerBackend();
+    if (this.#worker && this.#src) this.#sendSource();
+    if (shouldPlay) this.#machine.send({ type: hostPlaybackEvent.play });
+  }
+
   #startServiceWorkerSource(src: string): void {
     const backend = this.#serviceWorkerBackend;
     if (!backend) {
@@ -1021,10 +1128,18 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       .catch((error: unknown) => {
         if (error instanceof ServiceWorkerLoadAbortedError) return;
         if (error instanceof SiaNativeStreamUnavailableError) {
+          if (this.#backend === SIA_PLAYBACK_BACKENDS.AUTO) {
+            this.#fallbackAutoToWorker();
+            return;
+          }
           this.#reportError("unsupported");
           return;
         }
         if (error instanceof ServiceWorkerLoadError) {
+          if (this.#backend === SIA_PLAYBACK_BACKENDS.AUTO) {
+            this.#fallbackAutoToWorker();
+            return;
+          }
           const kind =
             error.message === "native stream acquisition failed"
               ? "network"
@@ -1997,6 +2112,13 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // through #reportError.
     event.stopImmediatePropagation();
     if (this.#destroyed || !this.#src) return;
+    if (
+      this.#backend === SIA_PLAYBACK_BACKENDS.AUTO &&
+      this.#activeBackend === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER
+    ) {
+      this.#fallbackAutoToWorker();
+      return;
+    }
     // A native element failure (the `MEDIA_ERR_SRC_NOT_SUPPORTED` /
     // `PIPELINE_ERROR_COULD_NOT_RENDER` trail) from a dead or replaced
     // resource. The machine classifies it: while a recovery is in flight or a
