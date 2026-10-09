@@ -1,4 +1,4 @@
-# 0007 — accept a full Sia share URL as the media `src`
+# 0007: accept a full Sia share URL as the media `src`
 
 ## Status
 
@@ -21,13 +21,13 @@ SDK and indexd. A share URL is a pre-signed URL of the form
 
 together with its `sia://` alias (the same URL with the `https://` prefix
 rewritten, which is what the WASM SDK emits and accepts). The path segment
-carries the object's identity — the 64-hex-character encoding of the
-32-byte hash256 of the object — and the fragment carries the object's
+carries the object's identity: the 64-hex-character encoding of the
+32-byte hash256 of the object: and the fragment carries the object's
 32-byte decryption key, base64url-encoded. The signature lives in the
 query string, so the fragment needs no signing: the URL alone is enough
 to locate and decrypt the object.
 
-When a caller already holds a share link, requiring them to additionally
+When a caller already holds a share link, requiring them to also
 decompose it into an object key and an encryption key just to feed the
 library's options is redundant plumbing. Conversely, callers that directly
 know the object (and hold the key out-of-band) should not need to
@@ -51,8 +51,8 @@ dedicated module (`src/share-url.ts`):
   URL parser).
 - **Parsing validates before use.** The parser requires the URL to be
   http(s), the path to match `/objects/<key>/shared`, the object key to be
-  exactly 64 hex characters, and the `encryption_key` fragment — parsed as
-  a query — to be present and to decode (base64url, padded or unpadded)
+  exactly 64 hex characters, and the `encryption_key` fragment: parsed as
+  a query: to be present and to decode (base64url, padded or unpadded)
   to exactly 32 bytes. Malformed URLs fail early with descriptive errors,
   before any worker traffic is attempted.
 - **Routing prefers the share URL.** When `src` is a share URL, the
@@ -86,7 +86,7 @@ dedicated module (`src/share-url.ts`):
   its own test surface.
 - A share URL embeds the decryption key: anyone holding the URL can read
   the object until it expires. Callers must treat the URL as sensitive
-  material — kept out of configuration files and React state — mirroring
+  material: kept out of configuration files and React state: mirroring
   the key-handling discipline of ADR
   [0006](0006-app-key-handshake-to-worker.md).
 - Payment and account access are still required, so a share URL alone is
@@ -95,7 +95,7 @@ dedicated module (`src/share-url.ts`):
 
 ## Related ADRs
 
-- Where the engine runs and why the worker consumes these inputs →
+- Where the engine runs and why the worker consumes these inputs:
   [0002](0002-worker-owner-streaming-engine.md)
-- The account/app-key handshake a share URL does not replace →
+- The account/app-key handshake a share URL does not replace:
   [0006](0006-app-key-handshake-to-worker.md)

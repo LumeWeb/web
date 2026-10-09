@@ -1,13 +1,17 @@
-# 0006 — hand the Sia app-key seed to the worker via an X25519 encapsulation handshake
+# 0006: hand the Sia app-key seed to the worker via an X25519 encapsulation handshake
 
 ## Status
 
 Accepted (2026-09-08; implemented in `libs/sia-video-source`)
 
+Scope note: this decision covers credentials for the package's media-worker
+SDK. ADR [0011](0011-backend-policy-and-native-stream-provider.md) records the
+native-provider boundary; native playback does not use this worker handshake.
+
 ## Context
 
 ADR [0002](0002-worker-owner-streaming-engine.md) places the entire Sia
-engine — including the `@siafoundation/sia-storage` WASM SDK — in a
+engine: including the `@siafoundation/sia-storage` WASM SDK: in a
 dedicated Web Worker. That SDK is keyed by a **Sia app-key seed**: a 32-byte
 value that represents the user's master credential for Sia storage (exports
 of an `AppKey` obtained from `@siafoundation/sia-storage` yield exactly these
@@ -29,12 +33,12 @@ Two hard constraints shape how it crosses:
    streaming path down with it.
 
 An honest threat model dictates what this handshake can and cannot promise.
-A Web Worker is a *threading* boundary, not an absolute security boundary:
+A Web Worker is a _threading_ boundary, not an absolute security boundary:
 same-origin JavaScript can post arbitrary messages to the worker and invoke
 its capabilities at any time. The design goal is therefore narrower and
-statically checkable — **minimize the raw-key-material exposure and lifetime
+statically checkable: **minimize the raw-key-material exposure and lifetime
 on the main thread, and make extraction out of the main thread's runtime
-surface impossible by construction** — rather than claiming absolute
+surface impossible by construction**: rather than claiming absolute
 containment against arbitrary same-origin code.
 
 ## Decision
@@ -44,7 +48,7 @@ envelope**, freshly encapsulated by the host for every handshake:
 
 - **The worker owns its key material.** On the first `HELLO` it generates a
   static X25519 key pair from the platform CSPRNG (`crypto.getRandomValues`,
-  which — unlike `crypto.subtle` — has no Secure Context requirement),
+  which: unlike `crypto.subtle`: has no Secure Context requirement),
   memoizes it for the worker's lifetime, and publishes **only the raw
   32-byte public key** inside `HELLO_OK` (ADR
   [0005](0005-custom-zero-copy-proto-over-comlink.md)'s wire protocol).
@@ -53,11 +57,11 @@ envelope**, freshly encapsulated by the host for every handshake:
   platform `extractable` flag.
 - **The host encapsulates, the application never sees ciphertext math.** The
   host's `SiaVideoSource` takes an application-supplied callback
-  (`getAppKeySeed`) that closes over the *logged-in SDK reference*, not the
+  (`getAppKeySeed`) that closes over the _logged-in SDK reference_, not the
   key: at handshake time the callback asks that SDK to export its `AppKey`
   internally and hands over the 32-byte bytes for exactly one call. The
-  plaintext exists only inside `#encryptAndSendSeed` — never on a field,
-  never in React state, never in a message sent anywhere unencrypted — and
+  plaintext exists only inside `#encryptAndSendSeed`: never on a field,
+  never in React state, never in a message sent anywhere unencrypted: and
   is scrubbed (zeroed) in a `finally` after the envelope is built.
 - **The encapsulation itself** (`src/app-key-handshake.ts`): a fresh
   ephemeral X25519 key pair per envelope, ECDH against the worker's public
@@ -66,13 +70,13 @@ envelope**, freshly encapsulated by the host for every handshake:
   context string as **additional authenticated data**. The resulting
   `AppKeyEnvelope` (`ephemeralPublicKey`, `iv`, `ciphertext`) travels as the
   `APP_KEY` wire message. Binding the AEAD to the protocol context means an
-  envelope from a foreign context — or replayed outside this handshake —
+  envelope from a foreign context (or replayed outside this handshake)
   fails integrity; a fresh IV/ephemeral key per envelope makes identical
   seeds produce unlinkable wire bytes.
 - **The worker decrypts internally and nothing reverses.** On `APP_KEY` the
   worker encapsulates down with its static private key, compares with the
   currently-held seed, and either keeps the SDK alive (same seed) or
-  invalidates the connection (new seed) — the previous plaintext copy is
+  invalidates the connection (new seed): the previous plaintext copy is
   scrubbed on replacement and at destroy. No protocol message, host field,
   or public export carries the seed or the worker's private key back out,
   and `WorkerConfig` structurally has no seed field at all (compile-time
@@ -81,14 +85,14 @@ envelope**, freshly encapsulated by the host for every handshake:
   (ADR [0001](0001-custom-media-contracts.md)) and React layer see only the
   opaque envelope flow across the existing typed wire protocol
   (ADR [0005](0005-custom-zero-copy-proto-over-comlink.md)).
-- **All primitives are the pure-JS `noble` family** — `@noble/curves` for
+- **All primitives are the pure-JS `noble` family**: `@noble/curves` for
   X25519, `@noble/hashes` for HKDF/SHA-256 and secure randomness,
   `@noble/ciphers` for AES-GCM. This is what removes the HTTPS/Secure-Context
-  dependency outright: the handshake works in plain-http realms, workers, and
+  dependency outright: the handshake works in plain-http environments, workers, and
   test environments alike, with small, pure-JS, easily inspectable
   implementations instead of platform calls. Ed25519 is deliberately absent
-  from the scheme: Ed25519 is a *signature* algorithm and cannot perform
-  encryption or ECDH — X25519, the Diffie-Hellman sibling of the same curve
+  from the scheme: Ed25519 is a _signature_ algorithm and cannot perform
+  encryption or ECDH: X25519, the Diffie-Hellman sibling of the same curve
   family, is the correct primitive for the shared-secret step.
 
 ## Consequences
@@ -99,7 +103,7 @@ envelope**, freshly encapsulated by the host for every handshake:
   React code, and never lands in browser storage. The host's retained state
   and every logged message contain, at most, ciphertext.
 - After the handoff the seed lives only inside the worker isolate, reduced to
-  one current copy that is scrubbed on replacement and on destroy — the
+  one current copy that is scrubbed on replacement and on destroy: the
   key-material lifetime on the main thread is bounded to the single
   export-and-encrypt call window.
 - No HTTPS dependency: `crypto.subtle` is never touched, so the handshake is
@@ -113,7 +117,7 @@ envelope**, freshly encapsulated by the host for every handshake:
 
 - The transient main-thread exposure is unavoidable: for the moment between
   the SDK's internal export and the finished envelope, the plaintext exists
-  in JS memory on the main thread (JS makes perfect zeroing impossible —
+  in JS memory on the main thread (JS makes perfect zeroing impossible:
   runtimes may hold copies the code cannot reach). A same-origin attacker
   active at exactly that window could still observe the seed; this design
   shrinks the window and the reachable surface, it does not close it.
@@ -144,7 +148,7 @@ envelope**, freshly encapsulated by the host for every handshake:
 
 **Follow-on ADRs**
 
-- The worker boundary this handshake rides on →
+- The worker boundary this handshake rides on:
   [0005](0005-custom-zero-copy-proto-over-comlink.md)
-- Why the seed consumer itself lives in a worker →
+- Why the seed consumer itself lives in a worker:
   [0002](0002-worker-owner-streaming-engine.md)
