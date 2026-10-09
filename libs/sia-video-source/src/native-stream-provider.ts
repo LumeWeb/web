@@ -38,6 +38,16 @@ export interface SiaNativeStreamProviderDependencies {
   resolveSource: (src: string, signal?: AbortSignal) => Promise<unknown>;
 }
 
+/** App stream service that native playback is built from: availability, source resolution, and stream sessions. */
+export interface SiaNativeStreamService<TSource = unknown> {
+  isAvailable(signal?: AbortSignal): Promise<boolean>;
+  resolve(src: string, signal?: AbortSignal): Promise<TSource>;
+  session(
+    source: TSource,
+    signal?: AbortSignal,
+  ): Promise<SiaNativeStreamSession> | SiaNativeStreamSession;
+}
+
 export interface SiaNativeStreamSession {
   url(
     source: unknown,
@@ -76,7 +86,36 @@ export class SiaNativeStreamUnavailableError extends Error {
 const DEFAULT_STREAM_NAME = "video";
 const SHARE_KEY_FRAGMENT = /#encryption_key=[^\s"'<>)]*/gi;
 
+/**
+ * Builds a native stream provider. Accepts either an app stream service
+ * (`isAvailable`, `resolve`, `session`) or the three dependency callbacks
+ * (`capability`, `resolveSource`, `createStreamSession`).
+ */
+export function createSiaNativeStreamProvider<TSource = unknown>(
+  service: SiaNativeStreamService<TSource>,
+): SiaNativeStreamProvider;
 export function createSiaNativeStreamProvider(
+  deps: SiaNativeStreamProviderDependencies,
+): SiaNativeStreamProvider;
+export function createSiaNativeStreamProvider(
+  input: SiaNativeStreamProviderDependencies | SiaNativeStreamService<unknown>,
+): SiaNativeStreamProvider {
+  const deps = isNativeStreamService(input)
+    ? {
+        capability: (signal?: AbortSignal) => input.isAvailable(signal),
+        // The factory types the resolved source as unknown at this seam; the
+        // only values that reach session are the ones resolve just produced.
+        createStreamSession: (source: unknown, signal?: AbortSignal) =>
+          input.session(source, signal),
+        resolveSource: (src: string, signal?: AbortSignal) =>
+          input.resolve(src, signal),
+      }
+    : input;
+  return buildNativeStreamProvider(deps);
+}
+
+/** Runs one open() through the normalized dependency callbacks. */
+function buildNativeStreamProvider(
   deps: SiaNativeStreamProviderDependencies,
 ): SiaNativeStreamProvider {
   const provider = {
@@ -122,6 +161,35 @@ export function createSiaNativeStreamProvider(
 function errorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   return String(error);
+}
+
+/**
+ * True when `value` is an app stream service. A dependency object wins when
+ * it has the three callback keys, even if an integration adds service-shaped
+ * methods as extra properties.
+ */
+function isNativeStreamService(
+  value: unknown,
+): value is SiaNativeStreamService<unknown> {
+  if (typeof value !== "object" || value === null) return false;
+  const candidate = value as {
+    capability?: unknown;
+    createStreamSession?: unknown;
+    isAvailable?: unknown;
+    resolve?: unknown;
+    resolveSource?: unknown;
+    session?: unknown;
+  };
+  const isDependencies =
+    typeof candidate.capability === "function" &&
+    typeof candidate.createStreamSession === "function" &&
+    typeof candidate.resolveSource === "function";
+  return (
+    !isDependencies &&
+    typeof candidate.isAvailable === "function" &&
+    typeof candidate.resolve === "function" &&
+    typeof candidate.session === "function"
+  );
 }
 
 /** Redacts a share URL and its encryption-key fragment from resolver errors. */
