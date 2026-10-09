@@ -36,6 +36,10 @@ import {
   SiaNativeStreamUnavailableError,
 } from "./native-stream-provider.ts";
 import {
+  reportTransportTelemetry,
+  type SiaTransportTelemetryCallback,
+} from "./transport-telemetry.ts";
+import {
   ServiceWorkerBackend,
   ServiceWorkerLoadAbortedError,
   ServiceWorkerLoadError,
@@ -174,7 +178,9 @@ export const siaSourceInfoChange = "sia-source-info-change" as const;
  * `info`, so the host clears the value when the window closes.
  */
 export type SiaSourceInfoChangeDetail =
-  { active: false } | { active: true; info: SourceInfo };
+  | { active: false }
+  | { active: true; info: SourceInfo; kind: "worker" }
+  | { active: true; kind: "native" };
 
 /**
  * The typed DOM event `SiaVideoSource` dispatches for every worker milestone
@@ -270,6 +276,7 @@ export interface SiaVideoSourceOptions {
    */
   createWorker?: () => Worker;
   nativeStreamProvider?: SiaNativeStreamProvider;
+  onTransportTelemetry?: SiaTransportTelemetryCallback;
   /**
    * Supplies the 32-byte Sia app-key seed for the worker handshake. The host
    * reads it only once per (re)attach, immediately after the worker's HELLO_OK
@@ -369,7 +376,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       this.#serviceWorkerBackend?.destroy();
       this.#serviceWorkerBackend = this.#nativeStreamProvider
         ? new ServiceWorkerBackend(this.#nativeStreamProvider, {
-            onSourceAttached: () => this.#applyPendingServiceWorkerResume(),
+            onSourceAttached: () => {
+              this.#openNativeSourceInfo();
+              this.#applyPendingServiceWorkerResume();
+            },
           })
         : null;
     } else if (this.#activeBackend === SIA_PLAYBACK_BACKENDS.MEDIA_WORKER) {
@@ -401,7 +411,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#pendingServiceWorkerResume = false;
     this.#serviceWorkerBackend = value
       ? new ServiceWorkerBackend(value, {
-          onSourceAttached: () => this.#applyPendingServiceWorkerResume(),
+          onSourceAttached: () => {
+            this.#openNativeSourceInfo();
+            this.#applyPendingServiceWorkerResume();
+          },
         })
       : null;
     if (this.#src && this.target) {
@@ -413,6 +426,12 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         this.#selectAutoBackend();
       }
     }
+  }
+  get onTransportTelemetry(): SiaTransportTelemetryCallback | undefined {
+    return this.#onTransportTelemetry;
+  }
+  set onTransportTelemetry(value: SiaTransportTelemetryCallback | undefined) {
+    this.#onTransportTelemetry = value;
   }
   get engine(): null | Worker {
     return this.#worker;
@@ -661,6 +680,8 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // replacement load consumes it only after the provider attaches its URL.
   #pendingServiceWorkerResume = false;
   #nativeStreamProvider: SiaNativeStreamProvider | undefined;
+  #onTransportTelemetry: SiaTransportTelemetryCallback | undefined;
+  #transportBytesDownloaded = 0;
 
   // Monotonic counter for the typed `sia-worker-milestone-change` event: bumps
   // once per accepted worker LOG, never reset (consumers order milestones by
@@ -774,16 +795,34 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#workerMse = options.workerMse;
     this.#backend = options.backend ?? SIA_PLAYBACK_BACKENDS.AUTO;
     this.#nativeStreamProvider = options.nativeStreamProvider;
+    this.#onTransportTelemetry = options.onTransportTelemetry;
     this.#serviceWorkerBackend = this.#nativeStreamProvider
       ? new ServiceWorkerBackend(this.#nativeStreamProvider, {
-          onSourceAttached: () => this.#applyPendingServiceWorkerResume(),
+          onSourceAttached: () => {
+            this.#openNativeSourceInfo();
+            this.#applyPendingServiceWorkerResume();
+          },
         })
       : null;
     this.#mediaWorkerBackend = new MediaWorkerBackend({
       createWorker: this.#options.createWorker ?? defaultCreateWorker,
       logger: this.#logger.child("host"),
-      onChunkAppend: (bytes) => this.#mediaWorkerBackend.appendChunk(bytes),
-      onChunkProgress: () => this.dispatchEvent(new Event("progress")),
+      onChunkAppend: (bytes) => {
+        this.#transportBytesDownloaded += bytes.byteLength;
+        reportTransportTelemetry(this.#onTransportTelemetry, {
+          bytesDownloaded: this.#transportBytesDownloaded,
+          status: "downloading",
+        });
+        this.#mediaWorkerBackend.appendChunk(bytes);
+      },
+      onChunkProgress: (bytes) => {
+        this.#transportBytesDownloaded += bytes ?? 0;
+        reportTransportTelemetry(this.#onTransportTelemetry, {
+          bytesDownloaded: this.#transportBytesDownloaded,
+          status: "downloading",
+        });
+        this.dispatchEvent(new Event("progress"));
+      },
       onDecodeFailure: (error) =>
         this.#reportError(workerErrorCode.decode, errorDescription(error)),
       onError: this.#onWorkerError,
@@ -1092,6 +1131,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
   #startWorkerBackend(): void {
     if (this.#worker || !this.target) return;
+    this.#transportBytesDownloaded = 0;
+    reportTransportTelemetry(this.#onTransportTelemetry, {
+      bytesDownloaded: 0,
+      status: "connecting",
+    });
     try {
       this.#worker = this.#mediaWorkerBackend.spawn();
     } catch (error) {
@@ -1144,8 +1188,25 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     const target = this.target as HTMLVideoElement | null;
     if (!target) return;
     backend.attach(target);
+    this.#transportBytesDownloaded = 0;
+    reportTransportTelemetry(this.#onTransportTelemetry, {
+      bytesDownloaded: 0,
+      status: "connecting",
+    });
     void backend
-      .load(src, { mimeType: this.#mimeType })
+      .load(src, {
+        mimeType: this.#mimeType,
+        onTelemetry: (telemetry) => {
+          this.#transportBytesDownloaded = Math.max(
+            this.#transportBytesDownloaded,
+            telemetry.bytesDownloaded,
+          );
+          reportTransportTelemetry(this.#onTransportTelemetry, {
+            bytesDownloaded: this.#transportBytesDownloaded,
+            status: telemetry.status,
+          });
+        },
+      })
       .catch((error: unknown) => {
         if (error instanceof ServiceWorkerLoadAbortedError) return;
         if (error instanceof SiaNativeStreamUnavailableError) {
@@ -2391,7 +2452,13 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   #openSourceInfo(info: SourceInfo): void {
     if (this.#sourceInfoNotified) return;
     this.#sourceInfoNotified = true;
-    this.#emitSourceInfoDetail({ active: true, info });
+    this.#emitSourceInfoDetail({ active: true, info, kind: "worker" });
+  }
+
+  #openNativeSourceInfo(): void {
+    if (this.#sourceInfoNotified) return;
+    this.#sourceInfoNotified = true;
+    this.#emitSourceInfoDetail({ active: true, kind: "native" });
   }
 
   #post(message: MainToWorkerMessage): void {

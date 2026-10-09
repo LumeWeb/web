@@ -6,17 +6,17 @@
  * browser test mode); in node mode it is skipped so `SIA_TEST_ENV=node` stays
  * DOM-free.
  */
-import { describe, expect, it } from 'vitest';
-import type { Media } from '@videojs/media';
-import { type SourceInfo, workerMode } from '../protocol.ts';
+import { describe, expect, it } from "vitest";
+import type { Media } from "@videojs/media";
+import { type SourceInfo, workerMode } from "../protocol.ts";
 import {
   emitSourceInfo,
   mountSourceInfoReactHarness,
   waitFor,
-} from './fixtures/source-info-react-harness.tsx';
-import { FakeSiaMedia } from './fixtures/fake-sia-media.ts';
+} from "./fixtures/source-info-react-harness.tsx";
+import { FakeSiaMedia } from "./fixtures/fake-sia-media.ts";
 
-const IN_BROWSER = typeof document !== 'undefined';
+const IN_BROWSER = typeof document !== "undefined";
 
 /** The inert source-info state a Player without an open window reports. */
 const INERT = {
@@ -25,16 +25,16 @@ const INERT = {
 
 /** A representative worker-vouched SourceInfo the hook must surface. */
 const SOURCE_INFO: SourceInfo = {
-  container: 'fmp4',
+  container: "fmp4",
   durationSeconds: 3919.08,
   mime: 'video/mp4; codecs="avc1.64001f, mp4a.40.2"',
   mode: workerMode.main,
-  tracks: [{ codec: 'avc1.64001f', kind: 'video' }],
+  tracks: [{ codec: "avc1.64001f", kind: "video" }],
 };
 
-describe('useSiaSourceInfo within a @videojs/react Player', () => {
+describe("useSiaSourceInfo within a @videojs/react Player", () => {
   it.skipIf(!IN_BROWSER)(
-    'reads the exact same source-info state the shared selector publishes',
+    "reads the exact same source-info state the shared selector publishes",
     async () => {
       const media = new FakeSiaMedia();
       const harness = await mountSourceInfoReactHarness();
@@ -49,17 +49,21 @@ describe('useSiaSourceInfo within a @videojs/react Player', () => {
 
         // An active detail drives the same state a non-React store consumer
         // sees, carrying the exact SourceInfo under the nested window.
-        emitSourceInfo(media, { active: true, info: SOURCE_INFO });
+        emitSourceInfo(media, {
+          active: true,
+          info: SOURCE_INFO,
+          kind: "worker",
+        });
         await waitFor(() => {
           expect(harness.snapshots.at(-1)).toEqual({
-            sourceInfo: { active: true, info: SOURCE_INFO },
+            sourceInfo: { active: true, info: SOURCE_INFO, kind: "worker" },
           });
         });
         const win = harness.snapshots.at(-1)?.sourceInfo;
-        if (win?.active) {
+        if (win?.active && win.kind === "worker") {
           expect(win.info.durationSeconds).toBe(3919.08);
         } else {
-          expect.unreachable('the window must be open after an active detail');
+          expect.unreachable("the window must be open after an active detail");
         }
 
         // Closing the window clears the info field in the hook too.

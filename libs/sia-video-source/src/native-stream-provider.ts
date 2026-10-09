@@ -1,7 +1,8 @@
 /* oxlint-disable perfectionist/sort-objects, perfectionist/sort-interfaces, perfectionist/sort-object-types, perfectionist/sort-classes, perfectionist/sort-exports */
 /** App-owned adapter that returns service-worker stream URLs for Sia sources. */
 
-import { isSiaShareUrl } from './share-url.ts';
+import { isSiaShareUrl } from "./share-url.ts";
+import type { SiaTransportStatus } from "./transport-telemetry.ts";
 
 export interface SiaNativeStream {
   release(): void;
@@ -18,7 +19,13 @@ export interface SiaNativeStreamProvider {
   available(signal?: AbortSignal): Promise<boolean>;
   open(
     src: string,
-    options: { mimeType?: string; name?: string; signal: AbortSignal },
+    options: {
+      mimeType?: string;
+      name?: string;
+      signal: AbortSignal;
+      onStatus?: (status: SiaTransportStatus) => void;
+      onProgress?: (bytesDownloaded: number) => void;
+    },
   ): Promise<SiaNativeStream>;
 }
 
@@ -38,6 +45,8 @@ export interface SiaNativeStreamSession {
       name: string;
       signal?: AbortSignal;
       type?: string;
+      onStatus?: (status: SiaTransportStatus) => void;
+      onProgress?: (bytesDownloaded: number) => void;
     },
   ): Promise<SiaNativeStreamFile>;
 }
@@ -46,6 +55,8 @@ interface NativeProviderOpenOptions {
   mimeType?: string;
   name?: string;
   signal: AbortSignal;
+  onStatus?: (status: SiaTransportStatus) => void;
+  onProgress?: (bytesDownloaded: number) => void;
 }
 
 export class SiaNativeStreamResolutionError extends Error {
@@ -85,6 +96,8 @@ export function createSiaNativeStreamProvider(
         signal: options.signal,
         type: options.mimeType,
       };
+      if (options.onStatus) urlOptions.onStatus = options.onStatus;
+      if (options.onProgress) urlOptions.onProgress = options.onProgress;
       const file = await session.url(source, urlOptions);
       if (file.blob) {
         file.release();
@@ -116,8 +129,8 @@ function sanitizeResolverError(error: unknown, src: string): unknown {
   if (!isSiaShareUrl(src)) return error;
 
   const message = errorMessage(error)
-    .replaceAll(src, src.slice(0, src.indexOf('#')))
-    .replace(SHARE_KEY_FRAGMENT, '#[redacted]');
+    .replaceAll(src, src.slice(0, src.indexOf("#")))
+    .replace(SHARE_KEY_FRAGMENT, "#[redacted]");
   if (message === errorMessage(error)) return error;
   return new SiaNativeStreamResolutionError(message);
 }

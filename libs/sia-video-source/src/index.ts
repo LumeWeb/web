@@ -32,13 +32,17 @@ export {
   exportWorkerPublicKey,
   generateWorkerKeyPair,
   scrub,
-} from './app-key-handshake.ts';
-export { type BrowserRuntime, detectBrowserCapabilities, type PlaybackCapabilities } from './capabilities/browser-capabilities.ts';
+} from "./app-key-handshake.ts";
+export {
+  type BrowserRuntime,
+  detectBrowserCapabilities,
+  type PlaybackCapabilities,
+} from "./capabilities/browser-capabilities.ts";
 export {
   type CapabilityVerdict,
   capabilityVerdictForCodec,
   type CodecId,
-} from './capabilities/codec-verdict.ts';
+} from "./capabilities/codec-verdict.ts";
 export {
   constructMseMediaSource,
   detectMseRuntime,
@@ -47,8 +51,13 @@ export {
   mseImplementation,
   type MseRuntimeSnapshot,
   prepareMediaElementForMse,
-} from './capabilities/mse-runtime.ts';
-export { DEFAULT_ERROR_MESSAGES, MEDIA_ERROR_CODES, mediaErrorEvent, mediaErrorFromWorkerMessage } from './errors.ts';
+} from "./capabilities/mse-runtime.ts";
+export {
+  DEFAULT_ERROR_MESSAGES,
+  MEDIA_ERROR_CODES,
+  mediaErrorEvent,
+  mediaErrorFromWorkerMessage,
+} from "./errors.ts";
 export {
   createConsoleLogger,
   LOG_LEVELS,
@@ -58,8 +67,8 @@ export {
   type LogLevelFilter,
   logLevelRank,
   nullLogger,
-} from './log/logger.ts';
-export { type LoglevelLike, wrapLoglevel } from './log/loglevel.ts';
+} from "./log/logger.ts";
+export { type LoglevelLike, wrapLoglevel } from "./log/loglevel.ts";
 export {
   type CancelledMediaLoad,
   inspectMediaLibrary,
@@ -69,12 +78,12 @@ export {
   type ReadyMediaLoad,
   type UnsupportedMediaLoad,
   type UnsupportedReason,
-} from './media/library-load.ts';
+} from "./media/library-load.ts";
 export {
   type ContainerKind,
   type MediaKind,
   type PlaybackTrack,
-} from './media/types.ts';
+} from "./media/types.ts";
 export {
   createSiaNativeStreamProvider,
   type SiaNativeStream,
@@ -84,11 +93,11 @@ export {
   SiaNativeStreamResolutionError,
   type SiaNativeStreamSession,
   SiaNativeStreamUnavailableError,
-} from './native-stream-provider.ts';
+} from "./native-stream-provider.ts";
 export {
   SIA_PLAYBACK_BACKENDS,
   type SiaPlaybackBackend,
-} from './playback-backend.ts';
+} from "./playback-backend.ts";
 export {
   type AppKeyEnvelope,
   type BufferWindow,
@@ -114,23 +123,35 @@ export {
   type WorkerMsePreference,
   type WorkerToMainMessage,
   WorkerToMainMessageType,
-} from './protocol.ts';
-export { DEFAULT_SDK_READ_CONCURRENCY, isShardShortageError, isTransportReadError, LruChunkCache, objectSize, RangedReader, ReadBudget, ReadTransportError, type ShardProgress, type SiaObjectLike, type SiaSdkLike } from './ranged-reader.ts';
-export { type Clock, ManualClock, wallClock } from './session/clock.ts';
+} from "./protocol.ts";
+export {
+  DEFAULT_SDK_READ_CONCURRENCY,
+  isShardShortageError,
+  isTransportReadError,
+  LruChunkCache,
+  objectSize,
+  RangedReader,
+  ReadBudget,
+  ReadTransportError,
+  type ShardProgress,
+  type SiaObjectLike,
+  type SiaSdkLike,
+} from "./ranged-reader.ts";
+export { type Clock, ManualClock, wallClock } from "./session/clock.ts";
 export {
   createErrorReporter,
   type ErrorReporter,
   type PlaybackFailure,
   workerErrorForFailure,
   type WorkerErrorReport,
-} from './session/error-reporter.ts';
+} from "./session/error-reporter.ts";
 export {
   createLoadPipeline,
   type LoadPipeline,
   type LoadPipelineDeps,
   type LoadRequest,
   type LoadResult,
-} from './session/load-pipeline.ts';
+} from "./session/load-pipeline.ts";
 export {
   createSessionCoordinator,
   createSessionHandshake,
@@ -141,49 +162,53 @@ export {
   type PostMessage as SessionPostMessage,
   type SinkFactoryContext,
   WorkerComposition,
-} from './session/session-coordinator.ts';
+} from "./session/session-coordinator.ts";
 export {
   createSiaWorkerComposition,
   type SiaWorkerCompositionDeps,
-} from './session/sia-composition.ts';
+} from "./session/sia-composition.ts";
 export {
   type SourceCapabilityFacts,
   sourceInfoFor,
-} from './session/source-capabilities.ts';
+} from "./session/source-capabilities.ts";
 export {
   createStreamController,
   type StreamController,
   type StreamControllerOptions,
   type StreamLoad,
   type StreamState,
-} from './session/stream-controller.ts';
+} from "./session/stream-controller.ts";
 export {
   createWorkerMseRoot,
   type WorkerMseRoot,
   type WorkerMseRootOptions,
-} from './session/worker-mse-root.ts';
-export { isSiaShareUrl, parseSiaShareUrl, type SiaShareUrl } from './share-url.ts';
-export { type SiaFeatures, siaFeatures } from './sia-features.ts';
+} from "./session/worker-mse-root.ts";
+export {
+  isSiaShareUrl,
+  parseSiaShareUrl,
+  type SiaShareUrl,
+} from "./share-url.ts";
+export { type SiaFeatures, siaFeatures } from "./sia-features.ts";
 export {
   selectSiaLoad,
   siaLoadFeature,
   type SiaLoadState,
-} from './sia-load-feature.ts';
+} from "./sia-load-feature.ts";
 export {
   selectSiaProgress,
   siaProgressFeature,
   type SiaProgressState,
-} from './sia-progress-feature.ts';
+} from "./sia-progress-feature.ts";
 export {
   selectSiaRecovery,
   siaRecoveryFeature,
   type SiaRecoveryState,
-} from './sia-recovery-feature.ts';
+} from "./sia-recovery-feature.ts";
 export {
   selectSiaSourceInfo,
   siaSourceInfoFeature,
   type SiaSourceInfoState,
-} from './sia-source-info-feature.ts';
+} from "./sia-source-info-feature.ts";
 export {
   forwardWorkerLog,
   logThresholdFor,
@@ -198,14 +223,19 @@ export {
   type SiaVideoSourceOptions,
   siaWorkerMilestoneChange,
   type SiaWorkerMilestoneDetail,
-} from './sia-video-source.ts';
-export { type AppendSink } from './sink/append-sink.ts';
+} from "./sia-video-source.ts";
+export { type AppendSink } from "./sink/append-sink.ts";
 export {
   createWorkerMseSinkFactory,
   MseAdapter,
   type MseAdapterOptions,
   type WorkerMseSinkFactoryDeps,
-} from './sink/mse-adapter.ts';
+} from "./sink/mse-adapter.ts";
+export {
+  type SiaTransportStatus,
+  type SiaTransportTelemetry,
+  type SiaTransportTelemetryCallback,
+} from "./transport-telemetry.ts";
 export {
   type ByteRange,
   type ByteSource,
@@ -215,12 +245,12 @@ export {
   type ReadOptions,
   supersededStream,
   toSupersededError,
-} from './transport/byte-source.ts';
-export { MemoryByteSource } from './transport/memory-byte-source.ts';
+} from "./transport/byte-source.ts";
+export { MemoryByteSource } from "./transport/memory-byte-source.ts";
 export {
   createSiaByteSourceFactory,
   SiaByteSource,
   type SiaByteSourceFactoryOptions,
   type SiaByteSourceOptions,
   type SiaByteSourceSdk,
-} from './transport/sia-byte-source.ts';
+} from "./transport/sia-byte-source.ts";

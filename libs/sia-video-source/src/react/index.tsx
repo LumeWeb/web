@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * React wrapper for the Sia media engine, following the packaged video.js v10
@@ -24,31 +24,44 @@
  * postMessage channel stores the plaintext.
  */
 
-import { forwardRef, type ReactNode, useEffect, useRef, type VideoHTMLAttributes } from 'react';
-import { useAttachMedia, useComposedRefs, useMediaInstance, usePlayer } from '@videojs/react';
-import { type AppKeySeedProvider } from '../app-key-handshake.ts';
-import type { Logger } from '../log/logger.ts';
+import {
+  forwardRef,
+  type ReactNode,
+  useEffect,
+  useRef,
+  type VideoHTMLAttributes,
+} from "react";
+import {
+  useAttachMedia,
+  useComposedRefs,
+  useMediaInstance,
+  usePlayer,
+} from "@videojs/react";
+import { type AppKeySeedProvider } from "../app-key-handshake.ts";
+import type { Logger } from "../log/logger.ts";
 import {
   selectSiaRecovery,
   type SiaRecoveryState,
-} from '../sia-recovery-feature.ts';
-import {
-  selectSiaLoad,
-  type SiaLoadState,
-} from '../sia-load-feature.ts';
+} from "../sia-recovery-feature.ts";
+import { selectSiaLoad, type SiaLoadState } from "../sia-load-feature.ts";
 import {
   selectSiaProgress,
   type SiaProgressState,
-} from '../sia-progress-feature.ts';
+} from "../sia-progress-feature.ts";
 import {
   selectSiaSourceInfo,
   type SiaSourceInfoState,
-} from '../sia-source-info-feature.ts';
-import { siaVideoDefaultProps, SiaVideoSource } from '../sia-video-source.ts';
-import type { WorkerConfig } from '../protocol.ts';
+} from "../sia-source-info-feature.ts";
+import { siaVideoDefaultProps, SiaVideoSource } from "../sia-video-source.ts";
+import type { WorkerConfig } from "../protocol.ts";
+import type { SiaTransportTelemetryCallback } from "../transport-telemetry.ts";
 
 export interface SiaVideoProps
-  extends Omit<VideoHTMLAttributes<HTMLVideoElement>, keyof typeof siaVideoDefaultProps>,
+  extends
+    Omit<
+      VideoHTMLAttributes<HTMLVideoElement>,
+      keyof typeof siaVideoDefaultProps
+    >,
     Partial<typeof siaVideoDefaultProps> {
   children?: ReactNode;
   /**
@@ -75,6 +88,7 @@ export interface SiaVideoProps
   logger?: Logger;
   /** Declared content type for the source; forwarded to the worker on every `SOURCE`. */
   mimeType?: string;
+  onTransportTelemetry?: SiaTransportTelemetryCallback;
   /**
    * Explicit in-place reload trigger: when this string changes (e.g. a mode or
    * account identifier the app increments), the persistent media instance
@@ -122,105 +136,128 @@ function asMediaLike(media: SiaVideoSource): MediaLike {
  * passed object identity is needed; `sia` and `getAppKeySeed` are still
  * required for the account connection that funds the downloads.
  */
-export const SiaVideo = forwardRef<HTMLVideoElement, SiaVideoProps>(function SiaVideo(
-  { children, getAppKeySeed, getSharingKeySeed, logger, reloadKey, sia, ...props },
-  ref,
-) {
-  // The media instance is created lazily and kept for the component's whole
-  // lifetime; `workerConfig`/`mimeType` are applied per-render below.
-  const media = useMediaInstance(SiaVideoSource);
-
-  // Structural HELLO inputs only. The host applies configuration at handshake
-  // time, so a CHANGE to any of these after the initial attach must push an
-  // explicit `reloadConfiguration()`. The comparison deliberately uses value
-  // facts only — presence booleans and primitives/strings, compared ELEMENT-WISE
-  // (a composite signature string would be collision-prone for the free-form
-  // `reloadKey`/`indexerUrl`) — NEVER supplier function refs (inline arrows
-  // change on every render), NEVER the nested `app` metadata, NEVER the logger
-  // identity: those reach the worker at the next attach and must not re-handshake.
-  //
-  // The element attaches during commit (the ref callback spawns the worker), so
-  // by the time this passive effect runs the initial attach has already HELLO'd
-  // with the first render's props. The FIRST run therefore only records the
-  // mount-time baseline and never reloads — otherwise a fresh mount would
-  // double-HELLO. Every later primitive change to a structural HELLO input
-  // (including `reloadKey`) triggers exactly one in-place
-  // `reloadConfiguration()`; the previous facts are recorded in a ref so a
-  // re-render with unchanged facts (or a StrictMode effect re-run) is a no-op.
-  const appliedReloadDeps = useRef<null | readonly ReloadValueDependency[]>(null);
-  useEffect(() => {
-    if (!media.engine) return;
-    const next: ReloadValueDependency[] = [
+export const SiaVideo = forwardRef<HTMLVideoElement, SiaVideoProps>(
+  function SiaVideo(
+    {
+      children,
+      getAppKeySeed,
+      getSharingKeySeed,
+      logger,
+      onTransportTelemetry,
       reloadKey,
-      sia !== undefined,
-      sia?.indexerUrl,
-      sia?.workerMse,
-      getAppKeySeed !== undefined,
-      getSharingKeySeed !== undefined,
-    ];
-    const prev = appliedReloadDeps.current;
-    if (prev === null) {
-      appliedReloadDeps.current = next;
-      return;
-    }
-    const changed =
-      prev.length !== next.length || next.some((value, index) => prev[index] !== value);
-    appliedReloadDeps.current = next;
-    if (changed) media.reloadConfiguration();
-  }, [media, reloadKey, sia, getAppKeySeed, getSharingKeySeed]);
+      sia,
+      ...props
+    },
+    ref,
+  ) {
+    // The media instance is created lazily and kept for the component's whole
+    // lifetime; `workerConfig`/`mimeType` are applied per-render below.
+    const media = useMediaInstance(SiaVideoSource);
 
-  let htmlProps = props as VideoHTMLAttributes<HTMLVideoElement>;
-  if (media) {
-    const sourceProps = props as Record<string, unknown>;
-    const rest: Record<string, unknown> = {};
-    // The media instance persists across renders, so every config field is
-    // synced on EVERY render. The fixed fields below are typed setters on the
-    // engine and need no cast; only the keyed default/present-prop loops use
-    // the anonymous record view, whose one `as unknown as` lives in the helper.
-    const owning = asMediaLike(media);
-    for (const [key, value] of Object.entries(sourceProps)) {
-      if (key in siaVideoDefaultProps) {
-        if (value !== undefined && owning[key] !== value) {
+    // Structural HELLO inputs only. The host applies configuration at handshake
+    // time, so a CHANGE to any of these after the initial attach must push an
+    // explicit `reloadConfiguration()`. The comparison deliberately uses value
+    // facts only — presence booleans and primitives/strings, compared ELEMENT-WISE
+    // (a composite signature string would be collision-prone for the free-form
+    // `reloadKey`/`indexerUrl`) — NEVER supplier function refs (inline arrows
+    // change on every render), NEVER the nested `app` metadata, NEVER the logger
+    // identity: those reach the worker at the next attach and must not re-handshake.
+    //
+    // The element attaches during commit (the ref callback spawns the worker), so
+    // by the time this passive effect runs the initial attach has already HELLO'd
+    // with the first render's props. The FIRST run therefore only records the
+    // mount-time baseline and never reloads — otherwise a fresh mount would
+    // double-HELLO. Every later primitive change to a structural HELLO input
+    // (including `reloadKey`) triggers exactly one in-place
+    // `reloadConfiguration()`; the previous facts are recorded in a ref so a
+    // re-render with unchanged facts (or a StrictMode effect re-run) is a no-op.
+    const appliedReloadDeps = useRef<null | readonly ReloadValueDependency[]>(
+      null,
+    );
+    useEffect(() => {
+      if (!media.engine) return;
+      const next: ReloadValueDependency[] = [
+        reloadKey,
+        sia !== undefined,
+        sia?.indexerUrl,
+        sia?.workerMse,
+        getAppKeySeed !== undefined,
+        getSharingKeySeed !== undefined,
+      ];
+      const prev = appliedReloadDeps.current;
+      if (prev === null) {
+        appliedReloadDeps.current = next;
+        return;
+      }
+      const changed =
+        prev.length !== next.length ||
+        next.some((value, index) => prev[index] !== value);
+      appliedReloadDeps.current = next;
+      if (changed) media.reloadConfiguration();
+    }, [media, reloadKey, sia, getAppKeySeed, getSharingKeySeed]);
+
+    let htmlProps = props as VideoHTMLAttributes<HTMLVideoElement>;
+    if (media) {
+      const sourceProps = props as Record<string, unknown>;
+      const rest: Record<string, unknown> = {};
+      // The media instance persists across renders, so every config field is
+      // synced on EVERY render. The fixed fields below are typed setters on the
+      // engine and need no cast; only the keyed default/present-prop loops use
+      // the anonymous record view, whose one `as unknown as` lives in the helper.
+      const owning = asMediaLike(media);
+      for (const [key, value] of Object.entries(sourceProps)) {
+        if (key in siaVideoDefaultProps) {
+          if (value !== undefined && owning[key] !== value) {
+            owning[key] = value;
+          }
+          continue;
+        }
+        // `mimeType` is a media property, not an HTML attribute — never a DOM
+        // attribute. Synchronized unconditionally below (i.e. cleared when the
+        // prop is omitted entirely), not in this present-props-only loop.
+        if (key === "mimeType") continue;
+        rest[key] = value;
+      }
+      // Unconditional each render: setting mimeType to `undefined` when the prop
+      // is absent clears whatever a previous render stored, so a later source on
+      // the same persistent media instance never inherits a stale declared MIME.
+      media.mimeType = props.mimeType;
+      // Also unconditional: an updated `sia` configuration and the seed suppliers
+      // must land on the persistent instance even if the setup callback (which
+      // only runs on mount) already ran. The host applies them on the next
+      // (re)attach — the suppliers are consumed there, not here, so the seeds
+      // never live in this component's render output, state, or the media
+      // instance.
+      media.workerConfig = sia;
+      media.getAppKeySeed = getAppKeySeed;
+      media.getSharingKeySeed = getSharingKeySeed;
+      // Also unconditional: the logger sink is a live reference the host re-reads
+      // from its `logger.level` for the worker's HELLO threshold and forwards
+      // worker events through; swapping it per-render needs no attach.
+      media.logger = logger;
+      media.onTransportTelemetry = onTransportTelemetry;
+      for (const [key, value] of Object.entries(siaVideoDefaultProps)) {
+        if (
+          sourceProps[key] === undefined &&
+          value !== undefined &&
+          owning[key] !== value
+        ) {
           owning[key] = value;
         }
-        continue;
       }
-      // `mimeType` is a media property, not an HTML attribute — never a DOM
-      // attribute. Synchronized unconditionally below (i.e. cleared when the
-      // prop is omitted entirely), not in this present-props-only loop.
-      if (key === 'mimeType') continue;
-      rest[key] = value;
+      htmlProps = rest;
     }
-    // Unconditional each render: setting mimeType to `undefined` when the prop
-    // is absent clears whatever a previous render stored, so a later source on
-    // the same persistent media instance never inherits a stale declared MIME.
-    media.mimeType = props.mimeType;
-    // Also unconditional: an updated `sia` configuration and the seed suppliers
-    // must land on the persistent instance even if the setup callback (which
-    // only runs on mount) already ran. The host applies them on the next
-    // (re)attach — the suppliers are consumed there, not here, so the seeds
-    // never live in this component's render output, state, or the media
-    // instance.
-    media.workerConfig = sia;
-    media.getAppKeySeed = getAppKeySeed;
-    media.getSharingKeySeed = getSharingKeySeed;
-    // Also unconditional: the logger sink is a live reference the host re-reads
-    // from its `logger.level` for the worker's HELLO threshold and forwards
-    // worker events through; swapping it per-render needs no attach.
-    media.logger = logger;
-    for (const [key, value] of Object.entries(siaVideoDefaultProps)) {
-      if (sourceProps[key] === undefined && value !== undefined && owning[key] !== value) {
-        owning[key] = value;
-      }
-    }
-    htmlProps = rest;
-  }
 
-  const attachRef = useAttachMedia(media);
-  const composedRef = useComposedRefs(attachRef, ref);
+    const attachRef = useAttachMedia(media);
+    const composedRef = useComposedRefs(attachRef, ref);
 
-  return <video ref={composedRef} {...htmlProps}>{children}</video>;
-});
+    return (
+      <video ref={composedRef} {...htmlProps}>
+        {children}
+      </video>
+    );
+  },
+);
 
 /**
  * Subscribes to the Sia load-acceptance state of the nearest `<Player>`.

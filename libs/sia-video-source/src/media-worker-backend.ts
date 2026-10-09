@@ -46,7 +46,7 @@ export interface MediaWorkerBackendGlue {
   /** A main-mode CHUNK: the host appends the bytes to its append pipe. */
   onChunkAppend?(bytes: Uint8Array): void;
   /** A worker-mode (or unknown-mode) CHUNK: the host dispatches `progress`. */
-  onChunkProgress?(): void;
+  onChunkProgress?(bytes?: number): void;
   /** `addSourceBuffer` threw (the MIME was refused): escalate as a decode failure. */
   onDecodeFailure(error: unknown): void;
   /** Reports the freshly created SourceBuffer to the host after the backend stores it. */
@@ -410,7 +410,7 @@ export class MediaWorkerBackend {
    */
   routeChunk(mode: null | WorkerMode, bytes: Uint8Array): void {
     if (!mode || mode !== workerMode.main) {
-      this.#glue.onChunkProgress?.();
+      this.#glue.onChunkProgress?.(bytes.byteLength);
       return;
     }
     this.#glue.onChunkAppend?.(bytes);

@@ -7,6 +7,11 @@ import {
   type SiaNativeStreamProvider,
   SiaNativeStreamUnavailableError,
 } from "./native-stream-provider.ts";
+import {
+  reportTransportTelemetry,
+  type SiaTransportStatus,
+  type SiaTransportTelemetryCallback,
+} from "./transport-telemetry.ts";
 
 export interface ServiceWorkerBackendHooks {
   onSourceAttached?(url: string): void;
@@ -15,6 +20,7 @@ export interface ServiceWorkerBackendHooks {
 export interface ServiceWorkerLoadOptions {
   mimeType?: string;
   name?: string;
+  onTelemetry?: SiaTransportTelemetryCallback;
 }
 
 export interface ServiceWorkerStreamTarget {
@@ -92,11 +98,30 @@ export class ServiceWorkerBackend {
   ): Promise<SiaNativeStream> {
     if (signal.aborted) throw new ServiceWorkerLoadAbortedError();
     try {
+      let bytesDownloaded = 0;
+      const onStatus = options.onTelemetry
+        ? (status: SiaTransportStatus) =>
+            reportTransportTelemetry(options.onTelemetry, {
+              bytesDownloaded,
+              status,
+            })
+        : undefined;
+      const onProgress = options.onTelemetry
+        ? (bytes: number) => {
+            bytesDownloaded = Math.max(bytesDownloaded, bytes);
+            reportTransportTelemetry(options.onTelemetry, {
+              bytesDownloaded,
+              status: "downloading",
+            });
+          }
+        : undefined;
       const available = await this.#provider.available(signal);
       if (!available) throw new SiaNativeStreamUnavailableError();
       return await this.#provider.open(src, {
         mimeType: options.mimeType,
         name: options.name,
+        onProgress,
+        onStatus,
         signal,
       });
     } catch (err) {

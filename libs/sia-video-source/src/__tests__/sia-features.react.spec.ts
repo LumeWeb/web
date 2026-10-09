@@ -9,19 +9,19 @@
  * test mode); in node mode it is skipped so `SIA_TEST_ENV=node` stays
  * DOM-free.
  */
-import { describe, expect, it } from 'vitest';
-import type { Media } from '@videojs/media';
-import { type SourceInfo, workerMode } from '../protocol.ts';
+import { describe, expect, it } from "vitest";
+import type { Media } from "@videojs/media";
+import { type SourceInfo, workerMode } from "../protocol.ts";
 import {
   emitLoad,
   emitRecovery,
   emitSourceInfo,
   mountSiaFeaturesReactHarness,
   waitFor,
-} from './fixtures/sia-features-react-harness.tsx';
-import { FakeSiaMedia } from './fixtures/fake-sia-media.ts';
+} from "./fixtures/sia-features-react-harness.tsx";
+import { FakeSiaMedia } from "./fixtures/fake-sia-media.ts";
 
-const IN_BROWSER = typeof document !== 'undefined';
+const IN_BROWSER = typeof document !== "undefined";
 
 /** The inert recovery slice a Player without an open window reports. */
 const INERT_RECOVERY = {
@@ -34,7 +34,7 @@ const INERT_RECOVERY = {
 /** The open recovery window driven through the shared tuple. */
 const ACTIVE_RECOVERY = {
   active: true,
-  reason: 'decode',
+  reason: "decode",
   resumeSeconds: 12.5,
   wantsPlay: true,
 };
@@ -52,16 +52,16 @@ const INERT_SOURCE_INFO = {
 
 /** A representative worker-vouched SourceInfo driven through the shared tuple. */
 const SOURCE_INFO: SourceInfo = {
-  container: 'fmp4',
+  container: "fmp4",
   durationSeconds: 3919.08,
   mime: 'video/mp4; codecs="avc1.64001f, mp4a.40.2"',
   mode: workerMode.main,
-  tracks: [{ codec: 'avc1.64001f', kind: 'video' }],
+  tracks: [{ codec: "avc1.64001f", kind: "video" }],
 };
 
-describe('all three hooks on a Player built with the shared siaFeatures tuple', () => {
+describe("all three hooks on a Player built with the shared siaFeatures tuple", () => {
   it.skipIf(!IN_BROWSER)(
-    'read and update the same store, each slice on its own event',
+    "read and update the same store, each slice on its own event",
     async () => {
       const media = new FakeSiaMedia();
       const harness = await mountSiaFeaturesReactHarness();
@@ -78,7 +78,7 @@ describe('all three hooks on a Player built with the shared siaFeatures tuple', 
         // A recovery detail moves only the recovery hook.
         emitRecovery(media, {
           active: true,
-          reason: 'decode',
+          reason: "decode",
           resumeSeconds: 12.5,
           wantsPlay: true,
         });
@@ -97,10 +97,14 @@ describe('all three hooks on a Player built with the shared siaFeatures tuple', 
         expect(harness.sourceInfoSnapshots.at(-1)).toEqual(INERT_SOURCE_INFO);
 
         // A source-info detail moves only the source-info hook.
-        emitSourceInfo(media, { active: true, info: SOURCE_INFO });
+        emitSourceInfo(media, {
+          active: true,
+          info: SOURCE_INFO,
+          kind: "worker",
+        });
         await waitFor(() => {
           expect(harness.sourceInfoSnapshots.at(-1)).toEqual({
-            sourceInfo: { active: true, info: SOURCE_INFO },
+            sourceInfo: { active: true, info: SOURCE_INFO, kind: "worker" },
           });
         });
         expect(harness.recoverySnapshots.at(-1)).toEqual(ACTIVE_RECOVERY);
