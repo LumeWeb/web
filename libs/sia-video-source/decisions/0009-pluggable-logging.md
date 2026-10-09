@@ -1,4 +1,4 @@
-# 0009 — pluggable logging for the Sia video source
+# 0009: pluggable logging for the Sia video source
 
 ## Status
 
@@ -24,8 +24,8 @@ consumers at once:
 - **The embedding app** that already owns a logging stack (loglevel, LogTape,
   winston/pino, or a plain console) and wants the library's lines to flow into
   that stack.
-- **The worker** isolate, which cannot share a logger object across the wire
-  — milestone facts must be posted as protocol messages and rendered host-side.
+- **The worker** isolate, which cannot share a logger object across the wire;
+  milestone facts must be posted as protocol messages and rendered host-side.
 
 ## Decision
 
@@ -33,17 +33,17 @@ Adopt a tiny, dependency-free internal `Logger` interface as the only logging
 surface every internal call site speaks, plus a default console-backed implementation,
 and keep third-party loggers (loglevel/LogTape) out of `dependencies` as
 optional adapters. Worker milestones cross the wire as coarse `LOG` protocol
-messages gated by the HELLO log threshold, capped per connection.
+messages checked by the HELLO log threshold, capped per connection.
 
 ### 1. `Logger` interface + default console logger
 
 `src/log/logger.ts` defines `Logger` (trace/debug/info/warn/error, a `child`
 scope, and a `level` filter), `LOG_LEVELS` in severity order, `logLevelRank`
-(the single `>=` gate), a `nullLogger`, and `createConsoleLogger`. The console
+(the single `>=` check), a `nullLogger`, and `createConsoleLogger`. The console
 logger defaults to `'info'` in development builds and `'warn'` in production
 (`process.env.NODE_ENV` statically replaced by bundlers; browsers have no
 `process`, so the check is optional-chained and can never throw). Every call
-site routes through a `Logger` — a host can pass `new SiaVideoSource({ logger })`
+site routes through a `Logger`: a host can pass `new SiaVideoSource({ logger })`
 (or the React wrapper's `logger` prop), re-level at runtime by installing a
 fresh logger, or drop to `nullLogger` for silence.
 
@@ -51,7 +51,7 @@ fresh logger, or drop to `nullLogger` for silence.
 
 `src/log/loglevel.ts` ships a `wrapLoglevel` adapter that shapes any
 loglevel-style logger (or a plain `console`) into `Logger`, forwarding lines
-untouched. `loglevel` is **not** added to `dependencies` — the adapter depends
+untouched. `loglevel` is **not** added to `dependencies`: the adapter depends
 only on the structural `LoglevelLike` shape, so integrators who don't use
 loglevel never load it, and those who do wrap their own instance (never a
 module-global singleton the library forces on them). The same user-supplied
@@ -64,13 +64,13 @@ size, and integrators who want loglevel or LogTape wire their own sink.
 No logger object can cross to the worker, so `src/protocol.ts` revives the
 old debug-event hook as `WorkerToMainMessageType.LOG` (`'LOG'`): a coarse
 milestone name (catalogued in `WORKER_LOG_EVENT_NAMES`, advisory never a wire
-constraint — `sdk.built`, `object.resolved`, `read.window-*`, `bytes.read`,
+constraint: `sdk.built`, `object.resolved`, `read.window-*`, `bytes.read`,
 `session.*`, `stream.*`), a `level` from the four wire severities (`trace` is
 deliberately excluded to keep the wire cheap), and scalar-only `detail`.
 Forwarding is opt-in: the host HELLO carries a `log` threshold derived by
 `logThresholdFor` from its logger's level, and an absent threshold means the
-worker posts nothing — a muted host keeps the wire byte-identical to before.
-The composition's `emitLog` gates every milestone against the live threshold
+worker posts nothing: a muted host keeps the wire byte-identical to before.
+The composition's `emitLog` checks every milestone against the live threshold
 and a per-sink `MAX_WORKER_LOG_MESSAGES = 256` cap, so a pathologically
 failing source can never flood the postMessage channel. The host renders each
 received `LOG` onto
@@ -94,7 +94,7 @@ as the boolean `share: true` detail on `object.resolved`.
   stack for them and drag in global-singleton semantics. The structural
   `LoglevelLike` shape captures the parts of loglevel worth standardizing on
   without the dependency.
-- The HELLO-gated, capped, scalar-only wire keeps worker-to-main logging
+- The HELLO-checked, capped, scalar-only wire keeps worker-to-main logging
   bounded and credentials-safe by construction.
 
 **Harder**
