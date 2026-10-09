@@ -27,6 +27,7 @@ class FakeVideoTarget extends EventTarget {
 class FakeWorker {
   listener: ((event: { data: unknown }) => void) | null = null;
   readonly sent: MainToWorkerMessage[] = [];
+  terminated = false;
 
   addEventListener(
     _type: "message",
@@ -44,7 +45,7 @@ class FakeWorker {
     this.listener?.({ data: message });
   }
   terminate(): void {
-    // The host owns worker shutdown; this test worker has no resources.
+    this.terminated = true;
   }
 }
 
@@ -74,6 +75,9 @@ function replyToWorkerHandshake(worker: FakeWorker): void {
 
 const flush = (): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, 0));
+
+const HAS_BROWSER_MSE =
+  typeof document !== "undefined" && typeof MediaSource !== "undefined";
 
 function provider(available: boolean): SiaNativeStreamProvider {
   return {
@@ -205,6 +209,79 @@ describe("auto backend selection", () => {
 
     expect(createWorker).not.toHaveBeenCalled();
     expect(target.src).toBe("");
+    host.destroy();
+  });
+
+  it("re-handshakes an existing worker when AUTO has no native provider", async () => {
+    const worker = new FakeWorker();
+    const target = new FakeVideoTarget();
+    const host = new SiaVideoSource({
+      backend: SIA_PLAYBACK_BACKENDS.AUTO,
+      createWorker: vi.fn(() => worker) as unknown as () => Worker,
+      logger: nullLogger,
+    });
+
+    host.attach(target as unknown as HTMLVideoElement);
+    host.src = "reattach-key";
+    await flush();
+    replyToWorkerHandshake(worker);
+    await flush();
+    const sourceCount = worker.sent.filter(
+      (message) => message.type === MainToWorkerMessageType.SOURCE,
+    ).length;
+    const helloCount = worker.sent.filter(
+      (message) => message.type === MainToWorkerMessageType.HELLO,
+    ).length;
+
+    const replacement = new FakeVideoTarget();
+    host.attach(replacement as unknown as HTMLVideoElement);
+    await flush();
+
+    expect(
+      worker.sent.filter(
+        (message) => message.type === MainToWorkerMessageType.HELLO,
+      ),
+    ).toHaveLength(helloCount + 1);
+    expect(
+      worker.sent.filter(
+        (message) => message.type === MainToWorkerMessageType.SOURCE,
+      ),
+    ).toHaveLength(sourceCount);
+    replyToWorkerHandshake(worker);
+    await flush();
+    if (HAS_BROWSER_MSE) {
+      expect(
+        worker.sent.filter(
+          (message) => message.type === MainToWorkerMessageType.SOURCE,
+        ),
+      ).toHaveLength(sourceCount + 1);
+    }
+    host.destroy();
+  });
+
+  it("tears down the worker before AUTO switches to an available native stream", async () => {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({
+      backend: SIA_PLAYBACK_BACKENDS.AUTO,
+      createWorker: vi.fn(() => worker) as unknown as () => Worker,
+      logger: nullLogger,
+      nativeStreamProvider: provider(false),
+    });
+    const target = new FakeVideoTarget();
+    host.attach(target as unknown as HTMLVideoElement);
+    host.src = "transition-key";
+    await flush();
+    replyToWorkerHandshake(worker);
+    await flush();
+
+    host.nativeStreamProvider = provider(true);
+    await flush();
+    await flush();
+    await flush();
+    await flush();
+
+    expect(worker.terminated).toBe(true);
+    expect(target.src).toBe("https://stream.example/transition-key");
     host.destroy();
   });
 

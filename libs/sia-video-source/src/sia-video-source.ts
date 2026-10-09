@@ -363,7 +363,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   }
   set backend(value: SiaPlaybackBackend) {
     if (value === this.#backend) return;
-    if (this.#backend === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER) {
+    if (this.#activeBackend === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER) {
       // Release the provider stream before another backend writes to the same
       // element. Recreate the wrapper because destroy() permanently closes it.
       this.#serviceWorkerBackend?.destroy();
@@ -372,12 +372,8 @@ export class SiaVideoSource extends HTMLVideoElementHost {
             onSourceAttached: () => this.#applyPendingServiceWorkerResume(),
           })
         : null;
-    } else if (value === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER) {
-      this.#detachCurrentResource();
-      this.#mediaWorkerBackend.resetQueue();
-      this.#mediaWorkerBackend.terminate();
-      this.#worker = null;
-      this.#teardownMainThreadMse();
+    } else if (this.#activeBackend === SIA_PLAYBACK_BACKENDS.MEDIA_WORKER) {
+      this.#teardownMediaWorker();
     }
     this.#backend = value;
     this.#activeBackend = null;
@@ -414,7 +410,6 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         this.#activeBackend = SIA_PLAYBACK_BACKENDS.SERVICE_WORKER;
         this.#startServiceWorkerSource(this.#src);
       } else if (this.#backend === SIA_PLAYBACK_BACKENDS.AUTO) {
-        this.#activeBackend = null;
         this.#selectAutoBackend();
       }
     }
@@ -1049,7 +1044,8 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     if (!this.target || this.#backend !== SIA_PLAYBACK_BACKENDS.AUTO) return;
     if (!this.#nativeStreamProvider) {
       this.#activeBackend = SIA_PLAYBACK_BACKENDS.MEDIA_WORKER;
-      this.#startWorkerBackend();
+      if (this.#worker) this.#startHandshake();
+      else this.#startWorkerBackend();
       return;
     }
     const generation = ++this.#autoSelectionGeneration;
@@ -1061,11 +1057,20 @@ export class SiaVideoSource extends HTMLVideoElementHost {
           !this.target
         )
           return;
-        this.#activeBackend = available
-          ? SIA_PLAYBACK_BACKENDS.SERVICE_WORKER
-          : SIA_PLAYBACK_BACKENDS.MEDIA_WORKER;
-        if (available && this.#src) this.#startServiceWorkerSource(this.#src);
-        else {
+        if (available) {
+          if (this.#activeBackend === SIA_PLAYBACK_BACKENDS.MEDIA_WORKER) {
+            this.#pendingServiceWorkerResume = Boolean(
+              this.target && !this.target.paused,
+            );
+            this.#teardownMediaWorker();
+            this.#resetLoadState();
+          }
+          this.#activeBackend = SIA_PLAYBACK_BACKENDS.SERVICE_WORKER;
+          if (this.#src) this.#startServiceWorkerSource(this.#src);
+        } else {
+          if (this.#activeBackend === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER)
+            this.#serviceWorkerBackend?.detach();
+          this.#activeBackend = SIA_PLAYBACK_BACKENDS.MEDIA_WORKER;
           this.#startWorkerBackend();
           if (this.#worker) this.#sendSource();
         }
@@ -1076,6 +1081,8 @@ export class SiaVideoSource extends HTMLVideoElementHost {
           this.#backend !== SIA_PLAYBACK_BACKENDS.AUTO
         )
           return;
+        if (this.#activeBackend === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER)
+          this.#serviceWorkerBackend?.detach();
         this.#activeBackend = SIA_PLAYBACK_BACKENDS.MEDIA_WORKER;
         this.#startWorkerBackend();
         if (this.#worker) this.#sendSource();
@@ -1096,6 +1103,20 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       return;
     }
     this.#startHandshake();
+  }
+
+  #teardownMediaWorker(): void {
+    this.#detachCurrentResource();
+    this.#attachGeneration += 1;
+    this.#helloRequestId = null;
+    this.#attachRequestId = null;
+    this.#attachGenerationAtAttach = null;
+    this.#mediaWorkerBackend.resetQueue();
+    if (this.#worker) this.#post({ type: MainToWorkerMessageType.DETACH });
+    this.#mediaWorkerBackend.terminate();
+    this.#worker = null;
+    this.#mode = null;
+    this.#teardownMainThreadMse();
   }
 
   #fallbackAutoToWorker(): void {
