@@ -19,6 +19,8 @@ interface FakeProvider {
 }
 
 class FakeVideoTarget extends EventTarget {
+  paused = true;
+  play = vi.fn(() => Promise.resolve());
   src = "";
   getAttribute(_name: string): null {
     return null;
@@ -116,6 +118,93 @@ describe("forced service-worker playback", () => {
 
     expect(terminated).toBe(1);
     expect(sent).toHaveLength(1);
+    host.destroy();
+  });
+
+  it("reloadConfiguration restores playback for a playing target after attachment", async () => {
+    const fake = fakeProvider();
+    const { host, target } = forcedHost({
+      nativeStreamProvider: fake.provider,
+    });
+
+    host.src = "abc123";
+    await flush();
+    target.paused = false;
+    host.reloadConfiguration();
+    await flush();
+
+    expect(fake.opened).toEqual(["abc123", "abc123"]);
+    expect(fake.released).toBe(1);
+    expect(target.play).toHaveBeenCalledOnce();
+    expect(target.src).toBe("https://stream.example/abc123");
+    host.destroy();
+  });
+
+  it("reloadConfiguration leaves a paused target paused after attachment", async () => {
+    const fake = fakeProvider();
+    const { host, target } = forcedHost({
+      nativeStreamProvider: fake.provider,
+    });
+
+    host.src = "abc123";
+    await flush();
+    host.reloadConfiguration();
+    await flush();
+
+    expect(target.play).not.toHaveBeenCalled();
+    expect(target.src).toBe("https://stream.example/abc123");
+    host.destroy();
+  });
+
+  it("reloadConfiguration releases and replays the current source", async () => {
+    const fake = fakeProvider();
+    const { host, target } = forcedHost({
+      nativeStreamProvider: fake.provider,
+    });
+
+    host.src = "abc123";
+    await flush();
+    host.reloadConfiguration();
+    await flush();
+
+    expect(fake.opened).toEqual(["abc123", "abc123"]);
+    expect(fake.released).toBe(1);
+    expect(target.src).toBe("https://stream.example/abc123");
+    host.destroy();
+  });
+
+  it("releases the native stream before switching to another backend", async () => {
+    const fake = fakeProvider();
+    const { host, target } = forcedHost({
+      nativeStreamProvider: fake.provider,
+    });
+
+    host.src = "abc123";
+    await flush();
+    host.backend = SIA_PLAYBACK_BACKENDS.AUTO;
+
+    expect(fake.released).toBe(1);
+    expect(target.src).toBe("");
+    host.destroy();
+  });
+
+  it("clears a fatal provider error before reloading with a replacement provider", async () => {
+    const unavailable: SiaNativeStreamProvider = {
+      available: () => Promise.resolve(false),
+      open: () => Promise.reject(new Error("not called")),
+    };
+    const fake = fakeProvider();
+    const { host, target } = forcedHost({ nativeStreamProvider: unavailable });
+
+    host.src = "abc123";
+    await flush();
+    expect(host.error).toBeInstanceOf(MediaError);
+
+    host.nativeStreamProvider = fake.provider;
+    await flush();
+
+    expect(host.error).toBeNull();
+    expect(target.src).toBe("https://stream.example/abc123");
     host.destroy();
   });
 

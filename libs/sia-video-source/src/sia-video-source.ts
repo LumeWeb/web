@@ -363,9 +363,21 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   }
   set backend(value: SiaPlaybackBackend) {
     if (value === this.#backend) return;
-    if (value === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER && this.#worker) {
+    if (this.#backend === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER) {
+      // Release the provider stream before another backend writes to the same
+      // element. Recreate the wrapper because destroy() permanently closes it.
+      this.#serviceWorkerBackend?.destroy();
+      this.#serviceWorkerBackend = this.#nativeStreamProvider
+        ? new ServiceWorkerBackend(this.#nativeStreamProvider, {
+            onSourceAttached: () => this.#applyPendingServiceWorkerResume(),
+          })
+        : null;
+    } else if (value === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER) {
+      this.#detachCurrentResource();
+      this.#mediaWorkerBackend.resetQueue();
       this.#mediaWorkerBackend.terminate();
       this.#worker = null;
+      this.#teardownMainThreadMse();
     }
     this.#backend = value;
   }
@@ -375,12 +387,18 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   set nativeStreamProvider(value: SiaNativeStreamProvider | undefined) {
     this.#nativeStreamProvider = value;
     this.#serviceWorkerBackend?.destroy();
-    this.#serviceWorkerBackend = value ? new ServiceWorkerBackend(value) : null;
+    this.#pendingServiceWorkerResume = false;
+    this.#serviceWorkerBackend = value
+      ? new ServiceWorkerBackend(value, {
+          onSourceAttached: () => this.#applyPendingServiceWorkerResume(),
+        })
+      : null;
     if (
       this.#backend === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER &&
       this.#src &&
       this.target
     ) {
+      this.#resetLoadState();
       this.#startServiceWorkerSource(this.#src);
     }
   }
@@ -462,6 +480,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   }
   set src(value: string) {
     if (this.#src === value) return;
+    this.#pendingServiceWorkerResume = false;
     this.#src = value;
 
     // A different source is now active: the machine drops every trace of the
@@ -616,6 +635,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   readonly #mediaWorkerBackend: MediaWorkerBackend;
   #backend: SiaPlaybackBackend;
   #serviceWorkerBackend: null | ServiceWorkerBackend;
+
+  // Forced reloads capture this before detaching the native resource. The
+  // replacement load consumes it only after the provider attaches its URL.
+  #pendingServiceWorkerResume = false;
   #nativeStreamProvider: SiaNativeStreamProvider | undefined;
 
   // Monotonic counter for the typed `sia-worker-milestone-change` event: bumps
@@ -731,7 +754,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#backend = options.backend ?? SIA_PLAYBACK_BACKENDS.AUTO;
     this.#nativeStreamProvider = options.nativeStreamProvider;
     this.#serviceWorkerBackend = this.#nativeStreamProvider
-      ? new ServiceWorkerBackend(this.#nativeStreamProvider)
+      ? new ServiceWorkerBackend(this.#nativeStreamProvider, {
+          onSourceAttached: () => this.#applyPendingServiceWorkerResume(),
+        })
       : null;
     this.#mediaWorkerBackend = new MediaWorkerBackend({
       createWorker: this.#options.createWorker ?? defaultCreateWorker,
@@ -963,17 +988,23 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   reloadConfiguration(): void {
     if (this.#destroyed || !this.target) return;
     if (this.#backend === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER) {
-      this.#attachGeneration += 1;
-      this.#mediaWorkerBackend.resetQueue();
-      this.#attachRequestId = null;
-      this.#attachGenerationAtAttach = null;
-      this.#helloRequestId = null;
-      this.#workerPublicKey = null;
-      this.#mediaWorkerBackend.terminate();
-      this.#worker = null;
+      const target = this.target as HTMLVideoElement | null;
+      this.#pendingServiceWorkerResume = Boolean(target && !target.paused);
+      this.#serviceWorkerBackend?.detach();
+      this.#resetLoadState();
+      if (this.#src) this.#startServiceWorkerSource(this.#src);
       return;
     }
     this.#startHandshake();
+  }
+
+  #applyPendingServiceWorkerResume(): void {
+    const target = this.target as HTMLVideoElement | null;
+    if (!this.#pendingServiceWorkerResume || !target || !this.#src) return;
+    this.#pendingServiceWorkerResume = false;
+    void target.play().catch(() => {
+      // Match host playback recovery: browser policy or readiness may reject play.
+    });
   }
 
   #startServiceWorkerSource(src: string): void {
