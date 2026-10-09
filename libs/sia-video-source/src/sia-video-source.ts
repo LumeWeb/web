@@ -22,17 +22,33 @@
  * pipeline instead of appending into an orphaned one.
  */
 
-import { type AppKeySeedProvider, encryptToWorker, scrub } from './app-key-handshake.ts';
-import { HTMLVideoElementHost, type HTMLVideoTargetLike } from '@videojs/media/dom/video-host';
-import { type ErrorLike, MediaError, type MediaPreloadType, type MediaStreamType } from '@videojs/media';
-import { mediaErrorEvent, mediaErrorFromWorkerMessage } from './errors.ts';
 import {
-  constructMseMediaSource,
+  type AppKeySeedProvider,
+  encryptToWorker,
+  scrub,
+} from "./app-key-handshake.ts";
+import {
+  HTMLVideoElementHost,
+  type HTMLVideoTargetLike,
+} from "@videojs/media/dom/video-host";
+import {
+  type ErrorLike,
+  MediaError,
+  type MediaPreloadType,
+  type MediaStreamType,
+} from "@videojs/media";
+import { mediaErrorEvent, mediaErrorFromWorkerMessage } from "./errors.ts";
+import {
   detectMseRuntime,
   mseImplementation,
   prepareMediaElementForMse,
-} from './capabilities/mse-runtime.ts';
-import { createConsoleLogger, type LogFields, type Logger, type LogLevelFilter } from './log/logger.ts';
+} from "./capabilities/mse-runtime.ts";
+import {
+  createConsoleLogger,
+  type LogFields,
+  type Logger,
+  type LogLevelFilter,
+} from "./log/logger.ts";
 import {
   type HostDecision,
   hostDecisionKind,
@@ -40,9 +56,8 @@ import {
   HostPlaybackMachine,
   playbackPreference,
   type RecoveryReason,
-  recoveryReason,
-} from './host-playback-machine.ts';
-import { MseAppendPipe } from './mse-pipe.ts';
+} from "./host-playback-machine.ts";
+import { MediaWorkerBackend } from "./media-worker-backend.ts";
 import {
   DEFAULT_FMP4_MIME,
   isWorkerToMainMessage,
@@ -55,7 +70,6 @@ import {
   type WorkerConfig,
   workerErrorCode,
   type WorkerErrorCode,
-  workerLogEventName,
   workerLogLevel,
   type WorkerLogLevel,
   workerMode,
@@ -63,11 +77,9 @@ import {
   type WorkerMsePreference,
   type WorkerToMainMessage,
   WorkerToMainMessageType,
-} from './protocol.ts';
+} from "./protocol.ts";
 
 /** Default props used by the React wrapper's prop-syncing hook. */
-const MSE_BACK_BUFFER_SECONDS = 30;
-
 /**
  * Tolerated overshoot past the worker-vouched duration before a seek is
  * treated as external: the reported duration can trail the real object by a
@@ -83,7 +95,7 @@ const SEEK_DURATION_TOLERANCE_SECONDS = 0.25;
  * `<video>` element, so consumers holding either can subscribe and read the
  * `detail` without re-inferring recovery from media events.
  */
-export const siaRecoveryChange = 'sia-recovery-change' as const;
+export const siaRecoveryChange = "sia-recovery-change" as const;
 
 /**
  * The `siaRecoveryChange` payload. `active: true` opens the window exactly
@@ -94,7 +106,12 @@ export const siaRecoveryChange = 'sia-recovery-change' as const;
  */
 export type RecoveryChangeDetail =
   | { active: false }
-  | { active: true; reason: RecoveryReason; resumeSeconds: number; wantsPlay: boolean };
+  | {
+      active: true;
+      reason: RecoveryReason;
+      resumeSeconds: number;
+      wantsPlay: boolean;
+    };
 
 /**
  * The typed DOM event `SiaVideoSource` dispatches when a load's acceptance
@@ -106,7 +123,7 @@ export type RecoveryChangeDetail =
  * `<video>` element, so consumers holding either can subscribe and read the
  * `detail` — the same pattern as `siaRecoveryChange`.
  */
-export const siaLoadChange = 'sia-load-change' as const;
+export const siaLoadChange = "sia-load-change" as const;
 
 /**
  * The `siaLoadChange` payload — boolean-only. `accepted: true` means the
@@ -135,7 +152,7 @@ export interface SiaLoadChangeDetail {
  * worker pipeline accepted the source with those facts — not that the load is
  * playable/ready, and `durationSeconds` may be `null`.
  */
-export const siaSourceInfoChange = 'sia-source-info-change' as const;
+export const siaSourceInfoChange = "sia-source-info-change" as const;
 
 /**
  * The `siaSourceInfoChange` payload — a closed window (`active: false`, no
@@ -144,8 +161,7 @@ export const siaSourceInfoChange = 'sia-source-info-change' as const;
  * `info`, so the host clears the value when the window closes.
  */
 export type SiaSourceInfoChangeDetail =
-  | { active: false }
-  | { active: true; info: SourceInfo };
+  { active: false } | { active: true; info: SourceInfo };
 
 /**
  * The typed DOM event `SiaVideoSource` dispatches for every worker milestone
@@ -166,7 +182,7 @@ export type SiaSourceInfoChangeDetail =
  * `logger.child('worker')` console forwarding is unchanged; this event is
  * the structured sibling of those log lines, additive to them.
  */
-export const siaWorkerMilestoneChange = 'sia-worker-milestone-change' as const;
+export const siaWorkerMilestoneChange = "sia-worker-milestone-change" as const;
 
 /**
  * The `siaWorkerMilestoneChange` payload: the wire `LOG` facts plus the
@@ -193,16 +209,19 @@ export interface SiaWorkerMilestoneDetail {
  * HELLO reads as `set-log`: that is the one post that tunes the worker's
  * forwarding threshold.
  */
-type RequestAction = 'app-key' | 'attach' | 'play' | 'playhead' | 'seek' | 'set-log' | 'source';
+type RequestAction =
+  "app-key" | "attach" | "play" | "playhead" | "seek" | "set-log" | "source";
 
-const REQUEST_ACTION_BY_TYPE: Readonly<Partial<Record<MainToWorkerMessageType, RequestAction>>> = {
-  [MainToWorkerMessageType.APP_KEY]: 'app-key',
-  [MainToWorkerMessageType.ATTACH]: 'attach',
-  [MainToWorkerMessageType.HELLO]: 'set-log',
-  [MainToWorkerMessageType.PLAY]: 'play',
-  [MainToWorkerMessageType.PLAYHEAD]: 'playhead',
-  [MainToWorkerMessageType.SEEK]: 'seek',
-  [MainToWorkerMessageType.SOURCE]: 'source',
+const REQUEST_ACTION_BY_TYPE: Readonly<
+  Partial<Record<MainToWorkerMessageType, RequestAction>>
+> = {
+  [MainToWorkerMessageType.APP_KEY]: "app-key",
+  [MainToWorkerMessageType.ATTACH]: "attach",
+  [MainToWorkerMessageType.HELLO]: "set-log",
+  [MainToWorkerMessageType.PLAY]: "play",
+  [MainToWorkerMessageType.PLAYHEAD]: "playhead",
+  [MainToWorkerMessageType.SEEK]: "seek",
+  [MainToWorkerMessageType.SOURCE]: "source",
 };
 
 /**
@@ -218,9 +237,9 @@ export const siaVideoDefaultProps: {
   src: string;
   streamType: MediaStreamType;
 } = {
-  preload: 'metadata',
-  src: '',
-  streamType: 'on-demand',
+  preload: "metadata",
+  src: "",
+  streamType: "on-demand",
 };
 
 export interface SiaVideoSourceOptions {
@@ -455,18 +474,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // Identity of the media resource the CURRENT load attached, used to tell a
   // live native event from a dead one. Worker mode holds the request-scoped
   // MediaSourceHandle the worker transferred (the element's srcObject) for the
-  // active load; main mode uses the current object URL (`#objectUrl`). Cleared
+  // active load; main mode uses the current object URL held by the backend. Cleared
   // at every load boundary BEFORE the replaced resource's events arrive, so
   // native events from a superseded pipeline are ignored until the fresh
   // resource genuinely attaches.
   #activeHandle: MediaSourceHandle | null = null;
-
-  // Shared MSE append pipe (main-thread fallback only). Centralizes the
-  // append-queue serialization, back-buffer eviction and end-of-stream deferral
-  // so the main-thread MSE path and the worker-side MSE pipeline exercise one
-  // pipe implementation. Created at `SOURCE_OK`(main) pipeline setup and
-  // aborted on teardown/load reset; `null` in worker mode.
-  #appendPipe: MseAppendPipe | null = null;
 
   // Seed suppliers from the `getAppKeySeed`/`getSharingKeySeed` options or the
   // per-render setters. Holding only the functions keeps seed bytes out of
@@ -548,7 +560,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // request id, element/worker refs, and pending re-attach seconds.
   readonly #machine = new HostPlaybackMachine();
 
-  #mediaSource: MediaSource | null = null;
+  readonly #mediaWorkerBackend: MediaWorkerBackend;
 
   // Monotonic counter for the typed `sia-worker-milestone-change` event: bumps
   // once per accepted worker LOG, never reset (consumers order milestones by
@@ -564,8 +576,6 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // a page's lifetime, and the host needs it for the element-side
   // `disableRemotePlayback` prep and the fail-fast device gate.
   readonly #mseSnapshot = detectMseRuntime();
-
-  #objectUrl: null | string = null;
 
   readonly #options: SiaVideoSourceOptions;
 
@@ -588,8 +598,6 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // position never outlives the confirmation window.
   #pauseConfirmArmedPosition: null | number = null;
 
-  #pending: MainToWorkerMessage[] = [];
-
   // Element position a recovery (decode reload / external-seek restart) wants
   // applied once the FRESH resource actually attaches. Setting `currentTime`
   // immediately after `#sendSource()` runs while the element still holds the
@@ -608,8 +616,6 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
   #preload: MediaPreloadType = siaVideoDefaultProps.preload;
 
-  #ready = false;
-
   // True from the moment a `restart-source` decision announced `active: true`
   // until the recovery window closes (`active: false` was emitted). The host
   // maps the machine's `recovering` window to the typed event; this flag
@@ -621,8 +627,6 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
   #sharingKeySeedProvider: AppKeySeedProvider | undefined;
 
-  #sourceBuffer: null | SourceBuffer = null;
-
   // Whether the ACTIVE load's source information is currently announced as
   // `active: true` (with the worker's `SourceInfo`). Set exactly once per
   // SOURCE_OK — the same accepted load that opens acceptance — and reset (and
@@ -630,7 +634,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // and destroy, so a stale `info` can never leak across loads.
   #sourceInfoNotified = false;
 
-  #src = '';
+  #src = "";
 
   // True when the document-level `visibilitychange` listener is registered
   // (guarded: only in a DOM environment, i.e. a real page, never in a bare
@@ -668,6 +672,22 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#logger = options.logger ?? createConsoleLogger();
     this.#mimeType = options.mimeType;
     this.#workerMse = options.workerMse;
+    this.#mediaWorkerBackend = new MediaWorkerBackend({
+      createWorker: this.#options.createWorker ?? defaultCreateWorker,
+      logger: this.#logger.child("host"),
+      onChunkAppend: (bytes) => this.#mediaWorkerBackend.appendChunk(bytes),
+      onChunkProgress: () => this.dispatchEvent(new Event("progress")),
+      onDecodeFailure: (error) =>
+        this.#reportError(workerErrorCode.decode, errorDescription(error)),
+      onError: this.#onWorkerError,
+      onMessage: this.#onMessage,
+      onMessageError: this.#onWorkerMessageError,
+      onSourceBuffer: () => undefined,
+      onSourceBufferUpdated: () => {
+        this.#mediaWorkerBackend.kickAppendPipe();
+        this.#reportMainBufferedState();
+      },
+    });
     // The machine must start knowing whether the document is hidden (a load
     // started on a hidden tab must not spend retry budget on throttled
     // workers), and must keep learning as visibility changes.
@@ -694,18 +714,18 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // a fatal UI error. This handler runs first and stops that forwarding,
     // then classifies the failure itself — deferral while paused, retry-capped
     // recovery while playing, exhaustion through #reportError.
-    target.addEventListener('error', this.#onNativeError);
+    target.addEventListener("error", this.#onNativeError);
     // Registered BEFORE the base host's native forwarding, so a stale `ended`
     // from a dead resource can stop it from reaching host/video.js ended
     // observers (see `#onEnded`). A genuine current-resource ended is never
     // stopped, so the forwarding still runs for real EOF.
-    target.addEventListener('ended', this.#onEnded);
+    target.addEventListener("ended", this.#onEnded);
     super.attach(target);
-    target.addEventListener('seeking', this.#onSeeking);
-    target.addEventListener('seeked', this.#onSeeked);
-    target.addEventListener('timeupdate', this.#onTimeUpdate);
-    target.addEventListener('play', this.#onPlay);
-    target.addEventListener('pause', this.#onPause);
+    target.addEventListener("seeking", this.#onSeeking);
+    target.addEventListener("seeked", this.#onSeeked);
+    target.addEventListener("timeupdate", this.#onTimeUpdate);
+    target.addEventListener("play", this.#onPlay);
+    target.addEventListener("pause", this.#onPause);
 
     if (this.#worker) {
       // An already-attached host re-negotiates with a fresh HELLO (the same
@@ -716,17 +736,15 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     }
 
     try {
-      this.#worker = (this.#options.createWorker ?? defaultCreateWorker)();
+      this.#worker = this.#mediaWorkerBackend.spawn();
     } catch (error) {
       this.#worker = null;
-      this.#logger.child('host').error('worker.spawn-failed', { message: errorDescription(error) });
+      this.#logger
+        .child("host")
+        .error("worker.spawn-failed", { message: errorDescription(error) });
       this.#reportError(workerErrorCode.network, errorDescription(error));
       return;
     }
-
-    this.#worker.addEventListener('error', this.#onWorkerError);
-    this.#worker.addEventListener('messageerror', this.#onWorkerMessageError);
-    this.#worker.addEventListener('message', this.#onMessage);
     // HELLO negotiates readiness itself, so it must not go through the
     // pending-message buffer — that buffer only drains on HELLO_OK.
     this.#startHandshake();
@@ -737,9 +755,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
    * a MIME string cannot vouch for by itself, so support is only claimed by
    * the programmatic engine, never pre-declared per-type.
    */
-  override canPlayType(type: string): '' {
+  override canPlayType(type: string): "" {
     void type;
-    return '';
+    return "";
   }
 
   destroy(): void {
@@ -748,27 +766,21 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // makes an async seed/encryption chain captured under an older generation
     // drop itself, and clearing the correlation ids makes a late HELLO_OK or
     // ATTACH_OK gate nothing (the override `detach` runs through `super.destroy`
-    // too, so this is defense-in-depth for the instant before that). The host
-    // is not-ready and the handshake buffer is emptied: there is no session
-    // left to flush into.
+    // too, so this is defense-in-depth for the instant before that). The
+    // backend closes its session gate and clears queued intent: there is no
+    // session left to flush into.
     this.#attachGeneration += 1;
     this.#helloRequestId = null;
     this.#attachRequestId = null;
     this.#attachGenerationAtAttach = null;
-    this.#ready = false;
-    this.#pending = [];
+    this.#mediaWorkerBackend.resetQueue();
     // Teardown is posted DIRECTLY (never through #send's not-ready gate): a
     // destroy arriving mid-reload must still reach the worker.
     this.#post({ type: MainToWorkerMessageType.DESTROY });
     const worker = this.#worker;
     this.#worker = null;
 
-    if (worker) {
-      worker.removeEventListener('message', this.#onMessage);
-      worker.removeEventListener('error', this.#onWorkerError);
-      worker.removeEventListener('messageerror', this.#onWorkerMessageError);
-      worker.terminate();
-    }
+    if (worker) this.#mediaWorkerBackend.terminate();
 
     this.#teardownMainThreadMse();
     // A destroyed host keeps no pipeline to recover or resume, so the memory
@@ -804,15 +816,14 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // A detach is a handshake boundary: an async seed/encryption chain from a
     // reload still in flight must not apply into the detached session (the
     // generation bump drops it), and a late HELLO_OK or ATTACH_OK must not gate
-    // anything (the correlation ids are cleared). The host is left not-ready
-    // with an empty handshake buffer: a detach mid-reload must not flush the
-    // buffered intent into the parting session.
+    // anything (the correlation ids are cleared). The backend closes its
+    // session gate and clears queued intent: a detach mid-reload must not
+    // flush traffic into the parting session.
     this.#attachGeneration += 1;
     this.#helloRequestId = null;
     this.#attachRequestId = null;
     this.#attachGenerationAtAttach = null;
-    this.#ready = false;
-    this.#pending = [];
+    this.#mediaWorkerBackend.resetQueue();
     // A detached host's recovery window is over: close any open observation
     // (a re-attach replay re-announces if it recovers again).
     this.#closeRecoveryObservation();
@@ -831,13 +842,13 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // The element's resource identity dies with the detach; a re-attach
     // rebuilds the load and re-identifies it.
     this.#activeHandle = null;
-    this.target?.removeEventListener('error', this.#onNativeError);
-    this.target?.removeEventListener('seeking', this.#onSeeking);
-    this.target?.removeEventListener('seeked', this.#onSeeked);
-    this.target?.removeEventListener('timeupdate', this.#onTimeUpdate);
-    this.target?.removeEventListener('play', this.#onPlay);
-    this.target?.removeEventListener('pause', this.#onPause);
-    this.target?.removeEventListener('ended', this.#onEnded);
+    this.target?.removeEventListener("error", this.#onNativeError);
+    this.target?.removeEventListener("seeking", this.#onSeeking);
+    this.target?.removeEventListener("seeked", this.#onSeeked);
+    this.target?.removeEventListener("timeupdate", this.#onTimeUpdate);
+    this.target?.removeEventListener("play", this.#onPlay);
+    this.target?.removeEventListener("pause", this.#onPause);
+    this.target?.removeEventListener("ended", this.#onEnded);
     // Teardown is posted DIRECTLY (never through #send's not-ready gate): a
     // detach arriving mid-reload must still reach the worker.
     this.#post({ type: MainToWorkerMessageType.DETACH });
@@ -892,41 +903,8 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#emitLoadDetail({ accepted: true });
   }
 
-  #addMainSourceBuffer(mediaSource: MediaSource, mime: string, durationSeconds: null | number): void {
-    if (mediaSource.readyState !== 'open') return;
-    try {
-      if (durationSeconds !== null) mediaSource.duration = durationSeconds;
-      const sourceBuffer = mediaSource.addSourceBuffer(mime);
-      // The pipe waits on `updateend` internally; the kick here (and on the
-      // event) only re-runs the pump for state the option getters observe —
-      // above all the SourceBuffer appearing after bytes were already queued.
-      sourceBuffer.addEventListener('updateend', () => {
-        this.#appendPipe?.kick();
-        this.#reportMainBufferedState();
-      });
-      this.#sourceBuffer = sourceBuffer;
-      this.#appendPipe?.kick();
-      this.#reportMainBufferedState();
-      // The main-thread SourceBuffer opened (counterpart of the worker's
-      // `session.mse-open`): scalar MIME + duration facts only.
-      this.#logger.child('host').info(
-        'mse-open',
-        durationSeconds === null ? { mime } : { durationSeconds, mime },
-      );
-    } catch (error) {
-      // The MIME the host applied was refused — name it, then report decode as
-      // before (counterpart of the worker's `session.mse-open-failed`).
-      this.#logger.child('host').error('mse-open-failed', { mime });
-      this.#reportError(workerErrorCode.decode, errorDescription(error));
-    }
-  }
-
   #appendChunk(bytes: Uint8Array): void {
-    if (!this.#mode || this.#mode !== workerMode.main) {
-      this.dispatchEvent(new Event('progress'));
-      return;
-    }
-    this.#appendPipe?.append(bytes);
+    this.#mediaWorkerBackend.routeChunk(this.#mode, bytes);
   }
 
   // Performs the effects a machine transition decided. Returns true when a
@@ -939,7 +917,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         case hostDecisionKind.deferRepair:
           // Nothing to perform: the machine stored the repair, and the next
           // explicit play/seek consumes it and posts the restart itself.
-          this.#logger.child('host').info('repair.deferred', {
+          this.#logger.child("host").info("repair.deferred", {
             reason: decision.reason,
             resumeSeconds: decision.resumeSeconds,
           });
@@ -995,33 +973,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   }
 
   #beginMainThreadMse(mime: string, durationSeconds: null | number): void {
-    // Each load's main-thread pipeline owns one shared append pipe. The
-    // getters read the live host state so the pipe serializes appends into
-    // whatever SourceBuffer the (possibly still-opening) MediaSource yields,
-    // and it reports fatal append failures through the load's error path.
-    // Sia-specific layers feeding it bytes — CHUNK delivery, the object-URL
-    // plumbing — are unchanged.
-    this.#appendPipe = new MseAppendPipe({
-      backBufferSeconds: MSE_BACK_BUFFER_SECONDS,
-      getMediaSource: () => this.#mediaSource,
-      getPlayheadSeconds: () => this.target?.currentTime ?? 0,
-      getSourceBuffer: () => this.#sourceBuffer,
-      // MSE-pipe diagnostics are forwarded onto the host logger's `host` scope
-      // the same way the worker path's onLog forwarding works: the back-buffer
-      // eviction trace is debug, and the rare best-effort breadcrumbs (failed
-      // eviction /
-      // parser-reset / EOS — all still swallowed, just observable now) are
-      // warn. Scalar detail only, and behavior is unchanged (all hooks
-      // optional).
-      onDiag: (name, detail) => {
-        const sink = this.#logger.child('host');
-        if (name === workerLogEventName.mseEvict) sink.debug(name, detail);
-        else sink.warn(name, detail);
-      },
-      onError: (error) => this.#reportError(workerErrorCode.decode, errorDescription(error)),
-    });
     const target = this.target;
-    if (!target || this.#mediaSource) return;
+    // A repeated SOURCE_OK for this request is harmless. Keep the existing
+    // pipeline rather than replacing a live pipe that still owns queued bytes.
+    if (!target || this.#mediaWorkerBackend.mediaSource) return;
 
     // Only a standard or managed-implementing MSE runtime can play Sia video:
     // anything else — no MSE at all (all iPhone Safari pre-17.1) or only the
@@ -1031,8 +986,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // this backstops a worker-mode session that degrades to main-mode
     // posting.)
     const impl = this.#mseSnapshot.impl;
-    if (impl === mseImplementation.none || impl === mseImplementation.webkitLegacy) {
-      this.#reportError(workerErrorCode.device, 'no-mse');
+    if (
+      impl === mseImplementation.none ||
+      impl === mseImplementation.webkitLegacy
+    ) {
+      this.#reportError(workerErrorCode.device, "no-mse");
       return;
     }
 
@@ -1042,28 +1000,33 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // matching comment), so they fall through to the concrete attempt. On
     // MMS-only runtimes there is no `MediaSource` global, so the check is
     // skipped exactly as it always was on such runtimes.
-    if (typeof MediaSource !== 'undefined' && mime.includes('codecs=') && !MediaSource.isTypeSupported(mime)) {
+    if (
+      typeof MediaSource !== "undefined" &&
+      mime.includes("codecs=") &&
+      !MediaSource.isTypeSupported(mime)
+    ) {
       this.#reportError(workerErrorCode.unsupported, `MIME: ${mime}`);
       return;
     }
 
-    const mediaSource = constructMseMediaSource();
-    this.#mediaSource = mediaSource;
-
-    if (mediaSource.readyState === 'open') {
-      this.#addMainSourceBuffer(mediaSource, mime, durationSeconds);
-    } else {
-      mediaSource.addEventListener('sourceopen', () => this.#addMainSourceBuffer(mediaSource, mime, durationSeconds), {
-        once: true,
-      });
-    }
-
-    const objectUrl = URL.createObjectURL(mediaSource);
-    this.#objectUrl = objectUrl;
-    // Managed runtimes require `disableRemotePlayback = true` BEFORE the
-    // source is attached or `sourceopen` never fires; a no-op for standard.
-    prepareMediaElementForMse(target, this.#mseSnapshot.impl, (name) => this.#logger.child('host').debug(name));
-    target.src = objectUrl;
+    const mediaSource = this.#mediaWorkerBackend.beginMse(
+      mime,
+      durationSeconds,
+      globalThis,
+    );
+    this.#mediaWorkerBackend.attachObjectUrl(
+      mediaSource,
+      target,
+      this.#mseSnapshot.impl,
+    );
+    // Allocate only after target, MediaSource, runtime, and MIME checks pass.
+    // A valid setup owns one pipe for the load; duplicate SOURCE_OK returns
+    // above without replacing its queued bytes.
+    this.#mediaWorkerBackend.createAppendPipe({
+      getMediaSource: () => this.#mediaWorkerBackend.mediaSource,
+      getPlayheadSeconds: () => this.target?.currentTime ?? 0,
+      getSourceBuffer: () => this.#mediaWorkerBackend.sourceBuffer,
+    });
     // The main-MSE replacement resource is now attached (the element is
     // HAVE_NOTHING for it); a recovery's recorded position applies here, the
     // same HAVE_NOTHING position the worker-MSE path gets on HANDLE.
@@ -1110,15 +1073,20 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       if (element.srcObject !== null) element.srcObject = null;
       return;
     }
-    const element = target as unknown as { getAttribute(name: string): null | string; removeAttribute(name: string): void };
-    if (element.getAttribute('src') !== null) element.removeAttribute('src');
+    const element = target as unknown as {
+      getAttribute(name: string): null | string;
+      removeAttribute(name: string): void;
+    };
+    if (element.getAttribute("src") !== null) element.removeAttribute("src");
   }
 
   // Emits the typed load-change event through the attached <video> element,
   // the identical dispatch path (and element→host forwarding) as
   // `#emitRecoveryDetail`.
   #emitLoadDetail(detail: SiaLoadChangeDetail): void {
-    this.target?.dispatchEvent(new CustomEvent<SiaLoadChangeDetail>(siaLoadChange, { detail }));
+    this.target?.dispatchEvent(
+      new CustomEvent<SiaLoadChangeDetail>(siaLoadChange, { detail }),
+    );
   }
 
   // Emits the typed milestone event for one accepted worker LOG: same element
@@ -1146,7 +1114,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // for the types it has listeners on — so a consumer holding either receives
   // it exactly once, never duplicated by dispatching on both sides.
   #emitRecoveryDetail(detail: RecoveryChangeDetail): void {
-    this.target?.dispatchEvent(new CustomEvent<RecoveryChangeDetail>(siaRecoveryChange, { detail }));
+    this.target?.dispatchEvent(
+      new CustomEvent<RecoveryChangeDetail>(siaRecoveryChange, { detail }),
+    );
   }
 
   // Emits the typed source-info-change event through the attached <video>
@@ -1155,14 +1125,16 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // each receive it exactly once.
   #emitSourceInfoDetail(detail: SiaSourceInfoChangeDetail): void {
     this.target?.dispatchEvent(
-      new CustomEvent<SiaSourceInfoChangeDetail>(siaSourceInfoChange, { detail }),
+      new CustomEvent<SiaSourceInfoChangeDetail>(siaSourceInfoChange, {
+        detail,
+      }),
     );
   }
 
   async #encryptAndSendSeed(
     getSeed: AppKeySeedProvider,
     workerPublicKey: Uint8Array,
-    keyType: 'app' | 'sharing',
+    keyType: "app" | "sharing",
     generation: number,
   ): Promise<void> {
     let seed: Uint8Array | undefined;
@@ -1181,7 +1153,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       if (generation !== this.#attachGeneration || this.#destroyed) return;
       // POSTed directly, outside #send's pending buffer: the seed supplier has
       // been consumed at this point, so a future re-attach re-reads it anyway.
-      this.#post({ envelope, requestId: nextRequestId(), type: MainToWorkerMessageType.APP_KEY });
+      this.#post({
+        envelope,
+        requestId: nextRequestId(),
+        type: MainToWorkerMessageType.APP_KEY,
+      });
     } catch (error) {
       // A failure of a SUPERSEDED handshake is not this session's failure: a
       // stale supplier/encryption error must not surface on the current load.
@@ -1205,12 +1181,25 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // `generation` is the handshake this chain belongs to: every outbound step
   // re-checks it against `#attachGeneration`, so an older reload's chain that
   // resolves late drops its envelopes instead of winning the wire.
-  async #encryptAndSendSeeds(workerPublicKey: Uint8Array, generation: number): Promise<void> {
+  async #encryptAndSendSeeds(
+    workerPublicKey: Uint8Array,
+    generation: number,
+  ): Promise<void> {
     if (this.#appKeySeedProvider) {
-      await this.#encryptAndSendSeed(this.#appKeySeedProvider, workerPublicKey, 'app', generation);
+      await this.#encryptAndSendSeed(
+        this.#appKeySeedProvider,
+        workerPublicKey,
+        "app",
+        generation,
+      );
     }
     if (this.#sharingKeySeedProvider) {
-      await this.#encryptAndSendSeed(this.#sharingKeySeedProvider, workerPublicKey, 'sharing', generation);
+      await this.#encryptAndSendSeed(
+        this.#sharingKeySeedProvider,
+        workerPublicKey,
+        "sharing",
+        generation,
+      );
     }
   }
 
@@ -1218,7 +1207,8 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // advance, seek-resolved, exhaustion, source boundary). The machine is the
   // authority on whether a recovery is in flight; the host only repeats it.
   #endRecoveryObservationIfMachineLeft(): void {
-    if (this.#recoveryNotified && !this.#machine.isRecovering) this.#closeRecoveryObservation();
+    if (this.#recoveryNotified && !this.#machine.isRecovering)
+      this.#closeRecoveryObservation();
   }
 
   // True when a native media event on `target` belongs to the media resource
@@ -1232,22 +1222,24 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     if (this.#mode === workerMode.worker) {
       return (
         this.#activeHandle !== null &&
-        (target as unknown as { srcObject: unknown }).srcObject === this.#activeHandle
+        (target as unknown as { srcObject: unknown }).srcObject ===
+          this.#activeHandle
       );
     }
     if (this.#mode === workerMode.main) {
-      return this.#objectUrl !== null && target.src === this.#objectUrl;
+      return (
+        this.#mediaWorkerBackend.objectUrl !== null &&
+        target.src === this.#mediaWorkerBackend.objectUrl
+      );
     }
     return true;
   }
 
   #evictMainBuffer(): void {
-    // Fire-and-forget: the pipe serializes the removal through `flushBuffer`
-    // and runs it on a quiesced SourceBuffer (see `mse-pipe.ts`).
-    void this.#appendPipe?.evictBackBuffer();
+    this.#mediaWorkerBackend.evictBackBuffer();
   }
 
-  // Replays the ONE host intent a rebuilt load honors from the handshake
+  // Replays the ONE queued intent a rebuilt load honors from the handshake
   // buffer: a user SEEK, rebased onto the fresh SOURCE's request id (it was
   // buffered while the host was not-ready, under the request id of the
   // superseded session). PLAY is never replayed from the buffer — it is
@@ -1257,11 +1249,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // scrubbed during a reload), only the LATEST survives: an earlier seek in the
   // same window was superseded and replaying it would make the worker seek to
   // a stale position before the intended target.
-  #flushBufferedSeek(): void {
-    const pending = this.#pending;
-    this.#pending = [];
+  #flushBufferedSeek(pending: MainToWorkerMessage[]): void {
     const requestId = this.#requestId ?? nextRequestId();
-    let lastSeek: Extract<MainToWorkerMessage, { type: MainToWorkerMessageType.SEEK }> | undefined;
+    let lastSeek:
+      | Extract<MainToWorkerMessage, { type: MainToWorkerMessageType.SEEK }>
+      | undefined;
     for (const message of pending) {
       if (message.type === MainToWorkerMessageType.SEEK) lastSeek = message;
     }
@@ -1317,7 +1309,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   //
   // Neither shape routes to the machine: no loadFailed, no restart.
   #handleSeekUnavailable(
-    message: Extract<WorkerToMainMessage, { type: WorkerToMainMessageType.ERROR }>,
+    message: Extract<
+      WorkerToMainMessage,
+      { type: WorkerToMainMessageType.ERROR }
+    >,
   ): void {
     const target = this.target;
     // A time-less report names no position to match or restore, in either
@@ -1339,14 +1334,19 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       // acting would snap the element off the restored position.
       if (
         this.#lastRetargetSeconds !== null &&
-        Math.abs(this.#lastRetargetSeconds - message.time) <= SEEK_DURATION_TOLERANCE_SECONDS
+        Math.abs(this.#lastRetargetSeconds - message.time) <=
+          SEEK_DURATION_TOLERANCE_SECONDS
       ) {
         return;
       }
       const snapBack = this.#snapBackPosition(message.time);
       // A snap-back to the position the element is already stuck on is a
       // no-op write: the browser fires no fresh `seeking`, so skip it.
-      if (Math.abs(target.currentTime - snapBack) <= SEEK_DURATION_TOLERANCE_SECONDS) return;
+      if (
+        Math.abs(target.currentTime - snapBack) <=
+        SEEK_DURATION_TOLERANCE_SECONDS
+      )
+        return;
       target.currentTime = snapBack;
       return;
     }
@@ -1365,16 +1365,20 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // loop; the echo latch stops that.
     if (
       this.#lastRetargetSeconds !== null &&
-      Math.abs(this.#lastRetargetSeconds - message.time) <= SEEK_DURATION_TOLERANCE_SECONDS
+      Math.abs(this.#lastRetargetSeconds - message.time) <=
+        SEEK_DURATION_TOLERANCE_SECONDS
     ) {
       return;
     }
     const restored = this.#snapBackPosition(message.time);
     // Already sitting on the restored position: nothing to do.
-    if (Math.abs(target.currentTime - restored) <= SEEK_DURATION_TOLERANCE_SECONDS) return;
+    if (
+      Math.abs(target.currentTime - restored) <= SEEK_DURATION_TOLERANCE_SECONDS
+    )
+      return;
     // A retarget is a seek: drop chunks still queued for the dead position
     // so the restored run's fresh fragment parses clean.
-    this.#appendPipe?.reset(restored);
+    this.#mediaWorkerBackend.resetAppendPipe(restored);
     // Name the in-flight seek BEFORE posting: the reposition write below
     // puts the element in `seeking`, and a real browser fires a native
     // `seeking` for it. `#onSeeking` matches that echo against this marker
@@ -1413,16 +1417,19 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // The `log` forwarding threshold rides along too, mapped from the host
   // logger's level (see `logThresholdFor`); a silent host omits the field, so
   // the HELLO payload stays byte-identical to the pre-logging wire shape.
-  #helloMessage(): Extract<MainToWorkerMessage, { type: MainToWorkerMessageType.HELLO }> {
+  #helloMessage(): Extract<
+    MainToWorkerMessage,
+    { type: MainToWorkerMessageType.HELLO }
+  > {
     const log = logThresholdFor(this.#logger.level);
     // Presence facts and connection metadata only: seeds and keys never
     // appear, and the configured indexer URL is not a share URL.
-    this.#logger.info('hello', {
+    this.#logger.info("hello", {
       hasAppKeySeed: this.#appKeySeedProvider !== undefined,
       hasSharingSeed: this.#sharingKeySeedProvider !== undefined,
       indexerUrl: this.#workerConfig?.indexerUrl,
       protocol: PROTOCOL_VERSION,
-      threshold: log ?? 'silent',
+      threshold: log ?? "silent",
       workerMse: this.#workerMse,
     });
     return {
@@ -1445,7 +1452,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // rebuffer below what eviction kept, so a user replay to zero / before the
   // retained buffer restarts the source instead of hanging the element in
   // `seeking`, while a post-EOS seek INSIDE the retained buffer stays plain.
-  #isOutOfWindowSeek(seekSeconds: number, bufferedEnd: number, bufferedStart: number): boolean {
+  #isOutOfWindowSeek(
+    seekSeconds: number,
+    bufferedEnd: number,
+    bufferedStart: number,
+  ): boolean {
     if (
       this.#durationSeconds !== null &&
       seekSeconds > this.#durationSeconds + SEEK_DURATION_TOLERANCE_SECONDS
@@ -1477,10 +1488,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // postMessage choke point, so every outbound host→worker message is
   // attributable. DESTROY/DETACH have no request id and are skipped.
   #logRequest(message: MainToWorkerMessage): void {
-    if (!('requestId' in message)) return;
+    if (!("requestId" in message)) return;
     const action = REQUEST_ACTION_BY_TYPE[message.type];
     if (action !== undefined) {
-      this.#logger.debug('request', { action, requestId: message.requestId });
+      this.#logger.debug("request", { action, requestId: message.requestId });
     }
   }
 
@@ -1519,10 +1530,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     if (!isWorkerToMainMessage(event.data)) {
       const envelope = event.data as null | { type?: unknown };
       const type =
-        typeof envelope?.type === 'string' || typeof envelope?.type === 'number'
+        typeof envelope?.type === "string" || typeof envelope?.type === "number"
           ? String(envelope.type)
-          : 'unknown';
-      this.#logger.child('host').debug('protocol.rejected', { type });
+          : "unknown";
+      this.#logger.child("host").debug("protocol.rejected", { type });
       return;
     }
     const message = event.data;
@@ -1548,7 +1559,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         this.#mode = message.mode;
         // The worker accepted our HELLO; `version` is the protocol we spoke,
         // `mode` is the MSE construction site the worker picked for the session.
-        this.#logger.info('hello-ok', { mode: message.mode, version: PROTOCOL_VERSION });
+        this.#logger.info("hello-ok", {
+          mode: message.mode,
+          version: PROTOCOL_VERSION,
+        });
         // Every attach generation plays the current source from scratch: the
         // fresh SOURCE rebuilds worker-side or host-side MSE cleanly, no
         // matter what a previous detach tore down. The worker's attach path
@@ -1568,37 +1582,43 @@ export class SiaVideoSource extends HTMLVideoElementHost {
           // and letting a later recovery resurrect playback.
           this.#settlePauseConfirmIfArmed();
           const target = this.target as HTMLVideoElement | null;
-          const shouldPlay = target !== null && (!target.paused || this.#machine.preference === 'playing');
+          const shouldPlay =
+            target !== null &&
+            (!target.paused || this.#machine.preference === "playing");
           // The re-attach rebuilds the same source's load: recovery state
           // resets but the playback choice survives it.
           this.#machine.send({ type: hostPlaybackEvent.sourceAttach });
           this.#resetLoadState();
           // The fresh SOURCE goes out FIRST, while the host is still not-ready
-          // (`#ready` flips only below): that order is what makes the reload
+          // The rebuilt load is posted before buffered intent is released,
           // atomic — the rebuilt load is on the wire before any buffered intent
           // is re-applied, so the rebased SEEK and the re-stated PLAY below are
           // scoped to THIS load's request id, never the superseded session's.
           this.#sendSource();
-          this.#ready = true;
+          const pending = this.#mediaWorkerBackend.markReady();
           // Release the ONE surviving intent of the handshake window: a user
           // SEEK, rebased onto the fresh load. PLAY is never replayed from the
           // buffer (it is re-stated below from the machine's current choice),
           // and PLAYHEAD was dropped while not-ready.
-          this.#flushBufferedSeek();
+          this.#flushBufferedSeek(pending);
           if (shouldPlay) {
             // Re-stated SOLELY from the current machine playback choice (and
             // the element's live paused state), aimed at the fresh SOURCE's
             // request id so the worker honors it when that load completes —
             // a PLAY the user buffered mid-reload is never resurrected here.
-            this.#post({ requestId: this.#requestId ?? nextRequestId(), type: MainToWorkerMessageType.PLAY });
+            this.#post({
+              requestId: this.#requestId ?? nextRequestId(),
+              type: MainToWorkerMessageType.PLAY,
+            });
           }
         } else {
           // With no source to replay, the session is simply ready.
-          this.#ready = true;
+          this.#mediaWorkerBackend.markReady();
         }
         return;
       case WorkerToMainMessageType.CHUNK:
-        if (message.requestId === this.#requestId) this.#appendChunk(message.bytes);
+        if (message.requestId === this.#requestId)
+          this.#appendChunk(message.bytes);
         return;
       case WorkerToMainMessageType.ENDED:
         // Only the current load may end this MediaSource; a late ENDED from a
@@ -1617,7 +1637,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         if (this.#error) return;
         // The pipe deals endOfStream only after the append queue drains and
         // the SourceBuffer quiesces (see `mse-pipe.ts`).
-        this.#appendPipe?.requestEndOfStream();
+        this.#mediaWorkerBackend.requestEndOfStream();
         return;
       case WorkerToMainMessageType.ERROR: {
         // After a clear (`src = ''`) there is no active load, so a late
@@ -1626,7 +1646,8 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // errors matching the active load — or inherently global ones (no
         // request id) — stand.
         if (message.requestId !== null) {
-          if (this.#requestId === null || message.requestId !== this.#requestId) return;
+          if (this.#requestId === null || message.requestId !== this.#requestId)
+            return;
         }
         // An unavailable seek target is nonfatal: the data at that position
         // cannot be served, but the rest of the source is fine. Snap the
@@ -1645,6 +1666,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // auto-reload, and an unsupported container stays fatal — recovery
         // decisions stay purely in the machine; the host only performs the
         // effects (restart / record a repair / report the error).
+        this.#mediaWorkerBackend.markFailed();
         this.#applyDecisions(
           this.#machine.send({
             kind: message.kind,
@@ -1661,8 +1683,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // ManagedMediaSource `disableRemotePlayback = true` prep must happen
         // here too — a transferred worker-MMS handle never opens otherwise.
         if (target) {
-          prepareMediaElementForMse(target, this.#mseSnapshot.impl, (name) => this.#logger.child('host').debug(name));
-          (target as unknown as { srcObject: unknown }).srcObject = message.handle;
+          prepareMediaElementForMse(target, this.#mseSnapshot.impl, (name) =>
+            this.#logger.child("host").debug(name),
+          );
+          (target as unknown as { srcObject: unknown }).srcObject =
+            message.handle;
         }
         // The transferred handle is now the identity of the live resource:
         // only its native events are trusted until the next load boundary.
@@ -1690,11 +1715,14 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // A worker speaking a different protocol version is incompatible, no
         // matter how much of the message flow happens to match.
         if (message.version !== PROTOCOL_VERSION) {
-          this.#logger.warn('hello-ok.protocol-mismatch', {
+          this.#logger.warn("hello-ok.protocol-mismatch", {
             expectedVersion: PROTOCOL_VERSION,
             gotVersion: message.version,
           });
-          this.#reportError(workerErrorCode.unsupported, `worker protocol ${message.version}`);
+          this.#reportError(
+            workerErrorCode.unsupported,
+            `worker protocol ${message.version}`,
+          );
           return;
         }
         // The session stays NOT-ready through HELLO_OK: host-originated intent
@@ -1711,7 +1739,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // checked against it, so a newer reload/attach/detach/destroy started
         // while the supplies were still being read supersedes it.
         const generation = this.#attachGeneration;
-        if ((this.#appKeySeedProvider || this.#sharingKeySeedProvider) && this.#workerPublicKey) {
+        if (
+          (this.#appKeySeedProvider || this.#sharingKeySeedProvider) &&
+          this.#workerPublicKey
+        ) {
           // #encryptAndSendSeeds only postMessages the APP_KEY envelopes after
           // awaiting the seed suppliers and the worker-key encryption, so
           // posting ATTACH synchronously here would reach the FIFO worker
@@ -1722,7 +1753,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
           // #encryptAndSendSeed, so the session still proceeds and SOURCE
           // fails the same way it would without a seed. The buffered intent is
           // NOT flushed here — ATTACH_OK owns that release.
-          void this.#encryptAndSendSeeds(this.#workerPublicKey, generation).then(() => {
+          void this.#encryptAndSendSeeds(
+            this.#workerPublicKey,
+            generation,
+          ).then(() => {
             // A handshake superseded while its chain ran must not ATTACH: the
             // worker would re-attach under a stale configuration. (Each seed
             // envelope inside the chain is already generation-guarded too.)
@@ -1767,7 +1801,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
           (min, win) => (min === 0 || win.start < min ? win.start : min),
           0,
         );
-        this.dispatchEvent(new Event('progress'));
+        this.dispatchEvent(new Event("progress"));
         return;
       case WorkerToMainMessageType.SOURCE_OK:
         // Only the newest load may drive the pipeline; a late acknowledgement
@@ -1829,7 +1863,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // paused with nothing owed it records one repair; otherwise the load is
     // repaired eagerly, within the retry cap.
     this.#applyDecisions(
-      this.#machine.send({ resumeSeconds: target.currentTime, type: hostPlaybackEvent.nativeError }),
+      this.#machine.send({
+        resumeSeconds: target.currentTime,
+        type: hostPlaybackEvent.nativeError,
+      }),
     );
   };
 
@@ -1881,7 +1918,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     if (this.#applyDecisions(decisions)) return;
     // Deferred playback start (preload 'metadata'/'none'): first play (or a
     // user seek) triggers streaming.
-    this.#send({ requestId: this.#requestId ?? nextRequestId(), type: MainToWorkerMessageType.PLAY });
+    this.#send({
+      requestId: this.#requestId ?? nextRequestId(),
+      type: MainToWorkerMessageType.PLAY,
+    });
   };
 
   #onSeeked = (event: Event) => {
@@ -1918,10 +1958,21 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // resource: the machine consumes the owed repair NOW at the new target,
     // restoring the position without starting playback.
     if (this.#machine.repairOwed !== null) {
-      this.#applyDecisions(this.#machine.send({ seconds: seekSeconds, type: hostPlaybackEvent.seek }));
+      this.#applyDecisions(
+        this.#machine.send({
+          seconds: seekSeconds,
+          type: hostPlaybackEvent.seek,
+        }),
+      );
       return;
     }
-    if (this.#isOutOfWindowSeek(seekSeconds, nativeBufferedEnd(target), nativeBufferedStart(target))) {
+    if (
+      this.#isOutOfWindowSeek(
+        seekSeconds,
+        nativeBufferedEnd(target),
+        nativeBufferedStart(target),
+      )
+    ) {
       // The target can never be satisfied by this load (past the vouched
       // duration, past the delivered buffer once the source ended, or before
       // the retained buffer's front edge after end-of-stream). A bare SEEK
@@ -1929,7 +1980,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       // restart the source at the target instead — the same remedy as decode
       // recovery, retry-capped.
       this.#applyDecisions(
-        this.#machine.send({ seconds: seekSeconds, type: hostPlaybackEvent.seekOutOfWindow }),
+        this.#machine.send({
+          seconds: seekSeconds,
+          type: hostPlaybackEvent.seekOutOfWindow,
+        }),
       );
       return;
     }
@@ -1943,7 +1997,8 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // never matches: the tolerance keeps ordinary user scrubs flowing.
     if (
       this.#lastForwardedSeekSeconds !== null &&
-      Math.abs(this.#lastForwardedSeekSeconds - seekSeconds) <= SEEK_DURATION_TOLERANCE_SECONDS
+      Math.abs(this.#lastForwardedSeekSeconds - seekSeconds) <=
+        SEEK_DURATION_TOLERANCE_SECONDS
     ) {
       return;
     }
@@ -1953,7 +2008,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // seek cut off mid-fragment (Chromium's RunSegmentParserLoop failure).
     // The reset carries the target so the main-thread buffer is repositioned
     // to the sought position (the trimmed output's timestamps rebase to zero).
-    this.#appendPipe?.reset(seekSeconds);
+    this.#mediaWorkerBackend.resetAppendPipe(seekSeconds);
     // Name the in-flight seek so a late `unavailable` report can be matched
     // against it (the load-level request id spans every seek of the load).
     this.#lastForwardedSeekSeconds = seekSeconds;
@@ -1988,7 +2043,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // consecutive-recovery budget. A stalled reload emits no advancing
     // timeupdate at all, keeping its count busy and the loop bounded.
     if (this.#machine.isRecovering && now > this.#lastPlayheadSeconds + 0.05) {
-      this.#logger.child('host').info('recovery.played', { at: 'timeupdate' });
+      this.#logger.child("host").info("recovery.played", { at: "timeupdate" });
       this.#machine.send({ type: hostPlaybackEvent.recoverPlayed });
     }
     // A load that genuinely played again leaves the recovery window: echo the
@@ -2011,7 +2066,8 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // whose restart decision `#applyDecisions` performs like any other.
   #onVisibilityChange = (): void => {
     if (this.#destroyed) return;
-    const hidden = typeof document === 'undefined' || document.visibilityState === 'hidden';
+    const hidden =
+      typeof document === "undefined" || document.visibilityState === "hidden";
     this.#applyDecisions(
       this.#machine.send({
         type: hidden
@@ -2025,9 +2081,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // message, so it is surfaced only here — logged, never thrown; the worker
   // is left for the existing teardown paths to reap.
   #onWorkerError = (event: ErrorEvent): void => {
-    const reason = event.error instanceof Error ? event.error.message : undefined;
-    this.#logger.child('host').error('worker.error', {
-      message: event.message || 'error',
+    const reason =
+      event.error instanceof Error ? event.error.message : undefined;
+    this.#logger.child("host").error("worker.error", {
+      message: event.message || "error",
       reason,
     });
   };
@@ -2035,7 +2092,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // A postMessage round-trip failure (a structured-clone error) has no payload
   // of its own; the event name is the only identity there is.
   #onWorkerMessageError = (): void => {
-    this.#logger.child('host').error('worker.error', { message: 'messageerror' });
+    this.#logger
+      .child("host")
+      .error("worker.error", { message: "messageerror" });
   };
 
   // Announces the ACTIVE load's source information exactly once (the "no
@@ -2053,8 +2112,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
   #post(message: MainToWorkerMessage): void {
     if (!this.#worker) return;
-    this.#worker.postMessage(message);
-    if (message.type === MainToWorkerMessageType.SOURCE) this.#requestId = message.requestId;
+    this.#mediaWorkerBackend.post(message);
+    if (message.type === MainToWorkerMessageType.SOURCE)
+      this.#requestId = message.requestId;
     this.#logRequest(message);
   }
 
@@ -2085,6 +2145,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // failure is never masked by a clean end. `#error` is cleared at every
     // load boundary, so its presence here means *this* load reported an error.
     const error = mediaErrorFromWorkerMessage({ context, kind });
+    this.#mediaWorkerBackend.markFailed();
     this.#error = error;
     this.dispatchEvent(mediaErrorEvent(error));
   }
@@ -2093,11 +2154,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // MSE remains on the host (Firefox's fallback path).
   #reportMainBufferedState(): void {
     if (this.#mode !== workerMode.main) return;
-    const appendPipe = this.#appendPipe;
     const requestId = this.#requestId;
-    const sourceBuffer = this.#sourceBuffer;
+    const sourceBuffer = this.#mediaWorkerBackend.sourceBuffer;
     const target = this.target;
-    if (!appendPipe || requestId === null || !sourceBuffer || !target) return;
+    if (requestId === null || !sourceBuffer || !target) return;
 
     try {
       const buffered = sourceBuffer.buffered;
@@ -2107,7 +2167,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       }));
       this.#post({
         buffered: windows,
-        pendingBytes: appendPipe.pendingBytes,
+        pendingBytes: this.#mediaWorkerBackend.pendingBytes,
         playhead: target.currentTime,
         requestId,
         type: MainToWorkerMessageType.BUFFERED_STATE,
@@ -2172,14 +2232,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // Main-thread fallback state belongs to the old load; a fresh SOURCE_OK
     // rebuilds it. The old load's pipe is permanently stopped and nulled —
     // nothing queued may drain into the next load's SourceBuffer.
-    if (this.#objectUrl) {
-      URL.revokeObjectURL(this.#objectUrl);
-      this.#objectUrl = null;
-    }
-    this.#appendPipe?.abort();
-    this.#appendPipe = null;
-    this.#mediaSource = null;
-    this.#sourceBuffer = null;
+    this.#mediaWorkerBackend.resetMainThreadMse();
     // A source boundary (fresh source / reset / re-attach) supersedes any
     // in-flight recovery: echo the close to the typed event before the new
     // load can announce its own. A restart's own teardown keeps the window
@@ -2192,7 +2245,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // a window was actually open), so a stale `info` never crosses into the
     // fresh load and the fresh SOURCE_OK can re-open it.
     this.#resetSourceInfo();
-    this.dispatchEvent(new Event('emptied'));
+    this.dispatchEvent(new Event("emptied"));
   }
 
   // Resets the announced source-info window to closed exactly once (the "no
@@ -2225,9 +2278,14 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // observed `seeked 3919.08s` → spurious `ended` → emptied/loadstart
   // cascade). So the host never writes currentTime before the fresh resource
   // exposes a usable state; the position write at attach IS that usable state.
-  #restartSource(decision: Extract<HostDecision, { kind: typeof hostDecisionKind.restartSource }>): void {
+  #restartSource(
+    decision: Extract<
+      HostDecision,
+      { kind: typeof hostDecisionKind.restartSource }
+    >,
+  ): void {
     const attempt = this.#machine.attempt;
-    this.#logger.child('host').warn('recovery.restart', {
+    this.#logger.child("host").warn("recovery.restart", {
       attempt,
       play: decision.wantsPlay,
       reason: decision.reason,
@@ -2262,7 +2320,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // when the machine decided playback may resume. A paused element stays
     // paused: the recovery repairs the load, it does not start playback the
     // user never asked for.
-    this.#send({ requestId, time: decision.resumeSeconds, type: MainToWorkerMessageType.SEEK });
+    this.#send({
+      requestId,
+      time: decision.resumeSeconds,
+      type: MainToWorkerMessageType.SEEK,
+    });
     if (decision.wantsPlay) {
       this.#send({ requestId, type: MainToWorkerMessageType.PLAY });
     }
@@ -2281,18 +2343,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
   #send(message: MainToWorkerMessage): void {
     if (!this.#worker) return;
-    if (!this.#ready) {
-      // While the session is negotiating (initial attach / re-attach / reload
-      // window, i.e. between HELLO and ATTACH_OK) host-originated intent must
-      // not leak into the stale session's request flow. SEEK is buffered (the
-      // ATTACH_OK boundary rebases it onto the fresh load), while PLAYHEAD
-      // belongs to a playhead that is NOT the current load's and is dropped
-      // outright so a rebuilt session never replays a stale position.
-      if (message.type === MainToWorkerMessageType.PLAYHEAD) return;
-      this.#pending.push(message);
-      return;
-    }
-    this.#post(message);
+    this.#mediaWorkerBackend.send(message);
   }
 
   // Every SOURCE posts through here — a fresh `src`, an explicit `load()`,
@@ -2304,8 +2355,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // in a generic unsupported error.
   #sendSource(): void {
     const impl = this.#mseSnapshot.impl;
-    if (impl === mseImplementation.none || impl === mseImplementation.webkitLegacy) {
-      this.#reportError(workerErrorCode.device, 'no-mse');
+    if (
+      impl === mseImplementation.none ||
+      impl === mseImplementation.webkitLegacy
+    ) {
+      this.#reportError(workerErrorCode.device, "no-mse");
       return;
     }
     this.#post({
@@ -2352,11 +2406,14 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     const atArmedPosition =
       target !== null &&
       armedPosition !== null &&
-      Math.abs(target.currentTime - armedPosition) < SEEK_DURATION_TOLERANCE_SECONDS;
+      Math.abs(target.currentTime - armedPosition) <
+        SEEK_DURATION_TOLERANCE_SECONDS;
     if (target?.seeking && !atArmedPosition) return;
     // In `pausepending` this settles the retained playing choice to paused;
     // anywhere else (already superseded by a seek/play) it is a no-op.
-    this.#applyDecisions(this.#machine.send({ type: hostPlaybackEvent.pauseConfirmed }));
+    this.#applyDecisions(
+      this.#machine.send({ type: hostPlaybackEvent.pauseConfirmed }),
+    );
   }
 
   // The position an unavailable `time` snaps the element back to: the last
@@ -2370,12 +2427,14 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // load's lifetime.
   #snapBackPosition(deadSeconds: number): number {
     let position =
-      Math.abs(this.#lastPlayheadSeconds - deadSeconds) <= SEEK_DURATION_TOLERANCE_SECONDS
+      Math.abs(this.#lastPlayheadSeconds - deadSeconds) <=
+      SEEK_DURATION_TOLERANCE_SECONDS
         ? 0
         : this.#lastPlayheadSeconds;
     if (
       this.#lastRetargetSeconds !== null &&
-      Math.abs(position - this.#lastRetargetSeconds) <= SEEK_DURATION_TOLERANCE_SECONDS
+      Math.abs(position - this.#lastRetargetSeconds) <=
+        SEEK_DURATION_TOLERANCE_SECONDS
     ) {
       position = 0;
     }
@@ -2402,8 +2461,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   //     buffer survives to its own ATTACH_OK).
   #startHandshake(): void {
     this.#attachGeneration += 1;
-    this.#ready = false;
-    this.#pending = [];
+    this.#mediaWorkerBackend.resetQueue();
     this.#attachRequestId = null;
     this.#attachGenerationAtAttach = null;
     this.#helloRequestId = null;
@@ -2418,8 +2476,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // `visibilitychange` listener once for the host's lifetime (attached or not),
   // so later visibility changes keep the machine in sync.
   #syncVisibility(): void {
-    if (typeof document === 'undefined' || this.#visibilityListenerAttached) return;
-    const hidden = document.visibilityState === 'hidden';
+    if (typeof document === "undefined" || this.#visibilityListenerAttached)
+      return;
+    const hidden = document.visibilityState === "hidden";
     this.#applyDecisions(
       this.#machine.send({
         type: hidden
@@ -2427,26 +2486,17 @@ export class SiaVideoSource extends HTMLVideoElementHost {
           : hostPlaybackEvent.visibilityVisible,
       }),
     );
-    document.addEventListener('visibilitychange', this.#onVisibilityChange);
+    document.addEventListener("visibilitychange", this.#onVisibilityChange);
     this.#visibilityListenerAttached = true;
   }
 
   #teardownMainThreadMse(): void {
-    // Permanently stop the shared pipe: the whole MediaSource is being
-    // discarded, so nothing further may append, evict, or end through it.
-    this.#appendPipe?.abort();
-    this.#appendPipe = null;
-    if (this.#objectUrl) {
-      URL.revokeObjectURL(this.#objectUrl);
-      this.#objectUrl = null;
-    }
-    this.#mediaSource = null;
-    this.#sourceBuffer = null;
+    this.#mediaWorkerBackend.destroyMainThreadMse();
   }
 
   #teardownVisibilityListener(): void {
     if (!this.#visibilityListenerAttached) return;
-    document.removeEventListener('visibilitychange', this.#onVisibilityChange);
+    document.removeEventListener("visibilitychange", this.#onVisibilityChange);
     this.#visibilityListenerAttached = false;
   }
 }
@@ -2471,7 +2521,7 @@ export function forwardWorkerLog(
     type: WorkerToMainMessageType.LOG;
   }>,
 ): void {
-  const sink = logger.child('worker');
+  const sink = logger.child("worker");
   const fields: LogFields = { ...message.detail, requestId: message.requestId };
   switch (message.level) {
     case workerLogLevel.debug:
@@ -2503,19 +2553,21 @@ export function forwardWorkerLog(
 // worker's bar to match the console filter; 'silent' opts the host out of
 // worker LOG entirely by omitting the field (absent = the worker posts
 // nothing), keeping the wire payload byte-identical to before for a muted host.
-export function logThresholdFor(level: LogLevelFilter): undefined | WorkerLogLevel {
+export function logThresholdFor(
+  level: LogLevelFilter,
+): undefined | WorkerLogLevel {
   switch (level) {
-    case 'debug':
+    case "debug":
       return workerLogLevel.debug;
-    case 'error':
+    case "error":
       return workerLogLevel.error;
-    case 'info':
+    case "info":
       return workerLogLevel.info;
-    case 'silent':
+    case "silent":
       return undefined;
-    case 'trace':
+    case "trace":
       return workerLogLevel.debug;
-    case 'warn':
+    case "warn":
       return workerLogLevel.warn;
     default:
       // Unknown/future level: omit the threshold rather than leak debug traffic.
@@ -2530,7 +2582,9 @@ export function logThresholdFor(level: LogLevelFilter): undefined | WorkerLogLev
  * the app's own deploy targets automatically.
  */
 function defaultCreateWorker(): Worker {
-  return new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
+  return new Worker(new URL("./worker.js", import.meta.url), {
+    type: "module",
+  });
 }
 
 function errorDescription(error: unknown): string {
