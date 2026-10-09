@@ -22,6 +22,7 @@ import {
   DEFAULT_SDK_READ_CONCURRENCY,
   ReadBudget,
 } from './ranged-reader.ts';
+import { createSiaTransportPolicy } from './transport/transport-policy.ts';
 import {
   createDefaultSdk,
   defaultPost,
@@ -55,6 +56,10 @@ export {
   type WorkerToMainMessage,
   WorkerToMainMessageType,
 } from './protocol.ts';
+
+// Public alongside `SiaVideoWorkerOptions` so hosts can configure the
+// transport policy without a deep `transport/` import.
+export { createSiaTransportPolicy, type SiaTransportPolicy } from './transport/transport-policy.ts';
 
 export {
   type PostMessage,
@@ -108,6 +113,16 @@ export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = 
   // sink cap before invoking it — and posts without side effects or throw, so
   // a log line can never block the wire.
   const logSink: WorkerLogSink = (message) => post(message);
+  // The root owns one transport policy: every read gets the policy's stall
+  // timeout and the explicit per-download maxBufferedChunks. A host-injected
+  // `policy` wins wholesale; the host's `budget` only seeds the legacy
+  // download-concurrency budget on the default policy built when no `policy`
+  // is injected (it can never override an injected one).
+  const policy =
+    options.policy ??
+    createSiaTransportPolicy({
+      legacyDownloadBudget: options.budget ?? new ReadBudget(DEFAULT_SDK_READ_CONCURRENCY),
+    });
   const workerMseRoot = createWorkerMseRoot({
     backBufferSeconds: MSE_BACK_BUFFER_SECONDS,
     createMediaSource: options.createMediaSource,
@@ -140,7 +155,11 @@ export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = 
     // the same budget the coordinator forwards into each `SiaByteSource` it
     // creates.
     byteSource: {
-      budget: options.budget ?? new ReadBudget(DEFAULT_SDK_READ_CONCURRENCY),
+      // One shared transport policy for every source the worker's
+      // composition creates, so the stall watchdog, the per-download
+      // maxBufferedChunks, and the legacy download-concurrency budget can
+      // never drift apart between reads.
+      policy,
       ...(options.cache ? { cache: options.cache } : {}),
     },
     capabilities: options.capabilities,

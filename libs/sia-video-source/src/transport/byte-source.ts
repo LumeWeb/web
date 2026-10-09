@@ -45,11 +45,6 @@ export interface ReadOptions {
   loadGeneration: number;
   /** Optional external abort; aborts this read with the signal's reason. */
   signal?: AbortSignal;
-  /**
-   * Stall watchdog in ms: abort+error when a transport read yields no bytes
-   * for this long. Sia-only; a memory source can never stall.
-   */
-  stallTimeoutMs?: number;
 }
 
 interface ReadHandle {

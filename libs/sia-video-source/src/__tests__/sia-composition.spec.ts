@@ -32,6 +32,7 @@ import {
   WorkerToMainMessageType,
 } from '../protocol.ts';
 import { ReadBudget, type SiaObjectLike } from '../ranged-reader.ts';
+import { createSiaTransportPolicy } from '../transport/transport-policy.ts';
 import { createSiaWorkerComposition } from '../session/sia-composition.ts';
 import {
   defaultSupportsWorkerMse,
@@ -236,7 +237,9 @@ describe('createSiaByteSourceFactory (real Sia transport)', () => {
       },
       object: (_key: string): Promise<SiaObjectLike> => Promise.resolve(fakeObject(payload.length)),
     };
-    const factory = createSiaByteSourceFactory(sdk, { budget: new ReadBudget(1) });
+    const factory = createSiaByteSourceFactory(sdk, {
+      policy: createSiaTransportPolicy({ legacyDownloadBudget: new ReadBudget(1) }),
+    });
     const first = await factory('a');
     const second = await factory('b');
 

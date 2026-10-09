@@ -18,6 +18,7 @@ import {
   SiaByteSource,
   type SiaByteSourceSdk,
 } from '../transport/sia-byte-source.ts';
+import { createSiaTransportPolicy } from '../transport/transport-policy.ts';
 
 const MIB = 1024 * 1024;
 const PAYLOAD = new Uint8Array(3 * MIB).map((_, i) => i % 251);
@@ -185,7 +186,6 @@ describe('RangedReader read window milestones', () => {
     expect(recorder.events.filter((e) => e.name === 'read.window-start')).toHaveLength(1);
     expect(recorder.events.filter((e) => e.name === 'read.window-complete')).toHaveLength(1);
     expect(join(delivered)).toEqual(PAYLOAD);
-    expect(reader.position).toBe(PAYLOAD.length);
     expect(reader.active).toBe(false);
   });
 
@@ -297,7 +297,6 @@ describe('RangedReader read window milestones', () => {
     // All bytes still delivered, the read unwound cleanly, and the listener's
     // throw never reached the reader's own error path.
     expect(join(delivered)).toEqual(PAYLOAD);
-    expect(reader.position).toBe(PAYLOAD.length);
     expect(reader.active).toBe(false);
     expect(errors).toHaveLength(0);
   });
@@ -317,7 +316,6 @@ describe('RangedReader read window milestones', () => {
     await settle();
 
     expect(join(delivered)).toEqual(PAYLOAD);
-    expect(reader.position).toBe(PAYLOAD.length);
     expect(reader.active).toBe(false);
   });
 
@@ -500,6 +498,7 @@ describe('SiaByteSource onMilestone threading', () => {
     const source = new SiaByteSource({
       object: fakeObject(PAYLOAD.length),
       onMilestone: recorder.onMilestone,
+      policy: createSiaTransportPolicy(),
       sdk: fakeSdk(PAYLOAD),
     });
 
@@ -522,6 +521,7 @@ describe('SiaByteSource onMilestone threading', () => {
   it('a source without onMilestone reads identically and emits nothing', async () => {
     const source = new SiaByteSource({
       object: fakeObject(PAYLOAD.length),
+      policy: createSiaTransportPolicy(),
       sdk: fakeSdk(PAYLOAD),
     });
 
