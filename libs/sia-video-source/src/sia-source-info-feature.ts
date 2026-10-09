@@ -55,11 +55,14 @@
  * `SourceInfo`, so `sourceInfo.active ? sourceInfo.info : …` compiles to a
  * plain payload read.
  */
-import { definePlayerFeature, type PlayerFeature } from '@videojs/core/dom';
-import type { Media } from '@videojs/media';
-import { createSelector } from '@videojs/store';
-import type { SourceInfo } from './protocol.ts';
-import { siaSourceInfoChange, type SiaSourceInfoChangeDetail } from './sia-video-source.ts';
+import { definePlayerFeature, type PlayerFeature } from "@videojs/core/dom";
+import type { Media } from "@videojs/media";
+import { createSelector } from "@videojs/store";
+import type { SourceInfo } from "./protocol.ts";
+import {
+  siaSourceInfoChange,
+  type SiaSourceInfoChangeDetail,
+} from "./sia-video-source.ts";
 
 /**
  * The source-info facts a consumer reads off the player store.
@@ -83,7 +86,8 @@ export interface SiaSourceInfoState {
 /** A source-info window in its two states: closed, or open with the payload. */
 export type SiaSourceInfoWindow =
   | { active: false }
-  | { active: true; info: SourceInfo };
+  | { active: true; info: SourceInfo; kind: "worker" }
+  | { active: true; info?: never; kind: "native" };
 
 /**
  * A media capable of emitting the Sia source-info event. The video.js `Media`
@@ -92,7 +96,10 @@ export type SiaSourceInfoWindow =
  * structural view the `SiaVideoSource` host satisfies (it forwards element
  * events to host listeners for the types that have a listener).
  */
-type SiaSourceInfoCapable = Pick<Media, 'addEventListener' | 'removeEventListener'> & {
+type SiaSourceInfoCapable = Pick<
+  Media,
+  "addEventListener" | "removeEventListener"
+> & {
   addEventListener(
     type: typeof siaSourceInfoChange,
     listener: (event: SiaSourceInfoChangeEvent) => void,
@@ -119,26 +126,35 @@ function inertSourceInfoState(): SiaSourceInfoState {
  * `@videojs/core/dom` and `@videojs/store`, so a non-React v10 consumer needs
  * neither the React subpath of the video.js stack nor React itself.
  */
-export const siaSourceInfoFeature: PlayerFeature<SiaSourceInfoState> = definePlayerFeature({
-  attach({ set, signal, target }) {
-    const media = target.media as SiaSourceInfoCapable;
-    const onSourceInfoChange = (event: SiaSourceInfoChangeEvent): void => {
-      const detail = event.detail;
-      if (!detail) return;
-      if (detail.active) {
-        set({ sourceInfo: { active: true, info: detail.info } });
-        return;
-      }
-      // The host closes a source-info window exactly once with `active: false`;
-      // restore the closed branch so a later consumer never reads a stale
-      // payload from a superseded load.
-      set(inertSourceInfoState());
-    };
-    media.addEventListener(siaSourceInfoChange, onSourceInfoChange, { signal });
-  },
-  name: 'siaSourceInfo',
-  state: inertSourceInfoState,
-});
+export const siaSourceInfoFeature: PlayerFeature<SiaSourceInfoState> =
+  definePlayerFeature({
+    attach({ set, signal, target }) {
+      const media = target.media as SiaSourceInfoCapable;
+      const onSourceInfoChange = (event: SiaSourceInfoChangeEvent): void => {
+        const detail = event.detail;
+        if (!detail) return;
+        if (detail.active) {
+          if (detail.kind === "native") {
+            set({ sourceInfo: { active: true, kind: "native" } });
+            return;
+          }
+          set({
+            sourceInfo: { active: true, info: detail.info, kind: "worker" },
+          });
+          return;
+        }
+        // The host closes a source-info window exactly once with `active: false`;
+        // restore the closed branch so a later consumer never reads a stale
+        // payload from a superseded load.
+        set(inertSourceInfoState());
+      };
+      media.addEventListener(siaSourceInfoChange, onSourceInfoChange, {
+        signal,
+      });
+    },
+    name: "siaSourceInfo",
+    state: inertSourceInfoState,
+  });
 
 /**
  * Reads the Sia source-info slice off a player store's flat state; `undefined`
