@@ -206,6 +206,88 @@ function trackUnhandledRejections(): { count: () => number; dispose: () => void 
   };
 }
 
+// The reader is an exact-range transport: every `start(offset, length)` reads
+// precisely that window. It has no persistent playback position or `seek()`;
+// a new `start()` is the only way to change what is read, and the object cache
+// re-serves windows a prior read already delivered.
+describe('RangedReader exact-range API', () => {
+  it('exposes no seek() and no persistent position state', () => {
+    const delivered: Delivered[] = [];
+    const reader = newReader(PAYLOAD, delivered);
+    expect('seek' in reader).toBe(false);
+    expect('position' in reader).toBe(false);
+  });
+
+  it('reads only the exact range each start() requests, independent of prior reads', async () => {
+    const delivered: Delivered[] = [];
+    const cache = new LruChunkCache(64);
+    const requests: { length: number; offset: number }[] = [];
+    const reader = new RangedReader({
+      cache,
+      chunkSize: CHUNK_SIZE,
+      object: fakeObject(PAYLOAD.length),
+      onChunk: (bytes, position) => delivered.push({ bytes, position }),
+      sdk: {
+        download: (object, options) => {
+          requests.push({ length: options?.length ?? 0, offset: options?.offset ?? 0 });
+          return fakeSdk(PAYLOAD).download(object, options);
+        },
+      },
+    });
+
+    // A full read first, then a second, narrower, earlier range. The request
+    // must name its own window; it cannot carry state from the first.
+    reader.start(0, PAYLOAD.length);
+    await settle();
+    delivered.length = 0;
+    reader.start(8 * 1024, 4 * 1024);
+    await settle();
+
+    expect(requests).toEqual([
+      { length: PAYLOAD.length, offset: 0 },
+      { length: 4 * 1024, offset: 8 * 1024 },
+    ]);
+    // The second read delivered exactly [8 KiB, 12 KiB), at the right offsets.
+    expect(delivered).toHaveLength(1);
+    expect(delivered[0].bytes).toEqual(PAYLOAD.slice(8 * 1024, 12 * 1024));
+    expect(delivered[0].position).toBe(8 * 1024);
+    expect(join(delivered)).toEqual(PAYLOAD.slice(8 * 1024, 12 * 1024));
+    expect(reader.active).toBe(false);
+  });
+
+  it('re-serves a previously delivered range from the object cache without a new download', async () => {
+    const delivered: Delivered[] = [];
+    const cache = new LruChunkCache(64);
+    const downloads = { count: 0 };
+    const reader = new RangedReader({
+      cache,
+      chunkSize: CHUNK_SIZE,
+      object: fakeObject(PAYLOAD.length),
+      onChunk: (bytes, position) => delivered.push({ bytes, position }),
+      sdk: {
+        download: (object, options) => {
+          downloads.count++;
+          return fakeSdk(PAYLOAD).download(object, options);
+        },
+      },
+    });
+
+    reader.start(0, CHUNK_SIZE);
+    await settle();
+    const first = join(delivered);
+    delivered.length = 0;
+
+    // Re-reading the identical window is served entirely from the object
+    // cache: no second SDK download, byte-identical delivery.
+    reader.start(0, CHUNK_SIZE);
+    await settle();
+
+    expect(downloads.count).toBe(1);
+    expect(join(delivered)).toEqual(first);
+    expect(reader.active).toBe(false);
+  });
+});
+
 describe('RangedReader', () => {
   it('delivers the whole payload from offset 0', async () => {
     const delivered: Delivered[] = [];
@@ -239,7 +321,6 @@ describe('RangedReader', () => {
     // Exactly one download spans the whole requested range with exact
     // offset/length — never tiled into multiple SDK requests.
     expect(requests).toEqual([{ length: 24 * 1024, offset: 16 * 1024 }]);
-    expect(reader.position).toBe(40 * 1024);
     expect(reader.active).toBe(false);
 
     const out = new Uint8Array(24 * 1024);
@@ -294,8 +375,8 @@ describe('RangedReader', () => {
     const delivered: Delivered[] = [];
     const reader = newReader(PAYLOAD, delivered);
     reader.start(0);
-    // Seek fast enough that the first run is still awaiting its stream read.
-    reader.seek(32 * 1024);
+    // Restart fast enough that the first run is still awaiting its stream read.
+    reader.start(32 * 1024);
 
     expect(reader.active).toBe(true);
     await settle();
@@ -304,31 +385,44 @@ describe('RangedReader', () => {
     expect(delivered.length).toBeGreaterThan(0);
     expect(join(delivered)).toEqual(PAYLOAD.slice(32 * 1024));
     expect(reader.active).toBe(false);
-    expect(reader.position).toBe(PAYLOAD.length);
   });
 
   it('storing a new length at the same offset evicts the stale window', () => {
     const cache = new LruChunkCache(8);
-    cache.put(0, 10, new Uint8Array(10));
-    cache.put(0, 12, new Uint8Array(12));
+    cache.put('obj', 0, 10, new Uint8Array(10));
+    cache.put('obj', 0, 12, new Uint8Array(12));
 
     // Only the fresh window remains; the `0:10` twin is unreachable.
     expect(cache.size).toBe(1);
-    expect(cache.get(0, 12)).toEqual(new Uint8Array(12));
+    expect(cache.get('obj', 0, 12)).toEqual(new Uint8Array(12));
+  });
+
+  it('keeps entries for different objects separate at the same offset and length', () => {
+    const cache = new LruChunkCache(8);
+    cache.put('a', 0, 10, new Uint8Array(10).fill(1));
+    cache.put('b', 0, 10, new Uint8Array(10).fill(2));
+
+    // The two objects occupy the same range coordinates; their bytes must not mix.
+    expect(cache.size).toBe(2);
+    expect(cache.get('a', 0, 10)).toEqual(new Uint8Array(10).fill(1));
+    expect(cache.get('b', 0, 10)).toEqual(new Uint8Array(10).fill(2));
+    expect(cache.takeAt('a', 0)).toEqual(new Uint8Array(10).fill(1));
+    expect(cache.takeAt('b', 0)).toEqual(new Uint8Array(10).fill(2));
+    expect(cache.size).toBe(0);
   });
 
   it('keeps a replacement window reachable when eviction removes its consumed twin', () => {
     const cache = new LruChunkCache(1);
-    cache.put(0, 10, new Uint8Array(10));
-    expect(cache.takeAt(0)).toEqual(new Uint8Array(10)); // consumes the offset index
-    cache.put(0, 12, new Uint8Array(12)); // reindexes offset 0 → 12
+    cache.put('obj', 0, 10, new Uint8Array(10));
+    expect(cache.takeAt('obj', 0)).toEqual(new Uint8Array(10)); // consumes the offset index
+    cache.put('obj', 0, 12, new Uint8Array(12)); // reindexes offset 0 → 12
 
     // Even with no further put, offset 0 must still resolve to the fresh 12.
-    expect(cache.takeAt(0)).toEqual(new Uint8Array(12));
-    expect(cache.takeAt(0)).toBeUndefined();
+    expect(cache.takeAt('obj', 0)).toEqual(new Uint8Array(12));
+    expect(cache.takeAt('obj', 0)).toBeUndefined();
   });
 
-  it('replays contiguous cached windows across a backward seek without re-downloading', async () => {
+  it('replays contiguous cached windows across a backward re-read without re-downloading', async () => {
     const delivered: Delivered[] = [];
     const cache = new LruChunkCache(64);
     const downloads = { count: 0 };
@@ -348,13 +442,12 @@ describe('RangedReader', () => {
     await settle();
     const afterFirstRead = delivered.length;
 
-    reader.seek(CHUNK_SIZE);
+    reader.start(CHUNK_SIZE);
     await settle();
 
-    // Cached windows replay synchronously and fully satisfy the seek — no
+    // Cached windows replay synchronously and fully satisfy the re-read; no
     // further network read is needed.
     expect(reader.active).toBe(false);
-    expect(reader.position).toBe(PAYLOAD.length);
     expect(delivered[afterFirstRead].position).toBe(CHUNK_SIZE);
     expect(join(delivered.slice(afterFirstRead))).toEqual(PAYLOAD.slice(CHUNK_SIZE));
     expect(downloads.count).toBe(1);
@@ -450,7 +543,6 @@ describe('RangedReader deterministic stream cancel on teardown', () => {
     // The full range was delivered exactly; `#run` exited on position === end
     // without the pull source ever self-closing, so the stream is still open.
     expect(join(delivered)).toEqual(PAYLOAD);
-    expect(reader.position).toBe(PAYLOAD.length);
     expect(reader.active).toBe(false);
     // Even though the read is byte-exact, the open stream is now cancelled
     // (once) rather than dropped.
@@ -460,7 +552,7 @@ describe('RangedReader deterministic stream cancel on teardown', () => {
 });
 
 // The lazy dual-seed adapter (worker-runtime.ts) may hand the reader a
-// download that has not resolved when a seek/stop lands. Whatever the SDK
+// download that has not resolved when a new read/stop lands. Whatever the SDK
 // promised, a resolved stream stays owned until EOF or cancel, so a stale
 // async stream must be cancelled — never dropped still open (leaking its
 // WebTransport sessions).
@@ -497,7 +589,7 @@ describe('RangedReader delayed (promise) downloads', () => {
     }
   });
 
-  it('cancels only the stale async download when a seek replaces it', async () => {
+  it('cancels only the stale async download when a new read replaces it', async () => {
     const errors: unknown[] = [];
     const delivered: Delivered[] = [];
     const sdk = deferredSdk(PAYLOAD);
@@ -510,7 +602,7 @@ describe('RangedReader delayed (promise) downloads', () => {
     });
 
     reader.start(0);
-    reader.seek(CHUNK_SIZE);
+    reader.start(CHUNK_SIZE);
     // Resolve the superseded (offset 0) download first, then the current one.
     sdk.resolve(0);
     await settle();
@@ -521,7 +613,6 @@ describe('RangedReader delayed (promise) downloads', () => {
     // its own load generation and must not be touched.
     expect(sdk.cancelled).toEqual([0]);
     expect(join(delivered)).toEqual(PAYLOAD.slice(CHUNK_SIZE));
-    expect(reader.position).toBe(PAYLOAD.length);
     expect(reader.active).toBe(false);
     expect(errors).toEqual([]);
   });
@@ -539,7 +630,7 @@ describe('RangedReader delayed (promise) downloads', () => {
     });
 
     reader.start(0);
-    reader.seek(CHUNK_SIZE);
+    reader.start(CHUNK_SIZE);
     // Resolve and drain the current download fully first, then hold the stale
     // one resolving late — no long-lived leak, no state corruption.
     sdk.resolve(1);
@@ -549,7 +640,6 @@ describe('RangedReader delayed (promise) downloads', () => {
 
     expect(sdk.cancelled).toEqual([0]);
     expect(join(delivered)).toEqual(PAYLOAD.slice(CHUNK_SIZE));
-    expect(reader.position).toBe(PAYLOAD.length);
     expect(reader.active).toBe(false);
     expect(errors).toEqual([]);
   });
@@ -577,7 +667,6 @@ describe('RangedReader delayed (promise) downloads', () => {
       // report an error the caller already moved past.
       expect(errors).toEqual([]);
       expect(reader.active).toBe(false);
-      expect(reader.position).toBe(0);
       expect(delivered).toEqual([]);
       expect(unhandled.count()).toBe(0);
     } finally {
@@ -603,7 +692,6 @@ describe('RangedReader delayed (promise) downloads', () => {
     // not over-eagerly cancel a stream that is meant to deliver.
     expect(sdk.cancelled).toEqual([]);
     expect(join(delivered)).toEqual(PAYLOAD);
-    expect(reader.position).toBe(PAYLOAD.length);
     expect(reader.active).toBe(false);
   });
 
@@ -692,7 +780,6 @@ describe('RangedReader retries on transient read failure', () => {
     // window from the start offset and delivers it exactly once.
     expect(flaky.requests).toEqual([{ length: PAYLOAD.length, offset: 0 }, { length: PAYLOAD.length, offset: 0 }]);
     expect(join(delivered)).toEqual(PAYLOAD);
-    expect(reader.position).toBe(PAYLOAD.length);
     expect(reader.active).toBe(false);
     expect(errors).toEqual([]);
   });
@@ -736,7 +823,6 @@ describe('RangedReader retries on transient read failure', () => {
     // re-download would re-deliver the already-consumed 512B.
     expect(requests[1]).toEqual({ length: PAYLOAD.length - partialAfterFirst, offset: partialAfterFirst });
     expect(join(delivered)).toEqual(PAYLOAD);
-    expect(reader.position).toBe(PAYLOAD.length);
     expect(reader.active).toBe(false);
   });
 

@@ -1,13 +1,16 @@
 /**
- * Seek-aware read loop over the Sia SDK's ranged download API
+ * Exact-range read loop over the Sia SDK's ranged download API
  * (`Sdk.download(object, { offset, length })` → `ReadableStream`).
  *
- * A seek cancels the in-flight stream (the SDK aborts its WebTransport shard
- * recovery on drop) and starts a fresh download from the target byte offset;
- * a small LRU chunk cache re-serves recently delivered ranges so small
- * re-reads and short backward seeks never touch the network. The Sia SDK and
- * pinned-object handle are injected, which keeps this module testable and
- * lets the caller own SDK registration.
+ * Each read targets one explicit byte range: `start(offset, length)` downloads
+ * exactly that window, there is no persistent playback position, and a new
+ * `start()` (or `stop()`) cancels whatever stream is in flight (the SDK
+ * aborts its WebTransport shard recovery on drop) before the new window
+ * begins. A small LRU chunk cache re-serves previously delivered exact
+ * windows when a later read starts at a cached window boundary; it does not
+ * merge overlapping windows. The Sia SDK and pinned-object handle are injected,
+ * which keeps this module testable
+ * and lets the caller own SDK registration.
  */
 
 import type { Slab } from '@siafoundation/sia-storage';
@@ -52,7 +55,7 @@ export interface RangedReaderOptions {
    * retries on a transient failure (a download-open throw, a stream error, or
    * a short/dropped read that delivered < expected including zero bytes).
    * Defaults to 3 (`DEFAULT_MAX_ATTEMPTS`, i.e. two retries). A run superseded
-   * by a seek/stop, the stall watchdog (which has its own semantics), or a
+   * by a new start/stop, the stall watchdog (which has its own semantics), or a
    * throwing `onChunk` (the caller's own handler, never a transport blip) is
    * never retried; after the budget is exhausted the failure is reported
    * exactly as before.
@@ -150,19 +153,21 @@ export interface SiaSdkLike {
 }
 
 /**
- * Exact-window LRU cache. Keyed by `(offset, length)` pairs as delivered, so
- * hit rates follow the download window shape: good for re-reads of, and
- * backward seeks within, buffered history; a miss otherwise.
+ * Exact-window LRU cache. Keyed by object id plus `(offset, length)` as
+ * delivered, so two distinct objects that happen to be read at the same range
+ * coordinates never share cached bytes: hit rates follow the download window
+ * shape (good for re-reads of, and backward re-reads within, buffered history,
+ * a miss otherwise) within one object.
  */
 export class LruChunkCache {
   get size(): number {
     return this.#entries.size;
   }
   readonly #capacity: number;
-  readonly #entries = new Map<string, Uint8Array>();
+  readonly #entries = new Map<string, { bytes: Uint8Array; length: number; objectId: string; offset: number }>();
 
-  /** offset → length, for finding a window that starts at a given position. */
-  readonly #offsets = new Map<number, number>();
+  /** `${objectId}:${offset}` → length, for finding a window that starts at a given position. */
+  readonly #offsets = new Map<string, number>();
 
   /** @param capacity - Maximum number of chunks held; oldest evicted first. */
   constructor(capacity = 64) {
@@ -174,82 +179,82 @@ export class LruChunkCache {
     this.#offsets.clear();
   }
 
-  /** Returns the cached bytes spanning `[offset, offset + length)`, refreshing recency. */
-  get(offset: number, length: number): Uint8Array | undefined {
-    const key = `${offset}:${length}`;
-    const bytes = this.#entries.get(key);
-    if (bytes === undefined) return undefined;
+  /** Returns the cached bytes spanning `[offset, offset + length)` of `objectId`, refreshing recency. */
+  get(objectId: string, offset: number, length: number): Uint8Array | undefined {
+    const key = entryKey(objectId, offset, length);
+    const entry = this.#entries.get(key);
+    if (entry === undefined) return undefined;
     this.#entries.delete(key);
-    this.#entries.set(key, bytes);
-    return bytes;
+    this.#entries.set(key, entry);
+    return entry.bytes;
   }
 
-  /** Stores bytes for one delivered window, evicting the least-recent chunk. */
-  put(offset: number, length: number, bytes: Uint8Array): void {
-    const previous = this.#offsets.get(offset);
+  /** Stores bytes for one delivered window of `objectId`, evicting the least-recent chunk. */
+  put(objectId: string, offset: number, length: number, bytes: Uint8Array): void {
+    const offsetKey = `${objectId}:${offset}`;
+    const previous = this.#offsets.get(offsetKey);
     if (previous !== undefined) {
       // A re-put with a different length replaces the offset index; purge the
       // stale twin so the cache never accumulates unreachable entries.
-      this.#offsets.delete(offset);
-      this.#entries.delete(`${offset}:${previous}`);
+      this.#offsets.delete(offsetKey);
+      this.#entries.delete(entryKey(objectId, offset, previous));
     }
-    const key = `${offset}:${length}`;
+    const key = entryKey(objectId, offset, length);
     if (this.#entries.has(key)) {
       this.#entries.delete(key);
-      this.#offsets.delete(offset);
+      this.#offsets.delete(offsetKey);
     }
-    this.#entries.set(key, bytes);
-    this.#offsets.set(offset, length);
+    this.#entries.set(key, { bytes, length, objectId, offset });
+    this.#offsets.set(offsetKey, length);
 
     while (this.#entries.size > this.#capacity) {
       const oldest = this.#entries.keys().next().value;
       if (oldest === undefined) break;
-      const [start, end] = oldest.split(':');
+      const evicted = this.#entries.get(oldest) as { length: number; objectId: string; offset: number };
       this.#entries.delete(oldest);
       // The evicted offset may already index a newer replacement window; only
       // the index entry belonging to this evicted window may go.
-      if (this.#offsets.get(Number(start)) === Number(end)) {
-        this.#offsets.delete(Number(start));
+      const evictedOffsetKey = `${evicted.objectId}:${evicted.offset}`;
+      if (this.#offsets.get(evictedOffsetKey) === evicted.length) {
+        this.#offsets.delete(evictedOffsetKey);
       }
-      void end;
     }
   }
 
-  /** Returns the window cached at exactly `offset`, if one starts there. Dropping the index also drops the cached twin itself; a later re-put at the same offset then has no orphan to strand. */
-  takeAt(offset: number): Uint8Array | undefined {
-    const length = this.#offsets.get(offset);
+  /** Returns the window cached at exactly `offset` of `objectId`, if one starts there. Dropping the index also drops the cached twin itself; a later re-put at the same offset then has no orphan to strand. */
+  takeAt(objectId: string, offset: number): Uint8Array | undefined {
+    const length = this.#offsets.get(`${objectId}:${offset}`);
     if (length === undefined) return undefined;
-    const bytes = this.get(offset, length);
-    if (bytes === undefined) {
-      this.#offsets.delete(offset);
+    const entry = this.#entries.get(entryKey(objectId, offset, length));
+    if (entry === undefined) {
+      this.#offsets.delete(`${objectId}:${offset}`);
       return undefined;
     }
-    this.#offsets.delete(offset);
-    this.#entries.delete(`${offset}:${length}`);
-    return bytes;
+    this.#offsets.delete(`${objectId}:${offset}`);
+    this.#entries.delete(entryKey(objectId, offset, length));
+    return entry.bytes;
   }
 }
 
+
 /**
- * Owns one logical playback position. `seek(offset)` cancels whatever read is
- * in flight and restarts from the new offset; delivered chunks are cached
- * first, replayed while they chain contiguously, and the network read resumes
- * from the first cache miss.
+ * Reads one exact byte range at a time from a pinned Sia object.
+ * `start(offset, length)` serves exactly `[offset, offset + length)` (clamped
+ * to the object size) with a single ranged SDK download; there is no
+ * persistent playback position and no seeking. Cached windows already
+ * covering the requested range are replayed first, and the network read
+ * resumes from the first cache miss.
  */
 export class RangedReader {
   /** Whether a network read is currently in flight. */
   get active(): boolean {
     return this.#reader !== null;
   }
-  /** Absolute byte offset this reader is positioned at. */
-  get position(): number {
-    return this.#position;
-  }
   /** Object payload size in bytes. */
   get size(): number {
     return objectSize(this.#options.object);
   }
-  /** Cumulative bytes handed to `onChunk` since construction; monotonic, never reset on seek. */
+  /** Cumulative bytes handed to `onChunk` since construction; monotonic across all reads of this reader. */
   #bytesRead = 0;
   readonly #cache: LruChunkCache;
   // Per-run supersede counter; `start()`/`stop()` bump it so an abandoned run
@@ -259,7 +264,9 @@ export class RangedReader {
   #nextBytesMilestone = MIB;
   readonly #options: RangedReaderOptions;
 
-  #position = 0;
+  // The end of the range the current run is serving (null = read to EOF);
+  // run-scoped, refreshed by every `start()`; the reader holds no position
+  // of its own between runs.
   #rangeEnd: null | number = null;
 
   #reader: null | ReadableStreamDefaultReader = null;
@@ -272,25 +279,17 @@ export class RangedReader {
   }
 
   /**
-   * Seek: aborts the current stream and re-downloads from `offset`.
-   *
-   * @param offset - Absolute byte offset in the object.
-   */
-  seek(offset: number): void {
-    this.start(Math.max(0, offset));
-  }
-
-  /**
-   * (Re)starts delivery at `offset`. Any in-flight download is aborted, and
-   * cached windows chaining forward from `offset` are replayed before resuming
-   * from the network.
+   * (Re)starts delivery of the exact range `[offset, offset + length)`
+   * (`length` undefined reads to the end of the object). Any in-flight
+   * download is aborted first, and cached windows already covering the
+   * requested range are replayed before the network read resumes from the
+   * first cache miss.
    */
   start(offset = 0, length?: number): void {
     this.stop();
-    this.#position = offset;
     this.#rangeEnd = length === undefined ? null : Math.max(offset, offset + length);
     const loadGeneration = ++this.#loadGeneration;
-    void this.#run(loadGeneration);
+    void this.#run(offset, loadGeneration);
   }
 
   /** Cancels the in-flight stream; the cache survives for later re-reads. */
@@ -322,15 +321,18 @@ export class RangedReader {
   }
 
   #emitChunk(bytes: Uint8Array, position: number, maxChunkSize?: number): void {
+    // Cache windows are keyed by the owning object's id as well as the range
+    // coordinates, so two objects read at the same offset never share bytes.
+    const objectId = this.#options.object.id();
     if (bytes.byteLength <= (maxChunkSize ?? Infinity)) {
-      this.#cache.put(position, bytes.byteLength, bytes);
+      this.#cache.put(objectId, position, bytes.byteLength, bytes);
       this.#options.onChunk(bytes, position);
       this.#accountBytes(bytes.byteLength);
       return;
     }
     for (let offset = 0; offset < bytes.byteLength; offset += maxChunkSize!) {
       const slice = bytes.subarray(offset, Math.min(offset + maxChunkSize!, bytes.byteLength));
-      this.#cache.put(position + offset, slice.byteLength, slice);
+      this.#cache.put(objectId, position + offset, slice.byteLength, slice);
       this.#options.onChunk(slice, position + offset);
       this.#accountBytes(slice.byteLength);
     }
@@ -370,6 +372,7 @@ export class RangedReader {
     reader: ReadableStreamDefaultReader<Uint8Array>,
     loadGeneration: number,
     timeoutMs: number | undefined,
+    windowStart: number,
   ): Promise<ReadableStreamReadResult<Uint8Array>> {
     if (timeoutMs === undefined) return reader.read();
 
@@ -382,8 +385,8 @@ export class RangedReader {
           this.#stream = null;
           // Only an in-flight run's watchdog reports the stall (a superseded
           // run's late watchdog must not blame the replacement). No bytes
-          // arrived, so the position is still the read's start offset.
-          this.#milestone(workerLogEventName.readStalled, { position: this.#position, stallTimeoutMs: timeoutMs });
+          // arrived, so the position is still the read window's start offset.
+          this.#milestone(workerLogEventName.readStalled, { position: windowStart, stallTimeoutMs: timeoutMs });
         }
         reject(new Error(`Sia SDK read stalled: no bytes for ${timeoutMs}ms`));
       }, timeoutMs);
@@ -400,34 +403,39 @@ export class RangedReader {
     });
   }
 
-  async #run(loadGeneration: number): Promise<void> {
+  async #run(startOffset: number, loadGeneration: number): Promise<void> {
     const { budget, chunkSize, maxAttempts, object, onComplete, onError, retryBackoffMs, sdk, stallTimeoutMs } = this.#options;
     // Total attempts for the read window, capped at the configured budget
     // (default: original download + two retries).
     const attempts = maxAttempts === undefined ? DEFAULT_MAX_ATTEMPTS : Math.max(1, Math.floor(maxAttempts));
 
+    // Run-scoped delivery position: this run owns its own offset, and no read
+    // state outlives the run; there is no persistent reader position.
+    let position = startOffset;
+
     // Hoisted so the failure milestone below can report the read window even
     // when the download throws before `read.window-complete`; `start` is
-    // seeded with the current position so a pre-download failure (e.g. a
+    // seeded with the run's start offset so a pre-download failure (e.g. a
     // cache-replay onChunk throw) still names where the read stood.
     let end = 0;
-    let start = this.#position;
+    let start = position;
 
     try {
       // Replay contiguous cached windows before the network read; a listener
       // sees one seamless delivery either way. The replay ahead of budget
-      // dispatch is the "cache" phase: what it serves is what a seek or re-read
-      // spared the network, reported once per read-window (never per chunk).
-      const cacheReplayStart = this.#position;
+      // dispatch is the "cache" phase: what it serves is what the object cache
+      // already held for this range, reported once per read-window (never per
+      // chunk).
+      const cacheReplayStart = position;
       let cacheBytes = 0;
       while (this.#loadGeneration === loadGeneration) {
-        const cached = this.#cache.takeAt(this.#position);
+        const cached = this.#cache.takeAt(object.id(), position);
         if (cached === undefined) break;
-        const remaining = this.#rangeEnd === null ? cached.byteLength : this.#rangeEnd - this.#position;
+        const remaining = this.#rangeEnd === null ? cached.byteLength : this.#rangeEnd - position;
         if (remaining <= 0) break;
         const delivered = cached.subarray(0, remaining);
-        this.#emitChunk(delivered, this.#position, chunkSize);
-        this.#position += delivered.byteLength;
+        this.#emitChunk(delivered, position, chunkSize);
+        position += delivered.byteLength;
         cacheBytes += delivered.byteLength;
         if (delivered.byteLength < cached.byteLength) break;
       }
@@ -443,7 +451,7 @@ export class RangedReader {
 
       const size = objectSize(object);
       end = Math.min(this.#rangeEnd ?? size, size);
-      start = Math.min(this.#position, size);
+      start = Math.min(position, size);
       if (start >= end) {
         onComplete?.();
         return;
@@ -471,7 +479,7 @@ export class RangedReader {
               waiters: budget.waiters,
             });
           });
-          // A seek/stop arrived while this run waited for its permit: abandon
+          // A new start/stop arrived while this run waited for its permit: abandon
           // (the `finally` releases the just-acquired slot).
           if (this.#loadGeneration !== loadGeneration) return;
         }
@@ -492,7 +500,7 @@ export class RangedReader {
         // `sdk.download()` can never abort the whole conversion. The retry
         // budget is `maxAttempts` (default 3 = two retries); `read.window-start`
         // is not re-emitted per attempt and `read.error` fires only once, after
-        // the final attempt. Never retried: a run superseded by a seek/stop,
+        // the final attempt. Never retried: a run superseded by a new start/stop,
         // the stall watchdog (own semantics, `read.stalled` already fired), a
         // throwing `onChunk` (the caller's own handler, never a transport
         // blip), or a shard shortage (persistent: re-requesting the same
@@ -505,7 +513,7 @@ export class RangedReader {
         while (attempt < attempts && this.#loadGeneration === loadGeneration) {
           if (attempt > 0) {
             // Modest fixed backoff so a burst of transient blips does not
-            // hammer the SDK. A seek/stop that lands mid-wait supersedes the
+            // hammer the SDK. A new start/stop that lands mid-wait supersedes the
             // run: no further attempt is started.
             const backoffMs = retryBackoffMsFor(attempt, retryBackoffMs);
             if (backoffMs > 0) await new Promise((resolve) => setTimeout(resolve, backoffMs));
@@ -518,7 +526,7 @@ export class RangedReader {
             });
           }
           attempt++;
-          // A fresh download serves `[this.#position, end)` — the range still
+          // A fresh download serves `[position, end)`; the range still
           // owed to onChunk. For a zero-byte failure that is the whole
           // `[start, end)` window retried from scratch; after a partial
           // delivery it resumes where delivery stopped so bytes already
@@ -533,14 +541,14 @@ export class RangedReader {
             // promise; a settled stream is used synchronously so `active`
             // reflects the in-flight read without an extra microtask.
             const resolved = sdk.download(object, {
-              length: end - this.#position,
-              offset: this.#position,
+              length: end - position,
+              offset: position,
               ...this.#options.downloadOptions,
             });
             const stream = resolved instanceof Promise ? await resolved : resolved;
             // A stale async (connect-on-demand) download that resolves after a
-            // seek landed would otherwise be dropped still open, leaking its
-            // WebTransport sessions (the SDK holds them until EOF or cancel);
+            // new read/stop landed would otherwise be dropped still open, leaking
+            // its WebTransport sessions (the SDK holds them until EOF or cancel);
             // adopt-or-cancel: cancel it. The cancel is fire-and-forget so a
             // stalled WASM cancel never blocks this run's unwinding and permit
             // release.
@@ -552,8 +560,8 @@ export class RangedReader {
             const reader = stream.getReader();
             this.#reader = reader;
 
-            while (this.#loadGeneration === loadGeneration && this.#position < end) {
-              const result = await this.#readWithStallWatchdog(reader, loadGeneration, stallTimeoutMs);
+            while (this.#loadGeneration === loadGeneration && position < end) {
+              const result = await this.#readWithStallWatchdog(reader, loadGeneration, stallTimeoutMs, start);
               if (this.#loadGeneration !== loadGeneration) break;
               if (result.done) {
                 // A download that closes before the range end is data loss, not
@@ -562,10 +570,10 @@ export class RangedReader {
                 // the owed range rather than silently skipping bytes.
                 throw new Error('Sia SDK read ended before the requested range was delivered');
               }
-              const remaining = end - this.#position;
+              const remaining = end - position;
               const delivered = result.value.subarray(0, remaining);
               try {
-                this.#emitChunk(delivered, this.#position, chunkSize);
+                this.#emitChunk(delivered, position, chunkSize);
               } catch (error) {
                 // onChunk is the caller's own handler: a throw there is a
                 // consumer failure, never a transport blip, so it is not
@@ -573,7 +581,7 @@ export class RangedReader {
                 consumerError = error;
                 throw error;
               }
-              this.#position += delivered.byteLength;
+              position += delivered.byteLength;
               if (delivered.byteLength < result.value.byteLength) break;
             }
 
@@ -586,7 +594,7 @@ export class RangedReader {
             failure = null;
             break;
           } catch (error) {
-            failure = { consumer: consumerError !== null, delivered: Math.max(0, this.#position - start), error };
+            failure = { consumer: consumerError !== null, delivered: Math.max(0, position - start), error };
             // The stall watchdog has its own semantics (read.stalled already
             // fired), a throwing onChunk is the caller's failure, and a shard
             // shortage is a persistent capacity condition the SDK cannot fix
@@ -661,7 +669,7 @@ export class RangedReader {
         // facts: the start position, the requested length, and how many bytes
         // were actually delivered (omitted when none were).
         if (!isStallWatchdogError(error)) {
-          const deliveredBytes = this.#position - start;
+          const deliveredBytes = position - start;
           this.#milestone(workerLogEventName.readError, {
             expectedBytes: Math.max(0, end - start),
             position: start,
@@ -844,6 +852,11 @@ export function isTransportReadError(error: unknown): boolean {
 /** Object payload size in bytes, from the local slab map. */
 export function objectSize(object: SiaObjectLike): number {
   return object.slabs().reduce((total, slab) => total + slab.length, 0);
+}
+
+/** Cache entry key: object id plus the delivered window coordinates. */
+function entryKey(objectId: string, offset: number, length: number): string {
+  return `${objectId}:${offset}:${length}`;
 }
 
 /** Scalar, log-safe rendering of a caught failure for a `read.retry` milestone. */

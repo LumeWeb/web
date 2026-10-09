@@ -16,6 +16,7 @@ import {
   type SiaObjectLike,
   type SiaSdkLike,
 } from './ranged-reader.ts';
+import type { SiaTransportPolicy } from './transport/transport-policy.ts';
 import type { LoadPipeline } from './session/load-pipeline.ts';
 
 /** Back-buffer window the worker-side MSE root evicts beyond. */
@@ -53,7 +54,9 @@ export type SiaVideoSdk = {
 export interface SiaVideoWorkerOptions {
   /**
    * Shared concurrency permit for SDK ranged downloads (see
-   * {@link ReadBudget}). Defaults to one shared `ReadBudget` at
+   * {@link ReadBudget}). Configures the legacy `legacyDownloadBudget` of the
+   * default transport policy; a fully injected `policy` takes precedence over
+   * it. Defaults to one shared `ReadBudget` at
    * `DEFAULT_SDK_READ_CONCURRENCY` (4) for the default composition root, so a
    * batch of concurrent library reads can never open more renter WebTransport
    * sessions than the browser's 64 pending-session cap absorbs (the recurring
@@ -106,6 +109,15 @@ export interface SiaVideoWorkerOptions {
    * the real media-library pipeline the composition root creates.
    */
   loadPipeline?: LoadPipeline;
+  /**
+   * Transport policy for every direct SDK ranged read this worker serves: the
+   * stall watchdog timeout, the explicit per-download `maxBufferedChunks`, and
+   * the legacy download-concurrency budget. Defaults to
+   * `createSiaTransportPolicy()` with the budget at
+   * `DEFAULT_SDK_READ_CONCURRENCY` (4). Injectable so a host can retune any of
+   * the three in one place.
+   */
+  policy?: SiaTransportPolicy;
   /** Overrides message delivery; useful when the caller wires its own channel. */
   post?: PostMessage;
   /** Overrides the worker-MSE capability probe (e.g. for alternative runtimes). */

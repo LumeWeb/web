@@ -24,44 +24,45 @@ import {
   LruChunkCache,
   objectSize,
   RangedReader,
-  type ReadBudget,
   type SiaObjectLike,
   type SiaSdkLike,
 } from '../ranged-reader.ts';
 import { isSiaShareUrl, parseSiaShareUrl } from '../share-url.ts';
 import { type RequestId, workerLogEventName } from '../protocol.ts';
+import { createSiaTransportPolicy, type SiaTransportPolicy } from './transport-policy.ts';
 
 /**
  * Construction options shared across every source one factory creates. A
  * caller that constructs the factory once and reuses it gets one shared
- * budget/cache across all loads (like the worker's per-core budget/cache).
+ * policy and cache across all loads (like the worker's per-core policy/cache).
  */
 export interface SiaByteSourceFactoryOptions {
-  /** Shared concurrency permit (defaults to no cap). */
-  budget?: ReadBudget;
   /** Shared exact-window LRU cache (defaults to a fresh per-source one). */
   cache?: LruChunkCache;
   /** Max bytes per chunk handed to the returned stream. */
   chunkSize?: number;
-  /** Forwarded to every `Sdk.download` call. */
-  downloadOptions?: { maxBufferedChunks?: number };
   /** Milestone listener forwarded into every `RangedReader` (see `RangedReaderOptions.onMilestone`). */
   onMilestone?: (name: string, requestId: null | RequestId, detail: Readonly<Record<string, unknown>>) => void;
+  /** Transport policy owning stall timeout, per-download `maxBufferedChunks`, and the legacy concurrency budget (defaults to `createSiaTransportPolicy()`). */
+  policy?: SiaTransportPolicy;
 }
 
 export interface SiaByteSourceOptions {
-  /** Shared concurrency permit; defaults to no cap. */
-  budget?: ReadBudget;
   /** Shared exact-window LRU cache; defaults to a fresh per-source cache. */
   cache?: LruChunkCache;
   /** Max bytes per chunk handed to the returned stream. */
   chunkSize?: number;
-  /** Forwarded to every `Sdk.download` call. */
-  downloadOptions?: { maxBufferedChunks?: number };
   /** Pinned-object handle (or fake) whose payload the source reads. */
   object: SiaObjectLike;
   /** Milestone listener forwarded into every `RangedReader` this source creates. */
   onMilestone?: (name: string, requestId: null | RequestId, detail: Readonly<Record<string, unknown>>) => void;
+  /**
+   * Transport policy this source reads from for every read: the stall
+   * watchdog timeout, the explicit `maxBufferedChunks` on every SDK download,
+   * and the legacy download-concurrency budget. Callers never supply these
+   * per read.
+   */
+  policy: SiaTransportPolicy;
   /** The SOURCE requestId owning this source; milestones it emits carry it (null when none). */
   requestId?: null | RequestId;
   /** Sia SDK (or fake) that serves ranged downloads. */
@@ -155,8 +156,16 @@ export class SiaByteSource implements ByteSource {
       this.#generationState.settle(handle);
     };
 
-    const { budget, chunkSize, downloadOptions, object, onMilestone, requestId, sdk } = this.#options;
+    const { chunkSize, object, onMilestone, policy, requestId, sdk } = this.#options;
     const cache = this.#cache;
+    // Every read of this source carries the policy's transport settings: the
+    // stall watchdog timeout and the explicit per-download maxBufferedChunks
+    // come from the policy, never from the per-read options.
+    const readerOptions = {
+      budget: policy.legacyDownloadBudget,
+      downloadOptions: { maxBufferedChunks: policy.maxBufferedChunks },
+      stallTimeoutMs: policy.stallTimeoutMs,
+    };
 
     return new ReadableStream<Uint8Array>({
       cancel: () => {
@@ -174,10 +183,9 @@ export class SiaByteSource implements ByteSource {
           return;
         }
         const reader = new RangedReader({
-          budget,
+          ...readerOptions,
           cache,
           chunkSize,
-          downloadOptions,
           object,
           onChunk: (chunk) => {
             if (superseded || settled) return;
@@ -208,7 +216,6 @@ export class SiaByteSource implements ByteSource {
           onMilestone,
           requestId,
           sdk,
-          stallTimeoutMs: options.stallTimeoutMs,
         });
         readerRef = reader;
         reader.start(start, end - start);
@@ -234,8 +241,11 @@ export function createSiaByteSourceFactory(
 ): (src: string, requestId?: null | RequestId) => Promise<ByteSource> {
   // One shared exact-window cache per factory, so every source it creates
   // replays already-downloaded windows across loads (like the worker's
-  // per-core cache). An explicit caller-supplied cache still wins.
+  // per-core cache). An explicit caller-supplied cache still wins. One shared
+  // policy the same way: every source it creates reads its stall timeout,
+  // per-download maxBufferedChunks, and legacy budget from it.
   const cache = options.cache ?? new LruChunkCache();
+  const policy = options.policy ?? createSiaTransportPolicy();
   const onMilestone = options.onMilestone;
   return async (src: string, requestId?: null | RequestId): Promise<ByteSource> => {
     const object = await resolveSiaObject(sdk, src);
@@ -248,7 +258,7 @@ export function createSiaByteSourceFactory(
     if (onMilestone !== undefined) {
       onMilestone(workerLogEventName.objectResolved, requestId ?? null, { share: isSiaShareUrl(src), size: objectSize(object) });
     }
-    return new SiaByteSource({ ...options, cache, object, requestId, sdk });
+    return new SiaByteSource({ ...options, cache, object, policy, requestId, sdk });
   };
 }
 

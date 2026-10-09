@@ -23,8 +23,16 @@ import {
   type ReadOptions,
 } from '../transport/byte-source.ts';
 import { MemoryByteSource } from '../transport/memory-byte-source.ts';
-import { SiaByteSource } from '../transport/sia-byte-source.ts';
-import type { SiaObjectLike, SiaSdkLike } from '../ranged-reader.ts';
+import {
+  createSiaTransportPolicy,
+  type SiaTransportPolicy,
+} from '../transport/transport-policy.ts';
+import {
+  createSiaByteSourceFactory,
+  SiaByteSource,
+  type SiaByteSourceSdk,
+} from '../transport/sia-byte-source.ts';
+import { LruChunkCache, type SiaObjectLike, type SiaSdkLike } from '../ranged-reader.ts';
 
 // objectSize() derives the payload size from the slab map, so fakes must
 // return slabs whose lengths add up to the content length.
@@ -48,6 +56,18 @@ function fakeSdk(payload: Uint8Array): SiaSdkLike {
       });
     },
   };
+}
+
+/** SDK that records the `maxBufferedChunks` of every download it opens. */
+function recordingMaxBufferedChunksSdk(payload: Uint8Array): { downloads: (number | undefined)[]; sdk: SiaSdkLike } {
+  const downloads: (number | undefined)[] = [];
+  const sdk: SiaSdkLike = {
+    download: (object, options) => {
+      downloads.push(options?.maxBufferedChunks);
+      return fakeSdk(payload).download(object, options);
+    },
+  };
+  return { downloads, sdk };
 }
 
 /** SDK that records every (offset, length) download, slicing payload per request. */
@@ -154,7 +174,12 @@ function join(chunks: Uint8Array[]): Uint8Array {
 }
 
 function newSiaSource(payload: Uint8Array, sdk: SiaSdkLike, options: Partial<ConstructorParameters<typeof SiaByteSource>[0]> = {}): SiaByteSource {
-  return new SiaByteSource({ object: fakeObject(payload.length), sdk, ...options });
+  return new SiaByteSource({
+    object: fakeObject(payload.length),
+    policy: createSiaTransportPolicy(),
+    sdk,
+    ...options,
+  });
 }
 
 async function readAll(stream: ReadableStream<Uint8Array>): Promise<ReadOutcome> {
@@ -388,17 +413,67 @@ describe('SiaByteSource', () => {
     expect(releaseable.cancelled).toContain(0);
   });
 
-  it('errors a stalled read within the stall timeout instead of hanging', async () => {
-    const source = newSiaSource(PAYLOAD, stalledSdk());
+  it('errors a stalled read within the policy stall timeout, with no caller-supplied read options', async () => {
+    const policy: SiaTransportPolicy = createSiaTransportPolicy({ stallTimeoutMs: 20 });
+    const source = newSiaSource(PAYLOAD, stalledSdk(), { policy });
     const startedAt = Date.now();
 
-    const outcome = await readAll(
-      source.read({ length: 1024, offset: 0 }, { loadGeneration: 1, stallTimeoutMs: 20 }),
-    );
+    const outcome = await readAll(source.read({ length: 1024, offset: 0 }, { loadGeneration: 1 }));
 
     expect(outcome.chunks).toHaveLength(0);
     expect(outcome.error).toBeDefined();
     expect(Date.now() - startedAt).toBeLessThan(2000);
+  });
+
+  it('sends the policy maxBufferedChunks with every SDK download', async () => {
+    const { downloads, sdk } = recordingMaxBufferedChunksSdk(PAYLOAD);
+    const source = newSiaSource(PAYLOAD, sdk, { policy: createSiaTransportPolicy({ maxBufferedChunks: 7 }) });
+
+    await readAll(source.read({ length: 4096, offset: 0 }, { loadGeneration: 1 }));
+
+    expect(downloads).toEqual([7]);
+  });
+
+  it('never serves one object the bytes another object cached at the same range', async () => {
+    const payloadA = new Uint8Array(64).fill(1);
+    const payloadB = new Uint8Array(64).fill(2);
+    const payloads: Record<string, Uint8Array> = { a: payloadA, b: payloadB };
+    const downloads: string[] = [];
+    const sdk: SiaByteSourceSdk = {
+      download: (object, options) => {
+        const key = object.id();
+        downloads.push(key);
+        const payload = payloads[key];
+        const start = options?.offset ?? 0;
+        const end = Math.min(start + (options?.length ?? payload.length - start), payload.length);
+        return new ReadableStream<Uint8Array>({
+          start: (controller) => {
+            if (end > start) controller.enqueue(payload.slice(start, end));
+            controller.close();
+          },
+        });
+      },
+      object: (key) =>
+        Promise.resolve({
+          id: () => key,
+          size: () => payloads[key].length,
+          slabs: () => [{ length: payloads[key].length } as unknown as Slab],
+        }),
+    };
+    // One shared cache across both sources, the shape the worker wires for real
+    // playback: two objects at the same range coordinates must not collide in it.
+    const factory = createSiaByteSourceFactory(sdk, { cache: new LruChunkCache() });
+
+    const sourceA = await factory('a');
+    const readA = await readAll(sourceA.read({ length: 32, offset: 0 }, { loadGeneration: 1 }));
+    const sourceB = await factory('b');
+    const readB = await readAll(sourceB.read({ length: 32, offset: 0 }, { loadGeneration: 1 }));
+
+    expect(join(readA.chunks)).toEqual(payloadA.slice(0, 32));
+    // Object B's range was never cached: it downloads its own bytes instead of
+    // receiving object A's cached bytes for the same offset/length.
+    expect(join(readB.chunks)).toEqual(payloadB.slice(0, 32));
+    expect(downloads).toEqual(['a', 'b']);
   });
 
   it('never delivers bytes from an in-flight read superseded by a newer load generation', async () => {
