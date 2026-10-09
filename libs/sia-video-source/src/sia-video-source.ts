@@ -27,6 +27,16 @@ import {
   encryptToWorker,
   scrub,
 } from "./app-key-handshake.ts";
+import { type SiaPlaybackBackend } from "./playback-backend.ts";
+import {
+  type SiaNativeStreamProvider,
+  SiaNativeStreamUnavailableError,
+} from "./native-stream-provider.ts";
+import {
+  ServiceWorkerBackend,
+  ServiceWorkerLoadAbortedError,
+  ServiceWorkerLoadError,
+} from "./service-worker-backend.ts";
 import {
   HTMLVideoElementHost,
   type HTMLVideoTargetLike,
@@ -242,7 +252,12 @@ export const siaVideoDefaultProps: {
   streamType: "on-demand",
 };
 
+export const FORCED_SERVICE_WORKER_NO_PROVIDER =
+  "service-worker backend requires a nativeStreamProvider";
+
+/* oxlint-disable perfectionist/sort-interfaces */
 export interface SiaVideoSourceOptions {
+  backend?: SiaPlaybackBackend;
   /**
    * Builds the playback worker. Defaults to a module worker compiled from this
    * package's `./worker` subpath — resolvable as a relative URL next to this
@@ -251,6 +266,7 @@ export interface SiaVideoSourceOptions {
    * emit it automatically. Apps with their own worker pipeline inject it here.
    */
   createWorker?: () => Worker;
+  nativeStreamProvider?: SiaNativeStreamProvider;
   /**
    * Supplies the 32-byte Sia app-key seed for the worker handshake. The host
    * reads it only once per (re)attach, immediately after the worker's HELLO_OK
@@ -337,7 +353,22 @@ export interface SiaVideoSourceOptions {
  *   surfaced with its structured `SiaWorkerMilestoneDetail` for consumers that
  *   derive diagnostic/progress state (see `siaProgressFeature`).
  */
+/* oxlint-disable perfectionist/sort-classes */
 export class SiaVideoSource extends HTMLVideoElementHost {
+  get backend(): SiaPlaybackBackend {
+    return this.#backend;
+  }
+  set backend(value: SiaPlaybackBackend) {
+    this.#backend = value;
+  }
+  get nativeStreamProvider(): SiaNativeStreamProvider | undefined {
+    return this.#nativeStreamProvider;
+  }
+  set nativeStreamProvider(value: SiaNativeStreamProvider | undefined) {
+    this.#nativeStreamProvider = value;
+    this.#serviceWorkerBackend?.destroy();
+    this.#serviceWorkerBackend = value ? new ServiceWorkerBackend(value) : null;
+  }
   get engine(): null | Worker {
     return this.#worker;
   }
@@ -426,6 +457,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       this.#machine.send({ type: hostPlaybackEvent.sourceReset });
     }
 
+    if (this.#backend === "service-worker")
+      this.#serviceWorkerBackend?.detach();
+
     // A DISTINCT source replaces the element's live resource: detach the old
     // MediaSource resource NOW — before the load-boundary bookkeeping — so the
     // superseded frame, its advancing `timeupdate`, its `ended`, and a stuck
@@ -442,6 +476,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
 
     if (!value) return;
 
+    if (this.#backend === "service-worker") {
+      this.#startServiceWorkerSource(value);
+      return;
+    }
     if (this.#worker) {
       this.#sendSource();
       return;
@@ -561,6 +599,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   readonly #machine = new HostPlaybackMachine();
 
   readonly #mediaWorkerBackend: MediaWorkerBackend;
+  #backend: SiaPlaybackBackend;
+  #serviceWorkerBackend: null | ServiceWorkerBackend;
+  #nativeStreamProvider: SiaNativeStreamProvider | undefined;
 
   // Monotonic counter for the typed `sia-worker-milestone-change` event: bumps
   // once per accepted worker LOG, never reset (consumers order milestones by
@@ -672,6 +713,11 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#logger = options.logger ?? createConsoleLogger();
     this.#mimeType = options.mimeType;
     this.#workerMse = options.workerMse;
+    this.#backend = options.backend ?? "auto";
+    this.#nativeStreamProvider = options.nativeStreamProvider;
+    this.#serviceWorkerBackend = this.#nativeStreamProvider
+      ? new ServiceWorkerBackend(this.#nativeStreamProvider)
+      : null;
     this.#mediaWorkerBackend = new MediaWorkerBackend({
       createWorker: this.#options.createWorker ?? defaultCreateWorker,
       logger: this.#logger.child("host"),
@@ -727,6 +773,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     target.addEventListener("play", this.#onPlay);
     target.addEventListener("pause", this.#onPause);
 
+    if (this.#backend === "service-worker") {
+      if (this.#src) this.#startServiceWorkerSource(this.#src);
+      return;
+    }
     if (this.#worker) {
       // An already-attached host re-negotiates with a fresh HELLO (the same
       // path `reloadConfiguration` uses), so a re-attach also re-reads the
@@ -761,6 +811,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   }
 
   destroy(): void {
+    this.#serviceWorkerBackend?.destroy();
     this.#destroyed = true;
     // A destroy invalidates any pending handshake work: bumping the generation
     // makes an async seed/encryption chain captured under an older generation
@@ -813,6 +864,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   }
 
   detach(): void {
+    this.#serviceWorkerBackend?.detach();
     // A detach is a handshake boundary: an async seed/encryption chain from a
     // reload still in flight must not apply into the detached session (the
     // generation bump drops it), and a late HELLO_OK or ATTACH_OK must not gate
@@ -856,6 +908,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   }
   /** Reloads the current source through the engine, clearing any stored error. */
   override load(): void {
+    if (this.#backend === "service-worker" && this.#src) {
+      this.#startServiceWorkerSource(this.#src);
+      return;
+    }
     if (this.#src && this.#worker) {
       // An explicit re-load starts like a fresh `src`: the rebuilt pipeline
       // begins paused, never-played, and only streams once the user plays.
@@ -890,7 +946,45 @@ export class SiaVideoSource extends HTMLVideoElementHost {
    */
   reloadConfiguration(): void {
     if (this.#destroyed || !this.target) return;
+    if (this.#backend === "service-worker") {
+      this.#attachGeneration += 1;
+      this.#mediaWorkerBackend.resetQueue();
+      this.#attachRequestId = null;
+      this.#attachGenerationAtAttach = null;
+      this.#helloRequestId = null;
+      this.#workerPublicKey = null;
+      this.#mediaWorkerBackend.terminate();
+      this.#worker = null;
+      return;
+    }
     this.#startHandshake();
+  }
+
+  #startServiceWorkerSource(src: string): void {
+    const backend = this.#serviceWorkerBackend;
+    if (!backend) {
+      this.#reportError("unsupported", FORCED_SERVICE_WORKER_NO_PROVIDER);
+      return;
+    }
+    const target = this.target as HTMLVideoElement | null;
+    if (!target) return;
+    backend.attach(target);
+    void backend
+      .load(src, { mimeType: this.#mimeType })
+      .catch((error: unknown) => {
+        if (error instanceof ServiceWorkerLoadAbortedError) return;
+        if (error instanceof SiaNativeStreamUnavailableError) {
+          this.#reportError("unsupported");
+          return;
+        }
+        if (error instanceof ServiceWorkerLoadError) {
+          const kind =
+            error.message === "native stream acquisition failed"
+              ? "network"
+              : "unsupported";
+          this.#reportError(kind);
+        }
+      });
   }
 
   // Announces the active load as accepted exactly once (the "no duplicate

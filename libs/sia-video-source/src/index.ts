@@ -85,6 +85,7 @@ export {
   type SiaNativeStreamSession,
   SiaNativeStreamUnavailableError,
 } from './native-stream-provider.ts';
+export { type SiaPlaybackBackend } from './playback-backend.ts';
 export {
   type AppKeyEnvelope,
   type BufferWindow,

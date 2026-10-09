@@ -61,7 +61,8 @@ export const DEFAULT_ERROR_MESSAGES: Readonly<Partial<Record<WorkerErrorCode, st
  * the v10 error feature and native `HTMLMediaElement` error handling expect.
  */
 export function mediaErrorEvent(error: MediaError): ErrorEvent {
-  return new ErrorEvent('error', { error, message: error.message });
+  if (typeof ErrorEvent !== 'undefined') return new ErrorEvent('error', { error, message: error.message });
+  return new Event('error') as ErrorEvent;
 }
 
 /**
