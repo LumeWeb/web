@@ -86,6 +86,10 @@ export {
   SiaNativeStreamUnavailableError,
 } from './native-stream-provider.ts';
 export {
+  SIA_PLAYBACK_BACKENDS,
+  type SiaPlaybackBackend,
+} from './playback-backend.ts';
+export {
   type AppKeyEnvelope,
   type BufferWindow,
   GCM_IV_LENGTH,

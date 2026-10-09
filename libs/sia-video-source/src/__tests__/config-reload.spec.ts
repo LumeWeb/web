@@ -73,7 +73,7 @@ class FakeWorker {
 
 /**
  * Test-only seam that widens the host's PROTECTED attach target into a public,
- * read-only view. Test (D) must prove the SAME element survives a reload, and
+ * read-only view. Test must prove the SAME element survives a reload, and
  * the library deliberately keeps the element behind `protected target` (part
  * of its encapsulation). A fixture subclass is the legitimate place to widen
  * that visibility for assertions; production code is untouched.
@@ -174,8 +174,8 @@ function workerConfig(indexerUrl = 'https://sia.storage') {
   return { app: appMetadata(), indexerUrl };
 }
 
-describe('SiaVideoSource.reloadConfiguration', () => {
-  it.skipIf(!IN_BROWSER)('posts a fresh HELLO carrying the current workerConfig (A)', async () => {
+describe('reloadConfiguration applies worker configuration', () => {
+  it.skipIf(!IN_BROWSER)('posts a fresh HELLO carrying the current workerConfig', async () => {
     const worker = new FakeWorker();
     const host = new SiaVideoSource({
       createWorker: () => worker as unknown as Worker,
@@ -202,7 +202,7 @@ describe('SiaVideoSource.reloadConfiguration', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('re-reads the current seed supplier into a fresh encrypted APP_KEY envelope (B)', async () => {
+  it.skipIf(!IN_BROWSER)('re-reads the current seed supplier into a fresh encrypted APP_KEY envelope', async () => {
     const worker = new FakeWorker();
     const keyPair = generateWorkerKeyPair();
     const publicKey = exportWorkerPublicKey(keyPair);
@@ -248,7 +248,7 @@ describe('SiaVideoSource.reloadConfiguration', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('replays the current source on ATTACH_OK and re-states PLAY for a preserved playing intent (C)', () => {
+  it.skipIf(!IN_BROWSER)('replays the current source on ATTACH_OK and re-states PLAY for a preserved playing intent', () => {
     const { host, target, worker } = attachAndHandshake();
     loadAndAcknowledge(host, worker, 'k');
     // The user asked to play (machine playback choice 'playing').
@@ -270,7 +270,7 @@ describe('SiaVideoSource.reloadConfiguration', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('does not re-state PLAY when the user is paused (C)', () => {
+  it.skipIf(!IN_BROWSER)('does not re-state PLAY when the user is paused', () => {
     const { host, worker } = attachAndHandshake();
     loadAndAcknowledge(host, worker, 'k');
     expect(targetPaused(host)).toBe(true);
@@ -289,7 +289,7 @@ describe('SiaVideoSource.reloadConfiguration', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('keeps the same worker and element across a reload (D)', () => {
+  it.skipIf(!IN_BROWSER)('keeps the same worker and element across a reload', () => {
     let spawns = 0;
     const worker = new FakeWorker();
     const host = new ObservableSiaVideoSource({
@@ -318,7 +318,7 @@ describe('SiaVideoSource.reloadConfiguration', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('closes an active recovery exactly once and resets the load on reload (E)', () => {
+  it.skipIf(!IN_BROWSER)('closes an active recovery exactly once and resets the load on reload', () => {
     const { host, target, worker } = attachAndHandshake();
     const loadId = loadAndAcknowledge(host, worker, 'k');
     const seen: RecoveryChangeDetail[] = [];
@@ -351,7 +351,7 @@ describe('SiaVideoSource.reloadConfiguration', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('drops a stored fatal error at the reload load boundary (E)', () => {
+  it.skipIf(!IN_BROWSER)('drops a stored fatal error at the reload load boundary', () => {
     const { host, worker } = attachAndHandshake();
     const loadId = loadAndAcknowledge(host, worker, 'k');
     worker.reply({ context: 'connection reset', kind: 'network', requestId: loadId, type: WorkerToMainMessageType.ERROR });
@@ -369,7 +369,7 @@ describe('SiaVideoSource.reloadConfiguration', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('is a no-op before attach, when detached, and after destroy (F)', () => {
+  it.skipIf(!IN_BROWSER)('is a no-op before attach, when detached, and after destroy', () => {
     const worker = new FakeWorker();
     const host = new SiaVideoSource({
       createWorker: () => worker as unknown as Worker,
@@ -400,7 +400,7 @@ describe('SiaVideoSource.reloadConfiguration', () => {
     expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.HELLO)).toHaveLength(0);
   });
 
-  it.skipIf(!IN_BROWSER)('setters alone never handshake (G)', () => {
+  it.skipIf(!IN_BROWSER)('setters alone never handshake', () => {
     const { host, worker } = attachAndHandshake();
     worker.sent.length = 0;
 
@@ -414,7 +414,7 @@ describe('SiaVideoSource.reloadConfiguration', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('ignores a stale HELLO_OK answered before a newer reload HELLO was posted (H/race)', async () => {
+  it.skipIf(!IN_BROWSER)('ignores a stale HELLO_OK answered before a newer reload HELLO was posted', async () => {
     const worker = new FakeWorker();
     const keyPair = generateWorkerKeyPair();
     const publicKey = exportWorkerPublicKey(keyPair);
@@ -458,7 +458,7 @@ describe('SiaVideoSource.reloadConfiguration', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('overlapping reloads cannot let the older async seed chain win (H)', async () => {
+  it.skipIf(!IN_BROWSER)('overlapping reloads cannot let the older async seed chain win', async () => {
     const worker = new FakeWorker();
     const keyPair = generateWorkerKeyPair();
     const publicKey = exportWorkerPublicKey(keyPair);
@@ -519,7 +519,7 @@ describe('SiaVideoSource.reloadConfiguration', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('a pending reload chain is dropped when the host detaches before it completes (I)', async () => {
+  it.skipIf(!IN_BROWSER)('a pending reload chain is dropped when the host detaches before it completes', async () => {
     const worker = new FakeWorker();
     let resolveFirst: ((seed: Uint8Array) => void) | undefined;
     const staleSeed = crypto.getRandomValues(new Uint8Array(32));
@@ -554,7 +554,7 @@ describe('SiaVideoSource.reloadConfiguration', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('rapid repeated reloads while playing keep the newest chain and replay with PLAY (H)', async () => {
+  it.skipIf(!IN_BROWSER)('rapid repeated reloads while playing keep the newest chain and replay with PLAY', async () => {
     const worker = new FakeWorker();
     const keyPair = generateWorkerKeyPair();
     const publicKey = exportWorkerPublicKey(keyPair);
@@ -616,7 +616,7 @@ describe('SiaVideoSource.reloadConfiguration', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('ignores a HELLO_OK that answers a handshake superseded by destroy (I)', async () => {
+  it.skipIf(!IN_BROWSER)('ignores a HELLO_OK that answers a handshake superseded by destroy', async () => {
     const worker = new FakeWorker();
     const host = new SiaVideoSource({
       createWorker: () => worker as unknown as Worker,
