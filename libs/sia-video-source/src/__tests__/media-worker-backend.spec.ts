@@ -113,6 +113,26 @@ describe("MediaWorkerBackend outbound transport", () => {
 });
 
 describe("MediaWorkerBackend main-thread SourceBuffer setup", () => {
+  it("reuses the live append pipe when setup is repeated", () => {
+    const { logger } = recordingLogger();
+    const backend = new MediaWorkerBackend({
+      logger,
+      onDecodeFailure: () => undefined,
+      onSourceBuffer: () => undefined,
+      onSourceBufferUpdated: () => undefined,
+    });
+    const options = {
+      getMediaSource: () => null,
+      getPlayheadSeconds: () => 0,
+      getSourceBuffer: () => null,
+    };
+
+    const first = backend.createAppendPipe(options);
+    const second = backend.createAppendPipe(options);
+
+    expect(second).toBe(first);
+  });
+
   it("resets the load pipeline in revoke → abort → clear order", () => {
     const { logger } = recordingLogger();
     const steps: string[] = [];

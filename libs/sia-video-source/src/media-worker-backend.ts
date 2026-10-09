@@ -282,11 +282,12 @@ export class MediaWorkerBackend {
   }
 
   /**
-   * Creates and retains the shared main-thread append pipe. The returned
-   * pipe is kept for compatibility with internal callers, but append/cancel
-   * routing and teardown remain backend-owned.
+   * Creates the load's main-thread append pipe once. Repeated setup signals
+   * return the live pipe so queued bytes cannot be orphaned by replacement.
+   * Append/cancel routing and teardown remain backend-owned.
    */
   createAppendPipe(options: MediaWorkerAppendPipeOptions): MseAppendPipe {
+    if (this.#appendPipe) return this.#appendPipe;
     this.#appendPipe = new MseAppendPipe({
       backBufferSeconds: MSE_BACK_BUFFER_SECONDS,
       getMediaSource: () => this.#mediaSource,

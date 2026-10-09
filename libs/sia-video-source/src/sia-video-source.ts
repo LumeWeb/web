@@ -973,14 +973,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   }
 
   #beginMainThreadMse(mime: string, durationSeconds: null | number): void {
-    // The backend owns the pipe and its SourceBuffer accessors; the host only
-    // supplies the current playhead needed for eviction and reset.
-    this.#mediaWorkerBackend.createAppendPipe({
-      getMediaSource: () => this.#mediaWorkerBackend.mediaSource,
-      getPlayheadSeconds: () => this.target?.currentTime ?? 0,
-      getSourceBuffer: () => this.#mediaWorkerBackend.sourceBuffer,
-    });
     const target = this.target;
+    // A repeated SOURCE_OK for this request is harmless. Keep the existing
+    // pipeline rather than replacing a live pipe that still owns queued bytes.
     if (!target || this.#mediaWorkerBackend.mediaSource) return;
 
     // Only a standard or managed-implementing MSE runtime can play Sia video:
@@ -1024,6 +1019,14 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       target,
       this.#mseSnapshot.impl,
     );
+    // Allocate only after target, MediaSource, runtime, and MIME checks pass.
+    // A valid setup owns one pipe for the load; duplicate SOURCE_OK returns
+    // above without replacing its queued bytes.
+    this.#mediaWorkerBackend.createAppendPipe({
+      getMediaSource: () => this.#mediaWorkerBackend.mediaSource,
+      getPlayheadSeconds: () => this.target?.currentTime ?? 0,
+      getSourceBuffer: () => this.#mediaWorkerBackend.sourceBuffer,
+    });
     // The main-MSE replacement resource is now attached (the element is
     // HAVE_NOTHING for it); a recovery's recorded position applies here, the
     // same HAVE_NOTHING position the worker-MSE path gets on HANDLE.
