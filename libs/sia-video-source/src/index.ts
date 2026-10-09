@@ -91,6 +91,7 @@ export {
   type SiaNativeStreamProvider,
   type SiaNativeStreamProviderDependencies,
   SiaNativeStreamResolutionError,
+  type SiaNativeStreamService,
   type SiaNativeStreamSession,
   SiaNativeStreamUnavailableError,
 } from "./native-stream-provider.ts";

@@ -82,11 +82,7 @@ The package never registers or controls the app's Service Worker. A provider rep
 ```ts
 import { createSiaNativeStreamProvider, SiaVideoSource } from "@lumeweb/sia-video-source";
 
-const nativeStreamProvider = createSiaNativeStreamProvider({
-  capability: (signal) => service.isAvailable(signal),
-  resolveSource: (src, signal) => service.resolve(src, signal),
-  createStreamSession: (source, signal) => service.session(source, signal),
-});
+const nativeStreamProvider = createSiaNativeStreamProvider(service);
 
 const source = new SiaVideoSource({
   backend: "auto",
@@ -94,6 +90,8 @@ const source = new SiaVideoSource({
   onTransportTelemetry: console.log,
 });
 ```
+
+`createSiaNativeStreamProvider` takes a service with `isAvailable(signal)`, `resolve(src, signal)`, and `session(source, signal)` methods and builds the provider from it, so the common case needs no adapter boilerplate. It also accepts the `SiaNativeStreamProviderDependencies` callback object (`capability`, `resolveSource`, `createStreamSession`) for integrations that wire the three callbacks by hand.
 
 The provider owns SDK setup, authorization, and Service Worker scope. The host owns backend selection, cancellation, assigning the returned URL, and releasing the stream. Native loads expose `sia-source-info-change` with `{ kind: "native" }` and no `info`; worker loads expose `{ kind: "worker", info }`.
 
