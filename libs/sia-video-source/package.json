@@ -21,6 +21,14 @@
       "types": "./dist/esm/worker.d.ts",
       "import": "./dist/esm/worker.js"
     },
+    "./sia": {
+      "types": "./dist/esm/sia-stream-service.d.ts",
+      "import": "./dist/esm/sia-stream-service.js"
+    },
+    "./sia/zustand": {
+      "types": "./dist/esm/sia-stream-zustand.d.ts",
+      "import": "./dist/esm/sia-stream-zustand.js"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
