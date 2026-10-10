@@ -1,0 +1,106 @@
+@import "@videojs/react/video/skin.css";
+@import "tailwindcss";
+
+/* ── Theme tokens (Tailwind v4 `@theme`) ────────────────────────────────
+   The demo's GitHub-dark palette plus the app's UI type stacks, exposed so
+   `bg-*`, `text-*`, `border-*`, `font-sans` and `font-mono` utilities resolve
+   to the exact values the global rules in `@layer base` below use.
+
+   Preflight reads `--default-font-family` (= `--font-sans`) and
+   `--default-mono-font-family` (= `--font-mono`), so defining these two also
+   drives the `html`/`code` font defaults below through the same token. Color
+   tokens are emitted on demand and only (re)appear once a rule or utility
+   references them. */
+@theme {
+  --color-canvas-default: #0d1117;
+  --color-canvas-subtle: #161b22;
+  --color-border-default: #30363d;
+  --color-border-muted: #21262d;
+  --color-fg-default: #e6edf3;
+  --color-fg-muted: #8b949e;
+  --color-accent: #58a6ff;
+  --color-accent-hover: #79c0ff;
+  --color-success: #238636;
+  --color-success-hover: #2ea043;
+  --color-danger: #f85149;
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* ── Global element/reset styles (Tailwind v4 `@layer base`) ────────────
+   Box sizing, html/body/root defaults, typography, color scheme and the base
+   body background/color/font defaults. These now live in Tailwind's `base`
+   layer (after preflight), so Tailwind utilities and component rules layer
+   logically on top of them. Values swapped for the equivalent `@theme` tokens
+   above (identical hex values, no visual change). Every rule here is a bare
+   element/pseudo-class selector; none of the component classes below were
+   touched. */
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    font-family: var(--font-sans);
+    line-height: 1.5;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-canvas-default);
+    color: var(--color-fg-default);
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background: var(--color-canvas-subtle);
+    padding: 1px 4px;
+    border-radius: 4px;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    background: var(--color-success);
+    border: 0;
+    border-radius: 6px;
+    padding: 8px 14px;
+    cursor: pointer;
+  }
+
+  button:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  button[type="button"] {
+    background: var(--color-border-muted);
+    border: 1px solid var(--color-border-default);
+  }
+}
+
+/* ── ErrorDialog primary-button contrast fallback ─────────────────────────
+   Video.js derives the primary button's label color from
+   `--media-accent-contrast-color` = `contrast-color(...)` of the accent. The
+   demo's video accent is white (`oklch(1 0 0)`), so a supporting engine
+   resolves the label to black on the white accent, already correct. The
+   dialog popup text itself is white, so in an engine where `contrast-color()`
+   cannot resolve, that `color` declaration becomes invalid-at-computed-value
+   and the button inherits the white popup text (white label on the white
+   accent). This unlayered fallback pins the label explicitly dark for the
+   white accent, but only inside `@supports not (color: contrast-color(...))`
+   so engines that support `contrast-color()` (current Chrome included) are
+   byte-for-byte unchanged. `.media-button--primary` alone is (0,2,0); the
+   `media-error-dialog` element makes this (0,2,1), so it beats the skin rule
+   even unlayered. */
+@supports not (color: contrast-color(white)) {
+  .media-default-skin media-error-dialog .media-button--primary {
+    color: #000;
+  }
+}
