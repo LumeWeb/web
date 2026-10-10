@@ -131,22 +131,10 @@ export function autoplayIntentIsLive(
 }
 
 /**
- * Pure gate for a single best-effort autoplay attempt; doubles as a type
- * guard narrowing the caller's play call.
- */
-export function shouldAttemptAutoplay(
-  pending: boolean,
-  loadAccepted: boolean,
-  playback: AutoPlayPlaybackApi | undefined,
-): playback is AutoPlayPlaybackApi {
-  return pending && loadAccepted && playback !== undefined;
-}
-
-/**
- * Boundary-aware autoplay gate: all of `shouldAttemptAutoplay` plus the load
- * acceptance observed at its RESET since the intent armed (`loadResetSeen`),
- * so a stale superseded `accepted: true` never consumes the intent against
- * old media. Doubles as a type guard.
+ * Boundary-aware autoplay gate: the load acceptance must be observed at its
+ * RESET since the intent armed (`loadResetSeen`), so a stale superseded
+ * `accepted: true` never consumes the intent against old media. Doubles as a
+ * type guard.
  */
 export function shouldAttemptAutoplayAfterReset(
   pending: boolean,

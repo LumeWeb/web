@@ -4,7 +4,6 @@ import {
   autoplayIntentForPreselection,
   autoplayIntentForRowToggle,
   autoplayIntentIsLive,
-  shouldAttemptAutoplay,
   shouldAttemptAutoplayAfterReset,
 } from "./AutoPlayBridge";
 
@@ -12,8 +11,7 @@ import {
  * Node unit tests for the pure best-effort autoplay model exposed by
  * `AutoPlayBridge`: the pending-intent arming/denarming helpers (a shared row
  * USER selection and a share-fragment preselection are the ONLY arming
- * events) and the exact play-attempt gate (intent pending AND Sia load
- * accepted AND a typed Video.js v10 `play` API present). The React
+ * events) and the reset-aware play-attempt gate. The React
  * `AutoPlayBridge` component itself is not exercised here (it needs a
  * `<Player>` DOM host to resolve `usePlayer`/`useSiaLoad`); only the pure
  * model is pinned, exactly as the Sia status bridge spec limits itself to its
@@ -29,24 +27,6 @@ const OTHER_OBJECT_KEY =
 const PLAYBACK: Pick<MediaPlaybackState, "play"> = {
   play: () => Promise.resolve(),
 };
-
-describe("shouldAttemptAutoplay (best-effort autoplay gate)", () => {
-  it("is false with no pending intent", () => {
-    expect(shouldAttemptAutoplay(false, true, PLAYBACK)).toBe(false);
-  });
-
-  it("is false while the Sia worker has not accepted the current load", () => {
-    expect(shouldAttemptAutoplay(true, false, PLAYBACK)).toBe(false);
-  });
-
-  it("is false when the player store exposes no play API (feature absent)", () => {
-    expect(shouldAttemptAutoplay(true, true, undefined)).toBe(false);
-  });
-
-  it("is true only when an intent is pending AND load accepted AND play is available", () => {
-    expect(shouldAttemptAutoplay(true, true, PLAYBACK)).toBe(true);
-  });
-});
 
 describe("shouldAttemptAutoplayAfterReset (never consume the intent against old/dead media)", () => {
   it("is false with no pending intent", () => {
