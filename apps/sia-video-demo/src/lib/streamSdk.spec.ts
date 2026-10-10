@@ -353,6 +353,267 @@ describe("createStreamSdkManager credential identity", () => {
   });
 });
 
+describe("createStreamSdkManager concurrency (single-flight)", () => {
+  /** A promise whose resolution the test controls. */
+  function deferred<T>() {
+    let resolveFn!: (value: T) => void;
+    let rejectFn!: (reason?: unknown) => void;
+    const promise = new Promise<T>((res, rej) => {
+      resolveFn = res;
+      rejectFn = rej;
+    });
+    return {
+      promise,
+      reject: (reason?: unknown) => rejectFn(reason),
+      resolve: (value: T) => resolveFn(value),
+    };
+  }
+
+  it("deduplicates concurrent same-identity requests into a single connect", async () => {
+    const { sdk } = fakeSdk();
+    const d = deferred<Sdk>();
+    const connectAppSdk = vi.fn(() => d.promise);
+    const manager = createStreamSdkManager({
+      connectAppSdk,
+      getAuth: fakeAuth(),
+    });
+
+    // Two requests land while no SDK is cached: only one connect may start.
+    const firstP = manager.getStreamSdk({
+      objectKey: OBJECT_KEY,
+      shared: false,
+    });
+    const secondP = manager.getStreamSdk({
+      objectKey: OBJECT_KEY,
+      shared: false,
+    });
+    d.resolve(sdk);
+    const [first, second] = await Promise.all([firstP, secondP]);
+    expect(connectAppSdk).toHaveBeenCalledTimes(1);
+    expect(first).toBe(second);
+    expect(first.sdk).toBe(sdk);
+
+    // The shared handle is cached: a later request does not reconnect.
+    const third = await manager.getStreamSdk({
+      objectKey: OBJECT_KEY,
+      shared: false,
+    });
+    expect(third).toBe(first);
+    expect(connectAppSdk).toHaveBeenCalledTimes(1);
+  });
+
+  it("clears pending state on connect rejection so the request can be retried", async () => {
+    const { sdk } = fakeSdk();
+    const d = deferred<Sdk>();
+    const connectAppSdk = vi
+      .fn()
+      .mockImplementationOnce(() => d.promise)
+      .mockResolvedValue(sdk);
+    const manager = createStreamSdkManager({
+      connectAppSdk,
+      getAuth: fakeAuth(),
+    });
+
+    const firstP = manager.getStreamSdk({
+      objectKey: OBJECT_KEY,
+      shared: false,
+    });
+    const secondP = manager.getStreamSdk({
+      objectKey: OBJECT_KEY,
+      shared: false,
+    });
+    d.reject(new Error("connect failed"));
+    await expect(firstP).rejects.toThrow("connect failed");
+    await expect(secondP).rejects.toThrow("connect failed");
+
+    // A failed connect must not pin a rejected promise for this identity.
+    const retry = await manager.getStreamSdk({
+      objectKey: OBJECT_KEY,
+      shared: false,
+    });
+    expect(retry.sdk).toBe(sdk);
+    expect(connectAppSdk).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not let a pending connect become current after free()", async () => {
+    const obsoleteFree = vi.fn();
+    const obsolete = { free: obsoleteFree } as unknown as Sdk;
+    const freshFree = vi.fn();
+    const fresh = { free: freshFree } as unknown as Sdk;
+    const d = deferred<Sdk>();
+    const connectAppSdk = vi
+      .fn()
+      .mockImplementationOnce(() => d.promise)
+      .mockResolvedValue(fresh);
+    const manager = createStreamSdkManager({
+      connectAppSdk,
+      getAuth: fakeAuth(),
+    });
+
+    const pending = manager.getStreamSdk({
+      objectKey: OBJECT_KEY,
+      shared: false,
+    });
+    // free() while the connect is in flight: the in-flight result is obsolete.
+    manager.free();
+    d.resolve(obsolete);
+    // The obsolete connect must reject, not resolve with a freed SDK.
+    await expect(pending).rejects.toThrow();
+
+    // The obsolete SDK is freed, never installed as the cached handle.
+    expect(obsoleteFree).toHaveBeenCalledTimes(1);
+    const next = await manager.getStreamSdk({
+      objectKey: OBJECT_KEY,
+      shared: false,
+    });
+    expect(next.sdk).toBe(fresh);
+    expect(connectAppSdk).toHaveBeenCalledTimes(2);
+    expect(freshFree).not.toHaveBeenCalled();
+  });
+
+  it("frees a pending connect whose credentials rotated while it was in flight", async () => {
+    const obsoleteFree = vi.fn();
+    const obsolete = { free: obsoleteFree } as unknown as Sdk;
+    const freshFree = vi.fn();
+    const fresh = { free: freshFree } as unknown as Sdk;
+    const d = deferred<Sdk>();
+    const connectAppSdk = vi
+      .fn()
+      .mockImplementationOnce(() => d.promise)
+      .mockResolvedValue(fresh);
+    const auth = mutableAuth();
+    const manager = createStreamSdkManager({
+      connectAppSdk,
+      getAuth: auth.get,
+    });
+
+    const pending = manager.getStreamSdk({
+      objectKey: OBJECT_KEY,
+      shared: false,
+    });
+    // Key rotation while the connect is in flight: it built stale credentials.
+    auth.state.userKeyHex = "cc".repeat(32);
+    d.resolve(obsolete);
+    // The obsolete connect must reject, not resolve with a freed SDK.
+    await expect(pending).rejects.toThrow();
+
+    expect(obsoleteFree).toHaveBeenCalledTimes(1);
+    const next = await manager.getStreamSdk({
+      objectKey: OBJECT_KEY,
+      shared: false,
+    });
+    expect(next.sdk).toBe(fresh);
+    expect(connectAppSdk).toHaveBeenCalledTimes(2);
+    expect(freshFree).not.toHaveBeenCalled();
+  });
+
+  it("cross-mode concurrent connects never clobber current or leak the obsolete handle", async () => {
+    const appFree = vi.fn();
+    const appSdk = { free: appFree } as unknown as Sdk;
+    const sharedFree = vi.fn();
+    const sharedSdk = { free: sharedFree } as unknown as SharedSdk;
+    const appD = deferred<Sdk>();
+    const sharedD = deferred<SharedSdk>();
+    const connectAppSdk = vi.fn(() => appD.promise);
+    const connectSharedSdk = vi.fn(() => sharedD.promise);
+    const manager = createStreamSdkManager({
+      connectAppSdk,
+      connectSharedSdk,
+      getAuth: fakeAuth({ sharingKeyHex: SHARING_KEY_HEX }),
+    });
+
+    // App connect starts first; shared connect starts while app is in flight.
+    const appP = manager.getStreamSdk({
+      objectKey: OBJECT_KEY,
+      shared: false,
+    });
+    const sharedP = manager.getStreamSdk({
+      objectKey: OBJECT_KEY,
+      shared: true,
+    });
+
+    // Both are in flight concurrently. Resolve shared first: it becomes
+    // current (no prior current to free).
+    sharedD.resolve(sharedSdk);
+    const sharedHandle = await sharedP;
+    expect(sharedHandle.sdk).toBe(sharedSdk);
+    expect(sharedFree).not.toHaveBeenCalled();
+
+    // Resolve app second: it must free the shared SDK (mode switch) and
+    // become current. The shared SDK is free()ed exactly once — no leak.
+    appD.resolve(appSdk);
+    const appHandle = await appP;
+    expect(appHandle.sdk).toBe(appSdk);
+    expect(sharedFree).toHaveBeenCalledTimes(1);
+    expect(appFree).not.toHaveBeenCalled();
+
+    // Both connects happened, no extra frees.
+    expect(connectAppSdk).toHaveBeenCalledTimes(1);
+    expect(connectSharedSdk).toHaveBeenCalledTimes(1);
+
+    // The current handle is the app one (last settled).
+    const current = await manager.getStreamSdk({
+      objectKey: OBJECT_KEY,
+      shared: false,
+    });
+    expect(current.sdk).toBe(appSdk);
+    // No additional free calls.
+    expect(sharedFree).toHaveBeenCalledTimes(1);
+    expect(appFree).not.toHaveBeenCalled();
+  });
+
+  it("same-mode credential rotation with a second pending request does not double free", async () => {
+    const obsoleteFree = vi.fn();
+    const obsolete = { free: obsoleteFree } as unknown as Sdk;
+    const freshFree = vi.fn();
+    const fresh = { free: freshFree } as unknown as Sdk;
+    const d1 = deferred<Sdk>();
+    const d2 = deferred<Sdk>();
+    const connectAppSdk = vi
+      .fn()
+      .mockImplementationOnce(() => d1.promise)
+      .mockImplementationOnce(() => d2.promise);
+    const auth = mutableAuth();
+    const manager = createStreamSdkManager({
+      connectAppSdk,
+      getAuth: auth.get,
+    });
+
+    // First request starts a connect with the original identity.
+    const firstP = manager.getStreamSdk({
+      objectKey: OBJECT_KEY,
+      shared: false,
+    });
+
+    // Credential rotation while the first connect is in flight.
+    auth.state.userKeyHex = "cc".repeat(32);
+
+    // Second request with the new identity: it must NOT share the first's
+    // promise (different identity) and must NOT double-free the first's SDK.
+    const secondP = manager.getStreamSdk({
+      objectKey: OBJECT_KEY,
+      shared: false,
+    });
+
+    // Two separate connects were started.
+    expect(connectAppSdk).toHaveBeenCalledTimes(2);
+
+    // Resolve the first (obsolete) connect: its SDK is freed exactly once.
+    d1.resolve(obsolete);
+    await expect(firstP).rejects.toThrow();
+    expect(obsoleteFree).toHaveBeenCalledTimes(1);
+
+    // Resolve the second (fresh) connect: it becomes current.
+    d2.resolve(fresh);
+    const second = await secondP;
+    expect(second.sdk).toBe(fresh);
+    expect(freshFree).not.toHaveBeenCalled();
+
+    // The obsolete SDK was freed exactly once (not twice).
+    expect(obsoleteFree).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe("watchAuthIdentity", () => {
   /** A minimal zustand-style store: fires listeners on emit like zustand. */
   function fakeAuthStore(initial: {

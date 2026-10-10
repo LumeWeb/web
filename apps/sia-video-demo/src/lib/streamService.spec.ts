@@ -11,6 +11,70 @@ import {
   resolveDemoStreamSource,
 } from "./streamService";
 
+// The lazy default manager path dynamic-imports the auth store and the WASM
+// SDK. Both are mocked so the default (non-injected) path is testable in
+// Node, and the mock spies double as leak detectors (each manager creation
+// subscribes the auth store exactly once).
+const mocks = vi.hoisted(() => {
+  let failSubscriptions = false;
+  const listeners = new Set<() => void>();
+  const authState = {
+    indexerUrl: "https://indexer.example",
+    sharingKeyHex: null as null | string,
+    userKeyHex: "aa".repeat(32),
+  };
+  const useAuthStore = {
+    getState: () => authState,
+    subscribe: vi.fn((listener: () => void) => {
+      if (failSubscriptions) {
+        throw new Error("auth store unavailable");
+      }
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    }),
+  };
+  const failNextCreation = () => {
+    failSubscriptions = true;
+  };
+  const allowCreation = () => {
+    failSubscriptions = false;
+  };
+  const builderConnected = vi.fn((_key: unknown) =>
+    Promise.resolve({} as unknown),
+  );
+  const initSia = vi.fn(() => Promise.resolve());
+  const enableStreaming = vi.fn(() => Promise.resolve(true));
+  const openStreams = vi.fn();
+  return {
+    allowCreation,
+    builderConnected,
+    enableStreaming,
+    failNextCreation,
+    initSia,
+    openStreams,
+    useAuthStore,
+  };
+});
+
+vi.mock("../stores/auth", () => ({ useAuthStore: mocks.useAuthStore }));
+vi.mock("@siafoundation/sia-storage", () => {
+  class AppKey {}
+  class Builder {
+    connected = (key: unknown) => mocks.builderConnected(key);
+    free = () => undefined;
+  }
+  return {
+    AppKey,
+    Builder,
+    enableStreaming: mocks.enableStreaming,
+    initSia: mocks.initSia,
+    openStreams: mocks.openStreams,
+    SharedSdk: { connect: vi.fn() },
+  };
+});
+
 const OBJECT_KEY =
   "a1b2c3d4e5f60718293a4b5c6d7e8f90112233445566778899aabbccddeeff01";
 
@@ -30,6 +94,72 @@ function shareUrl(objectKey = OBJECT_KEY): string {
 }
 
 const SIGNAL = new AbortController().signal;
+
+describe("default SDK manager (lazy, single-flight)", () => {
+  it("shares one lazy manager across concurrent first requests (no duplicate connect, no leaked auth-store subscription)", async () => {
+    const { object } = fakePinnedObject();
+    const { streams } = fakeStreams();
+    const fakeSdk = {
+      free: vi.fn(),
+      object: () => Promise.resolve(object),
+    } as unknown as Sdk;
+    mocks.builderConnected.mockResolvedValue(fakeSdk);
+    mocks.openStreams.mockReturnValue(streams);
+    const service = createDemoNativeStreamService();
+
+    // Two concurrent first-time stream requests: the lazy manager must be
+    // created exactly once (one auth-store subscription, one SDK connect).
+    const [a, b] = await Promise.all([
+      service.session({ objectKey: OBJECT_KEY, shared: false }, SIGNAL),
+      service.session({ objectKey: OBJECT_KEY, shared: false }, SIGNAL),
+    ]);
+
+    // Both sessions reach the stream URL through the same single manager.
+    const fileA = await a.url(null, { name: "video", signal: SIGNAL });
+    const fileB = await b.url(null, { name: "video", signal: SIGNAL });
+    expect(fileA.url).toBe("https://localhost/sia-storage-sw-stream");
+    expect(fileB.url).toBe("https://localhost/sia-storage-sw-stream");
+    expect(mocks.useAuthStore.subscribe).toHaveBeenCalledTimes(1);
+    expect(mocks.builderConnected).toHaveBeenCalledTimes(1);
+  });
+
+  it("retries manager creation after a failed first attempt", async () => {
+    const { object } = fakePinnedObject();
+    const { streams } = fakeStreams();
+    const fakeSdk = {
+      free: vi.fn(),
+      object: () => Promise.resolve(object),
+    } as unknown as Sdk;
+    mocks.builderConnected.mockResolvedValue(fakeSdk);
+    mocks.openStreams.mockReturnValue(streams);
+    // Fresh module: the lazy manager starts uncreated in this instance.
+    vi.resetModules();
+    const { createDemoNativeStreamService: freshCreate } =
+      await import("./streamService");
+    const service = freshCreate();
+    mocks.useAuthStore.subscribe.mockClear();
+    mocks.builderConnected.mockClear();
+
+    // The first creation fails (auth store unavailable): the lazy promise
+    // must not be pinned to the rejection, so the next request retries.
+    mocks.failNextCreation();
+    await expect(
+      service.session({ objectKey: OBJECT_KEY, shared: false }, SIGNAL),
+    ).rejects.toThrow("auth store unavailable");
+    mocks.allowCreation();
+
+    const ok = await service.session(
+      { objectKey: OBJECT_KEY, shared: false },
+      SIGNAL,
+    );
+    const file = await ok.url(null, { name: "video", signal: SIGNAL });
+    expect(file.url).toBe("https://localhost/sia-storage-sw-stream");
+    // The failed attempt subscribes once before throwing, the retry succeeds:
+    // exactly one live subscription, exactly one SDK connect.
+    expect(mocks.useAuthStore.subscribe).toHaveBeenCalledTimes(2);
+    expect(mocks.builderConnected).toHaveBeenCalledTimes(1);
+  });
+});
 
 // ---------------------------------------------------------------------------
 // resolveDemoStreamSource (unchanged contract)

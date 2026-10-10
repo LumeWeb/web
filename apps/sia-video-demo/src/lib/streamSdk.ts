@@ -50,8 +50,9 @@ export interface StreamSdkHandle {
 export interface StreamSdkManager {
   /**
    * Returns a connected SDK handle for the given source mode. Lazily connects
-   * on first use, caches per mode, and frees the previous handle on mode
-   * switch.
+   * on first use, caches per mode, frees the previous handle on mode
+   * switch, and deduplicates concurrent connects for the same mode and
+   * credential identity (single flight).
    */
   free(): void;
   getStreamSdk(source: DemoStreamSource): Promise<StreamSdkHandle>;
@@ -76,8 +77,44 @@ export interface StreamSdkManagerDeps {
 }
 
 /**
+ * A connect in progress: its promise is shared by concurrent callers with
+ * the same (mode, identity), and it is obsoleted (never installed as the
+ * cached handle) when `free()` runs, a newer same-mode connect replaces it,
+ * or the credentials rotate underneath it.
+ */
+interface InFlightEntry {
+  generation: number;
+  identity: string;
+  mode: "app" | "shared";
+  promise: Promise<StreamSdkHandle>;
+}
+
+/** Per-mode in-flight slots: cross-mode connects coexist without clobbering. */
+interface InFlightMap {
+  app: InFlightEntry | null;
+  shared: InFlightEntry | null;
+}
+
+/**
+ * Error thrown to callers of an in-flight connect that was obsoleted before
+ * it settled (free() ran, credentials rotated, or a newer connect replaced
+ * it). The SDK it built has been freed; the caller must retry with a fresh
+ * request.
+ */
+export class StaleSdkError extends Error {
+  constructor(
+    message = "SDK connection is stale (credentials changed); retry",
+  ) {
+    super(message);
+    this.name = "StaleSdkError";
+  }
+}
+
+/**
  * Builds the demo-owned SDK lifetime manager. Lazily connects and caches one
- * SDK per mode; frees the previous handle on mode switch.
+ * SDK per mode; frees the previous handle on mode switch; deduplicates
+ * concurrent connects for the same mode and credential identity (single
+ * flight).
  */
 export function createStreamSdkManager(
   deps: StreamSdkManagerDeps,
@@ -91,21 +128,35 @@ export function createStreamSdkManager(
     identity: string;
     mode: "app" | "shared";
   } = null;
+  // Per-mode single-flight: one in-flight connect per mode. Concurrent
+  // callers with the same (mode, identity) share its promise; a failed
+  // connect clears it so it is retryable. Cross-mode connects coexist
+  // without clobbering each other.
+  const inFlight: InFlightMap = { app: null, shared: null };
+  // Bumped whenever an in-flight connect becomes obsolete (free() called, or
+  // replaced by a newer same-mode connect): its result must not be
+  // installed as the cached handle.
+  let generation = 0;
 
   return {
     free: () => {
+      // Obsolete any pending connects: they must not become current, and
+      // their SDKs are freed by the resolve path below.
+      generation += 1;
+      inFlight.app = null;
+      inFlight.shared = null;
       if (current) {
         current.handle.sdk.free();
         current = null;
       }
     },
-    getStreamSdk: async (source) => {
+    getStreamSdk: (source) => {
       const mode = source.shared ? "shared" : "app";
       const auth = getAuth();
       const identity = credentialIdentity(mode, auth);
       // Same mode with unchanged credentials: return the cached handle.
       if (current && current.mode === mode && current.identity === identity) {
-        return current.handle;
+        return Promise.resolve(current.handle);
       }
       // Mode switch or credential change (rotation, logout, indexer change):
       // free the previous handle so a restarting worker can never be handed
@@ -114,12 +165,63 @@ export function createStreamSdkManager(
         current.handle.sdk.free();
         current = null;
       }
-      const handle =
+      const existing = inFlight[mode];
+      // Same in-flight connect: share its promise instead of starting a
+      // second connection (the overwritten handle would be unreachable by
+      // free()/watchAuthIdentity, leaking live credentials).
+      if (existing && existing.identity === identity) {
+        return existing.promise;
+      }
+      // A pending connect for this mode whose identity is now stale: it can
+      // never become current. Let it settle; its resolve handler frees the
+      // SDK and rejects with StaleSdkError. No extra .then(free) here —
+      // the resolve path is the single free site.
+      if (existing) {
+        generation += 1;
+        inFlight[mode] = null;
+      }
+      const entry: InFlightEntry = {
+        generation,
+        identity,
+        mode,
+        promise: Promise.resolve(null as never),
+      };
+      entry.promise = (
         mode === "shared"
-          ? await connectSharedHandle(auth, connectShared)
-          : await connectAppHandle(auth, connectApp);
-      current = { handle, identity, mode };
-      return handle;
+          ? connectSharedHandle(auth, connectShared)
+          : connectAppHandle(auth, connectApp)
+      )
+        .then((handle) => {
+          if (inFlight[mode] === entry) inFlight[mode] = null;
+          // Obsolete by the time it settled: free() ran, a newer connect
+          // replaced it, or the credentials rotated underneath it. Its SDK
+          // is freed and the caller receives a StaleSdkError so it can
+          // retry with fresh credentials.
+          if (
+            entry.generation !== generation ||
+            credentialIdentity(mode, getAuth()) !== identity
+          ) {
+            handle.sdk.free();
+            throw new StaleSdkError();
+          }
+          // Free any existing cached handle (a different mode may have been
+          // installed while this connect was in flight) so it is not leaked.
+          if (current) {
+            current.handle.sdk.free();
+            current = null;
+          }
+          current = { handle, identity, mode };
+          return handle;
+        })
+        .catch((error) => {
+          // A failed connect (or a StaleSdkError) must not pin a rejected
+          // promise for this identity: the next request starts a fresh
+          // connect.
+          if (inFlight[mode] === entry) inFlight[mode] = null;
+          throw error;
+        });
+      inFlight[mode] = entry;
+      return entry.promise;
     },
   };
 }

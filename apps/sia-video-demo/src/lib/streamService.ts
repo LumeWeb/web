@@ -227,10 +227,12 @@ function abortError(): DOMException {
 // ---------------------------------------------------------------------------
 // Lazy default SDK manager: created on first stream request, not at module
 // load. The dynamic import of the auth store avoids its top-level `window`
-// side effect in Node test environments (tests always inject `getStreamSdk`).
+// side effect in Node test environments.
 // ---------------------------------------------------------------------------
 
-let _lazyManager: null | StreamSdkManager = null;
+// Single-flight: the creation promise itself is cached, so concurrent first
+// requests share one manager (and one `watchAuthIdentity` subscription).
+let _lazyPromise: null | Promise<StreamSdkManager> = null;
 
 /**
  * Builds the page-side SDK lifetime manager wired to the auth store. The
@@ -257,6 +259,12 @@ export async function createDefaultStreamSdkManager(): Promise<StreamSdkManager>
 async function defaultGetStreamSdk(
   source: DemoStreamSource,
 ): Promise<StreamSdkHandle> {
-  _lazyManager ??= await createDefaultStreamSdkManager();
-  return _lazyManager.getStreamSdk(source);
+  _lazyPromise ??= createDefaultStreamSdkManager().catch((error) => {
+    // A failed creation must not pin a rejected promise: the next request
+    // retries manager creation.
+    _lazyPromise = null;
+    throw error;
+  });
+  const manager = await _lazyPromise;
+  return manager.getStreamSdk(source);
 }
