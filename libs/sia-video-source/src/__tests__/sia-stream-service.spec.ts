@@ -2,15 +2,26 @@
 import { describe, expect, it, vi } from "vitest";
 import { createSiaStreamService } from "../sia-stream-service.ts";
 
-type ProcessLike = {
-  on: (event: "unhandledRejection", listener: (reason: unknown) => void) => void;
-  off: (event: "unhandledRejection", listener: (reason: unknown) => void) => void;
-};
+interface ProcessLike {
+  off: (
+    event: "unhandledRejection",
+    listener: (reason: unknown) => void,
+  ) => void;
+  on: (
+    event: "unhandledRejection",
+    listener: (reason: unknown) => void,
+  ) => void;
+}
 
 /** Observe unhandled rejections in both Node and browser test runners. */
-function trackUnhandledRejections(): { count: () => number; dispose: () => void } {
+function trackUnhandledRejections(): {
+  count: () => number;
+  dispose: () => void;
+} {
   let count = 0;
-  const nodeProcess = (globalThis as typeof globalThis & { process?: ProcessLike }).process;
+  const nodeProcess = (
+    globalThis as typeof globalThis & { process?: ProcessLike }
+  ).process;
   if (nodeProcess) {
     const listener = () => {
       count++;
@@ -29,7 +40,8 @@ function trackUnhandledRejections(): { count: () => number; dispose: () => void 
   globalThis.addEventListener("unhandledrejection", listener);
   return {
     count: () => count,
-    dispose: () => globalThis.removeEventListener("unhandledrejection", listener),
+    dispose: () =>
+      globalThis.removeEventListener("unhandledrejection", listener),
   };
 }
 
@@ -372,6 +384,39 @@ describe("createSiaStreamService", () => {
       "url failed",
     );
     expect(streams.close).toHaveBeenCalledOnce();
+  });
+
+  it("preserves the operation error when SDK cleanup throws during close", async () => {
+    const object = { free: vi.fn() };
+    const streams = {
+      url: vi.fn(() => Promise.reject(new Error("url failed"))),
+      close: vi.fn(),
+    };
+    const sdk = {
+      object: vi.fn(() => Promise.resolve(object)),
+      free: vi.fn(() => {
+        throw new Error("sdk free failed");
+      }),
+    };
+    const service = createSiaStreamService({
+      auth: {
+        get: () => ({ indexerUrl: "x", userKeyHex: "u", sharingKeyHex: null }),
+      },
+      connectApp: vi.fn(() => Promise.resolve(sdk as never)),
+      openStreams: vi.fn(() => Promise.resolve(streams)) as never,
+    });
+    const session = await service.session({
+      objectKey: "object",
+      shared: false,
+    });
+    service.dispose();
+
+    await expect(session.url("source", { name: "file" })).rejects.toThrow(
+      "url failed",
+    );
+    expect(streams.close).toHaveBeenCalledOnce();
+    expect(object.free).toHaveBeenCalledOnce();
+    expect(sdk.free).toHaveBeenCalledOnce();
   });
 
   it("rejects preparation after disposal without restarting it", async () => {

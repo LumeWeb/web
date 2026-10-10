@@ -226,7 +226,7 @@ export function createSiaStreamService(
           try {
             object.free();
           } finally {
-            releaseRecord(activeRecord);
+            releaseRecordSafely(activeRecord);
           }
         }
       };
