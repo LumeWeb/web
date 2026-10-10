@@ -3,8 +3,8 @@
  * player shell, media, and status bridge are composed from the selection.
  *
  * - An unarmed selection mounts nothing: no player chrome, media, or worker.
- * - An armed selection mounts the SiaPlayer shell around the demo
- *   SiaMediaElement (the demo-owned `SiaVideoSource` media instance) and the
+ * - An armed selection mounts the SiaPlayer shell around the library
+ *   `SiaVideo` wrapper and the
  *   inside-Player bridges (SiaStatusBridge, PlaybackFactsBridge,
  *   AutoPlayBridge, UserPlayBridge). The worker HELLO config comes from the
  *   current indexer; the transport `src` and the selected supplier callback
@@ -25,7 +25,7 @@
  *   publish `fetchForm` (a share URL embedding the decryption key) and any
  *   seed, so key material never reaches the reload identity string. A
  *   developer-options toggle does NOT go through the reload key: the
- *   media element's backend effect assigns `media.backend` in place, and
+ *   library wrapper assigns `media.backend` in place, and
  *   the host's backend setter updates the active playback safely.
  *
  * The pure derivations are exported so the mount props and reload-key
@@ -52,15 +52,15 @@ import type { PlaybackFacts } from "./PlaybackFactsBridge";
 import type { PublishAppKeySupplier } from "./PublishSuppliers";
 import type { SelectedSource } from "./SelectedSource";
 import type { SharedSharingKeySupplier } from "./SharedSuppliers";
-import { SiaMediaElement } from "./SiaMediaElement";
 import { SiaPlayer } from "./SiaPlayer";
+import { SiaVideo } from "@lumeweb/sia-video-source/react";
 import { SiaStatusBridge } from "./SiaStatusBridge";
 import type { SiaStatus } from "./SiaStatusBridge";
 
 /**
  * The demo native stream provider, built ONCE at module scope from the
  * demo stream service through the concise `createSiaNativeStreamProvider`
- * factory. Module-stable identity: the media element assigns it only on a
+ * factory. Module-stable identity: the library wrapper assigns it only on a
  * reference change, and the service reads the centralized developer-options
  * store at call time, so the single provider serves every mount.
  */
@@ -168,7 +168,7 @@ export function SiaVideoMount({
   if (!mount) return null;
   return (
     <SiaPlayer>
-      <SiaMediaElement
+      <SiaVideo
         backend={mount.backend}
         getAppKeySeed={mount.getAppKeySeed}
         getSharingKeySeed={mount.getSharingKeySeed}

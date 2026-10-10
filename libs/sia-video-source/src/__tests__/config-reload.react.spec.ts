@@ -13,9 +13,13 @@
  * Needs a DOM renderer, so these run in browser mode only (the same gate as
  * the other host/React specs); `SIA_TEST_ENV=node` skips them.
  */
+/* oxlint-disable typescript/no-this-alias, typescript/no-unsafe-return, typescript/unbound-method */
 import { afterEach, describe, expect, expectTypeOf, it, vi } from 'vitest';
 import type { AppMetadata } from '@siafoundation/sia-storage';
 import { nullLogger } from '../log/logger.ts';
+import type { SiaNativeStreamProvider } from '../native-stream-provider.ts';
+import type { SiaPlaybackBackend } from '../playback-backend.ts';
+import { SiaVideoSource } from '../sia-video-source.ts';
 import type { SiaVideoProps } from '../react/index.tsx';
 import { type AppKeySeedProvider } from '../app-key-handshake.ts';
 import {
@@ -64,22 +68,125 @@ describe('SiaVideo reload triggers', () => {
     return mountSiaVideo({ logger: nullLogger, ...props });
   }
 
-  it.skipIf(!IN_BROWSER)('first render does not duplicate the initial HELLO (M)', async () => {
-    // Compile-time contract (exercised on every typecheck): `src` is a plain
-    // string — a hex object key or a full Sia share URL — never the `''`
-    // literal an `as const` on the default props would expose. The `src: 'k'`
-    // props below depend on it.
-    expectTypeOf<SiaVideoProps['src']>().toEqualTypeOf<string | undefined>();
-    const h = await mount({ getAppKeySeed: seedSupplier(), reloadKey: 'a', sia: workerConfig(), src: 'k' });
-    // Let the mount's attach + passive reload effect fully flush.
-    await settle();
-    await waitFor(() => {
-      if (h.hellos() !== 1) throw new Error('expected exactly one HELLO after mount');
-    });
-    expect(h.hellos()).toBe(1);
-    h.unmount();
-  });
+  it.skipIf(!IN_BROWSER)(
+    "applies backend and provider before attach and updates the persistent instance",
+    async () => {
+      const backendDescriptor = Object.getOwnPropertyDescriptor(
+        SiaVideoSource.prototype,
+        "backend",
+      )!;
+      const providerDescriptor = Object.getOwnPropertyDescriptor(
+        SiaVideoSource.prototype,
+        "nativeStreamProvider",
+      )!;
+      let media: SiaVideoSource | undefined;
+      let providerAssignments = 0;
+      Object.defineProperty(SiaVideoSource.prototype, "backend", {
+        configurable: true,
+        get(this: SiaVideoSource) {
+          return Reflect.apply(backendDescriptor.get!, this, []);
+        },
+        set(this: SiaVideoSource, value: SiaPlaybackBackend) {
+          // oxlint-disable-next-line typescript(no-this-alias)
+          media = this;
+          Reflect.apply(backendDescriptor.set!, this, [value]);
+        },
+      });
+      Object.defineProperty(SiaVideoSource.prototype, "nativeStreamProvider", {
+        configurable: true,
+        get(this: SiaVideoSource) {
+          return Reflect.apply(providerDescriptor.get!, this, []);
+        },
+        set(this: SiaVideoSource, value: SiaNativeStreamProvider | undefined) {
+          // oxlint-disable-next-line typescript(no-this-alias)
+          media = this;
+          providerAssignments += 1;
+          Reflect.apply(providerDescriptor.set!, this, [value]);
+        },
+      });
+      try {
+        const providerA = {
+          available: () => Promise.resolve(false),
+          open: () => Promise.reject(new Error("unused")),
+        } as SiaNativeStreamProvider;
+        const providerB = {
+          available: () => Promise.resolve(false),
+          open: () => Promise.reject(new Error("unused")),
+        } as SiaNativeStreamProvider;
+        const h = await mount({
+          backend: "media-worker",
+          nativeStreamProvider: providerA,
+          src: "k",
+        });
+        expect(media).toBeDefined();
+        expect(media!.backend).toBe("media-worker");
+        expect(media!.nativeStreamProvider).toBe(providerA);
+        expect(providerAssignments).toBe(1);
+        const persistentMedia = media;
+        h.render({
+          backend: "service-worker",
+          nativeStreamProvider: providerB,
+          src: "k",
+        });
+        await settle();
+        expect(media).toBe(persistentMedia);
+        expect(media!.backend).toBe("service-worker");
+        expect(media!.nativeStreamProvider).toBe(providerB);
+        expect(providerAssignments).toBe(2);
+        h.render({
+          backend: "service-worker",
+          nativeStreamProvider: providerB,
+          src: "k",
+        });
+        await settle();
+        expect(providerAssignments).toBe(2);
+        h.unmount();
+      } finally {
+        Object.defineProperty(
+          SiaVideoSource.prototype,
+          "backend",
+          backendDescriptor,
+        );
+        Object.defineProperty(
+          SiaVideoSource.prototype,
+          "nativeStreamProvider",
+          providerDescriptor,
+        );
+      }
+    },
+  );
 
+
+  it.skipIf(!IN_BROWSER)(
+    "first render does not duplicate the initial HELLO (M)",
+    async () => {
+      // Compile-time contract (exercised on every typecheck): `src` is a plain
+      // string — a hex object key or a full Sia share URL — never the `''`
+      // literal an `as const` on the default props would expose. The `src: 'k'`
+      // props below depend on it.
+      expectTypeOf<SiaVideoProps["src"]>().toEqualTypeOf<string | undefined>();
+      expectTypeOf<SiaVideoProps["backend"]>().toEqualTypeOf<
+        SiaPlaybackBackend | undefined
+      >();
+      expectTypeOf<SiaVideoProps["nativeStreamProvider"]>().toEqualTypeOf<
+        SiaNativeStreamProvider | undefined
+      >();
+      const h = await mount({
+        getAppKeySeed: seedSupplier(),
+        reloadKey: "a",
+        sia: workerConfig(),
+        src: "k",
+      });
+      // Let the mount's attach + passive reload effect fully flush.
+      await settle();
+      await waitFor(() => {
+        if (h.hellos() !== 1)
+          throw new Error("expected exactly one HELLO after mount");
+      });
+      expect(h.hellos()).toBe(1);
+      h.unmount();
+    },
+  );
   it.skipIf(!IN_BROWSER)('a reloadKey change triggers exactly one reload without remount (J)', async () => {
     const h = await mount({ reloadKey: 'a', sia: workerConfig(), src: 'k' });
     await settle();

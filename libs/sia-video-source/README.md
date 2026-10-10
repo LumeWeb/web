@@ -48,7 +48,7 @@ import { SiaVideo } from "@lumeweb/sia-video-source/react";
 <SiaVideo src={objectKey} sia={{ indexerUrl, app }} getAppKeySeed={() => appSdk.appKey().seed()} />;
 ```
 
-`SiaVideo` also accepts `mimeType`, `logger`, `onTransportTelemetry`, `getSharingKeySeed`, and `reloadKey`. Seed suppliers are called for a worker handshake and their returned buffers are scrubbed. `reloadKey` triggers one in-place configuration reload when its value changes.
+`SiaVideo` also accepts `backend`, `nativeStreamProvider`, `mimeType`, `logger`, `onTransportTelemetry`, `getSharingKeySeed`, and `reloadKey`. `backend` selects the host playback backend and `nativeStreamProvider` supplies streams for the service-worker backend and the native fallback in `auto` mode. A defined `backend` is applied on each render; omitting it keeps the current policy, while passing `"auto"` returns to automatic selection. Seed suppliers are called for a worker handshake and their returned buffers are scrubbed. `reloadKey` triggers one in-place configuration reload when its value changes.
 
 ## Worker setup
 
