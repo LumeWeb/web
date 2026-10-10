@@ -7,6 +7,8 @@ export default defineConfig(
       "./src/index.ts",
       "./src/worker.ts",
       "./src/react/index.tsx",
+      "./src/sia-stream-service.ts",
+      "./src/sia-stream-zustand.ts",
       "!src/**/*.{spec,stories}.{ts,tsx}",
       "!src/**/*.test.{ts,tsx}",
     ],
@@ -14,6 +16,6 @@ export default defineConfig(
       outputOptions: {
         exports: "named",
       },
-    }
-  )
+    },
+  ),
 );
