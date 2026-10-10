@@ -12,49 +12,28 @@ describe("developer options store (centralized developer-mode configuration)", (
   beforeEach(() => {
     // Restore the documented defaults between tests (single module-level store).
     useDeveloperOptionsStore.getState().setDisableNativePlayback(false);
-    useDeveloperOptionsStore.getState().setNativeStreamBaseUrl("");
   });
 
-  it("defaults to native playback enabled with no stream base URL", () => {
+  it("defaults to native playback enabled", () => {
     const state = useDeveloperOptionsStore.getState();
     expect(state.disableNativePlayback).toBe(false);
-    expect(state.nativeStreamBaseUrl).toBe("");
   });
 
-  it("flips only the native-disable option when toggled", () => {
+  it("flips the native-disable option when toggled", () => {
     useDeveloperOptionsStore.getState().setDisableNativePlayback(true);
     const state = useDeveloperOptionsStore.getState();
     expect(state.disableNativePlayback).toBe(true);
-    expect(state.nativeStreamBaseUrl).toBe("");
-  });
-
-  it("sets only the stream base URL when configured", () => {
-    useDeveloperOptionsStore
-      .getState()
-      .setNativeStreamBaseUrl("https://stream.example/base");
-    const state = useDeveloperOptionsStore.getState();
-    expect(state.nativeStreamBaseUrl).toBe("https://stream.example/base");
-    expect(state.disableNativePlayback).toBe(false);
-  });
-
-  it("trims the stream base URL so blank input means unavailable", () => {
-    useDeveloperOptionsStore.getState().setNativeStreamBaseUrl("  ");
-    expect(useDeveloperOptionsStore.getState().nativeStreamBaseUrl).toBe("");
   });
 });
 
 /** The store's data fields form the single options object every consumer reads. */
-const OPTIONS_FIELDS: (keyof DeveloperOptions)[] = [
-  "disableNativePlayback",
-  "nativeStreamBaseUrl",
-];
+const OPTIONS_FIELDS: (keyof DeveloperOptions)[] = ["disableNativePlayback"];
 
 describe("developer options object shape", () => {
   it("carries exactly the centralized option fields", () => {
     const state = useDeveloperOptionsStore.getState();
     const options: DeveloperOptions = {
       disableNativePlayback: state.disableNativePlayback,
-      nativeStreamBaseUrl: state.nativeStreamBaseUrl,
     };
     expect(Object.keys(options).sort()).toEqual([...OPTIONS_FIELDS].sort());
   });

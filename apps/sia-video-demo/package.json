@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@lumeweb/sia-video-source": "workspace:*",
-    "@siafoundation/sia-storage": "^0.1.0",
+    "@siafoundation/sia-storage": "^0.1.3",
     "@videojs/core": "10.0.0-beta.32",
     "@videojs/media": "10.0.0-beta.32",
     "@videojs/react": "10.0.0-beta.32",

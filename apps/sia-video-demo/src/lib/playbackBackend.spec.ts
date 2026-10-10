@@ -11,21 +11,19 @@ import { resolvePlaybackBackend } from "./playbackBackend";
  */
 
 /** Full centralized options objects (the mapping must ignore the rest). */
-const NO_BASE: DeveloperOptions = {
+const NATIVE_ENABLED: DeveloperOptions = {
   disableNativePlayback: false,
-  nativeStreamBaseUrl: "",
 };
-const DISABLED_WITH_BASE: DeveloperOptions = {
+const NATIVE_DISABLED: DeveloperOptions = {
   disableNativePlayback: true,
-  nativeStreamBaseUrl: "https://stream.example/base",
 };
 
 describe("resolvePlaybackBackend", () => {
   it("keeps the auto policy while native playback is enabled", () => {
-    expect(resolvePlaybackBackend(NO_BASE)).toBe("auto");
+    expect(resolvePlaybackBackend(NATIVE_ENABLED)).toBe("auto");
   });
 
-  it("selects the worker-only backend when native playback is disabled even with a stream base URL configured", () => {
-    expect(resolvePlaybackBackend(DISABLED_WITH_BASE)).toBe("media-worker");
+  it("selects the worker-only backend when native playback is disabled", () => {
+    expect(resolvePlaybackBackend(NATIVE_DISABLED)).toBe("media-worker");
   });
 });
