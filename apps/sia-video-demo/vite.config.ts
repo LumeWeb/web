@@ -1,5 +1,6 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
+import { siaStorage } from "@siafoundation/sia-storage/vite";
 import { defineConfig } from "vite";
 
 // The workspace lib ships pre-compiled JSX; running the fast-refresh transform
@@ -24,6 +25,9 @@ export default defineConfig(({ mode }) => {
       react({
         exclude: /sia-video-source\/dist\//,
       }),
+      // Serves the SDK's streaming service worker in dev, emits it in build,
+      // and excludes the SDK's WASM from dependency pre-bundling.
+      siaStorage(),
       tailwindcss(),
     ],
     server: {

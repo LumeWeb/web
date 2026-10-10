@@ -2,10 +2,12 @@ import {
   createSiaNativeStreamProvider,
   SiaNativeStreamUnavailableError,
 } from "@lumeweb/sia-video-source";
-import { describe, expect, it } from "vitest";
+import type { Sdk, Streams } from "@siafoundation/sia-storage";
+import { describe, expect, it, vi } from "vitest";
+import type { StreamSdkHandle } from "./streamSdk";
 import {
   createDemoNativeStreamService,
-  demoStreamUrl,
+  type DemoStreamSource,
   resolveDemoStreamSource,
 } from "./streamService";
 
@@ -27,8 +29,11 @@ function shareUrl(objectKey = OBJECT_KEY): string {
   return `https://indexer.example/objects/${objectKey}/shared?req=abc${encryptionFragment()}`;
 }
 
-const BASE_URL = "https://stream.example/base";
 const SIGNAL = new AbortController().signal;
+
+// ---------------------------------------------------------------------------
+// resolveDemoStreamSource (unchanged contract)
+// ---------------------------------------------------------------------------
 
 describe("resolveDemoStreamSource", () => {
   it("resolves a Sia share URL to a shared source with its object key", () => {
@@ -50,71 +55,420 @@ describe("resolveDemoStreamSource", () => {
   });
 });
 
-describe("demoStreamUrl", () => {
-  it("builds the stream endpoint URL for a shared source", () => {
-    expect(
-      demoStreamUrl({ objectKey: OBJECT_KEY, shared: true }, BASE_URL),
-    ).toBe(`${BASE_URL}/stream?object=${OBJECT_KEY}&via=shared`);
-  });
+// ---------------------------------------------------------------------------
+// isAvailable: delegates to enableStreaming
+// ---------------------------------------------------------------------------
 
-  it("builds the stream endpoint URL for a non-shared source", () => {
-    expect(
-      demoStreamUrl({ objectKey: OBJECT_KEY, shared: false }, BASE_URL),
-    ).toBe(`${BASE_URL}/stream?object=${OBJECT_KEY}`);
-  });
-
-  it("strips a trailing slash from the base URL", () => {
-    expect(
-      demoStreamUrl({ objectKey: OBJECT_KEY, shared: false }, `${BASE_URL}/`),
-    ).toBe(`${BASE_URL}/stream?object=${OBJECT_KEY}`);
-  });
-});
-
-describe("createDemoNativeStreamService", () => {
-  it("is unavailable while no stream base URL is configured", async () => {
+describe("createDemoNativeStreamService.isAvailable", () => {
+  it("resolves true when enableStreaming resolves true", async () => {
     const service = createDemoNativeStreamService({
-      streamBaseUrl: () => "",
-    });
-    await expect(service.isAvailable(SIGNAL)).resolves.toBe(false);
-  });
-
-  it("is unavailable for a blank (whitespace-only) base URL", async () => {
-    const service = createDemoNativeStreamService({
-      streamBaseUrl: () => "   ",
-    });
-    await expect(service.isAvailable(SIGNAL)).resolves.toBe(false);
-  });
-
-  it("is available once a stream base URL is configured", async () => {
-    const service = createDemoNativeStreamService({
-      streamBaseUrl: () => BASE_URL,
+      enableStreaming: () => Promise.resolve(true),
     });
     await expect(service.isAvailable(SIGNAL)).resolves.toBe(true);
   });
 
-  it("opens a stream at the derived endpoint URL and stays releasable", async () => {
+  it("resolves false when enableStreaming resolves false", async () => {
     const service = createDemoNativeStreamService({
-      streamBaseUrl: () => BASE_URL,
+      enableStreaming: () => Promise.resolve(false),
+    });
+    await expect(service.isAvailable(SIGNAL)).resolves.toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// session.url: forwards options to Streams.url, release lifecycle
+// ---------------------------------------------------------------------------
+
+/** A fake PinnedObject with a spied free(). */
+function fakePinnedObject() {
+  const free = vi.fn();
+  return { free, object: { free, id: () => OBJECT_KEY } };
+}
+
+/**
+ * Builds a fake StreamSdkHandle whose sdk.object() returns the given fake
+ * PinnedObject.
+ */
+function fakeSdkHandle(
+  object: { free: () => void; id: () => string },
+  shared: boolean,
+): StreamSdkHandle {
+  const credentials: StreamSdkHandle["credentials"] = shared
+    ? { indexerUrl: "https://indexer.example", seed: "ab".repeat(32) }
+    : {
+        appMeta: {
+          appId: "cd".repeat(32),
+          callbackUrl: undefined,
+          description: "test",
+          logoUrl: undefined,
+          name: "Test",
+          serviceUrl: "https://localhost",
+        },
+        indexerUrl: "https://indexer.example",
+      };
+  const sdk = {
+    free: () => undefined,
+    object: () => Promise.resolve(object),
+  } as unknown as Sdk;
+  return { credentials, sdk };
+}
+
+/**
+ * A fake Streams handle that records url() and close() calls and returns a
+ * configurable StreamedFile.
+ */
+function fakeStreams(overrides?: { blob?: Blob }) {
+  const close = vi.fn();
+  const fileRelease = vi.fn();
+  const file = {
+    blob: overrides?.blob,
+    release: fileRelease,
+    url: "https://localhost/sia-storage-sw-stream",
+  };
+  const url = vi.fn(() => Promise.resolve(file));
+  const streams = { close, url } as unknown as Streams;
+  return { close, file, fileRelease, streams, url };
+}
+
+describe("createDemoNativeStreamService.session", () => {
+  it("forwards name, type, signal, onStatus, onProgress to Streams.url", async () => {
+    const { object } = fakePinnedObject();
+    const { streams, url: urlSpy } = fakeStreams();
+    const handle = fakeSdkHandle(object, true);
+
+    const service = createDemoNativeStreamService({
+      enableStreaming: () => Promise.resolve(true),
+      getStreamSdk: () => Promise.resolve(handle),
+      openStreams: () => streams,
+    });
+
+    const session = await service.session(
+      { objectKey: OBJECT_KEY, shared: true },
+      SIGNAL,
+    );
+    const onStatus = vi.fn();
+    const onProgress = vi.fn();
+    await session.url(handle, {
+      name: "test.mp4",
+      onProgress,
+      onStatus,
+      signal: SIGNAL,
+      type: "video/mp4",
+    });
+
+    expect(urlSpy).toHaveBeenCalledTimes(1);
+    const callArgs = urlSpy.mock.calls[0] as unknown as [
+      unknown,
+      Record<string, unknown>,
+    ];
+    expect(callArgs[0]).toBe(object);
+    expect(callArgs[1]).toMatchObject({
+      name: "test.mp4",
+      onProgress,
+      onStatus,
+      signal: SIGNAL,
+      type: "video/mp4",
+    });
+  });
+
+  it("release calls file.release, streams.close, and object.free exactly once each", async () => {
+    const { free: objectFree, object } = fakePinnedObject();
+    const { close: closeSpy, fileRelease, streams } = fakeStreams();
+    const handle = fakeSdkHandle(object, false);
+
+    const service = createDemoNativeStreamService({
+      enableStreaming: () => Promise.resolve(true),
+      getStreamSdk: () => Promise.resolve(handle),
+      openStreams: () => streams,
+    });
+
+    const session = await service.session(
+      { objectKey: OBJECT_KEY, shared: false },
+      SIGNAL,
+    );
+    const file = await session.url(handle, { name: "v", signal: SIGNAL });
+    file.release();
+
+    expect(fileRelease).toHaveBeenCalledTimes(1);
+    expect(closeSpy).toHaveBeenCalledTimes(1);
+    expect(objectFree).toHaveBeenCalledTimes(1);
+  });
+
+  it("release is idempotent: a second call is a no-op", async () => {
+    const { free: objectFree, object } = fakePinnedObject();
+    const { close: closeSpy, fileRelease, streams } = fakeStreams();
+    const handle = fakeSdkHandle(object, true);
+
+    const service = createDemoNativeStreamService({
+      enableStreaming: () => Promise.resolve(true),
+      getStreamSdk: () => Promise.resolve(handle),
+      openStreams: () => streams,
+    });
+
+    const session = await service.session(
+      { objectKey: OBJECT_KEY, shared: true },
+      SIGNAL,
+    );
+    const file = await session.url(handle, { name: "v", signal: SIGNAL });
+    file.release();
+    file.release();
+
+    expect(fileRelease).toHaveBeenCalledTimes(1);
+    expect(closeSpy).toHaveBeenCalledTimes(1);
+    expect(objectFree).toHaveBeenCalledTimes(1);
+  });
+
+  it("passes through a blob result so the library can reject it", async () => {
+    const { object } = fakePinnedObject();
+    const blob = new Blob(["data"]);
+    const { streams } = fakeStreams({ blob });
+    const handle = fakeSdkHandle(object, true);
+
+    const service = createDemoNativeStreamService({
+      enableStreaming: () => Promise.resolve(true),
+      getStreamSdk: () => Promise.resolve(handle),
+      openStreams: () => streams,
+    });
+
+    const session = await service.session(
+      { objectKey: OBJECT_KEY, shared: true },
+      SIGNAL,
+    );
+    const file = await session.url(handle, { name: "v", signal: SIGNAL });
+    expect(file.blob).toBe(blob);
+  });
+
+  it("rejects with the unavailable error when enableStreaming is false", async () => {
+    const service = createDemoNativeStreamService({
+      enableStreaming: () => Promise.resolve(false),
+    });
+    const provider = createSiaNativeStreamProvider(service);
+    await expect(
+      provider.open(shareUrl(), { signal: SIGNAL }),
+    ).rejects.toBeInstanceOf(SiaNativeStreamUnavailableError);
+  });
+
+  it("opens a stream through the full provider path and stays releasable", async () => {
+    const { free: objectFree, object } = fakePinnedObject();
+    const { close: closeSpy, fileRelease, streams } = fakeStreams();
+    const handle = fakeSdkHandle(object, true);
+
+    const service = createDemoNativeStreamService({
+      enableStreaming: () => Promise.resolve(true),
+      getStreamSdk: () => Promise.resolve(handle),
+      openStreams: () => streams,
     });
     const provider = createSiaNativeStreamProvider(service);
     const stream = await provider.open(shareUrl(), {
       name: "video",
       signal: SIGNAL,
     });
-    expect(stream.url).toBe(
-      `${BASE_URL}/stream?object=${OBJECT_KEY}&via=shared`,
-    );
+    expect(stream.url).toBe("https://localhost/sia-storage-sw-stream");
     stream.release();
-    stream.release(); // release stays idempotent
+    stream.release();
+    expect(fileRelease).toHaveBeenCalledTimes(1);
+    expect(closeSpy).toHaveBeenCalledTimes(1);
+    expect(objectFree).toHaveBeenCalledTimes(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Abort handling: a session signal that fires must release everything the
+// load created and reject with an AbortError (no leaked object/Streams).
+// ---------------------------------------------------------------------------
+
+describe("createDemoNativeStreamService abort handling", () => {
+  const SOURCE: DemoStreamSource = { objectKey: OBJECT_KEY, shared: true };
+
+  function serviceWith(
+    getStreamSdk: (source: DemoStreamSource) => Promise<StreamSdkHandle>,
+    openStreams: () => Streams,
+  ) {
+    return createDemoNativeStreamService({
+      enableStreaming: () => Promise.resolve(true),
+      getStreamSdk,
+      openStreams,
+    });
+  }
+
+  it("rejects with AbortError when the signal is already aborted, before any SDK work", async () => {
+    const { object } = fakePinnedObject();
+    const { streams } = fakeStreams();
+    const handle = fakeSdkHandle(object, true);
+    const getStreamSdk = vi.fn(() => Promise.resolve(handle));
+    const openStreams = vi.fn(() => streams);
+    const service = serviceWith(getStreamSdk, openStreams);
+
+    const controller = new AbortController();
+    controller.abort();
+    await expect(
+      service.session(SOURCE, controller.signal),
+    ).rejects.toMatchObject({ name: "AbortError" });
+    expect(getStreamSdk).not.toHaveBeenCalled();
+    expect(openStreams).not.toHaveBeenCalled();
   });
 
-  it("rejects with the unavailable error when the base URL is empty", async () => {
-    const service = createDemoNativeStreamService({
-      streamBaseUrl: () => "",
+  it("rejects with AbortError when the signal aborts while the SDK is connecting", async () => {
+    const { free: objectFree, object } = fakePinnedObject();
+    const { close: closeSpy, streams } = fakeStreams();
+    const handle = fakeSdkHandle(object, true);
+    let resolveSdk: ((handle: StreamSdkHandle) => void) | undefined;
+    const getStreamSdk = vi.fn(
+      () =>
+        new Promise<StreamSdkHandle>((resolve) => {
+          resolveSdk = resolve;
+        }),
+    );
+    const openStreams = vi.fn(() => streams);
+    const service = serviceWith(getStreamSdk, openStreams);
+
+    const controller = new AbortController();
+    const sessionPromise = service.session(SOURCE, controller.signal);
+    controller.abort();
+    resolveSdk?.(handle);
+    await expect(sessionPromise).rejects.toMatchObject({ name: "AbortError" });
+
+    // Nothing past the SDK connect may have been created or released.
+    expect(openStreams).not.toHaveBeenCalled();
+    expect(closeSpy).not.toHaveBeenCalled();
+    expect(objectFree).not.toHaveBeenCalled();
+  });
+
+  it("releases the fetched object when the signal aborts while fetching the PinnedObject", async () => {
+    const { free: objectFree, object } = fakePinnedObject();
+    const { close: closeSpy, streams } = fakeStreams();
+    let resolveObject: (() => void) | undefined;
+    const handle: StreamSdkHandle = {
+      credentials: {
+        indexerUrl: "https://indexer.example",
+        seed: "ab".repeat(32),
+      },
+      sdk: {
+        free: () => undefined,
+        object: () =>
+          new Promise((resolve) => {
+            resolveObject = () => resolve(object);
+          }),
+      } as unknown as Sdk,
+    };
+    const openStreams = vi.fn(() => streams);
+    const service = serviceWith(() => Promise.resolve(handle), openStreams);
+
+    const controller = new AbortController();
+    const sessionPromise = service.session(SOURCE, controller.signal);
+    // Let the session get past the SDK handle and start fetching the object.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    controller.abort();
+    resolveObject?.();
+    await expect(sessionPromise).rejects.toMatchObject({ name: "AbortError" });
+
+    // The object was created before the abort landed: it must be freed, and
+    // the Streams handle never opened.
+    expect(objectFree).toHaveBeenCalledTimes(1);
+    expect(openStreams).not.toHaveBeenCalled();
+    expect(closeSpy).not.toHaveBeenCalled();
+  });
+
+  it("releases object and Streams when the signal aborts while the stream URL is pending", async () => {
+    const { free: objectFree, object } = fakePinnedObject();
+    const close = vi.fn();
+    const fileRelease = vi.fn();
+    const file = {
+      blob: undefined,
+      release: fileRelease,
+      url: "https://localhost/sia-storage-sw-stream",
+    };
+    let resolveFile: (() => void) | undefined;
+    const url = vi.fn(
+      () =>
+        new Promise<typeof file>((resolve) => {
+          resolveFile = () => resolve(file);
+        }),
+    );
+    const streams = { close, url } as unknown as Streams;
+    const handle = fakeSdkHandle(object, true);
+    const service = serviceWith(
+      () => Promise.resolve(handle),
+      () => streams,
+    );
+
+    const session = await service.session(SOURCE, new AbortController().signal);
+    const controller = new AbortController();
+    const urlPromise = session.url(SOURCE, {
+      name: "v",
+      signal: controller.signal,
     });
-    const provider = createSiaNativeStreamProvider(service);
+    controller.abort();
+    resolveFile?.();
+    await expect(urlPromise).rejects.toMatchObject({ name: "AbortError" });
+
+    // The file that resolved in the race, the Streams handle, and the object
+    // are all released exactly once.
+    expect(fileRelease).toHaveBeenCalledTimes(1);
+    expect(close).toHaveBeenCalledTimes(1);
+    expect(objectFree).toHaveBeenCalledTimes(1);
+  });
+
+  it("releases the per-load handles and never calls Streams.url when url() starts already aborted", async () => {
+    const { free: objectFree, object } = fakePinnedObject();
+    const { close: closeSpy, streams, url: urlSpy } = fakeStreams();
+    const handle = fakeSdkHandle(object, true);
+    const service = serviceWith(
+      () => Promise.resolve(handle),
+      () => streams,
+    );
+
+    const session = await service.session(SOURCE, new AbortController().signal);
+    const controller = new AbortController();
+    controller.abort();
     await expect(
-      provider.open(shareUrl(), { signal: SIGNAL }),
-    ).rejects.toBeInstanceOf(SiaNativeStreamUnavailableError);
+      session.url(SOURCE, { name: "v", signal: controller.signal }),
+    ).rejects.toMatchObject({ name: "AbortError" });
+
+    expect(urlSpy).not.toHaveBeenCalled();
+    expect(closeSpy).toHaveBeenCalledTimes(1);
+    expect(objectFree).toHaveBeenCalledTimes(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// App vs shared source routing through the SDK handle
+// ---------------------------------------------------------------------------
+
+describe("createDemoNativeStreamService source routing", () => {
+  it("routes a shared source through the shared SDK handle", async () => {
+    const { object } = fakePinnedObject();
+    const { streams } = fakeStreams();
+    const getStreamSdk = vi.fn(() =>
+      Promise.resolve(fakeSdkHandle(object, true)),
+    );
+
+    const service = createDemoNativeStreamService({
+      enableStreaming: () => Promise.resolve(true),
+      getStreamSdk,
+      openStreams: () => streams,
+    });
+
+    const source: DemoStreamSource = { objectKey: OBJECT_KEY, shared: true };
+    await service.session(source, SIGNAL);
+    expect(getStreamSdk).toHaveBeenCalledWith(source);
+  });
+
+  it("routes an app source through the app SDK handle", async () => {
+    const { object } = fakePinnedObject();
+    const { streams } = fakeStreams();
+    const getStreamSdk = vi.fn(() =>
+      Promise.resolve(fakeSdkHandle(object, false)),
+    );
+
+    const service = createDemoNativeStreamService({
+      enableStreaming: () => Promise.resolve(true),
+      getStreamSdk,
+      openStreams: () => streams,
+    });
+
+    const source: DemoStreamSource = { objectKey: OBJECT_KEY, shared: false };
+    await service.session(source, SIGNAL);
+    expect(getStreamSdk).toHaveBeenCalledWith(source);
   });
 });

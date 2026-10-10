@@ -74,7 +74,6 @@ const previousWorker = globalThis.Worker;
 beforeEach(() => {
   useDeveloperOptionsStore.setState({
     disableNativePlayback: false,
-    nativeStreamBaseUrl: "",
   });
   backendSetterCalls = 0;
   observedMedia = null;
