@@ -64,6 +64,29 @@ class NativeStreamService {
 }
 
 describe("createSiaNativeStreamProvider (service overload)", () => {
+  it("does not prepare at construction and prepares before the first capability check", async () => {
+    const calls: string[] = [];
+    const service: SiaNativeStreamService<PinnedObject> = {
+      isAvailable: () => {
+        calls.push("available");
+        return Promise.resolve(false);
+      },
+      prepare: () => {
+        calls.push("prepare");
+        return Promise.resolve();
+      },
+      resolve: (src) => Promise.resolve({ key: src }),
+      session: () => ({
+        url: () =>
+          Promise.resolve({ release: () => undefined, url: STREAM_URL }),
+      }),
+    };
+    const provider = createSiaNativeStreamProvider(service);
+    expect(calls).toEqual([]);
+    await expect(provider.available()).resolves.toBe(false);
+    expect(calls).toEqual(["prepare", "available"]);
+  });
+
   it("builds a working provider from a typed service without adapter boilerplate", async () => {
     const service = new NativeStreamService();
     const provider: SiaNativeStreamProvider =

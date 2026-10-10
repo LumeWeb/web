@@ -35,11 +35,15 @@ export interface SiaNativeStreamProviderDependencies {
     source: unknown,
     signal?: AbortSignal,
   ) => Promise<SiaNativeStreamSession> | SiaNativeStreamSession;
+  /** Optional lazy setup. The provider calls it before capability checks and opens. */
+  prepare?: (signal?: AbortSignal) => Promise<void>;
   resolveSource: (src: string, signal?: AbortSignal) => Promise<unknown>;
 }
 
 /** App stream service that native playback is built from: availability, source resolution, and stream sessions. */
 export interface SiaNativeStreamService<TSource = unknown> {
+  /** Lazy setup hook. It may cache its promise and is never called by construction. */
+  prepare?(signal?: AbortSignal): Promise<void>;
   isAvailable(signal?: AbortSignal): Promise<boolean>;
   resolve(src: string, signal?: AbortSignal): Promise<TSource>;
   session(
@@ -103,6 +107,9 @@ export function createSiaNativeStreamProvider(
   const deps = isNativeStreamService(input)
     ? {
         capability: (signal?: AbortSignal) => input.isAvailable(signal),
+        prepare: input.prepare
+          ? (signal?: AbortSignal) => input.prepare!(signal)
+          : undefined,
         // The factory types the resolved source as unknown at this seam; the
         // only values that reach session are the ones resolve just produced.
         createStreamSession: (source: unknown, signal?: AbortSignal) =>
@@ -118,9 +125,24 @@ export function createSiaNativeStreamProvider(
 function buildNativeStreamProvider(
   deps: SiaNativeStreamProviderDependencies,
 ): SiaNativeStreamProvider {
+  let preparation: Promise<void> | undefined;
+  const prepare = (signal?: AbortSignal): Promise<void> => {
+    if (preparation) return preparation;
+    const pending = deps.prepare?.(signal) ?? Promise.resolve();
+    const retryable = pending.catch((error: unknown) => {
+      if (preparation === retryable) preparation = undefined;
+      throw error;
+    });
+    preparation = retryable;
+    return retryable;
+  };
   const provider = {
-    available: (signal?: AbortSignal) => deps.capability(signal),
+    available: async (signal?: AbortSignal) => {
+      await prepare(signal);
+      return deps.capability(signal);
+    },
     open: async (src: string, options: NativeProviderOpenOptions) => {
+      await prepare(options.signal);
       if (!(await deps.capability(options.signal)))
         throw new SiaNativeStreamUnavailableError();
       let source: unknown;

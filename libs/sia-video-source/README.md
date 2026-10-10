@@ -91,9 +91,9 @@ const source = new SiaVideoSource({
 });
 ```
 
-`createSiaNativeStreamProvider` takes a service with `isAvailable(signal)`, `resolve(src, signal)`, and `session(source, signal)` methods and builds the provider from it, so the common case needs no adapter boilerplate. It also accepts the `SiaNativeStreamProviderDependencies` callback object (`capability`, `resolveSource`, `createStreamSession`) for integrations that wire the three callbacks by hand.
+`createSiaNativeStreamProvider` takes a service with `isAvailable(signal)`, `resolve(src, signal)`, and `session(source, signal)` methods and builds the provider from it, so the common case needs no adapter boilerplate. A service may also provide lazy `prepare(signal)`, which runs before capability checks and opens; preparation is created on first use, shared while pending, and retried after rejection. It also accepts the `SiaNativeStreamProviderDependencies` callback object (`capability`, `resolveSource`, `createStreamSession`) for integrations that wire the three callbacks by hand.
 
-The provider owns SDK setup, authorization, and Service Worker scope. The host owns backend selection, cancellation, assigning the returned URL, and releasing the stream. Native loads expose `sia-source-info-change` with `{ kind: "native" }` and no `info`; worker loads expose `{ kind: "worker", info }`.
+The provider owns SDK setup, authorization, and Service Worker scope. The host owns backend selection, cancellation, assigning the returned URL, and releasing the stream. Native loads expose `sia-source-info-change` with `{ kind: "native" }` and no `info`; worker loads expose `{ kind: "worker", info }`. When backend policy is `auto`, call `source.reselectBackend()` after an asynchronous provider readiness change to recheck the current source. The method is a no-op for explicit backend policies and preserves active play intent when it changes from native to worker playback.
 
 For keyless share playback, supply `getSharingKeySeed`. The sharing key is read-only and scoped by the key owner. A share URL routes through `SharedSdk` when that supplier is present. With both suppliers, object keys use the app-key SDK and share URLs use the sharing-key SDK.
 

@@ -734,6 +734,16 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // at the fresh attach point (after reanchor) so the new resource plays
   // natively. Cleared at the load boundary so a later attach never replays.
   #pendingResumePlay = false;
+  // Wire PLAY is edge-triggered per native play/pause transition. Backend
+  // boundaries cancel pending native play requests, so no event attribution
+  // latch is needed here.
+  #playSentForTransition = false;
+  // Backend replacement is an explicit lifecycle: the captured preference is
+  // replayed at HANDLE. This records only that the replacement teardown is
+  // awaiting its native pause boundary; it is not an event generation (DOM
+  // events cannot carry one). A later play closes the lifecycle, and paused
+  // state is checked before any pause can affect the machine.
+  #nativeTeardownPausePending = false;
 
   #preload: MediaPreloadType = siaVideoDefaultProps.preload;
 
@@ -1070,6 +1080,25 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#startHandshake();
   }
 
+  /**
+   * Rechecks native readiness and reapplies the automatic backend for the
+   * current source. Integrations call this after their provider becomes ready;
+   * it does not choose a backend when policy is explicit.
+   */
+  reselectBackend(): void {
+    if (
+      this.#destroyed ||
+      !this.target ||
+      !this.#src ||
+      this.#backend !== SIA_PLAYBACK_BACKENDS.AUTO
+    )
+      return;
+    const shouldPlay = !this.target.paused;
+    this.#resetLoadState();
+    this.#pendingResumePlay = shouldPlay;
+    this.#selectAutoBackend();
+  }
+
   #applyPendingServiceWorkerResume(): void {
     const target = this.target as HTMLVideoElement | null;
     if (!this.#pendingServiceWorkerResume || !target || !this.#src) return;
@@ -1107,9 +1136,12 @@ export class SiaVideoSource extends HTMLVideoElementHost {
           this.#activeBackend = SIA_PLAYBACK_BACKENDS.SERVICE_WORKER;
           if (this.#src) this.#startServiceWorkerSource(this.#src);
         } else {
+          const shouldPlay = Boolean(this.target && !this.target.paused);
+          this.#pauseNativeForTeardown(this.target);
           if (this.#activeBackend === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER)
             this.#serviceWorkerBackend?.detach();
           this.#activeBackend = SIA_PLAYBACK_BACKENDS.MEDIA_WORKER;
+          this.#pendingResumePlay = shouldPlay;
           this.#startWorkerBackend();
           if (this.#worker) this.#sendSource();
         }
@@ -1120,13 +1152,24 @@ export class SiaVideoSource extends HTMLVideoElementHost {
           this.#backend !== SIA_PLAYBACK_BACKENDS.AUTO
         )
           return;
+        const shouldPlay = Boolean(this.target && !this.target.paused);
+        this.#pauseNativeForTeardown(this.target);
         if (this.#activeBackend === SIA_PLAYBACK_BACKENDS.SERVICE_WORKER)
           this.#serviceWorkerBackend?.detach();
         this.#activeBackend = SIA_PLAYBACK_BACKENDS.MEDIA_WORKER;
+        this.#pendingResumePlay = shouldPlay;
         this.#startWorkerBackend();
         if (this.#worker) this.#sendSource();
       },
     );
+  }
+
+  #pauseNativeForTeardown(target: HTMLVideoTargetLike | null): void {
+    // `pause` events have no source identity in the DOM. Keep an explicit
+    // teardown lifecycle instead of pretending a generation can be read back
+    // from the event; the event handler validates the observable paused state.
+    this.#nativeTeardownPausePending = Boolean(target && !target.paused);
+    target?.pause();
   }
 
   #startWorkerBackend(): void {
@@ -1169,14 +1212,16 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#autoFallbackUsed = true;
     const target = this.target;
     const shouldPlay = Boolean(target && !target.paused);
+    // Cancel the native play promise before detaching the service-worker
+    // resource. Its eventual play event belongs to the dead backend and must
+    // never be classified as a worker user PLAY.
+    this.#pauseNativeForTeardown(target);
     this.#serviceWorkerBackend?.detach();
     this.#activeBackend = SIA_PLAYBACK_BACKENDS.MEDIA_WORKER;
-    this.#pendingResumePlay = shouldPlay;
     this.#resetLoadState();
     this.#pendingResumePlay = shouldPlay;
     this.#startWorkerBackend();
     if (this.#worker && this.#src) this.#sendSource();
-    if (shouldPlay) this.#machine.send({ type: hostPlaybackEvent.play });
   }
 
   #startServiceWorkerSource(src: string): void {
@@ -1940,6 +1985,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
           // and PLAYHEAD was dropped while not-ready.
           this.#flushBufferedSeek(pending);
           if (shouldPlay) {
+            this.#playSentForTransition = true;
             // Re-stated SOLELY from the current machine playback choice (and
             // the element's live paused state), aimed at the fresh SOURCE's
             // request id so the worker honors it when that load completes —
@@ -2220,8 +2266,14 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     if (!target || event.target !== target) return;
     // A dead/superseded resource's incidental pause (the teardown clamp) is
     // engine work, not the user stopping — the machine's playback choice must
-    // survive it.
+    // survive it. A delayed stale pause is observable because a later play has
+    // already made the element unpaused; never let that event rewind intent.
     if (!this.#eventIsFromCurrentResource(target)) return;
+    if (!target.paused) return;
+    if (this.#nativeTeardownPausePending) {
+      this.#nativeTeardownPausePending = false;
+      return;
+    }
     if (this.#machine.isRecovering) {
       // The engine is replacing the pipeline (decode recovery / external-seek
       // restart); the incidental native pause that surfaces during teardown is
@@ -2229,12 +2281,18 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       // choice unchanged.
       return;
     }
+    // A user pause supersedes a deferred native resume. Without clearing this
+    // latch, a pause during the fallback handshake would let HANDLE call
+    // target.play() after the pause and resurrect stale intent.
+    this.#pendingResumePlay = false;
+    this.#pendingServiceWorkerResume = false;
+    const wasPlaying = this.#machine.preference === playbackPreference.playing;
+    this.#playSentForTransition = false;
     // A PLAYING load's pause is provisional: video.js fires a native pause
     // before `seeking` on a far scrub, so the machine stays in `pausepending`
     // (retaining the playing choice) and the host schedules a next-task
     // `pause.confirmed`. A pause on an already-paused / never-started load is
     // final — no window to confirm.
-    const wasPlaying = this.#machine.preference === playbackPreference.playing;
     this.#machine.send({ type: hostPlaybackEvent.pause });
     if (wasPlaying) this.#schedulePauseConfirm();
   };
@@ -2255,6 +2313,15 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // recovery's own resume play needs no special handling: the choice is
     // already playing, so the guarded machine transition is a no-op).
     if (this.#machine.isRecovering && target.paused) return;
+    // A user play supersedes any saved automatic resume intent. The old
+    // native play request was cancelled at the backend boundary, so this event
+    // is unambiguously a new transition.
+    this.#pendingResumePlay = false;
+    // A user/native play closes the replacement pause lifecycle. A delayed
+    // teardown pause arriving after this point observes `paused === false`
+    // and is ignored above, so it cannot rewind the user's choice.
+    this.#nativeTeardownPausePending = false;
+    if (this.#playSentForTransition) return;
     // The user asked to play. If a repair is owed the machine consumes it:
     // restart at the owed position with PLAY (the ONE recovery trigger that
     // may auto-resume, because the user asked to play). Otherwise the machine
@@ -2263,6 +2330,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     if (this.#applyDecisions(decisions)) return;
     // Deferred playback start (preload 'metadata'/'none'): first play (or a
     // user seek) triggers streaming.
+    this.#playSentForTransition = true;
     this.#send({
       requestId: this.#requestId ?? nextRequestId(),
       type: MainToWorkerMessageType.PLAY,
@@ -2560,6 +2628,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // sets its own position again AFTER this reset).
     this.#pendingReanchorSeconds = null;
     this.#pendingResumePlay = false;
+    this.#playSentForTransition = false;
     // Per-load window facts are gone until the next SOURCE_OK / PROGRESS.
     this.#endedReached = false;
     this.#durationSeconds = null;

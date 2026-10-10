@@ -10,7 +10,7 @@ This package adapts Sia ranged reads to the video.js v10 media contract. The wor
 - `src/protocol.ts` owns the wire unions, guards, request IDs, protocol version, and worker log catalog. `src/media/`, `src/sink/`, and `src/transport/` own conversion, MSE sinks, and transport policy.
 - `decisions/` contains append-only ADRs. The next new ADR is 0012. Use scope or supersession notes when a later backend or implementation changes an earlier decision.
 
-Do not move SDK credentials into `WorkerConfig`, React state, logs, or plaintext messages. App and sharing seeds travel in encrypted `APP_KEY` envelopes. Keep source-info kinds as `worker` with `SourceInfo` or `native` without `info`. Backend policy remains `auto`, `media-worker`, or `service-worker`; the auto native fallback is once per attached source instance. The package does not install a Service Worker. Mediabunny owns format recognition and CMAF conversion; do not document mux.js or a package-local container probe.
+Do not move SDK credentials into `WorkerConfig`, React state, logs, or plaintext messages. App and sharing seeds travel in encrypted `APP_KEY` envelopes. Keep source-info kinds as `worker` with `SourceInfo` or `native` without `info`. Backend policy remains `auto`, `media-worker`, or `service-worker`; automatic selection normally falls back once per attached source, while callers may invoke `reselectBackend()` after provider readiness changes. The package does not install a Service Worker. Mediabunny owns format recognition and CMAF conversion; do not document mux.js or a package-local container probe.
 
 ## Validation
 

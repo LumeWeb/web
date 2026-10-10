@@ -14,13 +14,58 @@ import { SiaVideoSource } from "../sia-video-source.ts";
 class FakeVideoTarget extends EventTarget {
   currentTime = 0;
   paused = true;
-  play = vi.fn(() => Promise.resolve());
+  pause = vi.fn(() => {
+    this.paused = true;
+    this.dispatchEvent(new Event("pause"));
+  });
+  play = vi.fn(() => {
+    this.paused = false;
+    this.dispatchEvent(new Event("play"));
+    return Promise.resolve();
+  });
   src = "";
   getAttribute(): null {
     return null;
   }
   removeAttribute(): void {
     this.src = "";
+  }
+}
+
+class AsyncPauseVideoTarget extends FakeVideoTarget {
+  override pause = vi.fn(() => {
+    this.paused = true;
+    setTimeout(() => this.dispatchEvent(new Event("pause")), 0);
+  });
+}
+
+class DelayedPlayVideoTarget extends FakeVideoTarget {
+  readonly pendingPlays: {
+    reject: (reason?: unknown) => void;
+    resolve: () => void;
+  }[] = [];
+  override pause = vi.fn(() => {
+    this.paused = true;
+    const pending = this.pendingPlays.splice(0);
+    for (const { reject } of pending)
+      reject(
+        new DOMException("The play() request was interrupted", "AbortError"),
+      );
+    this.dispatchEvent(new Event("pause"));
+  });
+
+  override play = vi.fn(() => {
+    this.paused = false;
+    return new Promise<void>((resolve, reject) => {
+      this.pendingPlays.push({ reject, resolve });
+    });
+  });
+
+  resolveNextPlay(): void {
+    const pending = this.pendingPlays.shift();
+    if (!pending) return;
+    this.dispatchEvent(new Event("play"));
+    pending.resolve();
   }
 }
 
@@ -110,7 +155,178 @@ describe("auto backend selection", () => {
     host.destroy();
   });
 
-  it("falls back once when native setup fails and keeps source and play intent", async () => {
+  it("retains cancellation through an asynchronous native teardown pause", async () => {
+    const worker = new FakeWorker();
+    const target = new AsyncPauseVideoTarget();
+    target.paused = false;
+    const host = new SiaVideoSource({
+      backend: SIA_PLAYBACK_BACKENDS.AUTO,
+      createWorker: vi.fn(() => worker) as unknown as () => Worker,
+      logger: nullLogger,
+      nativeStreamProvider: {
+        available: () => Promise.resolve(true),
+        open: () => Promise.reject(new Error("native setup failed")),
+      },
+    });
+
+    host.attach(target as unknown as HTMLVideoElement);
+    host.src = "async-pause-key";
+    void target.play();
+    await flush();
+    // A later user play must win even when the stale teardown pause arrives
+    // afterward, before the replacement worker has completed its handshake.
+    void target.play();
+    await flush();
+    replyToWorkerHandshake(worker);
+    const source = worker.sent.findLast(
+      (message) => message.type === MainToWorkerMessageType.SOURCE,
+    );
+    if (source && "requestId" in source)
+      worker.reply({
+        handle: {},
+        requestId: source.requestId,
+        type: WorkerToMainMessageType.HANDLE,
+      });
+    await flush();
+
+    expect(
+      worker.sent.filter(
+        (message) => message.type === MainToWorkerMessageType.PLAY,
+      ),
+    ).toHaveLength(1);
+    host.destroy();
+  });
+
+  it("does not retain cancellation when native teardown was already paused", async () => {
+    const worker = new FakeWorker();
+    const target = new FakeVideoTarget();
+    const host = new SiaVideoSource({
+      backend: SIA_PLAYBACK_BACKENDS.AUTO,
+      createWorker: vi.fn(() => worker) as unknown as () => Worker,
+      logger: nullLogger,
+      nativeStreamProvider: {
+        available: () => Promise.resolve(true),
+        open: () => Promise.reject(new Error("native setup failed")),
+      },
+    });
+
+    host.attach(target as unknown as HTMLVideoElement);
+    host.src = "already-paused-key";
+    await flush();
+    // pause() emits no event for an already-paused native element.
+    await flush();
+    void target.play();
+    target.paused = true;
+    target.dispatchEvent(new Event("pause"));
+    replyToWorkerHandshake(worker);
+    const source = worker.sent.findLast(
+      (message) => message.type === MainToWorkerMessageType.SOURCE,
+    );
+    if (source && "requestId" in source)
+      worker.reply({
+        handle: {},
+        requestId: source.requestId,
+        type: WorkerToMainMessageType.HANDLE,
+      });
+    await flush();
+
+    expect(
+      worker.sent.filter(
+        (message) => message.type === MainToWorkerMessageType.PLAY,
+      ),
+    ).toHaveLength(0);
+    host.destroy();
+  });
+
+  it("falls back when native availability is rejected and resumes play intent", async () => {
+    const worker = new FakeWorker();
+    const createWorker = vi.fn(() => worker);
+    const target = new FakeVideoTarget();
+    target.paused = false;
+    const host = new SiaVideoSource({
+      backend: SIA_PLAYBACK_BACKENDS.AUTO,
+      createWorker: createWorker as unknown as () => Worker,
+      logger: nullLogger,
+      nativeStreamProvider: {
+        available: () => Promise.reject(new Error("availability failed")),
+        open: () => Promise.reject(new Error("native setup failed")),
+      },
+    });
+
+    host.attach(target as unknown as HTMLVideoElement);
+    host.src = "availability-failure-key";
+    void target.play();
+    await flush();
+
+    expect(createWorker).toHaveBeenCalledOnce();
+    // The fallback captures the active play intent before tearing down native
+    // playback, then resumes it after the replacement HANDLE arrives.
+    replyToWorkerHandshake(worker);
+    const source = worker.sent.findLast(
+      (message) => message.type === MainToWorkerMessageType.SOURCE,
+    );
+    if (source && "requestId" in source)
+      worker.reply({
+        handle: {},
+        requestId: source.requestId,
+        type: WorkerToMainMessageType.HANDLE,
+      });
+    await flush();
+
+    expect(
+      worker.sent.filter(
+        (message) => message.type === MainToWorkerMessageType.PLAY,
+      ),
+    ).toHaveLength(1);
+    host.destroy();
+  });
+
+  it("does not replay stale play after native availability rejects and pauses during handshake", async () => {
+    const worker = new FakeWorker();
+    const target = new FakeVideoTarget();
+    target.paused = false;
+    const host = new SiaVideoSource({
+      backend: SIA_PLAYBACK_BACKENDS.AUTO,
+      createWorker: vi.fn(() => worker) as unknown as () => Worker,
+      logger: nullLogger,
+      nativeStreamProvider: {
+        available: () => Promise.reject(new Error("availability failed")),
+        open: () => Promise.reject(new Error("native setup failed")),
+      },
+    });
+
+    host.attach(target as unknown as HTMLVideoElement);
+    host.src = "stale-play-key";
+    await flush();
+
+    // Simulate the real native resume and then a user pause while the worker
+    // handshake is still pending. Both native events must not leave duplicate
+    // or stale PLAY intent queued for this replacement load.
+    void target.play();
+    target.paused = true;
+    target.dispatchEvent(new Event("pause"));
+    replyToWorkerHandshake(worker);
+    const source = worker.sent.findLast(
+      (message) => message.type === MainToWorkerMessageType.SOURCE,
+    );
+    if (source && "requestId" in source) {
+      worker.reply({
+        handle: {},
+        requestId: source.requestId,
+        type: WorkerToMainMessageType.HANDLE,
+      });
+    }
+    await flush();
+
+    expect(
+      worker.sent.filter(
+        (message) => message.type === MainToWorkerMessageType.PLAY,
+      ),
+    ).toHaveLength(0);
+    host.destroy();
+  });
+
+  it("falls back once when native setup fails and resumes play intent", async () => {
     const worker = new FakeWorker();
     const createWorker = vi.fn(() => worker);
     const target = new FakeVideoTarget();
@@ -127,9 +343,19 @@ describe("auto backend selection", () => {
 
     host.attach(target as unknown as HTMLVideoElement);
     host.src = "setup-failure-key";
+    void target.play();
     await flush();
     expect(createWorker).toHaveBeenCalledOnce();
     replyToWorkerHandshake(worker);
+    const source = worker.sent.findLast(
+      (message) => message.type === MainToWorkerMessageType.SOURCE,
+    );
+    if (source && "requestId" in source)
+      worker.reply({
+        handle: {},
+        requestId: source.requestId,
+        type: WorkerToMainMessageType.HANDLE,
+      });
     await flush();
 
     expect(host.src).toBe("setup-failure-key");
@@ -148,6 +374,136 @@ describe("auto backend selection", () => {
         (message) => message.type === MainToWorkerMessageType.PLAY,
       ),
     ).toHaveLength(1);
+    host.destroy();
+  });
+
+  it("resumes captured play intent when fallback overlaps a delayed native play", async () => {
+    const worker = new FakeWorker();
+    const target = new DelayedPlayVideoTarget();
+    const host = new SiaVideoSource({
+      backend: SIA_PLAYBACK_BACKENDS.AUTO,
+      createWorker: vi.fn(() => worker) as unknown as () => Worker,
+      logger: nullLogger,
+      nativeStreamProvider: provider(true),
+    });
+
+    host.attach(target as unknown as HTMLVideoElement);
+    host.src = "delayed-native-play-key";
+    await flush();
+    // Establish the playing preference through the ordinary user play path;
+    // the pending play is followed by its native play event before fallback.
+    // The replacement HANDLE must resume this still-active user intent once.
+    void target.play();
+    target.dispatchEvent(new Event("play"));
+    target.dispatchEvent(new Event("error"));
+    await flush();
+    replyToWorkerHandshake(worker);
+    const source = worker.sent.findLast(
+      (message) => message.type === MainToWorkerMessageType.SOURCE,
+    );
+    if (source && "requestId" in source)
+      worker.reply({
+        handle: {},
+        requestId: source.requestId,
+        type: WorkerToMainMessageType.HANDLE,
+      });
+    await flush();
+    target.resolveNextPlay();
+    target.resolveNextPlay();
+    await flush();
+
+    expect(
+      worker.sent.filter(
+        (message) => message.type === MainToWorkerMessageType.PLAY,
+      ),
+    ).toHaveLength(1);
+    host.destroy();
+  });
+
+  it("forwards a legitimate play after an observed play-then-pause transition", async () => {
+    const worker = new FakeWorker();
+    const target = new FakeVideoTarget();
+    const host = new SiaVideoSource({
+      backend: SIA_PLAYBACK_BACKENDS.AUTO,
+      createWorker: vi.fn(() => worker) as unknown as () => Worker,
+      logger: nullLogger,
+      nativeStreamProvider: provider(true),
+    });
+
+    host.attach(target as unknown as HTMLVideoElement);
+    host.src = "play-pause-play-key";
+    await flush();
+
+    // Use the actual host lifecycle: an observed native play establishes the
+    // prior transition, then a genuine pause settles it before native failure
+    // moves the source to the worker backend.
+    void target.play();
+    target.paused = true;
+    target.dispatchEvent(new Event("pause"));
+    await flush();
+    target.dispatchEvent(new Event("error"));
+    await flush();
+    replyToWorkerHandshake(worker);
+    const source = worker.sent.findLast(
+      (message) => message.type === MainToWorkerMessageType.SOURCE,
+    );
+    if (source && "requestId" in source)
+      worker.reply({
+        handle: {},
+        requestId: source.requestId,
+        type: WorkerToMainMessageType.HANDLE,
+      });
+    await flush();
+
+    // This is a new user transition, not the delayed play from the prior
+    // transition. It must produce exactly one worker PLAY.
+    void target.play();
+    await flush();
+    expect(
+      worker.sent.filter(
+        (message) => message.type === MainToWorkerMessageType.PLAY,
+      ),
+    ).toHaveLength(1);
+    host.destroy();
+  });
+
+  it("does not send stale PLAY when delayed native play lands after pause", async () => {
+    const worker = new FakeWorker();
+    const target = new DelayedPlayVideoTarget();
+    const host = new SiaVideoSource({
+      backend: SIA_PLAYBACK_BACKENDS.AUTO,
+      createWorker: vi.fn(() => worker) as unknown as () => Worker,
+      logger: nullLogger,
+      nativeStreamProvider: provider(true),
+    });
+
+    host.attach(target as unknown as HTMLVideoElement);
+    host.src = "delayed-stale-native-play-key";
+    await flush();
+    void target.play();
+    target.paused = true;
+    target.dispatchEvent(new Event("pause"));
+    target.dispatchEvent(new Event("error"));
+    await flush();
+    replyToWorkerHandshake(worker);
+    const source = worker.sent.findLast(
+      (message) => message.type === MainToWorkerMessageType.SOURCE,
+    );
+    if (source && "requestId" in source)
+      worker.reply({
+        handle: {},
+        requestId: source.requestId,
+        type: WorkerToMainMessageType.HANDLE,
+      });
+    await flush();
+    target.resolveNextPlay();
+    await flush();
+
+    expect(
+      worker.sent.filter(
+        (message) => message.type === MainToWorkerMessageType.PLAY,
+      ),
+    ).toHaveLength(0);
     host.destroy();
   });
 
@@ -173,6 +529,15 @@ describe("auto backend selection", () => {
 
     expect(createWorker).toHaveBeenCalledOnce();
     replyToWorkerHandshake(worker);
+    const source = worker.sent.findLast(
+      (message) => message.type === MainToWorkerMessageType.SOURCE,
+    );
+    if (source && "requestId" in source)
+      worker.reply({
+        handle: {},
+        requestId: source.requestId,
+        type: WorkerToMainMessageType.HANDLE,
+      });
     await flush();
     expect(host.src).toBe("element-failure-key");
     if (typeof MediaSource !== "undefined") {
@@ -186,7 +551,7 @@ describe("auto backend selection", () => {
       worker.sent.filter(
         (message) => message.type === MainToWorkerMessageType.PLAY,
       ),
-    ).toHaveLength(1);
+    ).toHaveLength(0);
     host.destroy();
   });
 
@@ -282,6 +647,174 @@ describe("auto backend selection", () => {
 
     expect(worker.terminated).toBe(true);
     expect(target.src).toBe("https://stream.example/transition-key");
+    host.destroy();
+  });
+
+  it("reselects the current source when provider readiness changes", async () => {
+    let available = false;
+    const worker = new FakeWorker();
+    const target = new FakeVideoTarget();
+    const host = new SiaVideoSource({
+      backend: SIA_PLAYBACK_BACKENDS.AUTO,
+      createWorker: vi.fn(() => worker) as unknown as () => Worker,
+      logger: nullLogger,
+      nativeStreamProvider: {
+        available: () => Promise.resolve(available),
+        open: (src) =>
+          Promise.resolve({
+            release: () => undefined,
+            url: `https://stream.example/${src}`,
+          }),
+      },
+    });
+    host.attach(target as unknown as HTMLVideoElement);
+    host.src = "readiness-key";
+    await flush();
+    replyToWorkerHandshake(worker);
+    available = true;
+    host.reselectBackend();
+    await flush();
+    await flush();
+
+    expect(target.src).toBe("https://stream.example/readiness-key");
+    host.destroy();
+  });
+
+  it("does not duplicate stale PLAY when reselection pauses during handshake", async () => {
+    let available = true;
+    const worker = new FakeWorker();
+    const target = new FakeVideoTarget();
+    target.paused = false;
+    const host = new SiaVideoSource({
+      backend: SIA_PLAYBACK_BACKENDS.AUTO,
+      createWorker: vi.fn(() => worker) as unknown as () => Worker,
+      logger: nullLogger,
+      nativeStreamProvider: {
+        available: () => Promise.resolve(available),
+        open: (src) =>
+          Promise.resolve({
+            release: () => undefined,
+            url: `https://stream.example/${src}`,
+          }),
+      },
+    });
+    host.attach(target as unknown as HTMLVideoElement);
+    host.src = "reselect-stale-play-key";
+    await flush();
+    available = false;
+    host.reselectBackend();
+    await flush();
+    await flush();
+    void target.play();
+    target.paused = true;
+    target.dispatchEvent(new Event("pause"));
+    replyToWorkerHandshake(worker);
+    const source = worker.sent.findLast(
+      (message) => message.type === MainToWorkerMessageType.SOURCE,
+    );
+    if (source && "requestId" in source)
+      worker.reply({
+        handle: {},
+        requestId: source.requestId,
+        type: WorkerToMainMessageType.HANDLE,
+      });
+    await flush();
+    expect(
+      worker.sent.filter(
+        (message) => message.type === MainToWorkerMessageType.PLAY,
+      ),
+    ).toHaveLength(0);
+    host.destroy();
+  });
+
+  it("does not resume stale worker playback after pause before native attachment", async () => {
+    let resolveOpen!: (result: { release: () => void; url: string }) => void;
+    const worker = new FakeWorker();
+    const target = new FakeVideoTarget();
+    target.paused = false;
+    let available = false;
+    const host = new SiaVideoSource({
+      backend: SIA_PLAYBACK_BACKENDS.AUTO,
+      createWorker: vi.fn(() => worker) as unknown as () => Worker,
+      logger: nullLogger,
+      nativeStreamProvider: {
+        available: () => Promise.resolve(available),
+        open: () =>
+          new Promise((resolve) => {
+            resolveOpen = (result) => resolve(result);
+          }),
+      },
+    });
+    host.attach(target as unknown as HTMLVideoElement);
+    host.src = "worker-to-native-pause-key";
+    await flush();
+    replyToWorkerHandshake(worker);
+    available = true;
+    void target.play();
+    await flush();
+    host.reselectBackend();
+    await flush();
+    target.pause();
+    resolveOpen({
+      release: () => undefined,
+      url: "https://stream.example/worker-to-native-pause-key",
+    });
+    await flush();
+
+    expect(target.src).toBe(
+      "https://stream.example/worker-to-native-pause-key",
+    );
+    expect(target.play).toHaveBeenCalledTimes(1);
+    host.destroy();
+  });
+
+  it("resumes play intent when reselection moves native playback to the worker", async () => {
+    let available = true;
+    const worker = new FakeWorker();
+    const createWorker = vi.fn(() => worker);
+    const target = new FakeVideoTarget();
+    target.paused = false;
+    const host = new SiaVideoSource({
+      backend: SIA_PLAYBACK_BACKENDS.AUTO,
+      createWorker: createWorker as unknown as () => Worker,
+      logger: nullLogger,
+      nativeStreamProvider: {
+        available: () => Promise.resolve(available),
+        open: (src) =>
+          Promise.resolve({
+            release: () => undefined,
+            url: `https://stream.example/${src}`,
+          }),
+      },
+    });
+    host.attach(target as unknown as HTMLVideoElement);
+    host.src = "playing-key";
+    await flush();
+    expect(target.src).toBe("https://stream.example/playing-key");
+    void target.play();
+    await flush();
+
+    available = false;
+    host.reselectBackend();
+    await flush();
+    replyToWorkerHandshake(worker);
+    const source = worker.sent.findLast(
+      (message) => message.type === MainToWorkerMessageType.SOURCE,
+    );
+    if (source && "requestId" in source)
+      worker.reply({
+        handle: {},
+        requestId: source.requestId,
+        type: WorkerToMainMessageType.HANDLE,
+      });
+    await flush();
+
+    expect(createWorker).toHaveBeenCalledOnce();
+    expect(
+      worker.sent.filter(
+        (message) => message.type === MainToWorkerMessageType.PLAY,
+      ),
+    ).toHaveLength(1);
     host.destroy();
   });
 

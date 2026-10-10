@@ -214,6 +214,7 @@ export const SiaVideo = forwardRef<HTMLVideoElement, SiaVideoProps>(
     let htmlProps = props as VideoHTMLAttributes<HTMLVideoElement>;
     if (media) {
       const sourceProps = props as Record<string, unknown>;
+      const pendingSource = sourceProps.src;
       const rest: Record<string, unknown> = {};
       // The media instance persists across renders, so every config field is
       // synced on EVERY render. The fixed fields below are typed setters on the
@@ -221,6 +222,7 @@ export const SiaVideo = forwardRef<HTMLVideoElement, SiaVideoProps>(
       // the anonymous record view, whose one `as unknown as` lives in the helper.
       const owning = asMediaLike(media);
       for (const [key, value] of Object.entries(sourceProps)) {
+        if (key === "src") continue;
         if (key in siaVideoDefaultProps) {
           if (value !== undefined && owning[key] !== value) {
             owning[key] = value;
@@ -258,6 +260,11 @@ export const SiaVideo = forwardRef<HTMLVideoElement, SiaVideoProps>(
       // worker events through; swapping it per-render needs no attach.
       media.logger = logger;
       media.onTransportTelemetry = onTransportTelemetry;
+      // Source assignment starts playback, so keep it after every transport and
+      // worker setting above has reached the persistent host instance.
+      if (pendingSource !== undefined && owning.src !== pendingSource) {
+        owning.src = pendingSource;
+      }
       for (const [key, value] of Object.entries(siaVideoDefaultProps)) {
         if (
           sourceProps[key] === undefined &&
