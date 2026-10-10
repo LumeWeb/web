@@ -91,6 +91,7 @@ export function createSiaStreamService(
     invalidate();
   });
   const prepareBase = () => {
+    if (disposed) throw new Error("Sia stream service is disposed");
     preparation ??= enable(options.streaming).catch((error) => {
       preparation = undefined;
       throw error;
@@ -98,8 +99,14 @@ export function createSiaStreamService(
     return preparation;
   };
   const service: SiaStreamService = {
-    prepare: (signal) => awaitWithAbort(prepareBase(), signal),
-    isAvailable: (signal) => awaitWithAbort(prepareBase(), signal),
+    prepare: (signal) =>
+      disposed
+        ? Promise.reject(new Error("Sia stream service is disposed"))
+        : awaitWithAbort(prepareBase(), signal),
+    isAvailable: (signal) =>
+      disposed
+        ? Promise.reject(new Error("Sia stream service is disposed"))
+        : awaitWithAbort(prepareBase(), signal),
     resolve: (src) => Promise.resolve(resolveSiaStreamSource(src)),
     session: async (source, signal) => {
       if (signal?.aborted) throw abortError();
@@ -154,45 +161,74 @@ export function createSiaStreamService(
         throw new Error("Sia stream SDK connection became stale");
       activeRecord.refs++;
       let object: Awaited<ReturnType<Sdk["object"]>>;
+      let objectPromise:
+        Promise<Awaited<ReturnType<Sdk["object"]>>> | undefined;
       try {
-        object = await activeRecord.sdk.object(source.objectKey);
+        objectPromise = Promise.resolve(
+          activeRecord.sdk.object(source.objectKey),
+        );
+        object = await awaitWithAbort(objectPromise, signal);
       } catch (error) {
-        releaseRecord(activeRecord);
+        if (objectPromise) {
+          void objectPromise
+            .then(
+              (lateObject) => cleanupObject(lateObject, activeRecord),
+              () => releaseRecordSafely(activeRecord),
+            )
+            .catch(() => {
+              // Detached cleanup must never create an unhandled rejection.
+            });
+        } else {
+          releaseRecordSafely(activeRecord);
+        }
         throw error;
       }
       if (signal?.aborted) {
-        object.free();
-        releaseRecord(activeRecord);
+        cleanupObject(object, activeRecord);
         throw abortError();
       }
       let streams: Streams;
+      let streamsPromise: Promise<Streams> | undefined;
       try {
-        streams = options.openStreams
-          ? await Promise.resolve(
-              options.openStreams(activeRecord.sdk, activeRecord.credentials),
-            )
-          : await defaultOpenStreams(
-              activeRecord.sdk,
-              activeRecord.credentials,
-            );
+        streamsPromise = Promise.resolve(
+          options.openStreams
+            ? options.openStreams(activeRecord.sdk, activeRecord.credentials)
+            : defaultOpenStreams(activeRecord.sdk, activeRecord.credentials),
+        );
+        streams = await awaitWithAbort(streamsPromise, signal);
       } catch (error) {
-        object.free();
-        releaseRecord(activeRecord);
+        if (streamsPromise) {
+          void streamsPromise
+            .then(
+              (lateStreams) =>
+                cleanupStreams(lateStreams, object, activeRecord),
+              () => cleanupObject(object, activeRecord),
+            )
+            .catch(() => {
+              // Detached cleanup must never create an unhandled rejection.
+            });
+        } else {
+          cleanupObject(object, activeRecord);
+        }
         throw error;
       }
       if (signal?.aborted) {
-        streams.close();
-        object.free();
-        releaseRecord(activeRecord);
+        cleanupStreams(streams, object, activeRecord);
         throw abortError();
       }
       let closed = false;
       const close = () => {
         if (closed) return;
         closed = true;
-        streams.close();
-        object.free();
-        releaseRecord(activeRecord);
+        try {
+          streams.close();
+        } finally {
+          try {
+            object.free();
+          } finally {
+            releaseRecord(activeRecord);
+          }
+        }
       };
       return {
         url: async (_source: unknown, opts): Promise<SiaNativeStreamFile> => {
@@ -214,8 +250,17 @@ export function createSiaStreamService(
             throw error;
           }
           if (opts.signal?.aborted) {
-            file.release();
-            close();
+            try {
+              file.release();
+            } catch {
+              // Preserve AbortError after best-effort file cleanup.
+            } finally {
+              try {
+                close();
+              } catch {
+                // Preserve AbortError after best-effort session cleanup.
+              }
+            }
             throw abortError();
           }
           let released = false;
@@ -225,8 +270,11 @@ export function createSiaStreamService(
             release: () => {
               if (released) return;
               released = true;
-              file.release();
-              close();
+              try {
+                file.release();
+              } finally {
+                close();
+              }
             },
           };
         },
@@ -243,6 +291,36 @@ export function createSiaStreamService(
   function releaseRecord(record: SdkRecord) {
     record.refs--;
     if (record.retired && record.refs === 0) record.sdk.free();
+  }
+  function releaseRecordSafely(record: SdkRecord) {
+    try {
+      releaseRecord(record);
+    } catch {
+      // Cleanup errors are intentionally swallowed.
+    }
+  }
+  function cleanupObject(
+    object: Awaited<ReturnType<Sdk["object"]>>,
+    record: SdkRecord,
+  ) {
+    try {
+      object.free();
+    } catch {
+      // Continue releasing the SDK even when object cleanup fails.
+    }
+    releaseRecordSafely(record);
+  }
+  function cleanupStreams(
+    streams: Streams,
+    object: Awaited<ReturnType<Sdk["object"]>>,
+    record: SdkRecord,
+  ) {
+    try {
+      streams.close();
+    } catch {
+      // Continue releasing the object and SDK when stream cleanup fails.
+    }
+    cleanupObject(object, record);
   }
   return service;
 }
