@@ -2,6 +2,37 @@
 import { describe, expect, it, vi } from "vitest";
 import { createSiaStreamService } from "../sia-stream-service.ts";
 
+type ProcessLike = {
+  on: (event: "unhandledRejection", listener: (reason: unknown) => void) => void;
+  off: (event: "unhandledRejection", listener: (reason: unknown) => void) => void;
+};
+
+/** Observe unhandled rejections in both Node and browser test runners. */
+function trackUnhandledRejections(): { count: () => number; dispose: () => void } {
+  let count = 0;
+  const nodeProcess = (globalThis as typeof globalThis & { process?: ProcessLike }).process;
+  if (nodeProcess) {
+    const listener = () => {
+      count++;
+    };
+    nodeProcess.on("unhandledRejection", listener);
+    return {
+      count: () => count,
+      dispose: () => nodeProcess.off("unhandledRejection", listener),
+    };
+  }
+
+  const listener = (event: PromiseRejectionEvent) => {
+    event.preventDefault();
+    count++;
+  };
+  globalThis.addEventListener("unhandledrejection", listener);
+  return {
+    count: () => count,
+    dispose: () => globalThis.removeEventListener("unhandledrejection", listener),
+  };
+}
+
 const connected = vi.fn();
 const builderFree = vi.fn();
 vi.mock("@siafoundation/sia-storage", () => ({
@@ -360,9 +391,7 @@ describe("createSiaStreamService", () => {
 
   it("does not reject detached object cleanup when object and SDK free throw", async () => {
     let resolveObject!: (object: { free: () => void }) => void;
-    const unhandled: unknown[] = [];
-    const onUnhandled = (reason: unknown) => unhandled.push(reason);
-    process.on("unhandledRejection", onUnhandled);
+    const unhandled = trackUnhandledRejections();
     const object = {
       free: vi.fn(() => {
         throw new Error("object free failed");
@@ -396,17 +425,15 @@ describe("createSiaStreamService", () => {
     resolveObject(object);
     await expect(session).rejects.toMatchObject({ name: "AbortError" });
     await new Promise((resolve) => setTimeout(resolve, 0));
-    process.off("unhandledRejection", onUnhandled);
-    expect(unhandled).toEqual([]);
+    unhandled.dispose();
+    expect(unhandled.count()).toBe(0);
     expect(object.free).toHaveBeenCalledOnce();
     expect(sdk.free).toHaveBeenCalledOnce();
   });
 
   it("does not reject detached stream cleanup when object and SDK free throw", async () => {
     let resolveStreams!: (streams: { close: () => void }) => void;
-    const unhandled: unknown[] = [];
-    const onUnhandled = (reason: unknown) => unhandled.push(reason);
-    process.on("unhandledRejection", onUnhandled);
+    const unhandled = trackUnhandledRejections();
     const object = {
       free: vi.fn(() => {
         throw new Error("object free failed");
@@ -442,8 +469,8 @@ describe("createSiaStreamService", () => {
     resolveStreams(streams);
     await expect(session).rejects.toMatchObject({ name: "AbortError" });
     await new Promise((resolve) => setTimeout(resolve, 0));
-    process.off("unhandledRejection", onUnhandled);
-    expect(unhandled).toEqual([]);
+    unhandled.dispose();
+    expect(unhandled.count()).toBe(0);
     expect(streams.close).toHaveBeenCalledOnce();
     expect(object.free).toHaveBeenCalledOnce();
     expect(sdk.free).toHaveBeenCalledOnce();
