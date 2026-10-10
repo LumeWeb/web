@@ -37,6 +37,83 @@ function makeSession(
 }
 
 describe("createSiaNativeStreamProvider", () => {
+  it("prepares lazily before checking capability and only once across availability and open", async () => {
+    const calls: string[] = [];
+    let prepared = 0;
+    const provider = createSiaNativeStreamProvider({
+      capability: () => {
+        calls.push("capability");
+        return Promise.resolve(true);
+      },
+      createStreamSession: () => ({
+        url: () =>
+          Promise.resolve({ release: () => undefined, url: STREAM_URL }),
+      }),
+      prepare: () => {
+        calls.push("prepare");
+        prepared += 1;
+        return Promise.resolve();
+      },
+      resolveSource: () => {
+        calls.push("resolve");
+        return Promise.resolve("pinned-object");
+      },
+    });
+
+    expect(prepared).toBe(0);
+    await provider.available();
+    await provider.open("abc123", { signal: SIGNAL });
+
+    expect(calls).toEqual(["prepare", "capability", "capability", "resolve"]);
+  });
+
+  it("shares one pending preparation across concurrent calls", async () => {
+    let resolvePreparation!: () => void;
+    let preparations = 0;
+    const provider = createSiaNativeStreamProvider({
+      capability: () => Promise.resolve(false),
+      createStreamSession: () => makeSession([], { release: () => undefined }),
+      prepare: () => {
+        preparations += 1;
+        return new Promise<void>((resolve) => {
+          resolvePreparation = resolve;
+        });
+      },
+      resolveSource: () => Promise.resolve("pinned-object"),
+    });
+    const first = provider.available();
+    const second = provider.available();
+    expect(preparations).toBe(1);
+    resolvePreparation();
+
+    await expect(first).resolves.toBe(false);
+    await expect(second).resolves.toBe(false);
+  });
+
+  it("retries preparation after an aborted attempt with the later call's signal", async () => {
+    const signals: AbortSignal[] = [];
+    let attempts = 0;
+    const provider = createSiaNativeStreamProvider({
+      capability: () => Promise.resolve(true),
+      createStreamSession: () => makeSession([], { release: () => undefined }),
+      prepare: (signal) => {
+        signals.push(signal!);
+        attempts += 1;
+        return attempts === 1
+          ? Promise.reject(new DOMException("aborted", "AbortError"))
+          : Promise.resolve();
+      },
+      resolveSource: () => Promise.resolve("pinned-object"),
+    });
+    const first = new AbortController();
+    const second = new AbortController();
+
+    await expect(provider.available(first.signal)).rejects.toThrow("aborted");
+    await expect(provider.available(second.signal)).resolves.toBe(true);
+
+    expect(signals).toEqual([first.signal, second.signal]);
+  });
+
   it("rejects without requesting a stream URL when capability is unavailable", async () => {
     const urlCalls: UrlCall[] = [];
     const provider = createSiaNativeStreamProvider({
@@ -135,7 +212,9 @@ describe("createSiaNativeStreamProvider", () => {
 
     expect(received).toEqual([shareUrl]);
     expect(error).toBeInstanceOf(SiaNativeStreamResolutionError);
-    expect((error as Error).message).toContain("indexer does not know this object");
+    expect((error as Error).message).toContain(
+      "indexer does not know this object",
+    );
     expect((error as Error).message).not.toContain(shareUrl);
     expect((error as Error).message).not.toContain("encryption_key");
     expect((error as Error).message).not.toContain("a29lcnktZXgtbXctbGtleQ");
@@ -149,7 +228,9 @@ describe("createSiaNativeStreamProvider", () => {
       resolveSource: () => Promise.reject(resolverError),
     });
 
-    await expect(provider.open("object-key", { signal: SIGNAL })).rejects.toBe(resolverError);
+    await expect(provider.open("object-key", { signal: SIGNAL })).rejects.toBe(
+      resolverError,
+    );
   });
 
   it("keeps errors from stream URL acquisition unchanged", async () => {
@@ -162,7 +243,9 @@ describe("createSiaNativeStreamProvider", () => {
       resolveSource: () => Promise.resolve("pinned-object"),
     });
 
-    await expect(provider.open("object-key", { signal: SIGNAL })).rejects.toBe(sessionError);
+    await expect(provider.open("object-key", { signal: SIGNAL })).rejects.toBe(
+      sessionError,
+    );
   });
 
   it("passes the caller signal to capability, resolution, session creation, and URL acquisition", async () => {
@@ -178,7 +261,10 @@ describe("createSiaNativeStreamProvider", () => {
         return {
           url: (_object, options) => {
             if (options.signal) seen.push(options.signal);
-            return Promise.resolve({ release: () => undefined, url: STREAM_URL });
+            return Promise.resolve({
+              release: () => undefined,
+              url: STREAM_URL,
+            });
           },
         };
       },
@@ -190,7 +276,12 @@ describe("createSiaNativeStreamProvider", () => {
 
     await provider.open("abc123", { signal: controller.signal });
 
-    expect(seen).toEqual([controller.signal, controller.signal, controller.signal, controller.signal]);
+    expect(seen).toEqual([
+      controller.signal,
+      controller.signal,
+      controller.signal,
+      controller.signal,
+    ]);
   });
 
   it("releases and rejects a URL result that carries a Blob", async () => {
