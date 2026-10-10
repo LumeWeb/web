@@ -62,15 +62,25 @@ export function DeveloperOptionsPanel() {
       <p className="text-fg-muted m-1 mb-2 text-xs">
         Effective playback backend: {view.effectiveBackend}
       </p>
-      <label className="block text-[13px]">
+      <label className="mt-2 block text-[13px]">
         Native stream base URL
         <input
-          className="border-border-default bg-canvas border px-2 py-1 text-[13px]"
+          aria-describedby="developer-options-native-stream-base-url-help"
+          className="border-border-default bg-canvas mt-1 block w-full border px-2 py-1 text-[13px]"
+          id="developer-options-native-stream-base-url"
           onChange={(event) => setNativeStreamBaseUrl(event.target.value)}
+          placeholder="https://example.com/stream"
           type="text"
           value={view.nativeStreamBaseUrl}
         />
       </label>
+      <p
+        className="text-fg-muted m-0 mt-1 text-xs"
+        id="developer-options-native-stream-base-url-help">
+        Optional. Base URL of the demo native streaming endpoint for
+        service-worker native playback. When left blank, that native option is
+        disabled and the AUTO policy uses the media worker.
+      </p>
     </section>
   );
 }
