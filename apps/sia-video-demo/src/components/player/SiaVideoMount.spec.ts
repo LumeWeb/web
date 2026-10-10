@@ -8,7 +8,11 @@ import type {
 } from "./SelectedSource";
 import type { ArmedSharedSource } from "./SharedSourceState";
 import type { SharedSharingKeySupplier } from "./SharedSuppliers";
-import { siaVideoMountReloadKey, siaVideoMountState } from "./SiaVideoMount";
+import {
+  shouldMountSiaVideo,
+  siaVideoMountReloadKey,
+  siaVideoMountState,
+} from "./SiaVideoMount";
 
 /**
  * Node unit tests for the Sia-player wiring helpers: the pure
@@ -89,6 +93,14 @@ function sharedSource(
 function sharingKeySupplier(): SharedSharingKeySupplier {
   return { getSharingKeySeed: () => Uint8Array.from([4, 5, 6]) };
 }
+
+describe("streaming preparation mount readiness", () => {
+  it("does not mount before preparation and mounts after preparation", () => {
+    const mount = siaVideoMountState(publishSource(), mountDeps());
+    expect(shouldMountSiaVideo(mount, false)).toBe(false);
+    expect(shouldMountSiaVideo(mount, true)).toBe(true);
+  });
+});
 
 describe("siaVideoMountState (mount the selected Sia source)", () => {
   it("mounts no player for an unarmed selection", () => {

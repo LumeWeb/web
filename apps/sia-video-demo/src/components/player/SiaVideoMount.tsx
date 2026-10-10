@@ -32,18 +32,20 @@
  * contract can be unit-tested without a DOM (SiaVideoMount.spec.ts).
  */
 
+/* oxlint-disable perfectionist/sort-modules, typescript(unbound-method) */
 import {
   createSiaNativeStreamProvider,
+  SIA_PLAYBACK_BACKENDS,
   type SiaNativeStreamProvider,
   type SiaPlaybackBackend,
 } from "@lumeweb/sia-video-source";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useStore } from "zustand";
 import type { WorkerConfig } from "@lumeweb/sia-video-source";
 import { APP_META } from "../../lib/constants";
 import { eventLogLogger } from "../../lib/eventLogLogger";
 import { resolvePlaybackBackend } from "../../lib/playbackBackend";
-import { createDemoNativeStreamService } from "../../lib/streamService";
+import { getDemoNativeStreamService } from "../../lib/streamService";
 import { useDeveloperOptionsStore } from "../../stores/developerOptions";
 import { AutoPlayBridge } from "./AutoPlayBridge";
 import { PlaybackFactsBridge } from "./PlaybackFactsBridge";
@@ -65,7 +67,12 @@ import type { SiaStatus } from "./SiaStatusBridge";
  * store at call time, so the single provider serves every mount.
  */
 const demoNativeStreamProvider: SiaNativeStreamProvider =
-  createSiaNativeStreamProvider(createDemoNativeStreamService());
+  createSiaNativeStreamProvider({
+    isAvailable: (signal) => getDemoNativeStreamService().isAvailable(signal),
+    resolve: (src) => getDemoNativeStreamService().resolve(src),
+    session: (source, signal) =>
+      getDemoNativeStreamService().session(source, signal),
+  });
 
 /** Inputs the mount derivation needs that are not part of the selected union. */
 export interface SiaVideoMountDeps {
@@ -152,9 +159,37 @@ export function SiaVideoMount({
     useDeveloperOptionsStore,
     (s) => s.disableNativePlayback,
   );
+  const [streamingPrepared, setStreamingPrepared] = useState(false);
+  const [preparationFailed, setPreparationFailed] = useState(false);
+  useEffect(() => {
+    let active = true;
+    setStreamingPrepared(false);
+    setPreparationFailed(false);
+    void getDemoNativeStreamService()
+      .prepare()
+      .then(
+        () => {
+          if (active) setStreamingPrepared(true);
+        },
+        () => {
+          if (active) {
+            // A failed startup must select the worker explicitly. Otherwise the
+            // provider's retryable preparation can make AUTO select native again.
+            setPreparationFailed(true);
+            setStreamingPrepared(true);
+          }
+        },
+      );
+    return () => {
+      active = false;
+    };
+  }, []);
   const backend = useMemo(
-    () => resolvePlaybackBackend({ disableNativePlayback }),
-    [disableNativePlayback],
+    () =>
+      preparationFailed
+        ? SIA_PLAYBACK_BACKENDS.MEDIA_WORKER
+        : resolvePlaybackBackend({ disableNativePlayback }),
+    [disableNativePlayback, preparationFailed],
   );
   const mount = useMemo(
     () =>
@@ -165,7 +200,7 @@ export function SiaVideoMount({
       }),
     [backend, indexerUrl, selectedSource],
   );
-  if (!mount) return null;
+  if (!shouldMountSiaVideo(mount, streamingPrepared)) return null;
   return (
     <SiaPlayer>
       <SiaVideo
@@ -190,6 +225,14 @@ export function SiaVideoMount({
       <PlaybackFactsBridge onFacts={onFacts} />
     </SiaPlayer>
   );
+}
+
+/** Mounting waits for native streaming preparation so AUTO can select it on first load. */
+export function shouldMountSiaVideo(
+  mount: null | SiaVideoMountState,
+  streamingPrepared: boolean,
+): mount is SiaVideoMountState {
+  return mount !== null && streamingPrepared;
 }
 
 /**
