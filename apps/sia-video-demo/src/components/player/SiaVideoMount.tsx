@@ -161,13 +161,6 @@ export function SiaVideoMount({
   );
   const [streamingPrepared, setStreamingPrepared] = useState(false);
   const [preparationFailed, setPreparationFailed] = useState(false);
-  const preparationKey = useMemo(
-    () =>
-      selectedSource
-        ? siaVideoMountReloadKey(selectedSource, { indexerUrl })
-        : "",
-    [indexerUrl, selectedSource],
-  );
   useEffect(() => {
     let active = true;
     setStreamingPrepared(false);
@@ -190,7 +183,7 @@ export function SiaVideoMount({
     return () => {
       active = false;
     };
-  }, [preparationKey]);
+  }, []);
   const backend = useMemo(
     () =>
       preparationFailed

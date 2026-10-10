@@ -91,6 +91,8 @@ import { SiaVideoMount } from "./SiaVideoMount";
 
 const OBJECT_KEY =
   "a1b2c3d4e5f60718293a4b5c6d7e8f90112233445566778899aabbccddeeff01";
+const CHANGED_OBJECT_KEY =
+  "ffeeddccbbaa99887766554433221100a1b2c3d4e5f60718293a4b5c6d7e8f90";
 const selectedSource: PublishSelectedSource = {
   mode: "publish",
   source: {
@@ -103,6 +105,7 @@ const selectedSource: PublishSelectedSource = {
 
 const workerMessages: unknown[] = [];
 let workerInstances = 0;
+let workerTerminations = 0;
 
 class StubWorker extends EventTarget {
   constructor() {
@@ -114,21 +117,38 @@ class StubWorker extends EventTarget {
     workerMessages.push(message);
   }
 
-  terminate(): void {}
+  terminate(): void {
+    workerTerminations += 1;
+  }
 }
 
-function MountWithCapture(): ReactElement {
+function MountWithCapture({
+  indexerUrl = "https://indexer.test",
+  source = selectedSource,
+}: {
+  indexerUrl?: string;
+  source?: PublishSelectedSource;
+}): ReactElement {
   return createElement(SiaVideoMount, {
     autoplayPending: false,
-    indexerUrl: "https://indexer.test",
+    indexerUrl,
     onAutoplayConsumed: () => {},
     onFacts: () => {},
     onPlayConsumed: () => {},
     onStatus: () => {},
     playRequested: false,
-    selectedSource,
+    selectedSource: source,
   });
 }
+
+const changedSource: PublishSelectedSource = {
+  ...selectedSource,
+  source: {
+    ...selectedSource.source,
+    fetchForm: `sia://indexer.changed/objects/${CHANGED_OBJECT_KEY}/shared`,
+    objectKey: CHANGED_OBJECT_KEY,
+  },
+};
 
 const backendDescriptor = Object.getOwnPropertyDescriptor(
   SiaVideoSource.prototype,
@@ -161,6 +181,7 @@ beforeEach(() => {
   backendSetterCalls = 0;
   observedMedia = null;
   workerInstances = 0;
+  workerTerminations = 0;
   workerMessages.length = 0;
   Object.defineProperty(SiaVideoSource.prototype, "backend", {
     configurable: true,
@@ -179,8 +200,9 @@ beforeEach(() => {
   root = createRoot(container);
 });
 
-afterEach(() => {
+afterEach(async () => {
   root?.unmount();
+  await flush();
   container?.remove();
   root = null;
   container = null;
@@ -222,6 +244,102 @@ describe("SiaVideoMount preparation effect", () => {
     expect(workerInstances).toBe(1);
     expect(workerMessages.length).toBeGreaterThan(0);
     expect(container!.querySelector("video")).not.toBeNull();
+  });
+
+  it("keeps preparation pending when source and indexer change before it settles", async () => {
+    useDeveloperOptionsStore.getState().setDisableNativePlayback(true);
+    root!.render(createElement(MountWithCapture));
+    await flush();
+
+    expect(preparation.prepareCalls).toBe(1);
+    expect(container!.querySelector("video")).toBeNull();
+
+    root!.render(
+      createElement(MountWithCapture, {
+        indexerUrl: "https://indexer.changed",
+        source: changedSource,
+      }),
+    );
+    await flush();
+
+    expect(preparation.prepareCalls).toBe(1);
+    expect(container!.querySelector("video")).toBeNull();
+
+    preparation.resolve();
+    await flush();
+
+    expect(preparation.prepareCalls).toBe(1);
+    expect(container!.querySelector("video")).not.toBeNull();
+
+    const hellos = workerMessages
+      .filter(
+        (
+          message,
+        ): message is { config?: { indexerUrl?: string }; type: string } =>
+          typeof message === "object" && message !== null && "type" in message,
+      )
+      .filter((message) => message.type === "HELLO");
+    expect(hellos.at(-1)?.config?.indexerUrl).toBe("https://indexer.changed");
+    expect(observedMedia?.src).toBe(changedSource.source.fetchForm);
+  });
+
+  it("applies changed indexer configuration through an in-place worker reload", async () => {
+    useDeveloperOptionsStore.getState().setDisableNativePlayback(true);
+    root!.render(createElement(MountWithCapture));
+    preparation.resolve();
+    await flush();
+
+    const media = observedMedia;
+    const video = container!.querySelector("video");
+    const initialHelloCount = workerMessages
+      .filter(
+        (
+          message,
+        ): message is { config?: { indexerUrl?: string }; type: string } =>
+          typeof message === "object" && message !== null && "type" in message,
+      )
+      .filter((message) => message.type === "HELLO").length;
+    expect(workerInstances).toBe(1);
+    expect(initialHelloCount).toBeGreaterThan(0);
+
+    root!.render(
+      createElement(MountWithCapture, {
+        indexerUrl: "https://indexer.changed",
+        source: changedSource,
+      }),
+    );
+    await flush();
+
+    const hellos = workerMessages
+      .filter(
+        (
+          message,
+        ): message is { config?: { indexerUrl?: string }; type: string } =>
+          typeof message === "object" && message !== null && "type" in message,
+      )
+      .filter((message) => message.type === "HELLO");
+    expect(hellos).toHaveLength(initialHelloCount + 1);
+    expect(hellos.at(-1)?.config?.indexerUrl).toBe("https://indexer.changed");
+    expect(observedMedia).toBe(media);
+    expect(container!.querySelector("video")).toBe(video);
+  });
+
+  it("terminates the fallback worker once when rejected preparation unmounts", async () => {
+    root!.render(createElement(MountWithCapture));
+    await flush();
+    preparation.reject(new Error("native preparation unavailable"));
+    await flush();
+
+    expect(workerInstances).toBe(1);
+    expect(workerTerminations).toBe(0);
+
+    root!.unmount();
+    await flush();
+
+    expect(workerTerminations).toBe(1);
+    root!.unmount();
+    await flush();
+    expect(workerTerminations).toBe(1);
   });
 });
 
