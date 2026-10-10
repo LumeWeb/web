@@ -173,18 +173,25 @@ export function PlayerScreen() {
   // object key (boot-time ingest or a mid-session hashchange) arms the
   // autoplay intent exactly once per fragment change.
   useEffect(() => {
-    if (objectKey) dispatch({ objectKey, type: SHARED_OBJECT_SELECTED });
-    setAutoplayIntent(autoplayIntentForPreselection(objectKey));
+    const preselection = shareFragmentPreselectionEffects(objectKey);
+    if (preselection.objectKey)
+      dispatch({
+        objectKey: preselection.objectKey,
+        type: SHARED_OBJECT_SELECTED,
+      });
+    setAutoplayIntent(preselection.autoplayIntent);
   }, [objectKey]);
 
   // Shared row user selection is an arming event: report the toggle to the
   // reducer and arm/denarm the intent to the newly selected key, mirroring
   // the reducer's toggle semantics.
   const onSharedObjectSelect = (objectKey: string): void => {
-    dispatch({ objectKey, type: "shared-object-toggled" });
-    setAutoplayIntent(
-      autoplayIntentForRowToggle(selection.shared.objectKey, objectKey),
+    const effects = sharedRowSelectionEffects(
+      selection.shared.objectKey,
+      objectKey,
     );
+    dispatch({ objectKey, type: "shared-object-toggled" });
+    setAutoplayIntent(effects.autoplayIntent);
   };
 
   // The armed intent is LIVE only while it matches the currently selected
@@ -216,7 +223,7 @@ export function PlayerScreen() {
             className="px-2.5 py-[5px] text-xs"
             onClick={sharingKeyHex ? clearSharingKeySeed : logout}
             type="button">
-            {topBarActionLabel(sharingKeyHex, userKeyHex)}
+            {topBarActionLabel(sharingKeyHex)}
           </button>
         </div>
       </div>
@@ -289,15 +296,40 @@ export function PlayerScreen() {
   );
 }
 
+/** Combines a shared-row toggle with the matching one-shot autoplay intent. */
+export function sharedRowSelectionEffects(
+  currentObjectKey: null | string,
+  clickedObjectKey: string,
+): { autoplayIntent: null | string; objectKey: null | string } {
+  const nextSelection = selectedSourceReducer(
+    initialSelectedSourceState(currentObjectKey),
+    { objectKey: clickedObjectKey, type: "shared-object-toggled" },
+  );
+  return {
+    autoplayIntent: autoplayIntentForRowToggle(
+      currentObjectKey,
+      clickedObjectKey,
+    ),
+    objectKey: nextSelection.shared.objectKey,
+  };
+}
+
+/** Keeps fragment preselection and its one-shot autoplay intent together. */
+export function shareFragmentPreselectionEffects(
+  objectKey: null | string | undefined,
+): { autoplayIntent: null | string; objectKey: null | string | undefined } {
+  return {
+    autoplayIntent: autoplayIntentForPreselection(objectKey),
+    objectKey,
+  };
+}
+
 /**
  * The ONE top-bar action a session offers: a sharing-key session gets
  * `Close share` (it clears the sharing key, and any account session behind
  * it reappears with its own action), while an authenticated session keeps
  * the real `Log out`. The two are never offered side by side.
  */
-export function topBarActionLabel(
-  sharingKeyHex: null | string,
-  _userKeyHex: string,
-): string {
+export function topBarActionLabel(sharingKeyHex: null | string): string {
   return sharingKeyHex ? CLOSE_SHARE_LABEL : LOGOUT_LABEL;
 }

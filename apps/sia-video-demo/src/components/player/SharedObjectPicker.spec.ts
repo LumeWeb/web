@@ -293,30 +293,6 @@ describe("SharedObjectPicker scrollable playlist", () => {
 });
 
 describe("SharedObjectPicker selection canonicalization", () => {
-  it("canonicalizes a clicked row id before retaining it", async () => {
-    const { nextSelectedObjectKey } = await loadPicker();
-    expect(nextSelectedObjectKey(null, OBJECT.toUpperCase())).toBe(OBJECT);
-    expect(nextSelectedObjectKey(null, `0x${OBJECT}`)).toBe(OBJECT);
-    expect(nextSelectedObjectKey(null, `  ${OBJECT}  `)).toBe(OBJECT);
-  });
-
-  it("toggles the selection off when the already-selected row is clicked", async () => {
-    const { nextSelectedObjectKey } = await loadPicker();
-    expect(nextSelectedObjectKey(OBJECT, OBJECT)).toBeNull();
-  });
-
-  it("switches the selection to a different row", async () => {
-    const { nextSelectedObjectKey } = await loadPicker();
-    const other = OBJECT.replace(/^a/, "b");
-    expect(nextSelectedObjectKey(OBJECT, other)).toBe(other);
-  });
-
-  it("ignores a malformed click id and keeps the current selection", async () => {
-    const { nextSelectedObjectKey } = await loadPicker();
-    expect(nextSelectedObjectKey(OBJECT, "not-hex")).toBe(OBJECT);
-    expect(nextSelectedObjectKey(null, "not-hex")).toBeNull();
-  });
-
   it("matches a candidate id to the selection via the same canonical form", async () => {
     const { isObjectKeySelected } = await loadPicker();
     expect(isObjectKeySelected(OBJECT, OBJECT.toUpperCase())).toBe(true);
@@ -432,15 +408,14 @@ describe("SharedObjectPicker module surface", () => {
   });
 
   it("never renders the sharing seed into listing or selection outputs", async () => {
-    const { finishSharedPickerListing, nextSelectedObjectKey } =
-      await loadPicker();
+    const { finishSharedPickerListing } = await loadPicker();
     const listing = finishSharedPickerListing({
       ended: true,
       pagesRead: 1,
       rows: [row(A, "clip-a.mp4")],
     });
     expect(JSON.stringify(listing)).not.toContain(SEED);
-    const selected = nextSelectedObjectKey(null, OBJECT);
+    const selected = OBJECT;
     expect(JSON.stringify({ selected })).not.toContain(SEED);
   });
 });

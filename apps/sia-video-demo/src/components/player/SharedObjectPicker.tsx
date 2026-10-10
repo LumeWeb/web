@@ -141,20 +141,6 @@ export function isObjectKeySelected(
   return candidate !== null && candidate === selected;
 }
 
-/**
- * Selects/deselects on row click: the clicked id canonicalizes exactly like
- * listing ids and fragment keys, re-clicking the selected row clears the
- * selection, any other valid id is retained, a malformed id is ignored.
- */
-export function nextSelectedObjectKey(
-  current: null | string,
-  clickedId: string,
-): null | string {
-  const clicked = canonicalizeSelectedObjectKey(clickedId);
-  if (!clicked) return current;
-  return clicked === current ? null : clicked;
-}
-
 export function SharedObjectPicker({
   indexerUrl,
   onSelectObject,

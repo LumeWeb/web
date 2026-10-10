@@ -68,26 +68,56 @@ describe("PlayerScreen copy", () => {
   });
 });
 
+describe("PlayerScreen shared selection orchestration", () => {
+  const OBJECT_KEY =
+    "a1b2c3d4e5f60718293a4b5c6d7e8f90112233445566778899aabbccddeeff01";
+
+  it("arms autoplay for a newly selected row and keeps the canonical key", async () => {
+    const { sharedRowSelectionEffects } = await loadPlayer();
+    expect(
+      sharedRowSelectionEffects(null, `0x${OBJECT_KEY.toUpperCase()}`),
+    ).toEqual({ autoplayIntent: OBJECT_KEY, objectKey: OBJECT_KEY });
+  });
+
+  it("clears both selection and autoplay when the selected row is toggled", async () => {
+    const { sharedRowSelectionEffects } = await loadPlayer();
+    expect(sharedRowSelectionEffects(OBJECT_KEY, OBJECT_KEY)).toEqual({
+      autoplayIntent: null,
+      objectKey: null,
+    });
+  });
+
+  it("arms fragment preselection autoplay only for a valid object key", async () => {
+    const { shareFragmentPreselectionEffects } = await loadPlayer();
+    expect(shareFragmentPreselectionEffects(`0x${OBJECT_KEY}`)).toEqual({
+      autoplayIntent: OBJECT_KEY,
+      objectKey: `0x${OBJECT_KEY}`,
+    });
+    expect(shareFragmentPreselectionEffects("not-an-object")).toEqual({
+      autoplayIntent: null,
+      objectKey: "not-an-object",
+    });
+  });
+});
+
 describe("PlayerScreen session top-bar action", () => {
   const SHARING_SEED = "a".repeat(64);
-  const APP_KEY = "b".repeat(64);
-
   it("labels the sharing-only session action 'Close share' (no Log out)", async () => {
     const { CLOSE_SHARE_LABEL, topBarActionLabel } = await loadPlayer();
     expect(CLOSE_SHARE_LABEL).toBe("Close share");
-    expect(topBarActionLabel(SHARING_SEED, "")).toBe("Close share");
+    expect(topBarActionLabel(SHARING_SEED)).toBe("Close share");
   });
 
   it("keeps 'Log out' for an authenticated account session", async () => {
     const { LOGOUT_LABEL, topBarActionLabel } = await loadPlayer();
     expect(LOGOUT_LABEL).toBe("Log out");
-    expect(topBarActionLabel(null, APP_KEY)).toBe("Log out");
+    expect(topBarActionLabel(null)).toBe("Log out");
   });
 
   it("never offers both actions: a shared session prefers 'Close share'", async () => {
     const { topBarActionLabel } = await loadPlayer();
     // With both credentials present the user can Close share to reveal the
     // account session, which then offers Log out alone.
-    expect(topBarActionLabel(SHARING_SEED, APP_KEY)).toBe("Close share");
+    expect(topBarActionLabel(SHARING_SEED)).toBe("Close share");
   });
 });
