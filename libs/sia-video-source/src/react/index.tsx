@@ -38,6 +38,8 @@ import {
   usePlayer,
 } from "@videojs/react";
 import { type AppKeySeedProvider } from "../app-key-handshake.ts";
+import type { SiaNativeStreamProvider } from "../native-stream-provider.ts";
+import type { SiaPlaybackBackend } from "../playback-backend.ts";
 import type { Logger } from "../log/logger.ts";
 import {
   selectSiaRecovery,
@@ -63,6 +65,12 @@ export interface SiaVideoProps
       keyof typeof siaVideoDefaultProps
     >,
     Partial<typeof siaVideoDefaultProps> {
+  /**
+   * Playback backend policy for the underlying media host. Applied when defined
+   * on every render; omit it to keep the current policy, or pass `"auto"` to
+   * return to automatic selection.
+   */
+  backend?: SiaPlaybackBackend;
   children?: ReactNode;
   /**
    * Supplies the 32-byte Sia app-key seed for the encrypted worker handshake.
@@ -88,6 +96,11 @@ export interface SiaVideoProps
   logger?: Logger;
   /** Declared content type for the source; forwarded to the worker on every `SOURCE`. */
   mimeType?: string;
+  /**
+   * Provider used by the service-worker and native fallback backends. A new
+   * provider is applied before a same-render backend switch.
+   */
+  nativeStreamProvider?: SiaNativeStreamProvider;
   onTransportTelemetry?: SiaTransportTelemetryCallback;
   /**
    * Explicit in-place reload trigger: when this string changes (e.g. a mode or
@@ -139,10 +152,12 @@ function asMediaLike(media: SiaVideoSource): MediaLike {
 export const SiaVideo = forwardRef<HTMLVideoElement, SiaVideoProps>(
   function SiaVideo(
     {
+      backend,
       children,
       getAppKeySeed,
       getSharingKeySeed,
       logger,
+      nativeStreamProvider,
       onTransportTelemetry,
       reloadKey,
       sia,
@@ -231,6 +246,13 @@ export const SiaVideo = forwardRef<HTMLVideoElement, SiaVideoProps>(
       media.workerConfig = sia;
       media.getAppKeySeed = getAppKeySeed;
       media.getSharingKeySeed = getSharingKeySeed;
+      // The backend setter may start a source immediately. Give it the new
+      // provider first so a same-render service-worker switch never uses the
+      // provider from the previous render.
+      if (media.nativeStreamProvider !== nativeStreamProvider) {
+        media.nativeStreamProvider = nativeStreamProvider;
+      }
+      if (backend !== undefined) media.backend = backend;
       // Also unconditional: the logger sink is a live reference the host re-reads
       // from its `logger.level` for the worker's HELLO threshold and forwards
       // worker events through; swapping it per-render needs no attach.
