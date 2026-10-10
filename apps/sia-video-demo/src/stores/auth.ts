@@ -132,6 +132,11 @@ export const useAuthStore = createStore<AuthState>()(
         // The object pre-selection dies with the seed that carried it, so a
         // later share opened by hand cannot quietly re-arm a stale key.
         set({ objectKey: "", sharingError: null, sharingKeyHex: null });
+        window.history.replaceState(
+          null,
+          "",
+          `${window.location.pathname}${window.location.search}`,
+        );
       },
 
       logout: () => {
@@ -142,9 +147,13 @@ export const useAuthStore = createStore<AuthState>()(
           // reset above) AND strip the #sharing_key/#object fragment from the
           // address bar, then let the auth flow re-render the gate on its own
           // NO full-page reload, so there is no white flash / UI flicker.
-          // `replaceState` with an empty URL keeps the current path/query but
-          // drops the fragment (and does not fire `hashchange`).
-          window.history.replaceState(null, "", "");
+          // A fragment-free path/query drops the share fragment without
+          // firing `hashchange`.
+          window.history.replaceState(
+            null,
+            "",
+            `${window.location.pathname}${window.location.search}`,
+          );
           return;
         }
         // SSO/app-key logout keeps the historic full reload, which drops the

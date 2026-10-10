@@ -17,6 +17,7 @@ import {
   normalizeSelectedSource,
   type PlayerMode,
   selectedSourceReducer,
+  SHARED_OBJECT_SELECTED,
 } from "./SelectedSource";
 import { SharedObjectPicker } from "./SharedObjectPicker";
 import { type ArmedSharedSource, sharedSourceState } from "./SharedSourceState";
@@ -172,6 +173,7 @@ export function PlayerScreen() {
   // object key (boot-time ingest or a mid-session hashchange) arms the
   // autoplay intent exactly once per fragment change.
   useEffect(() => {
+    if (objectKey) dispatch({ objectKey, type: SHARED_OBJECT_SELECTED });
     setAutoplayIntent(autoplayIntentForPreselection(objectKey));
   }, [objectKey]);
 

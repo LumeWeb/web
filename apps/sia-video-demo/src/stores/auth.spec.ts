@@ -25,12 +25,24 @@ function stubStorage(): Storage {
 /** Returns a fresh Store-like stub, mirroring the app's top-level `window`/`history`. */
 function stubWindow(hash = ""): {
   history: { replaceState: ReturnType<typeof vi.fn> };
-  location: { hash: string; origin: string; reload: ReturnType<typeof vi.fn> };
+  location: {
+    hash: string;
+    origin: string;
+    pathname: string;
+    reload: ReturnType<typeof vi.fn>;
+    search: string;
+  };
   reload: ReturnType<typeof vi.fn>;
 } {
   // `reload` lives on `location` (production calls `window.location.reload()`);
   // it is also returned at the top level so tests can assert on it directly.
-  const location = { hash, origin: ORIGIN, reload: vi.fn() };
+  const location = {
+    hash,
+    origin: ORIGIN,
+    pathname: "/watch",
+    reload: vi.fn(),
+    search: "?mode=demo",
+  };
   const history = { replaceState: vi.fn() };
   Object.defineProperty(globalThis, "window", {
     configurable: true,
@@ -140,12 +152,17 @@ describe("setSharingKeySeed (manual paste)", () => {
   });
 
   it("clears the seed (and its object key + error) on clearSharingKeySeed", async () => {
-    stubWindow("");
+    const { history } = stubWindow("");
     const { useAuthStore } = await importStore();
     useAuthStore.getState().setSharingKeySeed(SEED);
     useAuthStore.getState().setObjectKey(OBJECT);
     useAuthStore.getState().clearSharingKeySeed();
 
+    expect(history.replaceState).toHaveBeenLastCalledWith(
+      null,
+      "",
+      "/watch?mode=demo",
+    );
     const state = useAuthStore.getState();
     expect(state.sharingKeyHex).toBeNull();
     expect(state.objectKey).toBe("");
@@ -215,9 +232,13 @@ describe("logout", () => {
     // Sharing-key logout must NOT reload the window: the store now routes to
     // the gate on its own, so a reload would only cause UI flicker.
     expect(reload).not.toHaveBeenCalled();
-    // The #sharing_key/#object fragment is stripped (empty replaceState URL =
-    // current path/query with no fragment).
-    expect(history.replaceState).toHaveBeenLastCalledWith(null, "", "");
+    // The fragment-free path/query prevents boot ingest from restoring the
+    // session after logout.
+    expect(history.replaceState).toHaveBeenLastCalledWith(
+      null,
+      "",
+      "/watch?mode=demo",
+    );
     const stored = JSON.parse(storage.getItem(AUTH_STORAGE_KEY)!) as {
       state: { sharingKeyHex?: null | string };
     };

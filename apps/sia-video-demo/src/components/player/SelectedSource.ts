@@ -50,15 +50,18 @@ export interface PublishSelectionInput {
 /** The single selected-source union the later player wiring consumes. */
 export type SelectedSource = PublishSelectedSource | SharedSelectedSource;
 
+/** Shared-fragment selection updates the selected key without toggle semantics. */
+export const SHARED_OBJECT_SELECTED = "shared-object-selected" as const;
+
 /** Action union for the selected-source reducer; all selection-intent changes. */
 export type SelectedSourceAction =
   | { readonly input: string; readonly type: "publish-input-changed" }
   | { readonly mode: PlayerMode; readonly type: "mode-changed" }
+  | { readonly objectKey: string; readonly type: "shared-object-toggled" }
   | {
       readonly objectKey: string;
-      readonly type: "shared-object-selected";
+      readonly type: typeof SHARED_OBJECT_SELECTED;
     }
-  | { readonly objectKey: string; readonly type: "shared-object-toggled" }
   | { readonly type: "cleared" };
 
 /**
@@ -161,11 +164,6 @@ export function selectedSourceReducer(
     }
     case "publish-input-changed":
       return { ...state, publish: { input: action.input } };
-    case "shared-object-selected":
-      return {
-        ...state,
-        shared: { objectKey: canonicalizeSelectedObjectKey(action.objectKey) },
-      };
     case "shared-object-toggled": {
       const clicked = canonicalizeSelectedObjectKey(action.objectKey);
       if (!clicked) return state;
@@ -176,6 +174,11 @@ export function selectedSourceReducer(
         },
       };
     }
+    case SHARED_OBJECT_SELECTED:
+      return {
+        ...state,
+        shared: { objectKey: canonicalizeSelectedObjectKey(action.objectKey) },
+      };
     default:
       return state;
   }

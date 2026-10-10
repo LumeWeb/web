@@ -7,6 +7,7 @@ import {
   normalizeSelectedSource,
   type SelectedSourceDeps,
   selectedSourceReducer,
+  SHARED_OBJECT_SELECTED,
 } from "./SelectedSource";
 
 const APP_KEY_HEX = "ab".repeat(32);
@@ -80,12 +81,12 @@ describe("selectedSourceReducer", () => {
   it("canonicalizes a shared object selection without toggling off a matching key", () => {
     const next = selectedSourceReducer(initialSelectedSourceState(), {
       objectKey: OBJECT_KEY.toUpperCase(),
-      type: "shared-object-selected",
+      type: SHARED_OBJECT_SELECTED,
     });
     expect(next.shared.objectKey).toBe(OBJECT_KEY);
     const again = selectedSourceReducer(next, {
       objectKey: OBJECT_KEY,
-      type: "shared-object-selected",
+      type: SHARED_OBJECT_SELECTED,
     });
     expect(again.shared.objectKey).toBe(OBJECT_KEY);
   });
@@ -93,7 +94,7 @@ describe("selectedSourceReducer", () => {
   it("drops a malformed shared object selection instead of throwing", () => {
     const next = selectedSourceReducer(initialSelectedSourceState(OBJECT_KEY), {
       objectKey: "not-hex",
-      type: "shared-object-selected",
+      type: SHARED_OBJECT_SELECTED,
     });
     expect(next.shared.objectKey).toBeNull();
   });
@@ -235,7 +236,7 @@ describe("normalizeSelectedSource", () => {
   it("lifts an armed shared source into the shared union with its supplier", () => {
     const prev = selectedSourceReducer(initialSelectedSourceState(), {
       objectKey: OBJECT_KEY,
-      type: "shared-object-selected",
+      type: SHARED_OBJECT_SELECTED,
     });
     const selected = normalizeSelectedSource(prev, sharedModeDeps());
     expect(selected).not.toBeNull();
@@ -250,7 +251,7 @@ describe("normalizeSelectedSource", () => {
   it("is null while no shared armed source is available", () => {
     const prev = selectedSourceReducer(initialSelectedSourceState(), {
       objectKey: OBJECT_KEY,
-      type: "shared-object-selected",
+      type: SHARED_OBJECT_SELECTED,
     });
     expect(
       normalizeSelectedSource(prev, { ...sharedModeDeps(), sharedArmed: null }),
@@ -271,7 +272,7 @@ describe("normalizeSelectedSource", () => {
     const prev = selectedSourceReducer(
       selectedSourceReducer(initialSelectedSourceState(OBJECT_KEY), {
         objectKey: OBJECT_KEY,
-        type: "shared-object-selected",
+        type: SHARED_OBJECT_SELECTED,
       }),
       { mode: "publish", type: "mode-changed" },
     );
@@ -299,7 +300,7 @@ describe("normalizeSelectedSource", () => {
     const sharedSelected = normalizeSelectedSource(
       selectedSourceReducer(initialSelectedSourceState(), {
         objectKey: OBJECT_KEY,
-        type: "shared-object-selected",
+        type: SHARED_OBJECT_SELECTED,
       }),
       sharedModeDeps(),
     );
