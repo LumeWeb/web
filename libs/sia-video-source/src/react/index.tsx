@@ -38,7 +38,10 @@ import {
   usePlayer,
 } from "@videojs/react";
 import { type AppKeySeedProvider } from "../app-key-handshake.ts";
-import type { SiaNativeStreamProvider } from "../native-stream-provider.ts";
+import type {
+  SiaNativeStreamProvider,
+  SiaNativeStreamSourceKind,
+} from "../native-stream-provider.ts";
 import type { SiaPlaybackBackend } from "../playback-backend.ts";
 import type { Logger } from "../log/logger.ts";
 import {
@@ -100,6 +103,8 @@ export interface SiaVideoProps
    * Provider used by the service-worker and native fallback backends. A new
    * provider is applied before a same-render backend switch.
    */
+  /** Explicit auth context for native playback of bare object keys. */
+  nativeSourceKind?: SiaNativeStreamSourceKind;
   nativeStreamProvider?: SiaNativeStreamProvider;
   onTransportTelemetry?: SiaTransportTelemetryCallback;
   /**
@@ -157,6 +162,7 @@ export const SiaVideo = forwardRef<HTMLVideoElement, SiaVideoProps>(
       getAppKeySeed,
       getSharingKeySeed,
       logger,
+      nativeSourceKind,
       nativeStreamProvider,
       onTransportTelemetry,
       reloadKey,
@@ -248,6 +254,7 @@ export const SiaVideo = forwardRef<HTMLVideoElement, SiaVideoProps>(
       media.workerConfig = sia;
       media.getAppKeySeed = getAppKeySeed;
       media.getSharingKeySeed = getSharingKeySeed;
+      media.nativeSourceKind = nativeSourceKind ?? "app";
       // The backend setter may start a source immediately. Give it the new
       // provider first so a same-render service-worker switch never uses the
       // provider from the previous render.

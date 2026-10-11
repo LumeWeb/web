@@ -3,7 +3,9 @@ import { isSiaShareUrl, parseSiaShareUrl } from "./share-url.ts";
 import type {
   SiaNativeStreamFile,
   SiaNativeStreamService,
+  SiaNativeStreamSourceKind,
 } from "./native-stream-provider.ts";
+export type { SiaNativeStreamSourceKind } from "./native-stream-provider.ts";
 import type {
   Sdk,
   SharedSdk,
@@ -107,7 +109,8 @@ export function createSiaStreamService(
       disposed
         ? Promise.reject(new Error("Sia stream service is disposed"))
         : awaitWithAbort(prepareBase(), signal),
-    resolve: (src) => Promise.resolve(resolveSiaStreamSource(src)),
+    resolve: (src, _signal, sourceKind) =>
+      Promise.resolve(resolveSiaStreamSource(src, sourceKind)),
     session: async (source, signal) => {
       if (signal?.aborted) throw abortError();
       if (disposed) throw new Error("Sia stream service is disposed");
@@ -325,10 +328,13 @@ export function createSiaStreamService(
   return service;
 }
 
-export function resolveSiaStreamSource(src: string): SiaStreamSource {
+export function resolveSiaStreamSource(
+  src: string,
+  sourceKind?: SiaNativeStreamSourceKind,
+): SiaStreamSource {
   if (isSiaShareUrl(src))
     return { objectKey: parseSiaShareUrl(src).objectKey, shared: true };
-  if (KEY.test(src)) return { objectKey: src, shared: false };
+  if (KEY.test(src)) return { objectKey: src, shared: sourceKind === "shared" };
   throw new Error(
     "not a playable Sia source: expected a share URL or a 64-hex object key",
   );

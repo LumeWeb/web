@@ -33,6 +33,7 @@ import {
 } from "./playback-backend.ts";
 import {
   type SiaNativeStreamProvider,
+  type SiaNativeStreamSourceKind,
   SiaNativeStreamUnavailableError,
 } from "./native-stream-provider.ts";
 import {
@@ -276,6 +277,8 @@ export interface SiaVideoSourceOptions {
    */
   createWorker?: () => Worker;
   nativeStreamProvider?: SiaNativeStreamProvider;
+  /** Auth context for native playback; shared bare keys must identify this explicitly. */
+  nativeSourceKind?: SiaNativeStreamSourceKind;
   onTransportTelemetry?: SiaTransportTelemetryCallback;
   /**
    * Supplies the 32-byte Sia app-key seed for the worker handshake. The host
@@ -400,6 +403,12 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         this.#startWorkerBackend();
       }
     }
+  }
+  get nativeSourceKind(): SiaNativeStreamSourceKind {
+    return this.#nativeSourceKind;
+  }
+  set nativeSourceKind(value: SiaNativeStreamSourceKind) {
+    this.#nativeSourceKind = value;
   }
   get nativeStreamProvider(): SiaNativeStreamProvider | undefined {
     return this.#nativeStreamProvider;
@@ -691,6 +700,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // Forced reloads capture this before detaching the native resource. The
   // replacement load consumes it only after the provider attaches its URL.
   #pendingServiceWorkerResume = false;
+  #nativeSourceKind: SiaNativeStreamSourceKind = "app";
   #nativeStreamProvider: SiaNativeStreamProvider | undefined;
   #onTransportTelemetry: SiaTransportTelemetryCallback | undefined;
   #transportBytesDownloaded = 0;
@@ -816,6 +826,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#mimeType = options.mimeType;
     this.#workerMse = options.workerMse;
     this.#backend = options.backend ?? SIA_PLAYBACK_BACKENDS.AUTO;
+    this.#nativeSourceKind = options.nativeSourceKind ?? "app";
     this.#nativeStreamProvider = options.nativeStreamProvider;
     this.#onTransportTelemetry = options.onTransportTelemetry;
     this.#serviceWorkerBackend = this.#nativeStreamProvider
@@ -1262,6 +1273,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
             status: telemetry.status,
           });
         },
+        sourceKind: this.#nativeSourceKind,
       })
       .catch((error: unknown) => {
         if (error instanceof ServiceWorkerLoadAbortedError) return;
@@ -1644,7 +1656,12 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // same window was superseded and replaying it would make the worker seek to
   // a stale position before the intended target.
   #flushBufferedLogLevel(pending: MainToWorkerMessage[]): void {
-    let latest: Extract<MainToWorkerMessage, { type: MainToWorkerMessageType.LOG_LEVEL }> | undefined;
+    let latest:
+      | Extract<
+          MainToWorkerMessage,
+          { type: MainToWorkerMessageType.LOG_LEVEL }
+        >
+      | undefined;
     for (const message of pending) {
       if (message.type === MainToWorkerMessageType.LOG_LEVEL) latest = message;
     }

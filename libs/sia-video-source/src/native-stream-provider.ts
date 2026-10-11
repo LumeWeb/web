@@ -1,4 +1,4 @@
-/* oxlint-disable perfectionist/sort-objects, perfectionist/sort-interfaces, perfectionist/sort-object-types, perfectionist/sort-classes, perfectionist/sort-exports */
+/* oxlint-disable perfectionist/sort-objects, perfectionist/sort-interfaces, perfectionist/sort-object-types, perfectionist/sort-classes, perfectionist/sort-exports, perfectionist/sort-modules */
 /** App-owned adapter that returns service-worker stream URLs for Sia sources. */
 
 import { isSiaShareUrl } from "./share-url.ts";
@@ -22,6 +22,7 @@ export interface SiaNativeStreamProvider {
     options: {
       mimeType?: string;
       name?: string;
+      sourceKind?: SiaNativeStreamSourceKind;
       signal: AbortSignal;
       onStatus?: (status: SiaTransportStatus) => void;
       onProgress?: (bytesDownloaded: number) => void;
@@ -36,16 +37,27 @@ export interface SiaNativeStreamProviderDependencies {
     signal?: AbortSignal,
   ) => Promise<SiaNativeStreamSession> | SiaNativeStreamSession;
   /** Optional lazy setup. The provider calls it before capability checks and opens. */
-  prepare?: (signal?: AbortSignal) => Promise<void>;
-  resolveSource: (src: string, signal?: AbortSignal) => Promise<unknown>;
+  prepare?: (signal?: AbortSignal) => Promise<unknown>;
+  resolveSource: (
+    src: string,
+    signal?: AbortSignal,
+    sourceKind?: SiaNativeStreamSourceKind,
+  ) => Promise<unknown>;
 }
 
 /** App stream service that native playback is built from: availability, source resolution, and stream sessions. */
+export type SiaNativeStreamSourceKind = "app" | "shared";
+
 export interface SiaNativeStreamService<TSource = unknown> {
   /** Lazy setup hook. It may cache its promise and is never called by construction. */
-  prepare?(signal?: AbortSignal): Promise<void>;
+  prepare?(signal?: AbortSignal): Promise<unknown>;
   isAvailable(signal?: AbortSignal): Promise<boolean>;
-  resolve(src: string, signal?: AbortSignal): Promise<TSource>;
+  /** Source kind is explicit at this boundary; omitted callers retain app-source behavior. */
+  resolve(
+    src: string,
+    signal?: AbortSignal,
+    sourceKind?: SiaNativeStreamSourceKind,
+  ): Promise<TSource>;
   session(
     source: TSource,
     signal?: AbortSignal,
@@ -67,6 +79,7 @@ export interface SiaNativeStreamSession {
 
 interface NativeProviderOpenOptions {
   mimeType?: string;
+  sourceKind?: SiaNativeStreamSourceKind;
   name?: string;
   signal: AbortSignal;
   onStatus?: (status: SiaTransportStatus) => void;
@@ -114,8 +127,11 @@ export function createSiaNativeStreamProvider(
         // only values that reach session are the ones resolve just produced.
         createStreamSession: (source: unknown, signal?: AbortSignal) =>
           input.session(source, signal),
-        resolveSource: (src: string, signal?: AbortSignal) =>
-          input.resolve(src, signal),
+        resolveSource: (
+          src: string,
+          signal?: AbortSignal,
+          sourceKind?: SiaNativeStreamSourceKind,
+        ) => input.resolve(src, signal, sourceKind),
       }
     : input;
   return buildNativeStreamProvider(deps);
@@ -128,7 +144,9 @@ function buildNativeStreamProvider(
   let preparation: Promise<void> | undefined;
   const prepare = (signal?: AbortSignal): Promise<void> => {
     if (preparation) return preparation;
-    const pending = deps.prepare?.(signal) ?? Promise.resolve();
+    const pending = Promise.resolve(deps.prepare?.(signal)).then(
+      () => undefined,
+    );
     const retryable = pending.catch((error: unknown) => {
       if (preparation === retryable) preparation = undefined;
       throw error;
@@ -147,7 +165,11 @@ function buildNativeStreamProvider(
         throw new SiaNativeStreamUnavailableError();
       let source: unknown;
       try {
-        source = await deps.resolveSource(src, options.signal);
+        source = await deps.resolveSource(
+          src,
+          options.signal,
+          options.sourceKind,
+        );
       } catch (error) {
         throw sanitizeResolverError(error, src);
       }

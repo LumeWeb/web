@@ -2,6 +2,7 @@
 import { parseSiaShareUrl } from "@lumeweb/sia-video-source";
 import {
   createSiaStreamService,
+  type SiaNativeStreamSourceKind,
   type SiaStreamAuthSource,
   type SiaStreamService,
   type SiaStreamSource,
@@ -67,8 +68,12 @@ export function getDemoNativeStreamService(): DemoNativeStreamService {
 }
 
 /** Resolves a source with the library's canonical Sia URL parser. */
-export function resolveDemoStreamSource(src: string): DemoStreamSource {
-  if (/^[0-9a-f]{64}$/.test(src)) return { objectKey: src, shared: false };
+export function resolveDemoStreamSource(
+  src: string,
+  sourceKind?: SiaNativeStreamSourceKind,
+): DemoStreamSource {
+  if (/^[0-9a-f]{64}$/.test(src))
+    return { objectKey: src, shared: sourceKind === "shared" };
   const parsed = parseSiaShareUrl(src);
   return { objectKey: parsed.objectKey, shared: true };
 }

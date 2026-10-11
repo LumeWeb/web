@@ -69,7 +69,8 @@ import type { SiaStatus } from "./SiaStatusBridge";
 const demoNativeStreamProvider: SiaNativeStreamProvider =
   createSiaNativeStreamProvider({
     isAvailable: (signal) => getDemoNativeStreamService().isAvailable(signal),
-    resolve: (src) => getDemoNativeStreamService().resolve(src),
+    resolve: (src, signal, sourceKind) =>
+      getDemoNativeStreamService().resolve(src, signal, sourceKind),
     session: (source, signal) =>
       getDemoNativeStreamService().session(source, signal),
   });
@@ -219,6 +220,7 @@ export function SiaVideoMount({
         // Demo-wide event-log sink; stable singleton so the host's per-render
         // `media.logger = logger` re-application stays on one sink.
         logger={eventLogLogger}
+        nativeSourceKind={selectedSource?.mode === "shared" ? "shared" : "app"}
         nativeStreamProvider={mount.nativeStreamProvider}
         preload="auto"
         reloadKey={mount.reloadKey}
