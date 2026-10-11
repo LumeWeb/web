@@ -17,6 +17,7 @@ let root: null | Root = null;
 beforeEach(() => {
   useDeveloperOptionsStore.setState({
     disableNativePlayback: false,
+    disableWorkerPlayback: false,
   });
   container = document.createElement("div");
   document.body.appendChild(container);

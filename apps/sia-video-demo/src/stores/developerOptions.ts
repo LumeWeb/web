@@ -8,6 +8,7 @@
  * Options today:
  * - `disableNativePlayback`: force the deterministic worker-only backend
  *   (see `resolvePlaybackBackend`).
+ * - `disableWorkerPlayback`: force the native service-worker backend.
  */
 
 import { createStore } from "zustand";
@@ -16,16 +17,25 @@ import { createStore } from "zustand";
 export interface DeveloperOptions {
   /** Disable native (service-worker stream) playback; force the worker-only backend. */
   disableNativePlayback: boolean;
+  /** Disable package worker playback; force native playback when available. */
+  disableWorkerPlayback: boolean;
 }
 
 interface DeveloperOptionsState extends DeveloperOptions {
   setDisableNativePlayback: (value: boolean) => void;
+  setDisableWorkerPlayback: (value: boolean) => void;
 }
 
 export const useDeveloperOptionsStore = createStore<DeveloperOptionsState>()(
   (set) => ({
     // Native playback left enabled by default.
     disableNativePlayback: false,
-    setDisableNativePlayback: (value) => set({ disableNativePlayback: value }),
+    disableWorkerPlayback: false,
+    // Enabling one backend disables the other, so the store cannot hold a
+    // configuration with no playback backend.
+    setDisableNativePlayback: (value) =>
+      set({ disableNativePlayback: value, ...(value ? { disableWorkerPlayback: false } : {}) }),
+    setDisableWorkerPlayback: (value) =>
+      set({ disableWorkerPlayback: value, ...(value ? { disableNativePlayback: false } : {}) }),
   }),
 );

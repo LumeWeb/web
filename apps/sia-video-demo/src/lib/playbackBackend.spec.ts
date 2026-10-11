@@ -13,9 +13,15 @@ import { resolvePlaybackBackend } from "./playbackBackend";
 /** Full centralized options objects (the mapping must ignore the rest). */
 const NATIVE_ENABLED: DeveloperOptions = {
   disableNativePlayback: false,
+  disableWorkerPlayback: false,
 };
 const NATIVE_DISABLED: DeveloperOptions = {
   disableNativePlayback: true,
+  disableWorkerPlayback: false,
+};
+const WORKER_DISABLED: DeveloperOptions = {
+  disableNativePlayback: false,
+  disableWorkerPlayback: true,
 };
 
 describe("resolvePlaybackBackend", () => {
@@ -25,5 +31,9 @@ describe("resolvePlaybackBackend", () => {
 
   it("selects the worker-only backend when native playback is disabled", () => {
     expect(resolvePlaybackBackend(NATIVE_DISABLED)).toBe("media-worker");
+  });
+
+  it("selects native playback when worker playback is disabled", () => {
+    expect(resolvePlaybackBackend(WORKER_DISABLED)).toBe("service-worker");
   });
 });

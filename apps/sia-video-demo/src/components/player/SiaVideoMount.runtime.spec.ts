@@ -177,6 +177,7 @@ beforeEach(() => {
   preparation.reset();
   useDeveloperOptionsStore.setState({
     disableNativePlayback: false,
+    disableWorkerPlayback: false,
   });
   backendSetterCalls = 0;
   observedMedia = null;
