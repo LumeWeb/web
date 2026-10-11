@@ -5,11 +5,18 @@
  * written into the eventLog zustand store as one timestamped line.
  *
  * The host derives the worker's HELLO `log` forwarding threshold from
- * `logger.level`, so this sink's `level` doubles as the worker milestone
- * switch: `'info'` (the demo default, keeping logging quiet) keeps only the
- * session milestones (`session.*`, `sdk.built`, `object.resolved`, `stream.*`);
- * `'debug'` (available when a developer opts in) pulls the full wire
- * including the per-read `read.window-*` / `bytes.read` milestones.
+ * `logger.level` at every (re)attach, so the demo singleton's `level` is a
+ * LIVE read of the event-log store's verbose toggle: off (the default,
+ * keeping logging quiet) is `'info'` and keeps only the session milestones
+ * (`session.*`, `sdk.built`, `object.resolved`, `stream.*`); on is `'debug'`
+ * and pulls the full wire including the per-read `read.window-*` /
+ * `bytes.read` milestones. Toggling verbose therefore changes what the host
+ * and worker log from the next record on, not just which already-logged lines
+ * the panel shows.
+ *
+ * The `level` option also accepts a function, resolved at each write and each
+ * `level` read, so one stable logger object can track a runtime toggle
+ * without the host ever seeing a swapped reference.
  *
  * Seed-safety: the sink forwards ONLY the message and `fields` the library
  * logged. The library's `Logger` contract (libs/sia-video-source) keeps keys
@@ -37,23 +44,27 @@ const STORE_LEVEL: Record<LogLevel, EventLevel> = {
   warn: "warn",
 };
 
-/**
- * Builds a `Logger` whose records land in the event log. Matches the library's
+/** Builds a `Logger` whose records land in the event log. Matches the library's
  * `Logger` contract (`libs/sia-video-source/src/log/logger.ts`): `child`
  * dot-joins scopes and each scope renders as a `[scope]` prefix on the line;
  * `level` is the minimum emitted severity, filtering both the host's
  * worker-wire threshold (read through the live `.level`) and this sink's own
- * writes.
+ * writes. A function `level` is re-resolved on every write and every `level`
+ * read, so the threshold can track a runtime toggle on one stable object.
  */
 export function createEventLogLogger(
-  options: { level?: LogLevelFilter } = {},
+  options: { level?: (() => LogLevelFilter) | LogLevelFilter } = {},
 ): Logger {
-  const filter = options.level ?? "info";
+  const resolveFilter = (): LogLevelFilter =>
+    typeof options.level === "function"
+      ? options.level()
+      : (options.level ?? "info");
 
   const build = (scope: string): Logger => {
     const write =
       (methodLevel: LogLevel) =>
       (msg: string, fields?: LogFields): void => {
+        const filter = resolveFilter();
         if (filter === "silent") return;
         if (logLevelRank(methodLevel) < logLevelRank(filter)) return;
         const prefix = scope === "" ? "" : `[${scope}] `;
@@ -69,13 +80,23 @@ export function createEventLogLogger(
       debug: write("debug"),
       error: write("error"),
       info: write("info"),
-      level: filter,
+      get level(): LogLevelFilter {
+        return resolveFilter();
+      },
       trace: write("trace"),
       warn: write("warn"),
     };
   };
 
   return build("");
+}
+
+/**
+ * The log threshold the verbose toggle maps onto: off keeps the quiet
+ * `'info'` milestone view, on opens `'debug'` (the full wire).
+ */
+export function eventLogLevelForVerbose(verbose: boolean): LogLevelFilter {
+  return verbose ? "debug" : "info";
 }
 
 /** Scalar facts stay scalar; nested/object values are condensed, not dropped. */
@@ -112,6 +133,9 @@ function renderFacts(fields: LogFields): string {
  * Demo-wide logger singleton. A stable reference matters: the player wiring
  * re-applies `media.logger = logger` on every render, so a constant reference
  * keeps the host and the worker-threshold derivation on one sink for the whole
- * session.
+ * session. Its `level` is the live verbose mapping: the checkbox drives what
+ * the host logs and updates what the worker forwards without a reload.
  */
-export const eventLogLogger: Logger = createEventLogLogger();
+export const eventLogLogger: Logger = createEventLogLogger({
+  level: () => eventLogLevelForVerbose(useEventLogStore.getState().verbose),
+});

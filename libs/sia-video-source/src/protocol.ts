@@ -34,6 +34,7 @@ export enum MainToWorkerMessageType {
   DESTROY = 'DESTROY',
   DETACH = 'DETACH',
   HELLO = 'HELLO',
+  LOG_LEVEL = 'LOG_LEVEL',
   PLAY = 'PLAY',
   PLAYHEAD = 'PLAYHEAD',
   SEEK = 'SEEK',
@@ -159,6 +160,7 @@ export type MainToWorkerMessage =
       readonly requestId: RequestId;
       readonly type: MainToWorkerMessageType.APP_KEY;
     }
+  | { readonly level?: WorkerLogLevel; readonly type: MainToWorkerMessageType.LOG_LEVEL; }
   /** Current media playhead; drives buffered-timeline scheduling and back-buffer eviction. */
   | { readonly requestId: RequestId; readonly time: number; readonly type: MainToWorkerMessageType.PLAYHEAD; }
   | { readonly requestId: RequestId; readonly time: number; readonly type: MainToWorkerMessageType.SEEK; }
@@ -448,6 +450,8 @@ export function isMainToWorkerMessage(message: unknown): message is MainToWorker
         (typeof typed.sharingSeed === 'undefined' || typeof typed.sharingSeed === 'boolean') &&
         (typeof typed.log === 'undefined' || Object.values(workerLogLevel).includes(typed.log))
       );
+    case MainToWorkerMessageType.LOG_LEVEL:
+      return typeof typed.level === 'undefined' || Object.values(workerLogLevel).includes(typed.level);
     case MainToWorkerMessageType.PLAYHEAD:
     case MainToWorkerMessageType.SEEK:
       return typeof typed.requestId === 'number' && Number.isFinite(typed.time);

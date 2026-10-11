@@ -238,6 +238,180 @@ describe("auto backend selection", () => {
     host.destroy();
   });
 
+  it("waits for ATTACH_OK before sending a source when switching from native to the media worker", async () => {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({
+      backend: SIA_PLAYBACK_BACKENDS.AUTO,
+      createWorker: vi.fn(() => worker) as unknown as () => Worker,
+      logger: nullLogger,
+      nativeStreamProvider: provider(true),
+    });
+
+    host.attach(new FakeVideoTarget() as unknown as HTMLVideoElement);
+    host.src = "native-switch-key";
+    await flush();
+
+    host.backend = SIA_PLAYBACK_BACKENDS.MEDIA_WORKER;
+
+    expect(
+      worker.sent.filter(
+        (message) => message.type === MainToWorkerMessageType.SOURCE,
+      ),
+    ).toEqual([]);
+
+    replyToWorkerHandshake(worker);
+
+    expect(
+      worker.sent.filter(
+        (message) => message.type === MainToWorkerMessageType.SOURCE,
+      ),
+    ).toHaveLength(1);
+    host.destroy();
+  });
+
+  it("waits for ATTACH_OK before sending a source after native availability rejects", async () => {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({
+      backend: SIA_PLAYBACK_BACKENDS.AUTO,
+      createWorker: vi.fn(() => worker) as unknown as () => Worker,
+      logger: nullLogger,
+      nativeStreamProvider: {
+        available: () => Promise.reject(new Error("availability failed")),
+        open: () => Promise.reject(new Error("native setup failed")),
+      },
+    });
+
+    host.attach(new FakeVideoTarget() as unknown as HTMLVideoElement);
+    host.src = "availability-failure-key";
+    await flush();
+
+    expect(
+      worker.sent.filter(
+        (message) => message.type === MainToWorkerMessageType.SOURCE,
+      ),
+    ).toEqual([]);
+
+    replyToWorkerHandshake(worker);
+
+    expect(
+      worker.sent.filter(
+        (message) => message.type === MainToWorkerMessageType.SOURCE,
+      ),
+    ).toHaveLength(1);
+    host.destroy();
+  });
+
+  it("sends no source for a reload issued while the AUTO fallback handshake is pending", async () => {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({
+      backend: SIA_PLAYBACK_BACKENDS.AUTO,
+      createWorker: vi.fn(() => worker) as unknown as () => Worker,
+      logger: nullLogger,
+      nativeStreamProvider: {
+        available: () => Promise.reject(new Error("availability failed")),
+        open: () => Promise.reject(new Error("native setup failed")),
+      },
+    });
+
+    host.attach(new FakeVideoTarget() as unknown as HTMLVideoElement);
+    host.src = "reload-pending-key";
+    await flush();
+
+    // The fallback worker is spawned and its first handshake is in flight;
+    // a reload re-runs the handshake on the same worker.
+    host.reloadConfiguration();
+    await flush();
+
+    expect(
+      worker.sent.filter(
+        (message) => message.type === MainToWorkerMessageType.SOURCE,
+      ),
+    ).toEqual([]);
+
+    replyToWorkerHandshake(worker);
+
+    const sources = worker.sent.filter(
+      (message) => message.type === MainToWorkerMessageType.SOURCE,
+    );
+    expect(sources).toHaveLength(1);
+    expect(sources[0]).toMatchObject({ src: "reload-pending-key" });
+    host.destroy();
+  });
+
+  it("replays only the newest source when src and load are re-applied while the AUTO fallback handshake is pending", async () => {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({
+      backend: SIA_PLAYBACK_BACKENDS.AUTO,
+      createWorker: vi.fn(() => worker) as unknown as () => Worker,
+      logger: nullLogger,
+      nativeStreamProvider: {
+        available: () => Promise.reject(new Error("availability failed")),
+        open: () => Promise.reject(new Error("native setup failed")),
+      },
+    });
+
+    host.attach(new FakeVideoTarget() as unknown as HTMLVideoElement);
+    host.src = "reapply-first-key";
+    await flush();
+
+    // A re-render re-applies the (changed) source and an explicit load while
+    // the fallback handshake is still pending.
+    host.src = "reapply-second-key";
+    await flush();
+    host.load();
+    await flush();
+
+    expect(
+      worker.sent.filter(
+        (message) => message.type === MainToWorkerMessageType.SOURCE,
+      ),
+    ).toEqual([]);
+
+    replyToWorkerHandshake(worker);
+
+    const sources = worker.sent.filter(
+      (message) => message.type === MainToWorkerMessageType.SOURCE,
+    );
+    expect(sources).toHaveLength(1);
+    expect(sources[0]).toMatchObject({ src: "reapply-second-key" });
+    host.destroy();
+  });
+
+  it("falls back to the media worker without a pre-attach source when the native provider is absent", async () => {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({
+      backend: SIA_PLAYBACK_BACKENDS.AUTO,
+      createWorker: vi.fn(() => worker) as unknown as () => Worker,
+      logger: nullLogger,
+    });
+
+    host.attach(new FakeVideoTarget() as unknown as HTMLVideoElement);
+    host.src = "no-provider-key";
+    await flush();
+
+    // Service-worker streaming is unavailable: every re-apply during the
+    // pending fallback handshake must stay out of the worker until ATTACH_OK.
+    host.load();
+    await flush();
+    host.reloadConfiguration();
+    await flush();
+
+    expect(
+      worker.sent.filter(
+        (message) => message.type === MainToWorkerMessageType.SOURCE,
+      ),
+    ).toEqual([]);
+
+    replyToWorkerHandshake(worker);
+
+    const sources = worker.sent.filter(
+      (message) => message.type === MainToWorkerMessageType.SOURCE,
+    );
+    expect(sources).toHaveLength(1);
+    expect(sources[0]).toMatchObject({ src: "no-provider-key" });
+    host.destroy();
+  });
+
   it("falls back when native availability is rejected and resumes play intent", async () => {
     const worker = new FakeWorker();
     const createWorker = vi.fn(() => worker);

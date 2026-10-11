@@ -142,6 +142,31 @@ describe('SiaVideoSource (host state machine)', () => {
     host.destroy();
   });
 
+  it.skipIf(!IN_BROWSER)('records a new source request after the ready worker handshake', () => {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const target = document.createElement('video');
+    host.attach(target);
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    replyAttachOk(worker);
+
+    host.src = 'first-source';
+    const first = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).at(-1);
+    if (!first || !('requestId' in first)) throw new Error('first SOURCE was not sent');
+    worker.reply({ info: { container: 'fmp4', durationSeconds: null, mime: 'video/mp4', mode: 'main', tracks: [] }, requestId: first.requestId, type: WorkerToMainMessageType.SOURCE_OK });
+
+    host.src = 'second-source';
+    const second = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).at(-1);
+    if (!second || !('requestId' in second)) throw new Error('second SOURCE was not sent');
+    expect(second.requestId).not.toBe(first.requestId);
+    worker.reply({ info: { container: 'fmp4', durationSeconds: null, mime: 'video/mp4', mode: 'main', tracks: [] }, requestId: second.requestId, type: WorkerToMainMessageType.SOURCE_OK });
+    expect(target.src.startsWith('blob:')).toBe(true);
+
+    worker.reply({ context: 'second source failed', kind: 'network', requestId: second.requestId, type: WorkerToMainMessageType.ERROR });
+    expect(host.error?.code).toBe(2);
+    host.destroy();
+  });
+
   it.skipIf(!IN_BROWSER)('forwards native play and seek events to the worker', () => {
     const worker = new FakeWorker();
     const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });

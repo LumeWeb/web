@@ -23,10 +23,9 @@
  *   (which drives `reloadConfiguration()`), never a React `key` remount.
  *   The reload key is display-safe only: it deliberately excludes the
  *   publish `fetchForm` (a share URL embedding the decryption key) and any
- *   seed, so key material never reaches the reload identity string. A
- *   developer-options toggle does NOT go through the reload key: the
- *   library wrapper assigns `media.backend` in place, and
- *   the host's backend setter updates the active playback safely.
+ *   seed, so key material never reaches the reload identity string.
+ *   Developer options update the persistent media instance in place; log
+ *   verbosity updates the worker threshold without restarting playback.
  *
  * The pure derivations are exported so the mount props and reload-key
  * contract can be unit-tested without a DOM (SiaVideoMount.spec.ts).
@@ -47,6 +46,7 @@ import { eventLogLogger } from "../../lib/eventLogLogger";
 import { resolvePlaybackBackend } from "../../lib/playbackBackend";
 import { getDemoNativeStreamService } from "../../lib/streamService";
 import { useDeveloperOptionsStore } from "../../stores/developerOptions";
+import { useEventLogStore } from "../../stores/eventLog";
 import { AutoPlayBridge } from "./AutoPlayBridge";
 import { PlaybackFactsBridge } from "./PlaybackFactsBridge";
 import { UserPlayBridge } from "./UserPlayBridge";
@@ -159,6 +159,11 @@ export function SiaVideoMount({
     useDeveloperOptionsStore,
     (s) => s.disableNativePlayback,
   );
+  // Re-render the persistent SiaVideo wrapper when verbose changes. Its
+  // per-render sync reads the singleton's live level and calls
+  // setWorkerLogLevel(), which sends LOG_LEVEL in place (never reloadKey or a
+  // playback restart).
+  useStore(useEventLogStore, (s) => s.verbose);
   const [streamingPrepared, setStreamingPrepared] = useState(false);
   const [preparationFailed, setPreparationFailed] = useState(false);
   useEffect(() => {
