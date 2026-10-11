@@ -105,6 +105,27 @@ describe("createSiaNativeStreamProvider (service overload)", () => {
     ]);
   });
 
+  it("passes explicit shared source kind through the native boundary", async () => {
+    let kind: string | undefined;
+    const service: SiaNativeStreamService<PinnedObject> = {
+      isAvailable: () => Promise.resolve(true),
+      resolve: (src, _signal, sourceKind) => {
+        kind = sourceKind;
+        return Promise.resolve({ key: src });
+      },
+      session: () => ({
+        url: () =>
+          Promise.resolve({ release: () => undefined, url: STREAM_URL }),
+      }),
+    };
+    const provider = createSiaNativeStreamProvider(service);
+    await provider.open("a".repeat(64), {
+      signal: new AbortController().signal,
+      sourceKind: "shared",
+    });
+    expect(kind).toBe("shared");
+  });
+
   it("keeps dependency callbacks when the object also has service-shaped methods", async () => {
     const calls: string[] = [];
     const dependencies: Pick<

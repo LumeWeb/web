@@ -1,6 +1,9 @@
 /* oxlint-disable perfectionist/sort-objects */
 import { describe, expect, it, vi } from "vitest";
-import { createSiaStreamService } from "../sia-stream-service.ts";
+import {
+  createSiaStreamService,
+  resolveSiaStreamSource,
+} from "../sia-stream-service.ts";
 
 interface ProcessLike {
   off: (
@@ -59,6 +62,17 @@ vi.mock("@siafoundation/sia-storage", () => ({
 }));
 
 describe("createSiaStreamService", () => {
+  it("uses the explicit source kind for bare object keys", () => {
+    const key = "a".repeat(64);
+    expect(resolveSiaStreamSource(key, "shared")).toEqual({
+      objectKey: key,
+      shared: true,
+    });
+    expect(resolveSiaStreamSource(key, "app")).toEqual({
+      objectKey: key,
+      shared: false,
+    });
+  });
   it("prepares once and shares the terminal availability result", async () => {
     let finish!: (value: boolean) => void;
     const enable = vi.fn(

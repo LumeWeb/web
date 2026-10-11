@@ -5,6 +5,7 @@
 import {
   type SiaNativeStream,
   type SiaNativeStreamProvider,
+  type SiaNativeStreamSourceKind,
   SiaNativeStreamUnavailableError,
 } from "./native-stream-provider.ts";
 import {
@@ -20,6 +21,8 @@ export interface ServiceWorkerBackendHooks {
 export interface ServiceWorkerLoadOptions {
   mimeType?: string;
   name?: string;
+  /** Explicitly identifies the auth context for a bare object key. */
+  sourceKind?: SiaNativeStreamSourceKind;
   onTelemetry?: SiaTransportTelemetryCallback;
 }
 
@@ -121,6 +124,7 @@ export class ServiceWorkerBackend {
         mimeType: options.mimeType,
         name: options.name,
         onProgress,
+        sourceKind: options.sourceKind,
         onStatus,
         signal,
       });
