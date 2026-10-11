@@ -134,6 +134,27 @@ describe("preparingDecision (historical source-opening rule)", () => {
     ).toEqual({ show: false });
   });
 
+  it("ends the preparing phase when a terminal media error is present", () => {
+    const base = emptyPlaybackFacts();
+    const facts = {
+      ...base,
+      error: { ...base.error, present: true },
+    };
+    expect(
+      preparingFactsFromPlayback(facts, true, false, recovery()),
+    ).toMatchObject({ sourceUsable: true });
+    expect(
+      preparingDecision(
+        decide({
+          buffering: true,
+          paused: true,
+          playRequested: true,
+          sourceUsable: true,
+        }),
+      ),
+    ).toEqual({ show: false });
+  });
+
   it("labels a play requested while still buffering as preparing", () => {
     expect(
       preparingDecision(
