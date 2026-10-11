@@ -85,22 +85,13 @@
   }
 }
 
-/* ── ErrorDialog primary-button contrast fallback ─────────────────────────
-   Video.js derives the primary button's label color from
-   `--media-accent-contrast-color` = `contrast-color(...)` of the accent. The
-   demo's video accent is white (`oklch(1 0 0)`), so a supporting engine
-   resolves the label to black on the white accent, already correct. The
-   dialog popup text itself is white, so in an engine where `contrast-color()`
-   cannot resolve, that `color` declaration becomes invalid-at-computed-value
-   and the button inherits the white popup text (white label on the white
-   accent). This unlayered fallback pins the label explicitly dark for the
-   white accent, but only inside `@supports not (color: contrast-color(...))`
-   so engines that support `contrast-color()` (current Chrome included) are
-   byte-for-byte unchanged. `.media-button--primary` alone is (0,2,0); the
-   `media-error-dialog` element makes this (0,2,1), so it beats the skin rule
-   even unlayered. */
-@supports not (color: contrast-color(white)) {
-  .media-default-skin media-error-dialog .media-button--primary {
-    color: #000;
-  }
+/* ── ErrorDialog primary-button contrast ───────────────────────────────────
+   The dialog uses a white accent for its primary action. Video.js normally
+   derives the label from `contrast-color()`, but that custom-property-driven
+   value can still resolve to the dialog's white text in supported engines.
+   Pin the label to a dark color at the dialog boundary so the action remains
+   readable regardless of the browser's contrast-color implementation.
+   The dialog element adds specificity over the skin's button rule. */
+.media-default-skin media-error-dialog .media-button--primary {
+  color: #000;
 }
