@@ -16,8 +16,8 @@
  * - `preparingBuffering`, no buffered range yet = below HAVE_FUTURE_DATA.
  * - `preparingRecoveryRepair`, a silent non-resuming recovery repair
  *   (`wantsPlay: false`) is re-attaching the same source; it stays silent.
- * - `preparingSourceUsable`, seekable timeline, known duration, or started
- *   playback = the source reached metadata/canplay.
+ * - `preparingSourceUsable`, seekable timeline, known duration, started
+ *   playback, or a terminal media error = the opening phase is over.
  * - `preparingFactsFromPlayback`, folds those plus the local
  *   `playRequested` flag and the pending autoplay intent into the decision's
  *   `PreparingFacts`; either play intent lights the overlay.
@@ -81,6 +81,8 @@ export function preparingBuffering(facts: PlaybackFacts): boolean {
 export function preparingDecision(facts: PreparingFacts): PreparingDecision {
   // The source is usable: a reload is a seek or recovery, carried by the
   // native loading spinner.
+  // A terminal media error ends source opening too; do not leave the
+  // preparing overlay underneath the media error dialog.
   if (facts.sourceUsable) return { show: false };
   // No stage-click gesture and no pending autoplay intent: wait silently for
   // an explicit play.
@@ -109,7 +111,7 @@ export function preparingFactsFromPlayback(
     paused: facts.playback.paused,
     playRequested,
     recoveryRepair: preparingRecoveryRepair(recovery),
-    sourceUsable: preparingSourceUsable(facts),
+    sourceUsable: preparingSourceUsable(facts) || facts.error.present,
   };
 }
 
