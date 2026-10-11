@@ -2789,7 +2789,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       src: this.#src,
       type: MainToWorkerMessageType.SOURCE as MainToWorkerMessageType.SOURCE,
     };
-    if (attachOk) this.#post(message);
+    if (attachOk || this.#mediaWorkerBackend.ready) this.#post(message);
     else this.#send(message);
   }
 
