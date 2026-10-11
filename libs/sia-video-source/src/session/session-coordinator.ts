@@ -246,6 +246,8 @@ export interface SessionHandshake {
   readonly log?: WorkerLogLevel;
   /** Decrypted app-key seed of the active connection, or null until one is validated. */
   readonly seed?: null | Uint8Array;
+  /** Updates the worker LOG threshold without renewing the media session. */
+  setLogLevel?(level?: WorkerLogLevel): void;
   /** Decrypted sharing-key seed of the active connection, or null until one is validated. */
   readonly sharingSeed?: null | Uint8Array;
 }
@@ -405,6 +407,9 @@ export class WorkerComposition implements SessionCoordinator {
           });
           return;
         }
+        case MainToWorkerMessageType.LOG_LEVEL:
+          this.#handshake.setLogLevel?.(message.level);
+          return;
         case MainToWorkerMessageType.PLAY:
           this.#playRequested = true;
           this.#startStreaming();
@@ -964,6 +969,10 @@ export function createSessionHandshake(): SessionHandshake {
 
     get seed(): null | Uint8Array {
       return seed;
+    },
+
+    setLogLevel(level?: WorkerLogLevel): void {
+      log = level;
     },
 
     get sharingSeed(): null | Uint8Array {

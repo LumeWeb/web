@@ -485,6 +485,19 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   set logger(value: Logger | undefined) {
     this.#logger = value ?? createConsoleLogger();
   }
+  /**
+   * Updates the worker's forwarding threshold on the live connection. Unlike
+   * workerConfig this is intentionally not a handshake setting: while HELLO /
+   * ATTACH is pending it is queued and the latest value is released after
+   * ATTACH_OK, and an established session receives one LOG_LEVEL message.
+   */
+  setWorkerLogLevel(level: LogLevelFilter = this.#logger.level): void {
+    const threshold = logThresholdFor(level);
+    this.#send({
+      ...(threshold === undefined ? {} : { level: threshold }),
+      type: MainToWorkerMessageType.LOG_LEVEL,
+    });
+  }
   /** Declared content type for the current source; sent with every `SOURCE`. */
   get mimeType(): string | undefined {
     return this.#mimeType;
@@ -1630,6 +1643,14 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // scrubbed during a reload), only the LATEST survives: an earlier seek in the
   // same window was superseded and replaying it would make the worker seek to
   // a stale position before the intended target.
+  #flushBufferedLogLevel(pending: MainToWorkerMessage[]): void {
+    let latest: Extract<MainToWorkerMessage, { type: MainToWorkerMessageType.LOG_LEVEL }> | undefined;
+    for (const message of pending) {
+      if (message.type === MainToWorkerMessageType.LOG_LEVEL) latest = message;
+    }
+    if (latest) this.#post(latest);
+  }
+
   #flushBufferedSeek(pending: MainToWorkerMessage[]): void {
     const requestId = this.#requestId ?? nextRequestId();
     let lastSeek:
@@ -1977,6 +1998,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
           // scoped to THIS load's request id, never the superseded session's.
           this.#sendSource(true);
           const pending = this.#mediaWorkerBackend.markReady();
+          this.#flushBufferedLogLevel(pending);
           // Release the ONE surviving intent of the handshake window: a user
           // SEEK, rebased onto the fresh load. PLAY is never replayed from the
           // buffer (it is re-stated below from the machine's current choice),
@@ -1994,8 +2016,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
             });
           }
         } else {
-          // With no source to replay, the session is simply ready.
-          this.#mediaWorkerBackend.markReady();
+          // With no source to replay, the session is simply ready. Dynamic
+          // log-level changes still cross this boundary exactly once.
+          const pending = this.#mediaWorkerBackend.markReady();
+          this.#flushBufferedLogLevel(pending);
         }
         return;
       case WorkerToMainMessageType.CHUNK:

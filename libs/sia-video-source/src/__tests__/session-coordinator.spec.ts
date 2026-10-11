@@ -27,6 +27,7 @@ import {
   createSessionHandshake,
   type SessionCoordinator,
   type SessionCoordinatorDeps,
+  type SessionHandshake,
   type SinkFactoryContext,
 } from '../session/session-coordinator.ts';
 import type { AppendSink, AppendUnit } from '../sink/append-sink.ts';
@@ -182,6 +183,7 @@ class FakePlayback implements MediaPlayback {
 function makeDriver(options: {
   capabilities?: PlaybackCapabilities;
   createSource?: (src: string) => Promise<ByteSource>;
+  handshake?: SessionHandshake;
   onPlayhead?: (timeSeconds: number) => void;
   pipeline?: FakeLoadPipeline;
   sinkFactory?: (context: SinkFactoryContext) => AppendSink;
@@ -202,6 +204,7 @@ function makeDriver(options: {
   const deps: SessionCoordinatorDeps = {
     capabilities: options.capabilities ?? permissiveCapabilities(),
     createSource,
+    handshake: options.handshake,
     loadPipeline: pipeline,
     onPlayhead: options.onPlayhead,
     post: (message) => messages.push(message),
@@ -260,6 +263,18 @@ async function waitForMessage(driver: Driver, type: WorkerToMainMessage['type'])
 }
 
 describe('SessionCoordinator (WorkerComposition adapter)', () => {
+  it('applies LOG_LEVEL live while HELLO/ATTACH is pending without replaying media', async () => {
+    const handshake = createSessionHandshake();
+    const driver = makeDriver({ handshake });
+    await driver.say({ requestId: 1, type: MainToWorkerMessageType.HELLO });
+    await driver.say({ level: 'debug', type: MainToWorkerMessageType.LOG_LEVEL });
+    await driver.say({ level: 'warn', type: MainToWorkerMessageType.LOG_LEVEL });
+    await driver.say({ requestId: 2, type: MainToWorkerMessageType.ATTACH });
+    expect(driver.message(WorkerToMainMessageType.ATTACH_OK)).toHaveLength(1);
+    expect(handshake.log).toBe('warn');
+    expect(driver.pipeline.calls).toHaveLength(0);
+  });
+
   it('answers HELLO and ATTACH, then SOURCE_OK carries exactly the ready-result facts', async () => {
     const driver = makeDriver();
     driver.pipeline.results.push(readyLoad());

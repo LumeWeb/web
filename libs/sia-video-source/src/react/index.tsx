@@ -259,6 +259,7 @@ export const SiaVideo = forwardRef<HTMLVideoElement, SiaVideoProps>(
       // from its `logger.level` for the worker's HELLO threshold and forwards
       // worker events through; swapping it per-render needs no attach.
       media.logger = logger;
+      media.setWorkerLogLevel((logger ?? media.logger).level);
       media.onTransportTelemetry = onTransportTelemetry;
       // Source assignment starts playback, so keep it after every transport and
       // worker setting above has reached the persistent host instance.
