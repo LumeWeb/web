@@ -7,6 +7,7 @@ import {
 } from "../native-stream-provider.ts";
 import {
   FORCED_SERVICE_WORKER_NO_PROVIDER,
+  siaLoadChange,
   SiaVideoSource,
 } from "../sia-video-source.ts";
 import { nullLogger } from "../log/logger.ts";
@@ -205,6 +206,23 @@ describe("forced service-worker playback", () => {
 
     expect(host.error).toBeNull();
     expect(target.src).toBe("https://stream.example/abc123");
+    host.destroy();
+  });
+
+  it("announces native acquisition as an accepted load for host autoplay", async () => {
+    const fake = fakeProvider();
+    const { host } = forcedHost({ nativeStreamProvider: fake.provider });
+    const accepted: boolean[] = [];
+    host.addEventListener(siaLoadChange, (event: Event) => {
+      accepted.push(
+        (event as CustomEvent<{ accepted: boolean }>).detail.accepted,
+      );
+    });
+
+    host.src = "abc123";
+    await flush();
+
+    expect(accepted).toEqual([true]);
     host.destroy();
   });
 
