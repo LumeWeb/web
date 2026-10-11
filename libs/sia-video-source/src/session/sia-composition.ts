@@ -191,7 +191,7 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
   const byteSourceOptions: SiaByteSourceFactoryOptions | undefined = onMilestone
     ? { ...byteSource, onMilestone }
     : byteSource;
-  const createSource: (src: string, requestId?: null | RequestId) => Promise<ByteSource> = deps.createSdk
+  const createSource: (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared') => Promise<ByteSource> = deps.createSdk
     ? createLazySiaByteSourceFactory({ byteSource: byteSourceOptions, createSdk: deps.createSdk, handshake, logSink })
     : createSiaByteSourceFactory(sdk!, byteSourceOptions);
   // Worker MSE is used only when the runtime can construct it in a dedicated
@@ -398,7 +398,7 @@ function createLazySiaByteSourceFactory(deps: {
   ) => Promise<SiaByteSourceSdk>;
   readonly handshake: Pick<SessionHandshake, 'config' | 'log' | 'seed' | 'sharingSeed'>;
   readonly logSink?: WorkerLogSink;
-}): (src: string, requestId?: null | RequestId) => Promise<ByteSource> {
+}): (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared') => Promise<ByteSource> {
   const { byteSource, createSdk, handshake, logSink } = deps;
   let cached: null | {
     config: undefined | WorkerConfig;
@@ -407,7 +407,7 @@ function createLazySiaByteSourceFactory(deps: {
     sharingSeed: null | Uint8Array;
   } = null;
 
-  return async (src: string, requestId?: null | RequestId): Promise<ByteSource> => {
+  return async (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared'): Promise<ByteSource> => {
     const config = handshake.config;
     const seed = handshake.seed ?? null;
     const sharingSeed = handshake.sharingSeed ?? null;
@@ -441,7 +441,7 @@ function createLazySiaByteSourceFactory(deps: {
     }
     // The SOURCE requestId travels into the per-load source so its milestones
     // keep the owning load's identity even though the SDK is connection-scoped.
-    return createSiaByteSourceFactory(sdk, byteSource)(src, requestId);
+    return createSiaByteSourceFactory(sdk, byteSource)(src, requestId, sourceKind);
   };
 }
 

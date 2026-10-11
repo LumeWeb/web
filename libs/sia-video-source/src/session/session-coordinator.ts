@@ -161,7 +161,7 @@ export interface SessionCoordinatorDeps {
    * owning SOURCE `requestId` is supplied (null before any load) so
    * request-scoped reader milestones the source emits pick up their load.
    */
-  readonly createSource: (src: string, requestId?: null | RequestId) => Promise<ByteSource>;
+  readonly createSource: (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared') => Promise<ByteSource>;
   /** Handshake for `HELLO`/`APP_KEY` (default: `createSessionHandshake()`). */
   readonly handshake?: SessionHandshake;
   /**
@@ -300,7 +300,7 @@ export class WorkerComposition implements SessionCoordinator {
   }
 
   readonly #capabilities: PlaybackCapabilities;
-  readonly #createSource: (src: string, requestId?: null | RequestId) => Promise<ByteSource>;
+  readonly #createSource: (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared') => Promise<ByteSource>;
   #destroyed = false;
   readonly #errorReporter: ErrorReporter;
   readonly #handshake: SessionHandshake;
@@ -421,7 +421,7 @@ export class WorkerComposition implements SessionCoordinator {
           this.#handleSeek(message.time);
           return;
         case MainToWorkerMessageType.SOURCE:
-          await this.#handleSource(message.requestId, message.src, message.preload);
+          await this.#handleSource(message.requestId, message.src, message.preload, message.sourceKind);
           return;
       }
     } catch (error) {
@@ -510,6 +510,7 @@ export class WorkerComposition implements SessionCoordinator {
     requestId: RequestId,
     src: string,
     preload: 'auto' | 'metadata' | 'none' | undefined,
+    sourceKind?: 'app' | 'shared',
   ): Promise<void> {
     const loadGeneration = ++this.#loadGeneration;
     // Play intent is scoped to ONE load attempt (matches the current worker):
@@ -552,7 +553,7 @@ export class WorkerComposition implements SessionCoordinator {
     try {
       // The new SOURCE's request id is threaded into the byte-source factory
       // so reader/source milestones the load emits carry their owning request.
-      source = await this.#createSource(src, requestId);
+      source = await this.#createSource(src, requestId, sourceKind);
     } catch (error) {
       if (this.#destroyed || loadGeneration !== this.#loadGeneration) {
         // A stale creation releases its own abort signal and posts nothing.

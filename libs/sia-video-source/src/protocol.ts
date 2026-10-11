@@ -149,6 +149,8 @@ export type MainToWorkerMessage =
        * opaque wire content, so no message-shape distinction exists.
        */
       readonly src: string;
+      /** Explicit auth/source kind for bare keys; share URLs remain self-describing. */
+      readonly sourceKind?: 'app' | 'shared';
       readonly type: MainToWorkerMessageType.SOURCE;
     }
   | {

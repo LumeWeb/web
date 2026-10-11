@@ -81,6 +81,8 @@ export interface SiaByteSourceOptions {
  */
 export interface SiaByteSourceSdk extends SiaSdkLike {
   object(key: string): Promise<SiaObjectLike>;
+  /** Resolves a bare key through the sharing-key route when available. */
+  objectFromSharedKey?(key: string): Promise<SiaObjectLike>;
   objectFromShareUrl?(shareUrl: string): Promise<SiaObjectLike>;
 }
 
@@ -238,7 +240,7 @@ export class SiaByteSource implements ByteSource {
 export function createSiaByteSourceFactory(
   sdk: SiaByteSourceSdk,
   options: SiaByteSourceFactoryOptions = {},
-): (src: string, requestId?: null | RequestId) => Promise<ByteSource> {
+): (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared') => Promise<ByteSource> {
   // One shared exact-window cache per factory, so every source it creates
   // replays already-downloaded windows across loads (like the worker's
   // per-core cache). An explicit caller-supplied cache still wins. One shared
@@ -247,8 +249,8 @@ export function createSiaByteSourceFactory(
   const cache = options.cache ?? new LruChunkCache();
   const policy = options.policy ?? createSiaTransportPolicy();
   const onMilestone = options.onMilestone;
-  return async (src: string, requestId?: null | RequestId): Promise<ByteSource> => {
-    const object = await resolveSiaObject(sdk, src);
+  return async (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared'): Promise<ByteSource> => {
+    const object = await resolveSiaObject(sdk, src, sourceKind);
     // Emit only on successful resolution — a rejection already propagated
     // above. `share` is a plain boolean (`isSiaShareUrl`): the share URL
     // string itself embeds the object's decryption key and must NEVER appear
@@ -256,14 +258,20 @@ export function createSiaByteSourceFactory(
     // owning SOURCE requestId rides the milestone (null when the factory is
     // driven without one) so `object.resolved` keeps its load affiliation.
     if (onMilestone !== undefined) {
-      onMilestone(workerLogEventName.objectResolved, requestId ?? null, { share: isSiaShareUrl(src), size: objectSize(object) });
+      onMilestone(workerLogEventName.objectResolved, requestId ?? null, { share: sourceKind === 'shared' || isSiaShareUrl(src), size: objectSize(object) });
     }
     return new SiaByteSource({ ...options, cache, object, policy, requestId, sdk });
   };
 }
 
-async function resolveSiaObject(sdk: SiaByteSourceSdk, src: string): Promise<SiaObjectLike> {
-  if (!isSiaShareUrl(src)) return sdk.object(src);
+async function resolveSiaObject(sdk: SiaByteSourceSdk, src: string, sourceKind?: 'app' | 'shared'): Promise<SiaObjectLike> {
+  if (!isSiaShareUrl(src)) {
+    if (sourceKind === 'shared') {
+      if (!sdk.objectFromSharedKey) throw new Error('the injected Sia SDK does not support shared object keys');
+      return sdk.objectFromSharedKey(src);
+    }
+    return sdk.object(src);
+  }
   const share = parseSiaShareUrl(src);
   if (!sdk.objectFromShareUrl) {
     throw new Error('the injected Sia SDK does not support shared-object URLs (inject objectFromShareUrl or a keyless SharedSdk adapter)');
