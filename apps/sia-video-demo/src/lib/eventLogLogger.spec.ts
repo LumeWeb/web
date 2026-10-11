@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { useEventLogStore } from "../stores/eventLog";
-import { createEventLogLogger } from "./eventLogLogger";
+import {
+  createEventLogLogger,
+  eventLogLevelForVerbose,
+  eventLogLogger,
+} from "./eventLogLogger";
 
 /**
  * Node unit tests for the demo's typed `Logger` sink. The logger forwards the
@@ -123,5 +127,55 @@ describe("createEventLogLogger", () => {
     const joined = messages.join("\n");
     expect(joined).not.toContain(seed);
     expect(joined).not.toContain("sharingKeyHex");
+  });
+});
+
+describe("eventLogLevelForVerbose", () => {
+  it("maps the verbose toggle onto the worker/host log threshold", () => {
+    expect(eventLogLevelForVerbose(false)).toBe("info");
+    expect(eventLogLevelForVerbose(true)).toBe("debug");
+  });
+});
+
+describe("eventLogLogger (demo singleton)", () => {
+  beforeEach(() => {
+    useEventLogStore.setState({ lines: [], verbose: false });
+  });
+
+  it("reports the info threshold while verbose is off and debug while on", () => {
+    useEventLogStore.getState().setVerbose(false);
+    expect(eventLogLogger.level).toBe("info");
+    useEventLogStore.getState().setVerbose(true);
+    expect(eventLogLogger.level).toBe("debug");
+  });
+
+  it("records debug diagnostics only while verbose is on", () => {
+    eventLogLogger.child("worker").debug("read.window-open");
+    expect(useEventLogStore.getState().lines).toEqual([]);
+    useEventLogStore.getState().setVerbose(true);
+    eventLogLogger.child("worker").debug("read.window-open");
+    const lines = useEventLogStore.getState().lines;
+    expect(lines.map((line) => [line.level, line.message])).toEqual([
+      ["debug", "[worker] read.window-open"],
+    ]);
+  });
+
+  it("stops recording new debug lines when verbose is switched off again", () => {
+    useEventLogStore.getState().setVerbose(true);
+    eventLogLogger.child("worker").debug("bytes.read");
+    useEventLogStore.getState().setVerbose(false);
+    eventLogLogger.child("worker").debug("bytes.read again");
+    const lines = useEventLogStore.getState().lines;
+    expect(lines.map((line) => line.message)).toEqual(["[worker] bytes.read"]);
+  });
+
+  it("keeps one live threshold across the singleton and its child scopes", () => {
+    // The wrapper re-applies `media.logger = logger` on every render: the host
+    // re-reads the live `.level` at each (re)attach, so the singleton and the
+    // child scopes it hands out must track the same toggle.
+    const child = eventLogLogger.child("worker");
+    useEventLogStore.getState().setVerbose(true);
+    expect(eventLogLogger.level).toBe("debug");
+    expect(child.level).toBe("debug");
   });
 });
