@@ -15,6 +15,8 @@ import type { SiaPlaybackBackend } from "@lumeweb/sia-video-source";
 export interface DeveloperOptionsView {
   /** The native-disable toggle state (the checkbox's `checked`). */
   readonly disableNativePlayback: boolean;
+  /** The worker-disable toggle state (the checkbox's `checked`). */
+  readonly disableWorkerPlayback: boolean;
   /** The deterministic backend the current options produce. */
   readonly effectiveBackend: SiaPlaybackBackend;
 }
@@ -28,12 +30,21 @@ export function DeveloperOptionsPanel() {
     useDeveloperOptionsStore,
     (s) => s.disableNativePlayback,
   );
+  const disableWorkerPlayback = useStore(
+    useDeveloperOptionsStore,
+    (s) => s.disableWorkerPlayback,
+  );
   const setDisableNativePlayback = useStore(
     useDeveloperOptionsStore,
     (s) => s.setDisableNativePlayback,
   );
+  const setDisableWorkerPlayback = useStore(
+    useDeveloperOptionsStore,
+    (s) => s.setDisableWorkerPlayback,
+  );
   const view = developerOptionsView({
     disableNativePlayback,
+    disableWorkerPlayback,
   });
 
   return (
@@ -46,6 +57,14 @@ export function DeveloperOptionsPanel() {
           type="checkbox"
         />
         Disable native (service-worker) playback
+      </label>
+      <label className="flex cursor-pointer items-center gap-2 text-[13px]">
+        <input
+          checked={view.disableWorkerPlayback}
+          onChange={(event) => setDisableWorkerPlayback(event.target.checked)}
+          type="checkbox"
+        />
+        Disable web-worker playback
       </label>
       <p className="text-fg-muted m-1 mb-2 text-xs">
         Effective playback backend: {view.effectiveBackend}
@@ -63,6 +82,7 @@ export function developerOptionsView(
 ): DeveloperOptionsView {
   return {
     disableNativePlayback: options.disableNativePlayback,
+    disableWorkerPlayback: options.disableWorkerPlayback,
     effectiveBackend: resolvePlaybackBackend(options),
   };
 }

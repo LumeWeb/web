@@ -159,6 +159,10 @@ export function SiaVideoMount({
     useDeveloperOptionsStore,
     (s) => s.disableNativePlayback,
   );
+  const disableWorkerPlayback = useStore(
+    useDeveloperOptionsStore,
+    (s) => s.disableWorkerPlayback,
+  );
   // Re-render the persistent SiaVideo wrapper when verbose changes. Its
   // per-render sync reads the singleton's live level and calls
   // setWorkerLogLevel(), which sends LOG_LEVEL in place (never reloadKey or a
@@ -191,10 +195,10 @@ export function SiaVideoMount({
   }, []);
   const backend = useMemo(
     () =>
-      preparationFailed
+      preparationFailed && !disableWorkerPlayback
         ? SIA_PLAYBACK_BACKENDS.MEDIA_WORKER
-        : resolvePlaybackBackend({ disableNativePlayback }),
-    [disableNativePlayback, preparationFailed],
+        : resolvePlaybackBackend({ disableNativePlayback, disableWorkerPlayback }),
+    [disableNativePlayback, disableWorkerPlayback, preparationFailed],
   );
   const mount = useMemo(
     () =>

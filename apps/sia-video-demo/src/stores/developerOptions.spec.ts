@@ -12,6 +12,7 @@ describe("developer options store (centralized developer-mode configuration)", (
   beforeEach(() => {
     // Restore the documented defaults between tests (single module-level store).
     useDeveloperOptionsStore.getState().setDisableNativePlayback(false);
+    useDeveloperOptionsStore.getState().setDisableWorkerPlayback(false);
   });
 
   it("defaults to native playback enabled", () => {
@@ -23,17 +24,29 @@ describe("developer options store (centralized developer-mode configuration)", (
     useDeveloperOptionsStore.getState().setDisableNativePlayback(true);
     const state = useDeveloperOptionsStore.getState();
     expect(state.disableNativePlayback).toBe(true);
+    expect(state.disableWorkerPlayback).toBe(false);
+  });
+
+  it("disables native playback when worker playback is enabled", () => {
+    useDeveloperOptionsStore.getState().setDisableWorkerPlayback(true);
+    const state = useDeveloperOptionsStore.getState();
+    expect(state.disableWorkerPlayback).toBe(true);
+    expect(state.disableNativePlayback).toBe(false);
   });
 });
 
 /** The store's data fields form the single options object every consumer reads. */
-const OPTIONS_FIELDS: (keyof DeveloperOptions)[] = ["disableNativePlayback"];
+const OPTIONS_FIELDS: (keyof DeveloperOptions)[] = [
+  "disableNativePlayback",
+  "disableWorkerPlayback",
+];
 
 describe("developer options object shape", () => {
   it("carries exactly the centralized option fields", () => {
     const state = useDeveloperOptionsStore.getState();
     const options: DeveloperOptions = {
       disableNativePlayback: state.disableNativePlayback,
+      disableWorkerPlayback: state.disableWorkerPlayback,
     };
     expect(Object.keys(options).sort()).toEqual([...OPTIONS_FIELDS].sort());
   });

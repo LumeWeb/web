@@ -6,8 +6,9 @@
  *   stream first when the demo stream service is available, media worker
  *   fallback otherwise.
  * - Native disabled: the deterministic WORKER-ONLY choice
- *   (`SIA_PLAYBACK_BACKENDS.MEDIA_WORKER`), independent of any other option
- *   value.
+ *   (`SIA_PLAYBACK_BACKENDS.MEDIA_WORKER`).
+ * - Worker disabled: the explicit native service-worker choice, so AUTO cannot
+ *   fall back to a worker.
  */
 
 import {
@@ -17,9 +18,12 @@ import {
 import type { DeveloperOptions } from "../stores/developerOptions";
 
 export function resolvePlaybackBackend(
-  options: Pick<DeveloperOptions, "disableNativePlayback">,
+  options: Pick<
+    DeveloperOptions,
+    "disableNativePlayback" | "disableWorkerPlayback"
+  >,
 ): SiaPlaybackBackend {
-  return options.disableNativePlayback
-    ? SIA_PLAYBACK_BACKENDS.MEDIA_WORKER
-    : SIA_PLAYBACK_BACKENDS.AUTO;
+  if (options.disableNativePlayback) return SIA_PLAYBACK_BACKENDS.MEDIA_WORKER;
+  if (options.disableWorkerPlayback) return SIA_PLAYBACK_BACKENDS.SERVICE_WORKER;
+  return SIA_PLAYBACK_BACKENDS.AUTO;
 }
