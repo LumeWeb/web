@@ -4,11 +4,12 @@
  * discovery, codec-qualified MIME, duration, and the CMAF fragment stream all
  * come from mediabunny; this module only adapts the transport
  * (`mediaLibrarySource`) and prepares the conversion against the browser's MSE
- * before the load is accepted.
+ * before the load is accepted. Audio is optional: video-only inputs produce a
+ * video-only CMAF stream, while inputs without video remain unsupported.
  *
  * The conversion is initialized while the object is inspected, never deferred
- * to playback start: by the time the load is accepted, the chosen video and
- * audio tracks have already been validated for forced-copy into CMAF, so a
+ * to playback start: by the time the load is accepted, the chosen video (and
+ * optional audio) tracks have already been validated for forced-copy into CMAF, so a
  * source a copy cannot support is rejected up front with a stable reason code.
  *
  * Playback is restartable: `restart(seconds)` cancels the current conversion
@@ -219,7 +220,7 @@ interface ProducerGate {
 /**
  * Discovers and validates one load through a shared mediabunny `Input` and
  * prepares its conversion before reporting `ready`. Returns `unsupported`
- * with a stable reason for an object with no video or audio track, with
+ * with a stable reason for an object with no video track, with
  * codecs the MSE rejects, or with tracks a forced copy cannot place in CMAF;
  * `cancelled` when the reads were superseded or aborted; and `ready` with a
  * runnable playback otherwise.
@@ -317,7 +318,7 @@ function copyBytes(data: Uint8Array): Uint8Array {
  */
 function createMediaPlayback(options: {
   readonly assembly: FragmentAssembly;
-  readonly audioTrack: InputAudioTrack;
+  readonly audioTrack: InputAudioTrack | null;
   readonly initial: ConversionRun;
   readonly input: Input;
   readonly producerGate: ProducerGate;
@@ -544,9 +545,11 @@ function isCancelledError(error: unknown): boolean {
   );
 }
 
-/** `video/mp4` MIME carrying the chosen video and audio codec parameters. */
-function mseMime(videoCodec: string, audioCodec: string): string {
-  return `video/mp4; codecs="${videoCodec},${audioCodec}"`;
+/** MSE MIME carrying the chosen video codec and optional audio codec. */
+function mseMime(videoCodec: string, audioCodec?: string): string {
+  return audioCodec === undefined
+    ? `video/mp4; codecs="${videoCodec}"`
+    : `video/mp4; codecs="${videoCodec},${audioCodec}"`;
 }
 
 /** Derives a run's origin from its ordinal: the first run is the initial one. */
@@ -564,7 +567,7 @@ function originForRun(run: number): ConversionRunOrigin {
  */
 async function prepareConversion(options: {
   readonly assembly: FragmentAssembly;
-  readonly audioTrack: InputAudioTrack;
+  readonly audioTrack: InputAudioTrack | null;
   readonly input: Input;
   readonly trimStart?: number;
   readonly videoTrack: InputVideoTrack;
@@ -634,15 +637,21 @@ async function prepareConversion(options: {
     target: new NullTarget(),
   });
 
-  const conversion = await Conversion.init({
-    audio: (track: InputAudioTrack) => (track === audioTrack ? {} : { discard: true }),
-    copy: { mode: 'forced' },
+  // CMAF output is valid with video alone. Omit the audio selector entirely
+  // rather than fabricating silence or asking mediabunny to copy a missing
+  // track; the output then contains only the selected video track.
+  const conversionOptions = {
+    copy: { mode: 'forced' as const },
     input,
     output,
     showWarnings: false,
     trim: trimStart === undefined ? undefined : { start: trimStart },
     video: (track: InputVideoTrack) => (track === videoTrack ? {} : { discard: true }),
-  });
+    ...(audioTrack === null
+      ? {}
+      : { audio: (track: InputAudioTrack) => (track === audioTrack ? {} : { discard: true }) }),
+  };
+  const conversion = await Conversion.init(conversionOptions);
 
   return { conversion, origin: originForRun(run), run, targetSeconds: trimStart };
 }
@@ -662,19 +671,20 @@ async function prepareLoad(
   const videoTracks = tracks.filter((track) => track.isVideoTrack());
   const audioTracks = tracks.filter((track) => track.isAudioTrack());
   if (videoTracks.length === 0) return unsupported('video-track-missing');
-  if (audioTracks.length === 0) return unsupported('audio-track-missing');
-
+  // Audio is optional: a video-only source is a valid playable source and
+  // must not be rejected merely because there is no audio track.
   const videoTrack = await input.getPrimaryVideoTrack();
   if (videoTrack === null) return unsupported('video-track-missing');
   const videoCodec = await videoTrack.getCodecParameterString();
   if (videoCodec === null) return unsupported('video-codec-unknown');
 
-  const audioTrack = await chooseAudioTrack(audioTracks);
-  if (audioTrack === null) return unsupported('audio-codec-unsupported');
-  const audioCodec = await audioTrack.getCodecParameterString();
-  if (audioCodec === null) return unsupported('audio-codec-unsupported');
+  const audioTrack = audioTracks.length === 0 ? null : await chooseAudioTrack(audioTracks);
+  const audioCodec = audioTrack === null ? null : await audioTrack.getCodecParameterString();
+  if (audioTracks.length > 0 && (audioTrack === null || audioCodec === null)) {
+    return unsupported('audio-codec-unsupported');
+  }
 
-  const mime = mseMime(videoCodec, audioCodec);
+  const mime = mseMime(videoCodec, audioCodec ?? undefined);
   if (!capabilities.mseSupported(mime)) return unsupported('mime-unsupported');
 
   const assembly: FragmentAssembly = {
@@ -691,7 +701,7 @@ async function prepareLoad(
 
   const utilisesChosenTracks =
     initial.conversion.utilizedTracks.includes(videoTrack) &&
-    initial.conversion.utilizedTracks.includes(audioTrack);
+    (audioTrack === null || initial.conversion.utilizedTracks.includes(audioTrack));
   if (!initial.conversion.isValid || !utilisesChosenTracks) {
     cancelConversion(initial);
     return unsupported('copy-unavailable');
@@ -712,7 +722,7 @@ async function prepareLoad(
     status: 'ready',
     tracks: [
       { codec: videoCodec, kind: 'video' },
-      { codec: audioCodec, kind: 'audio' },
+      ...(audioCodec === null ? [] : [{ codec: audioCodec, kind: 'audio' as const }]),
     ],
   };
 }
