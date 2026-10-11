@@ -85,13 +85,13 @@
   }
 }
 
-/* ── ErrorDialog primary-button contrast ───────────────────────────────────
-   The dialog uses a white accent for its primary action. Video.js normally
-   derives the label from `contrast-color()`, but that custom-property-driven
-   value can still resolve to the dialog's white text in supported engines.
-   Pin the label to a dark color at the dialog boundary so the action remains
-   readable regardless of the browser's contrast-color implementation.
-   The dialog element adds specificity over the skin's button rule. */
+/* The skin's translucent popup surface makes its inherited white text vanish
+   over a blank video frame. This selector overrides the skin's surface rule. */
+.media-default-skin .media-dialog__popup {
+  background-color: var(--color-canvas-subtle);
+  color: var(--color-fg-default);
+}
+
 .media-default-skin media-error-dialog .media-button--primary {
   color: #000;
 }
