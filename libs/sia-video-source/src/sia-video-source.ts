@@ -1275,6 +1275,12 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         },
         sourceKind: this.#nativeSourceKind,
       })
+      .then(() => {
+        // Native acquisition is the service-worker equivalent of SOURCE_OK:
+        // publish the same accepted boundary so host consumers, including
+        // autoplay, do not wait forever for a worker-only acknowledgement.
+        this.#acceptLoad();
+      })
       .catch((error: unknown) => {
         if (error instanceof ServiceWorkerLoadAbortedError) return;
         if (error instanceof SiaNativeStreamUnavailableError) {
