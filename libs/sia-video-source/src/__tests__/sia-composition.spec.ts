@@ -158,6 +158,26 @@ describe('createSiaByteSourceFactory (real Sia transport)', () => {
     expect(delivered).toEqual(payload.slice(100, 1124));
   });
 
+  it('resolves an explicit shared bare key through the shared SDK route', async () => {
+    const payload = new Uint8Array(1024).fill(3);
+    const calls: string[] = [];
+    const object = { size: payload.byteLength } as unknown as SiaObjectLike;
+    const sdk = {
+      object: async (key: string) => {
+        calls.push(`app:${key}`);
+        return object;
+      },
+      objectFromSharedKey: async (key: string) => {
+        calls.push(`shared:${key}`);
+        return object;
+      },
+      download: () => new ReadableStream<Uint8Array>(),
+    } as unknown as SiaByteSourceSdk;
+    const factory = createSiaByteSourceFactory(sdk);
+    await factory('shared-object-key', undefined, 'shared');
+    expect(calls).toEqual(['shared:shared-object-key']);
+  });
+
   it('resolves a sia:// share URL through sdk.objectFromShareUrl(fetchForm)', async () => {
     const payload = new Uint8Array(4096).fill(7);
     const { objectKeys, sdk, shareForms } = fakeSiaSdk(payload, { shared: true });

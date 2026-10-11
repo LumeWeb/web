@@ -47,6 +47,8 @@ export type SiaVideoSdk = {
    */
   dispose?: () => Promise<void> | void;
   object(key: string): Promise<SiaObjectLike>;
+  /** Resolves a bare key through the sharing-key SDK route. */
+  objectFromSharedKey?(key: string): Promise<SiaObjectLike>;
   /** Resolves a `sia://` share URL (see `share-url.ts`) into a playable object. */
   objectFromShareUrl?(shareUrl: string): Promise<SiaObjectLike>;
 } & SiaSdkLike;
@@ -363,6 +365,7 @@ function createDualSourceSdk(
       return connectAppKeyRoute().then((sdk) => sdk.download(object, options));
     },
     object: (key) => connectAppKeyRoute().then((sdk) => tagged(sdk, sdk.object(key))),
+    objectFromSharedKey: (key) => connectSharedRoute().then((sdk) => tagged(sdk, sdk.object(key))),
     objectFromShareUrl: (shareUrl) =>
       connectSharedRoute().then((sdk) => tagged(sdk, sdk.object(parseSiaShareUrl(shareUrl).objectKey))),
     [Symbol.dispose]: () => {
@@ -442,6 +445,7 @@ function toSiaVideoSdk(sharedSdk: SharedSdk): SiaVideoSdk {
     dispose: (): Promise<void> | void => wrapped.dispose?.(),
     download: (object, options) => wrapped.download(object, options),
     object: (key) => wrapped.object(key),
+    objectFromSharedKey: (key) => wrapped.object(key),
     objectFromShareUrl: (shareUrl) => wrapped.object(parseSiaShareUrl(shareUrl).objectKey),
   };
 }

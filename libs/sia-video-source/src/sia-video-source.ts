@@ -2827,6 +2827,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       mimeType: this.#mimeType,
       preload: this.#preload || undefined,
       requestId: nextRequestId(),
+      sourceKind: this.#nativeSourceKind,
       src: this.#src,
       type: MainToWorkerMessageType.SOURCE as MainToWorkerMessageType.SOURCE,
     };
