@@ -398,7 +398,6 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       } else {
         this.#activeBackend = SIA_PLAYBACK_BACKENDS.MEDIA_WORKER;
         this.#startWorkerBackend();
-        if (this.#worker) this.#sendSource();
       }
     }
   }
@@ -1142,8 +1141,8 @@ export class SiaVideoSource extends HTMLVideoElementHost {
             this.#serviceWorkerBackend?.detach();
           this.#activeBackend = SIA_PLAYBACK_BACKENDS.MEDIA_WORKER;
           this.#pendingResumePlay = shouldPlay;
-          this.#startWorkerBackend();
-          if (this.#worker) this.#sendSource();
+          if (this.#worker) this.#startHandshake();
+          else this.#startWorkerBackend();
         }
       },
       () => {
@@ -1158,8 +1157,8 @@ export class SiaVideoSource extends HTMLVideoElementHost {
           this.#serviceWorkerBackend?.detach();
         this.#activeBackend = SIA_PLAYBACK_BACKENDS.MEDIA_WORKER;
         this.#pendingResumePlay = shouldPlay;
-        this.#startWorkerBackend();
-        if (this.#worker) this.#sendSource();
+        if (this.#worker) this.#startHandshake();
+        else this.#startWorkerBackend();
       },
     );
   }
@@ -1221,7 +1220,6 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#resetLoadState();
     this.#pendingResumePlay = shouldPlay;
     this.#startWorkerBackend();
-    if (this.#worker && this.#src) this.#sendSource();
   }
 
   #startServiceWorkerSource(src: string): void {
@@ -1977,7 +1975,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
           // atomic — the rebuilt load is on the wire before any buffered intent
           // is re-applied, so the rebased SEEK and the re-stated PLAY below are
           // scoped to THIS load's request id, never the superseded session's.
-          this.#sendSource();
+          this.#sendSource(true);
           const pending = this.#mediaWorkerBackend.markReady();
           // Release the ONE surviving intent of the handshake window: a user
           // SEEK, rebased onto the fresh load. PLAY is never replayed from the
@@ -2773,7 +2771,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // WebKit-prefixed one) is device-too-old and reports the honest `device`
   // error immediately instead of paying a worker roundtrip that can only end
   // in a generic unsupported error.
-  #sendSource(): void {
+  #sendSource(attachOk = false): void {
     const impl = this.#mseSnapshot.impl;
     if (
       impl === mseImplementation.none ||
@@ -2782,15 +2780,17 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       this.#reportError(workerErrorCode.device, "no-mse");
       return;
     }
-    this.#post({
+    const message = {
       // An empty preload reads as "no signal", so the worker is left at its
       // own deferring default rather than promising eager streaming.
       mimeType: this.#mimeType,
       preload: this.#preload || undefined,
       requestId: nextRequestId(),
       src: this.#src,
-      type: MainToWorkerMessageType.SOURCE,
-    });
+      type: MainToWorkerMessageType.SOURCE as MainToWorkerMessageType.SOURCE,
+    };
+    if (attachOk) this.#post(message);
+    else this.#send(message);
   }
 
   // Settles an armed provisional pause confirmation NOW, without waiting for
