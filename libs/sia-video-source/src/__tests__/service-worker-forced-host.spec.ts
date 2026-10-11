@@ -94,7 +94,7 @@ function refusingCreateWorker(): ReturnType<typeof vi.fn> {
 }
 
 describe("forced service-worker playback", () => {
-  it("reloadConfiguration disposes an existing worker without starting a handshake", () => {
+  it("reloadConfiguration disposes the worker without starting a forced service-worker handshake", () => {
     const sent: unknown[] = [];
     let terminated = 0;
     const worker = {
@@ -118,7 +118,13 @@ describe("forced service-worker playback", () => {
     host.reloadConfiguration();
 
     expect(terminated).toBe(1);
-    expect(sent).toHaveLength(1);
+    // Switching away from the media-worker backend owns the teardown. The
+    // forced service-worker backend is native and must not negotiate a new
+    // dedicated-worker session; it does, however, post exactly one DETACH.
+    expect(sent.map((message) => (message as { type: string }).type)).toEqual([
+      "HELLO",
+      "DETACH",
+    ]);
     host.destroy();
   });
 
