@@ -18,10 +18,6 @@ import {
 import { mseAppendFailureKind } from './mse-pipe.ts';
 import { createSiaWorkerComposition, createWorkerMseRoot, emitLog, type WorkerLogSink } from './session/sia-composition.ts';
 import { createSessionHandshake } from './session/session-coordinator.ts';
-import {
-  DEFAULT_SDK_READ_CONCURRENCY,
-  ReadBudget,
-} from './ranged-reader.ts';
 import { createSiaTransportPolicy } from './transport/transport-policy.ts';
 import {
   createDefaultSdk,
@@ -114,15 +110,8 @@ export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = 
   // a log line can never block the wire.
   const logSink: WorkerLogSink = (message) => post(message);
   // The root owns one transport policy: every read gets the policy's stall
-  // timeout and the explicit per-download maxBufferedChunks. A host-injected
-  // `policy` wins wholesale; the host's `budget` only seeds the legacy
-  // download-concurrency budget on the default policy built when no `policy`
-  // is injected (it can never override an injected one).
-  const policy =
-    options.policy ??
-    createSiaTransportPolicy({
-      legacyDownloadBudget: options.budget ?? new ReadBudget(DEFAULT_SDK_READ_CONCURRENCY),
-    });
+  // timeout and the explicit per-download maxBufferedChunks.
+  const policy = options.policy ?? createSiaTransportPolicy();
   const workerMseRoot = createWorkerMseRoot({
     backBufferSeconds: MSE_BACK_BUFFER_SECONDS,
     createMediaSource: options.createMediaSource,
@@ -147,18 +136,10 @@ export function createDefaultWorkerComposition(options: SiaVideoWorkerOptions = 
     post,
   });
   const coordinator = createSiaWorkerComposition({
-    // One shared concurrency permit for every SDK ranged download the
-    // worker's sources open (unless the host injects its own). Without it, a
-    // batch of concurrent library reads opens up to one renter WebTransport
-    // session per read and exhausts the browser's 64 pending-session cap,
-    // failing later reads with `Too many pending WebTransport sessions (64)` —
-    // the same budget the coordinator forwards into each `SiaByteSource` it
-    // creates.
+    // One shared transport policy for every source the worker's composition
+    // creates, so the stall watchdog and per-download maxBufferedChunks apply
+    // consistently to every read.
     byteSource: {
-      // One shared transport policy for every source the worker's
-      // composition creates, so the stall watchdog, the per-download
-      // maxBufferedChunks, and the legacy download-concurrency budget can
-      // never drift apart between reads.
       policy,
       ...(options.cache ? { cache: options.cache } : {}),
     },

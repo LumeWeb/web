@@ -1,7 +1,7 @@
 /**
  * The production composition-root binding: wires the `SessionCoordinator` to
  * the real Sia transport and worker-mode MSE, without rewriting
- * `RangedReader`/`ReadBudget`/`LruChunkCache` or the worker's `MseAppendPipe`
+ * `RangedReader`/`LruChunkCache` or the worker's `MseAppendPipe`
  * internals.
  *
  * The three exported bindings under test:
@@ -31,8 +31,7 @@ import {
   type WorkerToMainMessage,
   WorkerToMainMessageType,
 } from '../protocol.ts';
-import { ReadBudget, type SiaObjectLike } from '../ranged-reader.ts';
-import { createSiaTransportPolicy } from '../transport/transport-policy.ts';
+import { type SiaObjectLike } from '../ranged-reader.ts';
 import { createSiaWorkerComposition } from '../session/sia-composition.ts';
 import {
   defaultSupportsWorkerMse,
@@ -48,7 +47,6 @@ import {
   containsInOrder,
   FakeLoadPipeline,
   FakeMediaPlayback,
-  fakeObject,
   fakeSiaSdk,
   flush,
   permissiveCapabilities,
@@ -227,69 +225,7 @@ describe('createSiaByteSourceFactory (real Sia transport)', () => {
     expect(downloads.filter((offset) => offset === 0)).toHaveLength(1);
   });
 
-  it('shares one dispatch budget across the sources it creates', async () => {
-    const payload = new Uint8Array(4096).map((_, i) => i % 251);
-    // Held SDK: each download records that it opened and stays open until
-    // `release` drains it, so concurrent opens across distinct sources
-    // are observable — the same shape the worker's shared `ReadBudget` relies
-    // on to keep aggregate renter WebTransport session creation under the
-    // browser's 64 pending-session cap.
-    let inflight = 0;
-    let maxInflight = 0;
-    const pending: (() => void)[] = [];
-    const sdk: SiaByteSourceSdk = {
-      download: (_object, options) => {
-        inflight++;
-        maxInflight = Math.max(maxInflight, inflight);
-        const offset = options?.offset ?? 0;
-        const length = options?.length ?? payload.length - offset;
-        return new ReadableStream<Uint8Array>({
-          pull: (controller) =>
-            new Promise<void>((resolve) => {
-              pending.push(() => {
-                controller.enqueue(payload.slice(offset, offset + length));
-                controller.close();
-                inflight--;
-                resolve();
-              });
-            }),
-        });
-      },
-      object: (_key: string): Promise<SiaObjectLike> => Promise.resolve(fakeObject(payload.length)),
-    };
-    const factory = createSiaByteSourceFactory(sdk, {
-      policy: createSiaTransportPolicy({ legacyDownloadBudget: new ReadBudget(1) }),
-    });
-    const first = await factory('a');
-    const second = await factory('b');
 
-    const drain = async (source: ByteSource): Promise<number> => {
-      const chunks: Uint8Array[] = [];
-      for await (const chunk of source.read({ length: 512, offset: 0 }, { loadGeneration: 1 })) {
-        chunks.push(chunk);
-      }
-      return concatBytes(chunks).byteLength;
-    };
-    const firstRead = drain(first);
-    // Let the first read acquire the single permit and open its download before
-    // the second read starts, so the shared budget actually serializes them.
-    await flush();
-    const secondRead = drain(second);
-    await flush();
-
-    // Exactly one SDK download is open at a time even though two distinct
-    // sources created by the same factory read concurrently: the budget is
-    // shared per factory, exactly what the worker wires for real playback.
-    expect(maxInflight).toBe(1);
-
-    pending.shift()?.();
-    await flush();
-    pending.shift()?.();
-    await flush();
-
-    expect(await firstRead).toBe(512);
-    expect(await secondRead).toBe(512);
-  });
 });
 
 describe('createWorkerMseSinkFactory (worker MSE sink)', () => {

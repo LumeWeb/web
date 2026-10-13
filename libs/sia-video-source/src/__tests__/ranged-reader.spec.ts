@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Slab } from '@siafoundation/sia-storage';
-import { isShardShortageError, isTransportReadError, LruChunkCache, RangedReader, ReadBudget, ReadTransportError, type SiaObjectLike, type SiaSdkLike } from '../ranged-reader.ts';
+import { isShardShortageError, isTransportReadError, LruChunkCache, RangedReader, ReadTransportError, type SiaObjectLike, type SiaSdkLike } from '../ranged-reader.ts';
 
 /**
  * SDK that resembles the lazy dual-seed adapter: `download()` returns a
@@ -488,12 +488,10 @@ describe('RangedReader', () => {
 describe('RangedReader deterministic stream cancel on teardown', () => {
   it('cancels the still-open stream and reports exactly once when onChunk throws', async () => {
     const errors: unknown[] = [];
-    const budget = new ReadBudget(1);
     const unhandled = trackUnhandledRejections();
     try {
       const sdk = openPullSdk(PAYLOAD);
       const reader = new RangedReader({
-        budget,
         chunkSize: CHUNK_SIZE,
         object: fakeObject(PAYLOAD.length),
         onChunk: (_bytes, position) => {
@@ -514,8 +512,6 @@ describe('RangedReader deterministic stream cancel on teardown', () => {
       // cancelled at the source — the wasm Download dropped, aborting any
       // leftover slab recovery ahead of the read head.
       expect(sdk.cancelFiredOffsets).toEqual([0]);
-      // The fire-and-forget cancel did not delay the budget permit release.
-      expect(budget.inFlight).toBe(0);
       expect(reader.active).toBe(false);
       expect(unhandled.count()).toBe(0);
     } finally {
@@ -525,10 +521,8 @@ describe('RangedReader deterministic stream cancel on teardown', () => {
 
   it('cancels a stream left open after exact-length completion', async () => {
     const delivered: Delivered[] = [];
-    const budget = new ReadBudget(1);
     const sdk = openPullSdk(PAYLOAD);
     const reader = new RangedReader({
-      budget,
       chunkSize: CHUNK_SIZE,
       object: fakeObject(PAYLOAD.length),
       onChunk: (bytes, position) => delivered.push({ bytes, position }),
@@ -547,7 +541,6 @@ describe('RangedReader deterministic stream cancel on teardown', () => {
     // Even though the read is byte-exact, the open stream is now cancelled
     // (once) rather than dropped.
     expect(sdk.cancelFiredOffsets).toEqual([0]);
-    expect(budget.inFlight).toBe(0);
   });
 });
 
@@ -695,32 +688,6 @@ describe('RangedReader delayed (promise) downloads', () => {
     expect(reader.active).toBe(false);
   });
 
-  it('releases the budget permit when a stale async download is cancelled', async () => {
-    const budget = new ReadBudget(1);
-    const delivered: Delivered[] = [];
-    const sdk = deferredSdk(PAYLOAD);
-    const reader = new RangedReader({
-      budget,
-      chunkSize: CHUNK_SIZE,
-      object: fakeObject(PAYLOAD.length),
-      onChunk: (bytes, position) => delivered.push({ bytes, position }),
-      sdk: sdk.sdk,
-    });
-
-    reader.start();
-    // Let the run acquire its permit and open the held download before the
-    // stop lands, so this exercises the stale-cancel path (not the
-    // abandon-before-download path).
-    await settle();
-    reader.stop();
-    sdk.resolve(0);
-    await settle();
-
-    // The fire-and-forget cancel must not stall the run's unwinding: the
-    // permit is released exactly like a delivered/aborted read.
-    expect(budget.inFlight).toBe(0);
-    expect(sdk.cancelled).toEqual([0]);
-  });
 });
 
 /**

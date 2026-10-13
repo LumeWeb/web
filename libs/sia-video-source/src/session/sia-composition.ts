@@ -358,7 +358,6 @@ export function milestoneLevel(name: string): undefined | WorkerLogLevel {
         name === workerLogEventName.readWindowComplete ||
         name === workerLogEventName.bytesRead ||
         name === workerLogEventName.readRetry ||
-        name === workerLogEventName.readBudgetWait ||
         name === workerLogEventName.readCacheHit
         ? workerLogLevel.debug
         : undefined;

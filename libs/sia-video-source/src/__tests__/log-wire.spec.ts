@@ -305,7 +305,6 @@ describe('the composition milestone level mapping', () => {
     expect(milestoneLevel('read.window-start')).toBe(workerLogLevel.debug);
     expect(milestoneLevel('read.window-complete')).toBe(workerLogLevel.debug);
     expect(milestoneLevel('bytes.read')).toBe(workerLogLevel.debug);
-    expect(milestoneLevel('read.budget-wait')).toBe(workerLogLevel.debug);
     expect(milestoneLevel('read.cache-hit')).toBe(workerLogLevel.debug);
   });
 

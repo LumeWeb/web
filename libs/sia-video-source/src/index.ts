@@ -127,13 +127,11 @@ export {
   WorkerToMainMessageType,
 } from "./protocol.ts";
 export {
-  DEFAULT_SDK_READ_CONCURRENCY,
   isShardShortageError,
   isTransportReadError,
   LruChunkCache,
   objectSize,
   RangedReader,
-  ReadBudget,
   ReadTransportError,
   type ShardProgress,
   type SiaObjectLike,

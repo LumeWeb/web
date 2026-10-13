@@ -1,13 +1,13 @@
 /**
  * {@link ByteSource} adapter over the Sia ranged-read transport
- * (`RangedReader` + `LruChunkCache` + `ReadBudget`). It composes those pieces
+ * (`RangedReader` + `LruChunkCache`). It composes those pieces
  * rather than reimplementing them: range concurrency, cache replay, stall
  * watchdog, and single-download exact-range reads all live in the underlying
  * transport.
  *
  * Each `read()` wraps a `RangedReader` whose callbacks drain into the returned
- * `ReadableStream`; the shared cache/budget live on this source so consecutive
- * reads re-serve cached chunks and stay within the dispatch limit.
+ * `ReadableStream`; the shared cache lives on this source so consecutive reads
+ * re-serve cached chunks.
  */
 
 import {
@@ -43,7 +43,7 @@ export interface SiaByteSourceFactoryOptions {
   chunkSize?: number;
   /** Milestone listener forwarded into every `RangedReader` (see `RangedReaderOptions.onMilestone`). */
   onMilestone?: (name: string, requestId: null | RequestId, detail: Readonly<Record<string, unknown>>) => void;
-  /** Transport policy owning stall timeout, per-download `maxBufferedChunks`, and the legacy concurrency budget (defaults to `createSiaTransportPolicy()`). */
+  /** Transport policy owning stall timeout and per-download `maxBufferedChunks` (defaults to `createSiaTransportPolicy()`). */
   policy?: SiaTransportPolicy;
 }
 
@@ -58,8 +58,8 @@ export interface SiaByteSourceOptions {
   onMilestone?: (name: string, requestId: null | RequestId, detail: Readonly<Record<string, unknown>>) => void;
   /**
    * Transport policy this source reads from for every read: the stall
-   * watchdog timeout, the explicit `maxBufferedChunks` on every SDK download,
-   * and the legacy download-concurrency budget. Callers never supply these
+   * watchdog timeout and the explicit `maxBufferedChunks` on every SDK
+   * download. Callers never supply these
    * per read.
    */
   policy: SiaTransportPolicy;
@@ -164,7 +164,6 @@ export class SiaByteSource implements ByteSource {
     // stall watchdog timeout and the explicit per-download maxBufferedChunks
     // come from the policy, never from the per-read options.
     const readerOptions = {
-      budget: policy.legacyDownloadBudget,
       downloadOptions: { maxBufferedChunks: policy.maxBufferedChunks },
       stallTimeoutMs: policy.stallTimeoutMs,
     };
@@ -231,7 +230,7 @@ export class SiaByteSource implements ByteSource {
  * `SiaByteSource` over the injected SDK. Plain `src` values are pinned object
  * keys; `sia://` (or https alias) share URLs are parsed and resolved through
  * `sdk.objectFromShareUrl(fetchForm)`. The factory does not rewrite
- * `RangedReader`/`LruChunkCache`/`ReadBudget` internals, and keeps the
+ * `RangedReader`/`LruChunkCache` internals, and keeps the
  * SDK's existing share URL form. A keyless `SharedSdk` adapter (see
  * `worker-runtime.ts`) implements `objectFromShareUrl` by passing through
  * `SharedSdk.object(objectKey)`, so the factory needs no credential-mode
