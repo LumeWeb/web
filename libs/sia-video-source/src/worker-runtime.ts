@@ -12,7 +12,6 @@ import { parseSiaShareUrl } from './share-url.ts';
 import type { MainToWorkerMessage, WorkerConfig, WorkerToMainMessage } from './protocol.ts';
 import {
   type LruChunkCache,
-  type ReadBudget,
   type SiaObjectLike,
   type SiaSdkLike,
 } from './ranged-reader.ts';
@@ -54,18 +53,6 @@ export type SiaVideoSdk = {
 } & SiaSdkLike;
 
 export interface SiaVideoWorkerOptions {
-  /**
-   * Shared concurrency permit for SDK ranged downloads (see
-   * {@link ReadBudget}). Configures the legacy `legacyDownloadBudget` of the
-   * default transport policy; a fully injected `policy` takes precedence over
-   * it. Defaults to one shared `ReadBudget` at
-   * `DEFAULT_SDK_READ_CONCURRENCY` (4) for the default composition root, so a
-   * batch of concurrent library reads can never open more renter WebTransport
-   * sessions than the browser's 64 pending-session cap absorbs (the recurring
-   * `Too many pending WebTransport sessions (64)` storm). Injectable so a host
-   * that needs a different limit (or an unlimited transport) can opt out.
-   */
-  budget?: ReadBudget;
   /** Replaces the default byte chunk cache (capacity-limited LRU). */
   cache?: LruChunkCache;
   /**
@@ -113,11 +100,8 @@ export interface SiaVideoWorkerOptions {
   loadPipeline?: LoadPipeline;
   /**
    * Transport policy for every direct SDK ranged read this worker serves: the
-   * stall watchdog timeout, the explicit per-download `maxBufferedChunks`, and
-   * the legacy download-concurrency budget. Defaults to
-   * `createSiaTransportPolicy()` with the budget at
-   * `DEFAULT_SDK_READ_CONCURRENCY` (4). Injectable so a host can retune any of
-   * the three in one place.
+   * stall watchdog timeout and explicit per-download `maxBufferedChunks`.
+   * Defaults to `createSiaTransportPolicy()`.
    */
   policy?: SiaTransportPolicy;
   /** Overrides message delivery; useful when the caller wires its own channel. */

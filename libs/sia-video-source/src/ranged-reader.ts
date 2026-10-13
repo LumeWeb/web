@@ -37,14 +37,6 @@ const DEFAULT_MAX_ATTEMPTS = 3;
 const DEFAULT_RETRY_BACKOFF_MS: readonly number[] = [250, 500];
 
 export interface RangedReaderOptions {
-  /**
-   * Shared concurrency permit (see {@link ReadBudget}). When set, the reader
-   * waits for a free permit before opening its SDK download, so every reader
-   * sharing a budget — the independent concurrent reads mediabunny can issue
-   * share one — is guaranteed never to exceed the budget's concurrency limit.
-   * Unset (the default) opens downloads without a cap.
-   */
-  budget?: ReadBudget;
   cache?: LruChunkCache;
   /** Max bytes per chunk handed to `onChunk`; larger stream chunks are split. */
   chunkSize?: number;
@@ -72,8 +64,7 @@ export interface RangedReaderOptions {
    * when it completes successfully, `'bytes.read'` each time cumulative
    * delivery to `onChunk` crosses a whole 1 MiB boundary, `'read.cache-hit'`
    * (at most once per read-window, when the LRU replay served bytes before any
-   * download), `'read.budget-wait'` (once per blocking `ReadBudget.acquire`,
-   * i.e. when a permit wait begins behind the concurrency cap), `'read.stalled'`
+   * download), `'read.stalled'`
    * when the stall watchdog aborts a read that yielded no bytes, `'read.retry'`
    * once per retry of a failed download (carrying the attempt number,
    * the window's position/length, and the previous attempt's error message),
@@ -404,7 +395,7 @@ export class RangedReader {
   }
 
   async #run(startOffset: number, loadGeneration: number): Promise<void> {
-    const { budget, chunkSize, maxAttempts, object, onComplete, onError, retryBackoffMs, sdk, stallTimeoutMs } = this.#options;
+    const { chunkSize, maxAttempts, object, onComplete, onError, retryBackoffMs, sdk, stallTimeoutMs } = this.#options;
     // Total attempts for the read window, capped at the configured budget
     // (default: original download + two retries).
     const attempts = maxAttempts === undefined ? DEFAULT_MAX_ATTEMPTS : Math.max(1, Math.floor(maxAttempts));
@@ -457,33 +448,7 @@ export class RangedReader {
         return;
       }
 
-      // A mitigation permit held from just before the first SDK download until
-      // that run ends (delivered, aborted, abandoned, or retry-budget
-      // exhausted). One acquire, one release: every retry attempt of the same
-      // window keeps the same permit (never re-acquired, never leaked), so a
-      // stale or stalled run can never double-hold or double-free its slot.
-      let release: (() => void) | undefined;
       try {
-        // Hold the shared budget so concurrent library reads — mediabunny can
-        // issue independent overlapping reads — can never open more SDK
-        // downloads at once than the budget allows; see {@link ReadBudget}.
-        if (budget) {
-          // When the acquire actually blocks (every permit is held — e.g. the
-          // 64 pending WebTransport sessions are exhausted), the wait is the
-          // backpressure event worth surfacing: one emit per wait, carrying the
-          // live budget counters that describe how deep the queue sat.
-          release = await budget.acquire(() => {
-            this.#milestone(workerLogEventName.readBudgetWait, {
-              inFlight: budget.inFlight,
-              limit: budget.limit,
-              waiters: budget.waiters,
-            });
-          });
-          // A new start/stop arrived while this run waited for its permit: abandon
-          // (the `finally` releases the just-acquired slot).
-          if (this.#loadGeneration !== loadGeneration) return;
-        }
-
         // Milestone: a network read window begins here — after cache replay
         // and budget dispatch, at the single point where the first SDK
         // download actually starts. Emitted once per read window (the original
@@ -649,7 +614,6 @@ export class RangedReader {
           throw failure.error;
         }
       } finally {
-        if (release) release();
         // The per-attempt finally already cancelled and cleared this run's
         // stream; this guard only defends paths that never opened one (e.g. a
         // supersede right after permit acquire). Same generation-scoped rule:
@@ -679,103 +643,6 @@ export class RangedReader {
         onError?.(error);
       }
     }
-  }
-}
-
-/**
- * Default cap on how many SDK ranged downloads may be open at once across the
- * worker. The Sia SDK opens one or more WebTransport sessions the moment
- * `download()` is called (one per slab/renter) and holds them until the stream
- * is read to EOF or cancelled, and Chromium caps *pending* sessions at 64:
- * unbounded concurrent library reads burst past that budget and every later
- * download fails with `Too many pending WebTransport sessions (64)`, the
- * recurring stream-error storm behind the QUIC idle timeouts observed in the
- * live demo. 4 concurrent downloads keeps aggregate session establishment far
- * below the cap while leaving enough parallelism for mediabunny's overlapping
- * reads to make progress. The worker creates one shared `ReadBudget` at this
- * limit; a host that knows better injects its own via `SiaVideoWorkerOptions`.
- */
-export const DEFAULT_SDK_READ_CONCURRENCY = 4;
-
-/**
- * Bounded dispatcher for SDK reads. A shared budget caps how many
- * `Sdk.download()` streams may be open at once across every reader that shares
- * it. It never splits a range: each concurrent read acquires one permit and
- * keeps its own exact offset/length.
- *
- * The underlying Sia SDK opens one or more WebTransport sessions the moment
- * `download()` is called (one per slab/renter touched by the requested range,
- * bounded only by the download's `maxBufferedChunks`) and holds them until the
- * returned stream is read to EOF or cancelled — or, for a stale async download
- * that resolves after its run was superseded, until `RangedReader` cancels it
- * (adopt-or-cancel), so a dropped-open stream can never leak its sessions.
- * Chromium caps *pending*
- * sessions at 64: too many simultaneous downloads — as when mediabunny issues
- * an overlapping batch of independent reads — exhaust that budget and later
- * reads stall forever with `Too many pending WebTransport sessions (64)`. This
- * permit serializes stream creation so the SDK never holds more than `limit`
- * downloads' worth of sessions at once, and `RangedReader`'s stall watchdog
- * aborts (and releases) a permit when a read never delivers. The SDK exposes
- * no timeout or concurrency option itself, which is why the dispatch limiter
- * lives here, around the SDK.
- */
-export class ReadBudget {
-  /** Number of permits currently held by active reads. */
-  get inFlight(): number {
-    return this.#inFlight;
-  }
-  /** The configured concurrency cap. */
-  get limit(): number {
-    return this.#limit;
-  }
-  /** Number of readers queued waiting for a permit (the blocking one included once queued). */
-  get waiters(): number {
-    return this.#waiters.length;
-  }
-  #inFlight = 0;
-  readonly #limit: number;
-  #waiters: (() => void)[] = [];
-
-  /** @param limit - Maximum concurrent SDK downloads; floored to ≥ 1. */
-  constructor(limit = 1) {
-    this.#limit = Math.max(1, Math.floor(limit));
-  }
-
-  /**
-   * Resolves once a permit is free. The returned function releases the permit;
-   * call it exactly once when the read it capped has ended (delivered, aborted,
-   * or abandoned). Waits are FIFO so callers cannot starve each other.
-   *
-   * `onWait`, when supplied, runs synchronously exactly when this call
-   * actually blocks — queued behind the limit rather than granted a free
-   * permit — which is the single place a caller can observe a backpressure
-   * wait beginning. The live `inFlight`/`limit`/`waiters` counters are
-   * readable at that instant. Never invoked for an immediately-granted
-   * acquire, and a throwing callback is swallowed so a diagnostic hook can
-   * never corrupt the dispatch queue.
-   */
-  acquire(onWait?: () => void): Promise<() => void> {
-    if (this.#inFlight < this.#limit) {
-      this.#inFlight++;
-      return Promise.resolve(() => this.#release());
-    }
-    return new Promise((resolve) => {
-      this.#waiters.push(() => {
-        this.#inFlight++;
-        resolve(() => this.#release());
-      });
-      try {
-        onWait?.();
-      } catch {
-        // A throwing diagnostic hook must not corrupt the wait queue.
-      }
-    });
-  }
-
-  #release(): void {
-    this.#inFlight--;
-    const next = this.#waiters.shift();
-    next?.();
   }
 }
 

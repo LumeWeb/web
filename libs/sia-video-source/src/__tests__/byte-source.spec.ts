@@ -7,7 +7,7 @@
  * - `MemoryByteSource` — deterministic in-memory source for tests that must
  *   not require the SDK;
  * - `SiaByteSource` — a thin adapter over the existing `RangedReader` +
- *   `LruChunkCache` + `ReadBudget` (whose internals are not rewritten here)
+ *   `LruChunkCache` (whose internals are not rewritten here)
  *   so range concurrency, cache, and watchdog behavior stay unchanged.
  *
  * Covered behaviors: exact ranges, EOF, cancellation, stale load generations,
@@ -425,9 +425,11 @@ describe('SiaByteSource', () => {
     expect(Date.now() - startedAt).toBeLessThan(2000);
   });
 
-  it('sends the policy maxBufferedChunks with every SDK download', async () => {
+  it('uses no local read budget by default while preserving maxBufferedChunks', async () => {
     const { downloads, sdk } = recordingMaxBufferedChunksSdk(PAYLOAD);
-    const source = newSiaSource(PAYLOAD, sdk, { policy: createSiaTransportPolicy({ maxBufferedChunks: 7 }) });
+    const policy = createSiaTransportPolicy({ maxBufferedChunks: 7 });
+    expect(policy).not.toHaveProperty('legacyDownloadBudget');
+    const source = newSiaSource(PAYLOAD, sdk, { policy });
 
     await readAll(source.read({ length: 4096, offset: 0 }, { loadGeneration: 1 }));
 

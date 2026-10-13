@@ -165,7 +165,6 @@ Worker failures map to `MediaError` codes as follows:
 - If a share URL is rejected, preserve its query and fragment and check that the sharing key is attached to the object. Use `getSharingKeySeed` for keyless playback.
 - If Safari reports a device error, use iOS 17.1 or newer or a recent desktop browser. Safari support depends on its Managed Media Source implementation.
 - If playback reports unsupported media, confirm that the source has browser-supported video and audio tracks and that the declared MIME is not being used as proof of codec support.
-- If many reads fail with WebTransport session exhaustion, keep the default shared read budget or provide a lower transport policy concurrency.
 
 ## Ownership and limits
 

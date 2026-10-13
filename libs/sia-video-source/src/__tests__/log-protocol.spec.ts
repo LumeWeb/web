@@ -135,7 +135,6 @@ describe('WORKER_LOG_EVENT_NAMES milestone catalog', () => {
       'stream.ended',
       'read.window-start',
       'read.window-complete',
-      'read.budget-wait',
       'read.cache-hit',
       'read.stalled',
       'read.retry',
