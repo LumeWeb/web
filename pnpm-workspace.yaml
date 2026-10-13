@@ -189,6 +189,12 @@ onlyBuiltDependencies:
 
 minimumReleaseAge: 720
 minimumReleaseAgeExclude:
+  - '@siafoundation/sia-storage'
+  - '@siafoundation/sia-storage-darwin-arm64'
+  - '@siafoundation/sia-storage-darwin-x64'
+  - '@siafoundation/sia-storage-linux-arm64-gnu'
+  - '@siafoundation/sia-storage-linux-x64-gnu'
+  - '@siafoundation/sia-storage-win32-x64-msvc'
   - vocs
   - helia
   - '@helia/http'
