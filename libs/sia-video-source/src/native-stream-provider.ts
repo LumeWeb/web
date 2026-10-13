@@ -5,11 +5,15 @@ import { isSiaShareUrl } from "./share-url.ts";
 import type { SiaTransportStatus } from "./transport-telemetry.ts";
 
 export interface SiaNativeStream {
+  /** Best-effort prefetch of the stream's initial bytes. */
+  warm?: () => Promise<void>;
   release(): void;
   readonly url: string;
 }
 
 export interface SiaNativeStreamFile {
+  /** SDK 0.1.4 StreamedFile prefetch hook (optional for older SDKs). */
+  warm?: () => Promise<void>;
   readonly blob?: Blob;
   release(): void;
   readonly url: string;
@@ -188,8 +192,22 @@ function buildNativeStreamProvider(
           "native stream fell back to a whole-file blob; the native provider serves stream URLs only",
         );
       }
+      // Warming is deliberately detached from opening: a slow or failed
+      // prefetch must never delay playback or turn a playable URL into an
+      // error. The returned method still exposes the SDK capability to hosts
+      // that want to trigger it at a user interaction.
+      if (file.warm)
+        void Promise.resolve()
+          .then(() => file.warm!())
+          .catch(() => undefined);
       let released = false;
       return {
+        warm: file.warm
+          ? () =>
+              released
+                ? Promise.resolve()
+                : Promise.resolve().then(() => file.warm!())
+          : undefined,
         release: () => {
           if (released) return;
           released = true;

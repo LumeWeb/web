@@ -266,10 +266,18 @@ export function createSiaStreamService(
             }
             throw abortError();
           }
+          const fileWarm = (file as unknown as { warm?: () => Promise<void> }).warm;
           let released = false;
+          const warm = fileWarm
+            ? () =>
+                released
+                  ? Promise.resolve()
+                  : Promise.resolve().then(() => fileWarm.call(file))
+            : undefined;
           return {
             blob: file.blob,
             url: file.url,
+            warm,
             release: () => {
               if (released) return;
               released = true;

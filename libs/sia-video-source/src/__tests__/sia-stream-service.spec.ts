@@ -573,6 +573,40 @@ describe("createSiaStreamService", () => {
     expect(sdk.free).toHaveBeenCalledOnce();
   });
 
+  it("does not warm a released file", async () => {
+    const warm = vi.fn(() => Promise.resolve());
+    const file = {
+      release: vi.fn(),
+      url: "stream:test",
+      warm,
+    };
+    const streams = {
+      url: vi.fn(() => Promise.resolve(file)),
+      close: vi.fn(),
+    };
+    const object = { free: vi.fn() };
+    const sdk = {
+      object: vi.fn(() => Promise.resolve(object)),
+      free: vi.fn(),
+    };
+    const service = createSiaStreamService({
+      auth: {
+        get: () => ({ indexerUrl: "x", userKeyHex: "u", sharingKeyHex: null }),
+      },
+      connectApp: vi.fn(() => Promise.resolve(sdk as never)),
+      openStreams: vi.fn(() => Promise.resolve(streams)) as never,
+    });
+    const session = await service.session({
+      objectKey: "object",
+      shared: false,
+    });
+    const nativeFile = await session.url("source", { name: "file" });
+
+    nativeFile.release();
+    await expect(nativeFile.warm?.()).resolves.toBeUndefined();
+    expect(warm).not.toHaveBeenCalled();
+  });
+
   it("preserves AbortError and cleans up when file release throws during abort", async () => {
     interface TestFile {
       blob: Blob;
