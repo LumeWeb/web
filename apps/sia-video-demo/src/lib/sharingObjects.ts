@@ -18,7 +18,7 @@
  * results, error messages, or logs.
  */
 
-import type { PinnedObject, SharedSdk } from "@siafoundation/sia-storage";
+import type { ObjectSummary, SharedSdk } from "@siafoundation/sia-storage";
 import { normalizeObjectKeyHex } from "./hex";
 
 const DEFAULT_PAGE_SIZE = 100;
@@ -128,7 +128,7 @@ export class SharedObjectsListingError extends Error {
 /**
  * Lazy SDK boundary: connects the sharing seed and exposes it as a
  * `SharedObjectsPageClient` for `listSharedObjects`. Each returned page is
- * decoded into plain rows and every WASM handle (each `PinnedObject` as it is
+ * decoded into plain rows and every WASM handle (each `ObjectSummary` as it is
  * read, and the `SharedSdk` via `dispose()`) is freed. The seed is consumed
  * here at the boundary and is never echoed into the produced rows or any
  * message this module emits. `connect` is injectable for tests and defaults to
@@ -147,7 +147,7 @@ export async function createSharedObjectsClient(
   const sdk = await connect(indexerUrl, seedHex);
   const client: SharedObjectsPageClient = {
     fetchPage: async (offset, pageSize) =>
-      (await sdk.objects(offset, pageSize)).map((object) => rowOf(object)),
+      (await sdk.objectSummaries(offset, pageSize)).map((summary) => rowOf(summary)),
   };
   return {
     client,
@@ -317,22 +317,23 @@ function retryDelayMs(
   return Math.min(retryBaseDelayMs * 2 ** attempt, retryMaxDelayMs);
 }
 
-/** Decodes one PinnedObject into a plain row and frees its WASM handle. A
+/** Decodes one ObjectSummary into a plain row and frees its WASM handle. A
  * single bad row (e.g. a WASM metadata/size read failure) must not fail the
  * whole listing: degrade to the compact id label + 0 size. The id is
  * canonicalized so every row compares equal to a selected key from any other
  * path; the handle is freed even when decoding fails. */
-function rowOf(object: PinnedObject): SharedObjectRow {
-  const id = canonicalObjectKey(object.id());
+function rowOf(summary: ObjectSummary): SharedObjectRow {
+  let id = "";
   let size = 0;
   let name: string;
   try {
-    size = object.size();
-    name = decodeObjectName(id, object.metadata());
+    id = canonicalObjectKey(summary.id);
+    size = summary.size;
+    name = decodeObjectName(id, summary.metadata);
   } catch {
     name = fallbackObjectName(id);
   } finally {
-    object.free();
+    summary.free();
   }
   return { id, name, size };
 }
