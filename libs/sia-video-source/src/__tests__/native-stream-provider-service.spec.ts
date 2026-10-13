@@ -5,7 +5,7 @@
  * and that the provider keeps the factory's signal, release, Blob, and
  * error behavior.
  */
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   createSiaNativeStreamProvider,
   type SiaNativeStreamProvider,
@@ -213,6 +213,58 @@ describe("createSiaNativeStreamProvider (service overload)", () => {
       controller.signal,
       controller.signal,
     ]);
+  });
+
+  it("forwards warm without delaying open and keeps warm failures best effort", async () => {
+    let warmed = 0;
+    const service: SiaNativeStreamService<PinnedObject> = {
+      isAvailable: () => Promise.resolve(true),
+      resolve: (src) => Promise.resolve({ key: src }),
+      session: () => ({
+        url: () =>
+          Promise.resolve({
+            release: () => undefined,
+            url: STREAM_URL,
+            warm: () => {
+              warmed += 1;
+              return Promise.reject(new Error("warming failed"));
+            },
+          }),
+      }),
+    };
+    const stream = await createSiaNativeStreamProvider(service).open("abc123", {
+      signal: new AbortController().signal,
+    });
+
+    expect(stream.url).toBe(STREAM_URL);
+    expect(warmed).toBe(1);
+    expect(stream.warm).toBeDefined();
+    await expect(stream.warm?.()).rejects.toThrow("warming failed");
+    expect(warmed).toBe(2);
+  });
+
+  it("does not warm after release", async () => {
+    const warm = vi.fn(() => Promise.resolve());
+    const service: SiaNativeStreamService<PinnedObject> = {
+      isAvailable: () => Promise.resolve(true),
+      resolve: (src) => Promise.resolve({ key: src }),
+      session: () => ({
+        url: () =>
+          Promise.resolve({
+            release: () => undefined,
+            url: STREAM_URL,
+            warm,
+          }),
+      }),
+    };
+    const stream = await createSiaNativeStreamProvider(service).open("abc123", {
+      signal: new AbortController().signal,
+    });
+
+    await vi.waitFor(() => expect(warm).toHaveBeenCalledOnce());
+    stream.release();
+    await expect(stream.warm?.()).resolves.toBeUndefined();
+    expect(warm).toHaveBeenCalledOnce();
   });
 
   it("releases the upstream stream once after repeated release calls", async () => {
