@@ -225,31 +225,30 @@ describe("decodeObjectName", () => {
 });
 
 describe("createSharedObjectsClient — lazy SDK boundary", () => {
-  function pinnedObject(id: string, filename: string) {
+  function objectSummary(id: string, filename: string) {
     return {
       free: vi.fn(),
-      id: () => id,
-      metadata: () =>
-        new TextEncoder().encode(
-          `{"type":"sialo-object-meta","version":1,"filename":"${filename}"}`,
-        ),
-      size: () => id.length,
+      id,
+      metadata: new TextEncoder().encode(
+        `{"type":"sialo-object-meta","version":1,"filename":"${filename}"}`,
+      ),
+      size: id.length,
     };
   }
 
   function fakeSdk() {
     return {
       free: vi.fn(),
-      objects: vi.fn(),
+      objectSummaries: vi.fn(),
       stats: vi.fn(),
     };
   }
 
-  it("maps PinnedObject pages into decoded rows and frees every WASM handle", async () => {
+  it("maps ObjectSummary pages into plain rows and frees every summary handle", async () => {
     const sdk = fakeSdk();
-    const first = pinnedObject(A, "clip-a.mp4");
-    const second = pinnedObject(B, "clip-b.mp4");
-    sdk.objects.mockResolvedValue([first, second]);
+    const first = objectSummary(A, "clip-a.mp4");
+    const second = objectSummary(B, "clip-b.mp4");
+    sdk.objectSummaries.mockResolvedValue([first, second]);
     const connect = vi.fn(() => Promise.resolve(sdk as never));
 
     const handle = await createSharedObjectsClient(
@@ -269,7 +268,7 @@ describe("createSharedObjectsClient — lazy SDK boundary", () => {
 
   it("consumes the seed at the boundary but never echoes it into pages", async () => {
     const sdk = fakeSdk();
-    sdk.objects.mockResolvedValue([pinnedObject(A, "clip-a.mp4")]);
+    sdk.objectSummaries.mockResolvedValue([objectSummary(A, "clip-a.mp4")]);
     const connect = vi.fn(() => Promise.resolve(sdk as never));
 
     const handle = await createSharedObjectsClient(
