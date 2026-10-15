@@ -29,7 +29,7 @@
  */
 
 import type { ConversionRunOrigin, MediaPlayback } from '../media/library-load.ts';
-import { isShardShortageError, isTransportReadError } from '../ranged-reader.ts';
+import { isReadStalledError, isShardShortageError, isTransportReadError } from '../ranged-reader.ts';
 import type { AppendSink } from '../sink/append-sink.ts';
 import { type ErrorReporter, failureCode, failureCondition, type PlaybackFailure } from './error-reporter.ts';
 
@@ -192,6 +192,9 @@ class GenericStreamController implements StreamController {
    */
   #failureFor(error: unknown, _origin: ConversionRunOrigin, _targetSeconds?: number): PlaybackFailure {
     const detail = error instanceof Error ? error.message : String(error);
+    if (isReadStalledError(error)) {
+      return { cause: error, code: failureCode['read-stalled'], condition: failureCondition.readStalled, detail };
+    }
     if (isTransportReadError(error)) {
       return { cause: error, code: failureCode.failed, condition: failureCondition.transport, detail };
     }

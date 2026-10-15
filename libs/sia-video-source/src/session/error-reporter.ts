@@ -55,6 +55,7 @@ export const failureCondition = {
   normalization: 'normalization',
   seekTarget: 'seek-target',
   // This condition ends the conversion run; `seekTarget` remains nonfatal.
+  readStalled: 'read-stalled',
   shardShortage: 'shard-shortage',
   transport: 'transport',
 } as const;
@@ -74,6 +75,7 @@ export const failureCode = {
   malformed: 'malformed',
   'missing-index': 'missing-index',
   'no-rap': 'no-rap',
+  'read-stalled': 'read-stalled',
   quota: 'quota',
   superseded: 'superseded',
   timeout: 'timeout',
@@ -121,6 +123,7 @@ export type PlaybackFailure =
       readonly time?: number;
     }
   | { readonly cause?: unknown; readonly code: typeof failureCode.dataUnavailable; readonly condition: typeof failureCondition.shardShortage; readonly detail?: string }
+  | { readonly cause?: unknown; readonly code: typeof failureCode['read-stalled']; readonly condition: typeof failureCondition.readStalled; readonly detail?: string }
   | { readonly cause?: unknown; readonly code: typeof failureCode.failed; readonly condition: typeof failureCondition.transport; readonly detail?: string }
   | { readonly cause?: unknown; readonly code: typeof failureCode.failed | typeof failureCode['unsupported-route']; readonly condition: typeof failureCondition.normalization; readonly detail?: string }
   | { readonly cause?: unknown; readonly code: typeof failureCode.timeout | typeof failureCode.unauthorized | typeof failureCode.unreachable; readonly condition: typeof failureCondition.transport; readonly detail?: string }
@@ -187,6 +190,7 @@ function describeFailure(failure: PlaybackFailure): string {
     case failureCondition.layout:
     case failureCondition.normalization:
     case failureCondition.seekTarget:
+    case failureCondition.readStalled:
     case failureCondition.shardShortage:
     case failureCondition.transport: {
       // A transport failure (including the StreamController's
@@ -231,6 +235,8 @@ function errorKindForFailure(failure: PlaybackFailure): null | WorkerErrorCode {
     case failureCondition.shardShortage:
       // Its own wire kind lets the host restart the source with a fresh SDK.
       return workerErrorCode.shardShortage;
+    case failureCondition.readStalled:
+      return workerErrorCode.readStalled;
     case failureCondition.transport:
       return workerErrorCode.network;
   }

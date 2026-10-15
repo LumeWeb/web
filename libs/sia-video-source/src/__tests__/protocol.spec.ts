@@ -33,7 +33,7 @@ describe('protocol', () => {
     for (const [name, wire] of Object.entries(workerErrorCode)) {
       expect(wire, name).toBe(kebabCase(name));
     }
-    expect(Object.values(workerErrorCode).sort()).toEqual(['decode', 'device', 'network', 'quota', 'shard-shortage', 'unavailable', 'unsupported']);
+    expect(Object.values(workerErrorCode).sort()).toEqual(['decode', 'device', 'network', 'quota', 'read-stalled', 'shard-shortage', 'unavailable', 'unsupported']);
     expect(PROTOCOL_VERSION).toBe(0);
   });
 

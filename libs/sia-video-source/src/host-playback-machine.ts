@@ -172,6 +172,7 @@ export const hostReportKind = {
   decode: 'decode',
   device: 'device',
   network: 'network',
+  readStalled: 'read-stalled',
   quota: 'quota',
   shardShortage: 'shard-shortage',
   unavailable: 'unavailable',
@@ -191,6 +192,7 @@ export const recoveryReason = {
   decode: 'decode',
   native: 'native',
   network: 'network',
+  readStalled: 'read-stalled',
   seek: 'seek',
   shardShortage: 'shard-shortage',
 } as const;
@@ -360,7 +362,7 @@ const isPausedRecovery = (ctx: HostPlaybackState): boolean =>
 // other load-failure kinds are terminal.
 const isRecoverableFailure = (_ctx: HostPlaybackState, event: MachineEvent): boolean =>
   event.type === hostPlaybackEvent.loadFailed &&
-  (event.kind === hostReportKind.decode || event.kind === hostReportKind.shardShortage);
+  (event.kind === hostReportKind.decode || event.kind === hostReportKind.readStalled || event.kind === hostReportKind.shardShortage);
 const isTerminalFailure = (_ctx: HostPlaybackState, event: MachineEvent): boolean =>
   event.type === hostPlaybackEvent.loadFailed && !isRecoverableFailure(_ctx, event);
 /**
@@ -392,10 +394,12 @@ const recoverableFailureWhen =
 // recoverable load-failure event carries: the event's own kind, decode to
 // decode, shard-shortage to shard-shortage. Fixed-reason call sites (a far
 // seek, a native element failure) pass a plain value instead.
-const reasonForLoadFailure = (event: MachineEvent): RecoveryReason =>
-  event.type === hostPlaybackEvent.loadFailed && event.kind === hostReportKind.decode
-    ? recoveryReason.decode
-    : recoveryReason.shardShortage;
+const reasonForLoadFailure = (event: MachineEvent): RecoveryReason => {
+  if (event.type !== hostPlaybackEvent.loadFailed) return recoveryReason.shardShortage;
+  if (event.kind === hostReportKind.decode) return recoveryReason.decode;
+  if (event.kind === hostReportKind.readStalled) return recoveryReason.readStalled;
+  return recoveryReason.shardShortage;
+};
 const kindForLoadFailure = (event: MachineEvent): HostReportKind =>
   event.type === hostPlaybackEvent.loadFailed ? event.kind : hostReportKind.decode;
 

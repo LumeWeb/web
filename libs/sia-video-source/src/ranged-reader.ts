@@ -36,6 +36,19 @@ const DEFAULT_MAX_ATTEMPTS = 3;
  */
 const DEFAULT_RETRY_BACKOFF_MS: readonly number[] = [250, 500];
 
+/** A ranged read exceeded the watchdog without producing bytes. */
+export class ReadStalledError extends Error {
+  readonly position: number;
+  readonly stallTimeoutMs: number;
+
+  constructor(message: string, detail: { position: number; stallTimeoutMs: number }) {
+    super(message);
+    this.name = 'ReadStalledError';
+    this.position = detail.position;
+    this.stallTimeoutMs = detail.stallTimeoutMs;
+  }
+}
+
 export interface RangedReaderOptions {
   cache?: LruChunkCache;
   /** Max bytes per chunk handed to `onChunk`; larger stream chunks are split. */
@@ -379,7 +392,7 @@ export class RangedReader {
           // arrived, so the position is still the read window's start offset.
           this.#milestone(workerLogEventName.readStalled, { position: windowStart, stallTimeoutMs: timeoutMs });
         }
-        reject(new Error(`Sia SDK read stalled: no bytes for ${timeoutMs}ms`));
+        reject(new ReadStalledError(`Sia SDK read stalled: no bytes for ${timeoutMs}ms`, { position: windowStart, stallTimeoutMs: timeoutMs }));
       }, timeoutMs);
       reader.read().then(
         (result) => {
@@ -737,8 +750,12 @@ function errorDescription(error: unknown): string {
  * generic `read.error`. Coupled to the message this module itself raises in
  * `#readWithStallWatchdog`, never to an SDK-provided string.
  */
+export function isReadStalledError(error: unknown): error is ReadStalledError {
+  return error instanceof ReadStalledError;
+}
+
 function isStallWatchdogError(error: unknown): boolean {
-  return error instanceof Error && error.message.startsWith('Sia SDK read stalled: ');
+  return isReadStalledError(error);
 }
 
 /**

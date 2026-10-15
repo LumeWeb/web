@@ -8,7 +8,7 @@
 import { describe, expect, it } from 'vitest';
 import type { ConversionRunOrigin, MediaPlayback } from '../media/library-load.ts';
 import { workerErrorCode } from '../protocol.ts';
-import { ReadTransportError } from '../ranged-reader.ts';
+import { ReadStalledError, ReadTransportError } from '../ranged-reader.ts';
 import { type ErrorReporter, type PlaybackFailure, workerErrorForFailure } from '../session/error-reporter.ts';
 import {
   createStreamController,
@@ -441,6 +441,22 @@ describe('StreamController', () => {
 function shardShortageError(): Error {
   return new Error('Sia SDK: not enough shards to fulfill the requested range');
 }
+
+describe('stalled-read failure routing', () => {
+  it('reports a watchdog stall as a distinct recoverable failure with its diagnostic detail', () => {
+    const h = harness();
+    h.controller.start(h.load());
+    const stalled = new ReadStalledError('Sia SDK read stalled: no bytes for 8000ms', { position: 4096, stallTimeoutMs: 8000 });
+    h.playback.fail(stalled);
+
+    expect(h.controller.state).toBe('failed');
+    expect(h.errors).toEqual([expect.objectContaining({ cause: stalled, condition: 'read-stalled', detail: stalled.message })]);
+    expect(workerErrorForFailure(h.errors[0])).toEqual({
+      context: `read-stalled:read-stalled (${stalled.message})`,
+      kind: workerErrorCode.readStalled,
+    });
+  });
+});
 
 describe('shard-shortage failure routing by run origin', () => {
   it('a raw shard-shortage failure from a seek-restart run is fatal and reports availability', () => {
