@@ -140,6 +140,12 @@ export type MainToWorkerMessage =
       readonly mimeType?: string;
       /** Whether full-stream delivery may start immediately; see `preload` on the native element. */
       readonly preload?: 'auto' | 'metadata' | 'none';
+      /**
+       * Rebuilds the shared SDK before resolving this SOURCE. The host sets it
+       * on availability-failure restarts so renter hosts are resolved again;
+       * older workers ignore the optional field.
+       */
+      readonly refreshSdk?: boolean;
       readonly requestId: RequestId;
       /**
        * The object locator: either the hex object key of an object pinned
@@ -235,12 +241,17 @@ export interface WorkerConfig {
  *   into the same sink. The host routes it nonfatally on its own instead of
  *   through the machine, and `errors.ts` intentionally holds no MediaError
  *   mapping for it, since it is not a machine `loadFailed` kind.
+ * - `shardShortage` → the SDK exhausted host selection and shard-read
+ *   retries, leaving the object's data unavailable. The kind ends the current
+ *   run without a seek target; the host responds with a bounded source restart
+ *   and a fresh SDK. It maps to a network-class `MediaError`.
  */
 export const workerErrorCode = {
   decode: 'decode',
   device: 'device',
   network: 'network',
   quota: 'quota',
+  shardShortage: 'shard-shortage',
   unavailable: 'unavailable',
   unsupported: 'unsupported',
 } as const;
@@ -459,7 +470,10 @@ export function isMainToWorkerMessage(message: unknown): message is MainToWorker
       return (
         typeof typed.requestId === 'number' &&
         typeof typed.src === 'string' &&
-        (typeof typed.mimeType === 'undefined' || typeof typed.mimeType === 'string')
+        (typeof typed.mimeType === 'undefined' || typeof typed.mimeType === 'string') &&
+        // The optional field must be boolean when present; omitting it keeps
+        // older SOURCE messages valid.
+        (typeof typed.refreshSdk === 'undefined' || typeof typed.refreshSdk === 'boolean')
       );
     default:
       return true;

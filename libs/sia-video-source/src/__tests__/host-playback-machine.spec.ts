@@ -174,6 +174,113 @@ describe('decode failure while playing', () => {
   });
 });
 
+describe('an upstream shard-shortage (availability) failure', () => {
+  it('restarts at the saved playhead and resumes playback, like a decode failure', () => {
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+
+    const decisions = machine.send({
+      kind: hostReportKind.shardShortage,
+      resumeSeconds: 42.5,
+      type: hostPlaybackEvent.loadFailed,
+    });
+    expect(decisions).toEqual([
+      {
+        kind: hostDecisionKind.restartSource,
+        reason: recoveryReason.shardShortage,
+        resumeSeconds: 42.5,
+        wantsPlay: true,
+      },
+    ]);
+    expect(machine.current).toBe(hostPlaybackState.recovering);
+    expect(machine.attempt).toBe(1);
+  });
+
+  it('tries at most twice before surfacing an availability error, never a decode or unsupported one', () => {
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+
+    machine.send({ kind: hostReportKind.shardShortage, resumeSeconds: 42.5, type: hostPlaybackEvent.loadFailed });
+    machine.send({ type: hostPlaybackEvent.sourceReady });
+    expect(machine.attempt).toBe(1);
+    machine.send({ kind: hostReportKind.shardShortage, resumeSeconds: 42.5, type: hostPlaybackEvent.loadFailed });
+    expect(machine.attempt).toBe(2);
+    expect(machine.current).toBe(hostPlaybackState.recovering);
+
+    const decisions = machine.send({
+      kind: hostReportKind.shardShortage,
+      resumeSeconds: 42.5,
+      type: hostPlaybackEvent.loadFailed,
+    });
+    expect(decisions).toEqual([{ error: hostReportKind.shardShortage, kind: hostDecisionKind.reportError }]);
+    expect(machine.current).toBe(hostPlaybackState.failed);
+  });
+
+  it('stops auto-recovering a load whose shard shortage keeps recurring within a short burst', () => {
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+
+    const fail = (): HostDecision[] =>
+      machine.send({ kind: hostReportKind.shardShortage, resumeSeconds: 42.5, type: hostPlaybackEvent.loadFailed });
+    const recoverAndPlay = (): void => {
+      machine.send({ type: hostPlaybackEvent.sourceReady });
+      machine.send({ type: hostPlaybackEvent.recoverPlayed });
+    };
+
+    expect(fail().at(0)).toMatchObject({ kind: hostDecisionKind.restartSource });
+    recoverAndPlay();
+    expect(fail().at(0)).toMatchObject({ kind: hostDecisionKind.restartSource });
+    recoverAndPlay();
+    expect(fail().at(0)).toMatchObject({ kind: hostDecisionKind.restartSource });
+    recoverAndPlay();
+
+    const exhausted = fail();
+    expect(exhausted).toEqual([{ error: hostReportKind.shardShortage, kind: hostDecisionKind.reportError }]);
+    expect(machine.current).toBe(hostPlaybackState.failed);
+  });
+
+  it('defers behind a paused user and an explicit play consumes the deferred repair', () => {
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.pause });
+
+    const decisions = machine.send({
+      kind: hostReportKind.shardShortage,
+      resumeSeconds: 9,
+      type: hostPlaybackEvent.loadFailed,
+    });
+    expect(decisions).toEqual([{ kind: hostDecisionKind.deferRepair, reason: recoveryReason.shardShortage, resumeSeconds: 9 }]);
+    expect(machine.current).toBe(hostPlaybackState.ready);
+    expect(machine.repairOwed).toEqual({ reason: recoveryReason.shardShortage, seconds: 9 });
+
+    const consume = machine.send({ type: hostPlaybackEvent.play });
+    expect(consume).toEqual([
+      {
+        kind: hostDecisionKind.restartSource,
+        reason: recoveryReason.shardShortage,
+        resumeSeconds: 9,
+        wantsPlay: true,
+      },
+    ]);
+    expect(machine.current).toBe(hostPlaybackState.recovering);
+  });
+
+  it('leaves the reserved unavailable kind non-recoverable: it surfaces, no restart, no repair', () => {
+    // The machine receives `unavailable` only if host routing failed; keep it
+    // terminal so a seek-target error cannot consume recovery budget.
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+
+    const decisions = machine.send({
+      kind: hostReportKind.unavailable,
+      resumeSeconds: 42.5,
+      type: hostPlaybackEvent.loadFailed,
+    });
+    expect(decisions).toEqual([{ error: hostReportKind.unavailable, kind: hostDecisionKind.reportError }]);
+    expect(machine.current).toBe(hostPlaybackState.failed);
+    expect(machine.repairOwed).toBeNull();
+  });
+});
+
 describe('decode failure while paused', () => {
   it('never reloads behind the user; the repair waits for an explicit play to consume it', () => {
     const machine = readyMachine();

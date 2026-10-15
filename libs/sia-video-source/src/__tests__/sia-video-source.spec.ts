@@ -1813,6 +1813,119 @@ describe('decode failure recovery', () => {
   });
 });
 
+describe('availability (shard-shortage) failure recovery', () => {
+  // A `shard-shortage` ERROR (upstream shard shortage the SDK's own recovery
+  // exhausted) is fatal to the current run, but the host answers it with the
+  // same bounded reposition-and-resume as a decode incident. The restarted
+  // SOURCE additionally asks the worker to rebuild its shared SDK
+  // (`refreshSdk`) so the fresh connection re-resolves the renter set.
+
+  /** attach + HELLO_OK → a ready host with a main-mode session. */
+  function attachAndHandshake(): { host: SiaVideoSource; target: HTMLVideoElement; worker: FakeWorker } {
+    const worker = new FakeWorker();
+    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const target = document.createElement('video');
+    host.attach(target);
+    worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    replyAttachOk(worker);
+    return { host, target, worker };
+  }
+
+  const mainInfo = { container: 'fmp4', durationSeconds: null, mime: DEFAULT_FMP4_MIME, mode: 'main', tracks: [] } as const;
+
+  /** Loads `src` and acknowledges it (main-mode SOURCE_OK), returning its request id. */
+  function loadAndAcknowledge(host: SiaVideoSource, worker: FakeWorker, src: string): number {
+    host.src = src;
+    const source = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).at(-1);
+    if (!source) throw new Error('SOURCE was not sent');
+    worker.reply({
+      info: mainInfo,
+      requestId: source.requestId,
+      type: WorkerToMainMessageType.SOURCE_OK,
+    });
+    return source.requestId;
+  }
+
+  /** Request id of the newest SOURCE on the wire (the currently active load). */
+  function newestSourceId(worker: FakeWorker): number {
+    const source = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).at(-1);
+    if (!source) throw new Error('no SOURCE on the wire');
+    return source.requestId;
+  }
+
+  it.skipIf(!IN_BROWSER)('restarts at the saved playhead and asks the worker to rebuild its shared SDK', () => {
+    const { host, target, worker } = attachAndHandshake();
+    const originalLoadId = loadAndAcknowledge(host, worker, 'k');
+    target.dispatchEvent(new Event('play'));
+    worker.sent.length = 0;
+
+    // The host's most recent playhead: the recovery must reposition there.
+    target.currentTime = 42.5;
+    target.dispatchEvent(new Event('timeupdate'));
+    expect(worker.sent.at(-1)).toMatchObject({ time: 42.5, type: MainToWorkerMessageType.PLAYHEAD });
+
+    worker.reply({ context: 'not enough shards', kind: workerErrorCode.shardShortage, requestId: originalLoadId, type: WorkerToMainMessageType.ERROR });
+
+    const reloadSources = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE);
+    expect(reloadSources).toHaveLength(1);
+    // The restarted SOURCE asks for a shared-SDK rebuild (fresh renter set);
+    // no third-party kind or seek-target kind is involved.
+    expect(reloadSources[0]).toMatchObject({ refreshSdk: true, src: 'k', type: MainToWorkerMessageType.SOURCE });
+
+    // Bounded reposition-and-resume at the saved playhead: SOURCE → SEEK →
+    // PLAY, both control messages naming the NEW load's request id.
+    const seeks = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK);
+    expect(seeks).toHaveLength(1);
+    expect(seeks[0]).toMatchObject({ time: 42.5, type: MainToWorkerMessageType.SEEK });
+    expect(seeks[0].requestId).toBe(reloadSources[0].requestId);
+    const plays = worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY);
+    expect(plays).toHaveLength(1);
+    expect(plays[0].requestId).toBe(reloadSources[0].requestId);
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('a decode error restart does not ask for an SDK refresh', () => {
+    const { host, worker } = attachAndHandshake();
+    const originalLoadId = loadAndAcknowledge(host, worker, 'k');
+    worker.sent.length = 0;
+
+    worker.reply({ context: 'append failed', kind: 'decode', requestId: originalLoadId, type: WorkerToMainMessageType.ERROR });
+    const reloadSources = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE);
+    expect(reloadSources).toHaveLength(1);
+    expect(reloadSources[0].refreshSdk).toBeUndefined();
+    host.destroy();
+  });
+
+  it.skipIf(!IN_BROWSER)('surfaces a data-unavailable media error (network class, never unsupported) once the restart budget is exhausted', () => {
+    const { host, worker } = attachAndHandshake();
+    const initialLoadId = loadAndAcknowledge(host, worker, 'k');
+    worker.sent.length = 0;
+
+    let errorEvents = 0;
+    host.addEventListener('error', () => errorEvents++);
+
+    // Failure #1 → restart 1; no surface yet.
+    worker.reply({ context: 'not enough shards', kind: workerErrorCode.shardShortage, requestId: initialLoadId, type: WorkerToMainMessageType.ERROR });
+    expect(errorEvents).toBe(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
+
+    // Failure #2 on the restarted load → restart 2; still no surface.
+    worker.reply({ context: 'not enough shards', kind: workerErrorCode.shardShortage, requestId: newestSourceId(worker), type: WorkerToMainMessageType.ERROR });
+    expect(errorEvents).toBe(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(2);
+
+    // Failure #3 (max restarts = 2 exhausted) → surfaces a data-availability
+    // MediaError (network class), never an unsupported-media one, and no
+    // third restart is attempted.
+    worker.reply({ context: 'not enough shards', kind: workerErrorCode.shardShortage, requestId: newestSourceId(worker), type: WorkerToMainMessageType.ERROR });
+    expect(errorEvents).toBe(1);
+    expect(host.error?.code).toBe(2);
+    expect(host.error?.code).not.toBe(4);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(2);
+    host.destroy();
+  });
+});
+
 describe('native media element error handling', () => {
   // The element itself can fire a native `error` (MEDIA_ERR_SRC_NOT_SUPPORTED /
   // PIPELINE_ERROR_COULD_NOT_RENDER) even though the worker may or may not also

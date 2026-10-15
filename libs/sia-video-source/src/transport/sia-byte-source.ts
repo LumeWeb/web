@@ -234,12 +234,13 @@ export class SiaByteSource implements ByteSource {
  * SDK's existing share URL form. A keyless `SharedSdk` adapter (see
  * `worker-runtime.ts`) implements `objectFromShareUrl` by passing through
  * `SharedSdk.object(objectKey)`, so the factory needs no credential-mode
- * knowledge.
+ * knowledge. The returned factory accepts the shared four-argument shape;
+ * this factory's SDK is fixed at construction, so `refresh` has no effect.
  */
 export function createSiaByteSourceFactory(
   sdk: SiaByteSourceSdk,
   options: SiaByteSourceFactoryOptions = {},
-): (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared') => Promise<ByteSource> {
+): (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared', refresh?: boolean) => Promise<ByteSource> {
   // One shared exact-window cache per factory, so every source it creates
   // replays already-downloaded windows across loads (like the worker's
   // per-core cache). An explicit caller-supplied cache still wins. One shared

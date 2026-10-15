@@ -7,16 +7,10 @@
  * - start/seek/playhead trigger semantics;
  * - starting and tearing down the library conversion (one per play session);
  * - back-buffer eviction on `playhead()`;
- * - failure reporting, which receives the failed run's origin (initial
- *   sequential vs seek-restart) and, for a seek-restart run, the trim
- *   target the run was prepared at: a raw shard-shortage failure from a
- *   seek-restart run reports the reserved seek-target/data-unavailable
- *   failure (`unavailable` wire kind, carrying the trim target as `time`
- *   when the run names one) and stays NONFATAL; the session keeps its
- *   `playing` state and its live sink, so the host's follow-up seek can
- *   restart the conversion into the same sink. From the initial run, and
- *   every other condition, the fatal mapping applies (state `failed`,
- *   sink aborted, playback disposed on teardown).
+ * - failure reporting: a raw shard shortage reports the fatal
+ *   `shard-shortage` availability failure from every run. The controller
+ *   aborts the sink when its producer stops; the host performs bounded source
+ *   recovery. `seekTarget` remains the reserved nonfatal outcome.
  *
  * The conversion drives its own reads through the transport and requests
  * end-of-stream itself once its final fragment appends; the controller only
@@ -184,16 +178,9 @@ class GenericStreamController implements StreamController {
    *   is a distinct condition, not a normalization slip; error-reporter maps
    *   it to the `network` wire kind so the HOST can run its reload recovery,
    *   regardless of which run produced it;
-   * - a raw shard-shortage failure (ranged-reader surfaces it unwrapped: a
-   *   data-availability gap no retry can close) is the one case where the
-   *   run's origin matters. From a seek-restart run the requested seek
-   *   target cannot be serviced, so it reports the reserved `seekTarget` /
-   *   `data-unavailable` failure (the `unavailable` wire kind, nonfatal)
-   *   naming the run's trim target as `time` when the run has one; that
-   *   value is the position the failed conversion was trimmed at, never one
-   *   read out of the error. From the initial run there is no seek target to
-   *   name, so it maps through `normalization` to `unsupported` (fatal, no
-   *   auto-reload) and carries no `time`;
+   * - a raw shard-shortage failure means the SDK exhausted host selection and
+   *   per-shard retries. It reports `shardShortage` / `data-unavailable` from
+   *   every run, with no seek-target time, so the host can start recovery;
    * - everything else is a genuine conversion failure, reported as
    *   `normalization`, which maps to `unsupported`.
    *
@@ -202,21 +189,16 @@ class GenericStreamController implements StreamController {
    * instead of a bare `normalization:failed` / `transport:failed` /
    * `seek-target:data-unavailable`.
    *
-   * `targetSeconds` is the trim target the failed run was prepared at (only
-   * seek-restart runs have one); it reaches the seek-target failure as
-   * `time` when present and never reaches the transport or normalization
-   * variants.
    */
-  #failureFor(error: unknown, origin: ConversionRunOrigin, targetSeconds?: number): PlaybackFailure {
+  #failureFor(error: unknown, _origin: ConversionRunOrigin, _targetSeconds?: number): PlaybackFailure {
     const detail = error instanceof Error ? error.message : String(error);
     if (isTransportReadError(error)) {
       return { cause: error, code: failureCode.failed, condition: failureCondition.transport, detail };
     }
-    if (origin === 'seek-restart' && isShardShortageError(error)) {
-      if (targetSeconds === undefined) {
-        return { cause: error, code: failureCode.dataUnavailable, condition: failureCondition.seekTarget, detail };
-      }
-      return { cause: error, code: failureCode.dataUnavailable, condition: failureCondition.seekTarget, detail, time: targetSeconds };
+    // The producer has stopped after exhausting host selection and shard
+    // retries, so the controller ends every conversion run.
+    if (isShardShortageError(error)) {
+      return { cause: error, code: failureCode.dataUnavailable, condition: failureCondition.shardShortage, detail };
     }
     return { cause: error, code: failureCode.failed, condition: failureCondition.normalization, detail };
   }

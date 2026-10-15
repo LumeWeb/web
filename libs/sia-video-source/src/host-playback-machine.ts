@@ -40,13 +40,14 @@
  * ──────────────────────────────────────────────────
  *  - Reader retries never reach this machine: only a worker error the worker
  *    already exhausted its retries on arrives as `load.failed`.
- *  - A decode failure while playing restarts at the watch position, at most
- *    `MAX_RECOVERY_ATTEMPTS` times; exhaustion surfaces a decode error.
+ *  - A decode or shard-shortage failure restarts at the watch position, at
+ *    most `MAX_RECOVERY_ATTEMPTS` times; exhaustion reports that failure kind.
  *  - A decode failure while explicitly paused, or on a never-started source,
  *    never reloads: it records a repair without spending recovery budget, in
  *    a healthy load and on a load already in recovery. The next explicit
  *    play restarts once and resumes; the next explicit seek restarts at the
- *    target and stays paused.
+ *    target and stays paused. A shard-shortage failure on a paused or
+ *    never-started source follows the same deferred-repair path.
  *  - A native element error from a dead/replaced resource is ignored while a
  *    recovery is in flight or a repair is already owed; paused with nothing
  *    owed it records a repair; actively playing it gets the retry-capped
@@ -172,6 +173,7 @@ export const hostReportKind = {
   device: 'device',
   network: 'network',
   quota: 'quota',
+  shardShortage: 'shard-shortage',
   unavailable: 'unavailable',
   unsupported: 'unsupported',
 } as const;
@@ -181,15 +183,16 @@ export type HostReportKind = (typeof hostReportKind)[keyof typeof hostReportKind
 
 /**
  * The recovery/restart reasons the machine records in decisions and context.
- * A terminal `load.failed` keeps a repair owed only for the transport failure
- * kind (`network`), the one a user action can repair; an unsupported container
- * is not repairable and records no reason.
+ * A terminal `load.failed` keeps a repair owed for `network` and
+ * `shardShortage`, because a user action can start a fresh source and SDK.
+ * Unsupported containers record no repair reason.
  */
 export const recoveryReason = {
   decode: 'decode',
   native: 'native',
   network: 'network',
   seek: 'seek',
+  shardShortage: 'shard-shortage',
 } as const;
 
 /** A recovery/restart reason; see {@link recoveryReason}. */
@@ -353,10 +356,13 @@ const isSeekRecovery = (ctx: HostPlaybackState): boolean =>
 // cannot reach this transition.
 const isPausedRecovery = (ctx: HostPlaybackState): boolean =>
   ctx.recovery?.wantsPlay === false;
-const isDecodeFailure = (_ctx: HostPlaybackState, event: MachineEvent): boolean =>
-  event.type === hostPlaybackEvent.loadFailed && event.kind === hostReportKind.decode;
+// Decode and shard-shortage failures can use the bounded source restart;
+// other load-failure kinds are terminal.
+const isRecoverableFailure = (_ctx: HostPlaybackState, event: MachineEvent): boolean =>
+  event.type === hostPlaybackEvent.loadFailed &&
+  (event.kind === hostReportKind.decode || event.kind === hostReportKind.shardShortage);
 const isTerminalFailure = (_ctx: HostPlaybackState, event: MachineEvent): boolean =>
-  event.type === hostPlaybackEvent.loadFailed && event.kind !== hostReportKind.decode;
+  event.type === hostPlaybackEvent.loadFailed && !isRecoverableFailure(_ctx, event);
 /**
  * The consecutive in-session incident count the next automatic restart would
  * carry: it restarts at 1 when this is the first incident or the previous one
@@ -376,11 +382,25 @@ const nextAutoIncidentStreak = (ctx: HostPlaybackState, nowMs: number): number =
 const churnSaturated = (ctx: HostPlaybackState): boolean =>
   nextAutoIncidentStreak(ctx, Date.now()) > MAX_CONSECUTIVE_AUTO_RECOVERIES;
 
-/** ANDs a state predicate onto the decode-failure recognition guard. */
-const decodeFailureWhen =
+/** ANDs a state predicate onto the recoverable-failure recognition guard. */
+const recoverableFailureWhen =
   (pred: (ctx: HostPlaybackState) => boolean) =>
   (ctx: HostPlaybackState, event: MachineEvent): boolean =>
-    isDecodeFailure(ctx, event) && pred(ctx);
+    isRecoverableFailure(ctx, event) && pred(ctx);
+
+// The reason (and, for the exhausted surface, the reported kind) a
+// recoverable load-failure event carries: the event's own kind, decode to
+// decode, shard-shortage to shard-shortage. Fixed-reason call sites (a far
+// seek, a native element failure) pass a plain value instead.
+const reasonForLoadFailure = (event: MachineEvent): RecoveryReason =>
+  event.type === hostPlaybackEvent.loadFailed && event.kind === hostReportKind.decode
+    ? recoveryReason.decode
+    : recoveryReason.shardShortage;
+const kindForLoadFailure = (event: MachineEvent): HostReportKind =>
+  event.type === hostPlaybackEvent.loadFailed ? event.kind : hostReportKind.decode;
+
+/** A recorded reason, or a resolver that derives it from the event. */
+type ReasonOrResolver = ((event: MachineEvent) => RecoveryReason) | RecoveryReason;
 
 
 // ── Shared decision-recorder actions ─────────────────────────────────────────
@@ -470,11 +490,12 @@ const makeConsumeOwedOnVisible = (decisions: HostDecision[]) =>
 
 /** An owed repair a user-paused load must not restart: recorded for later. */
 const makeRecordDefer = (decisions: HostDecision[]) =>
-  (reason: RecoveryReason) =>
+  (reason: ReasonOrResolver) =>
     reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
       const resumeSeconds = resumeOf(event);
-      decisions.push({ kind: hostDecisionKind.deferRepair, reason, resumeSeconds });
-      return { ...ctx, repairOwed: { reason, seconds: resumeSeconds } };
+      const resolved = typeof reason === 'function' ? reason(event) : reason;
+      decisions.push({ kind: hostDecisionKind.deferRepair, reason: resolved, resumeSeconds });
+      return { ...ctx, repairOwed: { reason: resolved, seconds: resumeSeconds } };
     });
 
 /**
@@ -487,17 +508,18 @@ const makeRecordDefer = (decisions: HostDecision[]) =>
  * parks are never incidents, so their call sites pass `false`.
  */
 const makeRecordDeferWhileHidden = (decisions: HostDecision[]) =>
-  (reason: RecoveryReason, incident = true) =>
+  (reason: ReasonOrResolver, incident = true) =>
     reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
       const resumeSeconds = resumeOf(event);
       const wantsPlay = ctx.preference === playbackPreference.playing;
-      decisions.push({ kind: hostDecisionKind.deferRepair, reason, resumeSeconds });
+      const resolved = typeof reason === 'function' ? reason(event) : reason;
+      decisions.push({ kind: hostDecisionKind.deferRepair, reason: resolved, resumeSeconds });
       const nowMs = incident ? Date.now() : 0;
       return {
         ...ctx,
         autoRecoveryStreak: incident ? nextAutoIncidentStreak(ctx, nowMs) : ctx.autoRecoveryStreak,
         lastAutoIncidentAt: incident ? nowMs : ctx.lastAutoIncidentAt,
-        repairOwed: { reason, resumeOnVisible: true, seconds: resumeSeconds, wantsPlay },
+        repairOwed: { reason: resolved, resumeOnVisible: true, seconds: resumeSeconds, wantsPlay },
       };
     });
 
@@ -506,15 +528,17 @@ const makeRecordDeferWhileHidden = (decisions: HostDecision[]) =>
  * repair stays owed so an explicit user action may start a fresh source.
  */
 const makeRecordExhausted = (decisions: HostDecision[]) =>
-  (reason: RecoveryReason, kind: HostReportKind) =>
+  (reason: ReasonOrResolver, kind: ((event: MachineEvent) => HostReportKind) | HostReportKind) =>
     reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
       const resumeSeconds = resumeOf(event);
-      decisions.push({ error: kind, kind: hostDecisionKind.reportError });
+      const resolvedReason = typeof reason === 'function' ? reason(event) : reason;
+      const resolvedKind = typeof kind === 'function' ? kind(event) : kind;
+      decisions.push({ error: resolvedKind, kind: hostDecisionKind.reportError });
       return {
         ...ctx,
         attempt: 0,
         recovery: null,
-        repairOwed: { reason, seconds: resumeSeconds },
+        repairOwed: { reason: resolvedReason, seconds: resumeSeconds },
       };
     });
 
@@ -539,21 +563,22 @@ const makeRecordFatal = (decisions: HostDecision[]) =>
 /** A retry-capped restart: records the restart decision and spends one attempt. */
 const makeRecordRestart = (decisions: HostDecision[]) =>
   (
-    reason: RecoveryReason,
+    reason: ReasonOrResolver,
     wantsPlay: boolean | typeof AS_PREFERENCE,
     incident = false,
   ) =>
     reduce<HostPlaybackState, MachineEvent>((ctx, event) => {
       const resumeSeconds = resumeOf(event);
       const play = wantsPlay === AS_PREFERENCE ? ctx.preference === playbackPreference.playing : wantsPlay;
-      decisions.push({ kind: hostDecisionKind.restartSource, reason, resumeSeconds, wantsPlay: play });
+      const resolved = typeof reason === 'function' ? reason(event) : reason;
+      decisions.push({ kind: hostDecisionKind.restartSource, reason: resolved, resumeSeconds, wantsPlay: play });
       const nowMs = incident ? Date.now() : 0;
       return {
         ...ctx,
         attempt: ctx.attempt + 1,
         autoRecoveryStreak: incident ? nextAutoIncidentStreak(ctx, nowMs) : ctx.autoRecoveryStreak,
         lastAutoIncidentAt: incident ? nowMs : ctx.lastAutoIncidentAt,
-        recovery: { reason, resumeSeconds, wantsPlay: play },
+        recovery: { reason: resolved, resumeSeconds, wantsPlay: play },
         repairOwed: null,
       };
     });
@@ -718,38 +743,38 @@ function activeLoadTransitions(
     transition(
       hostPlaybackEvent.loadFailed,
       self,
-      guard(decodeFailureWhen(isPaused)),
-      recordDefer(recoveryReason.decode),
+      guard(recoverableFailureWhen(isPaused)),
+      recordDefer(reasonForLoadFailure),
     ),
     transition(
       hostPlaybackEvent.loadFailed,
       self,
-      guard(decodeFailureWhen(isNeverStarted)),
-      recordDefer(recoveryReason.decode),
+      guard(recoverableFailureWhen(isNeverStarted)),
+      recordDefer(reasonForLoadFailure),
     ),
     transition(
       hostPlaybackEvent.loadFailed,
       hostPlaybackState.failed,
-      guard(decodeFailureWhen(spentBudget)),
-      recordExhausted(recoveryReason.decode, hostReportKind.decode),
+      guard(recoverableFailureWhen(spentBudget)),
+      recordExhausted(reasonForLoadFailure, kindForLoadFailure),
     ),
     transition(
       hostPlaybackEvent.loadFailed,
       hostPlaybackState.failed,
-      guard(decodeFailureWhen(churnSaturated)),
-      recordExhausted(recoveryReason.decode, hostReportKind.decode),
+      guard(recoverableFailureWhen(churnSaturated)),
+      recordExhausted(reasonForLoadFailure, kindForLoadFailure),
     ),
     transition(
       hostPlaybackEvent.loadFailed,
       self,
-      guard(decodeFailureWhen(isHidden)),
-      recordDeferWhileHidden(recoveryReason.decode),
+      guard(recoverableFailureWhen(isHidden)),
+      recordDeferWhileHidden(reasonForLoadFailure),
     ),
     transition(
       hostPlaybackEvent.loadFailed,
       hostPlaybackState.recovering,
-      guard(decodeFailureWhen(canRetry)),
-      recordRestart(recoveryReason.decode, AS_PREFERENCE, true),
+      guard(recoverableFailureWhen(canRetry)),
+      recordRestart(reasonForLoadFailure, AS_PREFERENCE, true),
     ),
 
     // Native element failure from a dead/replaced resource: an already-owed
@@ -922,26 +947,26 @@ function pausePendingTransitions(decisions: HostDecision[]): Transition<string>[
     transition(
       hostPlaybackEvent.loadFailed,
       hostPlaybackState.failed,
-      guard(decodeFailureWhen(spentBudget)),
-      recordExhausted(recoveryReason.decode, hostReportKind.decode),
+      guard(recoverableFailureWhen(spentBudget)),
+      recordExhausted(reasonForLoadFailure, kindForLoadFailure),
     ),
     transition(
       hostPlaybackEvent.loadFailed,
       hostPlaybackState.failed,
-      guard(decodeFailureWhen(churnSaturated)),
-      recordExhausted(recoveryReason.decode, hostReportKind.decode),
+      guard(recoverableFailureWhen(churnSaturated)),
+      recordExhausted(reasonForLoadFailure, kindForLoadFailure),
     ),
     transition(
       hostPlaybackEvent.loadFailed,
       hostPlaybackState.pausePending,
-      guard(decodeFailureWhen(isHidden)),
-      recordDeferWhileHidden(recoveryReason.decode),
+      guard(recoverableFailureWhen(isHidden)),
+      recordDeferWhileHidden(reasonForLoadFailure),
     ),
     transition(
       hostPlaybackEvent.loadFailed,
       hostPlaybackState.recovering,
-      guard(decodeFailureWhen(canRetry)),
-      recordRestart(recoveryReason.decode, AS_PREFERENCE, true),
+      guard(recoverableFailureWhen(canRetry)),
+      recordRestart(reasonForLoadFailure, AS_PREFERENCE, true),
     ),
   ];
 }
@@ -1006,38 +1031,38 @@ function recoveringTransitions(decisions: HostDecision[]): Transition<string>[] 
     transition(
       hostPlaybackEvent.loadFailed,
       hostPlaybackState.recovering,
-      guard(decodeFailureWhen(isPaused)),
-      recordDefer(recoveryReason.decode),
+      guard(recoverableFailureWhen(isPaused)),
+      recordDefer(reasonForLoadFailure),
     ),
     transition(
       hostPlaybackEvent.loadFailed,
       hostPlaybackState.recovering,
-      guard(decodeFailureWhen(isNeverStarted)),
-      recordDefer(recoveryReason.decode),
+      guard(recoverableFailureWhen(isNeverStarted)),
+      recordDefer(reasonForLoadFailure),
     ),
     transition(
       hostPlaybackEvent.loadFailed,
       hostPlaybackState.failed,
-      guard(decodeFailureWhen(spentBudget)),
-      recordExhausted(recoveryReason.decode, hostReportKind.decode),
+      guard(recoverableFailureWhen(spentBudget)),
+      recordExhausted(reasonForLoadFailure, kindForLoadFailure),
     ),
     transition(
       hostPlaybackEvent.loadFailed,
       hostPlaybackState.failed,
-      guard(decodeFailureWhen(churnSaturated)),
-      recordExhausted(recoveryReason.decode, hostReportKind.decode),
+      guard(recoverableFailureWhen(churnSaturated)),
+      recordExhausted(reasonForLoadFailure, kindForLoadFailure),
     ),
     transition(
       hostPlaybackEvent.loadFailed,
       hostPlaybackState.recovering,
-      guard(decodeFailureWhen(isHidden)),
-      recordDeferWhileHidden(recoveryReason.decode),
+      guard(recoverableFailureWhen(isHidden)),
+      recordDeferWhileHidden(reasonForLoadFailure),
     ),
     transition(
       hostPlaybackEvent.loadFailed,
       hostPlaybackState.recovering,
-      guard(decodeFailureWhen(canRetry)),
-      recordRestart(recoveryReason.decode, AS_PREFERENCE, true),
+      guard(recoverableFailureWhen(canRetry)),
+      recordRestart(reasonForLoadFailure, AS_PREFERENCE, true),
     ),
   ];
 }

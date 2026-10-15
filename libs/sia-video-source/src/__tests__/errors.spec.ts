@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { MediaError } from '@videojs/media';
 import { DEFAULT_ERROR_MESSAGES, MEDIA_ERROR_CODES, mediaErrorEvent, mediaErrorFromWorkerMessage } from '../errors.ts';
+import { workerErrorCode } from '../protocol.ts';
 
 describe('MEDIA_ERROR_CODES', () => {
   it('maps worker kinds onto the HTMLMediaError codes', () => {
@@ -12,6 +13,10 @@ describe('MEDIA_ERROR_CODES', () => {
     expect(MEDIA_ERROR_CODES.decode).toBe(3);
     expect(MEDIA_ERROR_CODES.network).toBe(MediaError.MEDIA_ERR_NETWORK);
     expect(MEDIA_ERROR_CODES.network).toBe(2);
+    // The wire value is kebab-case, so this computed key checks the same
+    // network mapping that runtime lookup uses.
+    expect(MEDIA_ERROR_CODES[workerErrorCode.shardShortage]).toBe(MediaError.MEDIA_ERR_NETWORK);
+    expect(MEDIA_ERROR_CODES[workerErrorCode.shardShortage]).toBe(2);
     // quota is the one kind the original four-pin test missed: it maps to the
     // backward-compatible decode code, not a distinct HTMLMediaError.
     expect(MEDIA_ERROR_CODES.quota).toBe(MediaError.MEDIA_ERR_DECODE);
@@ -27,6 +32,15 @@ describe('browser mapping stability', () => {
     for (const kind of ['decode', 'device', 'network', 'quota', 'unsupported'] as const) {
       expect(DEFAULT_ERROR_MESSAGES[kind], kind).toBeTruthy();
     }
+  });
+
+  it('maps a shard-shortage availability report to a network-class error with an availability message', () => {
+    const error = mediaErrorFromWorkerMessage({ kind: 'shard-shortage' });
+    expect(error.code).toBe(MediaError.MEDIA_ERR_NETWORK);
+    expect(error.code).not.toBe(MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED);
+    expect(error.fatal).toBe(true);
+    expect(error.message).toBe(DEFAULT_ERROR_MESSAGES[workerErrorCode.shardShortage]);
+    expect(DEFAULT_ERROR_MESSAGES[workerErrorCode.shardShortage]).toMatch(/available/i);
   });
 
   it('leaves the reserved unavailable kind unmapped until its host routing arrives', () => {

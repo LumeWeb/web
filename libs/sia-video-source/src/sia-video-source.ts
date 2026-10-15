@@ -73,6 +73,7 @@ import {
   hostPlaybackEvent,
   HostPlaybackMachine,
   playbackPreference,
+  recoveryReason,
   type RecoveryReason,
 } from "./host-playback-machine.ts";
 import { MediaWorkerBackend } from "./media-worker-backend.ts";
@@ -930,7 +931,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       this.#worker = null;
       this.#logger
         .child("host")
-        .error("worker.spawn-failed", { message: errorDescription(error) });
+        .error("worker.spawn-failed", {
+          ...this.#workerFailureFacts(),
+          failure: "spawn",
+        });
       this.#reportError(workerErrorCode.network, errorDescription(error));
       return;
     }
@@ -1207,7 +1211,8 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     } catch (error) {
       this.#worker = null;
       this.#logger.child("host").error("worker.spawn-failed", {
-        message: errorDescription(error),
+        ...this.#workerFailureFacts(),
+        failure: "spawn",
       });
       this.#reportError(workerErrorCode.network, errorDescription(error));
       return;
@@ -2083,18 +2088,19 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // element back to the last playable position (the normal seeking path
         // then issues the follow-up SEEK) instead of routing to the machine,
         // which would treat it as a load failure and reset the playhead.
+        // `unavailable` belongs to seek-target failures. A raw shard shortage
+        // uses `shardShortage` and enters machine recovery below.
         if (message.kind === workerErrorCode.unavailable) {
           this.#handleSeekUnavailable(message);
           return;
         }
         // The worker already exhausted its own reader retries before posting
-        // this ERROR. The machine routes the failure by kind: a decode/seek
-        // incident gets the retry-capped reposition-and-resume (deferred
-        // behind a paused user, exhausted → MEDIA_ERR_DECODE), a
-        // network/transport incident reports MEDIA_ERR_NETWORK without any
-        // auto-reload, and an unsupported container stays fatal — recovery
-        // decisions stay purely in the machine; the host only performs the
-        // effects (restart / record a repair / report the error).
+        // this ERROR. Decode and shard-shortage incidents use bounded
+        // reposition-and-resume; exhaustion reports the incident's kind.
+        // Network transport and unsupported-container errors remain terminal.
+        // A shard-shortage SOURCE carries `refreshSdk`, so the worker rebuilds
+        // its SDK before re-resolving renter hosts. The machine owns these
+        // decisions; the host applies them.
         this.#mediaWorkerBackend.markFailed();
         this.#applyDecisions(
           this.#machine.send({
@@ -2542,18 +2548,35 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     const reason =
       event.error instanceof Error ? event.error.message : undefined;
     this.#logger.child("host").error("worker.error", {
-      message: event.message || "error",
-      reason,
+      ...this.#workerFailureFacts(),
+      failure: "worker",
+      hasError: reason !== undefined,
+      message: event.message ? "error-event" : "error",
     });
   };
 
   // A postMessage round-trip failure (a structured-clone error) has no payload
   // of its own; the event name is the only identity there is.
   #onWorkerMessageError = (): void => {
-    this.#logger
-      .child("host")
-      .error("worker.error", { message: "messageerror" });
+    this.#logger.child("host").error("worker.error", {
+      ...this.#workerFailureFacts(),
+      failure: "message",
+      message: "messageerror",
+    });
   };
+
+  /** Records playback and load facts while leaving raw worker errors out. */
+  #workerFailureFacts(): Record<string, null | number | string> {
+    return {
+      bufferedEndSeconds: this.#workerBufferEndSeconds,
+      bufferedStartSeconds: this.#workerBufferStartSeconds,
+      bytesDownloaded: this.#transportBytesDownloaded,
+      loadRequestId: this.#requestId,
+      mode: this.#mode ?? "unknown",
+      playheadSeconds: this.#lastPlayheadSeconds,
+      seekTargetSeconds: this.#lastForwardedSeekSeconds,
+    };
+  }
 
   // Announces the ACTIVE load's source information exactly once (the "no
   // duplicate open" guard), aligned with `#acceptLoad`: the same SOURCE_OK
@@ -2773,7 +2796,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // emits no further timeupdate to re-capture it).
     this.#resetLoadState();
     this.#lastPlayheadSeconds = decision.resumeSeconds;
-    this.#sendSource();
+    // Availability recovery rebuilds the SDK so the renter host set is
+    // resolved again. The stored reason also survives deferred play and seek.
+    this.#sendSource(false, decision.reason === recoveryReason.shardShortage);
     // Record the element position for the fresh resource's attach (see the WHY
     // above); `#onSeeking` re-entrance from the eventual native seek is
     // suppressed while the machine is recovering.
@@ -2818,7 +2843,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // WebKit-prefixed one) is device-too-old and reports the honest `device`
   // error immediately instead of paying a worker roundtrip that can only end
   // in a generic unsupported error.
-  #sendSource(attachOk = false): void {
+  #sendSource(attachOk = false, refreshSdk = false): void {
     const impl = this.#mseSnapshot.impl;
     if (
       impl === mseImplementation.none ||
@@ -2827,7 +2852,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       this.#reportError(workerErrorCode.device, "no-mse");
       return;
     }
-    const message = {
+    const message: MainToWorkerMessage = {
       // An empty preload reads as "no signal", so the worker is left at its
       // own deferring default rather than promising eager streaming.
       mimeType: this.#mimeType,
@@ -2836,6 +2861,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       sourceKind: this.#nativeSourceKind,
       src: this.#src,
       type: MainToWorkerMessageType.SOURCE as MainToWorkerMessageType.SOURCE,
+      // Availability recovery sets this flag so the worker rebuilds its SDK
+      // and resolves renter hosts again; ordinary restarts reuse the memo.
+      ...(refreshSdk ? { refreshSdk: true } : {}),
     };
     if (attachOk || this.#mediaWorkerBackend.ready) this.#post(message);
     else this.#send(message);

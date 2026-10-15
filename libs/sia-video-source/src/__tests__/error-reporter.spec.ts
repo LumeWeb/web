@@ -109,6 +109,19 @@ describe('ErrorReporter', () => {
     expect(report?.context).toBe('seek-target:data-unavailable');
   });
 
+  it('maps a shard-shortage availability failure to its own wire kind, distinct from seek-target and unsupported', () => {
+    const report = workerErrorForFailure({
+      code: failureCode.dataUnavailable,
+      condition: failureCondition.shardShortage,
+      detail: 'not enough shards to fulfill the requested range',
+    } satisfies PlaybackFailure);
+    expect(report?.kind).toBe(workerErrorCode.shardShortage);
+    expect(report?.kind).not.toBe(workerErrorCode.unavailable);
+    expect(report?.kind).not.toBe(workerErrorCode.network);
+    expect(report?.kind).not.toBe(workerErrorCode.unsupported);
+    expect(report?.context).toBe('shard-shortage:data-unavailable (not enough shards to fulfill the requested range)');
+  });
+
   it('names the cause on the unavailable seek-target context', () => {
     const report = workerErrorForFailure({
       cause: new Error('range past end of object'),

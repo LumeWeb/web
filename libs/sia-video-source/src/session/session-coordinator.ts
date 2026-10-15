@@ -160,8 +160,16 @@ export interface SessionCoordinatorDeps {
    * the SDK); `MemoryByteSource` in tests. Errors → network ERROR. The
    * owning SOURCE `requestId` is supplied (null before any load) so
    * request-scoped reader milestones the source emits pick up their load.
+   * The optional `refresh` flag (the SOURCE wire's `refreshSdk`) asks the
+   * transport binding to rebuild its shared SDK before resolving, so an
+   * availability-recovery restart re-resolves the renter host set.
    */
-  readonly createSource: (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared') => Promise<ByteSource>;
+  readonly createSource: (
+    src: string,
+    requestId?: null | RequestId,
+    sourceKind?: 'app' | 'shared',
+    refresh?: boolean,
+  ) => Promise<ByteSource>;
   /** Handshake for `HELLO`/`APP_KEY` (default: `createSessionHandshake()`). */
   readonly handshake?: SessionHandshake;
   /**
@@ -300,7 +308,12 @@ export class WorkerComposition implements SessionCoordinator {
   }
 
   readonly #capabilities: PlaybackCapabilities;
-  readonly #createSource: (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared') => Promise<ByteSource>;
+  readonly #createSource: (
+    src: string,
+    requestId?: null | RequestId,
+    sourceKind?: 'app' | 'shared',
+    refresh?: boolean,
+  ) => Promise<ByteSource>;
   #destroyed = false;
   readonly #errorReporter: ErrorReporter;
   readonly #handshake: SessionHandshake;
@@ -421,7 +434,7 @@ export class WorkerComposition implements SessionCoordinator {
           this.#handleSeek(message.time);
           return;
         case MainToWorkerMessageType.SOURCE:
-          await this.#handleSource(message.requestId, message.src, message.preload, message.sourceKind);
+          await this.#handleSource(message.requestId, message.src, message.preload, message.sourceKind, message.refreshSdk);
           return;
       }
     } catch (error) {
@@ -511,6 +524,7 @@ export class WorkerComposition implements SessionCoordinator {
     src: string,
     preload: 'auto' | 'metadata' | 'none' | undefined,
     sourceKind?: 'app' | 'shared',
+    refresh?: boolean,
   ): Promise<void> {
     const loadGeneration = ++this.#loadGeneration;
     // Play intent is scoped to ONE load attempt (matches the current worker):
@@ -553,7 +567,11 @@ export class WorkerComposition implements SessionCoordinator {
     try {
       // The new SOURCE's request id is threaded into the byte-source factory
       // so reader/source milestones the load emits carry their owning request.
-      source = await this.#createSource(src, requestId, sourceKind);
+      // `refresh` (the SOURCE wire's `refreshSdk`) asks the transport binding
+      // to rebuild its shared SDK first: an availability-recovery restart
+      // must re-resolve the renter host set, not reuse the pooled connection
+      // whose stale view made the data unavailable.
+      source = await this.#createSource(src, requestId, sourceKind, refresh);
     } catch (error) {
       if (this.#destroyed || loadGeneration !== this.#loadGeneration) {
         // A stale creation releases its own abort signal and posts nothing.

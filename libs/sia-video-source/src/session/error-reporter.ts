@@ -25,11 +25,15 @@
  *   failure names the failed seek target time (`time`), the report carries
  *   it onto the ERROR wire message; this layer only forwards a value the
  *   producer supplied, never fabricates one.
+ * - shard-shortage means the SDK exhausted shard recovery and the data is
+ *   unavailable. It maps to the `shard-shortage` wire kind, so the host can
+ *   restart the source with a fresh SDK; it carries no seek target or `time`.
  * - sequential fallback is a mode, not an error (nothing here emits it);
  * - no raw secret-bearing SDK object or URL is included in a message.
  *
  * `workerErrorForFailure` maps a domain failure onto the
- * `WorkerErrorCode` wire kinds (`network`/`unsupported`/`decode`/`unavailable`)
+ * `WorkerErrorCode` wire kinds (`network`/`unsupported`/`decode`/`unavailable`
+ * /`shard-shortage`)
  * so the coordinator's `post({ type: WorkerToMainMessageType.ERROR, … })` call site stays a one-liner, and
  * `createErrorReporter` is the adapter that enforces the drop rule before a
  * failure ever reaches the host.
@@ -50,6 +54,8 @@ export const failureCondition = {
   mse: 'mse',
   normalization: 'normalization',
   seekTarget: 'seek-target',
+  // This condition ends the conversion run; `seekTarget` remains nonfatal.
+  shardShortage: 'shard-shortage',
   transport: 'transport',
 } as const;
 
@@ -114,6 +120,7 @@ export type PlaybackFailure =
        */
       readonly time?: number;
     }
+  | { readonly cause?: unknown; readonly code: typeof failureCode.dataUnavailable; readonly condition: typeof failureCondition.shardShortage; readonly detail?: string }
   | { readonly cause?: unknown; readonly code: typeof failureCode.failed; readonly condition: typeof failureCondition.transport; readonly detail?: string }
   | { readonly cause?: unknown; readonly code: typeof failureCode.failed | typeof failureCode['unsupported-route']; readonly condition: typeof failureCondition.normalization; readonly detail?: string }
   | { readonly cause?: unknown; readonly code: typeof failureCode.timeout | typeof failureCode.unauthorized | typeof failureCode.unreachable; readonly condition: typeof failureCondition.transport; readonly detail?: string }
@@ -180,6 +187,7 @@ function describeFailure(failure: PlaybackFailure): string {
     case failureCondition.layout:
     case failureCondition.normalization:
     case failureCondition.seekTarget:
+    case failureCondition.shardShortage:
     case failureCondition.transport: {
       // A transport failure (including the StreamController's
       // `transport:failed` with the SDK/short-read cause as `detail`) carries
@@ -220,6 +228,9 @@ function errorKindForFailure(failure: PlaybackFailure): null | WorkerErrorCode {
       // reserved `unavailable` wire kind so host handling runs neither the
       // `network` reload recovery nor the fatal `decode`/`unsupported` paths.
       return workerErrorCode.unavailable;
+    case failureCondition.shardShortage:
+      // Its own wire kind lets the host restart the source with a fresh SDK.
+      return workerErrorCode.shardShortage;
     case failureCondition.transport:
       return workerErrorCode.network;
   }
