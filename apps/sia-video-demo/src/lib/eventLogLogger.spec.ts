@@ -149,22 +149,25 @@ describe("eventLogLogger (demo singleton)", () => {
     expect(eventLogLogger.level).toBe("debug");
   });
 
-  it("records debug diagnostics only while verbose is on", () => {
+  it("records debug diagnostics only while verbose is on", async () => {
     eventLogLogger.child("worker").debug("read.window-open");
+    await Promise.resolve();
     expect(useEventLogStore.getState().lines).toEqual([]);
     useEventLogStore.getState().setVerbose(true);
     eventLogLogger.child("worker").debug("read.window-open");
+    await Promise.resolve();
     const lines = useEventLogStore.getState().lines;
     expect(lines.map((line) => [line.level, line.message])).toEqual([
       ["debug", "[worker] read.window-open"],
     ]);
   });
 
-  it("stops recording new debug lines when verbose is switched off again", () => {
+  it("stops recording new debug lines when verbose is switched off again", async () => {
     useEventLogStore.getState().setVerbose(true);
     eventLogLogger.child("worker").debug("bytes.read");
     useEventLogStore.getState().setVerbose(false);
     eventLogLogger.child("worker").debug("bytes.read again");
+    await Promise.resolve();
     const lines = useEventLogStore.getState().lines;
     expect(lines.map((line) => line.message)).toEqual(["[worker] bytes.read"]);
   });

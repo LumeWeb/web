@@ -53,7 +53,11 @@ const STORE_LEVEL: Record<LogLevel, EventLevel> = {
  * read, so the threshold can track a runtime toggle on one stable object.
  */
 export function createEventLogLogger(
-  options: { level?: (() => LogLevelFilter) | LogLevelFilter } = {},
+  options: {
+    /** Defers store writes so a host logger call cannot update EventLog in render. */
+    defer?: boolean;
+    level?: (() => LogLevelFilter) | LogLevelFilter;
+  } = {},
 ): Logger {
   const resolveFilter = (): LogLevelFilter =>
     typeof options.level === "function"
@@ -69,9 +73,12 @@ export function createEventLogLogger(
         if (logLevelRank(methodLevel) < logLevelRank(filter)) return;
         const prefix = scope === "" ? "" : `[${scope}] `;
         const facts = fields ? ` ${renderFacts(fields)}` : "";
-        useEventLogStore
-          .getState()
-          .push(`${prefix}${msg}${facts}`, STORE_LEVEL[methodLevel]);
+        const writeLine = (): void =>
+          useEventLogStore
+            .getState()
+            .push(`${prefix}${msg}${facts}`, STORE_LEVEL[methodLevel]);
+        if (options.defer) queueMicrotask(writeLine);
+        else writeLine();
       };
 
     return {
@@ -137,5 +144,6 @@ function renderFacts(fields: LogFields): string {
  * the host logs and updates what the worker forwards without a reload.
  */
 export const eventLogLogger: Logger = createEventLogLogger({
+  defer: true,
   level: () => eventLogLevelForVerbose(useEventLogStore.getState().verbose),
 });
