@@ -191,7 +191,12 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
   const byteSourceOptions: SiaByteSourceFactoryOptions | undefined = onMilestone
     ? { ...byteSource, onMilestone }
     : byteSource;
-  const createSource: (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared') => Promise<ByteSource> = deps.createSdk
+  const createSource: (
+    src: string,
+    requestId?: null | RequestId,
+    sourceKind?: 'app' | 'shared',
+    refresh?: boolean,
+  ) => Promise<ByteSource> = deps.createSdk
     ? createLazySiaByteSourceFactory({ byteSource: byteSourceOptions, createSdk: deps.createSdk, handshake, logSink })
     : createSiaByteSourceFactory(sdk!, byteSourceOptions);
   // Worker MSE is used only when the runtime can construct it in a dedicated
@@ -386,7 +391,9 @@ function connectionEquals(
  * config + decrypted credential seeds (app-key and sharing-key): the first
  * SOURCE builds the SDK, later SOURCEs reuse it while the connection is
  * unchanged, and a changed connection rebuilds (disposing the superseded SDK)
- * so stale credentials are never cached over a newer one.
+ * so stale credentials are never cached over a newer one. `refresh: true` also
+ * rebuilds on an unchanged connection, allowing availability recovery to
+ * resolve the renter host set again.
  */
 function createLazySiaByteSourceFactory(deps: {
   readonly byteSource?: SiaByteSourceFactoryOptions;
@@ -397,7 +404,12 @@ function createLazySiaByteSourceFactory(deps: {
   ) => Promise<SiaByteSourceSdk>;
   readonly handshake: Pick<SessionHandshake, 'config' | 'log' | 'seed' | 'sharingSeed'>;
   readonly logSink?: WorkerLogSink;
-}): (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared') => Promise<ByteSource> {
+}): (
+  src: string,
+  requestId?: null | RequestId,
+  sourceKind?: 'app' | 'shared',
+  refresh?: boolean,
+) => Promise<ByteSource> {
   const { byteSource, createSdk, handshake, logSink } = deps;
   let cached: null | {
     config: undefined | WorkerConfig;
@@ -406,11 +418,13 @@ function createLazySiaByteSourceFactory(deps: {
     sharingSeed: null | Uint8Array;
   } = null;
 
-  return async (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared'): Promise<ByteSource> => {
+  return async (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared', refresh?: boolean): Promise<ByteSource> => {
     const config = handshake.config;
     const seed = handshake.seed ?? null;
     const sharingSeed = handshake.sharingSeed ?? null;
-    let sdk = cached && connectionEquals(cached, config, seed, sharingSeed) ? cached.sdk : null;
+    // Availability recovery bypasses the memo so renter hosts are resolved
+    // again on an unchanged connection.
+    let sdk = cached && !refresh && connectionEquals(cached, config, seed, sharingSeed) ? cached.sdk : null;
     if (!sdk) {
       try {
         sdk = await createSdk(config, seed, sharingSeed);

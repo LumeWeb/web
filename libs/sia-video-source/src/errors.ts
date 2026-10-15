@@ -10,7 +10,7 @@
  */
 
 import { MediaError } from '@videojs/media';
-import type { WorkerErrorCode } from './protocol.ts';
+import { workerErrorCode, type WorkerErrorCode } from './protocol.ts';
 
 export interface WorkerErrorMessage {
   readonly context?: string;
@@ -33,6 +33,10 @@ export interface WorkerErrorMessage {
  *   memory pressure as a decode restart, even though the surfaced MediaError
  *   keeps the same decode code MSE append failures use.
  * - `network` → `MEDIA_ERR_NETWORK` (2): SDK/WebTransport/stream failures.
+ * - `shardShortage` → `MEDIA_ERR_NETWORK` (2): the SDK exhausted shard
+ *   recovery, so the object's data is currently unavailable. The network
+ *   class gives callers a try-again-later error instead of an unsupported
+ *   media error.
  * - `unavailable` → unmapped by design: the reserved seek-target
  *   data-unavailable kind is never turned into a MediaError; the host routes
  *   it nonfatally on its own, so it never reaches a DOM error. If one is ever
@@ -46,6 +50,10 @@ export const MEDIA_ERROR_CODES: Readonly<Partial<Record<WorkerErrorCode, number>
   network: MediaError.MEDIA_ERR_NETWORK,
   quota: MediaError.MEDIA_ERR_DECODE,
   unsupported: MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED,
+  // Computed key: the member name (`shardShortage`) differs from the wire
+  // value (`shard-shortage`), so a plain literal key would key the entry by
+  // the name and miss every wire lookup.
+  [workerErrorCode.shardShortage]: MediaError.MEDIA_ERR_NETWORK,
 };
 
 export const DEFAULT_ERROR_MESSAGES: Readonly<Partial<Record<WorkerErrorCode, string>>> = {
@@ -54,6 +62,8 @@ export const DEFAULT_ERROR_MESSAGES: Readonly<Partial<Record<WorkerErrorCode, st
   network: 'The Sia network connection failed.',
   quota: 'Playback ran out of buffering memory while preparing Sia data for rendering.',
   unsupported: 'This Sia object is not playable in this browser.',
+  // The wire value is kebab-case, so runtime lookup needs a computed key.
+  [workerErrorCode.shardShortage]: 'This Sia object\'s data is not fully available right now. Try again later.',
 };
 
 /**

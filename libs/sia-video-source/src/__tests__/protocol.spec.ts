@@ -28,15 +28,12 @@ describe('protocol', () => {
   });
 
   it('keeps the worker error-code catalog closed, self-named, and unchanged in protocol version', () => {
-    // Every catalog member is its own lowercase wire string; the closed set is
-    // the established five kinds plus the reserved `unavailable` kind (a
-    // nonfatal, seek-target data-unavailable outcome with no current runtime
-    // producer). The vocabulary is additive; PROTOCOL_VERSION stays 0.
     expect(Object.keys(workerErrorCode)).toEqual([...Object.keys(workerErrorCode)].sort());
+    const kebabCase = (name: string): string => name.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
     for (const [name, wire] of Object.entries(workerErrorCode)) {
-      expect(wire, name).toBe(name.toLowerCase());
+      expect(wire, name).toBe(kebabCase(name));
     }
-    expect(Object.values(workerErrorCode).sort()).toEqual(['decode', 'device', 'network', 'quota', 'unavailable', 'unsupported']);
+    expect(Object.values(workerErrorCode).sort()).toEqual(['decode', 'device', 'network', 'quota', 'shard-shortage', 'unavailable', 'unsupported']);
     expect(PROTOCOL_VERSION).toBe(0);
   });
 
@@ -45,6 +42,20 @@ describe('protocol', () => {
     // kind passes the wire boundary exactly like the established kinds.
     const message: WorkerToMainMessage = { context: 'seek-target:data-unavailable', kind: 'unavailable', requestId: null, type: WorkerToMainMessageType.ERROR };
     expect(isWorkerToMainMessage(message)).toBe(true);
+  });
+
+  it('accepts an ERROR message carrying the shard-shortage availability kind', () => {
+    const message: WorkerToMainMessage = { context: 'shard-shortage:data-unavailable', kind: workerErrorCode.shardShortage, requestId: 7, type: WorkerToMainMessageType.ERROR };
+    expect(isWorkerToMainMessage(message)).toBe(true);
+  });
+
+  it('validates the optional SDK-refresh flag on a SOURCE message', () => {
+    // A malformed refresh flag must reject the SOURCE message.
+    const source: MainToWorkerMessage = { requestId: 5, src: 'k', type: MainToWorkerMessageType.SOURCE };
+    expect(isMainToWorkerMessage(source)).toBe(true);
+    expect(isMainToWorkerMessage({ ...source, refreshSdk: true })).toBe(true);
+    expect(isMainToWorkerMessage({ ...source, refreshSdk: false })).toBe(true);
+    expect(isMainToWorkerMessage({ ...source, refreshSdk: 'yes' })).toBe(false);
   });
 
   it('validates the optional failed seek-target time on an unavailable ERROR message', () => {

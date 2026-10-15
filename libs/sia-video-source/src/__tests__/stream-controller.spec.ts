@@ -443,134 +443,62 @@ function shardShortageError(): Error {
 }
 
 describe('shard-shortage failure routing by run origin', () => {
-  it('a raw shard-shortage failure from a seek-restart run reports the reserved seek-target/data-unavailable failure (unavailable wire kind)', () => {
+  it('a raw shard-shortage failure from a seek-restart run is fatal and reports availability', () => {
     const h = harness();
     h.controller.start(h.load());
-    // Arm a replacement (seek-restart) run, as an accepted seek does.
     expect(h.playback.restart(45)).toBe(true);
 
     const shortage = shardShortageError();
     h.playback.fail(shortage);
 
-    // Nonfatal data-unavailable: the session stays live (no `failed`
-    // transition, no sink abort) so a follow-up seek can restart the
-    // conversion into the same sink; the playback is not disposed either.
-    expect(h.controller.state).toBe('playing');
+    expect(h.controller.state).toBe('failed');
     expect(h.playback.receivedOrigins).toEqual(['seek-restart']);
     expect(h.errors).toHaveLength(1);
-    const reported = h.errors[0];
-    if (reported.condition === 'seek-target') {
-      expect(reported.code).toBe('data-unavailable');
-      expect(reported.detail).toBe(shortage.message);
-      expect(reported.cause).toBe(shortage);
-    } else {
-      throw new Error(`expected a seek-target failure, got ${reported.condition}`);
-    }
-    // End-to-end onto the wire: the reserved `unavailable` kind, distinct
-    // from the network / decode / unsupported kinds.
-    const report = workerErrorForFailure(reported);
-    expect(report?.kind).toBe(workerErrorCode.unavailable);
-    expect(report?.context).toContain('seek-target:data-unavailable');
-    // The failed run's sink is NOT aborted (it stays live for the
-    // follow-up seek's restart), and the playback is not disposed.
-    expect(h.sink.aborts).toEqual([]);
-    expect(h.playback.disposed).toBe(0);
-
-    // A shortage nested in a wrapped failure's causal chain (the second
-    // recognized wording, different case) is recognized the same way.
-    const wrapped = new Error('conversion failed', { cause: new Error('INSUFFICIENT SHARDS for the requested range') });
-    const restarted = harness();
-    restarted.controller.start(restarted.load());
-    expect(restarted.playback.restart(30)).toBe(true);
-    restarted.playback.fail(wrapped);
-
-    const wrappedReported = restarted.errors[0];
-    if (wrappedReported.condition === 'seek-target') {
-      expect(wrappedReported.code).toBe('data-unavailable');
-      expect(wrappedReported.detail).toBe('conversion failed');
-      expect(wrappedReported.cause).toBe(wrapped);
-    } else {
-      throw new Error(`expected a seek-target failure for a wrapped shortage, got ${wrappedReported.condition}`);
-    }
-    expect(workerErrorForFailure(wrappedReported)?.kind).toBe(workerErrorCode.unavailable);
-    // The wrapped case is nonfatal too: session live, sink not aborted.
-    expect(restarted.controller.state).toBe('playing');
-    expect(restarted.sink.aborts).toEqual([]);
+    expect(h.errors[0]).toMatchObject({
+      cause: shortage,
+      code: 'data-unavailable',
+      condition: 'shard-shortage',
+      detail: shortage.message,
+    });
+    expect(workerErrorForFailure(h.errors[0])).toEqual({
+      context: `shard-shortage:data-unavailable (${shortage.message})`,
+      kind: workerErrorCode.shardShortage,
+    });
+    expect(h.sink.aborts).toEqual([shortage]);
   });
 
-  it('a seek-restart shortage keeps the session live; a subsequent seek restarts the conversion into the same session', () => {
-    const h = harness();
-    h.controller.start(h.load());
-    // Arm a replacement (seek-restart) run the way an accepted seek does.
-    h.controller.seek(45);
-    expect(h.playback.restartInvocations).toEqual([45]);
-
-    h.playback.fail(shardShortageError());
-
-    // Nonfatal: the session stays live, the failure is reported once, the
-    // sink is not aborted, and the playback is not disposed.
-    expect(h.controller.state).toBe('playing');
-    expect(h.errors).toHaveLength(1);
-    expect(h.errors[0].condition).toBe('seek-target');
-    expect(h.sink.aborts).toEqual([]);
-    expect(h.playback.disposed).toBe(0);
-
-    // A repeat report from the same dead run (before any restart) is
-    // suppressed: one nonfatal report per failed run.
-    h.playback.fail(shardShortageError());
-    expect(h.errors).toHaveLength(1);
-
-    // The host's follow-up seek restarts the conversion into the SAME
-    // session: restart with the new target, parser re-anchored on the same
-    // generation, no second playback start.
-    h.controller.seek(60);
-    expect(h.playback.restartInvocations).toEqual([45, 60]);
-    expect(h.sink.resets).toEqual([
-      { generation: 1 },
-      { generation: 1, target: 45 },
-      { generation: 1, target: 60 },
-    ]);
-    expect(h.playback.startInvocations).toBe(1);
-    expect(h.playback.generation).toBe(1);
-    expect(h.controller.state).toBe('playing');
-    expect(h.sink.aborts).toEqual([]);
-
-    // The replacement run is fresh: its own shortage reports again.
-    h.playback.fail(shardShortageError());
-    expect(h.errors).toHaveLength(2);
-    expect(h.errors[1].condition).toBe('seek-target');
-    expect(h.controller.state).toBe('playing');
-    expect(h.sink.aborts).toEqual([]);
-  });
-
-  it('a raw shard-shortage failure from the initial run stays normalization (unsupported wire kind)', () => {
+  it('a raw shard-shortage failure from the initial run reports the shard-shortage availability failure (fatal)', () => {
     const h = harness();
     h.controller.start(h.load());
 
     const shortage = shardShortageError();
     h.playback.fail(shortage);
 
+    // Fatal: the session fails and the sink is aborted, so the coordinator
+    // tears the run down (the old pipeline cannot drain silently).
     expect(h.controller.state).toBe('failed');
     expect(h.playback.receivedOrigins).toEqual(['initial']);
     expect(h.errors).toHaveLength(1);
     const reported = h.errors[0];
-    if (reported.condition === 'normalization') {
-      expect(reported.code).toBe('failed');
+    if (reported.condition === 'shard-shortage') {
+      expect(reported.code).toBe('data-unavailable');
       expect(reported.detail).toBe(shortage.message);
       expect(reported.cause).toBe(shortage);
     } else {
-      throw new Error(`expected a normalization failure, got ${reported.condition}`);
+      throw new Error(`expected a shard-shortage failure, got ${reported.condition}`);
     }
-    // The existing initial-run mapping: fatal `unsupported`, never the
-    // reserved `unavailable` kind.
-    expect(workerErrorForFailure(reported)?.kind).toBe(workerErrorCode.unsupported);
+    // The distinct `shard-shortage` wire kind: never `unsupported` (which the
+    // host would treat as an unplayable source with no recovery) and never
+    // the reserved `unavailable` kind (a seek-target outcome). No seek target
+    // to name, so no time.
+    expect(workerErrorForFailure(reported)).toEqual({
+      context: `shard-shortage:data-unavailable (${shortage.message})`,
+      kind: workerErrorCode.shardShortage,
+    });
     expect(h.sink.aborts).toEqual([shortage]);
   });
 
-  it('a seek-restart shortage names its trim target time on the unavailable failure; an initial shortage and a transport error never carry a time', () => {
-    // The replacement run was trimmed at the 45.5 s seek, so the
-    // seek-target/data-unavailable failure names that exact position and the
-    // wire report carries it — the host can route the follow-up seek on it.
+  it('a shard shortage never carries the seek target time', () => {
     const h = harness();
     h.controller.start(h.load());
     h.controller.seek(45.5);
@@ -579,33 +507,32 @@ describe('shard-shortage failure routing by run origin', () => {
     const shortage = shardShortageError();
     h.playback.fail(shortage);
 
-    expect(h.controller.state).toBe('playing');
+    expect(h.controller.state).toBe('failed');
     expect(h.errors).toHaveLength(1);
     const reported = h.errors[0];
-    if (reported.condition === 'seek-target') {
-      expect(reported.code).toBe('data-unavailable');
-      expect(reported.detail).toBe(shortage.message);
-      expect(reported.time).toBe(45.5);
-    } else {
-      throw new Error(`expected a seek-target failure, got ${reported.condition}`);
-    }
+    expect(reported).toMatchObject({
+      code: 'data-unavailable',
+      condition: 'shard-shortage',
+      detail: shortage.message,
+    });
+    expect(reported).not.toHaveProperty('time');
     expect(workerErrorForFailure(reported)).toEqual({
-      context: `seek-target:data-unavailable (${shortage.message})`,
-      kind: workerErrorCode.unavailable,
-      time: 45.5,
+      context: `shard-shortage:data-unavailable (${shortage.message})`,
+      kind: workerErrorCode.shardShortage,
     });
 
-    // A shortage from the initial run has no seek target to name: the
-    // normalization failure and its wire report carry no time.
+    // A shortage from the initial run has no seek target to name: it reports
+    // the fatal shard-shortage availability failure, and its wire report
+    // carries no time.
     const initial = harness();
     initial.controller.start(initial.load());
     initial.playback.fail(shardShortageError());
 
-    expect(initial.errors[0].condition).toBe('normalization');
+    expect(initial.errors[0].condition).toBe('shard-shortage');
     expect(initial.errors[0]).not.toHaveProperty('time');
     expect(workerErrorForFailure(initial.errors[0])).toEqual({
-      context: `normalization:failed (${shardShortageError().message})`,
-      kind: workerErrorCode.unsupported,
+      context: `shard-shortage:data-unavailable (${shardShortageError().message})`,
+      kind: workerErrorCode.shardShortage,
     });
 
     // A real transport failure from a seek-restart run (the run DOES name a

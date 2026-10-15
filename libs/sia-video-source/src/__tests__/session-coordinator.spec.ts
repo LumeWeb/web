@@ -725,7 +725,7 @@ describe('shard-shortage failure routing through the session coordinator', () =>
   // raw identity, and one of the two recognized wordings.
   const shortage = (): Error => new Error('not enough shards to fulfill the requested range');
 
-  it('a seek-restart shard-shortage failure posts exactly one unavailable ERROR for the current request', async () => {
+  it('a seek-restart shard-shortage failure posts exactly one availability ERROR for the current request', async () => {
     const driver = makeDriver();
     const playback = new FakePlayback();
     driver.pipeline.results.push(readyLoad(playback));
@@ -744,18 +744,15 @@ describe('shard-shortage failure routing through the session coordinator', () =>
     // A second failure after the session already failed posts nothing.
     playback.fail(shortage());
 
-    // End-to-end proof through the coordinator's stream controller and
-    // error reporter: the seek-restart shortage lands on the reserved
-    // nonfatal `unavailable` wire kind, scoped to the current request,
-    // posted exactly once.
     const errors = driver.message(WorkerToMainMessageType.ERROR);
     expect(errors).toHaveLength(1);
-    expect(errors[0]).toMatchObject({ kind: workerErrorCode.unavailable, requestId: 26 });
-    expect(errors[0].context).toContain('seek-target:data-unavailable');
+    expect(errors[0]).toMatchObject({ kind: workerErrorCode.shardShortage, requestId: 26 });
+    expect(errors[0].time).toBeUndefined();
+    expect(errors[0].context).toContain('shard-shortage:data-unavailable');
     expect(errors[0].context).toContain(failure.message);
   });
 
-  it('a shard-shortage failure from the initial run stays unsupported (no seek target to name)', async () => {
+  it('a shard-shortage failure from the initial run posts a shard-shortage availability ERROR (no seek target to name)', async () => {
     const driver = makeDriver();
     const playback = new FakePlayback();
     driver.pipeline.results.push(readyLoad(playback));
@@ -767,14 +764,16 @@ describe('shard-shortage failure routing through the session coordinator', () =>
 
     const errors = driver.message(WorkerToMainMessageType.ERROR);
     expect(errors).toHaveLength(1);
-    expect(errors[0]).toMatchObject({ kind: workerErrorCode.unsupported, requestId: 27 });
+    expect(errors[0]).toMatchObject({ kind: workerErrorCode.shardShortage, requestId: 27 });
+    // The host uses this kind to enter availability recovery.
     expect(errors[0].kind).not.toBe(workerErrorCode.unavailable);
+    expect(errors[0].kind).not.toBe(workerErrorCode.unsupported);
     // No seek target to name: the wire message carries no time field at all.
     expect(errors[0].time).toBeUndefined();
-    expect(errors[0].context).toContain('normalization:failed');
+    expect(errors[0].context).toContain('shard-shortage:data-unavailable');
   });
 
-  it('a seek-restart shard shortage at 45.5 posts an unavailable ERROR carrying the failed target as time for the current request', async () => {
+  it('a seek-restart shard shortage at 45.5 posts an availability ERROR without a target time', async () => {
     const driver = makeDriver();
     const playback = new FakePlayback();
     driver.pipeline.results.push(readyLoad(playback));
@@ -782,10 +781,7 @@ describe('shard-shortage failure routing through the session coordinator', () =>
     await waitForMessage(driver, WorkerToMainMessageType.SOURCE_OK);
     expect(playback.origin).toBe('initial');
 
-    // The accepted seek arms the replacement run at 45.5; when that run's
-    // data cannot be served, the failure names the run's own trim target,
-    // and the coordinator forwards that producer-supplied value onto the
-    // wire — it never invents one.
+    // The replacement run has no seek-target time after a shard shortage.
     await driver.say({ requestId: 29, time: 45.5, type: MainToWorkerMessageType.SEEK });
     expect(playback.origin).toBe('seek-restart');
 
@@ -793,9 +789,9 @@ describe('shard-shortage failure routing through the session coordinator', () =>
 
     const errors = driver.message(WorkerToMainMessageType.ERROR);
     expect(errors).toHaveLength(1);
-    expect(errors[0]).toMatchObject({ kind: workerErrorCode.unavailable, requestId: 29, time: 45.5 });
-    expect(errors[0].time).toBe(45.5);
-    expect(errors[0].context).toContain('seek-target:data-unavailable');
+    expect(errors[0]).toMatchObject({ kind: workerErrorCode.shardShortage, requestId: 29 });
+    expect(errors[0].time).toBeUndefined();
+    expect(errors[0].context).toContain('shard-shortage:data-unavailable');
   });
 
   it('a transport read failure posts a network ERROR with no time, even from a named seek-restart run', async () => {
@@ -824,7 +820,7 @@ describe('shard-shortage failure routing through the session coordinator', () =>
     expect(errors[0].context).toContain('transport:failed');
   });
 
-  it('an inbound SEEK after an unavailable failure restarts the conversion on the existing playback and session (no new SOURCE)', async () => {
+  it('an inbound SEEK cannot restart a conversion after a shard-shortage failure', async () => {
     const resets: { generation: number; target?: number }[] = [];
     const aborts: unknown[] = [];
     const driver = makeDriver({
@@ -853,19 +849,14 @@ describe('shard-shortage failure routing through the session coordinator', () =>
     await driver.say({ requestId: 28, time: 3.5, type: MainToWorkerMessageType.SEEK });
     expect(playback.origin).toBe('seek-restart');
 
-    // The follow-up seek target's data cannot be served: the coordinator
-    // reports the nonfatal unavailable failure, but the session stays live.
-    playback.fail(shortage());
+    const failure = shortage();
+    playback.fail(failure);
     const errors = driver.message(WorkerToMainMessageType.ERROR);
     expect(errors).toHaveLength(1);
-    expect(errors[0]).toMatchObject({ kind: workerErrorCode.unavailable, requestId: 28 });
-    expect(errors[0].context).toContain('seek-target:data-unavailable');
-    expect(aborts).toEqual([]);
-    expect(playback.disposed).toBe(0);
+    expect(errors[0]).toMatchObject({ kind: workerErrorCode.shardShortage, requestId: 28 });
+    expect(aborts).toEqual([failure]);
 
-    // The host's follow-up SEEK arrives inbound: it must restart the
-    // conversion on the SAME playback/session — sink re-anchored on the
-    // same load generation, no second playback start, no new SOURCE load.
+    // Recovery starts a fresh SOURCE; this terminal session cannot accept SEEK.
     await driver.say({ requestId: 28, time: 1.25, type: MainToWorkerMessageType.SEEK });
     expect(playback.started).toBe(1);
     expect(driver.pipeline.calls).toHaveLength(1);
@@ -873,18 +864,8 @@ describe('shard-shortage failure routing through the session coordinator', () =>
     expect(resets).toEqual([
       { generation: 1 },
       { generation: 1, target: 3.5 },
-      { generation: 1, target: 1.25 },
     ]);
     expect(driver.message(WorkerToMainMessageType.ERROR)).toHaveLength(1);
-
-    // The restarted run is fresh: a second shortage reports again on the
-    // same session.
-    playback.fail(shortage());
-    const errors2 = driver.message(WorkerToMainMessageType.ERROR);
-    expect(errors2).toHaveLength(2);
-    expect(errors2[1]).toMatchObject({ kind: workerErrorCode.unavailable, requestId: 28 });
-    expect(aborts).toEqual([]);
-    expect(playback.disposed).toBe(0);
   });
 });
 

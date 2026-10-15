@@ -632,6 +632,65 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
     expect(disposeB).not.toHaveBeenCalled();
   });
 
+  it('rebuilds + disposes the memoized SDK for a SOURCE carrying the refresh flag, on an unchanged connection', async () => {
+    // An availability-recovery restart posts a SOURCE with `refreshSdk`: the
+    // pooled SDK (and its stale renter/host view) is exactly what made the
+    // data unavailable, so the flag forces a fresh connection even when the
+    // handshake is byte-identical.
+    const payload = new Uint8Array(2048).fill(1);
+    const sdkA = fakeSiaSdk(payload).sdk;
+    const sdkB = fakeSiaSdk(payload).sdk;
+    const disposeA = vi.fn();
+    const disposeB = vi.fn();
+    const built: string[] = [];
+    const createSdk: (config: undefined | WorkerConfig, seed: null | Uint8Array) => Promise<SiaByteSourceSdk> = vi.fn(
+      (_config: undefined | WorkerConfig) => {
+        built.push('A');
+        return Promise.resolve({
+          ...(built.length === 1 ? sdkA : sdkB),
+          dispose: built.length === 1 ? disposeA : disposeB,
+        } as SiaByteSourceSdk);
+      },
+    );
+    const messages: WorkerToMainMessage[] = [];
+    const pipeline = new FakeLoadPipeline([readyLoadResult(), readyLoadResult(), readyLoadResult()]);
+    const coordinator = createSiaWorkerComposition({
+      capabilities: permissiveCapabilities(),
+      createSdk,
+      loadPipeline: pipeline,
+      post: (message) => messages.push(message),
+      supportsWorkerMse: () => false,
+    });
+
+    await coordinator.handleMessage({ config: WORKER_CONFIG, requestId: 1, type: MainToWorkerMessageType.HELLO });
+    const helloOk = messages.find((m) => m.type === WorkerToMainMessageType.HELLO_OK);
+    const envelope = await encryptToWorker(
+      helloOk?.type === WorkerToMainMessageType.HELLO_OK ? helloOk.publicKey : new Uint8Array(32),
+      new Uint8Array(32).fill(9),
+    );
+    await coordinator.handleMessage({ envelope, requestId: 2, type: MainToWorkerMessageType.APP_KEY });
+
+    // First load: the SDK is built once.
+    await coordinator.handleMessage({ preload: 'auto', requestId: 3, src: 'fmp4', type: MainToWorkerMessageType.SOURCE });
+    await flush();
+    expect(built).toEqual(['A']);
+
+    // Same connection, second load, no flag: memoized SDK, no rebuild.
+    await coordinator.handleMessage({ preload: 'auto', requestId: 100, src: 'fmp4', type: MainToWorkerMessageType.SOURCE });
+    await flush();
+    expect(built).toEqual(['A']);
+    expect(disposeA).not.toHaveBeenCalled();
+
+    // Same connection, third load, WITH the refresh flag: the memoized SDK is
+    // disposed and a fresh one is built (a new connection re-resolves the
+    // renter set from the indexer).
+    await coordinator.handleMessage({ preload: 'auto', refreshSdk: true, requestId: 101, src: 'fmp4', type: MainToWorkerMessageType.SOURCE });
+    await flush();
+    expect(built).toEqual(['A', 'A']);
+    expect(disposeA).toHaveBeenCalledTimes(1);
+    expect(disposeB).not.toHaveBeenCalled();
+  });
+
   it('rebuilds + disposes the memoized SDK when a HELLO presence flag scrubs a seed on an identical config', async () => {
     const payload = new Uint8Array(2048).fill(1);
     const sdkA = fakeSiaSdk(payload).sdk;
