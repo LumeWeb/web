@@ -173,11 +173,14 @@ function wait(ms: number): Promise<void> {
 }
 
 /** Attaches and drives the session into worker mode. */
-function workerSession(): { host: SiaVideoSource; target: HTMLVideoElement; worker: FakeWorker } {
+function workerSession(src?: string): { host: SiaVideoSource; target: HTMLVideoElement; worker: FakeWorker } {
   const worker = new FakeWorker();
   const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
   const target = document.createElement('video');
   host.attach(target);
+  // SOURCE is replayed by ATTACH_OK when the source is already armed. This
+  // avoids racing the browser task that finishes the initial handshake.
+  if (src) host.src = src;
   worker.reply({
     features: { workerMse: true },
     publicKey: new Uint8Array(32),
@@ -259,6 +262,42 @@ function spyPlay(target: HTMLVideoElement) {
 }
 
 describe('replaced-media-resource events (worker mode)', () => {
+  it.skipIf(!IN_BROWSER)('detaches the old worker-MSE handle before recovery requests a replacement', () => {
+    const { host, target, worker } = workerSession('k');
+    const endedObserver = vi.fn();
+    host.addEventListener('ended', endedObserver);
+    const oldHandle = new MediaStream();
+    const idA = newestSourceId(worker);
+    worker.reply({ info: workerInfo, requestId: idA, type: WorkerToMainMessageType.SOURCE_OK });
+    worker.reply({ handle: oldHandle, requestId: idA, type: WorkerToMainMessageType.HANDLE } as unknown as WorkerToMainMessage);
+    markPlaying(target, 12.5);
+    const resumeSeconds = target.currentTime;
+    worker.sent.length = 0;
+
+    worker.reply(decodeError(idA));
+    const idB = newestSourceId(worker);
+
+    // The old handle must not remain the element's resource while SOURCE and
+    // the replacement HANDLE are in flight; a native ended from that handle
+    // would otherwise look like the current load to player observers.
+    expect(srcObjectOf(target)).toBeNull();
+    expect(sources(worker)).toHaveLength(1);
+    expect(worker.sent.find((message) => message.type === MainToWorkerMessageType.SEEK)).toMatchObject({
+      requestId: idB,
+      time: resumeSeconds,
+      type: MainToWorkerMessageType.SEEK,
+    });
+
+    // A queued old ended can arrive after the replacement HANDLE attaches.
+    // Recovery still owns the element, so it must not reach player observers.
+    const replacementHandle = new MediaStream();
+    worker.reply({ handle: replacementHandle, requestId: idB, type: WorkerToMainMessageType.HANDLE } as unknown as WorkerToMainMessage);
+    expect(srcObjectOf(target)).toBe(replacementHandle);
+    target.dispatchEvent(new Event('ended'));
+    expect(endedObserver).not.toHaveBeenCalled();
+    host.destroy();
+  });
+
   it.skipIf(!IN_BROWSER)('keeps recovery open when the superseded handle advances', () => {
     const { host, target, worker } = workerSession();
     const oldHandle = new MediaStream();
