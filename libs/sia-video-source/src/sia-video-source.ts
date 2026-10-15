@@ -1941,7 +1941,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
       // the old MediaSource mid-flight; that is not the user reaching EOF, so
       // it must neither latch end-state nor count as the recovered load having
       // played — the machine's own `recover.played` on an advancing playhead is
-      // the only completion signal.
+      // the only completion signal. Stop the event before the base host
+      // forwards it to player-facing ended observers.
+      event.stopImmediatePropagation();
       return;
     }
     // Genuine end-of-stream: the active load played out. Nothing past the
@@ -2793,6 +2795,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // machine already consumed the attempt and opened its recovery window, so
     // the target position must be re-recorded after the reset (a stalled load
     // emits no further timeupdate to re-capture it).
+    // Drop the old worker-MSE handle before resetting its request state. The
+    // handle can outlive #activeHandle, so resetting first leaves the element
+    // exposing a dead resource while the replacement SOURCE is in flight.
+    if (this.#mode === workerMode.worker) this.#detachCurrentResource();
     this.#resetLoadState();
     this.#lastPlayheadSeconds = decision.resumeSeconds;
     // Availability recovery rebuilds the SDK so the renter host set is
