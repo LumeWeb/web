@@ -32,6 +32,24 @@ function readyMachine(): HostPlaybackMachine {
 }
 
 describe('the load-failure vocabulary', () => {
+  it('restarts a stalled read while preserving playhead and play intent, then reports terminally at the budget', () => {
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+
+    const fail = (): HostDecision[] => machine.send({ kind: hostReportKind.readStalled, resumeSeconds: 42.5, type: hostPlaybackEvent.loadFailed });
+    expect(fail()).toEqual([{ kind: hostDecisionKind.restartSource, reason: recoveryReason.readStalled, resumeSeconds: 42.5, wantsPlay: true }]);
+    machine.send({ type: hostPlaybackEvent.sourceReady });
+    machine.send({ type: hostPlaybackEvent.recoverPlayed });
+    expect(fail()[0]).toMatchObject({ kind: hostDecisionKind.restartSource, resumeSeconds: 42.5, wantsPlay: true });
+    machine.send({ type: hostPlaybackEvent.sourceReady });
+    machine.send({ type: hostPlaybackEvent.recoverPlayed });
+    expect(fail()[0]).toMatchObject({ kind: hostDecisionKind.restartSource, resumeSeconds: 42.5, wantsPlay: true });
+    machine.send({ type: hostPlaybackEvent.sourceReady });
+    machine.send({ type: hostPlaybackEvent.recoverPlayed });
+    expect(fail()).toEqual([{ error: hostReportKind.readStalled, kind: hostDecisionKind.reportError }]);
+    expect(machine.current).toBe(hostPlaybackState.failed);
+  });
+
   it('keeps hostReportKind the same set as the wire WorkerErrorCode', () => {
     // A load-failure kind travels worker to host: the worker posts it as the
     // wire's WorkerErrorCode, the host records it as a hostReportKind. Keeping

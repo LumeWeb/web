@@ -241,6 +241,8 @@ export interface WorkerConfig {
  *   into the same sink. The host routes it nonfatally on its own instead of
  *   through the machine, and `errors.ts` intentionally holds no MediaError
  *   mapping for it, since it is not a machine `loadFailed` kind.
+ * - `readStalled` → the ranged-read watchdog timed out; the host restarts
+ *   the source with its bounded recovery budget.
  * - `shardShortage` → the SDK exhausted host selection and shard-read
  *   retries, leaving the object's data unavailable. The kind ends the current
  *   run without a seek target; the host responds with a bounded source restart
@@ -251,6 +253,7 @@ export const workerErrorCode = {
   device: 'device',
   network: 'network',
   quota: 'quota',
+  readStalled: 'read-stalled',
   shardShortage: 'shard-shortage',
   unavailable: 'unavailable',
   unsupported: 'unsupported',

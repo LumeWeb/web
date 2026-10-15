@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Slab } from '@siafoundation/sia-storage';
-import { isShardShortageError, isTransportReadError, LruChunkCache, RangedReader, ReadTransportError, type SiaObjectLike, type SiaSdkLike } from '../ranged-reader.ts';
+import { isReadStalledError, isShardShortageError, isTransportReadError, LruChunkCache, RangedReader, ReadTransportError, type SiaObjectLike, type SiaSdkLike } from '../ranged-reader.ts';
 
 /**
  * SDK that resembles the lazy dual-seed adapter: `download()` returns a
@@ -474,6 +474,7 @@ describe('RangedReader', () => {
     await new Promise((resolve) => setTimeout(resolve, 150));
 
     expect(errors).toHaveLength(1);
+    expect(isReadStalledError(errors[0])).toBe(true);
     expect(reader.active).toBe(false);
     // The stall was aborted promptly — the read must not hang the caller.
     expect(Date.now() - startedAt).toBeLessThan(2000);

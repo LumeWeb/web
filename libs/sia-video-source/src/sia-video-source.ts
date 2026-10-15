@@ -2088,19 +2088,18 @@ export class SiaVideoSource extends HTMLVideoElementHost {
         // element back to the last playable position (the normal seeking path
         // then issues the follow-up SEEK) instead of routing to the machine,
         // which would treat it as a load failure and reset the playhead.
-        // `unavailable` belongs to seek-target failures. A raw shard shortage
-        // uses `shardShortage` and enters machine recovery below.
+        // `unavailable` belongs to seek-target failures. Read stalls and raw
+        // shard shortages enter bounded machine recovery below.
         if (message.kind === workerErrorCode.unavailable) {
           this.#handleSeekUnavailable(message);
           return;
         }
         // The worker already exhausted its own reader retries before posting
-        // this ERROR. Decode and shard-shortage incidents use bounded
-        // reposition-and-resume; exhaustion reports the incident's kind.
+        // this ERROR. Decode, read-stalled, and shard-shortage incidents use
+        // bounded reposition-and-resume; exhaustion reports the incident's kind.
         // Network transport and unsupported-container errors remain terminal.
-        // A shard-shortage SOURCE carries `refreshSdk`, so the worker rebuilds
-        // its SDK before re-resolving renter hosts. The machine owns these
-        // decisions; the host applies them.
+        // Stalled reads and shard shortages rebuild the SDK before the retry.
+        // The machine owns recovery decisions and their retry budget.
         this.#mediaWorkerBackend.markFailed();
         this.#applyDecisions(
           this.#machine.send({
@@ -2798,7 +2797,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#lastPlayheadSeconds = decision.resumeSeconds;
     // Availability recovery rebuilds the SDK so the renter host set is
     // resolved again. The stored reason also survives deferred play and seek.
-    this.#sendSource(false, decision.reason === recoveryReason.shardShortage);
+    this.#sendSource(false, decision.reason === recoveryReason.shardShortage || decision.reason === recoveryReason.readStalled);
     // Record the element position for the fresh resource's attach (see the WHY
     // above); `#onSeeking` re-entrance from the eventual native seek is
     // suppressed while the machine is recovering.

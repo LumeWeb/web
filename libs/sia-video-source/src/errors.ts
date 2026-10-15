@@ -48,6 +48,7 @@ export const MEDIA_ERROR_CODES: Readonly<Partial<Record<WorkerErrorCode, number>
   decode: MediaError.MEDIA_ERR_DECODE,
   device: MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED,
   network: MediaError.MEDIA_ERR_NETWORK,
+  [workerErrorCode.readStalled]: MediaError.MEDIA_ERR_NETWORK,
   quota: MediaError.MEDIA_ERR_DECODE,
   unsupported: MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED,
   // Computed key: the member name (`shardShortage`) differs from the wire
@@ -60,6 +61,7 @@ export const DEFAULT_ERROR_MESSAGES: Readonly<Partial<Record<WorkerErrorCode, st
   decode: 'Playback failed while preparing Sia data for rendering.',
   device: 'This device or browser is too old to stream this video. Update to iOS 17.1+ or use a recent desktop browser.',
   network: 'The Sia network connection failed.',
+  [workerErrorCode.readStalled]: 'The Sia video read stalled before producing data. Try again later.',
   quota: 'Playback ran out of buffering memory while preparing Sia data for rendering.',
   unsupported: 'This Sia object is not playable in this browser.',
   // The wire value is kebab-case, so runtime lookup needs a computed key.
