@@ -589,18 +589,9 @@ export class RangedReader {
         // reports it exactly once with the read-window facts. A superseded run
         // exits silently — a stale failure must not reach onError.
         if (failure !== null && this.#loadGeneration === loadGeneration) {
-          // A transport/ranged-read failure that exhausted the budget is
-          // wrapped so the stream chain (and the host's recovery handling) can
-          // classify it: the message names the read window it gave up on,
-          // `cause` keeps the SDK/short-read error, and the window facts ride
-          // as fields. Three failures keep their original identity instead: a
-          // throwing onChunk (the caller's own handler), the stall watchdog
-          // (already reported as read.stalled), and a persistent shard
-          // shortage (the SDK's own error is the diagnosis; wrapping it as a
-          // transport blip would mislead the host's recovery). The wrapped
-          // message below, not a bare SDK string, is what describes a real
-          // transport failure to the wire.
-          if (!failure.consumer && !isStallWatchdogError(failure.error) && !isShardShortageError(failure.error)) {
+          // A stalled read is a transport failure; preserve only consumer and
+          // shard-shortage identities because they have different recovery paths.
+          if (!failure.consumer && !isShardShortageError(failure.error)) {
             throw new ReadTransportError(
               `Sia SDK ranged read failed after ${attempts} attempts (expected ${Math.max(0, end - start)} bytes at ${start})`,
               {

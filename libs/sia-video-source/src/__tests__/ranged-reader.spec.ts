@@ -474,6 +474,9 @@ describe('RangedReader', () => {
     await new Promise((resolve) => setTimeout(resolve, 150));
 
     expect(errors).toHaveLength(1);
+    expect(isTransportReadError(errors[0])).toBe(true);
+    expect((errors[0] as Error).message).toContain('Sia SDK ranged read failed');
+    expect(((errors[0] as Error).cause as Error).message).toContain('Sia SDK read stalled');
     expect(reader.active).toBe(false);
     // The stall was aborted promptly — the read must not hang the caller.
     expect(Date.now() - startedAt).toBeLessThan(2000);
