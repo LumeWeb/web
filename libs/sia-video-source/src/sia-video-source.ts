@@ -2634,6 +2634,9 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // load boundary, so its presence here means *this* load reported an error.
     const error = mediaErrorFromWorkerMessage({ context, kind });
     this.#mediaWorkerBackend.markFailed();
+    // A failed load cannot satisfy the prior play request. Let the next
+    // explicit play reach the machine so it can consume the owed repair.
+    this.#playSentForTransition = false;
     this.#error = error;
     this.dispatchEvent(mediaErrorEvent(error));
   }
