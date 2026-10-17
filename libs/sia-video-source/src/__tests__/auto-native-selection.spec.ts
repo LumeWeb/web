@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { nullLogger } from "../log/logger.ts";
 import { type SiaNativeStreamProvider } from "../native-stream-provider.ts";
 import { SIA_PLAYBACK_BACKENDS } from "../playback-backend.ts";
@@ -136,6 +136,18 @@ function provider(available: boolean): SiaNativeStreamProvider {
 }
 
 describe("auto backend selection", () => {
+  beforeEach(() => {
+    // These protocol tests do not construct MSE. Node needs the capability
+    // surface so SOURCE reaches the fake worker instead of failing as no-mse.
+    if (typeof MediaSource === "undefined") {
+      vi.stubGlobal("MediaSource", class {});
+    }
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it("uses the native stream when the provider reports availability", async () => {
     const createWorker = vi.fn();
     const target = new FakeVideoTarget();

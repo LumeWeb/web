@@ -129,7 +129,7 @@ function loadWorkerSource(
 /** Attaches and drives the session into main mode. */
 function mainSession(): { host: SiaVideoSource; target: HTMLVideoElement; worker: FakeWorker } {
   const worker = new FakeWorker();
-  const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+  const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
   const target = document.createElement('video');
   host.attach(target);
   worker.reply({
@@ -175,7 +175,7 @@ function wait(ms: number): Promise<void> {
 /** Attaches and drives the session into worker mode. */
 function workerSession(src?: string): { host: SiaVideoSource; target: HTMLVideoElement; worker: FakeWorker } {
   const worker = new FakeWorker();
-  const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+  const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
   const target = document.createElement('video');
   host.attach(target);
   // SOURCE is replayed by ATTACH_OK when the source is already armed. This
@@ -411,7 +411,7 @@ describe('replaced-media-resource events (worker mode)', () => {
 
   it.skipIf(!IN_BROWSER)('a superseded-handle ended never reaches host ended observers', () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     // Observer registered BEFORE attach, exactly how video.js would: the base
     // host registers its element `ended` forwarding for it, ahead of this
@@ -647,7 +647,7 @@ describe('replaced-media-resource events (main mode)', () => {
 
   it.skipIf(!IN_BROWSER)('accepts a genuine native ended from the current object URL after replacement', () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     const endedObserver = vi.fn();
     host.addEventListener('ended', endedObserver);

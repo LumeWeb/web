@@ -12,24 +12,44 @@ export default defineConfig({
   },
   test: {
     globals: true,
-    include: ["src/__tests__/**/*.spec.ts"],
     ...(IS_BROWSER
       ? {
-          browser: {
-            enabled: true,
-            provider: playwright(),
-            // Firefox cannot construct a MediaSource in a dedicated worker,
-            // so it runs the main-thread MSE path that Chromium does not.
-            instances: [
-              { browser: "chromium" as const, headless: true },
-              { browser: "firefox" as const, headless: true },
-            ],
-          },
-          hookTimeout: 60000,
-          testTimeout: 60000,
+          projects: [
+            {
+              extends: true,
+              test: {
+                name: "declarations",
+                environment: "node",
+                include: ["src/__tests__/**/*.declarations.spec.ts"],
+                hookTimeout: 30000,
+                testTimeout: 30000,
+              },
+            },
+            {
+              extends: true,
+              test: {
+                name: "playback",
+                include: ["src/__tests__/**/*.spec.ts"],
+                exclude: ["src/__tests__/**/*.declarations.spec.ts"],
+                browser: {
+                  enabled: true,
+                  provider: playwright(),
+                  // Firefox exercises main-thread MSE because it cannot
+                  // construct a MediaSource in a dedicated worker.
+                  instances: [
+                    { browser: "chromium" as const, headless: true },
+                    { browser: "firefox" as const, headless: true },
+                  ],
+                },
+                hookTimeout: 60000,
+                testTimeout: 60000,
+              },
+            },
+          ],
         }
       : {
           environment: "node",
+          include: ["src/__tests__/**/*.spec.ts"],
           hookTimeout: 30000,
           testTimeout: 30000,
         }),

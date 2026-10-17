@@ -523,7 +523,7 @@ describe.skipIf(!IN_BROWSER)('SiaVideoSource host reports main-thread buffered s
       if (!mediaSourceCtor || !mediaSourceCtor.isTypeSupported(BROWSER_DECODABLE_LONG_FIXTURE_MIME)) return;
 
       const worker = new HostFakeWorker();
-      const host = new SiaVideoSource({
+      const host = new SiaVideoSource({ backend: 'media-worker',
         createWorker: () => worker as unknown as Worker,
         logger: undefined,
       });

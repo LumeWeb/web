@@ -39,9 +39,9 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
-    "test:browser": "vitest run --browser",
-    "test:browser:watch": "vitest --browser",
-    "test:browser:ui": "vitest --browser --ui"
+    "test:browser": "vitest run --project 'playback*'",
+    "test:browser:watch": "vitest --project 'playback*'",
+    "test:browser:ui": "vitest --project 'playback*' --ui"
   },
   "dependencies": {
     "@noble/ciphers": "^2.4.0",

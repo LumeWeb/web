@@ -27,6 +27,7 @@ import {
   WorkerToMainMessageType,
 } from '../protocol.ts';
 import { SiaVideoSource } from '../sia-video-source.ts';
+import { SIA_PLAYBACK_BACKENDS } from '../playback-backend.ts';
 
 const IN_BROWSER = typeof document !== 'undefined' && typeof MediaSource !== 'undefined';
 
@@ -102,7 +103,7 @@ const workerInfo = {
 /** Attaches and drives the session into main mode. */
 function mainSession(): { host: SiaVideoSource; target: HTMLVideoElement; worker: FakeWorker } {
   const worker = new FakeWorker();
-  const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+  const host = new SiaVideoSource({ backend: SIA_PLAYBACK_BACKENDS.MEDIA_WORKER, createWorker: () => worker as unknown as Worker });
   const target = document.createElement('video');
   host.attach(target);
   worker.reply({
@@ -130,7 +131,7 @@ function srcObjectOf(target: HTMLVideoElement): unknown {
 /** Attaches and drives the session into worker mode. */
 function workerSession(): { host: SiaVideoSource; target: HTMLVideoElement; worker: FakeWorker } {
   const worker = new FakeWorker();
-  const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+  const host = new SiaVideoSource({ backend: SIA_PLAYBACK_BACKENDS.MEDIA_WORKER, createWorker: () => worker as unknown as Worker });
   const target = document.createElement('video');
   host.attach(target);
   worker.reply({
