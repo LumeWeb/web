@@ -57,7 +57,7 @@ class FakeWorker {
 /** attach + HELLO_OK (seed-less) produces a ready host. */
 function attachAndHandshake(): { host: SiaVideoSource; target: HTMLVideoElement; worker: FakeWorker } {
   const worker = new FakeWorker();
-  const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+  const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
   const target = document.createElement('video');
   host.attach(target);
   const hello = worker.sent.filter((m) => m.type === MainToWorkerMessageType.HELLO).at(-1);

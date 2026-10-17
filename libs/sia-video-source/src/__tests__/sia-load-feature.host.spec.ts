@@ -61,7 +61,7 @@ class FakeWorker {
 /** attach + HELLO_OK (seed-less) → a ready, main-mode host. */
 function attachAndHandshake(): { host: SiaVideoSource; target: HTMLVideoElement; worker: FakeWorker } {
   const worker = new FakeWorker();
-  const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+  const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
   const target = document.createElement('video');
   host.attach(target);
   worker.reply({
@@ -71,6 +71,9 @@ function attachAndHandshake(): { host: SiaVideoSource; target: HTMLVideoElement;
     type: WorkerToMainMessageType.HELLO_OK,
     version: PROTOCOL_VERSION,
   });
+  const attach = worker.sent.filter((m) => m.type === MainToWorkerMessageType.ATTACH).at(-1);
+  if (!attach) throw new Error('ATTACH was not sent');
+  worker.reply({ mode: 'main', requestId: attach.requestId, type: WorkerToMainMessageType.ATTACH_OK });
   return { host, target, worker };
 }
 

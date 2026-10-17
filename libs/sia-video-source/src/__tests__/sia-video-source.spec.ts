@@ -69,7 +69,7 @@ function workerConfig(indexerUrl = 'https://sia.storage') {
 
 describe('SiaVideoSource (host state machine)', () => {
   it.skipIf(!IN_BROWSER)('a createWorker failure surfaces a fatal network error and never starts a handshake', () => {
-    const host = new SiaVideoSource({
+    const host = new SiaVideoSource({ backend: 'media-worker',
       createWorker: () => {
         throw new Error('worker spawn failed');
       },
@@ -87,7 +87,7 @@ describe('SiaVideoSource (host state machine)', () => {
 
   it.skipIf(!IN_BROWSER)('sends HELLO with the configured SDK material on attach', () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({
+    const host = new SiaVideoSource({ backend: 'media-worker',
       createWorker: () => worker as unknown as Worker,
       workerConfig: workerConfig(),
     });
@@ -103,7 +103,7 @@ describe('SiaVideoSource (host state machine)', () => {
 
   it.skipIf(!IN_BROWSER)('proceeds to ATTACH only after a matching protocol version', () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     host.attach(document.createElement('video'));
 
     worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: 999 });
@@ -117,12 +117,13 @@ describe('SiaVideoSource (host state machine)', () => {
 
   it.skipIf(!IN_BROWSER)('goes through the full main-mode handshake: ATTACH → SOURCE_OK → blob src', () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
 
     worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     expect(worker.sent.some((m) => m.type === MainToWorkerMessageType.ATTACH)).toBe(true);
+    replyAttachOk(worker);
 
     host.src = 'k';
     const source = worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as
@@ -144,7 +145,7 @@ describe('SiaVideoSource (host state machine)', () => {
 
   it.skipIf(!IN_BROWSER)('records a new source request after the ready worker handshake', () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
     worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
@@ -169,7 +170,7 @@ describe('SiaVideoSource (host state machine)', () => {
 
   it.skipIf(!IN_BROWSER)('forwards native play and seek events to the worker', () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
     worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
@@ -204,11 +205,12 @@ describe('SiaVideoSource (host state machine)', () => {
 
   it.skipIf(!IN_BROWSER)('drops stale ERROR reports but surfaces current-load ones', () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
     worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
 
+    replyAttachOk(worker);
     host.src = 'k';
     // A superseded load's error must not surface.
     worker.reply({ context: 'stale', kind: 'network', requestId: 999, type: WorkerToMainMessageType.ERROR });
@@ -222,7 +224,7 @@ describe('SiaVideoSource (host state machine)', () => {
 
   it.skipIf(!IN_BROWSER)('drops a request-scoped ERROR that arrives after the source was cleared', () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     let errorEvents = 0;
     host.addEventListener('error', () => errorEvents++);
@@ -250,7 +252,7 @@ describe('SiaVideoSource (host state machine)', () => {
   it.skipIf(!IN_BROWSER)('attach on a destroyed host is a no-op', () => {
     let spawned = 0;
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({
+    const host = new SiaVideoSource({ backend: 'media-worker',
       createWorker: () => {
         spawned++;
         return worker as unknown as Worker;
@@ -267,7 +269,7 @@ describe('SiaVideoSource (host state machine)', () => {
 
   it.skipIf(!IN_BROWSER)('a re-attach renegotiates with a fresh HELLO for new config', () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     host.attach(document.createElement('video'));
     host.workerConfig = workerConfig('https://changed.example');
     host.detach();
@@ -283,7 +285,7 @@ describe('SiaVideoSource (host state machine)', () => {
   it.skipIf(!IN_BROWSER)('forwards an explicit worker-MSE preference on HELLO and omits it by default', () => {
     const worker = new FakeWorker();
 
-    const forced = new SiaVideoSource({
+    const forced = new SiaVideoSource({ backend: 'media-worker',
       createWorker: () => worker as unknown as Worker,
       workerConfig: workerConfig(),
       workerMse: 'main',
@@ -294,7 +296,7 @@ describe('SiaVideoSource (host state machine)', () => {
     forced.destroy();
 
     // Default auto (or unset) leaves the wire byte-identical: no workerMse.
-    const auto = new SiaVideoSource({ createWorker: () => worker as unknown as Worker, workerConfig: workerConfig() });
+    const auto = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker, workerConfig: workerConfig() });
     auto.attach(document.createElement('video'));
     const autoHello = worker.sent.filter((m) => m.type === MainToWorkerMessageType.HELLO).at(-1) as { config?: Record<string, unknown>; type: MainToWorkerMessageType.HELLO; };
     expect(autoHello.config).not.toHaveProperty('workerMse');
@@ -312,7 +314,7 @@ describe('SiaVideoSource (host state machine)', () => {
     const canAttach = handle !== undefined;
 
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
 
@@ -351,7 +353,7 @@ describe('SiaVideoSource (host state machine)', () => {
     const keyPair = generateWorkerKeyPair();
     const publicKey = exportWorkerPublicKey(keyPair);
     let supplierCalls = 0;
-    const host = new SiaVideoSource({
+    const host = new SiaVideoSource({ backend: 'media-worker',
       createWorker: () => worker as unknown as Worker,
       getAppKeySeed: () => {
         supplierCalls++;
@@ -400,7 +402,7 @@ describe('SiaVideoSource (host state machine)', () => {
     // React syncs the supplier onto the persistent media instance on every
     // render — i.e. after construction, through the `getAppKeySeed` setter,
     // never through the options object.
-    const host = new SiaVideoSource({
+    const host = new SiaVideoSource({ backend: 'media-worker',
       createWorker: () => worker as unknown as Worker,
       workerConfig: workerConfig(),
     });
@@ -435,7 +437,7 @@ describe('SiaVideoSource (host state machine)', () => {
     const keyPair = generateWorkerKeyPair();
     const publicKey = exportWorkerPublicKey(keyPair);
     // A distinct random seed per call: the supplier is consumed per handshake.
-    const host = new SiaVideoSource({
+    const host = new SiaVideoSource({ backend: 'media-worker',
       createWorker: () => worker as unknown as Worker,
       getAppKeySeed: () => crypto.getRandomValues(new Uint8Array(32)),
       workerConfig: workerConfig(),
@@ -470,7 +472,7 @@ describe('SiaVideoSource (host state machine)', () => {
     const keyPair = generateWorkerKeyPair();
     const publicKey = exportWorkerPublicKey(keyPair);
     let errorEvents = 0;
-    const host = new SiaVideoSource({
+    const host = new SiaVideoSource({ backend: 'media-worker',
       createWorker: () => worker as unknown as Worker,
       getAppKeySeed: () => crypto.getRandomValues(new Uint8Array(32)),
       workerConfig: workerConfig(),
@@ -540,7 +542,7 @@ describe('SiaVideoSource (host state machine)', () => {
     const keyPair = generateWorkerKeyPair();
     const publicKey = exportWorkerPublicKey(keyPair);
     let supplierCalls = 0;
-    const host = new SiaVideoSource({
+    const host = new SiaVideoSource({ backend: 'media-worker',
       createWorker: () => worker as unknown as Worker,
       getSharingKeySeed: () => {
         supplierCalls++;
@@ -580,7 +582,7 @@ describe('SiaVideoSource (host state machine)', () => {
     // be captured before the handshake (same as the single-envelope tests).
     const expectedAppSeed = new Uint8Array(appSeed);
     const expectedSharingSeed = new Uint8Array(sharingSeed);
-    const host = new SiaVideoSource({
+    const host = new SiaVideoSource({ backend: 'media-worker',
       createWorker: () => worker as unknown as Worker,
       getAppKeySeed: () => appSeed,
       getSharingKeySeed: () => sharingSeed,
@@ -611,7 +613,7 @@ describe('SiaVideoSource (host state machine)', () => {
 
   it.skipIf(!IN_BROWSER)('a play issued during re-attach is re-sent once the new pipeline is ready', () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     // The source predates the engine, so it replays on ATTACH_OK rather than
     // going straight out. The user's play() races the handshake and is queued
@@ -650,7 +652,7 @@ describe('SiaVideoSource (host state machine)', () => {
 
   it.skipIf(!IN_BROWSER)('flushes only the latest buffered seek when multiple seeks precede the handshake completion', () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.src = 'multi-seek-object';
     host.attach(target);
@@ -689,7 +691,7 @@ describe('SiaVideoSource (host state machine)', () => {
 
   it.skipIf(!IN_BROWSER)('does not resume a playback the user deliberately paused before the re-attach', async () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.src = 'paused-object';
     host.attach(target);
@@ -718,7 +720,7 @@ describe('SiaVideoSource (host state machine)', () => {
 
   it.skipIf(!IN_BROWSER)('re-attaching resumes a video that was already playing', () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.src = 'sticky-object';
     host.attach(target);
@@ -739,7 +741,7 @@ describe('SiaVideoSource (host state machine)', () => {
 
   it.skipIf(!IN_BROWSER)('pressing play after pausing is still honored across a re-attach', () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.src = 'replay-object';
     host.attach(target);
@@ -762,7 +764,7 @@ describe('SiaVideoSource (host state machine)', () => {
     const worker = new FakeWorker();
     const keyPair = generateWorkerKeyPair();
     const publicKey = exportWorkerPublicKey(keyPair);
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     host.attach(document.createElement('video'));
     worker.reply({ features: { workerMse: false }, publicKey, requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     await new Promise((resolve) => setTimeout(resolve, 0));
@@ -774,7 +776,7 @@ describe('SiaVideoSource (host state machine)', () => {
 
   it.skipIf(!IN_BROWSER)('reports main-thread buffered state when the SourceBuffer opens, updates, and playhead changes', async () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     let sourceBuffer: SourceBuffer | undefined;
     const addSourceBuffer = Reflect.get(MediaSource.prototype, 'addSourceBuffer');
@@ -840,7 +842,7 @@ describe('SiaVideoSource (host state machine)', () => {
 
   it.skipIf(!IN_BROWSER)('calls MediaSource.endOfStream after ENDED once appends drain (main mode)', async () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
     worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
@@ -883,9 +885,10 @@ describe('SiaVideoSource (host state machine)', () => {
 
   it.skipIf(!IN_BROWSER)('an ENDED that does not match the active load is ignored', async () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     host.attach(document.createElement('video'));
     worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
+    replyAttachOk(worker);
 
     host.src = 'k';
     const source = worker.sent.find((m) => m.type === MainToWorkerMessageType.SOURCE) as
@@ -909,7 +912,7 @@ describe('SiaVideoSource (host state machine)', () => {
 
   it.skipIf(!IN_BROWSER)('does not end main-thread MSE after its load reports an error', async () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     host.attach(document.createElement('video'));
     worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
     replyAttachOk(worker);
@@ -938,7 +941,7 @@ describe('SiaVideoSource (host state machine)', () => {
 
   it.skipIf(!IN_BROWSER)('aborts the SourceBuffer parser on repeated forward/back seeks (main-thread MSE fallback)', async () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
     worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
@@ -1004,7 +1007,7 @@ describe('SiaVideoSource (host state machine)', () => {
 
   it.skipIf(!IN_BROWSER)('surfaces a fatal SourceBuffer append failure once and never endOfStreams the failed pipeline', async () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
     worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
@@ -1063,7 +1066,7 @@ describe('SiaVideoSource (host state machine)', () => {
 
   it.skipIf(!IN_BROWSER)('trims the back buffer through the shared pipe on playhead advance', async () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
     worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
@@ -1119,7 +1122,7 @@ describe('decode failure recovery', () => {
   /** attach + HELLO_OK → a ready host with a main-mode session. */
   function attachAndHandshake(): { host: SiaVideoSource; target: HTMLVideoElement; worker: FakeWorker; } {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
     worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
@@ -1206,7 +1209,8 @@ describe('decode failure recovery', () => {
 
     worker.reply({ context: 'append failed', kind: 'decode', requestId: newLoadId, type: WorkerToMainMessageType.ERROR });
 
-    // The reload repositions the fresh source at the start, not at 42.5.
+    target.dispatchEvent(new Event('play'));
+    // The deferred repair belongs to k2, not the old source's playhead.
     const seeks = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK);
     expect(seeks.at(-1)).toMatchObject({ time: 0, type: MainToWorkerMessageType.SEEK });
     expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).at(-1)).toMatchObject({ src: 'k2', type: MainToWorkerMessageType.SOURCE });
@@ -1218,17 +1222,15 @@ describe('decode failure recovery', () => {
     const originalLoadId = loadAndAcknowledge(host, worker, 'k');
     worker.sent.length = 0;
 
-    // No native `play` ever happened: the element is paused and the host holds
-    // no play intent, so the recovery must repair the load without restarting
-    // playback behind the user's back.
+    // Without play intent, a decode error must not start downloading a
+    // replacement pipeline behind the user's back.
     expect(target.paused).toBe(true);
 
     worker.reply({ context: 'append failed', kind: 'decode', requestId: originalLoadId, type: WorkerToMainMessageType.ERROR });
 
     expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
-    // The load itself still recovers: a fresh SOURCE plus a SEEK to position 0.
-    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
-    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK).at(-1)).toMatchObject({ time: 0, type: MainToWorkerMessageType.SEEK });
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(0);
     host.destroy();
   });
 
@@ -1246,17 +1248,13 @@ describe('decode failure recovery', () => {
     const freshLoadId = newestSourceId(worker);
     worker.sent.length = 0;
 
-    // The never-played fresh source decode-errors: its recovery repairs the
-    // load (fresh SOURCE + SEEK to 0) but must stay paused — the earlier
-    // source's play must not leak into an unsolicited PLAY for this one.
+    // Play intent belongs to k, so k2 must wait for its own explicit play
+    // or seek before starting the deferred repair.
     worker.reply({ context: 'append failed', kind: 'decode', requestId: freshLoadId, type: WorkerToMainMessageType.ERROR });
 
     expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.PLAY)).toHaveLength(0);
-    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(1);
-    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK).at(-1)).toMatchObject({
-      time: 0,
-      type: MainToWorkerMessageType.SEEK,
-    });
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+    expect(worker.sent.filter((m) => m.type === MainToWorkerMessageType.SEEK)).toHaveLength(0);
     host.destroy();
   });
 
@@ -1324,8 +1322,9 @@ describe('decode failure recovery', () => {
   });
 
   it.skipIf(!IN_BROWSER)('reports the decode error to the UI only after recovery attempts are exhausted', () => {
-    const { host, worker } = attachAndHandshake();
+    const { host, target, worker } = attachAndHandshake();
     const initialLoadId = loadAndAcknowledge(host, worker, 'k');
+    target.dispatchEvent(new Event('play'));
     worker.sent.length = 0;
 
     let errorEvents = 0;
@@ -1350,9 +1349,10 @@ describe('decode failure recovery', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER)('a stream that never plays keeps failing through the same two reloads', () => {
-    const { host, worker } = attachAndHandshake();
+  it.skipIf(!IN_BROWSER)('a recovery that never advances keeps failing through the same two reloads', () => {
+    const { host, target, worker } = attachAndHandshake();
     const initialLoadId = loadAndAcknowledge(host, worker, 'k');
+    target.dispatchEvent(new Event('play'));
     worker.sent.length = 0;
 
     let errorEvents = 0;
@@ -1385,6 +1385,7 @@ describe('decode failure recovery', () => {
   it.skipIf(!IN_BROWSER)('once a recovered stream plays, the next error gets two fresh reloads again', () => {
     const { host, target, worker } = attachAndHandshake();
     const initialLoadId = loadAndAcknowledge(host, worker, 'k');
+    target.dispatchEvent(new Event('play'));
     worker.sent.length = 0;
 
     let errorEvents = 0;
@@ -1666,8 +1667,9 @@ describe('decode failure recovery', () => {
   });
 
   it.skipIf(!IN_BROWSER)('clears recovery state on a fresh src', () => {
-    const { host, worker } = attachAndHandshake();
+    const { host, target, worker } = attachAndHandshake();
     const kLoadId = loadAndAcknowledge(host, worker, 'k');
+    target.dispatchEvent(new Event('play'));
 
     let errorEvents = 0;
     host.addEventListener('error', () => errorEvents++);
@@ -1686,6 +1688,7 @@ describe('decode failure recovery', () => {
     const k2Sources = worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE).filter((m) => m.src === 'k2');
     expect(k2Sources).toHaveLength(1);
     worker.reply({ info: mainInfo, requestId: k2Sources[0].requestId, type: WorkerToMainMessageType.SOURCE_OK });
+    target.dispatchEvent(new Event('play'));
 
     // Decode error on the fresh load → reload happens again (not 0, and not
     // surfacing immediately from the old exhausted budget).
@@ -1823,7 +1826,7 @@ describe('availability (shard-shortage) failure recovery', () => {
   /** attach + HELLO_OK → a ready host with a main-mode session. */
   function attachAndHandshake(): { host: SiaVideoSource; target: HTMLVideoElement; worker: FakeWorker } {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
     worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
@@ -1885,8 +1888,9 @@ describe('availability (shard-shortage) failure recovery', () => {
   });
 
   it.skipIf(!IN_BROWSER)('a decode error restart does not ask for an SDK refresh', () => {
-    const { host, worker } = attachAndHandshake();
+    const { host, target, worker } = attachAndHandshake();
     const originalLoadId = loadAndAcknowledge(host, worker, 'k');
+    target.dispatchEvent(new Event('play'));
     worker.sent.length = 0;
 
     worker.reply({ context: 'append failed', kind: 'decode', requestId: originalLoadId, type: WorkerToMainMessageType.ERROR });
@@ -1897,8 +1901,9 @@ describe('availability (shard-shortage) failure recovery', () => {
   });
 
   it.skipIf(!IN_BROWSER)('surfaces a data-unavailable media error (network class, never unsupported) once the restart budget is exhausted', () => {
-    const { host, worker } = attachAndHandshake();
+    const { host, target, worker } = attachAndHandshake();
     const initialLoadId = loadAndAcknowledge(host, worker, 'k');
+    target.dispatchEvent(new Event('play'));
     worker.sent.length = 0;
 
     let errorEvents = 0;
@@ -1939,7 +1944,7 @@ describe('native media element error handling', () => {
   /** attach + HELLO_OK → a ready host with a main-mode session. */
   function attachAndHandshake(): { host: SiaVideoSource; target: HTMLVideoElement; worker: FakeWorker; } {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
     worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
@@ -2204,7 +2209,7 @@ describe('out-of-window seek recovery', () => {
   /** attach + HELLO_OK → a ready host with a main-mode session. */
   function attachAndHandshake(): { host: SiaVideoSource; target: HTMLVideoElement; worker: FakeWorker; } {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
     worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
@@ -2709,7 +2714,7 @@ describe('the typed recovery-change event', () => {
 
   function attachAndHandshake(): { host: SiaVideoSource; target: HTMLVideoElement; worker: FakeWorker; } {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
     worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
@@ -2887,7 +2892,7 @@ describe('unavailable seek snap-back (host, nonfatal)', () => {
 
   function attachAndHandshake(): { host: SiaVideoSource; target: HTMLVideoElement; worker: FakeWorker; } {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
     worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });
@@ -3241,7 +3246,7 @@ describe('late unavailable seek retarget (host, nonfatal)', () => {
 
   function attachAndHandshake(): { host: SiaVideoSource; target: HTMLVideoElement; worker: FakeWorker; } {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({ createWorker: () => worker as unknown as Worker });
+    const host = new SiaVideoSource({ backend: 'media-worker', createWorker: () => worker as unknown as Worker });
     const target = document.createElement('video');
     host.attach(target);
     worker.reply({ features: { workerMse: false }, publicKey: new Uint8Array(32), requestId: helloRequestId(worker), type: WorkerToMainMessageType.HELLO_OK, version: PROTOCOL_VERSION });

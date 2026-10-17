@@ -92,7 +92,7 @@ function appMetadata(): AppMetadata {
 /** attach + HELLO_OK + ATTACH_OK (seed-less) → a ready, main-mode host. */
 function attachAndHandshake(): { host: SiaVideoSource; target: HTMLVideoElement; worker: FakeWorker } {
   const worker = new FakeWorker();
-  const host = new SiaVideoSource({
+  const host = new SiaVideoSource({ backend: 'media-worker',
     createWorker: () => worker as unknown as Worker,
     workerConfig: workerConfig(),
   });
@@ -177,7 +177,7 @@ function workerConfig(indexerUrl = 'https://sia.storage') {
 describe('reloadConfiguration applies worker configuration', () => {
   it.skipIf(!IN_BROWSER)('posts a fresh HELLO carrying the current workerConfig', async () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({
+    const host = new SiaVideoSource({ backend: 'media-worker',
       createWorker: () => worker as unknown as Worker,
       workerConfig: workerConfig('https://a.example'),
     });
@@ -210,7 +210,7 @@ describe('reloadConfiguration applies worker configuration', () => {
     const secondSeed = crypto.getRandomValues(new Uint8Array(32));
     const expectedSecond = new Uint8Array(secondSeed);
     let supplierCalls = 0;
-    const host = new SiaVideoSource({
+    const host = new SiaVideoSource({ backend: 'media-worker',
       createWorker: () => worker as unknown as Worker,
       getAppKeySeed: () => {
         supplierCalls++;
@@ -371,7 +371,7 @@ describe('reloadConfiguration applies worker configuration', () => {
 
   it.skipIf(!IN_BROWSER)('is a no-op before attach, when detached, and after destroy', () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({
+    const host = new SiaVideoSource({ backend: 'media-worker',
       createWorker: () => worker as unknown as Worker,
       workerConfig: workerConfig(),
     });
@@ -418,7 +418,7 @@ describe('reloadConfiguration applies worker configuration', () => {
     const worker = new FakeWorker();
     const keyPair = generateWorkerKeyPair();
     const publicKey = exportWorkerPublicKey(keyPair);
-    const host = new SiaVideoSource({
+    const host = new SiaVideoSource({ backend: 'media-worker',
       createWorker: () => worker as unknown as Worker,
       getAppKeySeed: () => crypto.getRandomValues(new Uint8Array(32)),
       workerConfig: workerConfig(),
@@ -467,7 +467,7 @@ describe('reloadConfiguration applies worker configuration', () => {
     const expectedSecond = new Uint8Array(secondSeed);
     let resolveFirst: ((seed: Uint8Array) => void) | undefined;
     let supplierCalls = 0;
-    const host = new SiaVideoSource({
+    const host = new SiaVideoSource({ backend: 'media-worker',
       createWorker: () => worker as unknown as Worker,
       getAppKeySeed: () => {
         supplierCalls++;
@@ -523,7 +523,7 @@ describe('reloadConfiguration applies worker configuration', () => {
     const worker = new FakeWorker();
     let resolveFirst: ((seed: Uint8Array) => void) | undefined;
     const staleSeed = crypto.getRandomValues(new Uint8Array(32));
-    const host = new SiaVideoSource({
+    const host = new SiaVideoSource({ backend: 'media-worker',
       createWorker: () => worker as unknown as Worker,
       getAppKeySeed: () =>
         new Promise<Uint8Array>((resolve) => {
@@ -558,7 +558,7 @@ describe('reloadConfiguration applies worker configuration', () => {
     const worker = new FakeWorker();
     const keyPair = generateWorkerKeyPair();
     const publicKey = exportWorkerPublicKey(keyPair);
-    const host = new SiaVideoSource({
+    const host = new SiaVideoSource({ backend: 'media-worker',
       createWorker: () => worker as unknown as Worker,
       getAppKeySeed: () => crypto.getRandomValues(new Uint8Array(32)),
       workerConfig: workerConfig(),
@@ -567,6 +567,7 @@ describe('reloadConfiguration applies worker configuration', () => {
     host.attach(target);
     replyHelloOk(worker);
     await settle();
+    replyAttachOk(worker);
     loadAndAcknowledge(host, worker, 'k');
     // The user asked to play.
     target.dispatchEvent(new Event('play'));
@@ -618,7 +619,7 @@ describe('reloadConfiguration applies worker configuration', () => {
 
   it.skipIf(!IN_BROWSER)('ignores a HELLO_OK that answers a handshake superseded by destroy', async () => {
     const worker = new FakeWorker();
-    const host = new SiaVideoSource({
+    const host = new SiaVideoSource({ backend: 'media-worker',
       createWorker: () => worker as unknown as Worker,
       getAppKeySeed: () => crypto.getRandomValues(new Uint8Array(32)),
       workerConfig: workerConfig(),
