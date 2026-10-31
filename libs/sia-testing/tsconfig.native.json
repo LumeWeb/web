@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "customConditions": ["node"],
+    "types": ["node"],
+    "lib": ["esnext", "dom"]
+  },
+  "include": ["tests/sdk/native/**/*.ts"],
+  "exclude": []
+}

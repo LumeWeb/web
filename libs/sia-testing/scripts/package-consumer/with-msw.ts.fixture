@@ -1,0 +1,11 @@
+/** Checks MSW declarations against the installed peer in the copied consumer. */
+import { createIndexdHandlers } from "@lumeweb/sia-testing/msw";
+import { setupIndexdServer } from "@lumeweb/sia-testing/msw/node";
+import metadata from "@lumeweb/sia-testing/package.json" with { type: "json" };
+import { model } from "./pure.js";
+
+const handlers = createIndexdHandlers({ model });
+const server = setupIndexdServer({ model });
+server.resetHandlers(...handlers.handlers);
+const name: string = metadata.name;
+void name;

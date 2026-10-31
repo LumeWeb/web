@@ -1,0 +1,6 @@
+/** Keeps browser exports reachable so Vite checks their transitive imports. */
+import * as fixtures from "@lumeweb/sia-testing/fixtures";
+import * as model from "@lumeweb/sia-testing/model";
+import * as msw from "@lumeweb/sia-testing/msw";
+
+console.log(fixtures, model, msw);

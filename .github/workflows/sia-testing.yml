@@ -1,0 +1,40 @@
+name: sia-testing
+
+on:
+  push:
+    paths:
+      - 'libs/sia-testing/**'
+      - 'libs/tsdown-config/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/sia-testing.yml'
+  pull_request:
+    paths:
+      - 'libs/sia-testing/**'
+      - 'libs/tsdown-config/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/sia-testing.yml'
+
+concurrency:
+  group: sia-testing-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: LumeWeb/workflows/.github/actions/setup-all@develop
+      - run: pnpm --filter=@lumeweb/sia-testing check-types
+      - run: pnpm --filter=@lumeweb/sia-testing lint
+      - run: pnpm --filter=@lumeweb/sia-testing test
+      - run: pnpm --filter=@lumeweb/sia-testing test:native:helpers
+      - run: pnpm --filter=@lumeweb/sia-testing test:native:control
+      - run: pnpm --filter=@lumeweb/tsdown-config build:config
+      - run: pnpm --filter=@lumeweb/sia-testing test:package
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: LumeWeb/workflows/.github/actions/setup-all@develop
+      - run: pnpm --filter=@lumeweb/sia-testing exec playwright install --with-deps chromium
+      - run: pnpm --filter=@lumeweb/sia-testing test:browser

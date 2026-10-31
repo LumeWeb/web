@@ -1,0 +1,69 @@
+{
+  "name": "@lumeweb/sia-testing",
+  "version": "0.1.0",
+  "description": "Deterministic Indexd control-plane testing tools for Sia Storage SDK consumers",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    "./fixtures": {
+      "types": "./dist/esm/fixtures/index.d.ts",
+      "import": "./dist/esm/fixtures/index.js"
+    },
+    "./model": {
+      "types": "./dist/esm/model/index.d.ts",
+      "import": "./dist/esm/model/index.js"
+    },
+    "./msw": {
+      "types": "./dist/esm/msw/index.d.ts",
+      "import": "./dist/esm/msw/index.js"
+    },
+    "./msw/node": {
+      "types": "./dist/esm/msw/node.d.ts",
+      "import": "./dist/esm/msw/node.js"
+    },
+    "./http": {
+      "types": "./dist/esm/http/index.d.ts",
+      "import": "./dist/esm/http/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "check-types": "tsc --noEmit && tsc --noEmit -p tsconfig.native.json",
+    "lint": "oxlint src tests scripts",
+    "test": "vitest run --project unit",
+    "test:browser": "playwright test --config playwright.ci.config.ts && playwright test --config playwright.loopback.config.ts",
+    "test:native:helpers": "vitest run --project native-helpers",
+    "test:native:control": "vitest run --project native-control",
+    "test:package": "pnpm run build && node scripts/check-package.mjs",
+    "test:mutation": "node scripts/mutation-regression.mjs"
+  },
+  "peerDependencies": {
+    "msw": "^2.14.6"
+  },
+  "peerDependenciesMeta": {
+    "msw": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@lumeweb/tsdown-config": "workspace:*",
+    "@playwright/test": "^1.61.1",
+    "@siafoundation/sia-storage": "0.1.4",
+    "@types/node": "catalog:",
+    "msw": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:framework",
+    "vitest": "catalog:"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
+  }
+}
