@@ -131,3 +131,10 @@ Await `recordAccountKey` immediately after registration, before any funding wait
 Close browser/native resources before the callback returns. The helper attempts each independent exact-owned cleanup phase and preserves callback and cleanup errors. A failed pre-delete recovery write prevents that resource's DELETE, while later eligible phases still run. Uncertain registration, an unacknowledged record write or failed cleanup retains private recovery data under `/tmp/sia-native-cutoff-run-*`. Missing account identity is not proof that registration did not happen.
 
 The executable retains the kernel lock through owned descendant teardown, account cleanup and postflight. Child output is private and capped at 8 MiB. Failed runs retain `/tmp/sia-e2e-run-*` diagnostics. Review exact retained records privately; do not publish credentials or raw SDK output, discover-and-delete other resources, or kill a guardian to force lock release. Successful deletion does not prove that host sectors were reclaimed.
+
+A consumer-owned example lives in `libs/sia-video-source/tests/e2e`. Its page
+calls the production stream service through the library's public `/sia` export.
+After building this package and `@lumeweb/tsdown-config`, run
+`node scripts/check-consumers.mjs` to check the packed library and testing API
+in a copied consumer. It checks types, lint and page builds, and collects the
+spec without starting a browser or contacting a service.

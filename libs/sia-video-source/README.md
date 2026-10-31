@@ -187,3 +187,31 @@ SIA_TEST_ENV=node pnpm --filter @lumeweb/sia-video-source test
 `test` uses browser mode by default in the Vitest configuration and runs Chromium and Firefox. `SIA_TEST_ENV=node` selects the Node environment. The browser suite has Firefox coverage; Safari requires a separate device or browser run.
 
 Source ownership is split between `src/sia-video-source.ts` for the host, `src/session/` for worker coordination, `src/media/` and `src/sink/` for media flow, `src/worker.ts` and `src/worker-runtime.ts` for the worker entry, and `src/react/` for the wrapper. Add design decisions as numbered append-only files under `decisions/`; the next number after 0011 is 0012. Verify public examples against the package exports and types before changing this README.
+
+## Manual real-service E2E
+
+`tests/e2e/page.ts` owns its SDK, sharing key and stream file. It calls the
+public `@lumeweb/sia-video-source/sia` service with an explicit `shared` source,
+then requests bytes 2 through 4 from the service-managed URL. The live spec
+expects status 206, `Content-Range: bytes 2-4/8` and bytes `[2, 3, 4]`.
+This case does not test the playback worker or MSE backend.
+
+The Node spec imports `readE2EService` and `withDisposableAccount` from
+`@lumeweb/sia-testing/e2e/node`. Its page acknowledges the account identity
+through a typed Playwright binding. The acknowledgement persists recovery
+before the funding wait. Browser-owned handles and service-worker registrations
+are closed before the account callback returns.
+
+From this package, `test:e2e:collect` lists the spec without starting a server;
+`test:e2e:build` builds the page with the SDK's Vite plugin. `test:e2e:live` is
+manual only. It calls `sia-testing-e2e --cwd "$PWD" -- playwright test --config
+playwright.e2e.config.ts`, which holds the guarded lease through cleanup and
+postflight. Follow the prerequisites and explicit service, storage, consent and
+SPKI settings in `@lumeweb/sia-testing`'s README. Never use this command against
+an operator-owned deployment without separate authorization. No CI task runs it.
+
+The offline delivery check is `node scripts/check-consumers.mjs` from
+`libs/sia-testing`, after building `sia-testing` and the shared tsdown config.
+It uses cached dependencies in disposable copies, actual offline tarballs,
+TypeScript, lint, Vite builds and Playwright collection. It starts no browser
+or service, and cannot establish a live pass.

@@ -2712,9 +2712,15 @@ importers:
         specifier: ^1.2.0
         version: 1.2.0
     devDependencies:
+      '@lumeweb/sia-testing':
+        specifier: workspace:*
+        version: link:../sia-testing
       '@lumeweb/tsdown-config':
         specifier: workspace:*
         version: link:../tsdown-config
+      '@playwright/test':
+        specifier: ^1.61.1
+        version: 1.61.1
       '@types/node':
         specifier: ^26.1.0
         version: 26.1.0
@@ -2763,6 +2769,9 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
+      vite:
+        specifier: catalog:framework
+        version: 8.0.16(@types/node@26.1.0)(@vitejs/devtools@0.1.22)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0)
       vitest:
         specifier: 'catalog:'
         version: 4.1.9(@types/node@26.1.0)(@vitest/browser-playwright@4.1.9)(@vitest/coverage-v8@4.1.9)(happy-dom@20.10.6)(jsdom@29.1.1(@noble/hashes@2.4.0))(msw@2.14.6(@types/node@26.1.0)(typescript@6.0.3))(vite@8.0.16)

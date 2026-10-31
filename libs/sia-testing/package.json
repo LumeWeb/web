@@ -51,6 +51,7 @@
     "test:native:helpers": "vitest run --project native-helpers",
     "test:native:control": "vitest run --project native-control",
     "test:package": "pnpm run build && node scripts/check-package.mjs",
+    "test:consumers": "node scripts/check-consumers.mjs",
     "test:mutation": "node scripts/mutation-regression.mjs"
   },
   "peerDependencies": {

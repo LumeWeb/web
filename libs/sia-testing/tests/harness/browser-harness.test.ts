@@ -10,6 +10,7 @@ const boundary = vi.hoisted(() => ({
   listFailure: false,
   releases: [] as string[],
   rowReleases: 0,
+  shareFailure: false,
   uploadGate: undefined as Promise<void> | undefined,
   uploads: 0,
 }));
@@ -84,7 +85,10 @@ vi.mock("@siafoundation/sia-storage", () => {
           },
           object: () => Promise.resolve(new Handle()),
           pinObject: () => Promise.resolve(),
-          shareObject: () => Promise.resolve(),
+          shareObject: () =>
+            boundary.shareFailure
+              ? Promise.reject(new Error("share failed"))
+              : Promise.resolve(),
           updateObjectMetadata: () => Promise.resolve(),
           upload: async (input: Handle, stream: ReadableStream<Uint8Array>) => {
             await boundary.uploadGate;
@@ -154,6 +158,7 @@ beforeEach(() => {
   vi.resetModules();
   boundary.releases.length = 0;
   boundary.failRelease = false;
+  boundary.shareFailure = false;
   boundary.failKeyRelease = false;
   boundary.uploads = 0;
   boundary.fundingWaits = 0;
@@ -493,3 +498,49 @@ it("retains peer identity when releasing the temporary app key fails", async () 
   probe.closePeer();
   expect(probe.peerAccountKey()).toBe("registered");
 });
+
+// Only package resolution changes here; the consumer keeps its production service.
+vi.mock("@lumeweb/sia-video-source/sia", () => {
+  const source = "../../../sia-video-source/src/sia-stream-service.ts";
+  return import(new URL(source, import.meta.url).href);
+});
+it.each(["library"])(
+  "keeps the %s consumer operation error and every release error",
+  async () => {
+    const path = "../../../sia-video-source/tests/e2e/page.ts";
+    const { consumer } = (await import(
+      new URL(path, import.meta.url).href
+    )) as {
+      consumer: {
+        close(): void;
+        register(): Promise<void>;
+        request(url: string, app: string): Promise<string>;
+        run(): Promise<unknown>;
+      };
+    };
+    vi.stubGlobal("window", { recordConsumerAccount: () => Promise.resolve() });
+    await consumer.request("http://localhost", "test");
+    await consumer.register();
+    boundary.releases.length = 0;
+    boundary.shareFailure = true;
+    boundary.failRelease = true;
+    try {
+      const failure: unknown = await consumer
+        .run()
+        .catch((error: unknown) => error);
+      const flatten = (error: unknown): unknown[] =>
+        error instanceof AggregateError
+          ? error.errors.flatMap(flatten)
+          : [error];
+      expect(flatten(failure).map(String)).toEqual([
+        "Error: share failed",
+        "Error: sharing key release",
+        "Error: object release",
+      ]);
+      expect(boundary.releases).toEqual(["sharing key", "object"]);
+    } finally {
+      boundary.failRelease = false;
+      consumer.close();
+    }
+  },
+);

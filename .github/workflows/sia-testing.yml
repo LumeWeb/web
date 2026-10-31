@@ -5,6 +5,7 @@ on:
     paths:
       - 'libs/sia-testing/**'
       - 'libs/tsdown-config/**'
+      - 'libs/sia-video-source/**'
       - 'pnpm-lock.yaml'
       - '.github/workflows/sia-testing.yml'
       - '.github/workflows/sia-testing-real.yml'
@@ -13,6 +14,7 @@ on:
     paths:
       - 'libs/sia-testing/**'
       - 'libs/tsdown-config/**'
+      - 'libs/sia-video-source/**'
       - 'pnpm-lock.yaml'
       - '.github/workflows/sia-testing.yml'
       - '.github/workflows/sia-testing-real.yml'
@@ -35,6 +37,7 @@ jobs:
       - run: pnpm --filter=@lumeweb/sia-testing test:native:control
       - run: pnpm --filter=@lumeweb/tsdown-config build:config
       - run: pnpm --filter=@lumeweb/sia-testing test:package
+      - run: pnpm --filter=@lumeweb/sia-testing test:consumers
   browser:
     runs-on: ubuntu-latest
     steps:
