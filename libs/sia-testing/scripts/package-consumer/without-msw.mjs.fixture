@@ -1,0 +1,25 @@
+/** Checks runtime imports before the optional MSW peer is installed. */
+import assert from "node:assert/strict";
+import { createAccount } from "@lumeweb/sia-testing/fixtures";
+import { createIndexdHttpServer } from "@lumeweb/sia-testing/http";
+import { createIndexdModel } from "@lumeweb/sia-testing/model";
+
+assert.equal(typeof createAccount().ready, "boolean");
+const model = createIndexdModel();
+assert.deepEqual(model.snapshot().accounts, []);
+assert.equal(createIndexdHttpServer({ model }).server.listening, false);
+await assert.rejects(import("@lumeweb/sia-testing"), {
+  code: "ERR_PACKAGE_PATH_NOT_EXPORTED",
+});
+for (const entry of [
+  "@lumeweb/sia-testing/msw",
+  "@lumeweb/sia-testing/msw/node",
+]) {
+  await assert.rejects(
+    import(entry),
+    (error) =>
+      error.code === "ERR_MODULE_NOT_FOUND" &&
+      /Cannot find package 'msw'/.test(error.message),
+    entry + " must require the optional msw peer",
+  );
+}

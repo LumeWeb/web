@@ -1,0 +1,14 @@
+/** Compiles in the copied consumer so workspace declarations cannot hide missing package types. */
+import { createAccount } from "@lumeweb/sia-testing/fixtures";
+import { createIndexdHttpServer } from "@lumeweb/sia-testing/http";
+import {
+  createIndexdModel,
+  type IndexdModel,
+} from "@lumeweb/sia-testing/model";
+
+export const model: IndexdModel = createIndexdModel({ quotaBytes: 100 });
+const count: number = model.snapshot().accounts.length;
+const server = createIndexdHttpServer({ model });
+const listening: boolean = server.server.listening;
+const ready: boolean = createAccount().ready;
+void [ready, count, listening];

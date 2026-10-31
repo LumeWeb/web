@@ -1,0 +1,10 @@
+/** Executes every declared export after the optional MSW peer is installed. */
+import metadata from "@lumeweb/sia-testing/package.json" with { type: "json" };
+
+for (const entry of Object.keys(metadata.exports)) {
+  const specifier = metadata.name + entry.slice(1);
+  await import(
+    specifier,
+    entry === "./package.json" ? { with: { type: "json" } } : undefined
+  );
+}
