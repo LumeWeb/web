@@ -23,3 +23,11 @@ for (const entry of [
     entry + " must require the optional msw peer",
   );
 }
+
+const e2e = await import("@lumeweb/sia-testing/e2e/node");
+assert.equal(typeof e2e.readE2EService, "function");
+assert.equal(typeof e2e.withDisposableAccount, "function");
+await assert.rejects(
+  import("@lumeweb/sia-testing/e2e/internal/disposable-account"),
+  { code: "ERR_PACKAGE_PATH_NOT_EXPORTED" },
+);

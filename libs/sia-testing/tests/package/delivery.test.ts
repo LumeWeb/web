@@ -24,6 +24,17 @@ beforeEach(async () => {
   };
   await writeFile(join(packed, "package.json"), JSON.stringify(metadata));
   const files: Record<string, string> = {
+    "e2e/cli.js":
+      'import { main } from "./internal/command.js"; main();',
+    "e2e/internal/account.js":
+      'export const readE2EService = () => { throw new Error("fixture only"); }; export const withDisposableAccount = async () => { throw new Error("fixture only"); };',
+    "e2e/internal/command.js":
+      'export function main() { if (process.argv.includes("--help")) console.log("Usage: fixture"); else { console.error(process.env.SIA_TEST_ALLOW_MUTATION === "1" ? "verified inherited lease required" : "explicit consent required"); process.exitCode = 1; } }',
+    "e2e/node.d.ts":
+      "export interface E2EService { indexdURL: URL; adminURL: URL; password: string; storagePath: string } export interface DisposableAccount { appID: string; quotaKey: string; approve(url: string): Promise<void>; recordAccountKey(key: string): Promise<void> } export interface DisposableAccountOptions {service: E2EService; appID: string; fundTargetBytes: number} export declare function readE2EService(env: NodeJS.ProcessEnv): E2EService; export declare function withDisposableAccount<T>(options: DisposableAccountOptions, use: (account: DisposableAccount) => Promise<T>): Promise<T>;",
+    "e2e/node.js":
+      'export { readE2EService, withDisposableAccount } from "./internal/account.js";',
+
     "fixtures/index.d.ts":
       "export declare function createAccount(): { ready: boolean };",
     "fixtures/index.js":
@@ -82,7 +93,7 @@ function check(
 test("delivers all packed entries without npm installation", () => {
   const result = check();
   expect(result.output).toContain(
-    "packed consumer checks passed (6 explicit exports)",
+    "packed consumer checks passed (7 explicit exports)",
   );
   expect(result.status).toBe(0);
 }, 60000);
@@ -224,3 +235,79 @@ test.each(["msw/index.js", "msw/node.js"])(
   },
   60000,
 );
+
+test("rejects a package that omits the guarded account entrypoint", async () => {
+  const path = join(packed, "package.json");
+  const metadata = JSON.parse(await readFile(path, "utf8")) as { exports: Record<string, unknown> };
+  delete metadata.exports["./e2e/node"];
+  await writeFile(path, JSON.stringify(metadata));
+  const result = check();
+  expect(result.status).toBe(1);
+  expect(result.output).toContain("e2e/node");
+}, 60000);
+
+test("rejects a package that omits the guarded executable", async () => {
+  const path = join(packed, "package.json");
+  const metadata = JSON.parse(await readFile(path, "utf8")) as { bin?: unknown };
+  delete metadata.bin;
+  await writeFile(path, JSON.stringify(metadata));
+  const result = check();
+  expect(result.status).toBe(1);
+  expect(result.output).toContain("executable");
+}, 60000);
+
+test("rejects a Node entrypoint that imports checkout source by absolute path", async () => {
+  const external = join(temp, "checkout-only.mjs");
+  await writeFile(external, "export const privateSource = true;");
+  await append("dist/esm/e2e/node.js", `\nimport ${JSON.stringify(external)};\n`);
+  const result = check();
+  expect(result.status).toBe(1);
+  expect(result.output).toContain("outside packed package");
+}, 60000);
+
+test("rejects a missing executable artifact", async () => {
+  await rm(join(packed, "dist/esm/e2e/cli.js"));
+  const result = check();
+  expect(result.status).toBe(1);
+  expect(result.output).toContain("missing packed executable");
+}, 60000);
+
+test("rejects a missing internal account artifact", async () => {
+  await rm(join(packed, "dist/esm/e2e/internal/account.js"));
+  const result = check();
+  expect(result.status).toBe(1);
+  expect(result.output).toContain("account.js");
+}, 60000);
+
+test.each(["@siafoundation/sia-storage", "vite", "vitest", "@playwright/test"])(
+  "rejects a lazy Node entrypoint runtime dependency on %s",
+  async (dependency) => {
+    await append("dist/esm/e2e/node.js", `\nexport const load = () => import(${JSON.stringify(dependency)});\n`);
+    const result = check();
+    expect(result.status).toBe(1);
+    expect(result.output).toContain("forbidden E2E runtime dependency");
+  }, 60000,
+);
+
+test("rejects a missing internal executable artifact", async () => {
+  await rm(join(packed, "dist/esm/e2e/internal/command.js"));
+  const result = check();
+  expect(result.status).toBe(1);
+  expect(result.output).toContain("command.js");
+}, 60000);
+
+test("rejects an executable that trusts a claimed inherited lease", async () => {
+  await writeFile(join(packed, "dist/esm/e2e/internal/command.js"), 'export function main() { if (process.argv.includes("--help")) console.log("Usage: fixture"); else if (process.env.SIA_TEST_ALLOW_MUTATION !== "1") { console.error("consent required"); process.exitCode=1; } else console.log("UNSAFE"); }');
+  const result = check();
+  expect(result.status).toBe(1);
+  expect(result.output).toContain("lease");
+}, 60000);
+
+test("rejects a Node declaration that resolves checkout-only types", async () => {
+  const external = join(temp, "checkout-only.d.ts");
+  await writeFile(external, "export interface CheckoutOnly { privateSource: true }");
+  await append("dist/esm/e2e/node.d.ts", `\nexport type { CheckoutOnly } from ${JSON.stringify(external)};\n`);
+  const result = check();
+  expect(result.status).toBe(1);
+  expect(result.output).toContain("declaration outside packed consumer");
+}, 60000);

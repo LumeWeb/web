@@ -30,7 +30,11 @@
       "types": "./dist/esm/http/index.d.ts",
       "import": "./dist/esm/http/index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./e2e/node": {
+      "types": "./dist/esm/e2e/node.d.ts",
+      "import": "./dist/esm/e2e/node.js"
+    }
   },
   "scripts": {
     "build": "tsdown",
@@ -65,5 +69,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/LumeWeb/web"
+  },
+  "bin": {
+    "sia-testing-e2e": "./dist/esm/e2e/cli.js"
   }
 }
