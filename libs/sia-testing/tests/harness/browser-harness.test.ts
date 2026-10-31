@@ -504,10 +504,13 @@ vi.mock("@lumeweb/sia-video-source/sia", () => {
   const source = "../../../sia-video-source/src/sia-stream-service.ts";
   return import(new URL(source, import.meta.url).href);
 });
-it.each(["library"])(
+it.each(["library", "demo"])(
   "keeps the %s consumer operation error and every release error",
-  async () => {
-    const path = "../../../sia-video-source/tests/e2e/page.ts";
+  async (name) => {
+    const path =
+      name === "library"
+        ? "../../../sia-video-source/tests/e2e/page.ts"
+        : "../../../../apps/sia-video-demo/tests/e2e/page.ts";
     const { consumer } = (await import(
       new URL(path, import.meta.url).href
     )) as {

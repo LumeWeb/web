@@ -108,13 +108,17 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
     join(directory, "node_modules/oxlint-tsgolint"),
   );
   const library = join(directory, "libs/sia-video-source");
+  const demo = join(directory, "apps/sia-video-demo");
   const testing = join(directory, "packages/sia-testing");
   const testingTarball = await pack(
     join(repo, "libs/sia-testing"),
     join(directory, "testing-tarball"),
   );
   await cp(testingTarball, testing, { recursive: true });
-  for (const [source, target] of [["libs/sia-video-source", library]]) {
+  for (const [source, target] of [
+    ["libs/sia-video-source", library],
+    ["apps/sia-video-demo", demo],
+  ]) {
     await mkdir(target, { recursive: true });
     for (const name of [
       "src",
@@ -142,6 +146,7 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
     "@lumeweb/tsdown-config": join(repo, "libs/tsdown-config"),
   };
   await dependencies(library, localPackages);
+  await dependencies(demo, localPackages);
   // The library consumes its own exported /sia path in its browser page.
   await linkDirectory(
     library,
@@ -185,7 +190,7 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
         name: "@lumeweb/video-source-check-consumer",
       }),
     );
-    for (const root of [library]) {
+    for (const root of [library, demo]) {
       await rm(join(root, "node_modules/@lumeweb/sia-video-source"));
       await linkDirectory(
         packedLibrary,
@@ -228,8 +233,8 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
   // Node must resolve the public entry from a copy without source or private tests.
   await cp(
     new URL("./package-consumer/e2e-node.mjs.fixture", import.meta.url),
-    join(library, "public-import.mjs"),
+    join(demo, "public-import.mjs"),
   );
-  run(join(library, "public-import.mjs"), [], library);
-  console.log("consumer checks passed: 1 build, 1 typecheck, 1 collected test");
+  run(join(demo, "public-import.mjs"), [], demo);
+  console.log("consumer checks passed: 2 builds, 2 typechecks, 2 collected tests");
 });

@@ -132,9 +132,11 @@ Close browser/native resources before the callback returns. The helper attempts 
 
 The executable retains the kernel lock through owned descendant teardown, account cleanup and postflight. Child output is private and capped at 8 MiB. Failed runs retain `/tmp/sia-e2e-run-*` diagnostics. Review exact retained records privately; do not publish credentials or raw SDK output, discover-and-delete other resources, or kill a guardian to force lock release. Successful deletion does not prove that host sectors were reclaimed.
 
-A consumer-owned example lives in `libs/sia-video-source/tests/e2e`. Its page
-calls the production stream service through the library's public `/sia` export.
-After building this package and `@lumeweb/tsdown-config`, run
-`node scripts/check-consumers.mjs` to check the packed library and testing API
-in a copied consumer. It checks types, lint and page builds, and collects the
-spec without starting a browser or contacting a service.
+Consumer-owned examples live in `libs/sia-video-source/tests/e2e` and
+`apps/sia-video-demo/tests/e2e` in this repository. They import only the public
+`@lumeweb/sia-testing/e2e/node` operations for account authority, and call their
+own production APIs in their own pages. They are not package scenarios or
+published test-page helpers. `node scripts/check-consumers.mjs` (after building `@lumeweb/tsdown-config` and `@lumeweb/sia-testing`) checks actual
+offline tarballs in copied consumers, including public imports, types, page
+builds, lint and safe collection. Build this package and `@lumeweb/tsdown-config`
+first. The checker does not start a browser or touch a live service.

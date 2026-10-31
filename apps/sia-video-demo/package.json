@@ -12,7 +12,10 @@
     "test": "vitest run --config vitest.config.unit.ts",
     "test:watch": "vitest --config vitest.config.unit.ts",
     "lint": "oxlint src --max-warnings 0",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:e2e:collect": "playwright test --config playwright.e2e.config.ts --list",
+    "test:e2e:live": "sia-testing-e2e --cwd \"$PWD\" -- playwright test --config playwright.e2e.config.ts",
+    "test:e2e:build": "vite build --config tests/e2e/vite.config.ts"
   },
   "dependencies": {
     "@lumeweb/sia-video-source": "workspace:*",
@@ -37,7 +40,9 @@
     "@vitejs/plugin-react": "^6.0.3",
     "typescript": "catalog:",
     "vite": "catalog:framework",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "@lumeweb/sia-testing": "workspace:*",
+    "@playwright/test": "^1.61.1"
   },
   "repository": {
     "type": "git",
