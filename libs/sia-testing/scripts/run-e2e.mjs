@@ -16,13 +16,31 @@ import { commandMain } from "../src/e2e/internal/run-command.mjs";
 import { packageRoot } from "./workspace.mjs";
 
 const suites = {
+  "browser-host-fixtures": [
+    "@playwright/test/cli.js",
+    "test",
+    "--config",
+    "playwright.host-fixtures.config.ts",
+  ],
   "host-fixtures": [
     "vitest/vitest.mjs",
     "run",
     "--project",
     "real-host-fixtures",
   ],
+  "metadata": [
+    "@playwright/test/cli.js",
+    "test",
+    "--config",
+    "playwright.metadata.config.ts",
+  ],
   "native": ["vitest/vitest.mjs", "run", "--project", "real-native"],
+  "payload": [
+    "@playwright/test/cli.js",
+    "test",
+    "--config",
+    "playwright.payload.config.ts",
+  ],
 };
 try {
   const { positionals, values } = parseArgs({

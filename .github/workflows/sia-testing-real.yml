@@ -1,0 +1,66 @@
+name: sia-testing-real-service
+
+on:
+  workflow_dispatch:
+
+jobs:
+  real:
+    if: ${{ github.ref_protected == true }}
+    runs-on: [self-hosted, sia-testing]
+    env:
+      SIA_TEST_INDEXD_URL: ${{ secrets.SIA_TEST_INDEXD_URL }}
+      SIA_TEST_ADMIN_URL: ${{ secrets.SIA_TEST_ADMIN_URL }}
+      SIA_TEST_ADMIN_PASSWORD: ${{ secrets.SIA_TEST_ADMIN_PASSWORD }}
+      SIA_TEST_HOST_SPKI_FILE: ${{ vars.SIA_TEST_HOST_SPKI_FILE }}
+      SIA_TEST_CLUSTER_LOG: ${{ vars.SIA_TEST_CLUSTER_LOG }}
+      SIA_TEST_STORAGE_PATH: ${{ vars.SIA_TEST_STORAGE_PATH }}
+      SIA_TEST_CHAIN_HEIGHT: ${{ vars.SIA_TEST_CHAIN_HEIGHT }}
+      SIA_TEST_CLUSTER_BINARY: ${{ vars.SIA_TEST_CLUSTER_BINARY }}
+      SIA_TEST_CLUSTER_PID: ${{ vars.SIA_TEST_CLUSTER_PID }}
+      SIA_TEST_CLUSTER_SHA256: ${{ vars.SIA_TEST_CLUSTER_SHA256 }}
+      SIA_TEST_CLUSTER_START_TICKS: ${{ vars.SIA_TEST_CLUSTER_START_TICKS }}
+      SIA_TEST_CLUSTER_STATE: ${{ vars.SIA_TEST_CLUSTER_STATE }}
+      SIA_TEST_CLUSTER_UID: ${{ vars.SIA_TEST_CLUSTER_UID }}
+      SIA_TEST_CLUSTER_URL: ${{ vars.SIA_TEST_CLUSTER_URL }}
+      SIA_TEST_ALLOW_MUTATION: '1'
+    steps:
+      - uses: actions/checkout@v5
+      - uses: LumeWeb/workflows/.github/actions/setup-all@develop
+        with:
+          cache: 'false'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Disable task caches
+        run: echo TURBO_FORCE=true >> "$GITHUB_ENV"
+      - run: pnpm --filter=@lumeweb/sia-testing exec playwright install --with-deps chromium
+      - name: Real browser metadata suite
+        id: metadata
+        run: pnpm --filter=@lumeweb/sia-testing test:real:metadata
+        continue-on-error: true
+      - name: Real browser suite
+        id: browser
+        run: pnpm --filter=@lumeweb/sia-testing test:real:payload
+        continue-on-error: true
+      - name: Real native suite
+        id: native
+        run: pnpm --filter=@lumeweb/sia-testing test:real:native
+        continue-on-error: true
+      - name: Fail if a real suite failed
+        if: always()
+        run: test "${{ steps.metadata.outcome }}" = success && test "${{ steps.browser.outcome }}" = success && test "${{ steps.native.outcome }}" = success
+      - name: Write public suite results
+        if: always()
+        env:
+          SIA_RESULT_METADATA: ${{ steps.metadata.outcome }}
+          SIA_RESULT_BROWSER: ${{ steps.browser.outcome }}
+          SIA_RESULT_NATIVE: ${{ steps.native.outcome }}
+        run: pnpm --filter=@lumeweb/sia-testing exec node scripts/write-public-results.mjs
+      - name: Upload public suite results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sia-testing-real-results-${{ github.run_id }}
+          path: libs/sia-testing/public-real-results/**
+          if-no-files-found: ignore
+          retention-days: 7

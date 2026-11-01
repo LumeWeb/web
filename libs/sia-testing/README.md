@@ -71,7 +71,7 @@ These commands need no cluster.
 
 ## Cluster E2E tests
 
-Native SDK tests use an explicitly supplied disposable cluster. See the [E2E maintainer guide](https://github.com/LumeWeb/web/blob/develop/libs/sia-testing/docs/e2e.md) for consent, service prerequisites and private cleanup records.
+Browser and native SDK payload tests use an explicitly supplied disposable cluster. See the [E2E maintainer guide](https://github.com/LumeWeb/web/blob/develop/libs/sia-testing/docs/e2e.md) for consent, service prerequisites and private cleanup records.
 
 ## Guarded consumer E2E tests
 

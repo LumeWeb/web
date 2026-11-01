@@ -4,7 +4,7 @@ Maintainer instructions for the source checkout. Use an already running disposab
 
 ## Prerequisites
 
-Use Node.js 24 and Linux with Python 3, flock, subreaper and pidfd support. The Node entrypoints load TypeScript support modules through Node's native type stripping. Install the workspace dependencies before running tests.
+Use Node.js 24 and Linux with Python 3, flock, subreaper and pidfd support. The Node entrypoints load TypeScript support modules through Node's native type stripping. Install the workspace dependencies and Chromium before running browser tests.
 
 The current preflight requires 30 hostd, one Indexd and no renterd, with all hosts upload-ready and no failed scans. The chain must be synced, match the configured height and have a tip younger than three hours. The host-volume filesystem must have at least 9.5 GiB available.
 
@@ -24,8 +24,9 @@ Supply credentials privately, not through checked-in files. All participating wr
 | `SIA_TEST_CLUSTER_URL`, `SIA_TEST_CHAIN_HEIGHT` | Loopback cluster API origin and expected height |
 | `SIA_TEST_STORAGE_PATH` | Filesystem path holding host volumes |
 | `SIA_TEST_CLUSTER_LOG` | Debug log for payload RPC observations |
+| `SIA_TEST_HOST_SPKI_FILE` | Browser payload only: file of comma-separated host certificate public-key hashes |
 
-HTTPS share-URL cases require a normally trusted HTTPS app listener; they are skipped on HTTP.
+Browser payload tests use Chromium's SPKI exception list. Exceptions match the supplied public-key hashes, not hostnames. Metadata browser tests do not use these exceptions. HTTPS share-URL cases require a normally trusted HTTPS app listener; they are skipped on HTTP.
 
 ## Commands
 
@@ -33,9 +34,11 @@ Run from `libs/sia-testing`:
 
 | Command | Scenarios |
 | --- | --- |
+| `pnpm test:real:payload` | Browser payloads, sharing, imports, accounting, worker ranges and observed token deadlines |
 | `pnpm test:real:native` | Native payloads, file paths and metadata |
+| `pnpm test:real:metadata` | Zero-funded browser metadata and cancellation; still creates accounts |
 | `pnpm test:real:native-token-expiry` | Fresh-process native routing control |
-| `pnpm test:real:host-fixtures` | Controlled host metadata changes |
+| `pnpm test:real:host-fixtures`, `pnpm test:real:browser-host-fixtures` | Controlled host metadata changes |
 
 For native token deadlines, add `--scenario=key-expiry` or `--scenario=revocation` and set `SIA_NATIVE_TOKEN_ALLOW_FUNDED=1`.
 
