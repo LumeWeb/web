@@ -580,7 +580,10 @@ it("approves only the requested connection using the owned connect key", async (
     responseURL: "http://127.0.0.1:4000/auth/connect/owned",
   });
   expect(response.bodyUsed).toBe(true);
-  expect(requests).toEqual([
+  expect(requests.map(({ signal, ...init }) => {
+    expect(signal).toBeInstanceOf(AbortSignal);
+    return init;
+  })).toEqual([
     {
       body: '{"approve":true}',
       headers: {

@@ -19,6 +19,8 @@ import { readFile, rm, statfs } from "node:fs/promises";
 import { randomBytes } from "node:crypto";
 
 const appIDPattern = /^[0-9a-f]{64}$/i;
+// A stalled body must not prevent cleanup from reaching later owned resources.
+const requestTimeoutMs = 10_000;
 
 /** @param {{connectKey: string | undefined; indexdURL: string | URL; responseURL: string; fetchImpl?: (url: URL, init: RequestInit) => Promise<Response>}} options */
 export async function approveIndexd({
@@ -48,6 +50,7 @@ export async function approveIndexd({
     },
     method: "POST",
     redirect: "error",
+    signal: AbortSignal.timeout(requestTimeoutMs),
   });
   const approvalFailure = response.ok
     ? undefined
@@ -264,6 +267,7 @@ async function call(base, password, method, path, body, fetchImpl = fetch) {
     method,
     // Redirects can replace the owned resource path while retaining admin authority.
     redirect: "error",
+    signal: AbortSignal.timeout(requestTimeoutMs),
     ...(body && { body: JSON.stringify(body) }),
   });
   if (!response.ok)
@@ -318,6 +322,7 @@ async function provisionOwned({
       headers: { Authorization: auth(password) },
       method: "GET",
       redirect: "error",
+      signal: AbortSignal.timeout(requestTimeoutMs),
     });
     // An empty or malformed successful response is still existence, never absence.
     await response.body?.cancel();
