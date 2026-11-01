@@ -63,7 +63,7 @@ const source = new SiaVideoSource({
 });
 ```
 
-The default factory resolves `./worker.js` relative to the built package entry. The worker entry auto-installs its message listener when evaluated in a dedicated worker. For custom composition, `./worker` exports `installSiaVideoSourceWorker`, `createDefaultWorkerComposition`, `SiaVideoWorkerOptions`, `SiaVideoSdk`, `WorkerCompositionHost`, and `createSiaTransportPolicy`.
+The default factory resolves `./worker.js` relative to the built package entry. The worker entry auto-installs its message listener when evaluated in a dedicated worker. Custom worker scripts must import setup helpers from `@lumeweb/sia-video-source/worker/setup`; importing the executable `./worker` entry before calling the installer would also start a default composition. Both entries export `installSiaVideoSourceWorker`, `createDefaultWorkerComposition`, `SiaVideoWorkerOptions`, `SiaVideoSdk`, `WorkerCompositionHost`, and `createSiaTransportPolicy`.
 
 `SiaVideoWorkerOptions.createSdk(config, appKeySeed, sharingSeed)` injects an SDK factory. `createCompositionRoot` replaces the default worker composition when an app owns the complete worker runtime. The package still validates the typed protocol and does not install or manage a Service Worker.
 
@@ -186,7 +186,19 @@ SIA_TEST_ENV=node pnpm --filter @lumeweb/sia-video-source test
 
 `test` uses browser mode by default in the Vitest configuration and runs Chromium and Firefox. `SIA_TEST_ENV=node` selects the Node environment. The browser suite has Firefox coverage; Safari requires a separate device or browser run.
 
-Source ownership is split between `src/sia-video-source.ts` for the host, `src/session/` for worker coordination, `src/media/` and `src/sink/` for media flow, `src/worker.ts` and `src/worker-runtime.ts` for the worker entry, and `src/react/` for the wrapper. Add design decisions as numbered append-only files under `decisions/`; the next number after 0011 is 0012. Verify public examples against the package exports and types before changing this README.
+Source ownership is split between `src/sia-video-source.ts` for the host, `src/session/` for worker coordination, `src/media/` and `src/sink/` for media flow, `src/worker.ts` and `src/worker-runtime.ts` for the worker entry, and `src/react/` for the wrapper. Add design decisions as numbered append-only files under `decisions/`; the next number after 0012 is 0013. Verify public examples against the package exports and types before changing this README.
+
+## Browser playback E2E without Sia services
+
+Run `pnpm --filter @lumeweb/sia-video-source test:e2e:mock` from the repository root after installing Chromium and Firefox with Playwright. CI is configured to run both browser projects. The command builds its shared dependencies, and Playwright builds the library before starting the consumer page. `test:e2e:mock:collect` lists the tests without starting the browser or listeners.
+
+Each test owns an HTTP payload mock and uses the packaged host with a real dedicated worker. Only the SDK factory is replaced in the media-worker tests. Mediabunny conversion and browser decoding remain real. Chromium covers worker MSE and forced main-thread MSE; Firefox covers the main-thread fallback. Tests check decoded frames, seeking outside the buffered video, cancellation when a source is replaced, and playback after an earlier source fails. They create no real Sia accounts and need no blockchain fixture.
+
+Native-provider tests serve a committed MP4 through Vite and resolve its fixture metadata through the mock SDK. They check automatic backend selection and release of a failed native stream before worker fallback. Pauses during provider acquisition or worker fallback must prevent automatic playback. This covers the library's native-provider integration, not the SDK-owned service worker.
+
+Main-thread loads check their exact output MIME on the host before the worker accepts the source. These checks are scoped to the load and cancelled on replacement or teardown. ADR [0012](decisions/0012-append-thread-mse-capabilities.md) describes the protocol and its timeout.
+
+These tests do not verify SDK WebTransport, encryption or backend authorization. The manual real-service test remains separate.
 
 ## Manual real-service E2E
 

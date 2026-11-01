@@ -43,5 +43,14 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: LumeWeb/workflows/.github/actions/setup-all@develop
-      - run: pnpm --filter=@lumeweb/sia-testing exec playwright install --with-deps chromium
+      - run: pnpm --filter=@lumeweb/sia-testing exec playwright install --with-deps chromium firefox
       - run: pnpm --filter=@lumeweb/sia-testing test:browser
+      - run: pnpm --filter=@lumeweb/sia-video-source test:e2e:mock
+      - run: pnpm --filter=@lumeweb/sia-video-source exec tsc --noEmit -p tsconfig.mock.json
+      - run: pnpm --filter=@lumeweb/sia-video-source exec oxlint tests/playback playwright.mock.config.ts
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: video-playback-failures
+          path: libs/sia-video-source/test-results/
+          if-no-files-found: ignore

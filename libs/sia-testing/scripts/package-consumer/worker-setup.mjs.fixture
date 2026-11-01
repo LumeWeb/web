@@ -1,0 +1,31 @@
+/** Packed setup imports must leave the worker uninstalled until the consumer chooses its composition. */
+import assert from 'node:assert/strict';
+
+const previousSelf = globalThis.self;
+const listeners = [];
+const received = [];
+globalThis.self = {
+  addEventListener(type, listener) {
+    assert.equal(type, 'message');
+    listeners.push(listener);
+  },
+};
+try {
+  const { installSiaVideoSourceWorker } = await import('@lumeweb/sia-video-source/worker/setup');
+  assert.equal(listeners.length, 0);
+  installSiaVideoSourceWorker({
+    createCompositionRoot: () => ({
+      handleMessage(message) {
+        received.push(message);
+        return Promise.resolve();
+      },
+    }),
+  });
+  assert.equal(listeners.length, 1);
+  listeners[0]({ data: { type: 'foreign' } });
+  listeners[0]({ data: { requestId: 73, type: 'HELLO' } });
+  assert.deepEqual(received, [{ requestId: 73, type: 'HELLO' }]);
+} finally {
+  if (previousSelf === undefined) delete globalThis.self;
+  else globalThis.self = previousSelf;
+}

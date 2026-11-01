@@ -118,6 +118,25 @@ describe('ServiceWorkerBackend', () => {
     expect(attached).toEqual([STREAM_URL]);
   });
 
+  it('captures play intent before assigning the stream URL', async () => {
+    const { provider } = makeProvider({});
+    let url = '';
+    let paused = false;
+    let wantedPlay = false;
+    const target = {
+      get src() { return url; },
+      set src(value: string) { url = value; paused = true; },
+    };
+    const backend = new ServiceWorkerBackend(provider, {
+      onBeforeSourceAttached: () => { wantedPlay = !paused; },
+    });
+    backend.attach(target);
+    await backend.load('abc123');
+    expect(wantedPlay).toBe(true);
+    expect(target.src).toBe(STREAM_URL);
+    backend.destroy();
+  });
+
   it('releases the acquired stream exactly once on detach', async () => {
     const releases: number[] = [];
     const { provider } = makeProvider({

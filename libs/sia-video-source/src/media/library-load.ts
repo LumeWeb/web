@@ -92,6 +92,8 @@ export type ConversionRunOrigin = 'initial' | 'seek-restart';
 export interface InspectMediaLibraryOptions {
   /** MSE/codec capability snapshot used for the startup validation. */
   readonly capabilities: PlaybackCapabilities;
+  /** Main-thread MSE can exist even when the inspecting worker has no MediaSource. */
+  readonly checkMime?: (mime: string) => Promise<boolean>;
   /** Load-generation counter forwarded to every ByteSource read. */
   readonly loadGeneration?: number;
   /** External abort signal forwarded to every ByteSource read. */
@@ -217,6 +219,9 @@ interface ProducerGate {
   waitForCapacity: () => Promise<void> | void;
 }
 
+/** Capability-channel failures must not be classified as malformed or unsupported media. */
+class MseProbeFailure extends Error {}
+
 /**
  * Discovers and validates one load through a shared mediabunny `Input` and
  * prepares its conversion before reporting `ready`. Returns `unsupported`
@@ -229,7 +234,7 @@ export async function inspectMediaLibrary(
   source: ByteSource,
   options: InspectMediaLibraryOptions,
 ): Promise<MediaLoadResult> {
-  const { capabilities, loadGeneration, signal } = options;
+  const { capabilities, checkMime, loadGeneration, signal } = options;
   // The producer waits are no-ops while the load is inspected (no sink exists
   // yet, so reads must never block before playback starts) and are re-pointed
   // at the bound sink's waits when the playback's `start` runs.
@@ -246,8 +251,12 @@ export async function inspectMediaLibrary(
   const input = new Input({ formats: ALL_FORMATS, source: customSource });
   let result: MediaLoadResult;
   try {
-    result = await prepareLoad(input, capabilities, producerGate);
+    result = await prepareLoad(input, capabilities, producerGate, checkMime);
   } catch (error) {
+    if (error instanceof MseProbeFailure) {
+      input.dispose();
+      throw error;
+    }
     result = isCancelledError(error)
       ? { status: 'cancelled' }
       : { detail: describeError(error), reason: 'format-unreadable', status: 'unsupported' };
@@ -666,6 +675,7 @@ async function prepareLoad(
   input: Input,
   capabilities: PlaybackCapabilities,
   producerGate: ProducerGate,
+  checkMime?: (mime: string) => Promise<boolean>,
 ): Promise<MediaLoadResult> {
   const tracks = await input.getTracks();
   const videoTracks = tracks.filter((track) => track.isVideoTrack());
@@ -685,7 +695,18 @@ async function prepareLoad(
   }
 
   const mime = mseMime(videoCodec, audioCodec ?? undefined);
-  if (!capabilities.mseSupported(mime)) return unsupported('mime-unsupported');
+  let supported: boolean;
+  if (checkMime) {
+    try {
+      supported = await checkMime(mime);
+    } catch (error) {
+      if (isCancelledError(error)) throw error;
+      throw new MseProbeFailure('Append-thread MIME check failed', { cause: error });
+    }
+  } else {
+    supported = capabilities.mseSupported(mime);
+  }
+  if (!supported) return unsupported('mime-unsupported');
 
   const assembly: FragmentAssembly = {
     disposed: false,

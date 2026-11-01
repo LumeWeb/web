@@ -223,5 +223,6 @@ Consumer-owned examples live in `libs/sia-video-source/tests/e2e` and
 own production APIs in their own pages. They are not package scenarios or
 published test-page helpers. `node scripts/check-consumers.mjs` (after building `@lumeweb/tsdown-config` and `@lumeweb/sia-testing`) checks actual
 offline tarballs in copied consumers, including public imports, types, page
-builds, lint and safe collection. Build this package and `@lumeweb/tsdown-config`
-first. The checker does not start a browser or touch a live service.
+builds, lint and safe collection. It also checks that the packed video-library
+worker setup accepts a custom composition without installing a default listener.
+Build this package and `@lumeweb/tsdown-config` first. The checker does not start a browser or touch a live service.

@@ -6,6 +6,7 @@ export default defineConfig(
     [
       "./src/index.ts",
       "./src/worker.ts",
+      "./src/worker-setup.ts",
       "./src/react/index.tsx",
       "./src/sia-stream-service.ts",
       "./src/sia-stream-zustand.ts",
