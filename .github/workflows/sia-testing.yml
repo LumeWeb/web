@@ -38,6 +38,10 @@ jobs:
       - run: pnpm --filter=@lumeweb/tsdown-config build:config
       - run: pnpm --filter=@lumeweb/sia-testing test:package
       - run: pnpm --filter=@lumeweb/sia-testing test:consumers
+      - run: pnpm --filter=@lumeweb/sia-video-source test:e2e:sdk:offline
+      - run: pnpm --filter=@lumeweb/sia-video-source test:e2e:sdk:build
+      - run: pnpm --filter=@lumeweb/sia-video-source exec tsc --noEmit -p tsconfig.contract.json
+      - run: pnpm --filter=@lumeweb/sia-video-source exec oxlint tests/contract playwright.contract.config.ts
   browser:
     runs-on: ubuntu-latest
     steps:
