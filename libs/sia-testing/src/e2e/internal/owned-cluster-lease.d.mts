@@ -1,7 +1,7 @@
 /** Kernel lease checks shared by guarded runners and provisioning. */
 export const clusterLockPath: string;
-export function assertOwnedMutation(): Promise<void>;
-export function ownedRun(
+export function assertMutationAllowed(): Promise<void>;
+export function runWithGuardian(
   command: string,
   args: string[],
   env: NodeJS.ProcessEnv,

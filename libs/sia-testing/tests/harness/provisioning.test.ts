@@ -21,6 +21,45 @@ function acknowledge(init: RequestInit): Response {
   return new Response(init.body);
 }
 
+/** An unacknowledged connect key must remain recorded without being selected for deletion. */
+async function expectUnconfirmedConnectKey(createKey: () => Promise<Response>) {
+  const methods: string[] = [];
+  const phases: string[] = [];
+  const fetchImpl = (url: URL, init: RequestInit) => {
+    methods.push(
+      `${init.method} ${url.pathname.startsWith("/api/apps") ? "key" : "quota"}`,
+    );
+    if (init.method === "GET")
+      return Promise.resolve(new Response(null, { status: 404 }));
+    if (init.method === "POST") return createKey();
+    return Promise.resolve(new Response(null, { status: 204 }));
+  };
+  await expect(
+    provisionIndexd({
+      adminURL: "http://127.0.0.1:40124",
+      appID: "ab".repeat(32),
+      fetchImpl,
+      password: "fixture-password",
+      recovery: {
+        persist: (event) => {
+          phases.push(event.phase);
+          return Promise.resolve();
+        },
+      },
+    }),
+  ).rejects.toThrow();
+  expect(methods).toEqual([
+    "GET quota",
+    "GET key",
+    "PUT quota",
+    "POST key",
+    "DELETE quota",
+  ]);
+  expect(phases).toContain("connect-key-create-pending");
+  expect(phases).not.toContain("connect-key-created");
+  expect(phases[phases.length - 1]).toBe("quota-deleted");
+}
+
 describe("Indexd provisioning calls", () => {
   it.each([null, "caller-quota"])(
     "rejects supplied quota names without making an admin request: %s",
@@ -335,54 +374,25 @@ describe("recoverable Indexd provisioning", () => {
     expect(methods).toEqual([]);
   });
 
-  it.each(["conflict", "lost response", "mismatched key"])(
-    "retains planned identity without deleting an unconfirmed key after %s",
-    async (outcome) => {
-      const methods: string[] = [];
-      const phases: string[] = [];
-      const fetchImpl = (url: URL, init: RequestInit) => {
-        methods.push(
-          `${init.method} ${url.pathname.startsWith("/api/apps") ? "key" : "quota"}`,
-        );
-        if (init.method === "GET")
-          return Promise.resolve(new Response(null, { status: 404 }));
-        if (init.method === "POST") {
-          if (outcome === "lost response")
-            throw new Error("transport lost after commit");
-          if (outcome === "conflict")
-            return Promise.resolve(new Response(null, { status: 409 }));
-          return Promise.resolve(
-            new Response(JSON.stringify({ key: "not-the-planned-key" })),
-          );
-        }
-        return Promise.resolve(new Response(null, { status: 204 }));
-      };
-      await expect(
-        provisionIndexd({
-          adminURL: "http://127.0.0.1:40124",
-          appID: "ab".repeat(32),
-          fetchImpl,
-          password: "fixture-password",
-          recovery: {
-            persist: (event) => {
-              phases.push(event.phase);
-              return Promise.resolve();
-            },
-          },
-        }),
-      ).rejects.toThrow();
-      expect(methods).toEqual([
-        "GET quota",
-        "GET key",
-        "PUT quota",
-        "POST key",
-        "DELETE quota",
-      ]);
-      expect(phases).toContain("connect-key-create-pending");
-      expect(phases).not.toContain("connect-key-created");
-      expect(phases[phases.length - 1]).toBe("quota-deleted");
-    },
-  );
+  it("does not delete an unconfirmed connect key after a conflict", async () => {
+    await expectUnconfirmedConnectKey(() =>
+      Promise.resolve(new Response(null, { status: 409 })),
+    );
+  });
+
+  it("does not delete an unconfirmed connect key after a lost response", async () => {
+    await expectUnconfirmedConnectKey(() =>
+      Promise.reject(new Error("transport lost after commit")),
+    );
+  });
+
+  it("does not delete an unconfirmed connect key after a mismatched response", async () => {
+    await expectUnconfirmedConnectKey(() =>
+      Promise.resolve(
+        new Response(JSON.stringify({ key: "not-the-planned-key" })),
+      ),
+    );
+  });
 
   it.each([
     ["quota-create-pending", []],
@@ -580,10 +590,12 @@ it("approves only the requested connection using the owned connect key", async (
     responseURL: "http://127.0.0.1:4000/auth/connect/owned",
   });
   expect(response.bodyUsed).toBe(true);
-  expect(requests.map(({ signal, ...init }) => {
-    expect(signal).toBeInstanceOf(AbortSignal);
-    return init;
-  })).toEqual([
+  expect(
+    requests.map(({ signal, ...init }) => {
+      expect(signal).toBeInstanceOf(AbortSignal);
+      return init;
+    }),
+  ).toEqual([
     {
       body: '{"approve":true}',
       headers: {

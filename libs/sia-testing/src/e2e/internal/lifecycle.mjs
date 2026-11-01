@@ -15,7 +15,7 @@ export async function settlePhases(phases) {
 }
 
 /** @param {() => Promise<void>} operation @param {(() => Promise<void>)[]} cleanup */
-export async function withOwnedCleanup(operation, cleanup) {
+export async function withCleanup(operation, cleanup) {
   const failures = await settlePhases([
     { phase: "business", run: operation },
     ...cleanup.map((run, index) => ({ phase: `cleanup-${index}`, run })),
@@ -23,6 +23,6 @@ export async function withOwnedCleanup(operation, cleanup) {
   if (failures.length)
     throw new AggregateError(
       failures.map((failure) => failure.error),
-      "Test or owned cleanup failed",
+      "Operation or cleanup failed",
     );
 }

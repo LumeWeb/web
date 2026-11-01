@@ -93,7 +93,7 @@ sys.exit(code if code is not None and code>=0 else 1)
 `;
 
 /** Consent and a kernel-held shared lease must precede any admin mutation. */
-export async function assertOwnedMutation() {
+export async function assertMutationAllowed() {
   if (process.env.SIA_TEST_ALLOW_MUTATION !== "1")
     throw new Error("Mutation consent is required");
   try {
@@ -112,7 +112,7 @@ export async function assertOwnedMutation() {
 
 /** Both runner and SDK boundaries use a subreaper which keeps the locked OFD through descendant teardown. */
 /** @param {string} command @param {string[]} args @param {NodeJS.ProcessEnv} env @param {boolean} acquire @param {string} lockPath @param {number} deadlineMs @param {number} graceMs @param {string} [cwd] @param {string} [privateLogPath] @returns {Promise<number>} */
-export async function ownedRun(
+export async function runWithGuardian(
   command,
   args,
   env,

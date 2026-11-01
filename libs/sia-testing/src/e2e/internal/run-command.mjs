@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
-import { assertOwnedMutation, clusterLockPath, ownedRun } from "./owned-cluster-lease.mjs";
+import { assertMutationAllowed, clusterLockPath, runWithGuardian } from "./owned-cluster-lease.mjs";
 import { preflight } from "./service-preflight.mjs";
 import { readHostServiceConfig } from "./config.ts";
 
@@ -30,13 +30,13 @@ export async function commandMain(argv, entry = fileURLToPath(import.meta.url)) 
     }
     readHostServiceConfig(process.env);
     if (values.locked) {
-      try { await assertOwnedMutation(); } catch {
+      try { await assertMutationAllowed(); } catch {
         console.error("E2E requires a verified inherited lease");
         return 1;
       }
       return await runGuardedCommand(command, args, values.cwd, process.env);
     }
-    return await ownedRun(process.execPath, [entry, "--locked", "--cwd", values.cwd, "--", command, ...args], process.env, true, clusterLockPath, 7_200_000, 2000, values.cwd);
+    return await runWithGuardian(process.execPath, [entry, "--locked", "--cwd", values.cwd, "--", command, ...args], process.env, true, clusterLockPath, 7_200_000, 2000, values.cwd);
   } catch {
     console.error("E2E refused or failed; private inputs and diagnostics omitted");
     return 1;
@@ -44,7 +44,7 @@ export async function commandMain(argv, entry = fileURLToPath(import.meta.url)) 
 }
 
 /** @param {string} command @param {string[]} args @param {string} cwd @param {NodeJS.ProcessEnv} env @param {import('./run-command.mjs').RunnerIO} [io] */
-export async function runGuardedCommand(command, args, cwd, env, io = { assertMutation: assertOwnedMutation, preflight, run: ownedRun }) {
+export async function runGuardedCommand(command, args, cwd, env, io = { assertMutation: assertMutationAllowed, preflight, run: runWithGuardian }) {
   if (!isAbsolute(cwd) || !command) throw new Error("Explicit command and absolute cwd are required");
   await io.assertMutation();
   readHostServiceConfig(env);

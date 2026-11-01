@@ -1,7 +1,7 @@
 /** Records acknowledged identities before returning control to consumer funding work. */
 import { isAbsolute } from "node:path";
 import type { DisposableAccount, DisposableAccountOptions } from "../node.js";
-import { assertOwnedMutation } from "./owned-cluster-lease.mjs";
+import { assertMutationAllowed } from "./owned-cluster-lease.mjs";
 import {
   approveIndexd,
   cleanupIndexd,
@@ -14,7 +14,7 @@ import { settlePhases } from "./lifecycle.mjs";
 
 export interface AccountIO {
   approve: typeof approveIndexd;
-  assertMutation: typeof assertOwnedMutation;
+  assertMutation: typeof assertMutationAllowed;
   cleanup: typeof cleanupIndexd;
   createRecord: typeof createRecoveryRecord;
   provision: typeof provisionIndexd;
@@ -22,7 +22,7 @@ export interface AccountIO {
 }
 const liveIO: AccountIO = {
   approve: approveIndexd,
-  assertMutation: assertOwnedMutation,
+  assertMutation: assertMutationAllowed,
   cleanup: cleanupIndexd,
   createRecord: createRecoveryRecord,
   provision: provisionIndexd,

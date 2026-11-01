@@ -9,7 +9,7 @@
  * Cleanup acts only on acknowledged run-owned identities; it never searches for
  * other accounts or treats an unconfirmed registration as proof of absence.
  */
-import { assertOwnedMutation } from "./owned-cluster-lease.mjs";
+import { assertMutationAllowed } from "./owned-cluster-lease.mjs";
 import {
   createRecoveryRecord,
   writeRecoveryRecord,
@@ -41,7 +41,7 @@ export async function approveIndexd({
     !connectKey
   )
     throw new Error("Invalid owned approval target");
-  if (fetchImpl === fetch) await assertOwnedMutation();
+  if (fetchImpl === fetch) await assertMutationAllowed();
   const response = await fetchImpl(target, {
     body: JSON.stringify({ approve: true }),
     headers: {
@@ -83,7 +83,7 @@ export async function cleanupIndexd({
   quotaKey,
   recoveryRecord,
 }) {
-  if (fetchImpl === fetch) await assertOwnedMutation();
+  if (fetchImpl === fetch) await assertMutationAllowed();
   if (created?.recoveryPath) {
     const path = created.recoveryPath;
     const intent = /** @type {unknown} */ (
@@ -214,7 +214,7 @@ export async function provisionIndexd(options) {
     storagePath = process.env.SIA_TEST_STORAGE_PATH,
   } = options;
   if (fetchImpl === fetch) {
-    await assertOwnedMutation();
+    await assertMutationAllowed();
     if (!storagePath?.startsWith("/")) throw new Error("Explicit host storage path is required");
     const disk = await statfs(storagePath, { bigint: true });
     if (disk.bavail * disk.bsize < 8n * 1024n ** 3n)
@@ -233,7 +233,7 @@ export async function provisionIndexd(options) {
     connectKey: randomBytes(32).toString("hex"),
     quotaKey: `sj_${randomBytes(14).toString("hex")}`,
   });
-  const created = await provisionOwned({
+  const created = await provisionFromPlan({
     adminURL,
     appID,
     fetchImpl,
@@ -297,7 +297,7 @@ function endpoint(base, path) {
  * }} options
  * @returns {Promise<import('./indexd-provision.mjs').ProvisionedResources>}
  */
-async function provisionOwned({
+async function provisionFromPlan({
   adminURL,
   appID,
   fetchImpl,

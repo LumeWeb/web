@@ -1,16 +1,41 @@
 /** Real owned-child output stays in a bounded private file, including failure paths. */
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdtemp, readFile, rm, stat } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { expect, it } from "vitest";
+import { withTemporaryDirectory } from "../../scripts/workspace.mjs";
+
+const secret =
+  "seed-SENTINEL ?signature=signed-query-SENTINEL raw-error-SENTINEL";
+
+/** Only this fixture's capture is read; the guardian owns and reaps the supplied worker. */
+async function captureOutput(worker: string) {
+  return withTemporaryDirectory("sia-runner-output-", async (directory) => {
+    const logPath = join(directory, "private.log");
+    const program = `import {runWithGuardian} from './src/e2e/internal/owned-cluster-lease.mjs';
+      const code=await runWithGuardian(process.execPath,['-e',${JSON.stringify(worker)}],process.env,true,${JSON.stringify(join(directory, "lock"))},3000,100,process.cwd(),${JSON.stringify(logPath)});console.log(JSON.stringify({code}));`;
+    const output = execFileSync(
+      process.execPath,
+      ["--input-type=module", "-e", program],
+      {
+        encoding: "utf8",
+        maxBuffer: 16 * 1024 * 1024,
+      },
+    );
+    return {
+      code: (JSON.parse(output) as { code: number }).code,
+      info: await stat(logPath),
+      output,
+      privateText: await readFile(logPath, "utf8"),
+    };
+  });
+}
 
 it.each(["missing", "not-a-descriptor", "2", "999999999999999999999"])(
   "rejects inherited descriptor %s before opening a private log",
   async (descriptor) => {
-    const directory = await mkdtemp(join(tmpdir(), "sia-runner-no-lease-"));
-    const logPath = join(directory, "private.log");
-    try {
+    await withTemporaryDirectory("sia-runner-no-lease-", async (directory) => {
+      const logPath = join(directory, "private.log");
       const result = spawnSync(
         process.execPath,
         [
@@ -23,36 +48,27 @@ it.each(["missing", "not-a-descriptor", "2", "999999999999999999999"])(
       );
       await expect(stat(logPath)).rejects.toMatchObject({ code: "ENOENT" });
       expect(result.status, result.stderr).toBe(1);
-    } finally {
-      await rm(directory, { force: true, recursive: true });
-    }
+    });
   },
 );
 
-it.each([false, true])(
-  "keeps private child output off the public channel with overflow %s",
-  async (overflow) => {
-    const directory = await mkdtemp(join(tmpdir(), "sia-runner-output-"));
-    try {
-      const logPath = join(directory, "private.log");
-      const secret =
-        "seed-SENTINEL ?signature=signed-query-SENTINEL raw-error-SENTINEL";
-      const worker = `process.stdout.write(${JSON.stringify(secret)});${overflow ? "process.stdout.write('x'.repeat(9 * 1024 * 1024));" : "process.exitCode=1;"} `;
-      const program = `import {ownedRun} from './src/e2e/internal/owned-cluster-lease.mjs';
-      const code=await ownedRun(process.execPath,['-e',${JSON.stringify(worker)}],process.env,true,${JSON.stringify(join(directory, "lock"))},3000,100,process.cwd(),${JSON.stringify(logPath)});console.log(JSON.stringify({code}));`;
-      const output = execFileSync(
-        process.execPath,
-        ["--input-type=module", "-e", program],
-        { encoding: "utf8", maxBuffer: 16 * 1024 * 1024 },
-      );
-      expect(output).not.toContain("SENTINEL");
-      expect((JSON.parse(output) as { code: number }).code).not.toBe(0);
-      expect(await readFile(logPath, "utf8")).toContain(secret);
-      const info = await stat(logPath);
-      expect(info.mode & 0o777).toBe(0o600);
-      expect(info.size).toBeLessThanOrEqual(8 * 1024 * 1024);
-    } finally {
-      await rm(directory, { force: true, recursive: true });
-    }
-  },
-);
+it("keeps a failed child's diagnostics in its private capture", async () => {
+  const captured = await captureOutput(
+    `process.stdout.write(${JSON.stringify(secret)});process.exitCode=1;`,
+  );
+  expect(captured.code).toBe(1);
+  expect(captured.output).not.toContain("SENTINEL");
+  expect(captured.privateText).toBe(secret);
+  expect(captured.info.mode & 0o777).toBe(0o600);
+});
+
+it("caps overflowing private output and fails the owned run", async () => {
+  const captured = await captureOutput(
+    `process.stdout.write(${JSON.stringify(secret)});process.stdout.write('x'.repeat(9 * 1024 * 1024));`,
+  );
+  expect(captured.code).not.toBe(0);
+  expect(captured.output).not.toContain("SENTINEL");
+  expect(captured.privateText).toContain(secret);
+  expect(captured.info.mode & 0o777).toBe(0o600);
+  expect(captured.info.size).toBeLessThanOrEqual(8 * 1024 * 1024);
+});
