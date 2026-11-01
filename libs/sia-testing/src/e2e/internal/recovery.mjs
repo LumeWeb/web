@@ -13,6 +13,7 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { dirname, join } from "node:path";
+import { withCleanup } from "./lifecycle.mjs";
 
 /** Creates recovery storage before provisioning, without copying admin or owner secrets. */
 export async function createRecoveryRecord() {
@@ -47,11 +48,15 @@ export async function writeRecoveryRecord(path, value) {
     directory,
     `.recovery-${randomBytes(16).toString("hex")}.tmp`,
   );
-  let directoryHandle, replacement;
+  /** @type {import('node:fs/promises').FileHandle | undefined} */
+  let directoryHandle;
+  /** @type {import('node:fs/promises').FileHandle | undefined} */
+  let replacement;
   let committed = false,
     created = false;
-  try {
-    const original = await file.stat();
+  const originalFile = file;
+  await withCleanup(async () => {
+    const original = await originalFile.stat();
     if (
       !original.isFile() ||
       original.uid !== process.getuid?.() ||
@@ -100,10 +105,16 @@ export async function writeRecoveryRecord(path, value) {
     committed = true;
     // A directory-sync failure is after commit: report it without rolling back the new record.
     await directoryHandle.sync();
-  } finally {
-    await replacement?.close();
-    await directoryHandle?.close();
-    await file.close();
-    if (created && !committed) await unlink(temporary);
-  }
+  }, [
+    async () => {
+      await replacement?.close();
+    },
+    async () => {
+      await directoryHandle?.close();
+    },
+    () => originalFile.close(),
+    async () => {
+      if (created && !committed) await unlink(temporary);
+    },
+  ]);
 }
