@@ -69,16 +69,75 @@ export function createRemoteMockSdk(options: RemoteMockSdkOptions): MockSdk {
     async deleteObject(id, options) {
       await call("deleteObject", id, options);
     },
-    async download(object, options = {}) {
-      const response = await call(
-        "download",
-        object.id(),
-        options,
-        undefined,
-        options,
-      );
-      if (!response.body) throw new Error("mock download response has no body");
-      return response.body;
+    download(object, options = {}) {
+      if (options.signal?.aborted)
+        return Promise.reject(
+          new DOMException("mock download cancelled", "AbortError"),
+        );
+      const abort = new AbortController();
+      let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+      let stopped = false;
+      let onAbort: (() => void) | undefined;
+      const detach = () => {
+        if (onAbort) options.signal?.removeEventListener("abort", onAbort);
+      };
+      // Firefox can wait for body bytes before resolving fetch. Expose cancellation
+      // before that wait so a replaced source can abort a held or paced request.
+      const stream = new ReadableStream<Uint8Array>({
+        async cancel(reason: unknown) {
+          stopped = true;
+          detach();
+          abort.abort();
+          await reader?.cancel(reason).catch(() => undefined);
+        },
+        async pull(controller) {
+          try {
+            if (!reader) {
+              const response = await call(
+                "download",
+                object.id(),
+                { signal: abort.signal },
+                undefined,
+                options,
+              );
+              if (stopped) {
+                await response.body?.cancel();
+                return;
+              }
+              if (!response.body)
+                throw new Error("mock download response has no body");
+              reader = response.body.getReader();
+            }
+            const next = await reader.read();
+            if (stopped) return;
+            if (next.done) {
+              stopped = true;
+              detach();
+              reader.releaseLock();
+              controller.close();
+            } else controller.enqueue(next.value);
+          } catch (error) {
+            if (stopped) return;
+            stopped = true;
+            detach();
+            abort.abort();
+            controller.error(error);
+          }
+        },
+        start(controller) {
+          onAbort = () => {
+            stopped = true;
+            detach();
+            abort.abort();
+            controller.error(
+              new DOMException("mock download cancelled", "AbortError"),
+            );
+            void reader?.cancel().catch(() => undefined);
+          };
+          options.signal?.addEventListener("abort", onAbort, { once: true });
+        },
+      });
+      return Promise.resolve(stream);
     },
     async object(id, options) {
       return objectResponse(await call("object", id, options));

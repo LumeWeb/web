@@ -61,7 +61,8 @@ test("an explicit checkpoint restores HTTP payloads after a server restart", asy
     expect(restored.model.objectEvents("owner")).toHaveLength(1);
     expect(restored.model.connectionRequest(request.id)?.approved).toBe(false);
     const other = createRemoteMockSdk({ client: "other", url: second.url });
-    await expect(other.download(object)).rejects.toThrow("not found");
+    const denied = (await other.download(object)).getReader();
+    await expect(denied.read()).rejects.toThrow("not found");
   } finally {
     await Promise.all(servers.map((server) => server.close()));
     await rm(directory, { force: true, recursive: true });

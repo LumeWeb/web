@@ -107,6 +107,8 @@ try {
 
 Pass the URL and client name to an app process instead of constructing `phone` in the server process. Client names select identities configured by the server; HTTP requests cannot override the bound account or device. Names are fixture selectors, not secret credentials. Use this server only with disposable test data.
 
+Remote downloads return a stream before fetch receives response headers. Cancelling the stream aborts its fetch, including work held before headers; HTTP download errors surface through stream reads.
+
 Mock routes live under `/mock-sdk/`, separate from the Indexd API. The server and payload network share one model. Device faults leave direct `network.control` and model inspection available to the test driver. Downloads stream without collecting their bodies in the server, and socket closure cancels pending SDK work. Request byte counts describe bytes emitted by the server's mock SDK, not proof that a remote app consumed them.
 
 Uploads retain the HTTP adapter's 1 MiB body limit by default. Set `maxBodyBytes` explicitly for larger fixtures. Closing the server aborts pending mock operations; clients own their streams and should consume or cancel them before teardown.
