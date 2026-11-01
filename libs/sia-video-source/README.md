@@ -198,7 +198,7 @@ Native-provider tests serve a committed MP4 through Vite and resolve its fixture
 
 Main-thread loads check their exact output MIME on the host before the worker accepts the source. These checks are scoped to the load and cancelled on replacement or teardown. ADR [0012](decisions/0012-append-thread-mse-capabilities.md) describes the protocol and its timeout.
 
-These tests do not verify SDK WebTransport, encryption or backend authorization. The manual real-service test remains separate.
+These tests do not verify SDK WebTransport, encryption or backend authorization. The separate [read-only SDK check](tests/contract/README.md) uses pre-provisioned objects and requires explicit endpoint and transfer approval. The manual real-service test below remains separate.
 
 ## Manual real-service E2E
 
