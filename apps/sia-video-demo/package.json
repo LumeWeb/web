@@ -13,6 +13,9 @@
     "test:watch": "vitest --config vitest.config.unit.ts",
     "lint": "oxlint src --max-warnings 0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:e2e:mock": "pnpm --filter @lumeweb/tsdown-config build:config && pnpm --filter @lumeweb/sia-testing build && pnpm --filter @lumeweb/sia-video-source build && playwright test --config playwright.mock.config.ts",
+    "test:e2e:mock:build": "vite build --config tests/playback/vite.config.ts",
+    "test:e2e:mock:collect": "pnpm --filter @lumeweb/tsdown-config build:config && pnpm --filter @lumeweb/sia-testing build && playwright test --config playwright.mock.config.ts --list",
     "test:e2e:collect": "playwright test --config playwright.e2e.config.ts --list",
     "test:e2e:live": "sia-testing-e2e --cwd \"$PWD\" -- playwright test --config playwright.e2e.config.ts",
     "test:e2e:build": "vite build --config tests/e2e/vite.config.ts"

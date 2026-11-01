@@ -247,13 +247,14 @@ describe("SiaVideoMount preparation effect", () => {
     expect(container!.querySelector("video")).not.toBeNull();
   });
 
-  it("keeps preparation pending when source and indexer change before it settles", async () => {
+  it("updates the worker source and indexer before native preparation settles", async () => {
     useDeveloperOptionsStore.getState().setDisableNativePlayback(true);
     root!.render(createElement(MountWithCapture));
     await flush();
 
     expect(preparation.prepareCalls).toBe(1);
-    expect(container!.querySelector("video")).toBeNull();
+    const video = container!.querySelector("video");
+    expect(video).not.toBeNull();
 
     root!.render(
       createElement(MountWithCapture, {
@@ -264,13 +265,7 @@ describe("SiaVideoMount preparation effect", () => {
     await flush();
 
     expect(preparation.prepareCalls).toBe(1);
-    expect(container!.querySelector("video")).toBeNull();
-
-    preparation.resolve();
-    await flush();
-
-    expect(preparation.prepareCalls).toBe(1);
-    expect(container!.querySelector("video")).not.toBeNull();
+    expect(container!.querySelector("video")).toBe(video);
 
     const hellos = workerMessages
       .filter(
@@ -282,6 +277,12 @@ describe("SiaVideoMount preparation effect", () => {
       .filter((message) => message.type === "HELLO");
     expect(hellos.at(-1)?.config?.indexerUrl).toBe("https://indexer.changed");
     expect(observedMedia?.src).toBe(changedSource.source.fetchForm);
+
+    preparation.resolve();
+    await flush();
+
+    expect(preparation.prepareCalls).toBe(1);
+    expect(container!.querySelector("video")).toBe(video);
   });
 
   it("applies changed indexer configuration through an in-place worker reload", async () => {

@@ -27,8 +27,8 @@ for (const name of Object.keys(environment)) {
   if (name.startsWith("SIA_TEST_") || name.startsWith("SIA_E2E_"))
     delete environment[name];
 }
-/** @param {string} root @param {Record<string, string>} localPackages */
-async function dependencies(root, localPackages) {
+/** @param {string} root @param {Record<string, string>} localPackages @param {string} installedRoot */
+async function dependencies(root, localPackages, installedRoot) {
   const manifest =
     /** @type {{ peerDependencies?: Record<string, string>, dependencies?: Record<string, string>, devDependencies?: Record<string, string> }} */ (
       JSON.parse(await readFile(join(root, "package.json"), "utf8"))
@@ -39,8 +39,12 @@ async function dependencies(root, localPackages) {
     ...manifest.devDependencies,
   };
   for (const [name, version] of Object.entries(all)) {
+    // Catalog names do not identify versions; another cached copy may have
+    // different exports from the consumer's installed dependency.
+    const installed = join(installedRoot, "node_modules", name);
     await linkDirectory(
-      localPackages[name] ?? dependency(name, version),
+      localPackages[name] ??
+        (existsSync(installed) ? installed : dependency(name, version)),
       join(root, "node_modules", name),
     );
   }
@@ -132,6 +136,13 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
       });
     await cp(join(target, "tsconfig.e2e.json"), join(target, "tsconfig.json"));
   }
+  for (const name of [
+    "index.html",
+    "vite.config.ts",
+    "playwright.mock.config.ts",
+    "tsconfig.mock.json",
+  ])
+    await cp(join(repo, "apps/sia-video-demo", name), join(demo, name));
   await cp(
     join(repo, "libs/sia-video-source/tsdown.config.ts"),
     join(library, "tsdown.config.ts"),
@@ -145,8 +156,12 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
     "@lumeweb/sia-video-source": library,
     "@lumeweb/tsdown-config": join(repo, "libs/tsdown-config"),
   };
-  await dependencies(library, localPackages);
-  await dependencies(demo, localPackages);
+  await dependencies(
+    library,
+    localPackages,
+    join(repo, "libs/sia-video-source"),
+  );
+  await dependencies(demo, localPackages, join(repo, "apps/sia-video-demo"));
   // The library consumes its own exported /sia path in its browser page.
   await linkDirectory(
     library,
@@ -178,7 +193,11 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
       library,
       join(directory, "library-tarball"),
     );
-    await dependencies(packedLibrary, localPackages);
+    await dependencies(
+      packedLibrary,
+      localPackages,
+      join(repo, "libs/sia-video-source"),
+    );
     // A different copied package name prevents self-reference from bypassing the tarball.
     const manifest = /** @type {Record<string, unknown>} */ (
       JSON.parse(await readFile(join(library, "package.json"), "utf8"))
@@ -230,6 +249,23 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
       { cause: error },
     );
   }
+  run(
+    join(repo, "node_modules/typescript/bin/tsc"),
+    ["--noEmit", "-p", "tsconfig.mock.json"],
+    demo,
+  );
+  run(
+    join(repo, "node_modules/vite/bin/vite.js"),
+    ["build", "--config", "tests/playback/vite.config.ts"],
+    demo,
+  );
+  const mockCollection = run(
+    join(repo, "node_modules/@playwright/test/cli.js"),
+    ["test", "--config", "playwright.mock.config.ts", "--list"],
+    demo,
+  );
+  if (!mockCollection.includes("Total: 14 tests in 1 file"))
+    throw new Error(`Unexpected demo mock collection: ${mockCollection}`);
   // Node must resolve the public entry from a copy without source or private tests.
   await cp(
     new URL("./package-consumer/e2e-node.mjs.fixture", import.meta.url),
@@ -242,6 +278,6 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
   );
   run(join(demo, "worker-setup-import.mjs"), [], demo);
   console.log(
-    "consumer checks passed: 2 builds, 2 typechecks, 2 collected tests; packed worker setup passed",
+    "consumer checks passed: 3 builds, 3 typechecks, 2 legacy collections, 14 demo mock tests; packed worker setup passed",
   );
 });

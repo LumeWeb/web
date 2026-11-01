@@ -238,12 +238,15 @@ export function SiaVideoMount({
   );
 }
 
-/** Mounting waits for native streaming preparation so AUTO can select it on first load. */
+/** AUTO waits so its first selection can use native streaming; worker-only playback does not depend on it. */
 export function shouldMountSiaVideo(
   mount: null | SiaVideoMountState,
   streamingPrepared: boolean,
 ): mount is SiaVideoMountState {
-  return mount !== null && streamingPrepared;
+  return (
+    mount !== null &&
+    (mount.backend === SIA_PLAYBACK_BACKENDS.MEDIA_WORKER || streamingPrepared)
+  );
 }
 
 /**
