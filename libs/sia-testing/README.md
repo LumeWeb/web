@@ -69,6 +69,10 @@ From `libs/sia-testing`, with dependencies installed. Before building, run `pnpm
 
 These commands need no cluster.
 
+## Cluster E2E tests
+
+Native SDK tests use an explicitly supplied disposable cluster. See the [E2E maintainer guide](https://github.com/LumeWeb/web/blob/develop/libs/sia-testing/docs/e2e.md) for consent, service prerequisites and private cleanup records.
+
 ## Guarded consumer E2E tests
 
 `@lumeweb/sia-testing/e2e/node` provisions disposable accounts for your own SDK page or native client. It has no SDK, Vite, Playwright, Vitest or MSW runtime dependency. The package does not serve a browser probe or configure your SDK assets, browser certificates or test runner.

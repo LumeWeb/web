@@ -1,5 +1,5 @@
 /**
- * Shares filesystem ownership rules for package checks and mutation checks.
+ * Shares package paths and disposable filesystem operations for repository scripts.
  * Each temporary directory belongs to one callback, with cleanup attempted
  * after its work finishes.
  *

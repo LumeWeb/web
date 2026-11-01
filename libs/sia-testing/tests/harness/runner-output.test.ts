@@ -72,3 +72,18 @@ it("caps overflowing private output and fails the owned run", async () => {
   expect(captured.info.mode & 0o777).toBe(0o600);
   expect(captured.info.size).toBeLessThanOrEqual(8 * 1024 * 1024);
 });
+
+it("keeps ordered native token failures in private capture", async () => {
+  const worker = `import {withTokenCleanup} from './tests/e2e/native/shared-token-checks.ts';await withTokenCleanup(()=>Promise.reject(new Error('signed-query-SENTINEL')),{cleanup:()=>Promise.reject(new Error('raw-error-SENTINEL')),confirm:()=>Promise.resolve(),expired:()=>false,revoke:()=>Promise.reject({seed:'seed-SENTINEL'})}).catch(error=>{console.error(error);process.exitCode=1;});`;
+  const captured = await captureOutput(worker);
+  expect(captured.code).toBe(1);
+  expect(captured.output).not.toContain("SENTINEL");
+  for (const sentinel of [
+    "signed-query-SENTINEL",
+    "seed-SENTINEL",
+    "raw-error-SENTINEL",
+  ])
+    expect(captured.privateText).toContain(sentinel);
+  expect(captured.info.mode & 0o777).toBe(0o600);
+  expect(captured.info.size).toBeLessThanOrEqual(8 * 1024 * 1024);
+});

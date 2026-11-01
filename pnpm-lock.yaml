@@ -2663,6 +2663,9 @@ importers:
       '@lumeweb/tsdown-config':
         specifier: workspace:*
         version: link:../tsdown-config
+      '@noble/hashes':
+        specifier: ^2.0.1
+        version: 2.4.0
       '@playwright/test':
         specifier: ^1.61.1
         version: 1.61.1

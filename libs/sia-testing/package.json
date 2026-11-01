@@ -42,6 +42,9 @@
     "lint": "oxlint src tests scripts",
     "test": "vitest run --project unit",
     "test:browser": "playwright test --config playwright.ci.config.ts && playwright test --config playwright.loopback.config.ts",
+    "test:real:native": "node scripts/run-e2e.mjs native",
+    "test:real:native-token-expiry": "node scripts/check-native-token-expiry.mjs",
+    "test:real:host-fixtures": "node scripts/run-e2e.mjs host-fixtures",
     "test:native:helpers": "vitest run --project native-helpers",
     "test:native:control": "vitest run --project native-control",
     "test:package": "pnpm run build && node scripts/check-package.mjs",
@@ -57,6 +60,7 @@
   },
   "devDependencies": {
     "@lumeweb/tsdown-config": "workspace:*",
+    "@noble/hashes": "^2.0.1",
     "@playwright/test": "^1.61.1",
     "@siafoundation/sia-storage": "0.1.4",
     "@types/node": "catalog:",

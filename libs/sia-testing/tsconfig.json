@@ -15,6 +15,7 @@
     "vitest.config.ts"
   ],
   "exclude": [
+    "tests/e2e/native/**",
     "tests/sdk/native/**"
   ]
 }
