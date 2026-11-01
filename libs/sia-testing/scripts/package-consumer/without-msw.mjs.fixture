@@ -3,6 +3,11 @@ import assert from "node:assert/strict";
 import { createAccount } from "@lumeweb/sia-testing/fixtures";
 import { createIndexdHttpServer } from "@lumeweb/sia-testing/http";
 import { createIndexdModel } from "@lumeweb/sia-testing/model";
+import { createMockNetwork, createMockObject, createRemoteMockSdk } from "@lumeweb/sia-testing/sdk";
+
+assert.equal(typeof createMockNetwork, "function");
+assert.equal(typeof createRemoteMockSdk, "function");
+assert.equal(createMockObject("video", 4).size(), 4);
 
 assert.equal(typeof createAccount().ready, "boolean");
 const model = createIndexdModel();

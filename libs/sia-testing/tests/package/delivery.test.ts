@@ -55,6 +55,10 @@ beforeEach(async () => {
       'import type { SetupServerApi } from "msw/node"; import type { IndexdModel } from "../model/index.js"; export declare function setupIndexdServer(options: { model: IndexdModel }): SetupServerApi;',
     "msw/node.js":
       'import { setupServer } from "msw/node"; export const setupIndexdServer = () => setupServer();',
+    "sdk/index.d.ts":
+      'import type { IndexdModel } from "../model/index.js"; export declare function createMockNetwork(options: { model: IndexdModel }): { model: IndexdModel }; export declare function createMockObject(id: string, size: number): { size(): number }; export declare function createRemoteMockSdk(options: { client: string; url: string }): unknown;',
+    "sdk/index.js":
+      'export const createMockNetwork = (options) => ({ model: options.model }); export const createMockObject = (_id, size) => ({ size: () => size }); export const createRemoteMockSdk = () => ({});',
   };
   for (const [path, content] of Object.entries(files)) {
     const file = join(packed, "dist/esm", path);
@@ -93,7 +97,7 @@ function check(
 test("delivers all packed entries without npm installation", () => {
   const result = check();
   expect(result.output).toContain(
-    "packed consumer checks passed (7 explicit exports)",
+    "packed consumer checks passed (8 explicit exports)",
   );
   expect(result.status).toBe(0);
 }, 60000);

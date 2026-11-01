@@ -1,3 +1,6 @@
+/** In-memory Indexd control-plane state for deterministic SDK fixtures. */
+import { type ModelState, readModelState } from "./state.js";
+
 export interface ConnectionRequest {
   expiresAt: Date;
   id: string;
@@ -68,6 +71,7 @@ export interface IndexdModel {
   reset(): void;
   revokeSharingKey(ownerId: string, publicKey: string): void;
   seedObject(accountId: string, object: ModelObject): void;
+  serialize(): string;
   sharedObject(
     recipientId: string,
     publicKey: string,
@@ -85,6 +89,8 @@ export interface IndexdModel {
     | "pinnedSize"
     | "updatedAt"
   >;
+  /** Identifies this account's current pin; removing and repinning the same slab creates a new identity. */
+  slabIdentity(accountId: string, slabId: string): symbol;
   snapshot(): { accounts: ModelAccount[] };
   unpinSlab(accountId: string, slabId: string): void;
   validateSignedShareUrl(url: string): {
@@ -99,6 +105,8 @@ export interface IndexdModelOptions {
   now?: () => Date;
   /** Maximum unique pinned bytes per account. Omit for an unlimited account. */
   quotaBytes?: number;
+  /** Full checkpoint; snapshot() remains a detached account summary. */
+  state?: string;
 }
 
 export interface ModelAccount {
@@ -173,17 +181,64 @@ interface SharingRecord {
 export function createIndexdModel(
   options: IndexdModelOptions = {},
 ): IndexdModel {
+  if (
+    options.state !== undefined &&
+    (options.hosts !== undefined || options.quotaBytes !== undefined)
+  )
+    throw new Error("snapshot owns host and quota settings");
+  const saved =
+    options.state === undefined ? undefined : readModelState(options.state);
   const now = options.now ?? (() => new Date());
-  const accounts = new Map<string, ModelAccount>();
-  const requests = new Map<string, ConnectionRequestStatus>();
-  let requestNumber = 0;
-  const objects = new Map<string, Map<string, ModelObject>>();
-  const slabs = new Map<string, ModelSlab>();
-  const accountSlabs = new Map<string, Set<string>>();
-  const events = new Map<string, ModelObjectEvent[]>();
-  const sharing = new Map<string, SharingRecord>();
-  const hostList = (options.hosts ?? []).map(copyHost);
-  const quotaBytes = options.quotaBytes;
+  const accounts = new Map<string, ModelAccount>(
+    saved?.accounts.map((row) => [row.account.id, row.account]),
+  );
+  const requests = new Map<string, ConnectionRequestStatus>(
+    saved?.requests.map((row) => [
+      row.id,
+      {
+        approved: row.approved,
+        expiresAt: new Date(row.expiresAt),
+        publicKey: row.publicKey,
+      },
+    ]),
+  );
+  let requestNumber = saved?.requestNumber ?? 0;
+  const objects = new Map<string, Map<string, ModelObject>>(
+    saved?.accounts.map((row) => [
+      row.account.id,
+      new Map(row.objects.map((object) => [object.id, object])),
+    ]),
+  );
+  const slabs = new Map<string, ModelSlab>(
+    saved?.slabs.map((slab) => [slab.id, slab]),
+  );
+  const accountSlabs = new Map<string, Map<string, symbol>>(
+    saved?.accounts.map((row) => [
+      row.account.id,
+      new Map(row.slabs.map((id) => [id, Symbol()])),
+    ]),
+  );
+  const events = new Map<string, ModelObjectEvent[]>(
+    saved?.accounts.map((row) => [row.account.id, row.events]),
+  );
+  const sharing = new Map<string, SharingRecord>(
+    saved?.sharing.map((row) => [
+      row.key.publicKey,
+      {
+        attachments: new Map(
+          row.attachments.map((attachment) => [
+            attachment.objectID,
+            attachment,
+          ]),
+        ),
+        key: row.key,
+        owner: row.owner,
+        revoked: row.revoked,
+      },
+    ]),
+  );
+  const hostList = (saved?.hosts ?? options.hosts ?? []).map(copyHost);
+  const quotaBytes = saved?.quotaBytes ?? options.quotaBytes;
 
   function requireAccount(id: string): void {
     if (!accounts.has(id)) throw new Error(`unknown account ${id}`);
@@ -195,7 +250,7 @@ export function createIndexdModel(
     const account = { id: publicKey, publicKey };
     accounts.set(account.id, account);
     objects.set(account.id, new Map());
-    accountSlabs.set(account.id, new Set());
+    accountSlabs.set(account.id, new Map());
     events.set(account.id, []);
     return { ...account };
   }
@@ -352,7 +407,7 @@ export function createIndexdModel(
     },
     listSlabs(accountId) {
       requireAccount(accountId);
-      return [...accountSlabs.get(accountId)!]
+      return [...accountSlabs.get(accountId)!.keys()]
         .filter((id) => slabs.has(id))
         .map((id) => ({ ...slabs.get(id)! }));
     },
@@ -420,12 +475,13 @@ export function createIndexdModel(
       if (prior && prior.size !== slab.size)
         throw new Error(`conflicting slab ${slab.id}`);
       slabs.set(slab.id, { ...slab });
-      accountSlabs.get(accountId)!.add(slab.id);
+      const pins = accountSlabs.get(accountId)!;
+      if (!pins.has(slab.id)) pins.set(slab.id, Symbol());
     },
     pruneSlabs(accountId) {
       requireAccount(accountId);
       const removed: string[] = [];
-      for (const slabId of [...accountSlabs.get(accountId)!]) {
+      for (const slabId of [...accountSlabs.get(accountId)!.keys()]) {
         if (
           ![...objects.get(accountId)!.values()].some((object) =>
             object.slabs?.includes(slabId),
@@ -433,7 +489,7 @@ export function createIndexdModel(
         ) {
           accountSlabs.get(accountId)!.delete(slabId);
           removed.push(slabId);
-          if (![...accountSlabs.values()].some((set) => set.has(slabId)))
+          if (![...accountSlabs.values()].some((pins) => pins.has(slabId)))
             slabs.delete(slabId);
         }
       }
@@ -473,6 +529,36 @@ export function createIndexdModel(
       requireAccount(accountId);
       objects.get(accountId)!.set(object.id, copyObject(object));
     },
+    serialize() {
+      const state: ModelState = {
+        accounts: [...accounts.values()].map((account) => ({
+          account,
+          events: events.get(account.id)!,
+          objects: [...objects.get(account.id)!.values()],
+          slabs: [...accountSlabs.get(account.id)!.keys()],
+        })),
+        hosts: hostList,
+        ...(quotaBytes === undefined ? {} : { quotaBytes }),
+        requestNumber,
+        requests: [...requests.entries()].map(([id, request]) => ({
+          ...request,
+          expiresAt: request.expiresAt.toISOString(),
+          id,
+        })),
+        sharing: [...sharing.values()].map((record) => ({
+          attachments: [...record.attachments.values()],
+          key: record.key,
+          owner: record.owner,
+          revoked: record.revoked,
+        })),
+        slabs: [...slabs.values()],
+        version: 1,
+      };
+      const serialized = JSON.stringify(state);
+      // JSON converts nonfinite numbers to null; reject them before a caller replaces a checkpoint file.
+      readModelState(serialized);
+      return serialized;
+    },
     sharedObject(recipientId, publicKey, objectID) {
       const record = recipientShare(recipientId, publicKey);
       const attachment = record.attachments.get(objectID);
@@ -496,6 +582,13 @@ export function createIndexdModel(
         updatedAt: record.key.updatedAt,
       };
     },
+    slabIdentity(accountId, slabId) {
+      requireAccount(accountId);
+      const identity = accountSlabs.get(accountId)!.get(slabId);
+      if (identity === undefined || !slabs.has(slabId))
+        throw new Error(`slab ${slabId} not found`);
+      return identity;
+    },
     snapshot() {
       return {
         accounts: [...accounts.values()].map((account) => ({ ...account })),
@@ -509,7 +602,7 @@ export function createIndexdModel(
         if (object.slabs?.includes(slabId))
           throw new Error(`slab ${slabId} is still referenced`);
       accountSlabs.get(accountId)!.delete(slabId);
-      if (![...accountSlabs.values()].some((set) => set.has(slabId)))
+      if (![...accountSlabs.values()].some((pins) => pins.has(slabId)))
         slabs.delete(slabId);
     },
     validateSignedShareUrl(rawUrl) {

@@ -1,7 +1,7 @@
 {
   "name": "@lumeweb/sia-testing",
   "version": "0.1.0",
-  "description": "Deterministic Indexd control-plane testing tools for Sia Storage SDK consumers",
+  "description": "Deterministic Indexd fixtures and payload mocks for Sia Storage SDK consumers",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -29,6 +29,10 @@
     "./http": {
       "types": "./dist/esm/http/index.d.ts",
       "import": "./dist/esm/http/index.js"
+    },
+    "./sdk": {
+      "types": "./dist/esm/sdk/index.d.ts",
+      "import": "./dist/esm/sdk/index.js"
     },
     "./package.json": "./package.json",
     "./e2e/node": {
