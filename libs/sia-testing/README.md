@@ -70,7 +70,7 @@ const stream = await reader.download(await reader.object("video"), {
 const bytes = new Uint8Array(await new Response(stream).arrayBuffer());
 ```
 
-The mock implements the `object`/ranged `download` interface used by streaming consumers. Its upload and pin methods are fixture operations; it does not implement the entire storage SDK. Uploaded bytes are copied, and each download returns detached chunks. Uploads become visible to `object()` and the model's event stream after pinning. Deletion removes the object record; pruning then releases unreferenced payloads.
+The mock implements the `object`/ranged `download` interface used by streaming consumers. Its upload and pin methods are fixture operations; it does not implement the entire storage SDK. Uploaded bytes are copied, and each download returns detached chunks. Resetting the model or removing a slab pin invalidates its cached payload, even when the same slab ID is pinned again. Uploads become visible to `object()` and the model's event stream after pinning. Deletion removes the object record; pruning then releases unreferenced payloads.
 
 `network.control` can take a device offline, add finite operation faults, or hold matching operations until the returned release function is called. `setConditions` configures latency and shared upload/download rates through `uploadBytesPerSecond` and `downloadBytesPerSecond`; zero disables pacing. Rate changes affect newly scheduled transfers. Cancelling a download releases its pending transfer and records the delivered byte count.
 

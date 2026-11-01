@@ -22,6 +22,7 @@ import {
 export { createMockObject, type MockObject, type MockSlab } from "./object.js";
 export { createRemoteMockSdk, type RemoteMockSdkOptions } from "./remote.js";
 import {
+  payloadIsCurrent,
   payloadSlabId,
   type PayloadStore,
   readNetworkState,
@@ -100,9 +101,8 @@ export function createMockNetwork(
     const record = payloads.get(accountId)?.get(id);
     if (!record) throw new Error(`payload ${id} not found`);
     // Model resets and externally pruned slabs must also invalidate retained handles.
-    try {
-      model.getSlab(accountId, record.slabId);
-    } catch {
+    if (!payloadIsCurrent(model, accountId, record)) {
+      payloads.get(accountId)!.delete(id);
       throw new Error(`payload ${id} not found`);
     }
     return record;
@@ -118,7 +118,7 @@ export function createMockNetwork(
     let owned = payloads.get(accountId);
     if (owned?.has(id)) {
       const prior = owned.get(id)!;
-      if (model.listSlabs(accountId).some((slab) => slab.id === prior.slabId))
+      if (payloadIsCurrent(model, accountId, prior))
         throw new Error(`payload ${id} already exists`);
     }
     const slabId = payloadSlabId(accountId, id);
@@ -127,7 +127,11 @@ export function createMockNetwork(
       owned = new Map();
       payloads.set(accountId, owned);
     }
-    owned.set(id, { bytes: bytes.slice(), slabId });
+    owned.set(id, {
+      bytes: bytes.slice(),
+      identity: model.slabIdentity(accountId, slabId),
+      slabId,
+    });
     return object;
   }
 

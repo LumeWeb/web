@@ -89,6 +89,8 @@ export interface IndexdModel {
     | "pinnedSize"
     | "updatedAt"
   >;
+  /** Identifies this account's current pin; removing and repinning the same slab creates a new identity. */
+  slabIdentity(accountId: string, slabId: string): symbol;
   snapshot(): { accounts: ModelAccount[] };
   unpinSlab(accountId: string, slabId: string): void;
   validateSignedShareUrl(url: string): {
@@ -210,8 +212,11 @@ export function createIndexdModel(
   const slabs = new Map<string, ModelSlab>(
     saved?.slabs.map((slab) => [slab.id, slab]),
   );
-  const accountSlabs = new Map<string, Set<string>>(
-    saved?.accounts.map((row) => [row.account.id, new Set(row.slabs)]),
+  const accountSlabs = new Map<string, Map<string, symbol>>(
+    saved?.accounts.map((row) => [
+      row.account.id,
+      new Map(row.slabs.map((id) => [id, Symbol()])),
+    ]),
   );
   const events = new Map<string, ModelObjectEvent[]>(
     saved?.accounts.map((row) => [row.account.id, row.events]),
@@ -245,7 +250,7 @@ export function createIndexdModel(
     const account = { id: publicKey, publicKey };
     accounts.set(account.id, account);
     objects.set(account.id, new Map());
-    accountSlabs.set(account.id, new Set());
+    accountSlabs.set(account.id, new Map());
     events.set(account.id, []);
     return { ...account };
   }
@@ -402,7 +407,7 @@ export function createIndexdModel(
     },
     listSlabs(accountId) {
       requireAccount(accountId);
-      return [...accountSlabs.get(accountId)!]
+      return [...accountSlabs.get(accountId)!.keys()]
         .filter((id) => slabs.has(id))
         .map((id) => ({ ...slabs.get(id)! }));
     },
@@ -470,12 +475,13 @@ export function createIndexdModel(
       if (prior && prior.size !== slab.size)
         throw new Error(`conflicting slab ${slab.id}`);
       slabs.set(slab.id, { ...slab });
-      accountSlabs.get(accountId)!.add(slab.id);
+      const pins = accountSlabs.get(accountId)!;
+      if (!pins.has(slab.id)) pins.set(slab.id, Symbol());
     },
     pruneSlabs(accountId) {
       requireAccount(accountId);
       const removed: string[] = [];
-      for (const slabId of [...accountSlabs.get(accountId)!]) {
+      for (const slabId of [...accountSlabs.get(accountId)!.keys()]) {
         if (
           ![...objects.get(accountId)!.values()].some((object) =>
             object.slabs?.includes(slabId),
@@ -483,7 +489,7 @@ export function createIndexdModel(
         ) {
           accountSlabs.get(accountId)!.delete(slabId);
           removed.push(slabId);
-          if (![...accountSlabs.values()].some((set) => set.has(slabId)))
+          if (![...accountSlabs.values()].some((pins) => pins.has(slabId)))
             slabs.delete(slabId);
         }
       }
@@ -529,7 +535,7 @@ export function createIndexdModel(
           account,
           events: events.get(account.id)!,
           objects: [...objects.get(account.id)!.values()],
-          slabs: [...accountSlabs.get(account.id)!],
+          slabs: [...accountSlabs.get(account.id)!.keys()],
         })),
         hosts: hostList,
         ...(quotaBytes === undefined ? {} : { quotaBytes }),
@@ -576,6 +582,13 @@ export function createIndexdModel(
         updatedAt: record.key.updatedAt,
       };
     },
+    slabIdentity(accountId, slabId) {
+      requireAccount(accountId);
+      const identity = accountSlabs.get(accountId)!.get(slabId);
+      if (identity === undefined || !slabs.has(slabId))
+        throw new Error(`slab ${slabId} not found`);
+      return identity;
+    },
     snapshot() {
       return {
         accounts: [...accounts.values()].map((account) => ({ ...account })),
@@ -589,7 +602,7 @@ export function createIndexdModel(
         if (object.slabs?.includes(slabId))
           throw new Error(`slab ${slabId} is still referenced`);
       accountSlabs.get(accountId)!.delete(slabId);
-      if (![...accountSlabs.values()].some((set) => set.has(slabId)))
+      if (![...accountSlabs.values()].some((pins) => pins.has(slabId)))
         slabs.delete(slabId);
     },
     validateSignedShareUrl(rawUrl) {

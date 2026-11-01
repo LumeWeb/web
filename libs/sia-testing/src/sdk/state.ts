@@ -3,6 +3,7 @@ import { createIndexdModel, type IndexdModel } from "../model/index.js";
 
 export interface PayloadRecord {
   bytes: Uint8Array;
+  identity: symbol;
   slabId: string;
 }
 
@@ -12,6 +13,19 @@ interface NetworkState {
   model: string;
   payloads: { accountId: string; data: string; id: string }[];
   version: 1;
+}
+
+/** A reused slab ID cannot prove that cached bytes belong to the account's current pin. */
+export function payloadIsCurrent(
+  model: IndexdModel,
+  accountId: string,
+  payload: PayloadRecord,
+): boolean {
+  try {
+    return model.slabIdentity(accountId, payload.slabId) === payload.identity;
+  } catch {
+    return false;
+  }
 }
 
 export function payloadSlabId(accountId: string, id: string): string {
@@ -62,7 +76,11 @@ export function readNetworkState(
         payloads.set(entry.accountId, owned);
       }
       if (owned.has(entry.id)) throw new Error("duplicate snapshot payload");
-      owned.set(entry.id, { bytes, slabId });
+      owned.set(entry.id, {
+        bytes,
+        identity: model.slabIdentity(entry.accountId, slabId),
+        slabId,
+      });
     }
     return { model, payloads };
   } catch (cause) {
@@ -81,11 +99,8 @@ export function serializeNetworkState(
     version: 1,
   };
   for (const account of model.snapshot().accounts) {
-    const pinned = new Map(
-      model.listSlabs(account.id).map((slab) => [slab.id, slab.size]),
-    );
     for (const [id, payload] of payloads.get(account.id) ?? []) {
-      if (pinned.get(payload.slabId) !== payload.bytes.byteLength) continue;
+      if (!payloadIsCurrent(model, account.id, payload)) continue;
       // Spreading a large byte array into fromCharCode would exceed the engine's argument limit.
       let binary = "";
       for (const byte of payload.bytes) binary += String.fromCharCode(byte);
