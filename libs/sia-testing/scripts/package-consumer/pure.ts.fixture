@@ -12,3 +12,30 @@ const server = createIndexdHttpServer({ model });
 const listening: boolean = server.server.listening;
 const ready: boolean = createAccount().ready;
 void [ready, count, listening];
+
+import {
+  readE2EService,
+  withDisposableAccount,
+  type DisposableAccount,
+  type E2EService,
+} from "@lumeweb/sia-testing/e2e/node";
+export async function provision(env: NodeJS.ProcessEnv): Promise<string> {
+  const service: E2EService = readE2EService(env);
+  return withDisposableAccount(
+    { service, appID: "a".repeat(64), fundTargetBytes: 0 },
+    async (account: DisposableAccount) => {
+      await account.approve(new URL("/auth/connect/request", service.indexdURL).toString());
+      await account.recordAccountKey(`ed25519:${"b".repeat(64)}`);
+      return account.quotaKey;
+    },
+  );
+}
+
+import type { DisposableAccountOptions } from "@lumeweb/sia-testing/e2e/node";
+export function noTransportOverride(service: E2EService): DisposableAccountOptions {
+  return {
+    service, appID: "a".repeat(64), fundTargetBytes: 0,
+    // @ts-expect-error Consumers cannot replace provisioning transport.
+    fetchImpl: fetch,
+  };
+}

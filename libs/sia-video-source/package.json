@@ -41,7 +41,10 @@
     "test:coverage": "vitest run --coverage",
     "test:browser": "vitest run --project 'playback*'",
     "test:browser:watch": "vitest --project 'playback*'",
-    "test:browser:ui": "vitest --project 'playback*' --ui"
+    "test:browser:ui": "vitest --project 'playback*' --ui",
+    "test:e2e:collect": "playwright test --config playwright.e2e.config.ts --list",
+    "test:e2e:live": "sia-testing-e2e --cwd \"$PWD\" -- playwright test --config playwright.e2e.config.ts",
+    "test:e2e:build": "vite build --config tests/e2e/vite.config.ts"
   },
   "dependencies": {
     "@noble/ciphers": "^2.4.0",
@@ -82,7 +85,10 @@
     "rolldown": "^1.0.0",
     "tsdown": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "@lumeweb/sia-testing": "workspace:*",
+    "@playwright/test": "^1.61.1",
+    "vite": "catalog:framework"
   },
   "repository": {
     "type": "git",

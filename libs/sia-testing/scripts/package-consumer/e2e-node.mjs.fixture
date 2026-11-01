@@ -1,0 +1,6 @@
+/** Consumer imports must resolve the delivered Node API without checkout-only modules. */
+import assert from 'node:assert/strict';
+import { readE2EService, withDisposableAccount } from '@lumeweb/sia-testing/e2e/node';
+
+assert.equal(typeof readE2EService, 'function');
+assert.equal(typeof withDisposableAccount, 'function');

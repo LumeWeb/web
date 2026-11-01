@@ -7,4 +7,9 @@ export default defineConfig(createLibraryConfig([
   "src/msw/index.ts",
   "src/msw/node.ts",
   "src/http/index.ts",
-]));
+  "src/e2e/node.ts",
+  "src/e2e/cli.ts",
+], {
+  deps: { neverBundle: [/^node:/], skipNodeModulesBundle: true },
+  sourcemap: false,
+}));

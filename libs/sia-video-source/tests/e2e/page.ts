@@ -1,0 +1,169 @@
+/** Owns the real SDK registration until Node has finished the consumer assertion. */
+import {
+  Builder,
+  generateRecoveryPhrase,
+  initSia,
+  PinnedObject,
+  type Sdk,
+} from "@siafoundation/sia-storage";
+import {
+  createSiaStreamService,
+  type SiaNativeStreamFile,
+} from "@lumeweb/sia-video-source/sia";
+
+let builder: Builder | undefined;
+let sdk: Sdk | undefined;
+let accountKey: string | undefined;
+let indexerUrl = "";
+/** Keep operation failures when the owned handles also fail to release. */
+async function preservingFailure<T>(
+  run: () => Promise<T>,
+  cleanup: () => void,
+): Promise<T> {
+  let outcome: { error: unknown; ok: false } | { ok: true; value: T };
+  try {
+    outcome = { ok: true, value: await run() };
+  } catch (error) {
+    outcome = { error, ok: false };
+  }
+  let cleanupFailure: undefined | { error: unknown };
+  try {
+    cleanup();
+  } catch (error) {
+    cleanupFailure = { error };
+  }
+  if (!outcome.ok) {
+    if (cleanupFailure)
+      throw new AggregateError(
+        [outcome.error, cleanupFailure.error],
+        "Consumer operation and cleanup failed",
+        { cause: outcome.error },
+      );
+    throw outcome.error;
+  }
+  if (cleanupFailure) throw cleanupFailure.error;
+  return outcome.value;
+}
+function release(actions: (() => void)[]) {
+  const errors: unknown[] = [];
+  for (const action of actions) {
+    try {
+      action();
+    } catch (error) {
+      errors.push(error);
+    }
+  }
+  if (errors.length)
+    throw new AggregateError(errors, "Consumer page cleanup failed");
+}
+async function run() {
+  if (!sdk) throw new Error("Consumer SDK is not registered");
+  const owner = sdk;
+  const input = new PinnedObject();
+  // WASM consumes the upload input even when upload rejects.
+  const object = await owner.upload(
+    input,
+    new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(Uint8Array.of(0, 1, 2, 3, 4, 5, 6, 7));
+        controller.close();
+      },
+    }),
+  );
+  let key: Awaited<ReturnType<Sdk["createSharingKey"]>> | undefined;
+  let service: ReturnType<typeof createSiaStreamService> | undefined;
+  let file: SiaNativeStreamFile | undefined;
+  return preservingFailure(
+    async () => {
+      await owner.pinObject(object);
+      key = await owner.createSharingKey("Consumer-owned E2E");
+      await owner.shareObject(key, object);
+      const sharingKeyHex = key.seed();
+      service = createSiaStreamService({
+        auth: { get: () => ({ indexerUrl, sharingKeyHex, userKeyHex: "" }) },
+      });
+      const available = await service.prepare();
+      const source = await service.resolve(object.id(), undefined, "shared");
+      const session = await service.session(source);
+      file = await session.url(source, {
+        name: "range.bin",
+        type: "application/octet-stream",
+      });
+      const response = await fetch(file.url, {
+        headers: { Range: "bytes=2-4" },
+      });
+      return {
+        available,
+        bytes: [...new Uint8Array(await response.arrayBuffer())],
+        contentRange: response.headers.get("Content-Range"),
+        objectID: object.id(),
+        source,
+        status: response.status,
+      };
+    },
+    () => {
+      release([
+        () => file?.release(),
+        () => service?.dispose(),
+        () => key?.free(),
+        () => object.free(),
+      ]);
+    },
+  );
+}
+export const consumer = {
+  accountKey() {
+    return accountKey;
+  },
+  close() {
+    const ownedBuilder = builder,
+      ownedSdk = sdk;
+    sdk = builder = undefined;
+    release([() => ownedSdk?.free(), () => ownedBuilder?.free()]);
+  },
+  async register() {
+    if (!builder || sdk)
+      throw new Error("Consumer registration is not available");
+    await builder.waitForApproval();
+    sdk = await builder.register(generateRecoveryPhrase());
+    const key = sdk.appKey();
+    try {
+      accountKey = key.publicKey();
+    } finally {
+      key.free();
+    }
+    await window.recordConsumerAccount(accountKey);
+  },
+  async request(url: string, appID: string) {
+    if (builder) throw new Error("Consumer page is already requested");
+    await initSia();
+    indexerUrl = url;
+    builder = new Builder(url, {
+      appId: appID,
+      callbackUrl: undefined,
+      description: "Disposable consumer test",
+      logoUrl: undefined,
+      name: "Consumer E2E",
+      serviceUrl: "https://example.invalid",
+    });
+    await builder.requestConnection();
+    return builder.responseUrl();
+  },
+  run,
+  async waitForFunding() {
+    if (!sdk) throw new Error("Consumer SDK is not registered");
+    const deadline = Date.now() + 7 * 60_000;
+    while (!(await sdk.account()).ready) {
+      if (Date.now() >= deadline) throw new Error("Consumer funding timed out");
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+  },
+};
+declare global {
+  interface Window {
+    consumer: typeof consumer;
+    recordConsumerAccount(key: string): Promise<void>;
+  }
+}
+window.consumer = consumer;
+document.querySelector("#status")!.textContent = "ready";

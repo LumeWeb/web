@@ -5,6 +5,6 @@
     "types": ["node"],
     "lib": ["esnext", "dom"]
   },
-  "include": ["tests/sdk/native/**/*.ts"],
+  "include": ["tests/sdk/native/**/*.ts", "tests/e2e/native/**/*.ts"],
   "exclude": []
 }

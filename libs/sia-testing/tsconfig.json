@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "rootDir": ".",
+    "lib": ["esnext", "dom"],
     "noEmit": true,
     "strict": true,
     "noUncheckedIndexedAccess": true,
@@ -14,6 +15,7 @@
     "vitest.config.ts"
   ],
   "exclude": [
+    "tests/e2e/native/**",
     "tests/sdk/native/**"
   ]
 }

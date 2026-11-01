@@ -1,0 +1,13 @@
+/** Exercises the live command with a real build and a server-free Vite replacement. */
+import { execSync } from "node:child_process";
+import { delimiter, resolve } from "node:path";
+import config from "./playwright.e2e.config.ts";
+
+execSync(config.webServer.command, {
+  env: {
+    ...process.env,
+    PATH: `${resolve("node_modules/.bin")}${delimiter}${process.env.PATH}`,
+  },
+  stdio: "pipe",
+  timeout: 90_000,
+});

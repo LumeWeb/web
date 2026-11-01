@@ -5,14 +5,22 @@ on:
     paths:
       - 'libs/sia-testing/**'
       - 'libs/tsdown-config/**'
+      - 'libs/sia-video-source/**'
+      - 'apps/sia-video-demo/**'
       - 'pnpm-lock.yaml'
       - '.github/workflows/sia-testing.yml'
+      - '.github/workflows/sia-testing-real.yml'
+      - 'maintainers/sia-testing/**'
   pull_request:
     paths:
       - 'libs/sia-testing/**'
       - 'libs/tsdown-config/**'
+      - 'libs/sia-video-source/**'
+      - 'apps/sia-video-demo/**'
       - 'pnpm-lock.yaml'
       - '.github/workflows/sia-testing.yml'
+      - '.github/workflows/sia-testing-real.yml'
+      - 'maintainers/sia-testing/**'
 
 concurrency:
   group: sia-testing-${{ github.workflow }}-${{ github.ref }}
@@ -31,6 +39,7 @@ jobs:
       - run: pnpm --filter=@lumeweb/sia-testing test:native:control
       - run: pnpm --filter=@lumeweb/tsdown-config build:config
       - run: pnpm --filter=@lumeweb/sia-testing test:package
+      - run: pnpm --filter=@lumeweb/sia-testing test:consumers
   browser:
     runs-on: ubuntu-latest
     steps:
