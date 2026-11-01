@@ -34,6 +34,8 @@ export interface LoadPipelineDeps {
 
 /** Everything the pipeline needs to decide one load. */
 export interface LoadRequest {
+  /** Bound to the current load so superseded MIME replies cannot decide a replacement load. */
+  readonly checkMime?: (mime: string) => Promise<boolean>;
   /** Load-generation counter forwarded to every ByteSource read. */
   readonly loadGeneration: number;
   /** Load-level abort signal forwarded to every ByteSource read. */
@@ -52,6 +54,7 @@ export function createLoadPipeline(deps: LoadPipelineDeps): LoadPipeline {
     async run(request: LoadRequest): Promise<LoadResult> {
       return inspect(request.source, {
         capabilities,
+        ...(request.checkMime ? { checkMime: request.checkMime } : {}),
         loadGeneration: request.loadGeneration,
         signal: request.signal,
       });

@@ -129,14 +129,90 @@ test("a streamed download opens before its first paced chunk", async () => {
     { id: () => "video" },
     { signal: AbortSignal.timeout(1000) },
   );
-  expect(network.control.requests()[0]).toMatchObject({
-    bytes: 0,
-    status: "pending",
-  });
+  await vi.waitFor(() =>
+    expect(network.control.requests()[0]).toMatchObject({
+      bytes: 0,
+      status: "pending",
+    }),
+  );
   await stream.cancel();
   await vi.waitFor(() =>
     expect(network.control.requests()[0]?.status).toBe("cancelled"),
   );
+});
+
+test("a remote stream can cancel a download before the server sends headers", async () => {
+  const { network, owner, url } = await fixture();
+  network.seedObject(owner.id, "video", new Uint8Array([1]));
+  const release = network.control.hold({ operation: "download" });
+  const sdk = sdkAPI.createRemoteMockSdk({ client: "peer", url });
+  let stream: ReadableStream<Uint8Array> | undefined;
+  const opening = sdk.download({ id: () => "video" }).then((value) => {
+    stream = value;
+  });
+  try {
+    await vi.waitFor(() =>
+      expect(network.control.requests()[0]?.status).toBe("pending"),
+    );
+    expect(stream).toBeDefined();
+    await stream!.cancel();
+    await vi.waitFor(() =>
+      expect(network.control.requests()[0]?.status).toBe("cancelled"),
+    );
+  } finally {
+    release();
+    await opening;
+    await stream?.cancel();
+  }
+});
+
+test("aborting the caller errors a remote read while headers are held", async () => {
+  const { network, owner, url } = await fixture();
+  network.seedObject(owner.id, "video", new Uint8Array([1]));
+  const release = network.control.hold({ operation: "download" });
+  const abort = new AbortController();
+  const sdk = sdkAPI.createRemoteMockSdk({ client: "peer", url });
+  const reader = (
+    await sdk.download({ id: () => "video" }, { signal: abort.signal })
+  ).getReader();
+  const pending = reader.read().catch((error: unknown) => error);
+  try {
+    await vi.waitFor(() =>
+      expect(network.control.requests()[0]?.status).toBe("pending"),
+    );
+    abort.abort();
+    expect(await pending).toMatchObject({ name: "AbortError" });
+    await vi.waitFor(() =>
+      expect(network.control.requests()[0]?.status).toBe("cancelled"),
+    );
+  } finally {
+    release();
+    await reader.cancel().catch(() => undefined);
+  }
+});
+
+test("HTTP download failures surface through the returned stream", async () => {
+  const { url } = await fixture();
+  const sdk = sdkAPI.createRemoteMockSdk({ client: "peer", url });
+  const reader = (await sdk.download({ id: () => "missing" })).getReader();
+  await expect(reader.read()).rejects.toThrow("not found");
+});
+
+test("a remote zero-byte payload closes without inventing a chunk", async () => {
+  const { network, owner, url } = await fixture();
+  network.seedObject(owner.id, "empty", new Uint8Array());
+  const sdk = sdkAPI.createRemoteMockSdk({ client: "peer", url });
+  const reader = (await sdk.download({ id: () => "empty" })).getReader();
+  expect(await reader.read()).toEqual({ done: true, value: undefined });
+});
+
+test("an already aborted remote download sends no request", async () => {
+  const { network, url } = await fixture();
+  const sdk = sdkAPI.createRemoteMockSdk({ client: "peer", url });
+  await expect(
+    sdk.download({ id: () => "video" }, { signal: AbortSignal.abort() }),
+  ).rejects.toMatchObject({ name: "AbortError" });
+  expect(network.control.requests()).toEqual([]);
 });
 
 test("a remote reader receives bytes before the whole paced body is available", async () => {

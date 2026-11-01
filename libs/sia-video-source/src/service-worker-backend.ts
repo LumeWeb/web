@@ -15,15 +15,17 @@ import {
 } from "./transport-telemetry.ts";
 
 export interface ServiceWorkerBackendHooks {
+  /** URL assignment can cancel native play; capture playback intent before changing src. */
+  onBeforeSourceAttached?(url: string): void;
   onSourceAttached?(url: string): void;
 }
 
 export interface ServiceWorkerLoadOptions {
   mimeType?: string;
   name?: string;
+  onTelemetry?: SiaTransportTelemetryCallback;
   /** Explicitly identifies the auth context for a bare object key. */
   sourceKind?: SiaNativeStreamSourceKind;
-  onTelemetry?: SiaTransportTelemetryCallback;
 }
 
 export interface ServiceWorkerStreamTarget {
@@ -83,6 +85,7 @@ export class ServiceWorkerBackend {
         }
         this.#stream = stream;
         this.#controller = null;
+        this.#hooks.onBeforeSourceAttached?.(stream.url);
         if (this.#target) this.#target.src = stream.url;
         this.#hooks.onSourceAttached?.(stream.url);
       },
@@ -124,9 +127,9 @@ export class ServiceWorkerBackend {
         mimeType: options.mimeType,
         name: options.name,
         onProgress,
-        sourceKind: options.sourceKind,
         onStatus,
         signal,
+        sourceKind: options.sourceKind,
       });
     } catch (err) {
       if (err instanceof SiaNativeStreamUnavailableError) throw err;

@@ -7,7 +7,10 @@ Accepted (implemented in `libs/sia-video-source`)
 Scope note: this decision covers the media-worker backend. ADR
 [0011](0011-backend-policy-and-native-stream-provider.md) supersedes its use
 for native stream loads, which do not require MSE; the detection and `device`
-error remain in force when a load takes the worker path.
+error remain in force when a load takes the worker path. ADR
+[0012](0012-append-thread-mse-capabilities.md) places the implementation and MIME
+checks on the thread that appends media, which can differ from the worker that
+inspects the object.
 
 ## Context
 

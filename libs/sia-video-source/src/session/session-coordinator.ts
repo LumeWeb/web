@@ -25,15 +25,15 @@
  * surfaces as a typed result, not a string comparison, and posts a protocol
  * `unsupported` error.
  *
- * Protocol compatibility: outbound messages are the existing
- * `WorkerToMainMessage` shapes (`HELLO_OK`, `ATTACH_OK`, `SOURCE_OK`,
- * `CHUNK`, `ENDED`, `ERROR`), the capability fields on `SOURCE_OK.info` stay
- * optional, and no protocol message is renamed.
+ * Existing outbound message shapes remain unchanged. Main-thread MSE adds
+ * load-scoped MSE_QUERY/MSE_RESULT exchanges; hosts without the optional
+ * HELLO implementation field retain local capability checks.
  */
 
 import type { PlaybackCapabilities } from '../capabilities/browser-capabilities.ts';
 import { detectBrowserCapabilities } from '../capabilities/browser-capabilities.ts';
-import { mseImplementation, resolveMseCtor } from '../capabilities/mse-runtime.ts';
+import { mseImplementation, type MseImplementation, resolveMseCtor } from '../capabilities/mse-runtime.ts';
+import { createHostMseProbe } from '../capabilities/host-mse-probe.ts';
 import {
   bufferedAheadInContainingWindow,
   DEFAULT_MSE_AHEAD_TARGET_SECONDS,
@@ -317,6 +317,8 @@ export class WorkerComposition implements SessionCoordinator {
   #destroyed = false;
   readonly #errorReporter: ErrorReporter;
   readonly #handshake: SessionHandshake;
+  #hostMse: MseImplementation | undefined;
+  readonly #hostMseProbe: ReturnType<typeof createHostMseProbe>;
   /**
    * One authoritative abort controller for the in-flight load. Created at
    * SOURCE, aborted by `#abandonLoad` (supersession / DETACH / DESTROY), and
@@ -350,6 +352,7 @@ export class WorkerComposition implements SessionCoordinator {
     this.#onAbandon = deps.onAbandon;
     this.#onPlayhead = deps.onPlayhead;
     this.#post = deps.post;
+    this.#hostMseProbe = createHostMseProbe(deps.post);
     this.#sinkFactory = deps.sinkFactory ?? (() => createPostingSink(this.#post, this.#requestId ?? 0));
 
     this.#errorReporter = createErrorReporter((report) => {
@@ -411,6 +414,7 @@ export class WorkerComposition implements SessionCoordinator {
           // arrives before ATTACH, so HELLO_OK's `features.workerMse` and the
           // subsequent ATTACH_OK both reflect the host's selection.
           this.#selectMode(message.config);
+          this.#hostMse = message.hostMse;
           this.#post({
             features: { workerMse: this.#mode === workerMode.worker },
             publicKey,
@@ -422,6 +426,9 @@ export class WorkerComposition implements SessionCoordinator {
         }
         case MainToWorkerMessageType.LOG_LEVEL:
           this.#handshake.setLogLevel?.(message.level);
+          return;
+        case MainToWorkerMessageType.MSE_RESULT:
+          this.#hostMseProbe.receive(message);
           return;
         case MainToWorkerMessageType.PLAY:
           this.#playRequested = true;
@@ -548,13 +555,10 @@ export class WorkerComposition implements SessionCoordinator {
       this.#postError(kind, requestId, context);
     };
 
-    // Only a standard or managed-implementing MSE runtime can play Sia video:
-    // anything else — no MSE at all (all iPhone Safari pre-17.1) or only the
-    // legacy WebKit-prefixed surface — is device-too-old. Fail fast with the
-    // honest `device` kind before any source creation or pipeline run; no
-    // abort controller exists for this attempt yet (`#abandonLoad` above
-    // already cleared the previous one).
-    const impl = this.#capabilities.mseImpl().impl;
+    // Firefox omits MediaSource in workers even when its main thread supports MSE.
+    // Check the append thread's implementation; older hosts retain local detection.
+    const useHostMse = this.#mode === workerMode.main && this.#hostMse !== undefined;
+    const impl = useHostMse ? this.#hostMse : this.#capabilities.mseImpl().impl;
     if (impl === mseImplementation.none || impl === mseImplementation.webkitLegacy) {
       failed(workerErrorCode.device, 'no-mse');
       this.#loadAbortController = null;
@@ -591,7 +595,10 @@ export class WorkerComposition implements SessionCoordinator {
 
     let result: LoadResult;
     try {
-      result = await this.#loadPipeline.run({ loadGeneration, signal: loadAbortController.signal, source });
+      result = await this.#loadPipeline.run({
+        ...(useHostMse ? { checkMime: (mime: string) => this.#hostMseProbe.supported(mime, requestId, loadAbortController.signal) } : {}),
+        loadGeneration, signal: loadAbortController.signal, source,
+      });
     } catch (error) {
       if (this.#destroyed || loadGeneration !== this.#loadGeneration) {
         // The replacement teardown already aborted this load's reads; the

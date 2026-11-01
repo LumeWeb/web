@@ -236,5 +236,12 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
     join(demo, "public-import.mjs"),
   );
   run(join(demo, "public-import.mjs"), [], demo);
-  console.log("consumer checks passed: 2 builds, 2 typechecks, 2 collected tests");
+  await cp(
+    new URL("./package-consumer/worker-setup.mjs.fixture", import.meta.url),
+    join(demo, "worker-setup-import.mjs"),
+  );
+  run(join(demo, "worker-setup-import.mjs"), [], demo);
+  console.log(
+    "consumer checks passed: 2 builds, 2 typechecks, 2 collected tests; packed worker setup passed",
+  );
 });

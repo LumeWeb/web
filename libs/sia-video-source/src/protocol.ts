@@ -12,6 +12,7 @@
 
 import type { AppMetadata } from '@siafoundation/sia-storage';
 import type { PlaybackTrack } from './media/types.ts';
+import { mseImplementation, type MseImplementation } from './capabilities/mse-runtime.ts';
 
 /** Wire protocol version; 0 is the initial, unreleased protocol. */
 export const PROTOCOL_VERSION = 0;
@@ -35,6 +36,7 @@ export enum MainToWorkerMessageType {
   DETACH = 'DETACH',
   HELLO = 'HELLO',
   LOG_LEVEL = 'LOG_LEVEL',
+  MSE_RESULT = 'MSE_RESULT',
   PLAY = 'PLAY',
   PLAYHEAD = 'PLAYHEAD',
   SEEK = 'SEEK',
@@ -53,6 +55,7 @@ export enum WorkerToMainMessageType {
   HANDLE = 'HANDLE',
   HELLO_OK = 'HELLO_OK',
   LOG = 'LOG',
+  MSE_QUERY = 'MSE_QUERY',
   PROGRESS = 'PROGRESS',
   SOURCE_OK = 'SOURCE_OK',
 }
@@ -108,6 +111,8 @@ export type MainToWorkerMessage =
       readonly appSeed?: boolean;
       /** Required with the default worker SDK factory; ignored when the app injected its own. */
       readonly config?: WorkerConfig;
+      /** The host owns MIME probing when its main thread will append the media. */
+      readonly hostMse?: MseImplementation;
       /**
        * Host forwarding threshold for worker `LOG` messages: the worker posts
        * only events whose severity is at or above this level. Absent = the
@@ -147,6 +152,8 @@ export type MainToWorkerMessage =
        */
       readonly refreshSdk?: boolean;
       readonly requestId: RequestId;
+      /** Explicit auth/source kind for bare keys; share URLs remain self-describing. */
+      readonly sourceKind?: 'app' | 'shared';
       /**
        * The object locator: either the hex object key of an object pinned
        * under the configured indexer account, or a full Sia share URL
@@ -155,8 +162,6 @@ export type MainToWorkerMessage =
        * opaque wire content, so no message-shape distinction exists.
        */
       readonly src: string;
-      /** Explicit auth/source kind for bare keys; share URLs remain self-describing. */
-      readonly sourceKind?: 'app' | 'shared';
       readonly type: MainToWorkerMessageType.SOURCE;
     }
   | {
@@ -169,6 +174,7 @@ export type MainToWorkerMessage =
       readonly type: MainToWorkerMessageType.APP_KEY;
     }
   | { readonly level?: WorkerLogLevel; readonly type: MainToWorkerMessageType.LOG_LEVEL; }
+  | { readonly queryId: number; readonly requestId: RequestId; readonly supported: boolean; readonly type: MainToWorkerMessageType.MSE_RESULT }
   /** Current media playhead; drives buffered-timeline scheduling and back-buffer eviction. */
   | { readonly requestId: RequestId; readonly time: number; readonly type: MainToWorkerMessageType.PLAYHEAD; }
   | { readonly requestId: RequestId; readonly time: number; readonly type: MainToWorkerMessageType.SEEK; }
@@ -424,6 +430,7 @@ export type WorkerToMainMessage =
     }
   | { readonly handle: MediaSourceHandle; readonly requestId: RequestId; readonly type: WorkerToMainMessageType.HANDLE; }
   | { readonly info: SourceInfo; readonly requestId: RequestId; readonly type: WorkerToMainMessageType.SOURCE_OK; }
+  | { readonly mime: string; readonly queryId: number; readonly requestId: RequestId; readonly type: WorkerToMainMessageType.MSE_QUERY }
   | { readonly mode: WorkerMode; readonly requestId: RequestId; readonly type: WorkerToMainMessageType.ATTACH_OK };
 
 /** Narrows a raw postMessage payload to the main → worker half of the protocol. */
@@ -462,10 +469,13 @@ export function isMainToWorkerMessage(message: unknown): message is MainToWorker
         typeof typed.requestId === 'number' &&
         (typeof typed.appSeed === 'undefined' || typeof typed.appSeed === 'boolean') &&
         (typeof typed.sharingSeed === 'undefined' || typeof typed.sharingSeed === 'boolean') &&
-        (typeof typed.log === 'undefined' || Object.values(workerLogLevel).includes(typed.log))
+        (typeof typed.log === 'undefined' || Object.values(workerLogLevel).includes(typed.log)) &&
+        (typed.hostMse === undefined || Object.values(mseImplementation).includes(typed.hostMse))
       );
     case MainToWorkerMessageType.LOG_LEVEL:
       return typeof typed.level === 'undefined' || Object.values(workerLogLevel).includes(typed.level);
+    case MainToWorkerMessageType.MSE_RESULT:
+      return Number.isSafeInteger(typed.requestId) && typed.requestId >= 0 && Number.isSafeInteger(typed.queryId) && typed.queryId > 0 && typeof typed.supported === 'boolean';
     case MainToWorkerMessageType.PLAYHEAD:
     case MainToWorkerMessageType.SEEK:
       return typeof typed.requestId === 'number' && Number.isFinite(typed.time);
@@ -518,6 +528,8 @@ export function isWorkerToMainMessage(message: unknown): message is WorkerToMain
         (typed.requestId === null || typeof typed.requestId === 'number') &&
         (typed.detail === undefined || (typeof typed.detail === 'object' && typed.detail !== null))
       );
+    case WorkerToMainMessageType.MSE_QUERY:
+      return Number.isSafeInteger(typed.requestId) && typed.requestId >= 0 && Number.isSafeInteger(typed.queryId) && typed.queryId > 0 && typeof typed.mime === 'string' && typed.mime.length > 0;
     case WorkerToMainMessageType.PROGRESS:
       return typeof typed.requestId === 'number' && typeof typed.received === 'number';
     case WorkerToMainMessageType.SOURCE_OK:
