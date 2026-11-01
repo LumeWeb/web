@@ -1,6 +1,15 @@
 /** Builds copied consumer pages using cached dependencies, never installs or contacts a service. */
 import { execFileSync } from "node:child_process";
-import { cp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import {
+  chmod,
+  cp,
+  mkdir,
+  readdir,
+  readFile,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -140,7 +149,26 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
   );
   const tsdown = dependency("tsdown", "catalog:");
   try {
-    run(join(tsdown, "dist/run.mjs"), [], library);
+    const bin = join(library, "node_modules/.bin");
+    await mkdir(bin, { recursive: true });
+    await symlink(join(tsdown, "dist/run.mjs"), join(bin, "tsdown"));
+    const serverCheck = join(library, "check-e2e-vite.mjs");
+    await cp(
+      new URL("./package-consumer/e2e-vite.mjs.fixture", import.meta.url),
+      serverCheck,
+    );
+    await chmod(serverCheck, 0o700);
+    await symlink(serverCheck, join(bin, "vite"));
+    await mkdir(join(library, "dist/esm"), { recursive: true });
+    await writeFile(
+      join(library, "dist/esm/sia-stream-service.js"),
+      "export const createSiaStreamService = undefined;\n",
+    );
+    await cp(
+      new URL("./package-consumer/e2e-build.mjs.fixture", import.meta.url),
+      join(library, "check-e2e-build.mjs"),
+    );
+    run(join(library, "check-e2e-build.mjs"), [], library);
     const packedLibrary = await pack(
       library,
       join(directory, "library-tarball"),
@@ -203,7 +231,5 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
     join(library, "public-import.mjs"),
   );
   run(join(library, "public-import.mjs"), [], library);
-  console.log(
-    "consumer checks passed: 1 build, 1 typecheck, 1 collected test",
-  );
+  console.log("consumer checks passed: 1 build, 1 typecheck, 1 collected test");
 });

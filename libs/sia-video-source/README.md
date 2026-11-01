@@ -202,10 +202,14 @@ through a typed Playwright binding. The acknowledgement persists recovery
 before the funding wait. Browser-owned handles and service-worker registrations
 are closed before the account callback returns.
 
-From this package, `test:e2e:collect` lists the spec without starting a server;
-`test:e2e:build` builds the page with the SDK's Vite plugin. `test:e2e:live` is
-manual only. It calls `sia-testing-e2e --cwd "$PWD" -- playwright test --config
-playwright.e2e.config.ts`, which holds the guarded lease through cleanup and
+From this package, `test:e2e:collect` lists the spec without starting a server.
+`test:e2e:build` builds the page with the SDK's Vite plugin and requires a library
+build first. `test:e2e:live` is manual only. Playwright runs `npm run build` before
+starting Vite so the page's public `/sia` import uses current output rather than
+a missing or stale `dist` export. Restart the live command after source changes;
+each run rebuilds the library. The live command calls
+`sia-testing-e2e --cwd "$PWD" -- playwright test --config playwright.e2e.config.ts`,
+which holds the guarded lease through cleanup and
 postflight. Follow the prerequisites and explicit service, storage, consent and
 SPKI settings in `@lumeweb/sia-testing`'s README. Never use this command against
 an operator-owned deployment without separate authorization. No CI task runs it.
@@ -213,5 +217,7 @@ an operator-owned deployment without separate authorization. No CI task runs it.
 The offline delivery check is `node scripts/check-consumers.mjs` from
 `libs/sia-testing`, after building `sia-testing` and the shared tsdown config.
 It uses cached dependencies in disposable copies, actual offline tarballs,
-TypeScript, lint, Vite builds and Playwright collection. It starts no browser
-or service, and cannot establish a live pass.
+TypeScript, lint, Vite builds and Playwright collection. It also runs the live
+startup command against a stale library export, replacing Vite startup with an
+import check that requires the rebuilt export. It starts no browser or service,
+and cannot establish a live pass.

@@ -22,7 +22,8 @@ export default defineConfig({
     },
   },
   webServer: {
-    command: "vite --config tests/e2e/vite.config.ts",
+    // The page imports the package's /sia export from dist, which may be missing or stale.
+    command: "npm run build && vite --config tests/e2e/vite.config.ts",
     port: 4192,
     reuseExistingServer: false,
   },

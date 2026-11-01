@@ -1,0 +1,10 @@
+#!/usr/bin/env node
+/** Replaces server startup with a check that the live command rebuilt its public import. */
+import assert from "node:assert/strict";
+
+const library = await import("@lumeweb/sia-video-source/sia");
+assert.equal(
+  typeof library.createSiaStreamService,
+  "function",
+  "Live startup must replace the stale library export before serving the page",
+);
