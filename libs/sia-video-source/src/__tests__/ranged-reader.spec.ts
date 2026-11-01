@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { Slab } from '@siafoundation/sia-storage';
-import { isReadStalledError, isShardShortageError, isTransportReadError, LruChunkCache, RangedReader, ReadTransportError, type SiaObjectLike, type SiaSdkLike } from '../ranged-reader.ts';
+import { fakeObject, fakeSdk } from './fixtures/sdk.ts';
+import { isReadStalledError, isShardShortageError, isTransportReadError, LruChunkCache, RangedReader, ReadTransportError, type SiaSdkLike } from '../ranged-reader.ts';
 
 /**
  * SDK that resembles the lazy dual-seed adapter: `download()` returns a
@@ -59,30 +59,6 @@ function deferredSdk(payload: Uint8Array): {
       if (request) resolvers[index]?.(materialize(request));
     },
     sdk,
-  };
-}
-
-// objectSize() derives the payload size from the slab map, so fakes must
-// return slabs whose lengths add up to the content length.
-function fakeObject(contentLength: number): SiaObjectLike {
-  const slab = { length: contentLength } as unknown as Slab;
-  return { id: () => 'test-object', size: () => contentLength, slabs: () => [slab] };
-}
-
-/** SDK whose downloads slice `payload`, returning a fresh buffer per chunk. */
-function fakeSdk(payload: Uint8Array): SiaSdkLike {
-  return {
-    download: (_object, options) => {
-      const start = options?.offset ?? 0;
-      const end = Math.min(start + (options?.length ?? payload.length - start), payload.length);
-      return new ReadableStream<Uint8Array>({
-        start: (controller) => {
-          const size = Math.max(0, end - start);
-          if (size > 0) controller.enqueue(payload.slice(start, end));
-          controller.close();
-        },
-      });
-    },
   };
 }
 
@@ -373,7 +349,13 @@ describe('RangedReader', () => {
 
   it('a cancelled run does not clobber its replacement’s reader', async () => {
     const delivered: Delivered[] = [];
-    const reader = newReader(PAYLOAD, delivered);
+    // Immediate `active` checks need the synchronous SDK route rather than an unopened promise.
+    const reader = new RangedReader({
+      chunkSize: CHUNK_SIZE,
+      object: fakeObject(PAYLOAD.length),
+      onChunk: (bytes, position) => delivered.push({ bytes, position }),
+      sdk: openPullSdk(PAYLOAD).sdk,
+    });
     reader.start(0);
     // Restart fast enough that the first run is still awaiting its stream read.
     reader.start(32 * 1024);

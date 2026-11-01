@@ -13,6 +13,12 @@ const listening: boolean = server.server.listening;
 const ready: boolean = createAccount().ready;
 void [ready, count, listening];
 
+import { createMockNetwork, createMockObject, createRemoteMockSdk } from "@lumeweb/sia-testing/sdk";
+const mock = createMockNetwork({ model });
+const mockSize: number = createMockObject("video", 4).size();
+const remote = createRemoteMockSdk({ client: "reader", url: "http://127.0.0.1:1" });
+void [mock, mockSize, remote];
+
 import {
   readE2EService,
   withDisposableAccount,

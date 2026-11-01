@@ -5,6 +5,10 @@ import {
   type Server,
   type ServerResponse,
 } from "node:http";
+import { Readable } from "node:stream";
+import { pipeline } from "node:stream/promises";
+import type { MockNetwork, MockSdk } from "../sdk/index.js";
+import { createMockDispatcher } from "./mock-sdk.js";
 import {
   createIndexdDispatcher,
   type DispatcherOptions,
@@ -18,6 +22,8 @@ import {
 export interface HttpServerOptions extends DispatcherOptions {
   allowedOrigin?: string;
   maxBodyBytes?: number;
+  mockClients?: Record<string, { accountId: string; device?: string }>;
+  mockNetwork?: MockNetwork;
   model?: IndexdModel;
   modelOptions?: IndexdModelOptions;
 }
@@ -32,7 +38,23 @@ export interface IndexdHttpServer {
 export function createIndexdHttpServer(
   options: HttpServerOptions = {},
 ): IndexdHttpServer {
-  const model = options.model ?? createIndexdModel(options.modelOptions);
+  if (
+    options.mockNetwork &&
+    options.model &&
+    options.mockNetwork.model !== options.model
+  )
+    throw new Error("HTTP and mock SDK must use the same model");
+  if (options.mockClients && !options.mockNetwork)
+    throw new Error("mock clients require a mock network");
+  const model =
+    options.mockNetwork?.model ??
+    options.model ??
+    createIndexdModel(options.modelOptions);
+  const clients = new Map<string, MockSdk>();
+  for (const [name, identity] of Object.entries(options.mockClients ?? {}))
+    clients.set(name, options.mockNetwork!.createSdk({ ...identity }));
+  const mockDispatch = createMockDispatcher(clients);
+  const calls = new Set<AbortController>();
   const dispatch = createIndexdDispatcher(model, options);
   const allowedOrigin = options.allowedOrigin ?? "*";
   const maxBodyBytes = options.maxBodyBytes ?? 1024 * 1024;
@@ -68,27 +90,47 @@ export function createIndexdHttpServer(
       return;
     }
 
-    const method = incoming.method ?? "GET";
-    const request = new Request(
-      `http://${incoming.headers.host ?? "127.0.0.1"}${incoming.url ?? "/"}`,
-      {
-        headers: Object.entries(incoming.headers).flatMap(([key, value]) =>
-          value === undefined
-            ? []
-            : [[key, Array.isArray(value) ? value.join(",") : value]],
-        ),
-        method,
-        ...(["GET", "HEAD"].includes(method)
-          ? {}
-          : { body: Buffer.concat(chunks) }),
-      },
-    );
-    const response = await dispatch(request);
-    // Read before copying headers so a failed body cannot leave its length or encoding on the error response.
-    const body = Buffer.from(await response.arrayBuffer());
-    outgoing.statusCode = response.status;
-    response.headers.forEach((value, key) => outgoing.setHeader(key, value));
-    outgoing.end(body);
+    const abort = new AbortController();
+    const cancelled = () => abort.abort();
+    calls.add(abort);
+    outgoing.once("close", cancelled);
+    try {
+      const method = incoming.method ?? "GET";
+      const request = new Request(
+        `http://${incoming.headers.host ?? "127.0.0.1"}${incoming.url ?? "/"}`,
+        {
+          headers: Object.entries(incoming.headers).flatMap(([key, value]) =>
+            value === undefined
+              ? []
+              : [[key, Array.isArray(value) ? value.join(",") : value]],
+          ),
+          method,
+          signal: abort.signal,
+          ...(["GET", "HEAD"].includes(method)
+            ? {}
+            : { body: Buffer.concat(chunks) }),
+        },
+      );
+      const mock = await mockDispatch(request);
+      if (mock) {
+        outgoing.statusCode = mock.status;
+        mock.headers.forEach((value, key) => outgoing.setHeader(key, value));
+        outgoing.flushHeaders();
+        if (mock.body)
+          await pipeline(Readable.from(responseChunks(mock.body)), outgoing);
+        else outgoing.end();
+        return;
+      }
+      const response = await dispatch(request);
+      // Read before copying headers so a failed body cannot leave its length or encoding on the error response.
+      const body = Buffer.from(await response.arrayBuffer());
+      outgoing.statusCode = response.status;
+      response.headers.forEach((value, key) => outgoing.setHeader(key, value));
+      outgoing.end(body);
+    } finally {
+      calls.delete(abort);
+      outgoing.removeListener("close", cancelled);
+    }
   }
 
   const server = createServer((incoming, outgoing) => {
@@ -101,6 +143,7 @@ export function createIndexdHttpServer(
 
   return {
     close() {
+      for (const call of calls) call.abort();
       return new Promise((resolve, reject) =>
         server.close((error) => (error ? reject(error) : resolve())),
       );
@@ -146,6 +189,21 @@ function replyError(
   response.statusCode = status;
   response.setHeader("content-type", "application/json");
   response.end(JSON.stringify({ error }));
+}
+
+/** Buffering mock bodies would hide transfer pacing and prevent socket closure from cancelling a read. */
+async function* responseChunks(body: ReadableStream<Uint8Array>) {
+  const reader = body.getReader();
+  try {
+    for (;;) {
+      const chunk = await reader.read();
+      if (chunk.done) return;
+      yield chunk.value;
+    }
+  } finally {
+    await reader.cancel().catch(() => undefined);
+    reader.releaseLock();
+  }
 }
 
 export const setupIndexdHttpServer = createIndexdHttpServer;

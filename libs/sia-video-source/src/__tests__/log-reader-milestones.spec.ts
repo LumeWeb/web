@@ -11,8 +11,8 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import type { Slab } from '@siafoundation/sia-storage';
-import { isTransportReadError, RangedReader, type SiaObjectLike, type SiaSdkLike } from '../ranged-reader.ts';
+import { fakeObject, fakeSdk } from './fixtures/sdk.ts';
+import { isTransportReadError, RangedReader, type SiaSdkLike } from '../ranged-reader.ts';
 import {
   createSiaByteSourceFactory,
   SiaByteSource,
@@ -37,30 +37,6 @@ function factorySdk(payload: Uint8Array): SiaByteSourceSdk {
   return {
     download: (_object, options) => fakeSdk(payload).download(_object, options),
     object: () => Promise.resolve(fakeObject(payload.length)),
-  };
-}
-
-// objectSize() derives the payload size from the slab map, so fakes must
-// return slabs whose lengths add up to the content length.
-function fakeObject(contentLength: number): SiaObjectLike {
-  const slab = { length: contentLength } as unknown as Slab;
-  return { id: () => 'test-object', size: () => contentLength, slabs: () => [slab] };
-}
-
-/** SDK whose downloads slice `payload`, returning a fresh buffer per chunk. */
-function fakeSdk(payload: Uint8Array): SiaSdkLike {
-  return {
-    download: (_object, options) => {
-      const start = options?.offset ?? 0;
-      const end = Math.min(start + (options?.length ?? payload.length - start), payload.length);
-      return new ReadableStream<Uint8Array>({
-        start: (controller) => {
-          const size = Math.max(0, end - start);
-          if (size > 0) controller.enqueue(payload.slice(start, end));
-          controller.close();
-        },
-      });
-    },
   };
 }
 

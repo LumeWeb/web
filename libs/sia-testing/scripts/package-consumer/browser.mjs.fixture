@@ -3,4 +3,6 @@ import * as fixtures from "@lumeweb/sia-testing/fixtures";
 import * as model from "@lumeweb/sia-testing/model";
 import * as msw from "@lumeweb/sia-testing/msw";
 
-console.log(fixtures, model, msw);
+import * as sdk from "@lumeweb/sia-testing/sdk";
+
+console.log(fixtures, model, msw, sdk);
