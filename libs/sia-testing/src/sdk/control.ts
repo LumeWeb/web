@@ -38,13 +38,17 @@ export interface MockSelector {
   operation: MockOperation;
 }
 
+interface HeldOperation extends MockSelector {
+  waiters: Set<() => void>;
+}
+
 /** Each pending call keeps its own record even when bounded history evicts it. */
 export function createControls(requestLimit: number) {
   if (!Number.isSafeInteger(requestLimit) || requestLimit < 1)
     throw new Error("requestLimit must be a positive safe integer");
   const offline = new Set<string>();
   const faults: (MockSelector & { message: string; times: number })[] = [];
-  const holds = new Set<MockSelector & { pending: Promise<void> }>();
+  const holds = new Set<HeldOperation>();
   const history: MockRequest[] = [];
   const conditions: MockConditions = {
     downloadBytesPerSecond: 0,
@@ -66,6 +70,33 @@ export function createControls(requestLimit: number) {
     if (offline.has(device)) throw new Error(`device ${device} is offline`);
   }
 
+  // Reactions on a shared promise survive cancellation until release; waiters must detach on abort.
+  function waitForHolds(
+    request: MockRequest,
+    signal?: AbortSignal,
+  ): Promise<void> {
+    const matching = [...holds].filter((hold) => matches(hold, request));
+    if (matching.length === 0) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const detach = () => {
+        for (const hold of matching) hold.waiters.delete(released);
+        signal?.removeEventListener("abort", aborted);
+      };
+      const released = () => {
+        if (matching.some((hold) => holds.has(hold))) return;
+        detach();
+        resolve();
+      };
+      const aborted = () => {
+        detach();
+        reject(new DOMException("mock operation cancelled", "AbortError"));
+      };
+      for (const hold of matching) hold.waiters.add(released);
+      signal?.addEventListener("abort", aborted, { once: true });
+      if (signal?.aborted) aborted();
+    });
+  }
+
   const control: MockControl = {
     addFault(input) {
       const times = input.times ?? 1;
@@ -78,15 +109,12 @@ export function createControls(requestLimit: number) {
       });
     },
     hold(input) {
-      let release!: () => void;
-      const pending = new Promise<void>((resolve) => {
-        release = resolve;
-      });
-      const record = { ...input, pending };
+      const record: HeldOperation = { ...input, waiters: new Set() };
       holds.add(record);
       return () => {
         holds.delete(record);
-        release();
+        for (const waiter of record.waiters) waiter();
+        record.waiters.clear();
       };
     },
     requests: () => history.map((record) => ({ ...record })),
@@ -125,14 +153,7 @@ export function createControls(requestLimit: number) {
           if (timer !== undefined) clearTimeout(timer);
         }
       }
-      await withAbort(
-        Promise.all(
-          [...holds]
-            .filter((hold) => matches(hold, request))
-            .map((hold) => hold.pending),
-        ),
-        signal,
-      );
+      await waitForHolds(request, signal);
       signal?.throwIfAborted();
       checkOnline(request.device);
       const fault = faults.find((item) => matches(item, request));
