@@ -10,7 +10,6 @@ on:
       - 'pnpm-lock.yaml'
       - '.github/workflows/sia-testing.yml'
       - '.github/workflows/sia-testing-real.yml'
-      - 'maintainers/sia-testing/**'
   pull_request:
     paths:
       - 'libs/sia-testing/**'
@@ -20,7 +19,6 @@ on:
       - 'pnpm-lock.yaml'
       - '.github/workflows/sia-testing.yml'
       - '.github/workflows/sia-testing-real.yml'
-      - 'maintainers/sia-testing/**'
 
 concurrency:
   group: sia-testing-${{ github.workflow }}-${{ github.ref }}
