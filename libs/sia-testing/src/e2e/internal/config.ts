@@ -1,5 +1,7 @@
+/** Requires explicit loopback service targets and redacts named credentials from diagnostics. */
 type Environment = Record<string, string | undefined>;
 
+/** A missing setting must fail instead of selecting an unrelated fallback service. */
 const required = (env: Environment, name: string): string => {
   const value = env[name]?.trim();
   if (!value)
@@ -9,7 +11,11 @@ const required = (env: Environment, name: string): string => {
   return value;
 };
 
-/** Local provisioning must not carry test-browser certificate exceptions to remote services. */
+/**
+ * Reads Indexd app/admin settings without opening a connection.
+ * Local provisioning must not carry test-browser certificate exceptions to
+ * remote services. Mutation consent is checked before callers can use these settings.
+ */
 export function readHostServiceConfig(env: Environment = process.env) {
   if (env.SIA_TEST_ALLOW_MUTATION !== "1")
     throw new Error(
@@ -32,6 +38,11 @@ export function readHostServiceConfig(env: Environment = process.env) {
   };
 }
 
+/**
+ * Removes URL credentials and named secret fields from diagnostic text.
+ * This is not a general secret scanner; callers must still keep SDK output and
+ * recovery records private.
+ */
 export function redactSensitive(value: string): string {
   const redactText = () =>
     value.replace(

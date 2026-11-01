@@ -10,10 +10,7 @@
  * other accounts or treats an unconfirmed registration as proof of absence.
  */
 import { assertMutationAllowed } from "./owned-cluster-lease.mjs";
-import {
-  createRecoveryRecord,
-  writeRecoveryRecord,
-} from "./recovery.mjs";
+import { createRecoveryRecord, writeRecoveryRecord } from "./recovery.mjs";
 import { dirname } from "node:path";
 import { readFile, rm, statfs } from "node:fs/promises";
 import { randomBytes } from "node:crypto";
@@ -22,7 +19,18 @@ const appIDPattern = /^[0-9a-f]{64}$/i;
 // A stalled body must not prevent cleanup from reaching later owned resources.
 const requestTimeoutMs = 10_000;
 
-/** @param {{connectKey: string | undefined; indexdURL: string | URL; responseURL: string; fetchImpl?: (url: URL, init: RequestInit) => Promise<Response>}} options */
+/**
+ * Approves one SDK connection using the private connect key on its selected app origin.
+ * A redirect or unrelated route must not receive that credential. The unused
+ * response body is cancelled without hiding an unsuccessful approval status.
+ *
+ * @param {{
+ *   connectKey: string | undefined;
+ *   indexdURL: string | URL;
+ *   responseURL: string;
+ *   fetchImpl?: (url: URL, init: RequestInit) => Promise<Response>;
+ * }} options
+ */
 export async function approveIndexd({
   connectKey,
   fetchImpl = fetch,
@@ -71,7 +79,12 @@ export async function approveIndexd({
   if (approvalFailure) throw approvalFailure;
 }
 
-/** Delete only resources created by provisionIndexd; never discover-and-delete.
+/**
+ * Deletes only acknowledged identities, never resources found by discovery.
+ * When a recorder is supplied, its pending write must succeed before that
+ * resource's DELETE. A failure must not skip later independent cleanup, and
+ * unknown registration keeps its recovery record even after key cleanup.
+ *
  * @param {import('./indexd-provision.mjs').CleanupOptions} options
  */
 export async function cleanupIndexd({
@@ -104,7 +117,9 @@ export async function cleanupIndexd({
   const base = new URL(adminURL);
   /** @type {unknown[]} */
   const errors = [];
-  /** @param {'account' | 'connect-key' | 'quota'} resource
+  /**
+   * A failed pending record must skip this resource without skipping the others.
+   * @param {'account' | 'connect-key' | 'quota'} resource
    * @param {() => Promise<unknown>} operation
    */
   async function remove(resource, operation) {
@@ -180,7 +195,10 @@ export async function cleanupIndexd({
     await rm(dirname(created.recoveryPath), { recursive: true });
 }
 
-/** Parse the stock indexd admin POST response (an accounts.ConnectKey object).
+/**
+ * Rejects successful POST responses that cannot acknowledge a created connect key.
+ * An empty or malformed response must not grant cleanup authority.
+ *
  * @param {unknown} value
  */
 export function parseConnectKeyResponse(value) {
@@ -197,7 +215,11 @@ export function parseConnectKeyResponse(value) {
   return value.key;
 }
 
-/** Create only the quota and connect key needed by one Builder approval.
+/**
+ * Creates a fresh quota and connect key for one Builder approval.
+ * The exact plan is recorded before mutation. A supplied recorder owns its
+ * storage; otherwise this helper retains its own private recovery file.
+ *
  * @param {import('./indexd-provision.mjs').ProvisionOptions} options
  * @returns {Promise<import('./indexd-provision.mjs').ProvisionedResources>}
  */
@@ -215,7 +237,8 @@ export async function provisionIndexd(options) {
   } = options;
   if (fetchImpl === fetch) {
     await assertMutationAllowed();
-    if (!storagePath?.startsWith("/")) throw new Error("Explicit host storage path is required");
+    if (!storagePath?.startsWith("/"))
+      throw new Error("Explicit host storage path is required");
     const disk = await statfs(storagePath, { bigint: true });
     if (disk.bavail * disk.bsize < 8n * 1024n ** 3n)
       throw new Error("Storage reserve missing");
@@ -245,12 +268,20 @@ export async function provisionIndexd(options) {
   return { ...created, ...(recoveryPath && { recoveryPath }) };
 }
 
-/** @param {string} password */
+/**
+ * Indexd's password-only Basic authentication requires an empty username.
+ * @param {string} password
+ */
 function auth(password) {
   return `Basic ${Buffer.from(`:${password}`).toString("base64")}`;
 }
 
-/** @param {URL} base
+/**
+ * Sends a bounded admin request and retains status and server detail for retry decisions.
+ * Cleanup recognizes Indexd's temporary connect-key-in-use failure without
+ * retrying unrelated errors. Server details must stay off public output.
+ *
+ * @param {URL} base
  * @param {string} password
  * @param {string} method
  * @param {string} path
@@ -275,22 +306,28 @@ async function call(base, password, method, path, body, fetchImpl = fetch) {
       new Error(`Indexd admin request failed (${response.status})`),
       { detail: (await response.text()).trim(), status: response.status },
     );
-  // Stock Indexd returns an empty 200 body for successful quota PUTs.
   if (response.status === 204) return undefined;
+  // Stock Indexd returns an empty 200 body for successful quota PUTs.
   const text = await response.text();
   return text.trim() ? JSON.parse(text) : undefined;
 }
 
-/** @param {string | URL} base
+/**
+ * Admin resources live under /api regardless of any path in the supplied base URL.
+ * @param {string | URL} base
  * @param {string} path
  */
 function endpoint(base, path) {
   return new URL(`/api${path}`, base);
 }
 
-/** PUT quotas has no server conditional-create. The caller must hold the shared admin lease
- * for the whole operation, excluding every cooperating writer. Arbitrary admins can still race it.
- * Pending phases retain exact identities after commit/response uncertainty; they do not confer ownership.
+/**
+ * Applies the recorded plan only after exact resource absence is established.
+ * Quota PUT has no conditional-create operation, so the shared lease must exclude
+ * cooperating writers throughout provisioning. Arbitrary admins can still race it.
+ * Pending phases retain exact identities after commit/response uncertainty;
+ * they do not confer ownership.
+ *
  * @param {import('./indexd-provision.mjs').ProvisionOptions & {
  * plan: import('./indexd-provision.mjs').RecoveryPlan,
  * persist: import('./indexd-provision.mjs').ProvisionRecovery['persist']

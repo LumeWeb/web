@@ -13,7 +13,13 @@
 import { createHash } from "node:crypto";
 import { readFile, realpath, statfs } from "node:fs/promises";
 
-/** @param {NodeJS.ProcessEnv} env */
+/**
+ * Checks the selected process and service readiness before or after a test command.
+ * Start ticks are checked again after HTTP reads because the PID can be reused
+ * while those requests are in flight. The return value is available storage bytes.
+ *
+ * @param {NodeJS.ProcessEnv} env
+ */
 export async function preflight(env) {
   const pid = integer(env, "SIA_TEST_CLUSTER_PID", 1);
   const uid = integer(env, "SIA_TEST_CLUSTER_UID", 0);
@@ -103,7 +109,12 @@ export async function preflight(env) {
   return Number(available);
 }
 
-/** @param {NodeJS.ProcessEnv} env @param {string} key @param {number} minimum */
+/**
+ * Rejects invalid process and height settings before they reach identity checks.
+ * @param {NodeJS.ProcessEnv} env
+ * @param {string} key
+ * @param {number} minimum
+ */
 function integer(env, key, minimum) {
   const text = required(env, key),
     value = Number(text);
@@ -111,7 +122,12 @@ function integer(env, key, minimum) {
     throw new Error("Invalid service identity setting");
   return value;
 }
-/** @param {URL} url @param {Record<string, string>} headers @returns {Promise<unknown>} */
+/**
+ * Bounds readiness requests and body reads without following a different service URL.
+ * @param {URL} url
+ * @param {Record<string, string>} headers
+ * @returns {Promise<unknown>}
+ */
 async function json(url, headers = {}) {
   const response = await fetch(url, {
     headers,
@@ -121,7 +137,10 @@ async function json(url, headers = {}) {
   if (!response.ok) throw new Error("Readiness HTTP failure");
   return response.json();
 }
-/** @param {string} value */
+/**
+ * Rejects URL paths and queries that root-relative readiness requests would discard.
+ * @param {string} value
+ */
 function localOrigin(value) {
   const url = new URL(value);
   if (
@@ -136,13 +155,21 @@ function localOrigin(value) {
     throw new Error("Invalid loopback service origin");
   return url;
 }
-/** @param {unknown} value @returns {Record<string, unknown>} */
+/**
+ * Rejects bodies that cannot supply named readiness fields.
+ * @param {unknown} value
+ * @returns {Record<string, unknown>}
+ */
 function record(value) {
   if (!value || typeof value !== "object" || Array.isArray(value))
     throw new Error("Invalid readiness body");
   return /** @type {Record<string, unknown>} */ (value);
 }
-/** @param {NodeJS.ProcessEnv} env @param {string} key */
+/**
+ * Missing settings must fail rather than selecting a different process or service.
+ * @param {NodeJS.ProcessEnv} env
+ * @param {string} key
+ */
 function required(env, key) {
   const value = env[key];
   if (!value) throw new Error("Missing explicit service setting");

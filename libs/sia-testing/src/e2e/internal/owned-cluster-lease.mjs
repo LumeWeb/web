@@ -4,6 +4,8 @@
  * Keeps the cluster mutation lock held until the complete owned process tree has
  * exited. A Python subreaper adopts detached descendants, while pidfds and kernel
  * parentage checks keep teardown signals from selecting unrelated reused PIDs.
+ * Node's public APIs do not expose the flock, subreaper and pidfd operations
+ * needed to retain that lock while detached descendants are reaped.
  *
  * The inherited locked file description proves ownership directly. Worker pools
  * that close extra descriptors must instead prove stable ancestry to this exact
@@ -92,7 +94,11 @@ if code!=0 and spec["acquire"] and spec.get("manifestPath"):
 sys.exit(code if code is not None and code>=0 else 1)
 `;
 
-/** Consent and a kernel-held shared lease must precede any admin mutation. */
+/**
+ * Requires mutation consent and proof that this process is covered by the cluster lock.
+ * Pool workers that close inherited descriptors may instead prove stable
+ * ancestry to the exact guardian and its still-locked inode.
+ */
 export async function assertMutationAllowed() {
   if (process.env.SIA_TEST_ALLOW_MUTATION !== "1")
     throw new Error("Mutation consent is required");
@@ -110,8 +116,24 @@ export async function assertMutationAllowed() {
   }
 }
 
-/** Both runner and SDK boundaries use a subreaper which keeps the locked OFD through descendant teardown. */
-/** @param {string} command @param {string[]} args @param {NodeJS.ProcessEnv} env @param {boolean} acquire @param {string} lockPath @param {number} deadlineMs @param {number} graceMs @param {string} [cwd] @param {string} [privateLogPath] @returns {Promise<number>} */
+/**
+ * Supervises a command and its descendants while retaining the locked file description.
+ * With acquire=false, the inherited descriptor must already hold lockPath.
+ * A deadline starts teardown but cannot release the lease while a kernel child remains.
+ * A supplied private log captures both output streams, capped at 8 MiB; overflow
+ * or a write failure fails the run after descendant cleanup.
+ *
+ * @param {string} command
+ * @param {string[]} args
+ * @param {NodeJS.ProcessEnv} env
+ * @param {boolean} acquire
+ * @param {string} lockPath
+ * @param {number} deadlineMs
+ * @param {number} graceMs
+ * @param {string} [cwd]
+ * @param {string} [privateLogPath]
+ * @returns {Promise<number>}
+ */
 export async function runWithGuardian(
   command,
   args,
@@ -167,13 +189,17 @@ export async function runWithGuardian(
     );
     let bytes = 0,
       failed = false;
-    /** @param {Buffer} chunk */
+    /**
+     * Keeps private output within its byte budget before any write reaches the file.
+     * @param {Buffer} chunk
+     */
     const capture = (chunk) => {
       if (failed || log === undefined) return;
       const remaining = 8 * 1024 * 1024 - bytes;
       try {
         const accepted = chunk.subarray(0, remaining);
         let offset = 0;
+        // writeSync can accept only part of a chunk, including when space is running out.
         while (offset < accepted.length)
           offset += writeSync(log, accepted, offset);
         bytes += accepted.length;
@@ -200,8 +226,12 @@ export async function runWithGuardian(
     });
   });
 }
-/** Verify the locked open file description, never an environment flag or PID claim.
- * @param {string | undefined} descriptor @param {string} lockPath
+/**
+ * Verifies an inherited locked file description against the selected lock inode.
+ * An environment flag, descriptor number or PID claim alone grants no authority.
+ *
+ * @param {string | undefined} descriptor
+ * @param {string} lockPath
  */
 export async function verifyNativeLease(descriptor, lockPath) {
   if (
@@ -225,7 +255,11 @@ export async function verifyNativeLease(descriptor, lockPath) {
   return true;
 }
 
-/** Process pools close extra fds; verify their kernel ancestry to our still-locked guardian.
+/**
+ * Verifies kernel ancestry to the exact still-locked guardian when a pool closes extra fds.
+ * Rechecking process identities and the descriptor rejects ancestry or lease
+ * changes that occur while /proc is being read.
+ *
  * @param {string} lockPath
  */
 export async function verifyOwnedGuardian(lockPath) {
@@ -283,7 +317,10 @@ export async function verifyOwnedGuardian(lockPath) {
   throw new Error("No locked owning guardian");
 }
 
-/** @param {number} pid */
+/**
+ * Includes start ticks so a reused PID cannot stand in for an earlier ancestor.
+ * @param {number} pid
+ */
 async function processIdentity(pid) {
   const text = await readFile(`/proc/${pid}/stat`, "utf8");
   const fields = text

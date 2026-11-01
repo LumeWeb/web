@@ -1,6 +1,11 @@
 /// <reference types="node" />
 // @ts-check
-/** Private recovery records retain exact identities when resource ownership is uncertain. */
+/**
+ * Retains exact recovery identities when provisioning or cleanup is interrupted.
+ * Records can contain connect credentials, so replacement must not follow links
+ * or write into a shared directory. File and directory sync acknowledge an
+ * update before the caller proceeds with further mutations.
+ */
 import { randomBytes } from "node:crypto";
 import { constants } from "node:fs";
 import {
@@ -15,7 +20,10 @@ import {
 import { dirname, join } from "node:path";
 import { withCleanup } from "./lifecycle.mjs";
 
-/** Creates recovery storage before provisioning, without copying admin or owner secrets. */
+/**
+ * Reserves a private record before provisioning, without admin passwords or owner seeds.
+ * A separate directory prevents uncertain registrations from overwriting another run's record.
+ */
 export async function createRecoveryRecord() {
   const directory = await mkdtemp("/tmp/sia-native-cutoff-run-");
   const path = join(directory, "recovery.json");
@@ -23,8 +31,14 @@ export async function createRecoveryRecord() {
   return path;
 }
 
-/** Atomically replace a private recovery record; a failed pre-rename update keeps its identities.
- * @param {string} path @param {Record<string, unknown>} value
+/**
+ * Replaces the record atomically; failure before rename keeps the previous identities.
+ * After the original file opens, write and release failures are reported together
+ * in AggregateError.errors. A committed rename is never rolled back after a
+ * directory-sync failure.
+ *
+ * @param {string} path
+ * @param {Record<string, unknown>} value
  */
 export async function writeRecoveryRecord(path, value) {
   if (!/^\/tmp\/sia-native-cutoff-run-[^/]+\/recovery\.json$/.test(path))
@@ -81,6 +95,7 @@ export async function writeRecoveryRecord(path, value) {
       directory,
       constants.O_RDONLY | constants.O_DIRECTORY | constants.O_NOFOLLOW,
     );
+    // Reject a replaced file or directory before rename can overwrite a different record.
     const [currentParent, heldParent, current] = await Promise.all([
       lstat(directory),
       directoryHandle.stat(),
