@@ -262,6 +262,8 @@ async function call(base, password, method, path, body, fetchImpl = fetch) {
       ...(body && { "content-type": "application/json" }),
     },
     method,
+    // Redirects can replace the owned resource path while retaining admin authority.
+    redirect: "error",
     ...(body && { body: JSON.stringify(body) }),
   });
   if (!response.ok)
@@ -315,6 +317,7 @@ async function provisionOwned({
     const response = await fetchImpl(endpoint(base, path), {
       headers: { Authorization: auth(password) },
       method: "GET",
+      redirect: "error",
     });
     // An empty or malformed successful response is still existence, never absence.
     await response.body?.cancel();
