@@ -8,7 +8,9 @@ Use Node.js 24 and Linux with Python 3, flock, subreaper and pidfd support. The 
 
 The current preflight requires 30 hostd, one Indexd and no renterd, with all hosts upload-ready and no failed scans. The chain must be synced, match the configured height and have a tip younger than three hours. The host-volume filesystem must have at least 9.5 GiB available.
 
-Recipient summaries need the Indexd compatibility patch in `maintainers/sia-testing/indexd-shared-object-summaries.patch`. Apply it to a clean cluster source checkout at `b2a67d62140d1b01e16177fedbaf51cc13ac4e89` before building; the tested service fork is `14b75cd5ed1ce4e73e52c6bc1a172635769e8799`. Stock Indexd summary responses are incompatible with SDK 0.1.4. This patch is not applied by the test runner.
+The service upgrade baseline is cluster `v0.1.8` (`75eceee30781bc2c382b36dbb5e24194a52b1a6a`), which depends on Indexd `v0.6.2`. That Indexd version implements `GET /shared/objects?includeslabs=false` without a compatibility patch. Its released HTTP handler has been checked offline with SDK 0.1.4 for signed summaries and pagination.
+
+The released cluster is not yet a validated replacement for the upload-ready loopback fixture. Indexd still rejects private host addresses. Hostd `v2.11.0`'s self-signed provider leaves certificate validity dates unset, so TLS verification rejects its certificate even when explicitly trusted. Host discovery and certificate validity must be resolved before running the live suites against this baseline. The summary contract check does not establish live payload compatibility.
 
 ## Environment
 
