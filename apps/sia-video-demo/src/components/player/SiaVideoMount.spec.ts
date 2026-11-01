@@ -95,6 +95,13 @@ function sharingKeySupplier(): SharedSharingKeySupplier {
 }
 
 describe("streaming preparation mount readiness", () => {
+  it("mounts worker-only playback without native streaming preparation", () => {
+    const mount = siaVideoMountState(publishSource(), {
+      ...mountDeps(),
+      backend: "media-worker",
+    });
+    expect(shouldMountSiaVideo(mount, false)).toBe(true);
+  });
   it("does not mount before preparation and mounts after preparation", () => {
     const mount = siaVideoMountState(publishSource(), mountDeps());
     expect(shouldMountSiaVideo(mount, false)).toBe(false);
