@@ -15,6 +15,19 @@ const app = {
   serviceUrl: "https://example.invalid",
 };
 
+it("a wildcard listen host is rejected before binding", async () => {
+  const mock = createMockSia();
+  try {
+    await expect(
+      startMockServer(mock, { host: "0.0.0.0" as "127.0.0.1", port: -1 }),
+    ).rejects.toMatchObject({
+      code: "invalid-input",
+      message: "Mock listener host must be loopback",
+    });
+  } finally {
+    await mock.close();
+  }
+});
 it("cancelling a held HTTP read aborts the matching server request", async () => {
   const mock = createMockSia();
   try {
@@ -47,6 +60,57 @@ it("cancelling a held HTTP read aborts the matching server request", async () =>
         hold.release();
         await reader.close();
       } finally {
+        await server.close();
+      }
+    });
+  } finally {
+    await mock.close();
+  }
+});
+
+it("closing a reader cancels held metadata before headers", async () => {
+  const mock = createMockSia();
+  try {
+    await mock.run({ app }, async (run) => {
+      const file = await bytesFixture({
+        bytes: Uint8Array.of(1),
+        name: "video",
+      });
+      const object = await run.objects.upload({
+        file,
+        metadata: new Uint8Array(),
+        name: file.name,
+      });
+      const actor = mock.actor("metadata");
+      const server = await startMockServer(mock);
+      const descriptor = server.connection({
+        access: run.ownerAccess,
+        as: actor,
+      });
+      const reader = createMockReader(descriptor, descriptor.credential);
+      const hold = mock.faults.hold({ actor, object, operation: "object" });
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const request = reader.object(object.id).catch(() => undefined);
+      try {
+        await hold.started();
+        await reader.close();
+        const cancelled = await Promise.race([
+          hold.cancelled(),
+          new Promise<never>((_resolve, reject) => {
+            timer = setTimeout(
+              () =>
+                reject(
+                  new Error("Server retained the cancelled metadata request"),
+                ),
+              1000,
+            );
+          }),
+        ]);
+        expect(cancelled.status).toBe("cancelled");
+      } finally {
+        clearTimeout(timer);
+        hold.release();
+        await request;
         await server.close();
       }
     });

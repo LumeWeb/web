@@ -112,11 +112,19 @@ export function createMockReader(
       );
       return Promise.resolve(stream);
     },
-    async object(id) {
-      return readObject(await (await call("object", { id })).json());
+    async object(id, options = {}) {
+      return readObject(
+        await (await call("object", { id }, options.signal)).json(),
+      );
     },
     async objects(input) {
-      const value = (await (await call("objects", input)).json()) as {
+      const value = (await (
+        await call(
+          "objects",
+          { limit: input.limit, offset: input.offset },
+          input.signal,
+        )
+      ).json()) as {
         done: boolean;
         nextOffset: number;
         objects: unknown[];

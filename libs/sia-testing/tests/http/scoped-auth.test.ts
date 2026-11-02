@@ -3,6 +3,7 @@ import { expect, it } from "vitest";
 import { createMockSia } from "../../src/testing/mock.js";
 import { mockCredential, startMockServer } from "../../src/testing/http.js";
 import { createMockAuth } from "../../src/testing/auth-client.js";
+import { createMockReader } from "../../src/testing/client.js";
 
 const app = {
   description: "Auth test",
@@ -60,6 +61,17 @@ it("approval registers a phrase and reconnects with its acknowledged key", async
         await auth.waitForApproval(request);
         const key = await auth.register(request, run.auth.fixturePhrase);
         expect(await auth.connected(key.keyHex)).toEqual(key);
+        const reader = createMockReader(
+          server.connection({
+            access: run.auth.registrationAccess,
+            as: mock.actor("registered-reader"),
+          }),
+          key,
+        );
+        expect((await reader.objects({ limit: 1, offset: 0 })).objects).toEqual(
+          [],
+        );
+        await reader.close();
         const denied = await auth.requestConnection(app);
         await run.auth.deny(denied.responseUrl);
         await expect(auth.waitForApproval(denied)).rejects.toMatchObject({

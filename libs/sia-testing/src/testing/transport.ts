@@ -4,6 +4,7 @@ import type { ActorRef, BrowserAccess, MockSia, ReadObject } from "./types.js";
 
 export interface MockConnection {
   readonly client: string;
+  readonly credential?: MockCredential;
   readonly kind: MockCredential["kind"];
   readonly url: string;
 }
@@ -11,7 +12,7 @@ export interface MockEndpoint {
   connection(input: {
     readonly access: BrowserAccess;
     readonly as: ActorRef;
-  }): MockConnection;
+  }): MockConnection & { readonly credential: MockCredential };
   readonly url: string;
 }
 export function createMockEndpoint(mock: MockSia, base: string) {
@@ -28,7 +29,12 @@ export function createMockEndpoint(mock: MockSia, base: string) {
       void reader.close();
       const client = crypto.randomUUID();
       clients.set(client, { actor: as, kind: credential.kind });
-      return Object.freeze({ client, kind: credential.kind, url: root.href });
+      return Object.freeze({
+        client,
+        credential: Object.freeze(credential),
+        kind: credential.kind,
+        url: root.href,
+      });
     },
     url: root.href,
   };
@@ -54,9 +60,16 @@ export function createMockEndpoint(mock: MockSia, base: string) {
           throw Object.assign(new Error("Invalid auth body"), {
             code: "invalid-input",
           });
+        const authenticationCredential: MockCredential =
+          client.kind === "registration" &&
+          parts[1] === "auth-connected" &&
+          "keyHex" in input &&
+          input.keyHex === credential.keyHex
+            ? { ...credential, kind: "app-key" }
+            : credential;
         return Response.json(
           runtime.authentication(
-            credential,
+            authenticationCredential,
             parts[1]!,
             input as Record<string, unknown>,
             root.href,
@@ -99,6 +112,7 @@ export function createMockEndpoint(mock: MockSia, base: string) {
         const page = await reader.objects({
           limit: number("limit", 100),
           offset: number("offset", 0),
+          signal: request.signal,
         });
         return Response.json({
           ...page,
@@ -110,7 +124,9 @@ export function createMockEndpoint(mock: MockSia, base: string) {
           code: "invalid-input",
         });
       if (parts[1] === "object")
-        return Response.json(wireObject(await reader.object(id)));
+        return Response.json(
+          wireObject(await reader.object(id, { signal: request.signal })),
+        );
       if (parts[1] !== "download")
         return Response.json({ code: "not-found" }, { status: 404 });
       const stream = await reader.download(

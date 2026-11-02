@@ -115,6 +115,10 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
     join(directory, "testing-tarball"),
   );
   await cp(testingTarball, testing, { recursive: true });
+  await linkDirectory(
+    dependency("@playwright/test", "^1.61.1"),
+    join(testing, "node_modules/@playwright/test"),
+  );
   for (const [source, target] of [
     ["libs/sia-video-source", library],
     ["apps/sia-video-demo", demo],
@@ -232,7 +236,7 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
       const expected =
         root === library
           ? "Total: 30 tests in 2 files"
-          : "Total: 14 tests in 1 file";
+          : "Total: 24 tests in 1 file";
       if (!output.includes(expected))
         throw new Error(`Unexpected consumer collection: ${output}`);
     }
@@ -248,6 +252,6 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
   );
   run(join(demo, "worker-setup-import.mjs"), [], demo);
   console.log(
-    "consumer checks passed: playback pages built and typed; 30 library and 14 demo mock tests collected; packed worker setup passed",
+    "consumer checks passed: playback pages built and typed; 30 library and 24 demo mock tests collected; packed worker setup passed",
   );
 });

@@ -1,11 +1,9 @@
-/** Checks MSW declarations against the installed peer in the copied consumer. */
-import { createIndexdHandlers } from "@lumeweb/sia-testing/msw";
-import { setupIndexdServer } from "@lumeweb/sia-testing/msw/node";
+/** Optional peer declarations must resolve from the copied consumer's installed dependencies. */
+import { createMockHandlers } from "@lumeweb/sia-testing/msw";
+import { createSiaTest } from "@lumeweb/sia-testing/playwright";
+import { mock } from "./pure.js";
 import metadata from "@lumeweb/sia-testing/package.json" with { type: "json" };
-import { model } from "./pure.js";
-
-const handlers = createIndexdHandlers({ model });
-const server = setupIndexdServer({ model });
-server.resetHandlers(...handlers.handlers);
+export const handlers = createMockHandlers(mock, { baseUrl: "https://example.invalid" }).handlers;
+export const test = createSiaTest({ backend: { app: { description: "Typed fixture", id: "a".repeat(64), name: "Typed", serviceUrl: "https://example.invalid" }, kind: "mock" } });
 const name: string = metadata.name;
 void name;

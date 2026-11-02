@@ -4,12 +4,12 @@ import { createLibraryConfig } from "@lumeweb/tsdown-config";
 export default defineConfig(
   createLibraryConfig(
     [
-      "src/fixtures/index.ts",
-      "src/model/index.ts",
-      "src/msw/index.ts",
-      "src/msw/node.ts",
-      "src/http/index.ts",
-      "src/sdk/index.ts",
+      "src/node.ts",
+      "src/mock.ts",
+      "src/client.ts",
+      "src/http.ts",
+      "src/msw.ts",
+      "src/playwright.ts",
     ],
     {
       deps: { neverBundle: [/^node:/], skipNodeModulesBundle: true },

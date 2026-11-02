@@ -8,8 +8,12 @@ export interface MockAuthRequest {
 }
 export function createMockAuth(
   connection: MockConnection,
-  credential: MockCredential,
+  suppliedCredential?: MockCredential,
 ) {
+  const credential = suppliedCredential ?? connection.credential;
+  if (!credential)
+    throw new Error("Mock authentication requires a credential binding");
+  const keyHex = credential.keyHex;
   const abort = new AbortController();
   async function call(
     operation: string,
@@ -21,7 +25,7 @@ export function createMockAuth(
       {
         body: JSON.stringify(data),
         headers: {
-          "authorization": `Bearer ${credential.keyHex}`,
+          "authorization": `Bearer ${keyHex}`,
           "content-type": "application/json",
         },
         method: "POST",

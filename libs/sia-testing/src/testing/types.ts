@@ -1,4 +1,4 @@
-/** Private scoped-storage contracts keep fixture mutation handles separate from readable object data. */
+/** Scoped storage contracts keep fixture mutation handles separate from readable object data. */
 import type { MockFaults, RequestReceipt } from "./controls.js";
 declare const ownership: unique symbol;
 export type ActorRef = Owned<"actor">;
@@ -42,6 +42,7 @@ export interface MockRun {
   };
   readonly backend: "mock";
   readonly id: string;
+  readonly mock: MockSia;
   readonly objects: ManagedObjects;
   readonly ownerAccess: BrowserAccess;
   readonly shares: ManagedShares;
@@ -81,8 +82,15 @@ export interface ReadPort {
       readonly signal?: AbortSignal;
     },
   ): Promise<ReadableStream<Uint8Array>>;
-  object(id: string): Promise<ReadObject>;
-  objects(input: { readonly limit: number; readonly offset: number }): Promise<{
+  object(
+    id: string,
+    options?: { readonly signal?: AbortSignal },
+  ): Promise<ReadObject>;
+  objects(input: {
+    readonly limit: number;
+    readonly offset: number;
+    readonly signal?: AbortSignal;
+  }): Promise<{
     readonly done: boolean;
     readonly nextOffset: number;
     readonly objects: readonly ReadObject[];

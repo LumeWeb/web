@@ -7,6 +7,7 @@ const workerEntry = fileURLToPath(
   import.meta.resolve("@lumeweb/sia-video-source/worker"),
 );
 const fixtureWorker = fileURLToPath(new URL("./worker.ts", import.meta.url));
+const fixtureBackend = fileURLToPath(new URL("./backend.ts", import.meta.url));
 
 function payloadWorker(): Plugin {
   return {
@@ -23,6 +24,14 @@ export default defineConfig((environment) => {
   return mergeConfig(applicationConfig(environment), {
     build: { outDir: "dist-playback" },
     plugins: [payloadWorker()],
+    resolve: {
+      alias: [
+        {
+          find: /^(?:.*\/)?storageBackend(?:\.ts)?$/,
+          replacement: fixtureBackend,
+        },
+      ],
+    },
     server: {
       forwardConsole: false,
       host: "127.0.0.1",

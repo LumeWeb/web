@@ -1,20 +1,20 @@
-/** Compiles in the copied consumer so workspace declarations cannot hide missing package types. */
-import { createAccount } from "@lumeweb/sia-testing/fixtures";
-import { createIndexdHttpServer } from "@lumeweb/sia-testing/http";
-import {
-  createIndexdModel,
-  type IndexdModel,
-} from "@lumeweb/sia-testing/model";
-
-export const model: IndexdModel = createIndexdModel({ quotaBytes: 100 });
-const count: number = model.snapshot().accounts.length;
-const server = createIndexdHttpServer({ model });
-const listening: boolean = server.server.listening;
-const ready: boolean = createAccount().ready;
-void [ready, count, listening];
-
-import { createMockNetwork, createMockObject, createRemoteMockSdk } from "@lumeweb/sia-testing/sdk";
-const mock = createMockNetwork({ model });
-const mockSize: number = createMockObject("video", 4).size();
-const remote = createRemoteMockSdk({ client: "reader", url: "http://127.0.0.1:1" });
-void [mock, mockSize, remote];
+/** Checks scoped run and reader declarations without MSW or Playwright installed. */
+import { createMockSia, bytesFixture } from "@lumeweb/sia-testing/mock";
+import { createMockReader } from "@lumeweb/sia-testing/client";
+import { startMockServer } from "@lumeweb/sia-testing/http";
+import { withSiaRun } from "@lumeweb/sia-testing/node";
+export const mock = createMockSia();
+const app = { description: "Packed fixture", id: "a".repeat(64), name: "Packed", serviceUrl: "https://example.invalid" };
+export async function typedConsumer() {
+  return withSiaRun({ backend: { app, kind: "mock" } }, async (run) => {
+    const file = await bytesFixture({ bytes: Uint8Array.of(1), name: "video" });
+    const object = await run.objects.upload({ file, metadata: new Uint8Array(), name: file.name });
+    const server = await startMockServer(run.mock);
+    const binding = server.connection({ access: run.ownerAccess, as: run.mock.actor("typed") });
+    const reader = createMockReader(binding, binding.credential);
+    const size: number = (await reader.object(object.id)).sizeBytes;
+    await reader.close();
+    await server.close();
+    return size;
+  });
+}

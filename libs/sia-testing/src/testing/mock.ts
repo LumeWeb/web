@@ -297,29 +297,34 @@ export function createMockSia(options: MockOptions = {}): MockSia {
             throw error;
           }
         },
-        async object(id) {
+        async object(id, options = {}) {
           const context = authorize(id);
           describe(context, id);
-          const request = await controls.begin(actor, "object", id, signal);
+          const callSignal = options.signal
+            ? AbortSignal.any([signal, options.signal])
+            : signal;
+          const request = await controls.begin(actor, "object", id, callSignal);
           try {
-            await context.sdk!.object(id, { signal });
+            await context.sdk!.object(id, { signal: callSignal });
             authorize(id);
             const object = describe(context, id);
             request.status = "completed";
             return object;
           } catch (error) {
-            request.status = signal.aborted ? "cancelled" : "failed";
+            request.status = callSignal.aborted ? "cancelled" : "failed";
             throw error;
           }
         },
-        objects({ limit, offset }) {
+        objects({ limit, offset, signal: externalSignal }) {
           return Promise.resolve().then(async () => {
             const context = authorize();
             const request = await controls.begin(
               actor,
               "objects",
               undefined,
-              signal,
+              externalSignal
+                ? AbortSignal.any([signal, externalSignal])
+                : signal,
             );
             try {
               authorize();
@@ -424,6 +429,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
         },
         backend: "mock",
         id,
+        mock: environment,
         objects: {
           async delete(handle) {
             return track(context, async () => {

@@ -1,11 +1,14 @@
 import { createStore } from "zustand";
 import { persist } from "zustand/middleware";
-// Value imports stay dynamic so the SDK's WASM module is only fetched from the
-// main thread when actually needed; only the erased type bindings stay static.
-import type { Builder, Sdk } from "@siafoundation/sia-storage";
+import {
+  type AuthRequest,
+  type AuthSession,
+  connectAppKey,
+  openAuthRequest,
+} from "../lib/storageBackend";
 import { AuthStatus } from "../components/auth/authFlow";
-import { APP_ID, APP_META, DEFAULT_INDEXER_URL } from "../lib/constants";
-import { fromHex, normalizeSharingSeedHex, toHex } from "../lib/hex";
+import { APP_ID, DEFAULT_INDEXER_URL } from "../lib/constants";
+import { normalizeSharingSeedHex, toHex } from "../lib/hex";
 import { buildSharingFragment, parseSharingFragment } from "../lib/sharingLink";
 
 /** Plaintext localStorage slot (the app-key seed is deliberately stored in the
@@ -42,7 +45,7 @@ export interface AuthState extends AuthActions {
    */
   objectKey: string;
   /** The live connection request, held across the approval/registration screens. */
-  request: Builder | null;
+  request: AuthRequest | null;
   /**
    * Last sharing-key paste validation failure, as a message the UI can show
    * next to the controls. Deliberately NOT persisted (transient UI state).
@@ -79,48 +82,10 @@ const initialState: Pick<
   userKeyHex: "",
 };
 
-/**
- * Reconnects a registered app-key seed into a main-thread `Sdk`. No SSO or
- * approval is involved: `Builder.connected` tells the indexer the app key
- * (which `register` already registered), exactly like `reconnect` does. The
- * store keeps only hex seeds, never an Sdk instance (an Sdk holds WASM/native
- * resources that must not be serialized into localStorage), so the SDK is
- * rebuilt on demand here.
- */
-async function connectAppKeySdk(
-  indexerUrl: string,
-  userKeyHex: string,
-): Promise<Sdk> {
-  const {
-    AppKey,
-    Builder: SdkBuilder,
-    initSia,
-  } = await import("@siafoundation/sia-storage");
-  await initSia();
-  const key = new AppKey(fromHex(userKeyHex));
-  const builder = new SdkBuilder(indexerUrl, APP_META);
-  const sdk = await builder.connected(key);
-  builder.free();
-  if (!sdk) {
-    throw new Error("The Sia app key is not registered with the indexer.");
-  }
-  return sdk;
-}
-
 /** Releases a main-thread SDK; the playback worker builds its own SDK later. */
-function disconnectSdk(sdk: null | Sdk | undefined): void {
+function disconnectSdk(sdk: AuthSession | null | undefined): void {
   if (!sdk) return;
   sdk.free();
-}
-
-/** Opens a connection request against the indexer and resolves once it exists. */
-async function openRequest(indexerUrl: string): Promise<Builder> {
-  const { Builder: SdkBuilder, initSia } =
-    await import("@siafoundation/sia-storage");
-  await initSia();
-  const request = new SdkBuilder(indexerUrl, APP_META);
-  await request.requestConnection();
-  return request;
 }
 
 export const useAuthStore = createStore<AuthState>()(
@@ -170,7 +135,7 @@ export const useAuthStore = createStore<AuthState>()(
         if (status !== AuthStatus.Disconnected) return;
         set({ status: AuthStatus.Reconnecting });
         try {
-          const sdk = await connectAppKeySdk(indexerUrl, userKeyHex);
+          const sdk = await connectAppKey(indexerUrl, userKeyHex);
           set({ status: AuthStatus.Connected });
           disconnectSdk(sdk);
         } catch {
@@ -184,7 +149,7 @@ export const useAuthStore = createStore<AuthState>()(
       register: async (phrase) => {
         const request = get().request;
         if (!request) throw new Error("no connection request in flight");
-        const sdk: Sdk = await request.register(phrase);
+        const sdk: AuthSession = await request.register(phrase);
         const appKey = sdk.appKey();
         const userKeyHex = toHex(appKey.export());
         appKey.free();
@@ -194,7 +159,7 @@ export const useAuthStore = createStore<AuthState>()(
       },
 
       requestConnection: async (indexerUrl) => {
-        const request = await openRequest(indexerUrl);
+        const request = await openAuthRequest(indexerUrl);
         set({ indexerUrl, request, status: "awaiting-approval" });
       },
 

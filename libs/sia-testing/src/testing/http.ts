@@ -22,6 +22,14 @@ export async function startMockServer(
     port?: number;
   } = {},
 ): Promise<MockEndpoint & { close(): Promise<void> }> {
+  if (
+    options.host !== undefined &&
+    options.host !== "127.0.0.1" &&
+    options.host !== "::1"
+  )
+    throw Object.assign(new Error("Mock listener host must be loopback"), {
+      code: "invalid-input",
+    });
   const calls = new Set<AbortController>();
   const dispatch = (request: Request) => configured.dispatch(request);
   async function respond(incoming: IncomingMessage, outgoing: ServerResponse) {

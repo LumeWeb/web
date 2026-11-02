@@ -24,30 +24,51 @@ beforeEach(async () => {
   };
   await writeFile(join(packed, "package.json"), JSON.stringify(metadata));
   const files: Record<string, string> = {
-    "fixtures/index.d.ts":
-      "export declare function createAccount(): { ready: boolean };",
-    "fixtures/index.js":
-      "export const createAccount = () => ({ ready: true });",
-    "http/index.d.ts":
-      'import type { Server } from "node:http"; import type { IndexdModel } from "../model/index.js"; export declare function createIndexdHttpServer(options: { model: IndexdModel }): { server: Server };',
-    "http/index.js":
-      'import "node:http"; export const createIndexdHttpServer = () => ({ server: { listening: false } });',
-    "model/index.d.ts":
-      "export interface IndexdModel { snapshot(): { accounts: unknown[] }; } export declare function createIndexdModel(options: { quotaBytes: number }): IndexdModel;",
-    "model/index.js":
-      "export const createIndexdModel = () => ({ snapshot: () => ({ accounts: [] }) });",
-    "msw/index.d.ts":
-      'import type { HttpHandler } from "msw"; import type { IndexdModel } from "../model/index.js"; export declare function createIndexdHandlers(options: { model: IndexdModel }): { handlers: HttpHandler[] };',
-    "msw/index.js":
-      'import { http } from "msw"; export const createIndexdHandlers = () => ({ handlers: [http.get("*", () => new Response())] });',
-    "msw/node.d.ts":
-      'import type { SetupServerApi } from "msw/node"; import type { IndexdModel } from "../model/index.js"; export declare function setupIndexdServer(options: { model: IndexdModel }): SetupServerApi;',
-    "msw/node.js":
-      'import { setupServer } from "msw/node"; export const setupIndexdServer = () => setupServer();',
-    "sdk/index.d.ts":
-      'import type { IndexdModel } from "../model/index.js"; export declare function createMockNetwork(options: { model: IndexdModel }): { model: IndexdModel }; export declare function createMockObject(id: string, size: number): { size(): number }; export declare function createRemoteMockSdk(options: { client: string; url: string }): unknown;',
-    "sdk/index.js":
-      "export const createMockNetwork = (options) => ({ model: options.model }); export const createMockObject = (_id, size) => ({ size: () => size }); export const createRemoteMockSdk = () => ({});",
+    "client.d.ts": `
+      import type { MockConnection } from "./http.js";
+      export interface MockCredential { kind: "app-key"; keyHex: string; }
+      export declare function createMockReader(connection: MockConnection, credential: MockCredential): {
+        object(id: string): Promise<{id: string; sizeBytes: number}>;
+        close(): Promise<void>;
+      };`,
+    "client.js": `export const createMockReader = (connection) => ({
+      object: async (id) => connection.mock.data.get(id),
+      download: async (object) => new Blob([object.bytes]).stream(), close: async () => {}
+    });`,
+    "http.d.ts": `
+      import type { MockSia } from "./mock.js";
+      import type { MockCredential } from "./client.js";
+      export interface MockConnection { credential: MockCredential; mock: MockSia; }
+      export declare function startMockServer(mock: MockSia): Promise<{
+        close(): Promise<void>;
+        connection(input: {access: object; as: object}): MockConnection;
+      }>;`,
+    "http.js": `import "node:http"; export const startMockServer = async (mock) => ({close: async () => {}, connection: () => ({mock, credential: {kind: "app-key", keyHex: "a".repeat(64)}})});`,
+    "mock.d.ts": `
+      export interface TestFile { name: string; sizeBytes: number; }
+      export interface TestObject { id: string; sizeBytes: number; }
+      export interface MockRun { mock: MockSia; ownerAccess: object; objects: { upload(input: {file: TestFile; metadata: Uint8Array; name: string}): Promise<TestObject> }; }
+      export interface MockSia { actor(label: string): object; run<T>(options: unknown, use: (run: MockRun) => Promise<T>): Promise<{value: T}>; close(): Promise<void>; }
+      export declare function createMockSia(): MockSia;
+      export declare function bytesFixture(input: {bytes: Uint8Array; name: string}): Promise<TestFile>;`,
+    "mock.js": `
+      export async function bytesFixture({bytes, name}) { return {bytes, name, sizeBytes: bytes.length}; }
+      export function createMockSia() {
+        const data = new Map();
+        const mock = { data, actor: () => ({}), close: async () => {}, async run(_options, use) {
+          const run = {mock, ownerAccess: {}, objects: {async upload({file, metadata}) {
+            const object = { id: String(data.size), sizeBytes: file.sizeBytes, metadata, bytes: file.bytes };
+            data.set(object.id, object); return object;
+          }}};
+          return { value: await use(run) };
+        }}; return mock;
+      }`,
+    "msw.d.ts": `import type { HttpHandler } from "msw"; export declare function createMockHandlers(mock: unknown, options: {baseUrl: string}): {handlers: HttpHandler[]};`,
+    "msw.js": `import {http} from "msw"; export const createMockHandlers = () => ({handlers: [http.get("*", () => new Response())]});`,
+    "node.d.ts": `import type { MockRun } from "./mock.js"; export declare function withSiaRun<T>(options: unknown, use: (run: MockRun) => Promise<T>): Promise<{value: T}>;`,
+    "node.js": `import {createMockSia} from "./mock.js"; export const withSiaRun = (options, use) => createMockSia().run(options, use);`,
+    "playwright.d.ts": `import {test} from "@playwright/test"; export declare function createSiaTest(options: unknown): typeof test;`,
+    "playwright.js": `import {test} from "@playwright/test"; export const createSiaTest = () => test;`,
   };
   for (const [path, content] of Object.entries(files)) {
     const file = join(packed, "dist/esm", path);
@@ -163,7 +184,7 @@ test("rejects a missing string export target", async () => {
 }, 60000);
 test("compiles declaration dependencies rather than checking only entry files", async () => {
   await append(
-    "dist/esm/model/index.d.ts",
+    "dist/esm/mock.d.ts",
     '\nexport { Missing } from "./missing-types.js";\n',
   );
   const result = check();
@@ -178,9 +199,9 @@ test.each([
 ])(
   "rejects the transitive browser dependency %s",
   async (dependency) => {
-    await append("dist/esm/fixtures/index.js", '\nimport "./forbidden.js";\n');
+    await append("dist/esm/client.js", '\nimport "./forbidden.js";\n');
     await writeFile(
-      join(packed, "dist/esm/fixtures/forbidden.js"),
+      join(packed, "dist/esm/forbidden.js"),
       `if (typeof window !== "undefined") void import(${JSON.stringify(dependency)});\n`,
     );
     const result = check();
@@ -193,16 +214,14 @@ test.each([
 );
 test("rejects a declaration that breaks the typed consumer", async () => {
   await writeFile(
-    join(packed, "dist/esm/model/index.d.ts"),
-    "export interface IndexdModel { snapshot(): { accounts: number }; } export declare function createIndexdModel(options: { quotaBytes: number }): IndexdModel;",
+    join(packed, "dist/esm/mock.d.ts"),
+    "export declare const createMockSia: number; export declare function bytesFixture(input: unknown): Promise<unknown>;",
   );
   const result = check();
   expect(result.status).not.toBe(0);
-  expect(result.output).toContain(
-    "Property 'length' does not exist on type 'number'",
-  );
+  expect(result.output).toContain("This expression is not callable");
 }, 60000);
-test.each(["msw/index.js", "msw/node.js"])(
+test.each(["msw.js", "playwright.js"])(
   "rejects %s when it no longer requires the optional peer",
   async (entry) => {
     await writeFile(
@@ -211,11 +230,11 @@ test.each(["msw/index.js", "msw/node.js"])(
     );
     const result = check();
     expect(result.status).not.toBe(0);
-    expect(result.output).toContain("must require the optional msw peer");
+    expect(result.output).toContain("must require the optional");
   },
   60000,
 );
-test.each(["msw/index.js", "msw/node.js"])(
+test.each(["msw.js", "playwright.js"])(
   "imports %s with the installed peer",
   async (entry) => {
     await append(
@@ -232,10 +251,7 @@ test.each(["msw/index.js", "msw/node.js"])(
 test("rejects a Node entrypoint that imports checkout source by absolute path", async () => {
   const external = join(temp, "checkout-only.mjs");
   await writeFile(external, "export const privateSource = true;");
-  await append(
-    "dist/esm/http/index.js",
-    `\nimport ${JSON.stringify(external)};\n`,
-  );
+  await append("dist/esm/http.js", `\nimport ${JSON.stringify(external)};\n`);
   const result = check();
   expect(result.status).toBe(1);
   expect(result.output).toContain("outside packed package");
@@ -245,7 +261,7 @@ test.each(["@siafoundation/sia-storage", "vite", "vitest", "@playwright/test"])(
   "rejects a lazy Node entrypoint runtime dependency on %s",
   async (dependency) => {
     await append(
-      "dist/esm/http/index.js",
+      "dist/esm/http.js",
       `\nexport const load = () => import(${JSON.stringify(dependency)});\n`,
     );
     const result = check();
@@ -262,7 +278,7 @@ test("rejects a Node declaration that resolves checkout-only types", async () =>
     "export interface CheckoutOnly { privateSource: true }",
   );
   await append(
-    "dist/esm/http/index.d.ts",
+    "dist/esm/http.d.ts",
     `\nexport type { CheckoutOnly } from ${JSON.stringify(external)};\n`,
   );
   const result = check();

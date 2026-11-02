@@ -18,7 +18,11 @@
  * results, error messages, or logs.
  */
 
-import type { ObjectSummary, SharedSdk } from "@siafoundation/sia-storage";
+import {
+  connectSharedObjects,
+  type ListingSession,
+  type ListingSummary,
+} from "./storageBackend";
 import { normalizeObjectKeyHex } from "./hex";
 
 const DEFAULT_PAGE_SIZE = 100;
@@ -142,12 +146,14 @@ export async function createSharedObjectsClient(
   connect: (
     indexerUrl: string,
     seedHex: string,
-  ) => Promise<SharedSdk> = defaultSharedObjectsConnect,
+  ) => Promise<ListingSession> = connectSharedObjects,
 ): Promise<SharedObjectsClientHandle> {
   const sdk = await connect(indexerUrl, seedHex);
   const client: SharedObjectsPageClient = {
     fetchPage: async (offset, pageSize) =>
-      (await sdk.objectSummaries(offset, pageSize)).map((summary) => rowOf(summary)),
+      (await sdk.objectSummaries(offset, pageSize)).map((summary) =>
+        rowOf(summary),
+      ),
   };
   return {
     client,
@@ -238,18 +244,6 @@ function canonicalObjectKey(id: string): string {
   }
 }
 
-/** Lazily connects the sharing seed: dynamic-imports the WASM SDK (the chunk
- * is only fetched when a seed is actually applied) and returns the SharedSdk. */
-async function defaultSharedObjectsConnect(
-  indexerUrl: string,
-  seedHex: string,
-): Promise<SharedSdk> {
-  const { initSia, SharedSdk: Sdk } =
-    await import("@siafoundation/sia-storage");
-  await initSia();
-  return Sdk.connect(indexerUrl, seedHex);
-}
-
 /** Compact id-based fallback label: `head…tail` of the 64-hex key, sanitized
  * and length-capped, used whenever a name cannot be decoded at all. */
 function fallbackObjectName(id: string): string {
@@ -322,7 +316,7 @@ function retryDelayMs(
  * whole listing: degrade to the compact id label + 0 size. The id is
  * canonicalized so every row compares equal to a selected key from any other
  * path; the handle is freed even when decoding fails. */
-function rowOf(summary: ObjectSummary): SharedObjectRow {
+function rowOf(summary: ListingSummary): SharedObjectRow {
   let id = "";
   let size = 0;
   let name: string;

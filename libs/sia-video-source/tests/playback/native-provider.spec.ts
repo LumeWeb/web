@@ -2,13 +2,12 @@
 import { expect } from "@playwright/test";
 import { test } from "./fixtures";
 import type {} from "./page";
-
 test("automatic selection plays the available native provider", async ({
-  networkURL,
+  media,
   page,
 }) => {
-  await page.goto(`/?network=${encodeURIComponent(networkURL)}&backend=auto`);
-  await page.evaluate(() => window.playback.load("2".repeat(64)));
+  await page.goto("/?backend=auto");
+  await page.evaluate((id) => window.playback.load(id), media.short.id);
   await expect
     .poll(() => page.evaluate(() => window.playback.snapshot().frames))
     .toBeGreaterThan(2);
@@ -22,15 +21,12 @@ test("automatic selection plays the available native provider", async ({
     await page.evaluate(() => window.playback.snapshot().nativeReleases),
   ).toBe(1);
 });
-
 test("automatic selection uses the media worker when native playback is unavailable", async ({
-  networkURL,
+  media,
   page,
 }) => {
-  await page.goto(
-    `/?network=${encodeURIComponent(networkURL)}&backend=auto&nativeAvailable=false`,
-  );
-  await page.evaluate(() => window.playback.load("2".repeat(64)));
+  await page.goto("/?backend=auto&nativeAvailable=false");
+  await page.evaluate((id) => window.playback.load(id), media.short.id);
   await expect
     .poll(() => page.evaluate(() => window.playback.snapshot().frames))
     .toBeGreaterThan(2);
@@ -42,15 +38,14 @@ test("automatic selection uses the media worker when native playback is unavaila
   });
   await page.evaluate(() => window.playback.destroy());
 });
-
 test("a broken native URL releases its stream before media-worker playback recovers", async ({
-  networkURL,
+  media,
   page,
 }) => {
   await page.goto(
-    `/?network=${encodeURIComponent(networkURL)}&backend=auto&nativeURL=${encodeURIComponent("/missing-native.mp4")}`,
+    `/?backend=auto&nativeURL=${encodeURIComponent("/missing-native.mp4")}`,
   );
-  await page.evaluate(() => window.playback.load("2".repeat(64)));
+  await page.evaluate((id) => window.playback.load(id), media.short.id);
   await expect
     .poll(() => page.evaluate(() => window.playback.snapshot().frames))
     .toBeGreaterThan(2);
@@ -65,30 +60,21 @@ test("a broken native URL releases its stream before media-worker playback recov
     await page.evaluate(() => window.playback.snapshot().nativeReleases),
   ).toBe(1);
 });
-
 test("a pause during worker fallback keeps the replacement paused", async ({
-  network,
-  networkURL,
+  media,
   page,
 }) => {
-  const release = network.control.hold({ operation: "object" });
+  const hold = media.mock.faults.hold({
+    actor: media.actor,
+    object: media.short,
+    operation: "object",
+  });
   try {
-    await page.goto(
-      `/?network=${encodeURIComponent(networkURL)}&backend=auto&nativeAvailable=false`,
-    );
-    await page.evaluate(() => window.playback.load("2".repeat(64)));
-    await expect
-      .poll(() =>
-        network.control
-          .requests()
-          .some(
-            (request) =>
-              request.operation === "object" && request.status === "pending",
-          ),
-      )
-      .toBe(true);
+    await page.goto("/?backend=auto&nativeAvailable=false");
+    await page.evaluate((id) => window.playback.load(id), media.short.id);
+    await hold.started();
     await page.evaluate(() => window.playback.pause());
-    release();
+    hold.release();
     await expect
       .poll(() => page.evaluate(() => window.playback.snapshot().sourceKind))
       .toBe("worker");
@@ -97,31 +83,24 @@ test("a pause during worker fallback keeps the replacement paused", async ({
     );
     await page.evaluate(() => window.playback.destroy());
   } finally {
-    release();
+    hold.release();
   }
 });
-
 test("a pause during native acquisition prevents automatic playback", async ({
-  network,
-  networkURL,
+  media,
   page,
 }) => {
-  const release = network.control.hold({ operation: "object" });
+  const hold = media.mock.faults.hold({
+    actor: media.actor,
+    object: media.short,
+    operation: "object",
+  });
   try {
-    await page.goto(`/?network=${encodeURIComponent(networkURL)}&backend=auto`);
-    await page.evaluate(() => window.playback.load("2".repeat(64)));
-    await expect
-      .poll(() =>
-        network.control
-          .requests()
-          .some(
-            (request) =>
-              request.operation === "object" && request.status === "pending",
-          ),
-      )
-      .toBe(true);
+    await page.goto("/?backend=auto");
+    await page.evaluate((id) => window.playback.load(id), media.short.id);
+    await hold.started();
     await page.evaluate(() => window.playback.pause());
-    release();
+    hold.release();
     await expect
       .poll(() => page.evaluate(() => window.playback.snapshot().readyState))
       .toBeGreaterThanOrEqual(2);
@@ -136,6 +115,6 @@ test("a pause during native acquisition prevents automatic playback", async ({
     );
     await page.evaluate(() => window.playback.destroy());
   } finally {
-    release();
+    hold.release();
   }
 });

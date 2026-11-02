@@ -3,8 +3,8 @@
  * files and undeclared imports must fail even when the checkout has enough source
  * and development dependencies to make its own tests pass.
  *
- * MSW is an optional peer. The non-MSW entrypoints must load and type-check
- * without it; the MSW adapters must require it and work when it is supplied.
+ * MSW and Playwright are optional peers. Storage entrypoints must load and
+ * type-check without them; their adapters must require the matching peer.
  * Browser entrypoints must also exclude Node built-ins and storage SDK code.
  * Test runners must stay out of that browser dependency graph.
  *
@@ -106,7 +106,7 @@ async function checkNodeGraph(consumer, name) {
   };
   await build({
     build: {
-      lib: { entry: join(root, "dist/esm/http/index.js"), formats: ["es"] },
+      lib: { entry: join(root, "dist/esm/http.js"), formats: ["es"] },
       minify: false,
       rollupOptions: {
         external: (id) => id.startsWith("node:") || builtins.has(id),
@@ -190,6 +190,7 @@ async function checkPackage(unpacked, directory) {
   }
 
   await linkDependency(consumer, "msw");
+  await linkDependency(consumer, "@playwright/test");
   runNode(consumer, ["with-msw.mjs"]);
   runNode(consumer, [tsc, "-p", "tsconfig.msw.json"]);
   await checkBrowser(consumer);

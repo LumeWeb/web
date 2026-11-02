@@ -24,8 +24,10 @@ export function RecoveryScreen() {
     if (!value) return;
     setError(null);
     try {
-      const { validateRecoveryPhrase } =
+      const { initSia, validateRecoveryPhrase } =
         await import("@siafoundation/sia-storage");
+      // Auth adapters may not load SDK WASM; validation must initialize its phrase parser.
+      await initSia();
       validateRecoveryPhrase(value);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
