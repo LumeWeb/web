@@ -1,8 +1,6 @@
 /** Private profiles are opened without following the final link and never serialize their credentials. */
-import { constants } from "node:fs";
-import { access, open, realpath } from "node:fs/promises";
-import { dirname, isAbsolute, join, relative, resolve } from "node:path";
-import type { AppDefinition } from "../types.js";
+import { readPrivateBytes } from "./private-files.js";
+import type { AppDefinition, RunLimits } from "../types.js";
 import type {
   LiveAuthentication,
   LiveConsent,
@@ -21,6 +19,74 @@ const defaults: LiveLimits = {
   maxObservedShardBytes: 64 * 1024 * 1024,
   maxShares: 8,
 };
+/** Cleanup reconnects with an acknowledged app key, so it never consumes a second preauthorization. */
+export function appKeyProfile(
+  profile: LiveProfile,
+  appKeyHex: string,
+  cleanup = false,
+): LiveProfile {
+  if (!/^[a-f0-9]{64}$/.test(appKeyHex)) throw failure("invalid-profile");
+  const document = profileDocument(profile);
+  const reserve = Math.min(
+    250,
+    Math.floor(document.limits.cleanupDeadlineMs / 2),
+  );
+  const limits = cleanup
+    ? Object.freeze({
+        ...document.limits,
+        cleanupDeadlineMs: Math.max(1, reserve),
+        deadlineMs: Math.max(1, document.limits.cleanupDeadlineMs - reserve),
+      })
+    : document.limits;
+  const derived = Object.freeze(
+    Object.defineProperties(Object.create(null), {
+      [Symbol.for("nodejs.util.inspect.custom")]: {
+        value: () => "[Sia live profile]",
+      },
+      toJSON: { value: () => "[Sia live profile]" },
+    }),
+  ) as LiveProfile;
+  profiles.set(
+    derived,
+    Object.freeze({
+      ...document,
+      auth: Object.freeze({ appKeyHex, kind: "app-key" as const }),
+      limits,
+    }),
+  );
+  return derived;
+}
+export function limitedProfile(
+  profile: LiveProfile,
+  overrides?: Partial<RunLimits>,
+): LiveProfile {
+  if (!overrides) return profile;
+  const document = profileDocument(profile);
+  const limits = { ...document.limits };
+  for (const [key, value] of Object.entries(overrides)) {
+    if (
+      !["maxLogicalUploadBytes", "maxObjects", "maxShares"].includes(key) ||
+      !Number.isSafeInteger(value) ||
+      value < 0 ||
+      value > document.limits[key as keyof RunLimits]
+    )
+      throw failure("invalid-profile");
+    limits[key as keyof RunLimits] = value;
+  }
+  const derived = Object.freeze(
+    Object.defineProperties(Object.create(null), {
+      [Symbol.for("nodejs.util.inspect.custom")]: {
+        value: () => "[Sia live profile]",
+      },
+      toJSON: { value: () => "[Sia live profile]" },
+    }),
+  ) as LiveProfile;
+  profiles.set(
+    derived,
+    Object.freeze({ ...document, limits: Object.freeze(limits) }),
+  );
+  return derived;
+}
 export async function loadLiveProfile(
   path: string,
   consent: LiveConsent,
@@ -34,65 +100,14 @@ export async function loadLiveProfile(
   } catch {
     throw failure("consent-required");
   }
-  if (!isAbsolute(path) || !process.getuid) throw failure("invalid-profile");
   let document: LiveProfileDocument;
   try {
-    // O_NONBLOCK lets fstat reject a named pipe without waiting for its writer.
-    const file = await open(
-      path,
-      constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK,
+    const bytes = await readPrivateBytes(path, 16384, workspaceRoot);
+    document = parse(
+      JSON.parse(
+        new TextDecoder("utf-8", { fatal: true }).decode(bytes),
+      ) as unknown,
     );
-    try {
-      const stat = await file.stat();
-      if (
-        !stat.isFile() ||
-        stat.uid !== process.getuid() ||
-        stat.nlink !== 1 ||
-        (stat.mode & 0o077) !== 0 ||
-        stat.size > 16384
-      )
-        throw failure("invalid-profile");
-      const actualPath = await realpath(path);
-      if (await checkoutRoot(dirname(actualPath)))
-        throw failure("invalid-profile");
-      const checkout =
-        workspaceRoot === undefined
-          ? await checkoutRoot(process.cwd())
-          : await realpath(workspaceRoot);
-      if (checkout) {
-        const child = relative(checkout, actualPath);
-        if (
-          child === "" ||
-          (!isAbsolute(child) &&
-            child !== ".." &&
-            !child.startsWith(
-              ".." + (process.platform === "win32" ? "\\" : "/"),
-            ))
-        )
-          throw failure("invalid-profile");
-      }
-      const buffer = Buffer.alloc(16385);
-      let length = 0;
-      while (length < buffer.length) {
-        const result = await file.read(
-          buffer,
-          length,
-          buffer.length - length,
-          null,
-        );
-        if (!result.bytesRead) break;
-        length += result.bytesRead;
-      }
-      if (length > 16384) throw failure("invalid-profile");
-      const bytes = buffer.subarray(0, length);
-      document = parse(
-        JSON.parse(
-          new TextDecoder("utf-8", { fatal: true }).decode(bytes),
-        ) as unknown,
-      );
-    } finally {
-      await file.close();
-    }
   } catch {
     throw failure("invalid-profile");
   }
@@ -112,20 +127,6 @@ export function profileDocument(profile: LiveProfile): LiveProfileDocument {
   const document = profiles.get(profile);
   if (!document) throw failure("invalid-profile");
   return document;
-}
-async function checkoutRoot(directory: string): Promise<string | undefined> {
-  let current = resolve(directory);
-  for (;;) {
-    try {
-      await access(join(current, ".git"));
-      return await realpath(current);
-    } catch {
-      /* A parent may contain the checkout marker. */
-    }
-    const parent = dirname(current);
-    if (parent === current) return undefined;
-    current = parent;
-  }
 }
 function endpoint(value: unknown): string {
   const url = new URL(text(value));
