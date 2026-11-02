@@ -105,19 +105,14 @@ describe("payload SDK", () => {
     expect(await bytes(await sdk.download(object))).toEqual([1]);
   });
 
-  test("pruning removes unreferenced payloads without deleting another pinned object", async () => {
+  test("pruning removes an unfinished upload without deleting a pinned object", async () => {
     const { account, network, sdk } = fixture();
-    const deleted = network.seedObject(
-      account.id,
-      "deleted",
-      new Uint8Array([1]),
-    );
+    const unfinished = await sdk.upload(new Uint8Array([1]), { id: "unfinished" });
     const kept = network.seedObject(account.id, "kept", new Uint8Array([2]));
-    await sdk.deleteObject("deleted");
-    await expect(sdk.object("deleted")).rejects.toThrow("not found");
-    expect(await bytes(await sdk.download(deleted))).toEqual([1]);
+    await expect(sdk.object("unfinished")).rejects.toThrow("not found");
+    expect(await bytes(await sdk.download(unfinished))).toEqual([1]);
     await sdk.pruneSlabs();
-    await expect(sdk.download(deleted)).rejects.toThrow("not found");
+    await expect(sdk.download(unfinished)).rejects.toThrow("not found");
     expect(await bytes(await sdk.download(kept))).toEqual([2]);
   });
 

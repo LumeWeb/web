@@ -86,13 +86,15 @@ export function createIndexdDispatcher(
         connection && !approval && path !== "/auth/connect"
           ? model.connectionRequest(path.split("/")[3]!)
           : undefined;
-      if (
-        connection &&
-        !approval &&
-        path !== "/auth/connect" &&
-        connectionRequest?.publicKey !== publicKey
-      )
-        return makeResponse(json({ error: "unauthorized" }, 401));
+      if (connection && !approval && path !== "/auth/connect") {
+        // SDK polling recognizes a missing request as user rejection.
+        if (!connectionRequest)
+          return makeResponse(
+            json({ error: "connection request not found" }, 404),
+          );
+        if (connectionRequest.publicKey !== publicKey)
+          return makeResponse(json({ error: "unauthorized" }, 401));
+      }
       let value: unknown;
       if (path === "/auth/connect" && method === "POST") {
         const body = (await request.json().catch(() => ({}))) as {
@@ -124,7 +126,20 @@ export function createIndexdDispatcher(
         const basic = request.headers.get("authorization") ?? "";
         if (!basic.toLowerCase().startsWith("basic "))
           return makeResponse(json({ error: "unauthorized" }, 401));
-        model.approveConnection(id, atob(basic.slice(6)).split(":")[1] ?? "");
+        // MSW can give an empty request a body stream; fixture clients still use bodyless approval.
+        const body = await request.text();
+        const decision: unknown =
+          body === "" ? { approve: true } : JSON.parse(body);
+        if (
+          !decision ||
+          typeof decision !== "object" ||
+          !("approve" in decision) ||
+          typeof decision.approve !== "boolean"
+        )
+          throw new Error("invalid approval decision");
+        if (decision.approve)
+          model.approveConnection(id, atob(basic.slice(6)).split(":")[1] ?? "");
+        else model.rejectConnection(id);
         return finish(makeResponse(empty()));
       } else if (
         /^\/auth\/connect\/[^/]+\/status$/.exec(path) &&

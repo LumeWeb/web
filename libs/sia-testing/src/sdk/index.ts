@@ -1,5 +1,9 @@
 /** In-process payload mocks for app tests; no Sia encryption or host protocols are performed. */
-import { createIndexdModel, type IndexdModel } from "../model/index.js";
+import {
+  createIndexdModel,
+  type IndexdModel,
+  type SlabPinTracker,
+} from "../model/index.js";
 import {
   createControls,
   type MockControl,
@@ -95,6 +99,49 @@ export function createMockNetwork(
   if (!Number.isSafeInteger(chunkBytes) || chunkBytes < 1)
     throw new Error("chunkBytes must be a positive safe integer");
   const payloads: PayloadStore = saved?.payloads ?? new Map();
+  const payloadsByPin = new Map<string, Map<symbol, Set<string>>>();
+  // Recreating empty trackers would accumulate weak model observers until GC runs.
+  const retirementTrackers = new Map<string, SlabPinTracker>();
+  for (const [accountId, owned] of payloads)
+    for (const [id, record] of owned)
+      indexPayload(accountId, id, record.identity);
+
+  /** An object's slab can outlive its object record while another packed object uses it. */
+  function indexPayload(accountId: string, id: string, identity: symbol): void {
+    let pins = payloadsByPin.get(accountId);
+    if (!pins) {
+      pins = new Map();
+      payloadsByPin.set(accountId, pins);
+    }
+    let ids = pins.get(identity);
+    if (!ids) {
+      ids = new Set();
+      pins.set(identity, ids);
+      let tracker = retirementTrackers.get(accountId);
+      if (!tracker) {
+        tracker = model.trackSlabPins(accountId);
+        retirementTrackers.set(accountId, tracker);
+      }
+      tracker.watch(identity);
+    }
+    ids.add(id);
+  }
+
+  /** Empty index buckets must release retired identities as well as the cached bytes. */
+  function forgetPayload(accountId: string, id: string): void {
+    const owned = payloads.get(accountId);
+    const record = owned?.get(id);
+    if (!record) return;
+    owned!.delete(id);
+    const pins = payloadsByPin.get(accountId)!;
+    const ids = pins.get(record.identity)!;
+    ids.delete(id);
+    if (ids.size === 0) {
+      pins.delete(record.identity);
+      retirementTrackers.get(accountId)!.forget(record.identity);
+    }
+    if (pins.size === 0) payloadsByPin.delete(accountId);
+  }
 
   function payload(accountId: string, id: string) {
     model.accountStats(accountId);
@@ -102,10 +149,26 @@ export function createMockNetwork(
     if (!record) throw new Error(`payload ${id} not found`);
     // Model resets and externally pruned slabs must also invalidate retained handles.
     if (!payloadIsCurrent(model, accountId, record)) {
-      payloads.get(accountId)!.delete(id);
+      forgetPayload(accountId, id);
       throw new Error(`payload ${id} not found`);
     }
     return record;
+  }
+
+  /** A sibling deletion can retire the pin of a payload whose object was deleted earlier. */
+  function discardStalePayloads(
+    accountId: string,
+    identities: Iterable<symbol>,
+  ): void {
+    const pins = payloadsByPin.get(accountId);
+    const owned = payloads.get(accountId);
+    for (const identity of identities) {
+      const ids = pins?.get(identity);
+      if (!ids) continue;
+      const record = owned!.get(ids.values().next().value!)!;
+      if (payloadIsCurrent(model, accountId, record)) continue;
+      for (const id of ids) forgetPayload(accountId, id);
+    }
   }
 
   function upload(
@@ -127,11 +190,14 @@ export function createMockNetwork(
       owned = new Map();
       payloads.set(accountId, owned);
     }
-    owned.set(id, {
+    const record = {
       bytes: bytes.slice(),
       identity: model.slabIdentity(accountId, slabId),
       slabId,
-    });
+    };
+    forgetPayload(accountId, id);
+    owned.set(id, record);
+    indexPayload(accountId, id, record.identity);
     return object;
   }
 
@@ -174,7 +240,13 @@ export function createMockNetwork(
           return run(
             "deleteObject",
             id,
-            () => model.deleteObject(accountId, id),
+            () => {
+              model.deleteObject(accountId, id);
+              discardStalePayloads(
+                accountId,
+                retirementTrackers.get(accountId)?.takeRetired() ?? [],
+              );
+            },
             false,
             call.signal,
           );
@@ -288,11 +360,12 @@ export function createMockNetwork(
             "pruneSlabs",
             undefined,
             () => {
-              const removed = new Set(model.pruneSlabs(accountId));
-              for (const [id, record] of payloads.get(accountId) ?? []) {
-                if (removed.has(record.slabId))
-                  payloads.get(accountId)!.delete(id);
-              }
+              model.pruneSlabs(accountId);
+              // External deletions can retire a pin before this prune call sees it.
+              discardStalePayloads(
+                accountId,
+                payloadsByPin.get(accountId)?.keys() ?? [],
+              );
             },
             false,
             call.signal,
@@ -324,7 +397,7 @@ export function createMockNetwork(
       } catch (error) {
         const record = payloads.get(accountId)!.get(id)!;
         model.unpinSlab(accountId, record.slabId);
-        payloads.get(accountId)!.delete(id);
+        forgetPayload(accountId, id);
         throw error;
       }
       return object;

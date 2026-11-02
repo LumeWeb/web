@@ -36,6 +36,6 @@ it('keeps pending approval and reset visible through the MSW adapter', async () 
     expect((await fetch(`https://indexd.test/auth/connect/${id}`, { headers: { authorization: 'Basic dGVzdDp0ZXN0' }, method: 'POST' })).status).toBe(204);
     expect(await (await status()).json()).toMatchObject({ approved: true });
     server.model.reset();
-    expect((await status()).status).toBe(401);
+    expect((await status()).status).toBe(404);
   } finally { server.close(); }
 });

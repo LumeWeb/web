@@ -64,6 +64,7 @@ export interface IndexdModel {
   pinSlab(accountId: string, slab: ModelSlab): void;
   pruneSlabs(accountId: string): string[];
   registerConnection(id: string, appKey: string): ModelAccount;
+  rejectConnection(id: string): void;
   requestConnection(input: {
     appId: string;
     publicKey: string;
@@ -92,6 +93,7 @@ export interface IndexdModel {
   /** Identifies this account's current pin; removing and repinning the same slab creates a new identity. */
   slabIdentity(accountId: string, slabId: string): symbol;
   snapshot(): { accounts: ModelAccount[] };
+  trackSlabPins(accountId: string): SlabPinTracker;
   unpinSlab(accountId: string, slabId: string): void;
   validateSignedShareUrl(url: string): {
     expiresAt: number;
@@ -170,6 +172,13 @@ export interface SharingKey {
 
 export type SharingKeyRecord = SharingAttachment;
 
+/** Caller-owned pin watches retain only retirements that the caller still needs to collect. */
+export interface SlabPinTracker {
+  forget(identity: symbol): void;
+  takeRetired(): symbol[];
+  watch(identity: symbol): void;
+}
+
 interface SharingRecord {
   attachments: Map<string, SharingAttachment>;
   key: SharingKey;
@@ -218,6 +227,10 @@ export function createIndexdModel(
       new Map(row.slabs.map((id) => [id, Symbol()])),
     ]),
   );
+  const pinTrackers = new Map<
+    string,
+    Set<WeakRef<{ retired: Set<symbol>; watched: Set<symbol> }>>
+  >();
   const events = new Map<string, ModelObjectEvent[]>(
     saved?.accounts.map((row) => [row.account.id, row.events]),
   );
@@ -284,6 +297,26 @@ export function createIndexdModel(
     )
       throw new Error("sharing key unavailable");
     return record;
+  }
+
+  /** Retires one account's pin without discarding a slab another account still owns. */
+  function removeSlabPin(accountId: string, slabId: string): void {
+    const identity = accountSlabs.get(accountId)!.get(slabId);
+    accountSlabs.get(accountId)!.delete(slabId);
+    if (identity !== undefined) retirePin(accountId, identity);
+    if (![...accountSlabs.values()].some((pins) => pins.has(slabId)))
+      slabs.delete(slabId);
+  }
+
+  /** Only watched pins enter queues, so unrelated model uploads cannot fill a cache's retirement history. */
+  function retirePin(accountId: string, identity: symbol): void {
+    const trackers = pinTrackers.get(accountId);
+    for (const reference of trackers ?? []) {
+      const state = reference.deref();
+      if (!state) trackers!.delete(reference);
+      else if (state.watched.delete(identity)) state.retired.add(identity);
+    }
+    if (trackers?.size === 0) pinTrackers.delete(accountId);
   }
 
   function slabBytes(ids: Iterable<string>): number {
@@ -357,11 +390,23 @@ export function createIndexdModel(
     },
     deleteObject(accountId, objectId) {
       requireAccount(accountId);
-      if (!objects.get(accountId)!.delete(objectId))
-        throw new Error(`object ${objectId} not found`);
-      events
-        .get(accountId)!
-        .push({ deleted: true, key: objectId, updatedAt: now().toISOString() });
+      const records = objects.get(accountId)!;
+      const object = records.get(objectId);
+      if (!object) throw new Error(`object ${objectId} not found`);
+      records.delete(objectId);
+      const updatedAt = now().toISOString();
+      for (const record of sharing.values()) {
+        if (record.owner === accountId && record.attachments.delete(objectId)) {
+          record.key.objectCount = record.attachments.size;
+          record.key.updatedAt = updatedAt;
+        }
+      }
+      // Pruning every unused slab would also remove uploads not yet pinned as objects.
+      for (const slabId of object.slabs ?? []) {
+        if (![...records.values()].some((item) => item.slabs?.includes(slabId)))
+          removeSlabPin(accountId, slabId);
+      }
+      events.get(accountId)!.push({ deleted: true, key: objectId, updatedAt });
     },
     detachSharedObject(ownerId, publicKey, objectID) {
       const record = ownedShare(ownerId, publicKey);
@@ -487,10 +532,8 @@ export function createIndexdModel(
             object.slabs?.includes(slabId),
           )
         ) {
-          accountSlabs.get(accountId)!.delete(slabId);
+          removeSlabPin(accountId, slabId);
           removed.push(slabId);
-          if (![...accountSlabs.values()].some((pins) => pins.has(slabId)))
-            slabs.delete(slabId);
         }
       }
       return removed;
@@ -504,6 +547,10 @@ export function createIndexdModel(
       requests.delete(id);
       return account;
     },
+    rejectConnection(id) {
+      // Indexd removes denied IDs unconditionally so clients can retry after expiry or registration.
+      requests.delete(id);
+    },
     requestConnection({ appId: _appId, publicKey }) {
       const id = `request-${++requestNumber}`;
       const expiresAt = new Date(now().getTime() + 10 * 60 * 1000);
@@ -511,6 +558,8 @@ export function createIndexdModel(
       return { expiresAt: new Date(expiresAt), id };
     },
     reset() {
+      for (const [accountId, pins] of accountSlabs)
+        for (const identity of pins.values()) retirePin(accountId, identity);
       accounts.clear();
       objects.clear();
       slabs.clear();
@@ -594,6 +643,33 @@ export function createIndexdModel(
         accounts: [...accounts.values()].map((account) => ({ ...account })),
       };
     },
+    trackSlabPins(accountId) {
+      requireAccount(accountId);
+      const state = { retired: new Set<symbol>(), watched: new Set<symbol>() };
+      let trackers = pinTrackers.get(accountId);
+      if (!trackers) {
+        trackers = new Set();
+        pinTrackers.set(accountId, trackers);
+      }
+      for (const reference of trackers)
+        if (!reference.deref()) trackers.delete(reference);
+      // A model may outlive its SDK caches; holding the queue strongly would retain retired identities.
+      trackers.add(new WeakRef(state));
+      return {
+        forget(identity) {
+          state.watched.delete(identity);
+          state.retired.delete(identity);
+        },
+        takeRetired() {
+          const retired = [...state.retired];
+          state.retired.clear();
+          return retired;
+        },
+        watch(identity) {
+          state.watched.add(identity);
+        },
+      };
+    },
     unpinSlab(accountId, slabId) {
       requireAccount(accountId);
       if (!accountSlabs.get(accountId)!.has(slabId))
@@ -601,9 +677,7 @@ export function createIndexdModel(
       for (const object of objects.get(accountId)!.values())
         if (object.slabs?.includes(slabId))
           throw new Error(`slab ${slabId} is still referenced`);
-      accountSlabs.get(accountId)!.delete(slabId);
-      if (![...accountSlabs.values()].some((pins) => pins.has(slabId)))
-        slabs.delete(slabId);
+      removeSlabPin(accountId, slabId);
     },
     validateSignedShareUrl(rawUrl) {
       const url = new URL(rawUrl);
