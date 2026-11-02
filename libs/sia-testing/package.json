@@ -1,7 +1,7 @@
 {
   "name": "@lumeweb/sia-testing",
   "version": "0.1.0",
-  "description": "Deterministic Indexd fixtures and payload mocks for Sia Storage SDK consumers",
+  "description": "Scoped fixtures and mock application ports for Sia playback tests",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -10,29 +10,29 @@
     "README.md"
   ],
   "exports": {
-    "./fixtures": {
-      "types": "./dist/esm/fixtures/index.d.ts",
-      "import": "./dist/esm/fixtures/index.js"
+    "./node": {
+      "types": "./dist/esm/node.d.ts",
+      "import": "./dist/esm/node.js"
     },
-    "./model": {
-      "types": "./dist/esm/model/index.d.ts",
-      "import": "./dist/esm/model/index.js"
+    "./mock": {
+      "types": "./dist/esm/mock.d.ts",
+      "import": "./dist/esm/mock.js"
     },
-    "./msw": {
-      "types": "./dist/esm/msw/index.d.ts",
-      "import": "./dist/esm/msw/index.js"
-    },
-    "./msw/node": {
-      "types": "./dist/esm/msw/node.d.ts",
-      "import": "./dist/esm/msw/node.js"
+    "./client": {
+      "types": "./dist/esm/client.d.ts",
+      "import": "./dist/esm/client.js"
     },
     "./http": {
-      "types": "./dist/esm/http/index.d.ts",
-      "import": "./dist/esm/http/index.js"
+      "types": "./dist/esm/http.d.ts",
+      "import": "./dist/esm/http.js"
     },
-    "./sdk": {
-      "types": "./dist/esm/sdk/index.d.ts",
-      "import": "./dist/esm/sdk/index.js"
+    "./msw": {
+      "types": "./dist/esm/msw.d.ts",
+      "import": "./dist/esm/msw.js"
+    },
+    "./playwright": {
+      "types": "./dist/esm/playwright.d.ts",
+      "import": "./dist/esm/playwright.js"
     },
     "./package.json": "./package.json"
   },
@@ -49,9 +49,17 @@
     "test:mutation": "node scripts/mutation-regression.mjs"
   },
   "peerDependencies": {
+    "@playwright/test": "^1.61.1",
+    "@siafoundation/sia-storage": "0.1.4",
     "msw": "^2.14.6"
   },
   "peerDependenciesMeta": {
+    "@siafoundation/sia-storage": {
+      "optional": true
+    },
+    "@playwright/test": {
+      "optional": true
+    },
     "msw": {
       "optional": true
     }

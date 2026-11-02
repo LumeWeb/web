@@ -23,7 +23,7 @@ export default defineConfig({
         test: {
           name: "native-control",
           include: [
-            "tests/sdk/native/{hosts,events,connections,publication}.test.ts",
+            "tests/sdk/native/{hosts,events,connections,publication,live-auth}.test.ts",
           ],
           environment: "node",
         },

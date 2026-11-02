@@ -1,30 +1,28 @@
-/** Checks runtime imports before the optional MSW peer is installed. */
+/** Runs scoped storage without either optional test peer. */
 import assert from "node:assert/strict";
-import { createAccount } from "@lumeweb/sia-testing/fixtures";
-import { createIndexdHttpServer } from "@lumeweb/sia-testing/http";
-import { createIndexdModel } from "@lumeweb/sia-testing/model";
-import { createMockNetwork, createMockObject, createRemoteMockSdk } from "@lumeweb/sia-testing/sdk";
-
-assert.equal(typeof createMockNetwork, "function");
-assert.equal(typeof createRemoteMockSdk, "function");
-assert.equal(createMockObject("video", 4).size(), 4);
-
-assert.equal(typeof createAccount().ready, "boolean");
-const model = createIndexdModel();
-assert.deepEqual(model.snapshot().accounts, []);
-assert.equal(createIndexdHttpServer({ model }).server.listening, false);
-await assert.rejects(import("@lumeweb/sia-testing"), {
-  code: "ERR_PACKAGE_PATH_NOT_EXPORTED",
-});
-for (const entry of [
-  "@lumeweb/sia-testing/msw",
-  "@lumeweb/sia-testing/msw/node",
-]) {
-  await assert.rejects(
-    import(entry),
-    (error) =>
-      error.code === "ERR_MODULE_NOT_FOUND" &&
-      /Cannot find package 'msw'/.test(error.message),
-    entry + " must require the optional msw peer",
-  );
+import { createMockSia, bytesFixture } from "@lumeweb/sia-testing/mock";
+import { createMockReader } from "@lumeweb/sia-testing/client";
+import { startMockServer } from "@lumeweb/sia-testing/http";
+import { withSiaRun } from "@lumeweb/sia-testing/node";
+const app = { description: "Packed fixture", id: "a".repeat(64), name: "Packed", serviceUrl: "https://example.invalid" };
+const mock = createMockSia();
+try {
+  await mock.run({ app }, async (run) => {
+    const file = await bytesFixture({ bytes: Uint8Array.of(4, 5), name: "video" });
+    const object = await run.objects.upload({ file, metadata: Uint8Array.of(6), name: file.name });
+    const server = await startMockServer(mock);
+    try {
+      const binding = server.connection({ access: run.ownerAccess, as: mock.actor("consumer") });
+      const reader = createMockReader(binding, binding.credential);
+      assert.deepEqual([...new Uint8Array(await new Response(await reader.download(await reader.object(object.id))).arrayBuffer())], [4, 5]);
+      await reader.close();
+    } finally { await server.close(); }
+  });
+} finally { await mock.close(); }
+assert.equal((await withSiaRun({ backend: { app, kind: "mock" } }, async () => "managed")).value, "managed");
+for (const entry of ["", "/fixtures", "/model", "/sdk", "/msw/node"]) {
+  await assert.rejects(import("@lumeweb/sia-testing" + entry), { code: "ERR_PACKAGE_PATH_NOT_EXPORTED" });
+}
+for (const [entry, peer] of [["msw", "msw"], ["playwright", "@playwright/test"]]) {
+  await assert.rejects(import("@lumeweb/sia-testing/" + entry), (error) => error.code === "ERR_MODULE_NOT_FOUND" && error.message.includes(peer), entry + " must require the optional " + peer + " peer");
 }

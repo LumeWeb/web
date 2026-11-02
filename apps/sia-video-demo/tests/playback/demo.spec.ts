@@ -1,5 +1,6 @@
 /** UI selection must reach real decoded frames; deselection must stop server-observed reads. */
 import { expect } from "@playwright/test";
+import { expectDecodedProgress } from "@lumeweb/sia-video-source/testing";
 import { openDemo, openShare, test } from "./fixtures";
 
 declare global {
@@ -7,6 +8,133 @@ declare global {
     demoSeekTime?: number;
   }
 }
+
+test("the account UI approves, registers and reconnects through the mock auth port", async ({
+  fixture,
+  sia,
+}) => {
+  let url = "";
+  const page = await sia.browser.open({
+    access: sia.auth.registrationAccess,
+    async apply(page, connection) {
+      url = new URL(
+        `${connection.backend.connection.client}/`,
+        connection.backend.connection.url,
+      ).href;
+      await page.addInitScript((credential) => {
+        window.__siaDemoTest = { credential };
+      }, connection.backend.credential);
+    },
+  });
+  await openDemo(page, { ...fixture, url });
+  await page
+    .getByRole("button", { exact: true, name: "Sign in with your Sia account" })
+    .click();
+  await page.getByRole("button", { exact: true, name: "Connect" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Approve the connection" }),
+  ).toBeVisible();
+  const responseUrl = await page.getByRole("link").getAttribute("href");
+  expect(responseUrl).not.toBeNull();
+  await sia.auth.approve(responseUrl!);
+  await page.getByRole("button", { exact: true, name: "Continue" }).click();
+  await page
+    .getByPlaceholder("12-word recovery phrase")
+    .fill(sia.auth.fixturePhrase);
+  await page.getByRole("button", { exact: true, name: "Register" }).click();
+  await expect(
+    page.getByRole("button", { exact: true, name: "Log out" }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByRole("button", { exact: true, name: "Log out" }),
+  ).toBeVisible();
+});
+
+test("a well-formed unknown sharing seed cannot list the fixture", async ({
+  fixture,
+  page,
+}) => {
+  await openDemo(page, fixture);
+  await page
+    .getByLabel("Sharing link or key", { exact: true })
+    .fill("f".repeat(64));
+  await page.getByRole("button", { exact: true, name: "Apply" }).click();
+  await expect(
+    page.getByRole("button", { exact: true, name: "Retry" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Long demo video.mp4/ }),
+  ).toHaveCount(0);
+  await expect(page.locator("video")).toHaveCount(0);
+});
+
+test("an owner credential cannot replace the sharing seed in the recipient UI", async ({
+  fixture,
+  page,
+  sia,
+}) => {
+  let key = "";
+  await sia.browser.open({
+    access: sia.ownerAccess,
+    apply(_page, connection) {
+      key = connection.backend.credential.keyHex;
+      return Promise.resolve();
+    },
+  });
+  await openDemo(page, fixture);
+  await page.getByLabel("Sharing link or key", { exact: true }).fill(key);
+  await page.getByRole("button", { exact: true, name: "Apply" }).click();
+  await expect(
+    page.getByRole("button", { exact: true, name: "Retry" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Long demo video.mp4/ }),
+  ).toHaveCount(0);
+  await expect(page.locator("video")).toHaveCount(0);
+});
+
+test("revoking a listed share prevents fresh worker playback", async ({
+  fixture,
+  page,
+  sia,
+}) => {
+  await openShare(page, fixture);
+  const row = page.getByRole("button", { name: /Long demo video.mp4/ });
+  await expect(row).toBeVisible();
+  await sia.shares.revoke(fixture.share);
+  await row.click();
+  await expect(page.getByRole("alertdialog")).toBeVisible();
+  expect(
+    await page
+      .locator("video")
+      .evaluate(
+        (video: HTMLVideoElement) =>
+          video.getVideoPlaybackQuality().totalVideoFrames,
+      ),
+  ).toBe(0);
+});
+
+test("deleting a listed video prevents fresh worker playback", async ({
+  fixture,
+  page,
+  sia,
+}) => {
+  await openShare(page, fixture);
+  const row = page.getByRole("button", { name: /Long demo video.mp4/ });
+  await expect(row).toBeVisible();
+  await sia.objects.delete(fixture.object);
+  await row.click();
+  await expect(page.getByRole("alertdialog")).toBeVisible();
+  expect(
+    await page
+      .locator("video")
+      .evaluate(
+        (video: HTMLVideoElement) =>
+          video.getVideoPlaybackQuality().totalVideoFrames,
+      ),
+  ).toBe(0);
+});
 
 test("the browser rejects external requests through the owned proxy", async ({
   egress,
@@ -25,16 +153,7 @@ test("a shared video selected in the demo decodes frames", async ({
   await expect(row).toContainText("673.7 KiB");
   await row.click();
   await expect(page.locator("video")).toBeVisible();
-  await expect
-    .poll(() =>
-      page
-        .locator("video")
-        .evaluate(
-          (video: HTMLVideoElement) =>
-            video.getVideoPlaybackQuality().totalVideoFrames,
-        ),
-    )
-    .toBeGreaterThan(0);
+  await expectDecodedProgress(page.locator("video"));
 });
 
 test("the demo seek control resumes decoded frames at the selected position", async ({
@@ -87,39 +206,24 @@ test("deselecting a shared row cancels its held download", async ({
   fixture,
   page,
 }) => {
-  const release = fixture.network.control.hold({ operation: "download" });
+  const hold = fixture.mock.faults.hold({
+    actor: fixture.actor,
+    object: fixture.object,
+    operation: "download",
+  });
   try {
     await openShare(page, fixture);
     const row = page.getByRole("button", { name: /Long demo video.mp4/ });
     await row.click();
-    await expect
-      .poll(() =>
-        fixture.network.control
-          .requests()
-          .some(
-            (request) =>
-              request.operation === "download" && request.status === "pending",
-          ),
-      )
-      .toBe(true);
+    await hold.started();
     await row.click();
     await expect(page.locator("video")).toHaveCount(0);
     await expect(
       page.getByText("No source selected yet.", { exact: true }),
     ).toBeVisible();
-    await expect
-      .poll(() =>
-        fixture.network.control
-          .requests()
-          .some(
-            (request) =>
-              request.operation === "download" &&
-              request.status === "cancelled",
-          ),
-      )
-      .toBe(true);
+    expect((await hold.cancelled()).status).toBe("cancelled");
   } finally {
-    release();
+    hold.release();
   }
 });
 
@@ -127,7 +231,11 @@ test("closing a fragment-opened share cancels its held download", async ({
   fixture,
   page,
 }) => {
-  const release = fixture.network.control.hold({ operation: "download" });
+  const hold = fixture.mock.faults.hold({
+    actor: fixture.actor,
+    object: fixture.object,
+    operation: "download",
+  });
   try {
     await openDemo(page, fixture);
     await page.evaluate(
@@ -139,16 +247,7 @@ test("closing a fragment-opened share cancels its held download", async ({
       },
       { id: fixture.longId, seed: fixture.sharingSeed },
     );
-    await expect
-      .poll(() =>
-        fixture.network.control
-          .requests()
-          .some(
-            (request) =>
-              request.operation === "download" && request.status === "pending",
-          ),
-      )
-      .toBe(true);
+    await hold.started();
     await page
       .getByRole("button", { exact: true, name: "Close share" })
       .click();
@@ -157,19 +256,9 @@ test("closing a fragment-opened share cancels its held download", async ({
     ).toBeVisible();
     await expect(page.locator("video")).toHaveCount(0);
     expect(new URL(page.url()).hash).toBe("");
-    await expect
-      .poll(() =>
-        fixture.network.control
-          .requests()
-          .some(
-            (request) =>
-              request.operation === "download" &&
-              request.status === "cancelled",
-          ),
-      )
-      .toBe(true);
+    expect((await hold.cancelled()).status).toBe("cancelled");
   } finally {
-    release();
+    hold.release();
   }
 });
 
@@ -177,7 +266,10 @@ test("a shared video can be selected again after a transport error", async ({
   fixture,
   page,
 }) => {
-  fixture.network.control.addFault({ operation: "object" });
+  fixture.mock.faults.fail(
+    { actor: fixture.actor, object: fixture.object, operation: "object" },
+    { code: "unavailable", times: 1 },
+  );
   await openShare(page, fixture);
   const row = page.getByRole("button", { name: /Long demo video.mp4/ });
   await row.click();
@@ -219,8 +311,8 @@ test("an invalid sharing key stays on the entry screen without loading video", a
   ).toBeVisible();
   await expect(page.locator("video")).toHaveCount(0);
   expect(
-    fixture.network.control
-      .requests()
+    fixture.mock
+      .history()
       .some(
         (request) =>
           request.operation === "object" || request.operation === "download",

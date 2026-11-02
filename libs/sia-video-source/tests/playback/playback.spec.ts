@@ -1,35 +1,44 @@
 /** Real decoded frames are the acceptance signal; source acknowledgement alone cannot pass these tests. */
 import { expect, type Page } from "@playwright/test";
-import { test } from "./fixtures";
+import { type Media, test } from "./fixtures";
 import type {} from "./page";
-
-const longVideo = "1".repeat(64);
-const shortVideo = "2".repeat(64);
-
-async function openVideo(page: Page, networkURL: string, mse: "auto" | "main") {
-  await page.goto(`/?network=${encodeURIComponent(networkURL)}&mse=${mse}`);
-  await page.evaluate((id) => window.playback.load(id), longVideo);
+async function openVideo(page: Page, media: Media, mse: "auto" | "main") {
+  await page.goto(`/?mse=${mse}`);
+  await page.evaluate((id) => window.playback.load(id), media.long.id);
 }
-
+for (const scheme of ["sia", "https"]) {
+  test(`${scheme} share URLs decode through the scoped HTTP reader`, async ({
+    media,
+    page,
+  }) => {
+    await page.goto("/?mse=main");
+    await page.evaluate(
+      (id) => window.playback.load(id),
+      `${scheme}://indexer.invalid/objects/${media.short.id}/shared?signature=fixture#encryption_key=${"A".repeat(43)}`,
+    );
+    await expect
+      .poll(() => page.evaluate(() => window.playback.snapshot().frames))
+      .toBeGreaterThan(2);
+    await page.evaluate(() => window.playback.destroy());
+  });
+}
 test("the default worker entry answers the consumer handshake", async ({
-  networkURL,
   page,
 }) => {
-  await page.goto(`/?network=${encodeURIComponent(networkURL)}`);
+  await page.goto("/");
   expect(await page.evaluate(() => window.playback.defaultHandshake())).toEqual(
     { publicKeyBytes: 32, requestId: 73 },
   );
 });
-
 test("main-thread MIME rejection prevents video acceptance", async ({
-  networkURL,
+  media,
   page,
 }) => {
   await page.addInitScript(() => {
     MediaSource.isTypeSupported = () => false;
   });
-  await page.goto(`/?network=${encodeURIComponent(networkURL)}&mse=main`);
-  await page.evaluate((id) => window.playback.load(id), shortVideo);
+  await page.goto("/?mse=main");
+  await page.evaluate((id) => window.playback.load(id), media.short.id);
   await expect
     .poll(() => page.evaluate(() => window.playback.snapshot().errorCode))
     .toBe(4);
@@ -39,17 +48,16 @@ test("main-thread MIME rejection prevents video acceptance", async ({
   });
   await page.evaluate(() => window.playback.destroy());
 });
-
 for (const { mse, workerMse } of [
   { mse: "auto", workerMse: true },
   { mse: "main", workerMse: false },
 ] as const) {
   test(`${mse} MSE decodes video from the HTTP mock`, async ({
     browserName,
-    networkURL,
+    media,
     page,
   }) => {
-    await openVideo(page, networkURL, mse);
+    await openVideo(page, media, mse);
     await expect
       .poll(() => page.evaluate(() => window.playback.snapshot()))
       .toMatchObject({
@@ -66,63 +74,47 @@ for (const { mse, workerMse } of [
       .toBeGreaterThan(0.1);
     await page.evaluate(() => window.playback.destroy());
   });
-
   test(`${mse} MSE cancels an old read when a different video replaces it`, async ({
-    network,
-    networkURL,
+    media,
     page,
   }) => {
-    network.control.setConditions({ downloadBytesPerSecond: 1 });
-    await openVideo(page, networkURL, mse);
-    await expect
-      .poll(() =>
-        network.control
-          .requests()
-          .some(
-            (request) =>
-              request.operation === "download" &&
-              request.objectId === longVideo &&
-              request.status === "pending",
-          ),
-      )
-      .toBe(true);
-    network.control.setConditions({ downloadBytesPerSecond: 0 });
-    await page.evaluate((id) => window.playback.load(id), shortVideo);
-    await expect
-      .poll(() =>
-        network.control
-          .requests()
-          .some(
-            (request) =>
-              request.operation === "download" &&
-              request.objectId === longVideo &&
-              request.status === "cancelled",
-          ),
-      )
-      .toBe(true);
-    await expect
-      .poll(() => page.evaluate(() => window.playback.snapshot().frames))
-      .toBeGreaterThan(2);
-    expect(
-      await page.evaluate(() => window.playback.snapshot().duration),
-    ).toBeCloseTo(2, 2);
-    expect(
-      await page.evaluate(() => window.playback.snapshot().error),
-    ).toBeNull();
-    await page.evaluate(() => window.playback.destroy());
+    const hold = media.mock.faults.hold({
+      actor: media.actor,
+      object: media.long,
+      operation: "download",
+    });
+    try {
+      await openVideo(page, media, mse);
+      await hold.started();
+      await page.evaluate((id) => window.playback.load(id), media.short.id);
+      expect((await hold.cancelled()).status).toBe("cancelled");
+      await expect
+        .poll(() => page.evaluate(() => window.playback.snapshot().frames))
+        .toBeGreaterThan(2);
+      expect(
+        await page.evaluate(() => window.playback.snapshot().duration),
+      ).toBeCloseTo(2, 2);
+      expect(
+        await page.evaluate(() => window.playback.snapshot().error),
+      ).toBeNull();
+      await page.evaluate(() => window.playback.destroy());
+    } finally {
+      hold.release();
+    }
   });
-
   test(`${mse} MSE plays a new source after an earlier source fails`, async ({
-    network,
-    networkURL,
+    media,
     page,
   }) => {
-    network.control.addFault({ operation: "object" });
-    await openVideo(page, networkURL, mse);
+    media.mock.faults.fail(
+      { actor: media.actor, object: media.long, operation: "object" },
+      { code: "unavailable", times: 1 },
+    );
+    await openVideo(page, media, mse);
     await expect
       .poll(() => page.evaluate(() => window.playback.snapshot().errorCode))
       .toBe(2);
-    await page.evaluate((id) => window.playback.load(id), shortVideo);
+    await page.evaluate((id) => window.playback.load(id), media.short.id);
     await expect
       .poll(() => page.evaluate(() => window.playback.snapshot().frames))
       .toBeGreaterThan(2);
@@ -131,14 +123,14 @@ for (const { mse, workerMse } of [
     ).toBeNull();
     await page.evaluate(() => window.playback.destroy());
   });
-
   test(`${mse} MSE decodes frames after seeking beyond the buffered video`, async ({
-    network,
-    networkURL,
+    media,
     page,
   }) => {
-    network.control.setConditions({ downloadBytesPerSecond: 128 * 1024 });
-    await openVideo(page, networkURL, mse);
+    media.mock.faults.setLink(media.actor, {
+      downloadBytesPerSecond: 128 * 1024,
+    });
+    await openVideo(page, media, mse);
     await expect
       .poll(() => page.evaluate(() => window.playback.snapshot().frames))
       .toBeGreaterThan(2);

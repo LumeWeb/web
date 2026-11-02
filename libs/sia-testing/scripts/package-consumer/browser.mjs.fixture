@@ -1,8 +1,5 @@
-/** Keeps browser exports reachable so Vite checks their transitive imports. */
-import * as fixtures from "@lumeweb/sia-testing/fixtures";
-import * as model from "@lumeweb/sia-testing/model";
+/** Keeps portable exports reachable so the browser build checks every imported module. */
+import * as mock from "@lumeweb/sia-testing/mock";
+import * as client from "@lumeweb/sia-testing/client";
 import * as msw from "@lumeweb/sia-testing/msw";
-
-import * as sdk from "@lumeweb/sia-testing/sdk";
-
-console.log(fixtures, model, msw, sdk);
+console.log(mock, client, msw);

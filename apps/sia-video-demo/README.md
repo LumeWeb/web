@@ -4,7 +4,7 @@
 
 Run `pnpm --filter @lumeweb/sia-video-demo test:e2e:mock` from the repository root after installing Playwright Chromium and Firefox. It builds the shared dependencies and runs the production demo UI and packaged media pipeline.
 
-Each test owns an HTTP payload mock. The Node SDK creates encrypted listing metadata against that local model; the playback worker uses `createRemoteMockSdk` for bytes from the committed MP4 fixture. No live Sia endpoint or account is used. The tests exercise shared-row selection and the visible seek control, requiring real decoded frames. Deselecting a row or closing a share must cancel the held server request, and the UI must recover when the object lookup fails once.
+Each test owns a managed mock run and a private browser context. Listing metadata and playback bytes come from the same backend, which checks the sharing seed supplied by the UI and encrypted worker envelope. No live Sia endpoint or account is used. The tests exercise shared-row selection and the visible seek control, requiring real decoded frames. Deselecting a row or closing a share must cancel its matching request receipt, and the UI must recover when the object lookup fails once.
 
 The suite selects worker-only playback through the demo's developer controls and blocks SDK streaming service workers. A rejecting browser proxy blocks non-loopback HTTP requests without forwarding them. This covers the demo UI and worker playback, not real host transport or SDK streaming-service-worker compatibility.
 

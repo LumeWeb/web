@@ -1,29 +1,42 @@
-/** Each test owns the payload listener; the real SDK seals listing metadata only against that local model. */
-import { readFile, writeFile } from "node:fs/promises";
+/** The demo UI and worker read the same run-owned objects with the supplied recipient credential. */
+import { writeFile } from "node:fs/promises";
 import { createServer } from "node:net";
-import { test as base, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { createSiaTest } from "@lumeweb/sia-testing/playwright";
 import {
-  AppKey,
-  Builder,
-  initSia,
-  PinnedObject,
-} from "@siafoundation/sia-storage";
-import { createIndexdHttpServer } from "@lumeweb/sia-testing/http";
-import { createMockNetwork, type MockNetwork } from "@lumeweb/sia-testing/sdk";
-
+  type ActorRef,
+  type MockSia,
+  type TestObject,
+  type TestShare,
+} from "@lumeweb/sia-testing/mock";
+import { mediaFixture } from "@lumeweb/sia-video-source/testing";
+import { APP_DESCRIPTION, APP_ID, APP_NAME } from "../../src/lib/constants";
+export interface Fixture {
+  readonly actor: ActorRef;
+  readonly longId: string;
+  readonly mock: MockSia;
+  readonly object: TestObject;
+  readonly share: TestShare;
+  sharingSeed: string;
+  url: string;
+}
 interface Egress {
   connections(): number;
   readonly url: string;
 }
-
-interface Fixture {
-  readonly longId: string;
-  readonly network: MockNetwork;
-  readonly sharingSeed: string;
-  readonly url: string;
-}
-
+const base = createSiaTest({
+  backend: {
+    app: {
+      description: APP_DESCRIPTION,
+      id: APP_ID,
+      name: APP_NAME,
+      serviceUrl: "https://example.invalid",
+    },
+    kind: "mock",
+  },
+});
 export const test = base.extend<{ egress: Egress; fixture: Fixture }>({
+  // Playwright requires destructured parameters for fixtures without dependencies.
   // oxlint-disable-next-line no-empty-pattern
   egress: async ({}, use) => {
     let connections = 0;
@@ -48,91 +61,47 @@ export const test = base.extend<{ egress: Egress; fixture: Fixture }>({
       );
     }
   },
-  // Playwright requires destructured parameters for fixtures without dependencies.
-  // oxlint-disable-next-line no-empty-pattern
-  fixture: async ({}, use) => {
-    await initSia();
-    const key = new AppKey(Buffer.alloc(32, 7));
-    const accountId = key.publicKey();
-    const network = createMockNetwork({ chunkBytes: 4096 });
-    network.model.createAccount({ publicKey: accountId });
-    const server = createIndexdHttpServer({
-      mockClients: { reader: { accountId, device: "demo-worker" } },
-      mockNetwork: network,
-      async responseOverride(request, response) {
-        if (
-          new URL(request.url).pathname !== "/shared/objects" ||
-          response.status !== 200
-        )
-          return response;
-        const rows = (await response.json()) as {
-          objectID: string;
-          size: number;
-        }[];
-        // Empty SDK objects provide valid metadata seals; the mock payload pins
-        // supply sizes because the dispatcher returns placeholder summary sizes.
-        return Response.json(
-          rows.map((row) => ({
-            ...row,
-            size: (
-              network.model.object(accountId, row.objectID)?.slabs ?? []
-            ).reduce(
-              (size, id) => size + network.model.getSlab(accountId, id).size,
-              0,
-            ),
-          })),
-          { headers: response.headers, status: response.status },
-        );
-      },
+  fixture: async ({ sia }, use) => {
+    const file = await mediaFixture("seekable-avc");
+    const object = await sia.objects.upload({
+      file,
+      metadata: new TextEncoder().encode(
+        JSON.stringify({
+          filename: "Long demo video.mp4",
+          type: "sialo-object-meta",
+          version: 1,
+        }),
+      ),
+      name: file.name,
     });
-    try {
-      const { port } = await server.listen();
-      const url = `http://127.0.0.1:${port}/`;
-      // The Node binding reads id bytes; browser declarations require appId.
-      const metadata = {
-        appId: "00".repeat(32),
-        callbackUrl: undefined,
-        description: "Local demo metadata fixture",
-        id: Buffer.alloc(32),
-        logoUrl: undefined,
-        name: "Demo fixture",
-        serviceUrl: "https://example.invalid",
-      };
-      const sdk = await new Builder(url, metadata).connected(key);
-      if (!sdk) throw new Error("Fixture account did not connect to its model");
-      const sharing = await sdk.createSharingKey("Local demo videos");
-      const seed: unknown = sharing.seed();
-      if (!Buffer.isBuffer(seed))
-        throw new Error("The fixture requires the Node SDK binding");
-      const payload = network.createSdk({ accountId });
-      const object = new PinnedObject();
-      object.updateMetadata(
-        Buffer.from(
-          JSON.stringify({
-            filename: "Long demo video.mp4",
-            type: "sialo-object-meta",
-            version: 1,
-          }),
-        ),
-      );
-      await sdk.pinObject(object);
-      const bytes = new Uint8Array(
-        await readFile(
-          new URL(
-            "../../../../libs/sia-video-source/src/__fixtures__/media/browser-decodable-long.mp4",
-            import.meta.url,
-          ),
-        ),
-      );
-      network.seedObject(accountId, object.id(), bytes);
-      await payload.pinObject(object);
-      await sdk.shareObject(sharing, object);
-      const longId = object.id();
-      await use({ longId, network, sharingSeed: seed.toString("hex"), url });
-    } finally {
-      await server.close();
-      network.model.reset();
-    }
+    const share = await sia.shares.create({ objects: [object] });
+    await use({
+      actor: sia.mock.actor("demo-browser"),
+      longId: object.id,
+      mock: sia.mock,
+      object,
+      share,
+      sharingSeed: "",
+      url: "",
+    });
+  },
+  page: async ({ fixture, sia }, use) => {
+    const page = await sia.browser.open({
+      access: fixture.share.access,
+      async apply(page, data) {
+        const backend = data.backend;
+        fixture.url = new URL(
+          `${backend.connection.client}/`,
+          backend.connection.url,
+        ).href;
+        fixture.sharingSeed = backend.credential.keyHex;
+        await page.addInitScript((credential) => {
+          window.__siaDemoTest = { credential };
+        }, backend.credential);
+      },
+      mockActor: fixture.actor,
+    });
+    await use(page);
   },
   // Firefox keeps intercepted worker fetches alive after termination. A proxy
   // rejects remote traffic while loopback payloads retain native cancellation.
@@ -140,7 +109,6 @@ export const test = base.extend<{ egress: Egress; fixture: Fixture }>({
     await use({ bypass: "127.0.0.1,localhost", server: egress.url });
   },
 });
-
 export async function openDemo(page: Page, fixture: Fixture) {
   await page.goto("/");
   await page
@@ -157,7 +125,6 @@ export async function openDemo(page: Page, fixture: Fixture) {
     .getByLabel("Disable native (service-worker) playback", { exact: true })
     .check();
 }
-
 export async function openShare(page: Page, fixture: Fixture) {
   await openDemo(page, fixture);
   await page
@@ -165,7 +132,6 @@ export async function openShare(page: Page, fixture: Fixture) {
     .fill(fixture.sharingSeed);
   await page.getByRole("button", { exact: true, name: "Apply" }).click();
 }
-
 test.afterEach(async ({ fixture, page }, info) => {
   if (info.status !== info.expectedStatus) {
     const state = await page
@@ -184,7 +150,7 @@ test.afterEach(async ({ fixture, page }, info) => {
     await writeFile(
       path,
       JSON.stringify({
-        requests: fixture.network.control.requests().slice(-64),
+        requests: fixture.mock.history(),
         state,
         workers: page.workers().map((worker) => worker.url()),
       }),
