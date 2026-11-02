@@ -38,28 +38,35 @@ export async function cleanupKnownResources(options: {
   const errors: unknown[] = [];
   let session: LiveSession | undefined;
   try {
-    session = await openLiveSession(profile, {
-      ...(options.agentModule ? { agentModule: options.agentModule } : {}),
-      signal,
-    });
-    for (const share of [...shares].reverse())
-      await mutation(
-        "revoke",
-        { shareId: share.shareId },
-        { seedHex: share.seedHex, shareId: share.shareId },
-      );
-    for (const object of [...objects].reverse()) {
-      if (!object.pinned)
+    for (const share of [...shares].reverse()) {
+      try {
         await mutation(
-          "pin",
-          { objectId: object.objectId },
-          { objectId: object.objectId, sealed: object.sealed },
+          "revoke",
+          { shareId: share.shareId },
+          { seedHex: share.seedHex, shareId: share.shareId },
         );
-      await mutation(
-        "delete",
-        { objectId: object.objectId },
-        { objectId: object.objectId },
-      );
+      } catch (error) {
+        errors.push(error);
+        await discardSession();
+      }
+    }
+    for (const object of [...objects].reverse()) {
+      try {
+        if (!object.pinned)
+          await mutation(
+            "pin",
+            { objectId: object.objectId },
+            { objectId: object.objectId, sealed: object.sealed },
+          );
+        await mutation(
+          "delete",
+          { objectId: object.objectId },
+          { objectId: object.objectId },
+        );
+      } catch (error) {
+        errors.push(error);
+        await discardSession();
+      }
     }
   } catch (error) {
     errors.push(error);
@@ -71,14 +78,33 @@ export async function cleanupKnownResources(options: {
   }
   if (errors.length)
     throw new AggregateError(errors, "Owned resource cleanup failed");
+  async function discardSession(): Promise<void> {
+    // RPC errors terminate the agent, so later resources need a fresh app-key connection.
+    try {
+      if (session) await closeLiveSession(session);
+    } catch (error) {
+      errors.push(error);
+    }
+    session = undefined;
+  }
   async function mutation(
     operation: string,
     input: unknown,
     payload: unknown,
   ): Promise<void> {
+    session ??= await openLiveSession(profile, {
+      ...(options.agentModule ? { agentModule: options.agentModule } : {}),
+      signal,
+    });
     const id = randomUUID();
-    await options.journal.append({ id, input, kind: "intent", operation });
-    await sessionProcess(session!).request(operation, payload, { signal });
-    await options.journal.append({ id, kind: "ack", result: null });
+    await options.journal.append(
+      { id, input, kind: "intent", operation },
+      { cleanup: true },
+    );
+    await sessionProcess(session).request(operation, payload, { signal });
+    await options.journal.append(
+      { id, kind: "ack", result: null },
+      { cleanup: true },
+    );
   }
 }

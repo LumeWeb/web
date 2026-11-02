@@ -1,7 +1,7 @@
 /** This control-plane fixture persists exact object and share records across owned child lifetimes. */
 import { randomBytes } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
-/** @typedef {{calls: string[], objects: {id: string, bytes?: number, pinned: boolean}[], shares: {id: string, objects: string[], seedHex: string}[], crashAfter?: string}} FixtureState */
+/** @typedef {{calls: string[], objects: {id: string, bytes?: number, pinned: boolean}[], shares: {id: string, objects: string[], seedHex: string}[], crashAfter?: string, failIds?: string[]}} FixtureState */
 /** @typedef {{id: string, operation: string, value: {app: {id: string}, bytes: Uint8Array, objectId: string, shareId: string}}} Request */
 const stateFile = new URL("./state.json", import.meta.url);
 process.send({ type: "ready" });
@@ -13,6 +13,13 @@ process.on("message", (message) => {
     );
     state.calls.push(request.operation);
     const input = request.value;
+    if (
+      ["delete", "revoke"].includes(request.operation) &&
+      state.failIds?.includes(input.objectId ?? input.shareId)
+    ) {
+      await writeFile(stateFile, JSON.stringify(state), { mode: 0o600 });
+      throw new Error("Selected fixture cleanup failure");
+    }
     /** @type {unknown} */
     let value = null;
     if (request.operation === "authenticate")
