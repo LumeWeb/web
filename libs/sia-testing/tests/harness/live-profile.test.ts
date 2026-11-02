@@ -4,13 +4,18 @@ import {
   link,
   mkdir,
   mkdtemp,
+  readFile,
   rm,
   symlink,
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { inspect } from "node:util";
+import { inspect, promisify } from "node:util";
+import { execFile } from "node:child_process";
+import { pathToFileURL } from "node:url";
+import ts from "typescript";
+import { startOwnedProcess } from "../../src/testing/live/process.js";
 import { afterEach, beforeEach, expect, it } from "vitest";
 import {
   loadLiveProfile,
@@ -97,6 +102,61 @@ it("a parent-directory symlink cannot hide a checkout profile", async () => {
   await expect(
     loadLiveProfile(join(alias, "profile.json"), consent, checkout),
   ).rejects.toMatchObject({ code: "invalid-profile" });
+});
+it("a profile in a different checkout is rejected without relying on the caller's location", async () => {
+  const checkout = join(directory, "other-checkout");
+  await mkdir(join(checkout, ".git"), { recursive: true });
+  const inside = join(checkout, "profile.json");
+  await writeFile(inside, JSON.stringify(document), { mode: 0o600 });
+  await expect(loadLiveProfile(inside, consent)).rejects.toMatchObject({
+    code: "invalid-profile",
+  });
+});
+it("a named-pipe profile is rejected without waiting for a writer", async () => {
+  await rm(path);
+  await promisify(execFile)("mkfifo", [path]);
+  await writeFile(
+    join(directory, "package.json"),
+    JSON.stringify({ type: "module" }),
+  );
+  for (const name of ["profile", "private-files"]) {
+    const source = await readFile(
+      new URL(`../../src/testing/live/${name}.ts`, import.meta.url),
+      "utf8",
+    ).catch((error: NodeJS.ErrnoException) => {
+      if (error.code === "ENOENT" && name === "private-files") return undefined;
+      throw error;
+    });
+    if (source)
+      await writeFile(
+        join(directory, `${name}.js`),
+        ts.transpileModule(source, {
+          compilerOptions: {
+            module: ts.ModuleKind.ESNext,
+            target: ts.ScriptTarget.ES2022,
+          },
+        }).outputText,
+      );
+  }
+  const agent = startOwnedProcess({
+    cleanupDeadlineMs: 1000,
+    deadlineMs: 500,
+    entrypoint: new URL(
+      "../fixtures/live-profile-control.mjs",
+      import.meta.url,
+    ),
+  });
+  try {
+    await expect(
+      agent.request("load", {
+        consent,
+        module: pathToFileURL(join(directory, "profile.js")).href,
+        path,
+      }),
+    ).resolves.toEqual({ code: "invalid-profile" });
+  } finally {
+    await agent.close();
+  }
 });
 it("oversized profiles are rejected", async () => {
   await writeFile(path, " ".repeat(16385));

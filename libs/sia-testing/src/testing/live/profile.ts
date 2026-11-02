@@ -37,7 +37,11 @@ export async function loadLiveProfile(
   if (!isAbsolute(path) || !process.getuid) throw failure("invalid-profile");
   let document: LiveProfileDocument;
   try {
-    const file = await open(path, constants.O_RDONLY | constants.O_NOFOLLOW);
+    // O_NONBLOCK lets fstat reject a named pipe without waiting for its writer.
+    const file = await open(
+      path,
+      constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK,
+    );
     try {
       const stat = await file.stat();
       if (
@@ -49,6 +53,8 @@ export async function loadLiveProfile(
       )
         throw failure("invalid-profile");
       const actualPath = await realpath(path);
+      if (await checkoutRoot(dirname(actualPath)))
+        throw failure("invalid-profile");
       const checkout =
         workspaceRoot === undefined
           ? await checkoutRoot(process.cwd())
