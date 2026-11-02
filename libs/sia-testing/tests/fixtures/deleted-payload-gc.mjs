@@ -40,4 +40,14 @@ const externalDeletionPruned = await check(async (network, sdk, id) => {
   network.model.deleteObject("owner", id);
   await sdk.pruneSlabs();
 });
-console.log(JSON.stringify({ externalDeletionPruned, sdkDeletion }));
+const lastSiblingDeleted = await check(async (network, sdk, id) => {
+  const slabs = network.model.object("owner", id)?.slabs;
+  if (!slabs) throw new Error("The fixture needs a pinned object slab");
+  const sibling = `${id}-sibling`;
+  network.model.pinObject("owner", { id: sibling, slabs });
+  await sdk.deleteObject(id);
+  await sdk.deleteObject(sibling);
+});
+console.log(
+  JSON.stringify({ externalDeletionPruned, lastSiblingDeleted, sdkDeletion }),
+);

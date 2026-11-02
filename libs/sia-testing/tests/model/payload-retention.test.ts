@@ -49,6 +49,7 @@ test("deleted payload records are collected while their network stays alive", as
     );
     expect(JSON.parse(result.stdout)).toEqual({
       externalDeletionPruned: 0,
+      lastSiblingDeleted: 0,
       sdkDeletion: 0,
     });
   } finally {

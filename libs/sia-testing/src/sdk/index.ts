@@ -108,6 +108,14 @@ export function createMockNetwork(
     return record;
   }
 
+  /** A sibling deletion can retire the pin of a payload whose object was deleted earlier. */
+  function discardStalePayloads(accountId: string): void {
+    const owned = payloads.get(accountId);
+    for (const [id, record] of owned ?? []) {
+      if (!payloadIsCurrent(model, accountId, record)) owned!.delete(id);
+    }
+  }
+
   function upload(
     accountId: string,
     id: string,
@@ -176,9 +184,7 @@ export function createMockNetwork(
             id,
             () => {
               model.deleteObject(accountId, id);
-              const record = payloads.get(accountId)?.get(id);
-              if (record && !payloadIsCurrent(model, accountId, record))
-                payloads.get(accountId)!.delete(id);
+              discardStalePayloads(accountId);
             },
             false,
             call.signal,
@@ -295,10 +301,7 @@ export function createMockNetwork(
             () => {
               model.pruneSlabs(accountId);
               // External deletions can retire a pin before this prune call sees it.
-              for (const [id, record] of payloads.get(accountId) ?? []) {
-                if (!payloadIsCurrent(model, accountId, record))
-                  payloads.get(accountId)!.delete(id);
-              }
+              discardStalePayloads(accountId);
             },
             false,
             call.signal,
