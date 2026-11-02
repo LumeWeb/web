@@ -1,4 +1,5 @@
 /** Private scoped-storage contracts keep fixture mutation handles separate from readable object data. */
+import type { MockFaults, RequestReceipt } from "./controls.js";
 declare const ownership: unique symbol;
 export type ActorRef = Owned<"actor">;
 
@@ -32,6 +33,13 @@ export interface MockOptions {
   readonly quotaBytes?: number;
 }
 export interface MockRun {
+  readonly auth: {
+    approve(url: string): Promise<void>;
+    deny(url: string): Promise<void>;
+    readonly fixturePhrase: string;
+    readonly kind: "approval";
+    readonly registrationAccess: BrowserAccess;
+  };
   readonly backend: "mock";
   readonly id: string;
   readonly objects: ManagedObjects;
@@ -47,6 +55,8 @@ export interface MockSia {
   actor(label: string): ActorRef;
   advanceTime(milliseconds: number): void;
   close(): Promise<void>;
+  readonly faults: MockFaults;
+  history(): readonly RequestReceipt[];
   reader(input: {
     readonly access: BrowserAccess;
     readonly as: ActorRef;
@@ -65,7 +75,11 @@ export interface ReadPort {
   close(): Promise<void>;
   download(
     object: ReadObject,
-    range?: { readonly length?: number; readonly offset?: number },
+    range?: {
+      readonly length?: number;
+      readonly offset?: number;
+      readonly signal?: AbortSignal;
+    },
   ): Promise<ReadableStream<Uint8Array>>;
   object(id: string): Promise<ReadObject>;
   objects(input: { readonly limit: number; readonly offset: number }): Promise<{

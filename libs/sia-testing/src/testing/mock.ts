@@ -6,6 +6,9 @@ import {
   type MockSdk,
 } from "../sdk/index.js";
 import { readFixture } from "./files.js";
+import { createRequestControls } from "./controls.js";
+import { createMockAuthentication, fixturePhrase } from "./authentication.js";
+import { type MockCredential, registerRuntime } from "./runtime.js";
 import type {
   ActorRef,
   BrowserAccess,
@@ -23,7 +26,9 @@ export { bytesFixture } from "./files.js";
 
 interface Context {
   abort: AbortController;
+  authentication?: ReturnType<typeof createMockAuthentication>;
   cleanup?: Promise<void>;
+  credentials: Set<string>;
   id: string;
   limits: RunLimits;
   network: MockNetwork | undefined;
@@ -40,6 +45,7 @@ interface Context {
 }
 interface Grant {
   context: Context;
+  credential: MockCredential;
   key: null | string;
 }
 interface ObjectRecord {
@@ -67,6 +73,8 @@ export function createMockSia(options: MockOptions = {}): MockSia {
     new Date(start === undefined ? Date.now() : start + elapsed);
   const active = new Set<Context>();
   const actors = new WeakSet<ActorRef>();
+  const controls = createRequestControls();
+  const credentials = new Map<string, BrowserAccess>();
   const grants = new WeakMap<BrowserAccess, Grant>();
   const objects = new WeakMap<
     TestObject,
@@ -80,7 +88,11 @@ export function createMockSia(options: MockOptions = {}): MockSia {
   function environmentOpen(): void {
     if (closed) throw failure("closed", "Mock environment is closed");
   }
-  function access(context: Context, key: null | string): BrowserAccess {
+  function access(
+    context: Context,
+    key: null | string,
+    registration = false,
+  ): BrowserAccess {
     const value = Object.freeze(
       Object.defineProperties(Object.create(null), {
         [Symbol.for("nodejs.util.inspect.custom")]: {
@@ -89,7 +101,17 @@ export function createMockSia(options: MockOptions = {}): MockSia {
         toJSON: { value: () => "[Sia test access]" },
       }),
     ) as BrowserAccess;
-    grants.set(value, { context, key });
+    const credential: MockCredential = {
+      keyHex: identifier(),
+      kind: registration
+        ? "registration"
+        : key === null
+          ? "app-key"
+          : "sharing-key",
+    };
+    grants.set(value, { context, credential, key });
+    credentials.set(credential.keyHex, value);
+    context.credentials.add(credential.keyHex);
     return value;
   }
   function ownedObject(context: Context, handle: TestObject): ObjectRecord {
@@ -154,6 +176,8 @@ export function createMockSia(options: MockOptions = {}): MockSia {
       context.network!.model.reset();
       context.sdk = undefined;
       context.network = undefined;
+      for (const key of context.credentials) credentials.delete(key);
+      context.credentials.clear();
       context.objects.clear();
       context.shares.clear();
       context.state = "closed";
@@ -164,7 +188,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
     return context.cleanup;
   }
 
-  return {
+  const environment: MockSia = {
     actor(label) {
       environmentOpen();
       if (!label.trim())
@@ -194,6 +218,8 @@ export function createMockSia(options: MockOptions = {}): MockSia {
       if (errors.length)
         throw new AggregateError(errors, "Mock environment cleanup failed");
     },
+    faults: controls.control,
+    history: controls.history,
     reader({ access: handle, as: actor }) {
       environmentOpen();
       if (!actors.has(actor))
@@ -211,6 +237,8 @@ export function createMockSia(options: MockOptions = {}): MockSia {
           throw failure("closed", "Reader is closed");
         if (!grant) throw failure("denied", "Read access is unavailable");
         const { context, key } = grant;
+        if (grant.credential.kind === "registration")
+          throw failure("denied", "Read access is unavailable");
         if (key !== null) {
           try {
             if (id === undefined) context.network!.model.sharedStats(key, key);
@@ -243,18 +271,40 @@ export function createMockSia(options: MockOptions = {}): MockSia {
           describe(context, id);
           if (range.offset !== undefined) integer(range.offset);
           if (range.length !== undefined) integer(range.length);
-          return context.sdk!.download({ id: () => id }, { ...range, signal });
+          const callSignal = range.signal
+            ? AbortSignal.any([signal, range.signal])
+            : signal;
+          const request = await controls.begin(
+            actor,
+            "download",
+            id,
+            callSignal,
+          );
+          authorize(id);
+          const body = await context.sdk!.download(
+            { id: () => id },
+            { ...range, signal: callSignal },
+          );
+          return controls.observe(request, body, callSignal);
         },
         async object(id) {
           const context = authorize(id);
           describe(context, id);
+          const request = await controls.begin(actor, "object", id, signal);
           await context.sdk!.object(id, { signal });
           authorize(id);
+          request.status = "completed";
           return describe(context, id);
         },
         objects({ limit, offset }) {
-          return Promise.resolve().then(() => {
+          return Promise.resolve().then(async () => {
             const context = authorize();
+            const request = await controls.begin(
+              actor,
+              "objects",
+              undefined,
+              signal,
+            );
             integer(offset);
             integer(limit);
             if (limit === 0)
@@ -277,6 +327,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
             const rows = ids
               .slice(offset, offset + limit)
               .map((id) => describe(context, id));
+            request.status = "completed";
             return {
               done: rows.length < limit,
               nextOffset: offset + rows.length,
@@ -311,6 +362,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
       const abort = new AbortController();
       const context: Context = {
         abort,
+        credentials: new Set(),
         id,
         limits,
         network,
@@ -328,7 +380,23 @@ export function createMockSia(options: MockOptions = {}): MockSia {
         uploadedBytes: 0,
       };
       active.add(context);
+      const ownerAccess = access(context, null);
+      const registrationAccess = access(context, null, true);
+      const authentication = createMockAuthentication(
+        runOptions.app,
+        () => ({ ...grants.get(ownerAccess)!.credential }),
+        now,
+        context.signal,
+      );
+      context.authentication = authentication;
       const run: MockRun = {
+        auth: {
+          approve: authentication.approve,
+          deny: authentication.deny,
+          fixturePhrase,
+          kind: "approval",
+          registrationAccess,
+        },
         backend: "mock",
         id,
         objects: {
@@ -406,7 +474,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
             });
           },
         },
-        ownerAccess: access(context, null),
+        ownerAccess,
         shares: {
           async attach(share, object) {
             return track(context, () => attach(context, share, object));
@@ -510,6 +578,44 @@ export function createMockSia(options: MockOptions = {}): MockSia {
       };
     },
   };
+  registerRuntime(environment, {
+    authenticate(credential) {
+      environmentOpen();
+      const handle = credentials.get(credential.keyHex);
+      const grant = handle && grants.get(handle);
+      if (
+        !handle ||
+        !grant ||
+        grant.context.state !== "open" ||
+        grant.credential.kind !== credential.kind
+      )
+        throw failure("denied", "Read access is unavailable");
+      return handle;
+    },
+    authentication(credential, operation, input, baseUrl) {
+      const handle = credentials.get(credential.keyHex);
+      const grant = handle && grants.get(handle);
+      if (
+        !grant ||
+        grant.context.state !== "open" ||
+        grant.credential.kind !== credential.kind
+      )
+        throw failure("denied", "Authentication access is unavailable");
+      if (operation === "auth-connected" && credential.kind === "app-key")
+        return input.keyHex === credential.keyHex ? { ...credential } : null;
+      if (credential.kind !== "registration")
+        throw failure("denied", "Authentication access is unavailable");
+      return grant.context.authentication!.execute(operation, input, baseUrl);
+    },
+    credential(handle) {
+      environmentOpen();
+      const grant = grants.get(handle);
+      if (!grant || grant.context.state !== "open")
+        throw failure("denied", "Read access is unavailable");
+      return { ...grant.credential };
+    },
+  });
+  return environment;
 }
 
 function failure(code: string, message: string): Error & { code: string } {
