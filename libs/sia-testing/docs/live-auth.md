@@ -1,6 +1,6 @@
 # Existing-server authentication internals
 
-These Node internals authenticate an owned SDK process against an existing server. They do not deploy a server or fund an account. Public managed runs still accept mock backends only; authentication is kept private until resource cleanup and recovery are connected.
+These Node internals authenticate an owned SDK process against an existing server. They do not deploy a server or fund an account. Managed Node runs use these internals through [the live backend](live-runs.md).
 
 ## Borrowed authority
 

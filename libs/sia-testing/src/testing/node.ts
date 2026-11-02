@@ -1,7 +1,17 @@
 /** Node owns a run's local adapters and fixture descriptors; the portable backend owns storage cleanup. */
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
-import { basename } from "node:path";
+import { basename, join } from "node:path";
+import { mkdtemp } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import {
+  limitedProfile,
+  loadLiveProfile,
+  profileDocument,
+} from "./live/profile.js";
+import { withLiveRun } from "./live/run.js";
+import { recoverLiveRun } from "./live/recovery.js";
+import type { LiveConsent } from "./live/types.js";
 import { Readable } from "node:stream";
 import { fileURLToPath } from "node:url";
 import { createMockSia } from "./mock.js";
@@ -10,14 +20,28 @@ import type {
   ActorRef,
   AppDefinition,
   BrowserAccess,
+  LiveRun,
+  LiveRunSummary,
   MockOptions,
   MockRun,
+  MockRunSummary,
   RunLimits,
   RunResult,
+  SiaRun,
   TestFile,
 } from "./types.js";
 
-export interface RunOptions {
+export interface LiveNodeRunOptions {
+  readonly backend: {
+    readonly consent: LiveConsent;
+    readonly kind: "live";
+    readonly profileFile: string;
+  };
+  readonly journalFile?: string;
+  readonly limits?: Partial<RunLimits>;
+  readonly signal?: AbortSignal;
+}
+export interface MockNodeRunOptions {
   readonly backend: {
     readonly app: AppDefinition;
     readonly kind: "mock";
@@ -26,12 +50,17 @@ export interface RunOptions {
   readonly limits?: Partial<RunLimits>;
   readonly signal?: AbortSignal;
 }
+export interface RecoveryOptions {
+  readonly backend: LiveNodeRunOptions["backend"];
+  readonly journalFile: string;
+}
+export type RunOptions = LiveNodeRunOptions | MockNodeRunOptions;
 interface Session {
   readonly app: AppDefinition;
   readonly resources: (() => Promise<void>)[];
   server?: ReturnType<typeof startMockServer>;
 }
-const sessions = new WeakMap<MockRun, Session>();
+const sessions = new WeakMap<SiaRun, Session>();
 export async function fileFixture(path: string | URL): Promise<TestFile> {
   const filename = typeof path === "string" ? path : fileURLToPath(path);
   const hash = createHash("sha256");
@@ -56,7 +85,7 @@ export async function fileFixture(path: string | URL): Promise<TestFile> {
     sizeBytes,
   });
 }
-export function ownRunResource(run: MockRun, close: () => Promise<void>): void {
+export function ownRunResource(run: SiaRun, close: () => Promise<void>): void {
   const session = sessions.get(run);
   if (!session) throw new Error("Run is not open");
   session.resources.push(close);
@@ -90,17 +119,78 @@ export async function privateConnection(
     },
   };
 }
+export async function recoverSiaRun(
+  options: RecoveryOptions,
+): Promise<LiveRunSummary> {
+  const profile = await loadLiveProfile(
+    options.backend.profileFile,
+    options.backend.consent,
+  );
+  return recoverLiveRun({ journalFile: options.journalFile, profile });
+}
+export function withSiaRun<T>(
+  options: MockNodeRunOptions,
+  use: (run: MockRun) => Promise<T>,
+): Promise<RunResult<T, MockRunSummary>>;
+export function withSiaRun<T>(
+  options: LiveNodeRunOptions,
+  use: (run: LiveRun) => Promise<T>,
+): Promise<RunResult<T, LiveRunSummary>>;
+export function withSiaRun<T>(
+  options: RunOptions,
+  use: (run: SiaRun) => Promise<T>,
+): Promise<RunResult<T>>;
 export async function withSiaRun<T>(
   options: RunOptions,
-  use: (run: MockRun) => Promise<T>,
-) {
+  use: ((run: LiveRun) => Promise<T>) | ((run: MockRun) => Promise<T>),
+): Promise<RunResult<T>> {
+  if (isLiveOptions(options)) {
+    const profile = limitedProfile(
+      await loadLiveProfile(
+        options.backend.profileFile,
+        options.backend.consent,
+      ),
+      options.limits,
+    );
+    const journalFile =
+      options.journalFile ??
+      join(await mkdtemp(join(tmpdir(), "sia-testing-run-")), "journal.jsonl");
+    let current: LiveRun | undefined;
+    return withLiveRun(
+      {
+        journalFile,
+        profile,
+        ...(options.signal ? { signal: options.signal } : {}),
+        beforeCleanup: async () => {
+          if (!current) return;
+          const session = sessions.get(current);
+          sessions.delete(current);
+          const errors: unknown[] = [];
+          for (const close of [...(session?.resources ?? [])].reverse()) {
+            try {
+              await close();
+            } catch (error) {
+              errors.push(error);
+            }
+          }
+          if (errors.length)
+            throw new AggregateError(errors, "Application cleanup failed");
+        },
+      },
+      async (run) => {
+        current = run;
+        sessions.set(run, { app: profileDocument(profile).app, resources: [] });
+        return (use as (run: LiveRun) => Promise<T>)(run);
+      },
+    );
+  }
   if (options.backend.kind !== "mock")
     throw Object.assign(new Error("Unsupported test backend"), {
       code: "invalid-input",
     });
   const mock = createMockSia(options.backend.options);
   const failures: unknown[] = [];
-  let result: RunResult<T> | undefined;
+  let result: RunResult<T, MockRunSummary> | undefined;
   try {
     result = await mock.run(
       {
@@ -114,7 +204,7 @@ export async function withSiaRun<T>(
         const errors: unknown[] = [];
         let value!: T;
         try {
-          value = await use(run);
+          value = await (use as (run: MockRun) => Promise<T>)(run);
         } catch (error) {
           errors.push(error);
         }
@@ -147,4 +237,7 @@ export async function withSiaRun<T>(
   if (failures.length)
     throw new AggregateError(failures, "Run and final close failed");
   return result!;
+}
+function isLiveOptions(options: RunOptions): options is LiveNodeRunOptions {
+  return options.backend.kind === "live";
 }
