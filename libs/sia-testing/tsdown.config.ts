@@ -10,6 +10,7 @@ export default defineConfig(
       "src/http.ts",
       "src/msw.ts",
       "src/playwright.ts",
+      "src/testing/live/agent.ts",
     ],
     {
       deps: { neverBundle: [/^node:/], skipNodeModulesBundle: true },

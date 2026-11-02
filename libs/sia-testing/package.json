@@ -50,9 +50,13 @@
   },
   "peerDependencies": {
     "@playwright/test": "^1.61.1",
+    "@siafoundation/sia-storage": "0.1.4",
     "msw": "^2.14.6"
   },
   "peerDependenciesMeta": {
+    "@siafoundation/sia-storage": {
+      "optional": true
+    },
     "@playwright/test": {
       "optional": true
     },
