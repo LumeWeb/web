@@ -33,6 +33,14 @@ test("keeps an object private to its owner", () => {
 });
 ```
 
+### Model controls
+
+The default model exposes an immediate, append-only mutation history. Use `createIndexdModel({ eventPublication: "manual", now })` to drive publication with a caller-owned clock and `model.publishObjectEvents()`. No timer or background job is started.
+
+Manual mode keeps one pending row per object. A mutation hides that object's previous published row until publication assigns a new cursor position. Each call publishes at most 25000 pending rows, ordered by account creation order and then object key. All rows in a batch receive the clock's current whole second. The publication second must advance across the entire model, including across accounts; repeated calls in the same second or after a clock rollback leave rows pending. An idle call does not consume its second.
+
+Manual checkpoints use model version 2 and preserve pending rows with the last publication second. Default checkpoints remain version 1. Restoring a checkpoint keeps its publication mode; pass `now` again to supply the new clock. Payload bytes remain readable independently of whether their object event has been published.
+
 Connection requests remain pending until `model.approveConnection(id, connectKey)` approves them. `model.rejectConnection(id)` removes a request, including an approved request that has not registered. HTTP clients can send `{ "approve": false }` to its response URL with Basic authentication. Polling then returns HTTP 404, which SDK 0.1.4 reports as user rejection. Registration also returns HTTP 404. Bodyless Basic approval remains supported for existing fixture clients.
 
 `model.trackSlabPins(accountId)` creates a caller-owned tracker. Pass current identities from `slabIdentity()` to `watch(identity)`; model pin removals, including reset, queue those identities for `takeRetired()` to drain. `forget(identity)` removes both the watch and any queued retirement. The model holds queue state weakly, and checkpoints do not store it. Payload SDK caches use these queues to collect direct model deletions during subsequent SDK deletion without inspecting live uploads.
@@ -132,7 +140,7 @@ const restored = createMockNetwork({
 
 Create a new listener with `mockNetwork: restored` and configure its client bindings again. Checkpoints retain pinned and uploaded-but-unpinned payloads. They also retain event history and pending approvals. Deleted payloads survive a checkpoint only while another object in the account keeps their slab pinned. Deleting the last reference invalidates retained payload handles.
 
-`model.serialize()` and `createIndexdModel({ state })` provide the same checkpoint behavior for control-plane-only fixtures. `model.snapshot()` remains an account summary. Saved host settings and quota limits are restored; conflicting replacement settings are rejected. Pass `now` again when restoring a controlled clock. A network snapshot cannot replace a caller-supplied `model`.
+`model.serialize()` and `createIndexdModel({ state })` provide the same checkpoint behavior for control-plane-only fixtures. `model.snapshot()` remains an account summary. Publication mode is restored alongside host and quota settings; conflicting replacement settings are rejected. Pass `now` again when restoring a controlled clock. A network snapshot cannot replace a caller-supplied `model`.
 
 Clocks and in-flight calls are not stored. Fault rules, device outages and request inspection history start fresh. A checkpoint captures stored data at the call to `serialize()`; it does not save later mutations or provide automatic crash recovery. Wait for operations to finish or cancel them before stopping the listener and writing a checkpoint.
 
@@ -144,7 +152,7 @@ These mocks perform no encryption, host RPCs or payments, and their object handl
 
 The emulator checks signed-query encoding, expiry and caller scope, not cryptographic signatures. Approval credentials are opaque and approved connection secrets are placeholders. Indexd routes exposed by HTTP and MSW do not implement host transfers or issue usable host tokens. The mock SDK transfers fixture bytes through its separate payload routes.
 
-Payload uploads allocate a separate synthetic slab for each object. Packed-object fixtures can pin multiple model objects to the same slab explicitly; the adapter does not implement the SDK's packed upload format. Object event history appends each mutation immediately. Event coalescing and whole-second publication are not modeled.
+Payload uploads allocate a separate synthetic slab for each object. Packed-object fixtures can pin multiple model objects to the same slab explicitly; the adapter does not implement the SDK's packed upload format. Default event history appends each mutation immediately. Manual publication models event coalescing and whole-second cursor positions. Publication runs synchronously; PostgreSQL writer locks and skipped locked rows are not simulated.
 
 The model's `quotaBytes` budget counts unique referenced slabs using supplied slab sizes. Fixed account-limit fields do not reproduce service funding or redundancy accounting. Seeded object IDs and envelopes are opaque test data, not proof of valid SDK encryption.
 

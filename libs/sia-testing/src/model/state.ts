@@ -17,6 +17,10 @@ export interface ModelState {
     slabs: string[];
   }[];
   hosts: ModelHost[];
+  publication?: {
+    lastPublishedAt?: string;
+    pending: { accountId: string; event: ModelObjectEvent }[];
+  };
   quotaBytes?: number;
   requestNumber: number;
   requests: {
@@ -32,7 +36,7 @@ export interface ModelState {
     revoked: boolean;
   }[];
   slabs: ModelSlab[];
-  version: 1;
+  version: 1 | 2;
 }
 
 /** Validation rejects identities and slab references that would change ownership when maps are rebuilt. */
@@ -40,7 +44,9 @@ export function readModelState(serialized: string): ModelState {
   try {
     const input: unknown = JSON.parse(serialized);
     const state = object(input);
-    if (state.version !== 1) throw new Error("unsupported snapshot version");
+    if (state.version !== 1 && state.version !== 2)
+      throw new Error("unsupported snapshot version");
+    if (state.version === 1 && state.publication !== undefined) invalid();
     integer(state.requestNumber);
     if (state.quotaBytes !== undefined) integer(state.quotaBytes);
     const accounts = array(state.accounts);
@@ -58,19 +64,49 @@ export function readModelState(serialized: string): ModelState {
         );
         unique(array(row.slabs));
         for (const id of array(row.slabs)) text(id);
-        for (const value of array(row.events)) {
-          const event = object(value);
-          strings(event, ["key", "updatedAt"]);
-          date(event.updatedAt);
-          bool(event.deleted);
-          if (event.object !== undefined) {
-            checkObject(event.object);
-            if (object(event.object).id !== event.key) invalid();
-          }
-        }
+        for (const value of array(row.events)) checkEvent(value);
         return account.id;
       }),
     );
+    if (state.version === 2) {
+      const publication = object(state.publication);
+      const lastPublishedAt = publication.lastPublishedAt;
+      if (lastPublishedAt !== undefined) {
+        date(lastPublishedAt);
+        if (Date.parse(lastPublishedAt as string) % 1000 !== 0) invalid();
+      }
+      const visible = new Set<string>();
+      for (const entry of accounts) {
+        const row = object(entry);
+        const accountId = object(row.account).id;
+        unique(array(row.events).map((value) => object(value).key));
+        for (const value of array(row.events)) {
+          const event = object(value);
+          const stamp = Date.parse(event.updatedAt as string);
+          if (
+            lastPublishedAt === undefined ||
+            stamp % 1000 !== 0 ||
+            stamp > Date.parse(lastPublishedAt as string)
+          )
+            invalid();
+          if (event.deleted !== (event.object === undefined)) invalid();
+          visible.add(JSON.stringify([accountId, event.key]));
+        }
+      }
+      unique(
+        array(publication.pending).map((value) => {
+          const row = object(value);
+          text(row.accountId);
+          if (!accountIds.has(row.accountId)) invalid();
+          checkEvent(row.event);
+          const event = object(row.event);
+          if (event.deleted !== (event.object === undefined)) invalid();
+          const key = JSON.stringify([row.accountId, event.key]);
+          if (visible.has(key)) invalid();
+          return key;
+        }),
+      );
+    }
     const slabs = array(state.slabs);
     const slabIds = unique(
       slabs.map((value) => {
@@ -175,6 +211,18 @@ function array(value: unknown): unknown[] {
 
 function bool(value: unknown): void {
   if (typeof value !== "boolean") invalid();
+}
+
+/** Event snapshots must keep their object identity aligned with the stream key. */
+function checkEvent(value: unknown): void {
+  const event = object(value);
+  strings(event, ["key", "updatedAt"]);
+  date(event.updatedAt);
+  bool(event.deleted);
+  if (event.object !== undefined) {
+    checkObject(event.object);
+    if (object(event.object).id !== event.key) invalid();
+  }
 }
 
 function checkObject(value: unknown): void {

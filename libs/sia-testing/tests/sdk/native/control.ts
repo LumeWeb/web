@@ -18,10 +18,10 @@ export async function withSdk(run: (sdk: Sdk, queries: Record<string, string>[],
       { addresses: ['quic://127.0.0.1:9101'], countryCode: 'DE', goodForUpload: true, latitude: 52, longitude: 13, publicKey: first },
       { addresses: ['siamux://127.0.0.1:9102'], countryCode: 'US', goodForUpload: false, latitude: 40, longitude: -74, publicKey: second },
       { addresses: ['siamux://127.0.0.1:9103', 'quic://127.0.0.1:9104'], countryCode: 'DE', goodForUpload: true, latitude: 48, longitude: 11, publicKey: third },
-    ]) {
+    ], options: Pick<IndexdModelOptions, 'eventPublication' | 'now'> = {}) {
   const queries: Record<string, string>[] = [];
   const server = createIndexdHttpServer({
-    modelOptions: { hosts, now: () => new Date("2026-01-01T00:00:00Z") },
+    modelOptions: { hosts, now: () => new Date("2026-01-01T00:00:00Z"), ...options },
     responseOverride(request, response) {
       const url = new URL(request.url);
       if (['/hosts', '/objects'].includes(url.pathname)) queries.push(Object.fromEntries([...url.searchParams].filter(([key]) => ['after', 'country', 'key', 'limit', 'offset', 'protocol'].includes(key))));
