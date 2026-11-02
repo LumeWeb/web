@@ -237,9 +237,16 @@ export async function withLiveRun<T>(
               !(suppliedMetadata instanceof Uint8Array)
             )
               throw failure("invalid-input");
-            const metadata = new Uint8Array(suppliedMetadata);
-            if (metadata.byteLength > maximumMetadataBytes)
+            // Typed-array subclasses can override byteLength; the intrinsic getter ignores that override.
+            const metadataBytes = Reflect.get(
+              Uint8Array.prototype,
+              "byteLength",
+              suppliedMetadata,
+            );
+            if (metadataBytes > maximumMetadataBytes)
               throw failure("invalid-input");
+            const metadata = new Uint8Array(metadataBytes);
+            metadata.set(suppliedMetadata);
             if (
               objectAttempts >= document.limits.maxObjects ||
               file.sizeBytes >

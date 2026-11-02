@@ -3,7 +3,7 @@ import { copyFile, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { expect, it } from "vitest";
+import { expect, it, vi } from "vitest";
 import { bytesFixture } from "../../src/testing/files.js";
 import { recoverLiveRun } from "../../src/testing/live/recovery.js";
 import { readJournal } from "../../src/testing/live/journal.js";
@@ -84,6 +84,40 @@ async function fixture(
     await rm(directory, { force: true, recursive: true });
   }
 }
+it.each([false, true])(
+  "oversized metadata is rejected before copying it (byteLength override: %s)",
+  (overrideSize) =>
+    fixture(async (options, state) => {
+      await withLiveRun(options, async (run) => {
+        const file = await bytesFixture({
+          bytes: Uint8Array.of(1),
+          name: "clip",
+        });
+        const original = Uint8Array;
+        const metadata = new original(16 * 1024 + 1);
+        if (overrideSize)
+          Object.defineProperty(metadata, "byteLength", { get: () => 0 });
+        vi.stubGlobal(
+          "Uint8Array",
+          new Proxy(original, {
+            construct(target, args, newTarget) {
+              if (args[0] === metadata)
+                throw new Error("Metadata snapshot allocation failed");
+              return Reflect.construct(target, args, newTarget) as Uint8Array;
+            },
+          }),
+        );
+        try {
+          await expect(
+            run.objects.upload({ file, metadata, name: file.name }),
+          ).rejects.toMatchObject({ code: "invalid-input" });
+        } finally {
+          vi.unstubAllGlobals();
+        }
+      });
+      expect((await state()).calls).toEqual(["authenticate"]);
+    }),
+);
 it("oversized live metadata is rejected before opening the source or calling the agent", () =>
   fixture(async (options, state) => {
     const result = await withLiveRun(options, async (run) => {
