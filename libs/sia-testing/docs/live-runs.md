@@ -44,6 +44,8 @@ Every mutation records an intent before calling the SDK. An acknowledgement is f
 
 A clean summary confirms sharing-key revocation and object deletion for the recorded fixtures. Physical sectors and slab pins may remain under the server's retention rules. The framework never invokes account-wide slab pruning.
 
+Creation records can use 16 MiB of journal space; cleanup and completion records have a further 1 MiB reserve. A full creation journal can therefore still record revocation and deletion during recovery. Cleanup continues with other recorded resources after a failure, reconnecting with the acknowledged app key when the SDK agent has stopped.
+
 Journals contain credentials and sealed object data. They are created exclusively with mode `0600` under a private directory outside the checkout. Do not attach them to CI artifacts. The default journal directory is under the operating system's temporary directory; supply a private persistent path if recovery must survive temporary-directory cleanup. Keep the reported journal path when a run fails.
 
 ```ts

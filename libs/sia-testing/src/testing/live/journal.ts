@@ -8,7 +8,10 @@ import {
   readPrivateHandle,
 } from "./private-files.js";
 export interface Journal {
-  append(event: JournalEvent): Promise<void>;
+  append(
+    event: JournalEvent,
+    options?: { readonly cleanup: true },
+  ): Promise<void>;
   close(): Promise<void>;
   readonly path: string;
 }
@@ -42,7 +45,9 @@ export interface JournalSnapshot {
   readonly records: readonly (JournalEvent & { readonly sequence: number })[];
   readonly truncated: boolean;
 }
-const maximumBytes = 16 * 1024 * 1024;
+const creationBytes = 16 * 1024 * 1024;
+// Cleanup intents and acknowledgements must still fit when creation records reach their limit.
+const maximumBytes = creationBytes + 1024 * 1024;
 export async function createJournal(
   path: string,
   header: Extract<JournalEvent, { kind: "header" }>,
@@ -218,7 +223,10 @@ function writer(
   return Object.freeze(
     Object.defineProperties(
       {
-        append(event: JournalEvent): Promise<void> {
+        append(
+          event: JournalEvent,
+          options?: { readonly cleanup: true },
+        ): Promise<void> {
           if (closing) return Promise.reject(failure("journal-closed"));
           let line: string;
           try {
@@ -227,7 +235,11 @@ function writer(
           } catch {
             return Promise.reject(failure("journal-invalid"));
           }
-          if (Buffer.byteLength(line) + 1 + bytes > maximumBytes)
+          const limit =
+            options?.cleanup || event.kind === "complete"
+              ? maximumBytes
+              : creationBytes;
+          if (Buffer.byteLength(line) + 1 + bytes > limit)
             return Promise.reject(failure("journal-limit"));
           sequence++;
           line += "\n";

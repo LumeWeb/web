@@ -84,6 +84,42 @@ async function fixture(
     await rm(directory, { force: true, recursive: true });
   }
 }
+it.each(["delete", "revoke"])(
+  "a failed %s does not prevent cleanup of other recorded resources",
+  (operation) =>
+    fixture(async (options, state) => {
+      let failedId = "";
+      await expect(
+        withLiveRun(options, async (run) => {
+          const file = await bytesFixture({
+            bytes: Uint8Array.of(1),
+            name: "clip",
+          });
+          for (let index = 0; index < 2; index++) {
+            const object = await run.objects.upload({
+              file,
+              metadata: new Uint8Array(),
+              name: file.name,
+            });
+            const share = await run.shares.create({ objects: [object] });
+            failedId = operation === "delete" ? object.id : share.id;
+          }
+          await writeFile(
+            join(dirname(options.journalFile), "state.json"),
+            JSON.stringify({ ...(await state()), failIds: [failedId] }),
+            { mode: 0o600 },
+          );
+        }),
+      ).rejects.toMatchObject({ summary: { cleanup: "uncertain" } });
+      const remaining = await state();
+      expect(remaining.objects.map((object) => object.id)).toEqual(
+        operation === "delete" ? ["f".repeat(64), failedId] : ["f".repeat(64)],
+      );
+      expect(remaining.shares.map((share) => share.id)).toEqual(
+        operation === "revoke" ? [failedId] : [],
+      );
+    }),
+);
 it("cleanup removes acknowledged fixtures and leaves an unrelated object untouched", () =>
   fixture(async (options, state) => {
     let applicationClosed = false;

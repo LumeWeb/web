@@ -232,6 +232,47 @@ it("recovery rejects a malformed complete record", () =>
       code: "journal-invalid",
     });
   }));
+it("recovery can record cleanup after normal writes fill the journal", () =>
+  fixture(async (path) => {
+    const journal = await createJournal(path, header);
+    const capacity = 16 * 1024 * 1024;
+    const size = (await readFile(path)).byteLength;
+    const event = { id: "large", kind: "ack" as const, result: "" };
+    const overhead = Buffer.byteLength(
+      JSON.stringify({ ...event, sequence: 1 }) + "\n",
+    );
+    await journal.append({
+      ...event,
+      result: "x".repeat(capacity - size - overhead),
+    });
+    await expect(
+      journal.append({ appKeyHex: "07".repeat(32), kind: "auth" }),
+    ).rejects.toMatchObject({ code: "journal-limit" });
+    await journal.close();
+    const resumed = await resumeJournal(path);
+    try {
+      await resumed.journal.append(
+        {
+          id: "cleanup",
+          input: { objectId: "a".repeat(64) },
+          kind: "intent",
+          operation: "delete",
+        },
+        { cleanup: true },
+      );
+      await resumed.journal.append(
+        { id: "cleanup", kind: "ack", result: null },
+        { cleanup: true },
+      );
+      await resumed.journal.append({ cleanup: "clean", kind: "complete" });
+    } finally {
+      await resumed.journal.close();
+    }
+    expect((await readJournal(path)).records.at(-1)).toMatchObject({
+      cleanup: "clean",
+      kind: "complete",
+    });
+  }));
 it("a named pipe is rejected before waiting for a writer", () =>
   fixture(async (path) => {
     await promisify(execFile)("mkfifo", [path]);

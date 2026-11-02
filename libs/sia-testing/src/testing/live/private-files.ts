@@ -17,7 +17,8 @@ export async function privatePath(
   if (!isAbsolute(path) || !process.getuid)
     throw new Error("Invalid private file path");
   const actual = join(await realpath(dirname(path)), basename(path));
-  if (await checkoutRoot(dirname(actual))) throw new Error("Private file is inside a checkout");
+  if (await checkoutRoot(dirname(actual)))
+    throw new Error("Private file is inside a checkout");
   const checkout =
     workspaceRoot === undefined
       ? await checkoutRoot(process.cwd())
