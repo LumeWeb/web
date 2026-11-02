@@ -34,11 +34,7 @@
       "types": "./dist/esm/sdk/index.d.ts",
       "import": "./dist/esm/sdk/index.js"
     },
-    "./package.json": "./package.json",
-    "./e2e/node": {
-      "types": "./dist/esm/e2e/node.d.ts",
-      "import": "./dist/esm/e2e/node.js"
-    }
+    "./package.json": "./package.json"
   },
   "scripts": {
     "build": "tsdown",
@@ -46,12 +42,6 @@
     "lint": "oxlint src tests scripts",
     "test": "vitest run --project unit",
     "test:browser": "playwright test --config playwright.ci.config.ts && playwright test --config playwright.loopback.config.ts",
-    "test:real:payload": "node scripts/run-e2e.mjs payload",
-    "test:real:metadata": "node scripts/run-e2e.mjs metadata",
-    "test:real:native": "node scripts/run-e2e.mjs native",
-    "test:real:native-token-expiry": "node scripts/check-native-token-expiry.mjs",
-    "test:real:host-fixtures": "node scripts/run-e2e.mjs host-fixtures",
-    "test:real:browser-host-fixtures": "node scripts/run-e2e.mjs browser-host-fixtures",
     "test:native:helpers": "vitest run --project native-helpers",
     "test:native:control": "vitest run --project native-control",
     "test:package": "pnpm run build && node scripts/check-package.mjs",
@@ -81,8 +71,5 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/LumeWeb/web"
-  },
-  "bin": {
-    "sia-testing-e2e": "./dist/esm/e2e/cli.js"
   }
 }

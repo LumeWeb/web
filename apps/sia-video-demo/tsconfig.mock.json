@@ -1,4 +1,10 @@
 {
-  "extends": "./tsconfig.e2e.json",
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "strict": true,
+    "noEmit": true,
+    "types": ["node"],
+    "lib": ["es2022", "dom", "dom.iterable"]
+  },
   "include": ["tests/playback/**/*.ts", "playwright.mock.config.ts"]
 }

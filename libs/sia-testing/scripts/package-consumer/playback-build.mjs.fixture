@@ -1,7 +1,7 @@
-/** Exercises the live command with a real build and a server-free Vite replacement. */
+/** Exercises playback startup with a real build and a server-free Vite replacement. */
 import { execSync } from "node:child_process";
 import { delimiter, resolve } from "node:path";
-import config from "./playwright.e2e.config.ts";
+import config from "./playwright.mock.config.ts";
 
 execSync(config.webServer.command, {
   env: {

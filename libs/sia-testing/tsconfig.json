@@ -9,13 +9,6 @@
     "exactOptionalPropertyTypes": true,
     "verbatimModuleSyntax": true
   },
-  "include": [
-    "src/**/*.ts",
-    "tests/**/*.ts",
-    "vitest.config.ts"
-  ],
-  "exclude": [
-    "tests/e2e/native/**",
-    "tests/sdk/native/**"
-  ]
+  "include": ["src/**/*.ts", "tests/**/*.ts", "vitest.config.ts"],
+  "exclude": ["tests/sdk/native/**"]
 }

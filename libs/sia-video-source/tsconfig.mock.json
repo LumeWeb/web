@@ -1,4 +1,4 @@
 {
-  "extends": "./tsconfig.e2e.json",
+  "extends": "./tsconfig.browser-tests.json",
   "include": ["tests/playback/**/*.ts", "playwright.mock.config.ts"]
 }

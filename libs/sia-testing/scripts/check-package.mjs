@@ -83,31 +83,46 @@ async function checkBrowser(consumer) {
   });
 }
 
-/** Resolve both Node artifacts from the copied package, including lazy imports.
+/** Resolve the HTTP adapter from the copied package, including lazy imports.
  * @param {string} consumer
  * @param {string} name
  */
 async function checkNodeGraph(consumer, name) {
   const { build } = await import("vite");
   const root = join(consumer, "node_modules", name);
-  const builtins = new Set(builtinModules.map((id) => id.replace(/^node:/, "")));
+  const builtins = new Set(
+    builtinModules.map((id) => id.replace(/^node:/, "")),
+  );
   /** @param {string} id */
   const reject = (id) => {
-    if (/(?:^|[/\\])(?:@siafoundation|@vitest|@playwright|vitest|playwright|playwright-core|vite|msw)(?:[/\\]|$)|\.node(?:$|\?)/.test(id))
-      throw new Error(`forbidden E2E runtime dependency ${id}`);
+    if (
+      /(?:^|[/\\])(?:@siafoundation|@vitest|@playwright|vitest|playwright|playwright-core|vite|msw)(?:[/\\]|$)|\.node(?:$|\?)/.test(
+        id,
+      )
+    )
+      throw new Error(`forbidden HTTP runtime dependency ${id}`);
     if (isAbsolute(id) && !id.startsWith(root + sep))
-      throw new Error(`E2E import outside packed package ${id}`);
+      throw new Error(`HTTP import outside packed package ${id}`);
   };
   await build({
     build: {
-      lib: { entry: [join(root, "dist/esm/e2e/node.js"), join(root, "dist/esm/e2e/cli.js")], formats: ["es"] },
+      lib: { entry: join(root, "dist/esm/http/index.js"), formats: ["es"] },
       minify: false,
-      rollupOptions: { external: (id) => id.startsWith("node:") || builtins.has(id) },
+      rollupOptions: {
+        external: (id) => id.startsWith("node:") || builtins.has(id),
+      },
       write: false,
     },
     configFile: false,
     logLevel: "error",
-    plugins: [{ enforce: "pre", load: reject, name: "packed-e2e-boundary", resolveId: reject }],
+    plugins: [
+      {
+        enforce: "pre",
+        load: reject,
+        name: "packed-http-boundary",
+        resolveId: reject,
+      },
+    ],
     root: consumer,
   });
 }
@@ -132,39 +147,6 @@ async function checkPackage(unpacked, directory) {
     await linkDependency(consumer, name);
 
   runNode(consumer, ["without-msw.mjs"]);
-  const executable = metadata.bin?.["sia-testing-e2e"];
-  if (!executable) throw new Error("missing packed executable");
-  const bin = join(consumer, "node_modules", metadata.name, executable);
-  const cliOptions = { ...processOptions, cwd: consumer, encoding: /** @type {const} */ ("utf8"), env: { ...environment, SIA_TEST_ALLOW_MUTATION: "0" } };
-  const help = execFileSync(process.execPath, [bin, "--help"], cliOptions);
-  if (!help.includes("Usage:")) throw new Error("executable help missing");
-  let refused = false;
-  try {
-    execFileSync(process.execPath, [bin, "--cwd", consumer, "--", process.execPath, "-e", "console.log('UNSAFE')"], cliOptions);
-  } catch (error) {
-    const failure = /** @type {{status?: number, stdout?: string, stderr?: string}} */ (error);
-    refused = failure.status === 1 && (failure.stderr ?? "").includes('consent') && !(failure.stdout ?? "").includes('UNSAFE');
-  }
-  if (!refused) throw new Error("executable did not refuse before consent");
-  let leaseRefused = false;
-  try {
-    execFileSync(process.execPath, [bin, "--locked", "--cwd", consumer, "--", process.execPath, "-e", "console.log('UNSAFE')"], {
-      ...cliOptions,
-      env: {
-        PATH: process.env.PATH,
-        SIA_NATIVE_TOKEN_LOCK_FD: "999999",
-        SIA_TEST_ADMIN_PASSWORD: "inert-offline-fixture",
-        SIA_TEST_ADMIN_URL: "http://127.0.0.1:1",
-        SIA_TEST_ALLOW_MUTATION: "1",
-        SIA_TEST_INDEXD_URL: "http://127.0.0.1:1",
-        SIA_TEST_STORAGE_PATH: "/tmp",
-      },
-    });
-  } catch (error) {
-    const failure = /** @type {{status?: number, stdout?: string, stderr?: string}} */ (error);
-    leaseRefused = failure.status === 1 && (failure.stderr ?? "").includes('inherited lease') && !(failure.stdout ?? "").includes('UNSAFE');
-  }
-  if (!leaseRefused) throw new Error("executable trusted a claimed inherited lease");
 
   await linkDependency(consumer, "@types/node");
   const tsc = require.resolve("typescript/bin/tsc");
@@ -175,20 +157,37 @@ async function checkPackage(unpacked, directory) {
     consumer,
     dirname(require.resolve("typescript/package.json")),
     nodeTypes,
-    dirname(createRequire(join(nodeTypes, "package.json")).resolve("undici-types/package.json")),
+    dirname(
+      createRequire(join(nodeTypes, "package.json")).resolve(
+        "undici-types/package.json",
+      ),
+    ),
   ];
   // Some cached Node declarations resolve the installed browser Buffer declarations too.
   try {
-    allowedTypes.push(dirname(createRequire(join(nodeTypes, "package.json")).resolve("buffer/package.json")));
-  } catch { /* Node's own buffer declaration needs no external package. */ }
-  const typeFiles = execFileSync(process.execPath, [tsc, "-p", "tsconfig.json", "--listFilesOnly"], {
-    ...processOptions, cwd: consumer, encoding: "utf8",
-  });
+    allowedTypes.push(
+      dirname(
+        createRequire(join(nodeTypes, "package.json")).resolve(
+          "buffer/package.json",
+        ),
+      ),
+    );
+  } catch {
+    /* Node's own buffer declaration needs no external package. */
+  }
+  const typeFiles = execFileSync(
+    process.execPath,
+    [tsc, "-p", "tsconfig.json", "--listFilesOnly"],
+    {
+      ...processOptions,
+      cwd: consumer,
+      encoding: "utf8",
+    },
+  );
   for (const file of typeFiles.trim().split(/\r?\n/)) {
     if (!allowedTypes.some((root) => file.startsWith(root + sep)))
       throw new Error(`declaration outside packed consumer ${file}`);
   }
-
 
   await linkDependency(consumer, "msw");
   runNode(consumer, ["with-msw.mjs"]);
@@ -300,16 +299,11 @@ function packAndExtractPackage(directory) {
  */
 async function readPackageMetadata(directory) {
   const metadata =
-    /** @type {{ dependencies?: Record<string, string>, bin?: Record<string, string>, exports: Record<string, unknown>, name: string }} */ (
+    /** @type {{ dependencies?: Record<string, string>, exports: Record<string, unknown>, name: string }} */ (
       JSON.parse(await readFile(join(directory, "package.json"), "utf8"))
     );
   if (metadata.name !== "@lumeweb/sia-testing")
     throw new Error("unexpected package name");
-  if (!metadata.exports["./e2e/node"])
-    throw new Error("missing e2e/node export");
-  const executable = metadata.bin?.["sia-testing-e2e"];
-  if (!executable || !executable.startsWith("./dist/") || executable.split("/").includes("..") || !existsSync(join(directory, executable)))
-    throw new Error("missing packed executable");
   if (metadata.exports["."])
     throw new Error("root barrel must not be exported");
   for (const [specifier, conditions] of Object.entries(metadata.exports)) {

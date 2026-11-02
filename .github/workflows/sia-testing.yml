@@ -9,7 +9,6 @@ on:
       - 'apps/sia-video-demo/**'
       - 'pnpm-lock.yaml'
       - '.github/workflows/sia-testing.yml'
-      - '.github/workflows/sia-testing-real.yml'
   pull_request:
     paths:
       - 'libs/sia-testing/**'
@@ -18,7 +17,6 @@ on:
       - 'apps/sia-video-demo/**'
       - 'pnpm-lock.yaml'
       - '.github/workflows/sia-testing.yml'
-      - '.github/workflows/sia-testing-real.yml'
 
 concurrency:
   group: sia-testing-${{ github.workflow }}-${{ github.ref }}

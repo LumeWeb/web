@@ -51,10 +51,7 @@
     "test:e2e:sdk": "pnpm --filter @lumeweb/tsdown-config build:config && playwright test --config playwright.contract.config.ts",
     "test:e2e:sdk:build": "pnpm --filter @lumeweb/tsdown-config build:config && pnpm build && vite build --config tests/contract/vite.config.ts",
     "test:e2e:sdk:collect": "playwright test --config playwright.contract.config.ts --list",
-    "test:e2e:sdk:offline": "node --test tests/contract/*.test.ts",
-    "test:e2e:collect": "playwright test --config playwright.e2e.config.ts --list",
-    "test:e2e:live": "sia-testing-e2e --cwd \"$PWD\" -- playwright test --config playwright.e2e.config.ts",
-    "test:e2e:build": "vite build --config tests/e2e/vite.config.ts"
+    "test:e2e:sdk:offline": "node --test tests/contract/*.test.ts"
   },
   "dependencies": {
     "@noble/ciphers": "^2.4.0",
