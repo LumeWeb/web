@@ -5,6 +5,7 @@ import { bytesFixture, createMockSia } from "../../src/testing/mock.js";
 import { createMockReader } from "../../src/testing/client.js";
 import { mockCredential } from "../../src/testing/http.js";
 import { createMockHandlers } from "../../src/testing/msw.js";
+import { createMockAuth } from "../../src/testing/auth-client.js";
 
 it("MSW lists the same fixture bytes without an owner fallback", async () => {
   const adapter = { createMockHandlers };
@@ -36,6 +37,17 @@ it("MSW lists the same fixture bytes without an owner fallback", async () => {
         const server = setupServer(...endpoint.handlers);
         server.listen({ onUnhandledRequest: "error" });
         try {
+          const ownerConnection = endpoint.connection({
+            access: run.ownerAccess,
+            as: mock.actor("owner"),
+          });
+          const credential = mockCredential(mock, run.ownerAccess);
+          const auth = createMockAuth(ownerConnection, credential);
+          try {
+            expect(await auth.connected(credential.keyHex)).toEqual(credential);
+          } finally {
+            await auth.close();
+          }
           const descriptor = endpoint.connection({
             access: share.access,
             as: mock.actor("recipient"),

@@ -232,6 +232,8 @@ export function createRequestControls() {
       stream: ReadableStream<Uint8Array>,
       signal: AbortSignal,
     ) {
+      const cancellation = new AbortController();
+      signal = AbortSignal.any([signal, cancellation.signal]);
       const reader = stream.getReader();
       let ended = false;
       let target!: ReadableStreamDefaultController<Uint8Array>;
@@ -250,6 +252,7 @@ export function createRequestControls() {
             ended = true;
             record.status = "cancelled";
             detach();
+            cancellation.abort(reason);
             return reader.cancel(reason);
           },
           async pull(controller) {

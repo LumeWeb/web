@@ -74,7 +74,7 @@ export interface ReadObject {
 export interface ReadPort {
   close(): Promise<void>;
   download(
-    object: ReadObject,
+    object: Pick<ReadObject, "id">,
     range?: {
       readonly length?: number;
       readonly offset?: number;

@@ -11,7 +11,7 @@ export function createMockHandlers(
   return {
     ...configured.endpoint,
     handlers: [
-      http.get(`${configured.endpoint.url}*`, ({ request }) =>
+      http.all(`${configured.endpoint.url}*`, ({ request }) =>
         configured.dispatch(request),
       ),
     ],

@@ -33,6 +33,7 @@ export function createMockEndpoint(mock: MockSia, base: string) {
     url: root.href,
   };
   async function dispatch(request: Request): Promise<Response> {
+    let detach: (() => void) | undefined;
     const url = new URL(request.url);
     if (url.origin !== root.origin || !url.pathname.startsWith(root.pathname))
       return Response.json({ code: "not-found" }, { status: 404 });
@@ -62,8 +63,17 @@ export function createMockEndpoint(mock: MockSia, base: string) {
           ),
         );
       }
-      const access = runtime.authenticate(credential);
+      const access = runtime.authenticate({
+        ...credential,
+        kind: client.kind === "registration" ? "app-key" : client.kind,
+      });
       const reader = mock.reader({ access, as: client.actor });
+      const cancelled = () => {
+        void reader.close();
+      };
+      request.signal.addEventListener("abort", cancelled, { once: true });
+      detach = () => request.signal.removeEventListener("abort", cancelled);
+      if (request.signal.aborted) cancelled();
       const allowed =
         parts[1] === "objects"
           ? ["offset", "limit"]
@@ -99,15 +109,20 @@ export function createMockEndpoint(mock: MockSia, base: string) {
         throw Object.assign(new Error("Object is required"), {
           code: "invalid-input",
         });
-      const object = await reader.object(id);
-      if (parts[1] === "object") return Response.json(wireObject(object));
+      if (parts[1] === "object")
+        return Response.json(wireObject(await reader.object(id)));
       if (parts[1] !== "download")
         return Response.json({ code: "not-found" }, { status: 404 });
-      const stream = await reader.download(object, {
-        length: number("length", object.sizeBytes),
-        offset: number("offset", 0),
-        signal: request.signal,
-      });
+      const stream = await reader.download(
+        { id },
+        {
+          ...(url.searchParams.has("length")
+            ? { length: number("length", 0) }
+            : {}),
+          offset: number("offset", 0),
+          signal: request.signal,
+        },
+      );
       return new Response(stream, {
         headers: { "content-type": "application/octet-stream" },
       });
@@ -132,6 +147,8 @@ export function createMockEndpoint(mock: MockSia, base: string) {
                   : 400,
         },
       );
+    } finally {
+      detach?.();
     }
   }
   return { dispatch, endpoint };

@@ -269,10 +269,11 @@ export function createMockSia(options: MockOptions = {}): MockSia {
           const id = object.id;
           const context = authorize(id);
           describe(context, id);
-          if (range.offset !== undefined) integer(range.offset);
-          if (range.length !== undefined) integer(range.length);
-          const callSignal = range.signal
-            ? AbortSignal.any([signal, range.signal])
+          const { length, offset, signal: inputSignal } = range;
+          if (offset !== undefined) integer(offset);
+          if (length !== undefined) integer(length);
+          const callSignal = inputSignal
+            ? AbortSignal.any([signal, inputSignal])
             : signal;
           const request = await controls.begin(
             actor,
@@ -280,21 +281,36 @@ export function createMockSia(options: MockOptions = {}): MockSia {
             id,
             callSignal,
           );
-          authorize(id);
-          const body = await context.sdk!.download(
-            { id: () => id },
-            { ...range, signal: callSignal },
-          );
-          return controls.observe(request, body, callSignal);
+          try {
+            authorize(id);
+            const body = await context.sdk!.download(
+              { id: () => id },
+              {
+                ...(offset === undefined ? {} : { offset }),
+                ...(length === undefined ? {} : { length }),
+                signal: callSignal,
+              },
+            );
+            return controls.observe(request, body, callSignal);
+          } catch (error) {
+            request.status = callSignal.aborted ? "cancelled" : "failed";
+            throw error;
+          }
         },
         async object(id) {
           const context = authorize(id);
           describe(context, id);
           const request = await controls.begin(actor, "object", id, signal);
-          await context.sdk!.object(id, { signal });
-          authorize(id);
-          request.status = "completed";
-          return describe(context, id);
+          try {
+            await context.sdk!.object(id, { signal });
+            authorize(id);
+            const object = describe(context, id);
+            request.status = "completed";
+            return object;
+          } catch (error) {
+            request.status = signal.aborted ? "cancelled" : "failed";
+            throw error;
+          }
         },
         objects({ limit, offset }) {
           return Promise.resolve().then(async () => {
@@ -305,34 +321,42 @@ export function createMockSia(options: MockOptions = {}): MockSia {
               undefined,
               signal,
             );
-            integer(offset);
-            integer(limit);
-            if (limit === 0)
-              throw failure("invalid-input", "Page limit must be positive");
-            const ids =
-              grant!.key === null
-                ? [...context.objects.values()]
-                    .filter(
-                      (record) =>
-                        !record.deleted &&
-                        context.network!.model.object(
-                          context.id,
-                          record.handle.id,
-                        ),
-                    )
-                    .map((record) => record.handle.id)
-                : context
-                    .network!.model.listRecipientObjects(grant!.key, grant!.key)
-                    .map((record) => record.objectID);
-            const rows = ids
-              .slice(offset, offset + limit)
-              .map((id) => describe(context, id));
-            request.status = "completed";
-            return {
-              done: rows.length < limit,
-              nextOffset: offset + rows.length,
-              objects: rows,
-            };
+            try {
+              integer(offset);
+              integer(limit);
+              if (limit === 0)
+                throw failure("invalid-input", "Page limit must be positive");
+              const ids =
+                grant!.key === null
+                  ? [...context.objects.values()]
+                      .filter(
+                        (record) =>
+                          !record.deleted &&
+                          context.network!.model.object(
+                            context.id,
+                            record.handle.id,
+                          ),
+                      )
+                      .map((record) => record.handle.id)
+                  : context
+                      .network!.model.listRecipientObjects(
+                        grant!.key,
+                        grant!.key,
+                      )
+                      .map((record) => record.objectID);
+              const rows = ids
+                .slice(offset, offset + limit)
+                .map((id) => describe(context, id));
+              request.status = "completed";
+              return {
+                done: rows.length < limit,
+                nextOffset: offset + rows.length,
+                objects: rows,
+              };
+            } catch (error) {
+              request.status = signal.aborted ? "cancelled" : "failed";
+              throw error;
+            }
           });
         },
       };
