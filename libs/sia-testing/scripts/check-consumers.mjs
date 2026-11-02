@@ -23,10 +23,6 @@ const environment = {
   NODE_OPTIONS: "",
   NODE_PATH: "",
 };
-for (const name of Object.keys(environment)) {
-  if (name.startsWith("SIA_TEST_") || name.startsWith("SIA_E2E_"))
-    delete environment[name];
-}
 /** @param {string} root @param {Record<string, string>} localPackages @param {string} installedRoot */
 async function dependencies(root, localPackages, installedRoot) {
   const manifest =
@@ -128,25 +124,18 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
       "src",
       "tests",
       "package.json",
-      "tsconfig.e2e.json",
-      "playwright.e2e.config.ts",
+      "tsconfig.mock.json",
+      "playwright.mock.config.ts",
     ])
       await cp(join(repo, source, name), join(target, name), {
         recursive: true,
       });
-    await cp(join(target, "tsconfig.e2e.json"), join(target, "tsconfig.json"));
+    await cp(join(target, "tsconfig.mock.json"), join(target, "tsconfig.json"));
   }
-  for (const name of [
-    "index.html",
-    "vite.config.ts",
-    "playwright.mock.config.ts",
-    "tsconfig.mock.json",
-  ])
+  for (const name of ["index.html", "vite.config.ts"])
     await cp(join(repo, "apps/sia-video-demo", name), join(demo, name));
-  await cp(
-    join(repo, "libs/sia-video-source/tsdown.config.ts"),
-    join(library, "tsdown.config.ts"),
-  );
+  for (const name of ["tsdown.config.ts", "tsconfig.browser-tests.json"])
+    await cp(join(repo, "libs/sia-video-source", name), join(library, name));
   await cp(
     join(repo, "tsconfig.base.json"),
     join(directory, "tsconfig.base.json"),
@@ -172,9 +161,9 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
     const bin = join(library, "node_modules/.bin");
     await mkdir(bin, { recursive: true });
     await symlink(join(tsdown, "dist/run.mjs"), join(bin, "tsdown"));
-    const serverCheck = join(library, "check-e2e-vite.mjs");
+    const serverCheck = join(library, "check-playback-vite.mjs");
     await cp(
-      new URL("./package-consumer/e2e-vite.mjs.fixture", import.meta.url),
+      new URL("./package-consumer/playback-vite.mjs.fixture", import.meta.url),
       serverCheck,
     );
     await chmod(serverCheck, 0o700);
@@ -185,10 +174,10 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
       "export const createSiaStreamService = undefined;\n",
     );
     await cp(
-      new URL("./package-consumer/e2e-build.mjs.fixture", import.meta.url),
-      join(library, "check-e2e-build.mjs"),
+      new URL("./package-consumer/playback-build.mjs.fixture", import.meta.url),
+      join(library, "check-playback-build.mjs"),
     );
-    run(join(library, "check-e2e-build.mjs"), [], library);
+    run(join(library, "check-playback-build.mjs"), [], library);
     const packedLibrary = await pack(
       library,
       join(directory, "library-tarball"),
@@ -220,27 +209,31 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
         [
           "--config",
           join(repo, ".oxlintrc.json"),
-          join(root, "tests/e2e"),
-          join(root, "playwright.e2e.config.ts"),
+          join(root, "tests/playback"),
+          join(root, "playwright.mock.config.ts"),
         ],
         { cwd: repo, encoding: "utf8", env: environment, timeout: 30_000 },
       );
       run(
         join(repo, "node_modules/typescript/bin/tsc"),
-        ["--noEmit", "-p", "tsconfig.e2e.json"],
+        ["--noEmit", "-p", "tsconfig.mock.json"],
         root,
       );
       run(
         join(repo, "node_modules/vite/bin/vite.js"),
-        ["build", "--config", "tests/e2e/vite.config.ts"],
+        ["build", "--config", "tests/playback/vite.config.ts"],
         root,
       );
       const output = run(
         join(repo, "node_modules/@playwright/test/cli.js"),
-        ["test", "--config", "playwright.e2e.config.ts", "--list"],
+        ["test", "--config", "playwright.mock.config.ts", "--list"],
         root,
       );
-      if (!output.includes("Total: 1 test in 1 file"))
+      const expected =
+        root === library
+          ? "Total: 30 tests in 2 files"
+          : "Total: 14 tests in 1 file";
+      if (!output.includes(expected))
         throw new Error(`Unexpected consumer collection: ${output}`);
     }
   } catch (error) {
@@ -249,35 +242,12 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
       { cause: error },
     );
   }
-  run(
-    join(repo, "node_modules/typescript/bin/tsc"),
-    ["--noEmit", "-p", "tsconfig.mock.json"],
-    demo,
-  );
-  run(
-    join(repo, "node_modules/vite/bin/vite.js"),
-    ["build", "--config", "tests/playback/vite.config.ts"],
-    demo,
-  );
-  const mockCollection = run(
-    join(repo, "node_modules/@playwright/test/cli.js"),
-    ["test", "--config", "playwright.mock.config.ts", "--list"],
-    demo,
-  );
-  if (!mockCollection.includes("Total: 14 tests in 1 file"))
-    throw new Error(`Unexpected demo mock collection: ${mockCollection}`);
-  // Node must resolve the public entry from a copy without source or private tests.
-  await cp(
-    new URL("./package-consumer/e2e-node.mjs.fixture", import.meta.url),
-    join(demo, "public-import.mjs"),
-  );
-  run(join(demo, "public-import.mjs"), [], demo);
   await cp(
     new URL("./package-consumer/worker-setup.mjs.fixture", import.meta.url),
     join(demo, "worker-setup-import.mjs"),
   );
   run(join(demo, "worker-setup-import.mjs"), [], demo);
   console.log(
-    "consumer checks passed: 3 builds, 3 typechecks, 2 legacy collections, 14 demo mock tests; packed worker setup passed",
+    "consumer checks passed: playback pages built and typed; 30 library and 14 demo mock tests collected; packed worker setup passed",
   );
 });

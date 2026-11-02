@@ -198,38 +198,13 @@ Native-provider tests serve a committed MP4 through Vite and resolve its fixture
 
 Main-thread loads check their exact output MIME on the host before the worker accepts the source. These checks are scoped to the load and cancelled on replacement or teardown. ADR [0012](decisions/0012-append-thread-mse-capabilities.md) describes the protocol and its timeout.
 
-These tests do not verify SDK WebTransport, encryption or backend authorization. The separate [read-only SDK check](tests/contract/README.md) uses pre-provisioned objects and requires explicit endpoint and transfer approval. The manual real-service test below remains separate.
-
-## Manual real-service E2E
-
-`tests/e2e/page.ts` owns its SDK, sharing key and stream file. It calls the
-public `@lumeweb/sia-video-source/sia` service with an explicit `shared` source,
-then requests bytes 2 through 4 from the service-managed URL. The live spec
-expects status 206, `Content-Range: bytes 2-4/8` and bytes `[2, 3, 4]`.
-This case does not test the playback worker or MSE backend.
-
-The Node spec imports `readE2EService` and `withDisposableAccount` from
-`@lumeweb/sia-testing/e2e/node`. Its page acknowledges the account identity
-through a typed Playwright binding. The acknowledgement persists recovery
-before the funding wait. Browser-owned handles and service-worker registrations
-are closed before the account callback returns.
-
-From this package, `test:e2e:collect` lists the spec without starting a server.
-`test:e2e:build` builds the page with the SDK's Vite plugin and requires a library
-build first. `test:e2e:live` is manual only. Playwright runs `npm run build` before
-starting Vite so the page's public `/sia` import uses current output rather than
-a missing or stale `dist` export. Restart the live command after source changes;
-each run rebuilds the library. The live command calls
-`sia-testing-e2e --cwd "$PWD" -- playwright test --config playwright.e2e.config.ts`,
-which holds the guarded lease through cleanup and
-postflight. Follow the prerequisites and explicit service, storage, consent and
-SPKI settings in `@lumeweb/sia-testing`'s README. Never use this command against
-an operator-owned deployment without separate authorization. No CI task runs it.
+These tests do not verify SDK WebTransport, encryption or backend authorization. The separate [read-only SDK check](tests/contract/README.md) uses pre-provisioned objects and requires explicit endpoint and transfer approval.
 
 The offline delivery check is `node scripts/check-consumers.mjs` from
 `libs/sia-testing`, after building `sia-testing` and the shared tsdown config.
-It uses cached dependencies in disposable copies, actual offline tarballs,
-TypeScript, lint, Vite builds and Playwright collection. It also runs the live
-startup command against a stale library export, replacing Vite startup with an
-import check that requires the rebuilt export. It starts no browser or service,
-and cannot establish a live pass.
+It packs both libraries offline and checks the library and demo playback pages
+against the packed library using TypeScript, lint, Vite builds and Playwright
+collection. It also runs the library's mock playback startup command against a
+stale library export, replacing Vite startup with an import check that requires
+the rebuilt export. It starts no browser or service and cannot establish a
+live pass.
