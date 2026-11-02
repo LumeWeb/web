@@ -20,7 +20,7 @@ export default defineConfig({
       {
         test: {
           name: "native-control",
-          include: ["tests/sdk/native/{hosts,events,connections}.test.ts"],
+          include: ["tests/sdk/native/{hosts,events,connections,publication}.test.ts"],
           environment: "node",
         },
       },

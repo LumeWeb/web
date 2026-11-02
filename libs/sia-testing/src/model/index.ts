@@ -63,6 +63,8 @@ export interface IndexdModel {
   ): void;
   pinSlab(accountId: string, slab: ModelSlab): void;
   pruneSlabs(accountId: string): string[];
+  /** Repeated manual publishes within the same clock second leave pending rows hidden. */
+  publishObjectEvents(): void;
   registerConnection(id: string, appKey: string): ModelAccount;
   rejectConnection(id: string): void;
   requestConnection(input: {
@@ -103,6 +105,8 @@ export interface IndexdModel {
 }
 
 export interface IndexdModelOptions {
+  /** Manual mode queues mutations until publishObjectEvents assigns whole-second cursor positions. */
+  eventPublication?: "immediate" | "manual";
   hosts?: ModelHost[];
   now?: () => Date;
   /** Maximum unique pinned bytes per account. Omit for an unlimited account. */
@@ -192,9 +196,11 @@ export function createIndexdModel(
 ): IndexdModel {
   if (
     options.state !== undefined &&
-    (options.hosts !== undefined || options.quotaBytes !== undefined)
+    (options.hosts !== undefined ||
+      options.quotaBytes !== undefined ||
+      options.eventPublication !== undefined)
   )
-    throw new Error("snapshot owns host and quota settings");
+    throw new Error("snapshot settings cannot be replaced");
   const saved =
     options.state === undefined ? undefined : readModelState(options.state);
   const now = options.now ?? (() => new Date());
@@ -231,9 +237,34 @@ export function createIndexdModel(
     string,
     Set<WeakRef<{ retired: Set<symbol>; watched: Set<symbol> }>>
   >();
+  // Manual restores use the coalesced maps below; the history array must not retain superseded snapshots.
   const events = new Map<string, ModelObjectEvent[]>(
-    saved?.accounts.map((row) => [row.account.id, row.events]),
+    saved?.accounts.map((row) => [
+      row.account.id,
+      saved.version === 2 ? [] : row.events,
+    ]),
   );
+  const eventPublication =
+    saved?.version === 2 ? "manual" : (options.eventPublication ?? "immediate");
+  const pendingEvents = new Map<string, Map<string, ModelObjectEvent>>(
+    saved?.accounts.map((row) => [row.account.id, new Map()]),
+  );
+  const publishedEvents = new Map<string, Map<string, ModelObjectEvent>>(
+    saved?.accounts.map((row) => [
+      row.account.id,
+      new Map(
+        eventPublication === "manual"
+          ? row.events.map((event) => [event.key, event])
+          : [],
+      ),
+    ]),
+  );
+  for (const row of saved?.publication?.pending ?? [])
+    pendingEvents.get(row.accountId)!.set(row.event.key, row.event);
+  let lastPublishedAt =
+    saved?.publication?.lastPublishedAt === undefined
+      ? undefined
+      : Date.parse(saved.publication.lastPublishedAt);
   const sharing = new Map<string, SharingRecord>(
     saved?.sharing.map((row) => [
       row.key.publicKey,
@@ -265,6 +296,8 @@ export function createIndexdModel(
     objects.set(account.id, new Map());
     accountSlabs.set(account.id, new Map());
     events.set(account.id, []);
+    pendingEvents.set(account.id, new Map());
+    publishedEvents.set(account.id, new Map());
     return { ...account };
   }
 
@@ -317,6 +350,14 @@ export function createIndexdModel(
       else if (state.watched.delete(identity)) state.retired.add(identity);
     }
     if (trackers?.size === 0) pinTrackers.delete(accountId);
+  }
+
+  /** A changed event loses its old cursor position until the publisher assigns a new one. */
+  function recordEvent(accountId: string, event: ModelObjectEvent): void {
+    if (eventPublication === "manual") {
+      publishedEvents.get(accountId)!.delete(event.key);
+      pendingEvents.get(accountId)!.set(event.key, event);
+    } else events.get(accountId)!.push(event);
   }
 
   function slabBytes(ids: Iterable<string>): number {
@@ -406,7 +447,7 @@ export function createIndexdModel(
         if (![...records.values()].some((item) => item.slabs?.includes(slabId)))
           removeSlabPin(accountId, slabId);
       }
-      events.get(accountId)!.push({ deleted: true, key: objectId, updatedAt });
+      recordEvent(accountId, { deleted: true, key: objectId, updatedAt });
     },
     detachSharedObject(ownerId, publicKey, objectID) {
       const record = ownedShare(ownerId, publicKey);
@@ -462,7 +503,11 @@ export function createIndexdModel(
     },
     objectEvents(accountId) {
       requireAccount(accountId);
-      return events.get(accountId)!.map((event) => ({
+      const rows =
+        eventPublication === "manual"
+          ? publishedEvents.get(accountId)!.values()
+          : events.get(accountId)!;
+      return [...rows].map((event) => ({
         ...event,
         ...(event.object ? { object: copyObject(event.object) } : {}),
       }));
@@ -507,7 +552,7 @@ export function createIndexdModel(
         if (value !== undefined) stored[field] = value;
       }
       objects.get(accountId)!.set(object.id, stored);
-      events.get(accountId)!.push({
+      recordEvent(accountId, {
         deleted: false,
         key: object.id,
         object: copyObject(stored),
@@ -538,6 +583,32 @@ export function createIndexdModel(
       }
       return removed;
     },
+    publishObjectEvents() {
+      if (
+        eventPublication !== "manual" ||
+        ![...pendingEvents.values()].some((rows) => rows.size > 0)
+      )
+        return;
+      const second = Math.floor(now().getTime() / 1000) * 1000;
+      // A second must advance globally so new rows cannot sort behind a reader's cursor.
+      if (lastPublishedAt !== undefined && second <= lastPublishedAt) return;
+      const updatedAt = new Date(second).toISOString();
+      let remaining = 25000;
+      // Indexd selects account IDs in creation order before object keys,
+      // so one account's backlog can postpone another account to a later second.
+      for (const accountId of accounts.keys()) {
+        const pending = pendingEvents.get(accountId)!;
+        for (const key of [...pending.keys()].sort()) {
+          if (remaining === 0) break;
+          const event = pending.get(key)!;
+          publishedEvents.get(accountId)!.set(key, { ...event, updatedAt });
+          pending.delete(key);
+          remaining--;
+        }
+        if (remaining === 0) break;
+      }
+      lastPublishedAt = second;
+    },
     registerConnection(id, appKey) {
       const request = requests.get(id);
       if (!request) throw new Error(`unknown request ${id}`);
@@ -565,6 +636,9 @@ export function createIndexdModel(
       slabs.clear();
       accountSlabs.clear();
       events.clear();
+      pendingEvents.clear();
+      publishedEvents.clear();
+      lastPublishedAt = undefined;
       requests.clear();
       sharing.clear();
       requestNumber = 0;
@@ -582,11 +656,28 @@ export function createIndexdModel(
       const state: ModelState = {
         accounts: [...accounts.values()].map((account) => ({
           account,
-          events: events.get(account.id)!,
+          events:
+            eventPublication === "manual"
+              ? [...publishedEvents.get(account.id)!.values()]
+              : events.get(account.id)!,
           objects: [...objects.get(account.id)!.values()],
           slabs: [...accountSlabs.get(account.id)!.keys()],
         })),
         hosts: hostList,
+        ...(eventPublication === "manual"
+          ? {
+              publication: {
+                ...(lastPublishedAt === undefined
+                  ? {}
+                  : {
+                      lastPublishedAt: new Date(lastPublishedAt).toISOString(),
+                    }),
+                pending: [...pendingEvents].flatMap(([accountId, pending]) =>
+                  [...pending.values()].map((event) => ({ accountId, event })),
+                ),
+              },
+            }
+          : {}),
         ...(quotaBytes === undefined ? {} : { quotaBytes }),
         requestNumber,
         requests: [...requests.entries()].map(([id, request]) => ({
@@ -601,7 +692,8 @@ export function createIndexdModel(
           revoked: record.revoked,
         })),
         slabs: [...slabs.values()],
-        version: 1,
+        // Version 2 forces older readers to reject manual checkpoints with unpublished state.
+        version: eventPublication === "manual" ? 2 : 1,
       };
       const serialized = JSON.stringify(state);
       // JSON converts nonfinite numbers to null; reject them before a caller replaces a checkpoint file.
