@@ -21,7 +21,7 @@ describe("Indexd dispatcher slab and sharing routes", () => {
     expect((await call(dispatch, "/slabs/prune?auth=1", { method: "POST" })).status).toBe(200);
     expect((await call(dispatch, "/slabs/s?auth=1", { method: "DELETE" })).status).toBe(403);
     await call(dispatch, "/objects/o?auth=1", { method: "DELETE" });
-    expect((await call(dispatch, "/slabs/s?auth=1", { method: "DELETE" })).status).toBe(204);
+    expect((await call(dispatch, "/slabs/s?auth=1", { method: "GET" })).status).toBe(404);
   });
 
   it("supports owner attachment routes and recipient shared get", async () => {

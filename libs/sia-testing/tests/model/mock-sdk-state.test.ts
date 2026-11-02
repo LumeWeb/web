@@ -58,18 +58,14 @@ test("an uploaded object remains unpinned across restart", async () => {
   ).toEqual([9]);
 });
 
-test("deleted bytes survive until the restored account prunes them", async () => {
+test("deleted payloads remain unavailable after restart without pruning", async () => {
   const { network, object, sdk } = await fixture();
   await sdk.deleteObject("video");
   const copy = createMockNetwork({ state: network.serialize() });
   const restored = copy.createSdk({ accountId: "owner" });
   await expect(restored.object("video")).rejects.toThrow("not found");
-  expect(await read(await restored.download(object))).toEqual([1, 2, 3]);
-  await restored.pruneSlabs();
-  const next = createMockNetwork({ state: copy.serialize() });
-  await expect(
-    next.createSdk({ accountId: "owner" }).download(object),
-  ).rejects.toThrow("not found");
+  await expect(restored.download(object)).rejects.toThrow("not found");
+  await expect(restored.pinObject(object)).rejects.toThrow("not found");
 });
 
 test("a restored network owns its payloads independently", async () => {

@@ -14,14 +14,14 @@ const removals: [string, (model: IndexdModel, slabId: string) => void][] = [
   [
     "external prune",
     (model) => {
-      model.deleteObject("owner", "video");
+      model.seedObject("owner", { id: "video", slabs: [] });
       model.pruneSlabs("owner");
     },
   ],
   [
     "external unpin",
     (model, slabId) => {
-      model.deleteObject("owner", "video");
+      model.seedObject("owner", { id: "video", slabs: [] });
       model.unpinSlab("owner", slabId);
     },
   ],
@@ -30,7 +30,7 @@ const removals: [string, (model: IndexdModel, slabId: string) => void][] = [
     (model, slabId) => {
       model.createAccount({ publicKey: "other" });
       model.pinSlab("other", { id: slabId, size: 3 });
-      model.deleteObject("owner", "video");
+      model.seedObject("owner", { id: "video", slabs: [] });
       model.pruneSlabs("owner");
     },
   ],

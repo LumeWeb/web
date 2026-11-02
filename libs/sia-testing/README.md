@@ -33,6 +33,8 @@ test("keeps an object private to its owner", () => {
 });
 ```
 
+Connection requests remain pending until `model.approveConnection(id, connectKey)` approves them. `model.rejectConnection(id)` removes a request, including an approved request that has not registered. HTTP clients can send `{ "approve": false }` to its response URL with Basic authentication. Polling then returns HTTP 404, which SDK 0.1.4 reports as user rejection. Registration also returns HTTP 404. Bodyless Basic approval remains supported for existing fixture clients.
+
 ## MSW setup
 
 ```ts
@@ -70,7 +72,7 @@ const stream = await reader.download(await reader.object("video"), {
 const bytes = new Uint8Array(await new Response(stream).arrayBuffer());
 ```
 
-The mock implements the `object`/ranged `download` interface used by streaming consumers. Its upload and pin methods are fixture operations; it does not implement the entire storage SDK. Uploaded bytes are copied, and each download returns detached chunks. Resetting the model or removing a slab pin invalidates its cached payload, even when the same slab ID is pinned again. Uploads become visible to `object()` and the model's event stream after pinning. Deletion removes the object record; pruning then releases unreferenced payloads.
+The mock implements the `object`/ranged `download` interface used by streaming consumers. Its upload and pin methods are fixture operations; it does not implement the entire storage SDK. Uploaded bytes are copied, and each download returns detached chunks. Resetting the model or removing a slab pin invalidates its cached payload, even when the same slab ID is pinned again. Uploads become visible to `object()` and the model's event stream after pinning. Deletion removes the object record and its sharing attachments. Only slabs no longer referenced by another object in the same account are unpinned; unrelated unfinished uploads remain available until pruning. A deleted object can be repinned while a sibling keeps its slab pinned, but its sharing attachments do not return.
 
 `network.control` can take a device offline, add finite operation faults, or hold matching operations until the returned release function is called. `setConditions` configures latency and shared upload/download rates through `uploadBytesPerSecond` and `downloadBytesPerSecond`; zero disables pacing. Rate changes affect newly scheduled transfers. Cancelling a download releases its pending transfer and records the delivered byte count.
 
@@ -126,7 +128,7 @@ const restored = createMockNetwork({
 });
 ```
 
-Create a new listener with `mockNetwork: restored` and configure its client bindings again. Checkpoints retain pinned and uploaded-but-unpinned payloads. They also retain event history and pending approvals. Object deletion continues to leave bytes available until pruning.
+Create a new listener with `mockNetwork: restored` and configure its client bindings again. Checkpoints retain pinned and uploaded-but-unpinned payloads. They also retain event history and pending approvals. Deleted payloads survive a checkpoint only while another object in the account keeps their slab pinned. Deleting the last reference invalidates retained payload handles.
 
 `model.serialize()` and `createIndexdModel({ state })` provide the same checkpoint behavior for control-plane-only fixtures. `model.snapshot()` remains an account summary. Saved host settings and quota limits are restored; conflicting replacement settings are rejected. Pass `now` again when restoring a controlled clock. A network snapshot cannot replace a caller-supplied `model`.
 
@@ -139,6 +141,8 @@ These mocks perform no encryption, host RPCs or payments, and their object handl
 ## Limits
 
 The emulator checks signed-query encoding, expiry and caller scope, not cryptographic signatures. Approval credentials are opaque and approved connection secrets are placeholders. Indexd routes exposed by HTTP and MSW do not implement host transfers or issue usable host tokens. The mock SDK transfers fixture bytes through its separate payload routes.
+
+Payload uploads allocate a separate synthetic slab for each object. Packed-object fixtures can pin multiple model objects to the same slab explicitly; the adapter does not implement the SDK's packed upload format. Object event history appends each mutation immediately. Event coalescing and whole-second publication are not modeled.
 
 The model's `quotaBytes` budget counts unique referenced slabs using supplied slab sizes. Fixed account-limit fields do not reproduce service funding or redundancy accounting. Seeded object IDs and envelopes are opaque test data, not proof of valid SDK encryption.
 

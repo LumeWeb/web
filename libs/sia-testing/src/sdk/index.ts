@@ -174,7 +174,12 @@ export function createMockNetwork(
           return run(
             "deleteObject",
             id,
-            () => model.deleteObject(accountId, id),
+            () => {
+              model.deleteObject(accountId, id);
+              const record = payloads.get(accountId)?.get(id);
+              if (record && !payloadIsCurrent(model, accountId, record))
+                payloads.get(accountId)!.delete(id);
+            },
             false,
             call.signal,
           );
@@ -288,9 +293,10 @@ export function createMockNetwork(
             "pruneSlabs",
             undefined,
             () => {
-              const removed = new Set(model.pruneSlabs(accountId));
+              model.pruneSlabs(accountId);
+              // External deletions can retire a pin before this prune call sees it.
               for (const [id, record] of payloads.get(accountId) ?? []) {
-                if (removed.has(record.slabId))
+                if (!payloadIsCurrent(model, accountId, record))
                   payloads.get(accountId)!.delete(id);
               }
             },

@@ -131,8 +131,8 @@ it('rejects registration before approval and removes consumed status', async () 
   expect(model.caller(recipient)).toBeUndefined();
   model.approveConnection(id, 'opaque');
   expect((await register()).status).toBe(204);
-  expect((await dispatch(new Request(signedUrl(`/auth/connect/${id}/status`, recipient)))).status).toBe(401);
-  expect((await register()).status).toBe(401);
+  expect((await dispatch(new Request(signedUrl(`/auth/connect/${id}/status`, recipient)))).status).toBe(404);
+  expect((await register()).status).toBe(404);
   expect((await dispatch(new Request(`https://indexd.test/auth/connect/${id}`, { headers: { authorization: 'Basic dGVzdDp0ZXN0' }, method: 'POST' }))).status).toBe(404);
 });
 it('rejects expired connection status, approval and registration', async () => {

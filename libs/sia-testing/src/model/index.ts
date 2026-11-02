@@ -64,6 +64,7 @@ export interface IndexdModel {
   pinSlab(accountId: string, slab: ModelSlab): void;
   pruneSlabs(accountId: string): string[];
   registerConnection(id: string, appKey: string): ModelAccount;
+  rejectConnection(id: string): void;
   requestConnection(input: {
     appId: string;
     publicKey: string;
@@ -286,6 +287,13 @@ export function createIndexdModel(
     return record;
   }
 
+  /** Retires one account's pin without discarding a slab another account still owns. */
+  function removeSlabPin(accountId: string, slabId: string): void {
+    accountSlabs.get(accountId)!.delete(slabId);
+    if (![...accountSlabs.values()].some((pins) => pins.has(slabId)))
+      slabs.delete(slabId);
+  }
+
   function slabBytes(ids: Iterable<string>): number {
     let size = 0;
     for (const id of ids) size += slabs.get(id)?.size ?? 0;
@@ -357,11 +365,23 @@ export function createIndexdModel(
     },
     deleteObject(accountId, objectId) {
       requireAccount(accountId);
-      if (!objects.get(accountId)!.delete(objectId))
-        throw new Error(`object ${objectId} not found`);
-      events
-        .get(accountId)!
-        .push({ deleted: true, key: objectId, updatedAt: now().toISOString() });
+      const records = objects.get(accountId)!;
+      const object = records.get(objectId);
+      if (!object) throw new Error(`object ${objectId} not found`);
+      records.delete(objectId);
+      const updatedAt = now().toISOString();
+      for (const record of sharing.values()) {
+        if (record.owner === accountId && record.attachments.delete(objectId)) {
+          record.key.objectCount = record.attachments.size;
+          record.key.updatedAt = updatedAt;
+        }
+      }
+      // Pruning every unused slab would also remove uploads not yet pinned as objects.
+      for (const slabId of object.slabs ?? []) {
+        if (![...records.values()].some((item) => item.slabs?.includes(slabId)))
+          removeSlabPin(accountId, slabId);
+      }
+      events.get(accountId)!.push({ deleted: true, key: objectId, updatedAt });
     },
     detachSharedObject(ownerId, publicKey, objectID) {
       const record = ownedShare(ownerId, publicKey);
@@ -487,10 +507,8 @@ export function createIndexdModel(
             object.slabs?.includes(slabId),
           )
         ) {
-          accountSlabs.get(accountId)!.delete(slabId);
+          removeSlabPin(accountId, slabId);
           removed.push(slabId);
-          if (![...accountSlabs.values()].some((pins) => pins.has(slabId)))
-            slabs.delete(slabId);
         }
       }
       return removed;
@@ -503,6 +521,9 @@ export function createIndexdModel(
       const account = createAccount({ publicKey: appKey });
       requests.delete(id);
       return account;
+    },
+    rejectConnection(id) {
+      requests.delete(id);
     },
     requestConnection({ appId: _appId, publicKey }) {
       const id = `request-${++requestNumber}`;
@@ -601,9 +622,7 @@ export function createIndexdModel(
       for (const object of objects.get(accountId)!.values())
         if (object.slabs?.includes(slabId))
           throw new Error(`slab ${slabId} is still referenced`);
-      accountSlabs.get(accountId)!.delete(slabId);
-      if (![...accountSlabs.values()].some((pins) => pins.has(slabId)))
-        slabs.delete(slabId);
+      removeSlabPin(accountId, slabId);
     },
     validateSignedShareUrl(rawUrl) {
       const url = new URL(rawUrl);
