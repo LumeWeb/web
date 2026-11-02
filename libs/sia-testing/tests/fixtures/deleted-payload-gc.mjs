@@ -39,6 +39,12 @@ async function check(remove, prepare = (network) => network) {
 }
 
 const sdkDeletion = await check((_network, sdk, id) => sdk.deleteObject(id));
+const externalDeletionCollected = await check(async (network, sdk, id) => {
+  network.model.deleteObject("owner", id);
+  const unrelated = `${id}-unrelated`;
+  network.seedObject("owner", unrelated, new Uint8Array([2]));
+  await sdk.deleteObject(unrelated);
+});
 const externalDeletionPruned = await check(async (network, sdk, id) => {
   network.model.deleteObject("owner", id);
   await sdk.pruneSlabs();
@@ -64,8 +70,35 @@ const replacement = await check(async (network, sdk, id) => {
   network.model.deleteObject("owner", id);
   await sdk.upload(new Uint8Array([2]), { id });
 });
+/** Keeps the model alive after its cache and retirement queue become unreachable. */
+function abandonCache() {
+  const network = createMockNetwork();
+  network.model.createAccount({ publicKey: "owner" });
+  const references = [];
+  for (let index = 0; index < 64; index++) {
+    const id = `abandoned-${index}`;
+    network.seedObject("owner", id, new Uint8Array([1]));
+    const slab = network.model.object("owner", id)?.slabs?.[0];
+    if (!slab) throw new Error("The fixture needs a pinned object slab");
+    references.push(new WeakRef(network.model.slabIdentity("owner", slab)));
+  }
+  return { model: network.model, references };
+}
+const abandoned = abandonCache();
+for (let index = 0; index < 64; index++)
+  abandoned.model.deleteObject("owner", `abandoned-${index}`);
+for (let index = 0; index < 10; index++) {
+  await setImmediate();
+  global.gc();
+}
+const abandonedCache = abandoned.references.filter(
+  (reference) => reference.deref() !== undefined,
+).length;
+abandoned.model.serialize();
 console.log(
   JSON.stringify({
+    abandonedCache,
+    externalDeletionCollected,
     externalDeletionPruned,
     invalidatedRead,
     lastSiblingDeleted,

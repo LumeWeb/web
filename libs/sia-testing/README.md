@@ -35,6 +35,8 @@ test("keeps an object private to its owner", () => {
 
 Connection requests remain pending until `model.approveConnection(id, connectKey)` approves them. `model.rejectConnection(id)` removes a request, including an approved request that has not registered. HTTP clients can send `{ "approve": false }` to its response URL with Basic authentication. Polling then returns HTTP 404, which SDK 0.1.4 reports as user rejection. Registration also returns HTTP 404. Bodyless Basic approval remains supported for existing fixture clients.
 
+`model.trackSlabPins(accountId)` creates a caller-owned tracker. Pass current identities from `slabIdentity()` to `watch(identity)`; model pin removals, including reset, queue those identities for `takeRetired()` to drain. `forget(identity)` removes both the watch and any queued retirement. The model holds queue state weakly, and checkpoints do not store it. Payload SDK caches use these queues to collect direct model deletions during subsequent SDK deletion without inspecting live uploads.
+
 ## MSW setup
 
 ```ts

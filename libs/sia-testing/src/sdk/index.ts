@@ -1,5 +1,9 @@
 /** In-process payload mocks for app tests; no Sia encryption or host protocols are performed. */
-import { createIndexdModel, type IndexdModel } from "../model/index.js";
+import {
+  createIndexdModel,
+  type IndexdModel,
+  type SlabPinTracker,
+} from "../model/index.js";
 import {
   createControls,
   type MockControl,
@@ -96,6 +100,8 @@ export function createMockNetwork(
     throw new Error("chunkBytes must be a positive safe integer");
   const payloads: PayloadStore = saved?.payloads ?? new Map();
   const payloadsByPin = new Map<string, Map<symbol, Set<string>>>();
+  // Recreating empty trackers would accumulate weak model observers until GC runs.
+  const retirementTrackers = new Map<string, SlabPinTracker>();
   for (const [accountId, owned] of payloads)
     for (const [id, record] of owned)
       indexPayload(accountId, id, record.identity);
@@ -111,6 +117,12 @@ export function createMockNetwork(
     if (!ids) {
       ids = new Set();
       pins.set(identity, ids);
+      let tracker = retirementTrackers.get(accountId);
+      if (!tracker) {
+        tracker = model.trackSlabPins(accountId);
+        retirementTrackers.set(accountId, tracker);
+      }
+      tracker.watch(identity);
     }
     ids.add(id);
   }
@@ -124,7 +136,10 @@ export function createMockNetwork(
     const pins = payloadsByPin.get(accountId)!;
     const ids = pins.get(record.identity)!;
     ids.delete(id);
-    if (ids.size === 0) pins.delete(record.identity);
+    if (ids.size === 0) {
+      pins.delete(record.identity);
+      retirementTrackers.get(accountId)!.forget(record.identity);
+    }
     if (pins.size === 0) payloadsByPin.delete(accountId);
   }
 
@@ -226,18 +241,11 @@ export function createMockNetwork(
             "deleteObject",
             id,
             () => {
-              const identities = new Set<symbol>();
-              const record = payloads.get(accountId)?.get(id);
-              if (record) identities.add(record.identity);
-              for (const slab of model.object(accountId, id)?.slabs ?? []) {
-                try {
-                  identities.add(model.slabIdentity(accountId, slab));
-                } catch {
-                  // model.seedObject can bypass slab pin validation.
-                }
-              }
               model.deleteObject(accountId, id);
-              discardStalePayloads(accountId, identities);
+              discardStalePayloads(
+                accountId,
+                retirementTrackers.get(accountId)?.takeRetired() ?? [],
+              );
             },
             false,
             call.signal,

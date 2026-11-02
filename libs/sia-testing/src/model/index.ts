@@ -93,6 +93,7 @@ export interface IndexdModel {
   /** Identifies this account's current pin; removing and repinning the same slab creates a new identity. */
   slabIdentity(accountId: string, slabId: string): symbol;
   snapshot(): { accounts: ModelAccount[] };
+  trackSlabPins(accountId: string): SlabPinTracker;
   unpinSlab(accountId: string, slabId: string): void;
   validateSignedShareUrl(url: string): {
     expiresAt: number;
@@ -171,6 +172,13 @@ export interface SharingKey {
 
 export type SharingKeyRecord = SharingAttachment;
 
+/** Caller-owned pin watches retain only retirements that the caller still needs to collect. */
+export interface SlabPinTracker {
+  forget(identity: symbol): void;
+  takeRetired(): symbol[];
+  watch(identity: symbol): void;
+}
+
 interface SharingRecord {
   attachments: Map<string, SharingAttachment>;
   key: SharingKey;
@@ -219,6 +227,10 @@ export function createIndexdModel(
       new Map(row.slabs.map((id) => [id, Symbol()])),
     ]),
   );
+  const pinTrackers = new Map<
+    string,
+    Set<WeakRef<{ retired: Set<symbol>; watched: Set<symbol> }>>
+  >();
   const events = new Map<string, ModelObjectEvent[]>(
     saved?.accounts.map((row) => [row.account.id, row.events]),
   );
@@ -289,9 +301,22 @@ export function createIndexdModel(
 
   /** Retires one account's pin without discarding a slab another account still owns. */
   function removeSlabPin(accountId: string, slabId: string): void {
+    const identity = accountSlabs.get(accountId)!.get(slabId);
     accountSlabs.get(accountId)!.delete(slabId);
+    if (identity !== undefined) retirePin(accountId, identity);
     if (![...accountSlabs.values()].some((pins) => pins.has(slabId)))
       slabs.delete(slabId);
+  }
+
+  /** Only watched pins enter queues, so unrelated model uploads cannot fill a cache's retirement history. */
+  function retirePin(accountId: string, identity: symbol): void {
+    const trackers = pinTrackers.get(accountId);
+    for (const reference of trackers ?? []) {
+      const state = reference.deref();
+      if (!state) trackers!.delete(reference);
+      else if (state.watched.delete(identity)) state.retired.add(identity);
+    }
+    if (trackers?.size === 0) pinTrackers.delete(accountId);
   }
 
   function slabBytes(ids: Iterable<string>): number {
@@ -533,6 +558,8 @@ export function createIndexdModel(
       return { expiresAt: new Date(expiresAt), id };
     },
     reset() {
+      for (const [accountId, pins] of accountSlabs)
+        for (const identity of pins.values()) retirePin(accountId, identity);
       accounts.clear();
       objects.clear();
       slabs.clear();
@@ -614,6 +641,33 @@ export function createIndexdModel(
     snapshot() {
       return {
         accounts: [...accounts.values()].map((account) => ({ ...account })),
+      };
+    },
+    trackSlabPins(accountId) {
+      requireAccount(accountId);
+      const state = { retired: new Set<symbol>(), watched: new Set<symbol>() };
+      let trackers = pinTrackers.get(accountId);
+      if (!trackers) {
+        trackers = new Set();
+        pinTrackers.set(accountId, trackers);
+      }
+      for (const reference of trackers)
+        if (!reference.deref()) trackers.delete(reference);
+      // A model may outlive its SDK caches; holding the queue strongly would retain retired identities.
+      trackers.add(new WeakRef(state));
+      return {
+        forget(identity) {
+          state.watched.delete(identity);
+          state.retired.delete(identity);
+        },
+        takeRetired() {
+          const retired = [...state.retired];
+          state.retired.clear();
+          return retired;
+        },
+        watch(identity) {
+          state.watched.add(identity);
+        },
       };
     },
     unpinSlab(accountId, slabId) {

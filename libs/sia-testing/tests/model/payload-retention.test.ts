@@ -48,6 +48,8 @@ test("deleted payload records are collected while their network stays alive", as
       { maxBuffer: 4096, timeout: 10000 },
     );
     expect(JSON.parse(result.stdout)).toEqual({
+      abandonedCache: 0,
+      externalDeletionCollected: 0,
       externalDeletionPruned: 0,
       invalidatedRead: 0,
       lastSiblingDeleted: 0,
