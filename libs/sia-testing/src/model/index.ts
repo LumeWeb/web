@@ -523,6 +523,7 @@ export function createIndexdModel(
       return account;
     },
     rejectConnection(id) {
+      // Indexd removes denied IDs unconditionally so clients can retry after expiry or registration.
       requests.delete(id);
     },
     requestConnection({ appId: _appId, publicKey }) {

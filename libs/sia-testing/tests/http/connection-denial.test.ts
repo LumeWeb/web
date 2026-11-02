@@ -43,6 +43,57 @@ test("an empty approval body preserves bodyless fixture approval", async () => {
   expect(model.connectionRequest(id)?.approved).toBe(true);
 });
 
+function deny(model: ReturnType<typeof createIndexdModel>, id: string) {
+  return createIndexdDispatcher(model)(
+    new Request(`https://indexd.test/auth/connect/${id}`, {
+      body: JSON.stringify({ approve: false }),
+      headers: { authorization: "Basic dGVzdDp0ZXN0" },
+      method: "POST",
+    }),
+  );
+}
+
+test("denying an unknown request succeeds without creating an account", async () => {
+  const model = createIndexdModel();
+  expect((await deny(model, "missing")).status).toBe(204);
+  expect(model.snapshot().accounts).toEqual([]);
+});
+
+test("denial removes an expired request", async () => {
+  let now = new Date("2030-01-01T00:00:00Z");
+  const model = createIndexdModel({ now: () => now });
+  const { id } = model.requestConnection({
+    appId: "app",
+    publicKey: recipient,
+  });
+  now = new Date("2030-01-01T00:10:00.001Z");
+  expect((await deny(model, id)).status).toBe(204);
+  expect(model.connectionRequest(id)).toBeUndefined();
+});
+
+test("repeating a denial succeeds after its request was removed", async () => {
+  const model = createIndexdModel();
+  const { id } = model.requestConnection({
+    appId: "app",
+    publicKey: recipient,
+  });
+  expect((await deny(model, id)).status).toBe(204);
+  expect((await deny(model, id)).status).toBe(204);
+  expect(model.connectionRequest(id)).toBeUndefined();
+});
+
+test("denial after registration preserves the registered account", async () => {
+  const model = createIndexdModel();
+  const { id } = model.requestConnection({
+    appId: "app",
+    publicKey: recipient,
+  });
+  model.approveConnection(id, "opaque");
+  const account = model.registerConnection(id, recipient);
+  expect((await deny(model, id)).status).toBe(204);
+  expect(model.caller(recipient)).toEqual(account);
+});
+
 test("a denied connection disappears instead of becoming approved", async () => {
   const model = createIndexdModel();
   const { id } = model.requestConnection({
