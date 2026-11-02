@@ -41,6 +41,17 @@ it("the video adapter reads a shared range and observes revocation", async () =>
             ).arrayBuffer(),
           ),
         ]).toEqual([2, 3]);
+        for (const scheme of ["sia", "https"]) {
+          const url = `${scheme}://indexer.invalid/objects/${object.id}/shared?signature=fixture#encryption_key=${"A".repeat(43)}`;
+          const resolved = await sdk.objectFromShareUrl!(url);
+          expect([
+            ...new Uint8Array(
+              await new Response(
+                await sdk.download(resolved, { length: 1, offset: 1 }),
+              ).arrayBuffer(),
+            ),
+          ]).toEqual([2]);
+        }
         await run.shares.revoke(share);
         await expect(sdk.objectFromSharedKey!(object.id)).rejects.toMatchObject(
           { code: "denied" },

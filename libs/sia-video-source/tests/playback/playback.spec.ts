@@ -6,6 +6,22 @@ async function openVideo(page: Page, media: Media, mse: "auto" | "main") {
   await page.goto(`/?mse=${mse}`);
   await page.evaluate((id) => window.playback.load(id), media.long.id);
 }
+for (const scheme of ["sia", "https"]) {
+  test(`${scheme} share URLs decode through the scoped HTTP reader`, async ({
+    media,
+    page,
+  }) => {
+    await page.goto("/?mse=main");
+    await page.evaluate(
+      (id) => window.playback.load(id),
+      `${scheme}://indexer.invalid/objects/${media.short.id}/shared?signature=fixture#encryption_key=${"A".repeat(43)}`,
+    );
+    await expect
+      .poll(() => page.evaluate(() => window.playback.snapshot().frames))
+      .toBeGreaterThan(2);
+    await page.evaluate(() => window.playback.destroy());
+  });
+}
 test("the default worker entry answers the consumer handshake", async ({
   page,
 }) => {

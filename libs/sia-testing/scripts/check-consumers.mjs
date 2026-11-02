@@ -235,7 +235,7 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
       );
       const expected =
         root === library
-          ? "Total: 30 tests in 2 files"
+          ? "Total: 34 tests in 2 files"
           : "Total: 24 tests in 1 file";
       if (!output.includes(expected))
         throw new Error(`Unexpected consumer collection: ${output}`);
@@ -252,6 +252,6 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
   );
   run(join(demo, "worker-setup-import.mjs"), [], demo);
   console.log(
-    "consumer checks passed: playback pages built and typed; 30 library and 24 demo mock tests collected; packed worker setup passed",
+    "consumer checks passed: playback pages built and typed; 34 library and 24 demo mock tests collected; packed worker setup passed",
   );
 });

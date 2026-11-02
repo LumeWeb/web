@@ -7,6 +7,7 @@ import {
 } from "@lumeweb/sia-testing/client";
 import type { SiaObjectLike } from "../ranged-reader.js";
 import type { SiaVideoSdk } from "../worker-runtime.js";
+import { parseSiaShareUrl } from "../share-url.js";
 export function createMockPlaybackSdk(
   indexerUrl: string,
   appSeed?: null | Uint8Array,
@@ -52,6 +53,8 @@ export function createMockPlaybackSdk(
     },
     object: (id) => resolve(app, id),
     objectFromSharedKey: (id) => resolve(shared, id),
+    objectFromShareUrl: (url) =>
+      resolve(shared ?? app, parseSiaShareUrl(url).objectKey),
   };
 }
 export function createVideoReaderSdk(reader: ReadPort): SiaVideoSdk {
@@ -89,5 +92,7 @@ export function createVideoReaderSdk(reader: ReadPort): SiaVideoSdk {
     },
     object,
     objectFromSharedKey: object,
+    // Mock URLs retain the reader's access checks; their signed query is not cryptographically verified.
+    objectFromShareUrl: (url) => object(parseSiaShareUrl(url).objectKey),
   };
 }
