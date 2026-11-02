@@ -322,6 +322,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
               signal,
             );
             try {
+              authorize();
               integer(offset);
               integer(limit);
               if (limit === 0)

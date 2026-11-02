@@ -209,11 +209,13 @@ export function createRequestControls() {
             if (signal.aborted) abort();
           });
         signal.throwIfAborted();
-        const fault = faults.find(
+        const faultIndex = faults.findIndex(
           (entry) => entry.remaining > 0 && matches(entry.selector, record),
         );
+        const fault = faults[faultIndex];
         if (fault) {
           fault.remaining--;
+          if (fault.remaining === 0) faults.splice(faultIndex, 1);
           throw Object.assign(new Error("Injected mock failure"), {
             code: fault.code,
           });
@@ -281,7 +283,19 @@ export function createRequestControls() {
                 ended = true;
                 record.status = signal.aborted ? "cancelled" : "failed";
                 detach();
-                controller.error(error);
+                let failure = error;
+                try {
+                  await reader.cancel(error);
+                } catch (cancelError) {
+                  if (cancelError !== error)
+                    failure = new AggregateError(
+                      [error, cancelError],
+                      "Download and source cancellation failed",
+                    );
+                } finally {
+                  reader.releaseLock();
+                }
+                controller.error(failure);
               }
             }
           },

@@ -54,7 +54,7 @@ it("an invalid admitted listing finishes its receipt as failed", () =>
     );
     expect(mock.history().at(-1)?.status).toBe("failed");
   }));
-it.each(["object", "download"] as const)(
+it.each(["object", "download", "objects"] as const)(
   "revoking a share while %s is held finishes its receipt",
   (operation) =>
     fixture(async (run, mock) => {
@@ -63,11 +63,17 @@ it.each(["object", "download"] as const)(
       const actor = mock.actor("recipient");
       const reader = mock.reader({ access: share.access, as: actor });
       const descriptor = await reader.object(object.id);
-      const hold = mock.faults.hold({ actor, object, operation });
+      const hold = mock.faults.hold({
+        actor,
+        ...(operation === "objects" ? {} : { object }),
+        operation,
+      });
       const pending =
         operation === "object"
           ? reader.object(object.id)
-          : reader.download(descriptor);
+          : operation === "objects"
+            ? reader.objects({ limit: 1, offset: 0 })
+            : reader.download(descriptor);
       const rejected = expect(pending).rejects.toMatchObject({
         code: "denied",
       });
