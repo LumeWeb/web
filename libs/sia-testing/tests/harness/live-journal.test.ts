@@ -232,6 +232,64 @@ it("recovery rejects a malformed complete record", () =>
       code: "journal-invalid",
     });
   }));
+it("reserved acknowledgements retain capacity while other operations append", () =>
+  fixture(async (path) => {
+    const journal = await createJournal(path, header);
+    try {
+      const reservation = journal.reserve(2048);
+      const size = (await readFile(path)).byteLength;
+      const event = { id: "other", kind: "ack" as const, result: "" };
+      const overhead = Buffer.byteLength(
+        JSON.stringify({ ...event, sequence: 1 }) + "\n",
+      );
+      await journal.append({
+        ...event,
+        result: "x".repeat(16 * 1024 * 1024 - size - overhead - 2048),
+      });
+      await expect(
+        journal.append({ appKeyHex: "07".repeat(32), kind: "auth" }),
+      ).rejects.toMatchObject({ code: "journal-limit" });
+      expect(() => journal.reserve(1)).toThrowError(
+        expect.objectContaining({ code: "journal-limit" }),
+      );
+      await reservation.append({
+        id: "upload",
+        kind: "ack",
+        result: { objectId: "a".repeat(64), sealed: "known" },
+      });
+      reservation.release();
+      reservation.release();
+      await expect(
+        reservation.append({ cleanup: "clean", kind: "complete" }),
+      ).rejects.toMatchObject({ code: "journal-closed" });
+      await journal.append({ appKeyHex: "07".repeat(32), kind: "auth" });
+    } finally {
+      await journal.close();
+    }
+    expect((await readJournal(path)).records).toHaveLength(4);
+  }));
+it("an oversized reserved record leaves its reservation available for a valid acknowledgement", () =>
+  fixture(async (path) => {
+    const journal = await createJournal(path, header);
+    try {
+      const reservation = journal.reserve(256);
+      await expect(
+        reservation.append({
+          id: "too-large",
+          kind: "ack",
+          result: "x".repeat(256),
+        }),
+      ).rejects.toMatchObject({ code: "journal-limit" });
+      await reservation.append({ id: "accepted", kind: "ack", result: null });
+      reservation.release();
+    } finally {
+      await journal.close();
+    }
+    expect((await readJournal(path)).records.at(-1)).toMatchObject({
+      id: "accepted",
+      sequence: 1,
+    });
+  }));
 it("recovery can record cleanup after normal writes fill the journal", () =>
   fixture(async (path) => {
     const journal = await createJournal(path, header);

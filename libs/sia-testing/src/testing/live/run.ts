@@ -22,6 +22,12 @@ import {
   sessionProcess,
 } from "./session.js";
 import type { LiveProfile } from "./types.js";
+import {
+  maximumMetadataBytes,
+  maximumSealedObjectBytes,
+  mutationRecordBytes,
+  uploadRecordBytes,
+} from "./resource-limits.js";
 export interface LiveRunOptions {
   readonly agentModule?: URL;
   readonly beforeCleanup?: () => Promise<void>;
@@ -146,21 +152,27 @@ export async function withLiveRun<T>(
     input: unknown,
     work: () => Promise<R>,
     observed?: (result: R) => void,
+    capacity = mutationRecordBytes,
   ): Promise<R> {
-    const operationId = randomUUID();
-    await journal!.append({
-      id: operationId,
-      input,
-      kind: "intent",
-      operation,
-    });
-    if (operation === "upload" || operation === "create-share")
-      unknownCreations.add(operationId);
-    const result = await work();
-    observed?.(result);
-    await journal!.append({ id: operationId, kind: "ack", result });
-    unknownCreations.delete(operationId);
-    return result;
+    const reservation = journal!.reserve(capacity);
+    try {
+      const operationId = randomUUID();
+      await reservation.append({
+        id: operationId,
+        input,
+        kind: "intent",
+        operation,
+      });
+      if (operation === "upload" || operation === "create-share")
+        unknownCreations.add(operationId);
+      const result = await work();
+      observed?.(result);
+      await reservation.append({ id: operationId, kind: "ack", result });
+      unknownCreations.delete(operationId);
+      return result;
+    } finally {
+      reservation.release();
+    }
   }
   try {
     journal = await createJournal(options.journalFile, {
@@ -225,6 +237,9 @@ export async function withLiveRun<T>(
               !(suppliedMetadata instanceof Uint8Array)
             )
               throw failure("invalid-input");
+            const metadata = new Uint8Array(suppliedMetadata);
+            if (metadata.byteLength > maximumMetadataBytes)
+              throw failure("invalid-input");
             if (
               objectAttempts >= document.limits.maxObjects ||
               file.sizeBytes >
@@ -233,7 +248,6 @@ export async function withLiveRun<T>(
               throw failure("limit");
             objectAttempts++;
             reservedBytes += file.sizeBytes;
-            const metadata = new Uint8Array(suppliedMetadata);
             const bytes = await readFixture(file, signal);
             ensureOpen();
             let record!: OwnedObject;
@@ -250,6 +264,7 @@ export async function withLiveRun<T>(
                   !/^[a-f0-9]{64}$/.test(result.objectId) ||
                   !("sealed" in result) ||
                   typeof result.sealed !== "string" ||
+                  Buffer.byteLength(result.sealed) > maximumSealedObjectBytes ||
                   !("sizeBytes" in result) ||
                   result.sizeBytes !== file.sizeBytes ||
                   !("observedShardBytes" in result) ||
@@ -279,6 +294,7 @@ export async function withLiveRun<T>(
                 };
                 objects.set(handle, record);
               },
+              uploadRecordBytes,
             );
             await mutate(
               "pin",

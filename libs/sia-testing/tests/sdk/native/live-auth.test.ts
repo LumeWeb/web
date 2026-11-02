@@ -4,7 +4,17 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import ts from "typescript";
-import { AppKey } from "@siafoundation/sia-storage";
+import {
+  AppKey,
+  PinnedObject,
+  type SealedObject,
+} from "@siafoundation/sia-storage";
+import { serialize } from "node:v8";
+import {
+  createJournal,
+  readJournal,
+} from "../../../src/testing/live/journal.js";
+import { uploadRecordBytes } from "../../../src/testing/live/resource-limits.js";
 import { expect, it } from "vitest";
 import { recoverSiaRun, withSiaRun } from "../../../src/node.js";
 import { bytesFixture } from "../../../src/testing/files.js";
@@ -21,8 +31,91 @@ import {
   sessionInfo,
   sessionProcess,
 } from "../../../src/testing/live/session.js";
+/** The child runs outside Vitest, so its relative runtime imports need compiled neighbours. */
+async function compileAgent(directory: string): Promise<void> {
+  await writeFile(
+    join(directory, "package.json"),
+    JSON.stringify({ type: "module" }),
+  );
+  for (const name of ["agent", "resource-limits"]) {
+    const source = await readFile(
+      resolve(`src/testing/live/${name}.ts`),
+      "utf8",
+    );
+    await writeFile(
+      join(directory, `${name}.${name === "agent" ? "mjs" : "js"}`),
+      ts.transpileModule(source, {
+        compilerOptions: {
+          module: ts.ModuleKind.ESNext,
+          target: ts.ScriptTarget.ES2022,
+        },
+      }).outputText,
+    );
+  }
+}
 const phrase =
   "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
+it("sealed metadata and sector descriptors fit a reserved upload acknowledgement", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "sia-seal-budget-"));
+  try {
+    const key = new AppKey(Buffer.alloc(32, 7));
+    const object = new PinnedObject();
+    object.updateMetadata(Buffer.alloc(16 * 1024, 255));
+    const sealed: SealedObject = {
+      ...object.seal(key),
+      slabs: Array.from({ length: 4 }, (_, slabIndex) => ({
+        encryptionKey: Buffer.alloc(32, 255),
+        length: 4 * 1024 * 1024,
+        minShards: 1,
+        offset: 0,
+        sectors: Array.from({ length: 255 }, (_, index) => ({
+          hostKey: "ed25519:" + index.toString(16).padStart(64, "f"),
+          root: (slabIndex * 255 + index).toString(16).padStart(64, "f"),
+        })),
+        version: 1,
+      })),
+    };
+    const journal = await createJournal(join(directory, "journal.jsonl"), {
+      apiBaseUrl: "http://127.0.0.1/",
+      appId: "0".repeat(64),
+      kind: "header",
+      runId: "budget",
+      version: 1,
+    });
+    try {
+      const reservation = journal.reserve(uploadRecordBytes);
+      try {
+        await reservation.append({
+          id: "upload",
+          input: { sha256: "f".repeat(64), sizeBytes: 16 * 1024 * 1024 },
+          kind: "intent",
+          operation: "upload",
+        });
+        await reservation.append({
+          id: "upload",
+          kind: "ack",
+          result: {
+            objectId: object.id(),
+            observedShardBytes: 256 * 1024 * 1024,
+            sealed: serialize(sealed).toString("base64"),
+            sizeBytes: 16 * 1024 * 1024,
+          },
+        });
+      } finally {
+        reservation.release();
+      }
+    } finally {
+      await journal.close();
+    }
+    expect((await readJournal(journal.path)).records.at(-1)).toMatchObject({
+      id: "upload",
+      kind: "ack",
+      result: { objectId: object.id() },
+    });
+  } finally {
+    await rm(directory, { force: true, recursive: true });
+  }
+});
 it.each(["app-key", "register", "preauthorized"] as const)(
   "the owned agent authenticates with the installed SDK using %s",
   async (kind) => {
@@ -95,19 +188,7 @@ it.each(["app-key", "register", "preauthorized"] as const)(
         join(directory, "node_modules"),
         "dir",
       );
-      const source = await readFile(
-        resolve("src/testing/live/agent.ts"),
-        "utf8",
-      );
-      await writeFile(
-        join(directory, "agent.mjs"),
-        ts.transpileModule(source, {
-          compilerOptions: {
-            module: ts.ModuleKind.ESNext,
-            target: ts.ScriptTarget.ES2022,
-          },
-        }).outputText,
-      );
+      await compileAgent(directory);
       const path = join(directory, "profile.json");
       const auth =
         kind === "app-key"
@@ -218,6 +299,25 @@ it.each(["app-key", "register", "preauthorized"] as const)(
               return owned.id;
             },
           );
+          const limited = await openLiveSession(profile, {
+            agentModule: pathToFileURL(join(directory, "agent.mjs")),
+          });
+          try {
+            await expect(
+              sessionProcess(limited).request("upload", {
+                bytes: new Uint8Array(),
+                metadata: new Uint8Array(16 * 1024),
+              }),
+            ).resolves.toMatchObject({ sizeBytes: 0 });
+            await expect(
+              sessionProcess(limited).request("upload", {
+                bytes: new Uint8Array(),
+                metadata: new Uint8Array(16 * 1024 + 1),
+              }),
+            ).rejects.toMatchObject({ code: "invalid-input" });
+          } finally {
+            await closeLiveSession(limited);
+          }
           expect(result.summary.cleanup).toBe("clean");
           await expect(
             recoverSiaRun({ backend, journalFile }),
@@ -274,17 +374,8 @@ it("cancelling installed SDK authentication stops its blocked native request", a
       join(directory, "node_modules"),
       "dir",
     );
-    const source = await readFile(resolve("src/testing/live/agent.ts"), "utf8");
+    await compileAgent(directory);
     const module = join(directory, "agent.mjs");
-    await writeFile(
-      module,
-      ts.transpileModule(source, {
-        compilerOptions: {
-          module: ts.ModuleKind.ESNext,
-          target: ts.ScriptTarget.ES2022,
-        },
-      }).outputText,
-    );
     const path = join(directory, "profile.json");
     await writeFile(
       path,
