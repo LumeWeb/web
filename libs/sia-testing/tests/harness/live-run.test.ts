@@ -84,6 +84,87 @@ async function fixture(
     await rm(directory, { force: true, recursive: true });
   }
 }
+it("oversized live metadata is rejected before opening the source or calling the agent", () =>
+  fixture(async (options, state) => {
+    const result = await withLiveRun(options, async (run) => {
+      const file = await bytesFixture({
+        bytes: Uint8Array.of(1),
+        name: "clip",
+      });
+      let opened = false;
+      await expect(
+        run.objects.upload({
+          file: {
+            ...file,
+            open() {
+              opened = true;
+              return file.open();
+            },
+          },
+          metadata: new Uint8Array(16 * 1024 + 1),
+          name: file.name,
+        }),
+      ).rejects.toMatchObject({ code: "invalid-input" });
+      expect(opened).toBe(false);
+    });
+    expect(result.summary.cleanup).toBe("clean");
+    expect((await state()).calls).toEqual(["authenticate"]);
+  }));
+it(
+  "journal exhaustion rejects the next upload before its agent creates an object",
+  () =>
+    fixture(async (options, state) => {
+      const path = join(dirname(options.journalFile), "larger-profile.json");
+      const document = profileDocument(options.profile);
+      await writeFile(
+        path,
+        JSON.stringify({
+          ...document,
+          limits: { ...document.limits, deadlineMs: 10000, maxObjects: 64 },
+        }),
+        { mode: 0o600 },
+      );
+      const profile = await loadLiveProfile(path, {
+        apiBaseUrl: document.apiBaseUrl,
+        mutations: true,
+        transfers: true,
+      });
+      await writeFile(
+        join(dirname(options.journalFile), "state.json"),
+        JSON.stringify({ ...(await state()), sealedBytes: 1024 * 1024 }),
+        { mode: 0o600 },
+      );
+      const result = await withLiveRun({ ...options, profile }, async (run) => {
+        const file = await bytesFixture({
+          bytes: Uint8Array.of(1),
+          name: "clip",
+        });
+        let accepted = 0;
+        for (; accepted < 32; accepted++) {
+          try {
+            await run.objects.upload({
+              file,
+              metadata: new Uint8Array(),
+              name: file.name,
+            });
+          } catch (error) {
+            expect(error).toMatchObject({ code: "journal-limit" });
+            break;
+          }
+        }
+        expect(
+          (await state()).calls.filter((call) => call === "upload"),
+        ).toHaveLength(accepted);
+        return accepted;
+      });
+      expect(result.summary.cleanup).toBe("clean");
+      expect(result.value).toBe(15);
+      expect((await state()).objects.map((object) => object.id)).toEqual([
+        "f".repeat(64),
+      ]);
+    }),
+  15000,
+);
 it.each(["delete", "revoke"])(
   "a failed %s does not prevent cleanup of other recorded resources",
   (operation) =>

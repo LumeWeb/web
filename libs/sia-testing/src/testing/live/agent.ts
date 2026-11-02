@@ -6,6 +6,10 @@ import { setTimeout as delay } from "node:timers/promises";
 import { deserialize, serialize } from "node:v8";
 import type { Sdk, SealedObject } from "@siafoundation/sia-storage";
 import type { LiveProfileDocument } from "./types.js";
+import {
+  maximumMetadataBytes,
+  maximumSealedObjectBytes,
+} from "./resource-limits.js";
 let sdk: Sdk | undefined;
 let api: typeof import("@siafoundation/sia-storage") | undefined;
 let profile: LiveProfileDocument | undefined;
@@ -155,9 +159,11 @@ async function resource(
     let result: unknown = null;
     code = "resource-error";
     if (operation === "upload") {
+      code = "invalid-input";
       if (
         !(input.bytes instanceof Uint8Array) ||
-        !(input.metadata instanceof Uint8Array)
+        !(input.metadata instanceof Uint8Array) ||
+        input.metadata.byteLength > maximumMetadataBytes
       )
         throw new Error("Invalid upload snapshot");
       if (
@@ -168,6 +174,7 @@ async function resource(
         code = "quota";
         throw new Error("Upload budget exceeded");
       }
+      code = "resource-error";
       objects++;
       uploadedBytes += input.bytes.byteLength;
       const initial = new api.PinnedObject();
@@ -193,10 +200,13 @@ async function resource(
                 },
               },
             );
+      const sealed = serialize(uploaded.seal(sdk.appKey())).toString("base64");
+      if (sealed.length > maximumSealedObjectBytes)
+        throw new Error("Invalid sealed object size");
       result = {
         objectId: uploaded.id(),
         observedShardBytes,
-        sealed: serialize(uploaded.seal(sdk.appKey())).toString("base64"),
+        sealed,
         sizeBytes: Number(uploaded.size()),
       };
     } else if (operation === "pin") {

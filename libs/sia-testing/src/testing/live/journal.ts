@@ -14,6 +14,7 @@ export interface Journal {
   ): Promise<void>;
   close(): Promise<void>;
   readonly path: string;
+  reserve(bytes: number): JournalReservation;
 }
 export type JournalEvent =
   | {
@@ -41,6 +42,10 @@ export type JournalEvent =
       readonly operation: string;
     }
   | { readonly id: string; readonly kind: "ack"; readonly result: unknown };
+export interface JournalReservation {
+  append(event: JournalEvent): Promise<void>;
+  release(): void;
+}
 export interface JournalSnapshot {
   readonly records: readonly (JournalEvent & { readonly sequence: number })[];
   readonly truncated: boolean;
@@ -218,38 +223,54 @@ function writer(
 ): Journal {
   let sequence = firstSequence;
   let bytes = firstBytes;
+  let reservedBytes = 0;
+  interface Allocation {
+    released: boolean;
+    remaining: number;
+  }
   let tail = Promise.resolve();
   let closing: Promise<void> | undefined;
+  /** Writes charge byte capacity before I/O so concurrent mutations cannot spend an acknowledgement's reservation. */
+  function append(
+    event: JournalEvent,
+    options?: { readonly cleanup: true },
+    allocation?: Allocation,
+  ): Promise<void> {
+    if (closing || allocation?.released)
+      return Promise.reject(failure("journal-closed"));
+    let line: string;
+    try {
+      line = JSON.stringify({ ...event, sequence });
+      validate(JSON.parse(line) as unknown, sequence);
+    } catch {
+      return Promise.reject(failure("journal-invalid"));
+    }
+    line += "\n";
+    const size = Buffer.byteLength(line);
+    if (allocation && size > allocation.remaining)
+      return Promise.reject(failure("journal-limit"));
+    const limit =
+      allocation || options?.cleanup || event.kind === "complete"
+        ? maximumBytes
+        : creationBytes;
+    if (bytes + reservedBytes + (allocation ? 0 : size) > limit)
+      return Promise.reject(failure("journal-limit"));
+    if (allocation) {
+      allocation.remaining -= size;
+      reservedBytes -= size;
+    }
+    sequence++;
+    bytes += size;
+    tail = tail.then(async () => {
+      await file.appendFile(line, "utf8");
+      await file.sync();
+    });
+    return tail;
+  }
   return Object.freeze(
     Object.defineProperties(
       {
-        append(
-          event: JournalEvent,
-          options?: { readonly cleanup: true },
-        ): Promise<void> {
-          if (closing) return Promise.reject(failure("journal-closed"));
-          let line: string;
-          try {
-            line = JSON.stringify({ ...event, sequence });
-            validate(JSON.parse(line) as unknown, sequence);
-          } catch {
-            return Promise.reject(failure("journal-invalid"));
-          }
-          const limit =
-            options?.cleanup || event.kind === "complete"
-              ? maximumBytes
-              : creationBytes;
-          if (Buffer.byteLength(line) + 1 + bytes > limit)
-            return Promise.reject(failure("journal-limit"));
-          sequence++;
-          line += "\n";
-          bytes += Buffer.byteLength(line);
-          tail = tail.then(async () => {
-            await file.appendFile(line, "utf8");
-            await file.sync();
-          });
-          return tail;
-        },
+        append,
         close(): Promise<void> {
           closing ??= (async () => {
             const errors: Error[] = [];
@@ -273,6 +294,24 @@ function writer(
           return closing;
         },
         path,
+        reserve(amount: number): JournalReservation {
+          if (closing) throw failure("journal-closed");
+          if (!Number.isSafeInteger(amount) || amount <= 0)
+            throw failure("journal-invalid");
+          if (bytes + reservedBytes + amount > creationBytes)
+            throw failure("journal-limit");
+          reservedBytes += amount;
+          const allocation: Allocation = { released: false, remaining: amount };
+          return Object.freeze({
+            append: (event: JournalEvent) =>
+              append(event, undefined, allocation),
+            release() {
+              if (allocation.released) return;
+              allocation.released = true;
+              reservedBytes -= allocation.remaining;
+            },
+          });
+        },
       },
       {
         [Symbol.for("nodejs.util.inspect.custom")]: {

@@ -34,6 +34,8 @@ The application callback must await its work and close resources it creates outs
 
 Profiles use the version 1 schema described in [live-auth.md](live-auth.md). Store the profile outside the checkout in an owner-only regular file. The API URL in consent must match the profile's normalized URL. The profile supplies application metadata and upload encoding alongside the authentication mode.
 
+Live upload metadata is limited to 16 KiB. Upload mutations reserve room for a sealed object of up to 1 MiB and their journal record fields before calling the SDK. Other concurrent mutations cannot spend those reserved bytes. Insufficient journal capacity therefore rejects creation before the SDK runs; filesystem write failures can still leave an uncertain result.
+
 Run-level `maxObjects`, `maxShares` and `maxLogicalUploadBytes` can lower the profile's limits. They cannot raise them. Accepted upload attempts reserve their object count and declared bytes before opening the source, and failed attempts retain those reservations. The source's byte count and SHA-256 digest must match its descriptor before SDK upload starts.
 
 The SDK agent checks observed uploaded-shard progress against the profile's `maxObservedShardBytes`. Progress callbacks do not account for every encrypted byte, retry or charge. No hard financial limit is claimed. Nonempty uploads require compatible, funded hosts on the existing server.
