@@ -5,7 +5,7 @@ export async function bytesFixture(input: {
   bytes: Uint8Array;
   name: string;
 }): Promise<TestFile> {
-  const stored = input.bytes.slice();
+  const stored = new Uint8Array(input.bytes);
   return Object.freeze({
     name: input.name,
     open: () =>
@@ -21,7 +21,10 @@ export async function bytesFixture(input: {
 }
 
 export async function digest(bytes: Uint8Array): Promise<string> {
-  const value = await crypto.subtle.digest("SHA-256", bytes.slice().buffer);
+  const value = await crypto.subtle.digest(
+    "SHA-256",
+    new Uint8Array(bytes).buffer,
+  );
   return [...new Uint8Array(value)]
     .map((byte) => byte.toString(16).padStart(2, "0"))
     .join("");
@@ -34,13 +37,18 @@ export async function readFixture(
 ): Promise<Uint8Array> {
   signal.throwIfAborted();
   const reader = file.open().getReader();
+  let cancellation: Promise<void> | undefined;
   const cancel = () => {
-    void reader.cancel(signal.reason).catch(() => undefined);
+    cancellation ??= reader.cancel(signal.reason);
+    void cancellation.catch(() => undefined);
   };
   signal.addEventListener("abort", cancel, { once: true });
   let complete = false;
+  const failures: unknown[] = [];
+  let result: Uint8Array | undefined;
   try {
-    const chunks: Uint8Array[] = [];
+    // The accepted byte length also bounds storage when a source emits arbitrarily many empty chunks.
+    const bytes = new Uint8Array(file.sizeBytes);
     let length = 0;
     for (;;) {
       signal.throwIfAborted();
@@ -52,26 +60,34 @@ export async function readFixture(
         length + next.value.byteLength > file.sizeBytes
       )
         throw invalidFile();
-      const bytes = next.value.slice();
-      length += bytes.byteLength;
-      chunks.push(bytes);
+      bytes.set(next.value, length);
+      length += next.value.byteLength;
     }
     if (length !== file.sizeBytes) throw invalidFile();
     complete = true;
-    const bytes = new Uint8Array(length);
-    let offset = 0;
-    for (const chunk of chunks) {
-      bytes.set(chunk, offset);
-      offset += chunk.byteLength;
-    }
     if ((await digest(bytes)) !== file.sha256) throw invalidFile();
     signal.throwIfAborted();
-    return bytes;
+    result = bytes;
+  } catch (error) {
+    failures.push(error);
+  }
+  signal.removeEventListener("abort", cancel);
+  if (!complete) cancel();
+  try {
+    await cancellation;
+  } catch (error) {
+    failures.push(error);
   } finally {
-    signal.removeEventListener("abort", cancel);
-    if (!complete) cancel();
     reader.releaseLock();
   }
+  if (failures.length === 1) throw failures[0];
+  if (failures.length > 1)
+    throw new AggregateError(
+      failures,
+      "Fixture read and source cancellation failed",
+      { cause: failures[1] },
+    );
+  return result!;
 }
 
 function invalidFile(): Error & { code: string } {

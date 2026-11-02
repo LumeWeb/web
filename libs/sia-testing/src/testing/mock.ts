@@ -227,7 +227,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
           throw failure("not-found", "Object is missing");
         return {
           id,
-          metadata: record.metadata.slice(),
+          metadata: new Uint8Array(record.metadata),
           sizeBytes: record.handle.sizeBytes,
         };
       }
@@ -237,14 +237,13 @@ export function createMockSia(options: MockOptions = {}): MockSia {
           return Promise.resolve();
         },
         async download(object, range = {}) {
-          const context = authorize(object.id);
-          describe(context, object.id);
+          // Getter-backed descriptors must use the same ID for authorization and the SDK lookup.
+          const id = object.id;
+          const context = authorize(id);
+          describe(context, id);
           if (range.offset !== undefined) integer(range.offset);
           if (range.length !== undefined) integer(range.length);
-          return context.sdk!.download(
-            { id: () => object.id },
-            { ...range, signal },
-          );
+          return context.sdk!.download({ id: () => id }, { ...range, signal });
         },
         async object(id) {
           const context = authorize(id);
@@ -384,7 +383,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
                 throw failure("limit", "Run upload allowance exceeded");
               context.objectAttempts++;
               context.reservedBytes += file.sizeBytes;
-              const metadata = input.metadata.slice();
+              const metadata = new Uint8Array(input.metadata);
               const bytes = await readFixture(file, context.signal);
               open(context);
               const handle = Object.freeze({
