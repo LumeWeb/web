@@ -12,7 +12,7 @@ it("an unsupported backend cannot report mock success", async () => {
   await expect(
     withSiaRun(
       {
-        backend: { kind: "live", profileFile: "/not-opened" },
+        backend: { kind: "cluster" },
       } as unknown as RunOptions,
       () => Promise.resolve("wrong backend"),
     ),

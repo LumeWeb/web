@@ -10,6 +10,21 @@ export interface AppDefinition {
   readonly serviceUrl: string;
 }
 export type BrowserAccess = Owned<"access">;
+export interface LiveRun {
+  readonly backend: "live";
+  readonly id: string;
+  readonly objects: ManagedObjects;
+  readonly ownerAccess: BrowserAccess;
+  readonly shares: ManagedShares;
+}
+export interface LiveRunSummary {
+  readonly backend: "live";
+  readonly cleanup: "clean" | "uncertain";
+  readonly id: string;
+  readonly journalFile: string;
+  readonly logicalUploadedBytes: number;
+  readonly observedShardBytes: number;
+}
 export interface ManagedObjects {
   delete(object: TestObject): Promise<void>;
   inspect(object: TestObject): Promise<"missing" | "present">;
@@ -52,6 +67,12 @@ export interface MockRunOptions {
   readonly limits?: Partial<RunLimits>;
   readonly signal?: AbortSignal;
 }
+export interface MockRunSummary {
+  readonly backend: "mock";
+  readonly cleanup: "clean";
+  readonly id: string;
+  readonly logicalUploadedBytes: number;
+}
 export interface MockSia {
   actor(label: string): ActorRef;
   advanceTime(milliseconds: number): void;
@@ -65,7 +86,7 @@ export interface MockSia {
   run<T>(
     options: MockRunOptions,
     use: (run: MockRun) => Promise<T>,
-  ): Promise<RunResult<T>>;
+  ): Promise<RunResult<T, MockRunSummary>>;
 }
 export interface ReadObject {
   readonly id: string;
@@ -101,16 +122,12 @@ export interface RunLimits {
   readonly maxObjects: number;
   readonly maxShares: number;
 }
-export interface RunResult<T> {
-  readonly summary: RunSummary;
+export interface RunResult<T, Summary extends RunSummary = RunSummary> {
+  readonly summary: Summary;
   readonly value: T;
 }
-export interface RunSummary {
-  readonly backend: "mock";
-  readonly cleanup: "clean";
-  readonly id: string;
-  readonly logicalUploadedBytes: number;
-}
+export type RunSummary = LiveRunSummary | MockRunSummary;
+export type SiaRun = LiveRun | MockRun;
 export interface TestFile {
   readonly name: string;
   open(): ReadableStream<Uint8Array>;

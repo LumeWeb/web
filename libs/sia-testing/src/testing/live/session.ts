@@ -1,4 +1,6 @@
 /** Authenticated sessions keep SDK credentials behind identity-bound Node handles. */
+import { createRequire } from "node:module";
+import { pathToFileURL } from "node:url";
 import { approveLiveConnection } from "./approval.js";
 import { profileDocument } from "./profile.js";
 import { type OwnedProcess, startOwnedProcess } from "./process.js";
@@ -44,7 +46,16 @@ export async function openLiveSession(
   const agent = startOwnedProcess({
     cleanupDeadlineMs: document.limits.cleanupDeadlineMs,
     deadlineMs: document.limits.deadlineMs,
-    entrypoint: options.agentModule ?? new URL("./agent.js", import.meta.url),
+    entrypoint:
+      options.agentModule ??
+      new URL(
+        "./dist/esm/testing/live/agent.js",
+        pathToFileURL(
+          createRequire(import.meta.url).resolve(
+            "@lumeweb/sia-testing/package.json",
+          ),
+        ),
+      ),
     async onEvent(event) {
       if (
         event.name !== "approval" ||

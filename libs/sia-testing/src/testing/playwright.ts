@@ -2,8 +2,8 @@
 import { test as base, type Page } from "@playwright/test";
 import {
   privateConnection as connect,
+  type MockNodeRunOptions,
   ownRunResource,
-  type RunOptions,
   withSiaRun,
 } from "./node.js";
 import type { ActorRef, BrowserAccess, MockRun } from "./types.js";
@@ -19,7 +19,7 @@ export interface BrowserBinding {
 export type BrowserRun = MockRun & {
   readonly browser: { open(binding: BrowserBinding): Promise<Page> };
 };
-export function createSiaTest(options: RunOptions) {
+export function createSiaTest(options: MockNodeRunOptions) {
   return base.extend<{ sia: BrowserRun }>({
     sia: async (
       { baseURL, browser, contextOptions, proxy, serviceWorkers },

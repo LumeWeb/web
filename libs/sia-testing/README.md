@@ -2,6 +2,8 @@
 
 Managed mock runs provide fixture objects and sharing keys without a Sia server. A run owns its resources and closes retained readers when its callback ends. HTTP and MSW use the same backend as in-process readers.
 
+Node runs can also use an existing server through an owner-only external profile and explicit consent. [Live runs](docs/live-runs.md) journal fixture ownership and recover known resources without account-wide pruning. Nonempty live transfers and browser compatibility have not been verified.
+
 ## Node runs
 
 ```ts

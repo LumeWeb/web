@@ -1,10 +1,18 @@
 /** Managed Node runs close application resources before deleting their fixture resources. */
-export { fileFixture, withSiaRun } from "./testing/node.js";
-export type { RunOptions } from "./testing/node.js";
+export { fileFixture, recoverSiaRun, withSiaRun } from "./testing/node.js";
 export type {
+  LiveNodeRunOptions,
+  MockNodeRunOptions,
+  RecoveryOptions,
+  RunOptions,
+} from "./testing/node.js";
+export type {
+  LiveRun,
+  LiveRunSummary,
   MockRun,
   RunResult,
   RunSummary,
+  SiaRun,
   TestFile,
   TestObject,
   TestShare,
