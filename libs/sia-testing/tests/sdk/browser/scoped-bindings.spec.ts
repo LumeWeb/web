@@ -96,7 +96,6 @@ test("a browser uploads an admitted raw body over the loopback listener", async 
             const object = await writer.upload({
               file,
               metadata: new Uint8Array(),
-              name: file.name,
             });
             const uploaded = await writer.inspect(object);
             await writer.pin(object);

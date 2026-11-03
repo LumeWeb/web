@@ -186,7 +186,9 @@ export function createMockApplication(
                 "byteLength",
               )!.get!.call(metadata) as number)
             : Infinity;
-        const name = input.name;
+        let name = input.name;
+        // oxlint-disable-next-line typescript/prefer-nullish-coalescing -- Null must reject rather than select the file label.
+        if (name === undefined) name = file.name;
         if (
           size > 1024 ||
           typeof name !== "string" ||

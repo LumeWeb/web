@@ -221,7 +221,7 @@ export async function withLiveRun<T>(
         upload(input) {
           return track(async () => {
             const source = input.file;
-            const name = input.name;
+            let name = input.name;
             const suppliedMetadata = input.metadata;
             const file = {
               name: source.name,
@@ -229,7 +229,10 @@ export async function withLiveRun<T>(
               sha256: source.sha256,
               sizeBytes: source.sizeBytes,
             };
+            // oxlint-disable-next-line typescript/prefer-nullish-coalescing -- Null must reject rather than select the file label.
+            if (name === undefined) name = file.name;
             if (
+              typeof name !== "string" ||
               !name ||
               !Number.isSafeInteger(file.sizeBytes) ||
               file.sizeBytes < 0 ||

@@ -31,7 +31,7 @@ test("the recipient reads a managed fixture", async ({ signal }) => {
     },
     async (run) => {
       const file = await bytesFixture({ name: "document", bytes: Uint8Array.of(1, 2) });
-      const object = await run.objects.upload({ file, name: file.name, metadata: new Uint8Array() });
+      const object = await run.objects.upload({ file, metadata: new Uint8Array() });
       const share = await run.shares.create({ objects: [object] });
       const reader = run.mock.reader({ access: share.access, as: run.mock.actor("recipient") });
       try {
@@ -46,7 +46,7 @@ test("the recipient reads a managed fixture", async ({ signal }) => {
 });
 ```
 
-The test driver owns the fixtures. `run.objects.upload` uploads and pins before returning. An application's `ApplicationPort.upload` stages bytes until the application calls `pin`; publication is a separate driver action. Metadata is opaque bytes. Empty metadata is intentional here, not a usable file record for every application. These ports do not replace the full storage SDK or model packed finalization and later metadata updates.
+The test driver owns the fixtures. `run.objects.upload` uploads and pins before returning. An application's `ApplicationPort.upload` stages bytes until the application calls `pin`; publication is a separate driver action. The optional upload `name` defaults to the snapshotted `TestFile.name` label; it does not set an application filename. Metadata stays required and is passed through as opaque bytes. Empty metadata is intentional here, not a usable file record for every application. These ports do not replace the full storage SDK or model packed finalization and later metadata updates.
 
 `fileFixture(path)` from `/node` streams a local file and records its digest. Upload rejects changed bytes. Files are limited to 16 MiB. Mock runs default to 8 object reservations, 8 share reservations, and 16 MiB of logical uploads. Deletion does not refund these allowances.
 
@@ -97,7 +97,7 @@ const siaTest = test.extend<{ sia: MockRun }>({
 for (const label of ["left", "right"]) {
   siaTest.concurrent(`isolates ${label}'s objects`, async ({ sia }) => {
     const file = await bytesFixture({ name: label, bytes: Uint8Array.of(3) });
-    const object = await sia.objects.upload({ file, name: file.name, metadata: new Uint8Array() });
+    const object = await sia.objects.upload({ file, metadata: new Uint8Array() });
     const actor = sia.mock.actor(label);
     const reader = sia.mock.reader({ access: sia.ownerAccess, as: actor });
     try {
@@ -142,7 +142,7 @@ test("publishes a pinned application object explicitly", async ({ signal }) => {
         const writer = mock.application({ access: run.ownerAccess, as: mock.actor("uploader") });
         try {
           const file = await bytesFixture({ name: "document", bytes: Uint8Array.of(4) });
-          const pending = await writer.upload({ file, name: file.name, metadata: new Uint8Array() });
+          const pending = await writer.upload({ file, metadata: new Uint8Array() });
           expect(await writer.inspect(pending)).toBe("uploaded");
           await writer.pin(pending);
           expect(await writer.inspect(pending)).toBe("pinned");

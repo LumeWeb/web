@@ -35,7 +35,8 @@ export interface ApplicationPort {
   upload(input: {
     readonly file: TestFile;
     readonly metadata: Uint8Array;
-    readonly name: string;
+    /** Defaults to the snapshotted file label; metadata remains explicit. */
+    readonly name?: string | undefined;
     readonly signal?: AbortSignal;
   }): Promise<ApplicationObject>;
 }
@@ -66,7 +67,8 @@ export interface ManagedObjects {
   upload(input: {
     readonly file: TestFile;
     readonly metadata: Uint8Array;
-    readonly name: string;
+    /** Defaults to the snapshotted file label; metadata remains explicit. */
+    readonly name?: string | undefined;
   }): Promise<TestObject>;
 }
 export interface ManagedShares {
