@@ -1,4 +1,4 @@
-/** Synthetic replies test the client DTO boundary without imitating native SDK responses. */
+/** Malformed owner-share replies must be rejected by the client. */
 import { expect, it, vi } from "vitest";
 import { createMockOwnerShares } from "../../src/client.js";
 
@@ -60,7 +60,7 @@ it.each([
   }
 });
 
-it("validates detail and content replies after a reference is materialized", async () => {
+it("rejects malformed detail and object replies for a known share", async () => {
   const fetch = vi
     .spyOn(globalThis, "fetch")
     .mockResolvedValueOnce(

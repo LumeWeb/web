@@ -50,7 +50,7 @@ Playwright bindings receive connection data in `apply(page, privateConnection)`.
 
 MSW and Playwright are optional peers. Portable mock/client imports contain no Node or storage SDK runtime. The low-level fixture/model/SDK exports and `/msw/node` wrapper are removed; there are no compatibility aliases.
 
-`/node` accepts mock backends and explicitly consented live profiles. Application HTTP/MSW ports speak a synthetic fixture protocol, not the native Indexd protocol. Native SDK controls provide separate installed-SDK evidence; portable package consumption does not establish native SDK compatibility. The package does not deploy services, fund accounts or run a local cluster.
+`/node` accepts mock backends and explicitly consented live profiles. Application HTTP/MSW ports speak a synthetic fixture protocol, not the native Indexd protocol. The package does not deploy services, fund accounts or run a local cluster.
 
 ## Inspect mock shares as their owner
 
