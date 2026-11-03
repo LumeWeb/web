@@ -26,14 +26,35 @@ beforeEach(async () => {
   const files: Record<string, string> = {
     "client.d.ts": `
       import type { MockConnection } from "./http.js";
-      import type { OwnerPort } from "./mock.js";
+      import type { OwnerPort, TestFile } from "./mock.js";
+      declare const applicationBrand: unique symbol;
+      export interface ApplicationObject { id: string; readonly [applicationBrand]: true; }
+      export declare function createMockApplication(connection: MockConnection, credential: MockCredential): {
+        upload(input: {file: TestFile; name: string; metadata: Uint8Array}): Promise<ApplicationObject>;
+        inspect(object: ApplicationObject): Promise<"missing" | "uploaded" | "pinned">;
+        pin(object: ApplicationObject): Promise<void>;
+        delete(object: ApplicationObject): Promise<void>;
+        events(input: {cursor: null | {after: string; id: string}; limit: number}): Promise<{nextCursor: null | {after: string; id: string}}>;
+        close(): Promise<void>;
+      };
       export declare function createMockOwnerShares(connection: MockConnection, credential: MockCredential): OwnerPort;
       export interface MockCredential { kind: "app-key"; keyHex: string; }
       export declare function createMockReader(connection: MockConnection, credential: MockCredential): {
         object(id: string): Promise<{id: string; sizeBytes: number}>;
         close(): Promise<void>;
       };`,
-    "client.js": `export const createMockOwnerShares = (connection) => connection.mock.ownerShares();
+    "client.js": `export const createMockApplication = (connection) => {
+      const mock = connection.mock;
+      return {
+        upload: async ({file}) => { const object = {id: String(mock.data.size), state: "uploaded"}; mock.data.set(object.id, object); return object; },
+        inspect: async (object) => object.state,
+        pin: async (object) => { object.state = "pinned"; },
+        delete: async (object) => { object.state = "missing"; },
+        events: async () => ({events: mock.published || [], nextCursor: null}),
+        close: async () => {}
+      };
+    };
+    export const createMockOwnerShares = (connection) => connection.mock.ownerShares();
     export const createMockReader = (connection) => ({
       object: async (id) => connection.mock.data.get(id),
       download: async (object) => new Blob([object.bytes]).stream(), close: async () => {}
@@ -49,14 +70,15 @@ beforeEach(async () => {
     "http.js": `import "node:http"; export const startMockServer = async (mock) => ({close: async () => {}, connection: () => ({mock, credential: {kind: "app-key", keyHex: "a".repeat(64)}})});`,
     "mock.d.ts": `
       export interface TestFile { name: string; sizeBytes: number; }
-      export interface TestObject { id: string; sizeBytes: number; }
+      declare const fixtureBrand: unique symbol;
+      export interface TestObject { id: string; sizeBytes: number; readonly [fixtureBrand]: true; }
       export interface OwnerPort {
         list(page: {offset: number; limit: number}): Promise<{items: {ref: object; description: string}[]}>;
         detail(ref: object): Promise<{statistics: {objectCount: number; logicalBytes: number}}>;
         objects(ref: object, page: {offset: number; limit: number}): Promise<{items: {id: string; sizeBytes: number; metadata: Uint8Array}[]}>;
         close(): Promise<void>;
       }
-      export interface MockRun { shares: { create(input: {objects: TestObject[]; description?: string}): Promise<object> }; mock: MockSia; ownerAccess: object; objects: { upload(input: {file: TestFile; metadata: Uint8Array; name: string}): Promise<TestObject> }; }
+      export interface MockRun { shares: { create(input: {objects: TestObject[]; description?: string}): Promise<object> }; mock: MockSia; ownerAccess: object; objects: { delete(object: TestObject): Promise<void>; upload(input: {file: TestFile; metadata: Uint8Array; name: string}): Promise<TestObject> }; }
       export interface MockSia { ownerShares(input: {access: object; as: object}): OwnerPort; actor(label: string): object; run<T>(options: unknown, use: (run: MockRun) => Promise<T>): Promise<{value: T}>; close(): Promise<void>; }
       export declare function createMockSia(): MockSia;
       export declare function bytesFixture(input: {bytes: Uint8Array; name: string}): Promise<TestFile>;`,
@@ -71,7 +93,7 @@ beforeEach(async () => {
           objects: async () => ({items: share.objects.map(({id, metadata, sizeBytes}) => ({id, metadata, sizeBytes}))}),
           close: async () => {}
         });
-        const mock = { data, ownerShares, actor: () => ({}), close: async () => {}, async run(_options, use) {
+        const mock = { data, ownerShares, publish: async () => { mock.published = [...data.values()]; }, actor: () => ({}), close: async () => {}, async run(_options, use) {
           const run = {mock, shares: {create: async (input) => (share = input)}, ownerAccess: {}, objects: {async upload({file, metadata}) {
             const object = { id: String(data.size), sizeBytes: file.sizeBytes, metadata, bytes: file.bytes };
             data.set(object.id, object); return object;

@@ -46,6 +46,7 @@ export interface MockDownloadOptions extends MockCallOptions {
 export interface MockNetwork {
   control: MockControl;
   createSdk(options: { accountId: string; device?: string }): MockSdk;
+  discardUpload(accountId: string, id: string): void;
   model: IndexdModel;
   seedObject(accountId: string, id: string, bytes: Uint8Array): MockObject;
   serialize(): string;
@@ -226,6 +227,7 @@ export function createMockNetwork(
         });
         try {
           await controls.before(request, signal);
+          signal?.throwIfAborted();
           const value = await action(request);
           if (!stream) request.status = "completed";
           return value;
@@ -378,6 +380,7 @@ export function createMockNetwork(
             id,
             async (request) => {
               await controls.upload(owned.byteLength, signal);
+              signal?.throwIfAborted();
               controls.checkOnline(device);
               const object = upload(accountId, id, owned);
               request.bytes = owned.byteLength;
@@ -388,6 +391,15 @@ export function createMockNetwork(
           );
         },
       };
+    },
+    discardUpload(accountId, id) {
+      const record = payload(accountId, id);
+      if (model.object(accountId, id))
+        throw new Error("Cannot discard a pinned object");
+      if (model.slabIdentity(accountId, record.slabId) !== record.identity)
+        throw new Error("Upload slab identity changed");
+      model.unpinSlab(accountId, record.slabId);
+      forgetPayload(accountId, id);
     },
     model,
     seedObject(accountId, id, bytes) {

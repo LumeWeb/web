@@ -1,6 +1,6 @@
 /** Checks scoped run and reader declarations without MSW or Playwright installed. */
 import { createMockSia, bytesFixture } from "@lumeweb/sia-testing/mock";
-import { createMockOwnerShares, createMockReader } from "@lumeweb/sia-testing/client";
+import { createMockApplication, createMockOwnerShares, createMockReader } from "@lumeweb/sia-testing/client";
 import { startMockServer } from "@lumeweb/sia-testing/http";
 import { withSiaRun } from "@lumeweb/sia-testing/node";
 export const mock = createMockSia();
@@ -21,6 +21,19 @@ export async function typedConsumer() {
     await owner.close();
     const size: number = (await reader.object(object.id)).sizeBytes;
     await reader.close();
+    const writer = createMockApplication(binding, binding.credential);
+    const pending = await writer.upload({ file, name: file.name, metadata: new Uint8Array() });
+    const staged: "missing" | "uploaded" | "pinned" = await writer.inspect(pending);
+    await writer.pin(pending);
+    const cursor = (await writer.events({cursor:null,limit:1})).nextCursor;
+    await writer.events({cursor,limit:1});
+    // @ts-expect-error fixture handles do not authorize application writes
+    await writer.pin(object);
+    // @ts-expect-error application handles do not authorize fixture mutations
+    await run.objects.delete(pending);
+    await writer.delete(pending);
+    await writer.close();
+    void staged;
     await server.close();
     return size + logicalBytes + objectSize;
   });
