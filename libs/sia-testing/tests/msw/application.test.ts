@@ -186,3 +186,75 @@ it("endpoint close cancels a held pin without closing the client", async () => {
     await mock.close();
   }
 });
+it("client close joins local source cancellation before settling", async () => {
+  const mock = createMockSia();
+  const endpoint = createMockHandlers(mock, {
+    baseUrl: "https://source-join.example.invalid/",
+  });
+  const server = setupServer(...endpoint.handlers);
+  server.listen({ onUnhandledRequest: "error" });
+  let finish!: () => void;
+  const finishing = new Promise<void>((resolve) => {
+    finish = resolve;
+  });
+  try {
+    await mock.run({ app }, async (run) => {
+      const connection = endpoint.connection({
+        access: run.ownerAccess,
+        as: mock.actor("writer"),
+      });
+      const writer = createMockApplication(connection, connection.credential);
+      let opened!: () => void;
+      const opening = new Promise<void>((resolve) => {
+        opened = resolve;
+      });
+      let cancel!: () => void;
+      const cancelling = new Promise<void>((resolve) => {
+        cancel = resolve;
+      });
+      const upload = writer
+        .upload({
+          file: {
+            name: "n",
+            open() {
+              opened();
+              return new ReadableStream({
+                async cancel() {
+                  cancel();
+                  await finishing;
+                },
+              });
+            },
+            sha256: "0".repeat(64),
+            sizeBytes: 1,
+          },
+          metadata: new Uint8Array(),
+          name: "n",
+        })
+        .catch((error: unknown) => error);
+      try {
+        await opening;
+        let settled = false;
+        const closing = writer.close();
+        void closing.then(() => {
+          settled = true;
+        });
+        await cancelling;
+        await new Promise<void>((resolve) => setTimeout(resolve, 0));
+        expect(settled).toBe(false);
+        finish();
+        await closing;
+        expect(await upload).toBeInstanceOf(Error);
+      } finally {
+        finish();
+        await writer.close();
+        await upload;
+      }
+    });
+  } finally {
+    finish();
+    await endpoint.close();
+    server.close();
+    await mock.close();
+  }
+});

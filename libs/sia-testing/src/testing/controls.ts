@@ -65,7 +65,7 @@ interface LinkState {
   rate: null | number;
   transfer: ReturnType<typeof createTransferLink>;
 }
-export function createRequestControls() {
+export function createRequestControls(records: RequestReceipt[] = []) {
   const holds = new Set<Held>();
   const links = new Map<ActorRef, LinkState>();
   function link(actor: ActorRef): LinkState {
@@ -87,7 +87,6 @@ export function createRequestControls() {
     remaining: number;
     selector: InternalSelector;
   }[] = [];
-  const records: RequestReceipt[] = [];
   function matches(selector: InternalSelector, request: RequestReceipt) {
     return (
       selector.operation === request.operation &&

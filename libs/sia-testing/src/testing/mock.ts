@@ -5,10 +5,15 @@ import {
   type MockNetwork,
   type MockSdk,
 } from "../sdk/index.js";
+import { withAbort } from "../sdk/abort.js";
 import { createMutationControls } from "./mutations.js";
 import type { ApplicationObject, ApplicationPort } from "./types.js";
 import { readFixture } from "./files.js";
-import { createRequestControls, type RequestSelector } from "./controls.js";
+import {
+  createRequestControls,
+  type RequestReceipt,
+  type RequestSelector,
+} from "./controls.js";
 import {
   createOwnerSharePort,
   ownerPage,
@@ -84,7 +89,8 @@ export function createMockSia(options: MockOptions = {}): MockSia {
     new Date(start === undefined ? Date.now() : start + elapsed);
   const active = new Set<Context>();
   const actors = new WeakSet<ActorRef>();
-  const controls = createRequestControls();
+  const records: RequestReceipt[] = [];
+  const controls = createRequestControls(records);
   const credentials = new Map<string, BrowserAccess>();
   const grants = new WeakMap<BrowserAccess, Grant>();
   const objects = new WeakMap<
@@ -105,7 +111,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
       throw failure("foreign-handle", "Unknown actor");
     if (selector.object && !applicationObjects.has(selector.object))
       throw failure("foreign-handle", "Unknown application object");
-  });
+  }, records);
   const shares = new WeakMap<
     TestShare,
     { context: Context; record: ShareRecord }
@@ -322,7 +328,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
         signal: AbortSignal,
         operation: "delete" | "pin" | "upload",
         objectId: string | undefined,
-        action: () => Promise<T>,
+        action: (receipt: RequestReceipt) => Promise<T>,
       ): Promise<T> {
         const receipt = await mutations.begin(
           actor,
@@ -333,8 +339,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
         try {
           signal.throwIfAborted();
           authorize();
-          const value = await action();
-          receipt.committed = true;
+          const value = await action(receipt);
           receipt.status = "completed";
           return value;
         } catch (error) {
@@ -361,14 +366,38 @@ export function createMockSia(options: MockOptions = {}): MockSia {
               signal,
               "delete",
               record.handle.id,
-              async () => {
+              async (receipt) => {
+                // Sharing the SDK call's signal or receipt would attribute one caller's cancellation to another.
+                while (record.deletion) {
+                  await withAbort(
+                    record.deletion.catch(() => undefined),
+                    signal,
+                  );
+                }
+                signal.throwIfAborted();
+                authorize();
                 if (record.deleted) return;
-                if (context.network!.model.object(context.id, record.handle.id))
-                  await context.sdk!.deleteObject(record.handle.id, { signal });
-                else
-                  context.network!.discardUpload(context.id, record.handle.id);
-                record.deleted = true;
-                record.metadata = new Uint8Array();
+                const deletion = (record.deletion = (async () => {
+                  if (
+                    context.network!.model.object(context.id, record.handle.id)
+                  )
+                    await context.sdk!.deleteObject(record.handle.id, {
+                      signal,
+                    });
+                  else
+                    context.network!.discardUpload(
+                      context.id,
+                      record.handle.id,
+                    );
+                  receipt.committed = true;
+                  record.deleted = true;
+                  record.metadata = new Uint8Array();
+                })());
+                try {
+                  await deletion;
+                } finally {
+                  if (record.deletion === deletion) delete record.deletion;
+                }
               },
             );
           });
@@ -434,14 +463,21 @@ export function createMockSia(options: MockOptions = {}): MockSia {
           return call(options.signal, async (context, signal) => {
             const record = owned(context, object);
             if (record.deleted) throw failure("not-found", "Object is missing");
-            await mutate(context, signal, "pin", record.handle.id, () => {
-              if (record.deleted)
-                throw failure("not-found", "Object is missing");
-              return context.sdk!.pinObject(
-                { id: () => record.handle.id },
-                { signal },
-              );
-            });
+            await mutate(
+              context,
+              signal,
+              "pin",
+              record.handle.id,
+              async (receipt) => {
+                if (record.deleted)
+                  throw failure("not-found", "Object is missing");
+                await context.sdk!.pinObject(
+                  { id: () => record.handle.id },
+                  { signal },
+                );
+                receipt.committed = true;
+              },
+            );
           });
         },
         upload(input) {
@@ -491,10 +527,11 @@ export function createMockSia(options: MockOptions = {}): MockSia {
                 signal,
                 "upload",
                 undefined,
-                async () => {
+                async (receipt) => {
                   const id = identifier();
                   await context.sdk!.upload(bytes, { id, signal });
                   committed = true;
+                  receipt.committed = true;
                   const internal = Object.freeze({
                     id,
                     sha256: file.sha256,
@@ -541,7 +578,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
         controls.control.setLink(actor, input);
       },
     },
-    history: () => [...controls.history(), ...mutations.history()],
+    history: controls.history,
     mutationFaults: mutations.control,
     ownerShares({ access: handle, as: actor }) {
       environmentOpen();

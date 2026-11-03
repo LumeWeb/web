@@ -263,15 +263,22 @@ export function createMockApplication(
           completed = true;
           return object;
         } finally {
-          clearTimeout(timer);
-          // Cancellation consumes only an unused admission; it cannot delete a committed upload.
-          if (!completed)
-            await call(
-              "app-upload-cancel",
-              "",
-              AbortSignal.timeout(30_000),
-              token,
-            ).catch(() => undefined);
+          try {
+            // A closed client must not wait for remote admission cleanup; the lease also expires server-side.
+            if (
+              !completed &&
+              !lifetime.signal.aborted &&
+              !expiry.signal.aborted
+            )
+              await call(
+                "app-upload-cancel",
+                "",
+                AbortSignal.any([lifetime.signal, expiry.signal]),
+                token,
+              ).catch(() => undefined);
+          } finally {
+            clearTimeout(timer);
+          }
         }
       });
     },

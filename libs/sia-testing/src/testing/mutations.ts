@@ -1,5 +1,9 @@
 /** Mutation controls stop before effects and never manufacture a lost acknowledgement. */
-import { createRequestControls, type RequestHold } from "./controls.js";
+import {
+  createRequestControls,
+  type RequestHold,
+  type RequestReceipt,
+} from "./controls.js";
 import type { ActorRef, ApplicationObject } from "./types.js";
 export interface MockMutationFaults {
   fail(
@@ -16,8 +20,9 @@ export interface MutationSelector {
 }
 export function createMutationControls(
   validate: (selector: MutationSelector) => void,
+  records: RequestReceipt[] = [],
 ) {
-  const controls = createRequestControls();
+  const controls = createRequestControls(records);
   const control: MockMutationFaults = {
     fail(selector, options) {
       selector = { ...selector };
