@@ -3,7 +3,7 @@ const { createRequestControls } =
   /** @type {typeof import("../../src/testing/controls.js")} */ (
     await import(process.argv[2])
   );
-const controls = createRequestControls();
+const controls = createRequestControls([], () => "reader");
 const actor = /** @type {import("../../src/testing/types.js").ActorRef} */ ({});
 const signal = new AbortController().signal;
 const mode = process.argv[3];

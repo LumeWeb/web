@@ -1,4 +1,5 @@
 /** Owner clients retain opaque local references while authenticated connections carry wire tokens. */
+import { domainError } from "./diagnostics.js";
 import { createMockCalls, readObject } from "./client.js";
 import type { MockCredential } from "./runtime.js";
 import type { MockConnection } from "./transport.js";
@@ -77,8 +78,10 @@ export function createMockOwnerShares(
     ref?: OwnerShareRef,
   ): Promise<ReadPage<T>> {
     const { limit, offset, signal } = input;
-    if (!integer(offset) || !integer(limit) || limit === 0)
-      throw failure("invalid-input");
+    if (!integer(offset))
+      throw domainError(operation, { code: "invalid-input", field: "offset" });
+    if (!integer(limit) || limit === 0)
+      throw domainError(operation, { code: "invalid-input", field: "limit" });
     const value: unknown = await (
       await call(
         operation,

@@ -1,4 +1,5 @@
 /** Fetch-backed read ports expose cancellation before the server sends headers. */
+import { domainError } from "./diagnostics.js";
 import type { MockCredential } from "./runtime.js";
 import type { MockConnection } from "./transport.js";
 import type { ReadObject, ReadPort } from "./types.js";
@@ -37,14 +38,7 @@ export function createMockCalls(
     });
     if (!response.ok) {
       const value: unknown = await response.json();
-      const code =
-        value &&
-        typeof value === "object" &&
-        "code" in value &&
-        typeof value.code === "string"
-          ? value.code
-          : "unavailable";
-      throw Object.assign(new Error("Mock read failed"), { code });
+      throw domainError(operation, value);
     }
     return response;
   };

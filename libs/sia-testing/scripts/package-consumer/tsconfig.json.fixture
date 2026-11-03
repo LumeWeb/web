@@ -10,5 +10,5 @@
     "typeRoots": ["./node_modules/@types"],
     "types": ["node"]
   },
-  "files": ["pure.ts"]
+  "files": ["pure.ts", "read-controls.ts"]
 }

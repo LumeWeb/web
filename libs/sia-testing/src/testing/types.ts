@@ -116,6 +116,7 @@ export interface MockRunSummary {
   readonly logicalUploadedBytes: number;
 }
 export interface MockSia {
+  /** The label appears in driver receipts; only the returned reference selects this actor. */
   actor(label: string): ActorRef;
   advanceTime(milliseconds: number): void;
   application(input: {

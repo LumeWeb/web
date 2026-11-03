@@ -1,4 +1,9 @@
 /** HTTP and MSW readers use one dispatcher and authenticate the application's current credential. */
+import {
+  diagnosticField,
+  invalidInput,
+  isEndpointShutdown,
+} from "./diagnostics.js";
 import { isLostReply } from "./reply-loss.js";
 import { createApplicationTransport } from "./application-transport.js";
 import { type MockCredential, mockRuntime } from "./runtime.js";
@@ -143,9 +148,7 @@ export function createMockEndpoint(mock: MockSia, base: string) {
         const value = url.searchParams.get(key);
         if (value === null) return fallback;
         if (!/^\d+$/.test(value) || !Number.isSafeInteger(Number(value)))
-          throw Object.assign(new Error("Invalid range"), {
-            code: "invalid-input",
-          });
+          throw invalidInput(key, `${key} must be a nonnegative safe integer`);
         return Number(value);
       };
       if (
@@ -242,15 +245,19 @@ export function createMockEndpoint(mock: MockSia, base: string) {
       });
     } catch (error) {
       if (isLostReply(error)) throw error;
-      const code =
-        error &&
-        typeof error === "object" &&
-        "code" in error &&
-        typeof error.code === "string"
+      const shutdown =
+        isEndpointShutdown(request.signal.reason) || isEndpointShutdown(error);
+      const field = diagnosticField(error);
+      const code = shutdown
+        ? "closed"
+        : error &&
+            typeof error === "object" &&
+            "code" in error &&
+            typeof error.code === "string"
           ? error.code
           : "invalid-input";
       return Response.json(
-        { code },
+        { code, ...(field ? { field } : {}) },
         {
           status:
             code === "denied"

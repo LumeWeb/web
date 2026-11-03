@@ -27,6 +27,7 @@ beforeEach(async () => {
     "client.d.ts": `
       import type { MockConnection } from "./http.js";
       import type { OwnerPort, TestFile } from "./mock.js";
+      export type { ReadObject, ReadPort } from "./mock.js";
       declare const applicationBrand: unique symbol;
       export interface ApplicationObject { id: string; readonly [applicationBrand]: true; }
       export declare function createMockApplication(connection: MockConnection, credential: MockCredential): {
@@ -79,7 +80,28 @@ beforeEach(async () => {
         close(): Promise<void>;
       }
       export interface MockRun { shares: { create(input: {objects: TestObject[]; description?: string}): Promise<object> }; mock: MockSia; ownerAccess: object; objects: { delete(object: TestObject): Promise<void>; upload(input: {file: TestFile; metadata: Uint8Array; name: string}): Promise<TestObject> }; }
-      export interface MockSia { ownerShares(input: {access: object; as: object}): OwnerPort; actor(label: string): object; run<T>(options: unknown, use: (run: MockRun) => Promise<T>): Promise<{value: T}>; close(): Promise<void>; }
+      export interface ReadObject { id: string; sizeBytes: number; }
+      export interface ReadPort { object(id: string): Promise<ReadObject>; close(): Promise<void>; }
+      interface ReadSelector { actor?: object; operation: "download" | "object" | "objects" | "owner-share" | "owner-share-objects" | "owner-shares"; }
+      interface MutationSelector { actor?: object; operation: "delete" | "pin" | "upload"; stage: "beforeCommit"; }
+      interface Hold { release(): void; started(): Promise<{actorLabel: string}>; cancelled(): Promise<{actorLabel: string}>; }
+      export interface MockSia {
+        faults: {
+          fail(selector: ReadSelector, options: {code: "denied" | "not-found" | "unavailable"; times: number}): void;
+          hold(selector: ReadSelector): Hold;
+        };
+        mutationFaults: {
+          fail(selector: MutationSelector, options: {code: "denied" | "unavailable"; times: number}): void;
+          hold(selector: MutationSelector): Hold;
+          loseReply(selector: {actor: object; operation: "pin"}, options: {times: number}): void;
+        };
+        history(): readonly {actorLabel: string; operation: ReadSelector["operation"] | MutationSelector["operation"] | "inspect" | "events"}[];
+        reader(input: {access: object; as: object}): ReadPort;
+        ownerShares(input: {access: object; as: object}): OwnerPort;
+        actor(label: string): object;
+        run<T>(options: unknown, use: (run: MockRun) => Promise<T>): Promise<{value: T}>;
+        close(): Promise<void>;
+      }
       export declare function createMockSia(): MockSia;
       export declare function bytesFixture(input: {bytes: Uint8Array; name: string}): Promise<TestFile>;`,
     "mock.js": `

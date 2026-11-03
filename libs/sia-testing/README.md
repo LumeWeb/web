@@ -89,6 +89,32 @@ References are opaque runtime-owned handles, not share IDs or recipient credenti
 
 Pages are current reads, not snapshots across edits. Ordering is deterministic for unchanged state. Offsets must be nonnegative safe integers and limits positive safe integers. Responses contain at most the requested limit, subject to the run's fixture allowances. `nextOffset` advances by the returned item count; `done` is true when fewer than `limit` items are returned, so an exactly full final page needs an empty follow-up page. `list`, `detail` and `objects` accept an abort signal. Repeated `close()` is safe, cancels held requests and joins pending calls. Run cleanup cancels retained ports before releasing state. Owner reads use the finite actor-selected `owner-shares`, `owner-share` and `owner-share-objects` controls.
 
+## Driver diagnostics
+
+`actor(label)` keeps the label as driver-visible diagnostic text. Request receipts
+from `history()`, `hold.started()` and `hold.cancelled()` include `actorLabel` for
+reads and mutations. Labels grant no authority: actors with equal labels remain
+distinct, and selectors require the original actor reference. Choose labels that
+can appear in test failure reports; do not put credentials or private data in them.
+History retains the latest 256 requests in start order. A held request can leave
+history before it finishes; its hold still returns labelled snapshots.
+
+Invalid fault `times` and invalid link rates or latency throw errors with
+`code: "invalid-input"`. Page validation messages identify `offset` or `limit`.
+Fetch domain errors include the local operation and a known invalid field when
+available, without forwarding callback messages or request values. Error codes
+remain available on the error's `code` property; narrow an unknown error before
+reading that property.
+
+Closing the loopback listener cancels its owned requests. If it can still deliver
+a domain response, the caller receives `code: "closed"`. A mutation cancelled
+before its effect retains `committed: false`; cancellation cannot undo an effect
+that already committed. Closing the listener does not close other direct ports
+in the run. Caller aborts and client close keep native cancellation behavior.
+Actual response loss remains a native Fetch error, including lost pin replies;
+cleanup failures can still reject with `AggregateError`. The package does not
+retry or publish events in response to errors.
+
 ## Checks
 
 ```sh

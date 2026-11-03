@@ -14,7 +14,11 @@ it("consumed fault selectors are collectible while pending faults remain active"
       join(directory, "package.json"),
       JSON.stringify({ type: "module" }),
     );
-    for (const name of ["testing/controls", "sdk/link"]) {
+    for (const name of [
+      "testing/controls",
+      "testing/diagnostics",
+      "sdk/link",
+    ]) {
       const source = await readFile(resolve(`src/${name}.ts`), "utf8");
       await mkdir(join(directory, name.split("/")[0]!), { recursive: true });
       await writeFile(

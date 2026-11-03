@@ -1,4 +1,5 @@
 /** Private one-use admissions reserve the run before a client opens its upload source. */
+import { endpointShutdown } from "./diagnostics.js";
 import type {
   ActorRef,
   ApplicationObject,
@@ -306,7 +307,7 @@ export function createApplicationTransport(mock: MockSia) {
             "Application endpoint cleanup failed",
           );
       });
-      lifetime.abort();
+      lifetime.abort(endpointShutdown());
       return closing;
     },
     dispatch(request: Request, operation: string, input: DispatchInput) {

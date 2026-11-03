@@ -1,12 +1,13 @@
 /** Request receipts outlive bounded history, and aborted holds remove their waiters. */
+import { invalidInput } from "./diagnostics.js";
 import { createTransferLink } from "../sdk/link.js";
 import type { ActorRef, TestObject } from "./types.js";
 export interface MockFaults {
   fail(
-    selector: RequestSelector,
+    selector: ReadRequestSelector,
     options: { code: "denied" | "not-found" | "unavailable"; times: number },
   ): void;
-  hold(selector: RequestSelector): RequestHold;
+  hold(selector: ReadRequestSelector): RequestHold;
   setLink(
     actor: ActorRef,
     input: {
@@ -23,6 +24,8 @@ export interface RequestHold {
 }
 export interface RequestReceipt {
   actor: ActorRef;
+  /** User-chosen text visible to the driver; selector authority remains the actor reference. */
+  actorLabel: string;
   bytes: number;
   committed?: boolean;
   id: string;
@@ -65,7 +68,19 @@ interface LinkState {
   rate: null | number;
   transfer: ReturnType<typeof createTransferLink>;
 }
-export function createRequestControls(records: RequestReceipt[] = []) {
+interface ReadRequestSelector extends RequestSelector {
+  operation:
+    | "download"
+    | "object"
+    | "objects"
+    | "owner-share"
+    | "owner-share-objects"
+    | "owner-shares";
+}
+export function createRequestControls(
+  records: RequestReceipt[],
+  actorLabel: (actor: ActorRef) => string,
+) {
   const holds = new Set<Held>();
   const links = new Map<ActorRef, LinkState>();
   function link(actor: ActorRef): LinkState {
@@ -113,7 +128,7 @@ export function createRequestControls(records: RequestReceipt[] = []) {
   } = {
     fail(selector, options) {
       if (!Number.isSafeInteger(options.times) || options.times < 1)
-        throw new Error("Fault count must be positive");
+        throw invalidInput("times", "times must be a positive safe integer");
       faults.push({
         code: options.code,
         remaining: options.times,
@@ -156,12 +171,18 @@ export function createRequestControls(records: RequestReceipt[] = []) {
         (!Number.isFinite(input.downloadBytesPerSecond) ||
           input.downloadBytesPerSecond <= 0)
       )
-        throw new Error("Download rate must be positive or null");
+        throw invalidInput(
+          "downloadBytesPerSecond",
+          "downloadBytesPerSecond must be positive or null",
+        );
       if (
         input.latencyMs !== undefined &&
         (!Number.isFinite(input.latencyMs) || input.latencyMs < 0)
       )
-        throw new Error("Latency must be nonnegative");
+        throw invalidInput(
+          "latencyMs",
+          "latencyMs must be finite and nonnegative",
+        );
       const current = link(actor);
       if (input.downloadBytesPerSecond !== undefined)
         current.rate = input.downloadBytesPerSecond;
@@ -179,6 +200,7 @@ export function createRequestControls(records: RequestReceipt[] = []) {
       signal.throwIfAborted();
       const record: RequestReceipt = {
         actor,
+        actorLabel: actorLabel(actor),
         bytes: 0,
         ...(["delete", "pin", "upload"].includes(operation)
           ? { committed: false }

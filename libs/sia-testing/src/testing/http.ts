@@ -7,6 +7,7 @@ import {
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { createMockEndpoint, type MockEndpoint } from "./transport.js";
+import { endpointShutdown } from "./diagnostics.js";
 import { isLostReply } from "./reply-loss.js";
 import { incomingBody } from "./http-body.js";
 import { mockRuntime } from "./runtime.js";
@@ -157,7 +158,7 @@ export async function startMockServer(
         const results = await Promise.allSettled([
           configured.close(),
           new Promise<void>((resolve, reject) => {
-            for (const call of calls) call.abort();
+            for (const call of calls) call.abort(endpointShutdown());
             server.close((error) => (error ? reject(error) : resolve()));
             server.closeIdleConnections();
           }),

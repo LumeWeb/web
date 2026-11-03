@@ -29,9 +29,10 @@ export function createMutationControls(
   validate: (selector: MutationSelector) => void,
   records: RequestReceipt[] = [],
   validateReply: (selector: PinReplySelector) => void,
+  actorLabel: (actor: ActorRef) => string,
 ) {
-  const controls = createRequestControls(records);
-  const replies = createRequestControls();
+  const controls = createRequestControls(records, actorLabel);
+  const replies = createRequestControls([], actorLabel);
   const control: MockMutationFaults = {
     fail(selector, options) {
       selector = { ...selector };
