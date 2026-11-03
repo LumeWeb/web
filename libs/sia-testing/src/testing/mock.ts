@@ -1,11 +1,7 @@
 /** Managed mock runs bind readers to owner or recipient access and clean only their own fixtures. */
 import { snapshotApplicationMetadata } from "./application-metadata.js";
 import { createIndexdModel } from "../model/index.js";
-import {
-  createMockNetwork,
-  type MockNetwork,
-  type MockSdk,
-} from "../sdk/index.js";
+import { createMockNetwork, type MockNetwork } from "../sdk/index.js";
 import { withAbort } from "../sdk/abort.js";
 import { invalidInput } from "./diagnostics.js";
 import { createMutationControls } from "./mutations.js";
@@ -53,7 +49,7 @@ interface Context {
   objects: Map<string, ObjectRecord>;
   pending: Set<Promise<unknown>>;
   reservedBytes: number;
-  sdk: MockSdk | undefined;
+  sdk: ReturnType<MockNetwork["createSdk"]> | undefined;
   shareAttempts: number;
   shares: Map<string, ShareRecord>;
   signal: AbortSignal;

@@ -45,7 +45,7 @@ export interface MockDownloadOptions extends MockCallOptions {
 
 export interface MockNetwork {
   control: MockControl;
-  createSdk(options: { accountId: string; device?: string }): MockSdk;
+  createSdk(options: { accountId: string; device?: string }): LocalMockSdk;
   discardUpload(accountId: string, id: string): void;
   model: IndexdModel;
   seedObject(accountId: string, id: string, bytes: Uint8Array): MockObject;
@@ -61,16 +61,24 @@ export interface MockSdk {
   object(id: string, options?: MockCallOptions): Promise<MockObject>;
   pinObject(
     object: Pick<MockObject, "id">,
-    options?: MockCallOptions & {
-      /** Checks ownership before the effect and returns a nonthrowing completion. */
-      prepareCommit?: () => () => void;
-    },
+    options?: MockCallOptions,
   ): Promise<void>;
   pruneSlabs(options?: MockCallOptions): Promise<void>;
   upload(
     bytes: Uint8Array,
     options: MockCallOptions & { id: string },
   ): Promise<MockObject>;
+}
+
+/** Pin completion shares the in-process model effect and cannot run atomically over Fetch. */
+interface LocalMockSdk extends Omit<MockSdk, "pinObject"> {
+  pinObject(
+    object: Pick<MockObject, "id">,
+    options?: MockCallOptions & {
+      /** Checks ownership before the effect and returns a nonthrowing completion. */
+      prepareCommit?: () => () => void;
+    },
+  ): Promise<void>;
 }
 
 /** Shares payloads between SDK clients while the supplied model owns account and pin rules. */
