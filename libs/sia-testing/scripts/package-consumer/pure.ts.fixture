@@ -8,7 +8,7 @@ const app = { description: "Packed fixture", id: "a".repeat(64), name: "Packed",
 export async function typedConsumer() {
   return withSiaRun({ backend: { app, kind: "mock" } }, async (run) => {
     const file = await bytesFixture({ bytes: Uint8Array.of(1), name: "video" });
-    const object = await run.objects.upload({ file, metadata: new Uint8Array(), name: file.name });
+    const object = await run.objects.upload({ file, metadata: new Uint8Array() });
     const server = await startMockServer(run.mock);
     const binding = server.connection({ access: run.ownerAccess, as: run.mock.actor("typed") });
     const reader = createMockReader(binding, binding.credential);
@@ -22,7 +22,11 @@ export async function typedConsumer() {
     const size: number = (await reader.object(object.id)).sizeBytes;
     await reader.close();
     const writer = createMockApplication(binding, binding.credential);
-    const pending = await writer.upload({ file, name: file.name, metadata: new Uint8Array() });
+    const pending = await writer.upload({ file, metadata: new Uint8Array() });
+    // @ts-expect-error Application uploads require explicit metadata.
+    void writer.upload({ file });
+    // @ts-expect-error Managed uploads require explicit metadata.
+    void run.objects.upload({ file });
     const staged: "missing" | "uploaded" | "pinned" = await writer.inspect(pending);
     await writer.pin(pending);
     const cursor = (await writer.events({cursor:null,limit:1})).nextCursor;

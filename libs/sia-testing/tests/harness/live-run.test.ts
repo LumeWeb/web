@@ -17,7 +17,12 @@ import {
 } from "../../src/testing/live/run.js";
 interface FixtureState {
   calls: string[];
-  objects: { id: string; pinned: boolean }[];
+  objects: {
+    id: string;
+    metadata?: number[];
+    payload?: number[];
+    pinned: boolean;
+  }[];
   shares: { id: string }[];
 }
 async function fixture(
@@ -84,6 +89,82 @@ async function fixture(
     await rm(directory, { force: true, recursive: true });
   }
 }
+it("live managed uploads accept omitted names without initializing the native SDK", () =>
+  fixture(async (options, state) => {
+    const result = await withLiveRun(options, async (run) => {
+      const source = await bytesFixture({
+        bytes: Uint8Array.of(1),
+        name: "fixture",
+      });
+      let opens = 0;
+      for (const name of ["", null, 1, false]) {
+        const file = {
+          ...source,
+          open() {
+            opens++;
+            return source.open();
+          },
+        };
+        await expect(
+          run.objects.upload({
+            file,
+            metadata: new Uint8Array(),
+            name: name as string,
+          }),
+        ).rejects.toMatchObject({ code: "invalid-input" });
+        await expect(
+          run.objects.upload({
+            file: { ...file, name: name as string },
+            metadata: new Uint8Array(),
+          }),
+        ).rejects.toMatchObject({ code: "invalid-input" });
+      }
+      expect(opens).toBe(0);
+      expect((await state()).calls).toEqual(["authenticate"]);
+      let reads = 0;
+      const file = {
+        ...source,
+        get name() {
+          reads++;
+          return reads === 1 ? "fixture" : "";
+        },
+      };
+      const object = await run.objects.upload({
+        file,
+        metadata: Uint8Array.of(9),
+      });
+      expect(await run.objects.inspect(object)).toBe("present");
+      expect(reads).toBe(1);
+      for (const descriptorName of ["", "é".repeat(513)]) {
+        let reads = 0;
+        const file = {
+          ...source,
+          get name() {
+            reads++;
+            return reads === 1 ? descriptorName : "changed";
+          },
+        };
+        const metadata = Uint8Array.of(37, 50, 70);
+        const object = await run.objects.upload({
+          file,
+          metadata,
+          name: "override",
+        });
+        expect(reads).toBe(1);
+        expect(await run.objects.inspect(object)).toBe("present");
+        expect(
+          (await state()).objects.find((row) => row.id === object.id),
+        ).toMatchObject({ metadata: [37, 50, 70], payload: [1], pinned: true });
+      }
+    });
+    expect(result.summary.logicalUploadedBytes).toBe(3);
+    expect(result.summary.cleanup).toBe("clean");
+    expect((await state()).calls.filter((call) => call === "upload")).toEqual([
+      "upload",
+      "upload",
+      "upload",
+    ]);
+  }));
 it.each([false, true])(
   "oversized metadata is rejected before copying it (byteLength override: %s)",
   (overrideSize) =>

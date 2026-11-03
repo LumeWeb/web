@@ -21,6 +21,120 @@ export function applicationScenarios(
   ) => Promise<{ close: () => Promise<void>; writer: ApplicationPort }>,
   transport = false,
 ) {
+  it("upload labels default to one descriptor snapshot without changing metadata", async () => {
+    const mock = createMockSia();
+    try {
+      await mock.run({ app }, async (run) => {
+        const { close, writer } = await connect(
+          mock,
+          run,
+          mock.actor("writer"),
+        );
+        const reader = mock.reader({
+          access: run.ownerAccess,
+          as: mock.actor("reader"),
+        });
+        try {
+          const source = await bytesFixture({
+            bytes: Uint8Array.of(1, 2),
+            name: "fixture",
+          });
+          const encoded = new TextEncoder().encode(
+            '{"name":"independent%2Flabel"}',
+          );
+          for (const [name, metadata, descriptorName = "fixture"] of [
+            [undefined, new Uint8Array()],
+            [undefined, encoded],
+            ["override", encoded],
+            ["override", encoded, ""],
+            ["override", encoded, "é".repeat(513)],
+            ["   ", new Uint8Array()],
+          ] as const) {
+            let reads = 0;
+            const file = {
+              ...source,
+              get name() {
+                reads++;
+                return reads === 1 ? descriptorName : "";
+              },
+            };
+            const object = await writer.upload({ file, metadata, name });
+            expect(reads).toBe(1);
+            expect(await writer.inspect(object)).toBe("uploaded");
+            await writer.pin(object);
+            expect((await reader.object(object.id)).metadata).toEqual(metadata);
+            expect(
+              new Uint8Array(
+                await new Response(await reader.download(object)).arrayBuffer(),
+              ),
+            ).toEqual(Uint8Array.of(1, 2));
+          }
+        } finally {
+          await reader.close();
+          await writer.close();
+          await close();
+        }
+      });
+    } finally {
+      await mock.close();
+    }
+  });
+  it("invalid explicit and fallback labels reject before opening a source", async () => {
+    const mock = createMockSia();
+    try {
+      await mock.run({ app }, async (run) => {
+        const { close, writer } = await connect(
+          mock,
+          run,
+          mock.actor("writer"),
+        );
+        try {
+          const source = await bytesFixture({
+            bytes: Uint8Array.of(1),
+            name: "fixture",
+          });
+          let opens = 0;
+          const file = {
+            ...source,
+            open() {
+              opens++;
+              return source.open();
+            },
+          };
+          for (const name of [
+            "",
+            null,
+            1,
+            false,
+            "x".repeat(1025),
+            "é".repeat(513),
+          ]) {
+            await expect(
+              writer.upload({
+                file,
+                metadata: new Uint8Array(),
+                name: name as string,
+              }),
+            ).rejects.toMatchObject({ code: "invalid-input" });
+          }
+          for (const name of ["", null, 1, "x".repeat(1025), "é".repeat(513)]) {
+            await expect(
+              writer.upload({
+                file: { ...file, name: name as string },
+                metadata: new Uint8Array(),
+              }),
+            ).rejects.toMatchObject({ code: "invalid-input" });
+          }
+          expect(opens).toBe(0);
+        } finally {
+          await writer.close();
+          await close();
+        }
+      });
+    } finally {
+      await mock.close();
+    }
+  });
   it("a lost pin reply requires inspection and stays unpublished", async () => {
     const mock = createMockSia();
     try {

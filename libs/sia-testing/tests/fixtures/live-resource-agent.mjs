@@ -1,8 +1,8 @@
 /** This control-plane fixture persists exact object and share records across owned child lifetimes. */
 import { randomBytes } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
-/** @typedef {{calls: string[], objects: {id: string, bytes?: number, pinned: boolean}[], shares: {id: string, objects: string[], seedHex: string}[], crashAfter?: string, failIds?: string[], sealedBytes?: number}} FixtureState */
-/** @typedef {{id: string, operation: string, value: {app: {id: string}, bytes: Uint8Array, objectId: string, shareId: string}}} Request */
+/** @typedef {{calls: string[], objects: {id: string, bytes?: number, metadata?: number[], payload?: number[], pinned: boolean}[], shares: {id: string, objects: string[], seedHex: string}[], crashAfter?: string, failIds?: string[], sealedBytes?: number}} FixtureState */
+/** @typedef {{id: string, operation: string, value: {app: {id: string}, bytes: Uint8Array, metadata: Uint8Array, objectId: string, shareId: string}}} Request */
 const stateFile = new URL("./state.json", import.meta.url);
 process.send({ type: "ready" });
 process.on("message", (message) => {
@@ -36,6 +36,8 @@ process.on("message", (message) => {
       state.objects.push({
         bytes: input.bytes.byteLength,
         id: objectId,
+        metadata: [...input.metadata],
+        payload: [...input.bytes],
         pinned: false,
       });
       value = {

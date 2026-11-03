@@ -512,7 +512,9 @@ export function createMockSia(options: MockOptions = {}): MockSia {
               sha256: input.file.sha256,
               sizeBytes: input.file.sizeBytes,
             };
-            const name = input.name;
+            let name = input.name;
+            // oxlint-disable-next-line typescript/prefer-nullish-coalescing -- Null must reject rather than select the file label.
+            if (name === undefined) name = file.name;
             const sourceMetadata = input.metadata;
             if (
               !(sourceMetadata instanceof Uint8Array) ||
@@ -935,9 +937,13 @@ export function createMockSia(options: MockOptions = {}): MockSia {
                 sha256: input.file.sha256,
                 sizeBytes: input.file.sizeBytes,
               };
+              let name = input.name;
+              // oxlint-disable-next-line typescript/prefer-nullish-coalescing -- Null must reject rather than select the file label.
+              if (name === undefined) name = file.name;
               integer(file.sizeBytes);
               if (
-                !input.name ||
+                typeof name !== "string" ||
+                !name ||
                 !/^[0-9a-f]{64}$/.test(file.sha256) ||
                 !(input.metadata instanceof Uint8Array)
               )

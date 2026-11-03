@@ -33,7 +33,7 @@ beforeEach(async () => {
       declare const applicationBrand: unique symbol;
       export interface ApplicationObject { id: string; readonly [applicationBrand]: true; }
       export declare function createMockApplication(connection: MockConnection, credential: MockCredential): {
-        upload(input: {file: TestFile; name: string; metadata: Uint8Array}): Promise<ApplicationObject>;
+        upload(input: {file: TestFile; name?: string | undefined; metadata: Uint8Array}): Promise<ApplicationObject>;
         inspect(object: ApplicationObject): Promise<"missing" | "uploaded" | "pinned">;
         pin(object: ApplicationObject): Promise<void>;
         delete(object: ApplicationObject): Promise<void>;
@@ -81,7 +81,7 @@ beforeEach(async () => {
         objects(ref: object, page: {offset: number; limit: number}): Promise<{items: {id: string; sizeBytes: number; metadata: Uint8Array}[]}>;
         close(): Promise<void>;
       }
-      export interface MockRun { shares: { create(input: {objects: TestObject[]; description?: string}): Promise<object> }; mock: MockSia; ownerAccess: object; objects: { delete(object: TestObject): Promise<void>; upload(input: {file: TestFile; metadata: Uint8Array; name: string}): Promise<TestObject> }; }
+      export interface MockRun { shares: { create(input: {objects: TestObject[]; description?: string}): Promise<object> }; mock: MockSia; ownerAccess: object; objects: { delete(object: TestObject): Promise<void>; upload(input: {file: TestFile; metadata: Uint8Array; name?: string | undefined}): Promise<TestObject> }; }
       export interface ReadObject { id: string; sizeBytes: number; }
       export interface ReadPort { object(id: string): Promise<ReadObject>; close(): Promise<void>; }
       interface ReadSelector { actor?: object; operation: "download" | "object" | "objects" | "owner-share" | "owner-share-objects" | "owner-shares"; }
