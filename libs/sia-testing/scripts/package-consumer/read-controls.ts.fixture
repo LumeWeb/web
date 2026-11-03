@@ -1,0 +1,90 @@
+/** Read faults accept read operations; mutation controls and receipts retain mutation operations. */
+import { createMockSia } from "@lumeweb/sia-testing/mock";
+import type { ReadObject, ReadPort } from "@lumeweb/sia-testing/mock";
+import type {
+  ReadObject as ClientReadObject,
+  ReadPort as ClientReadPort,
+} from "@lumeweb/sia-testing/client";
+
+const mock = createMockSia();
+const actor = mock.actor("reader");
+const failure = { code: "unavailable", times: 1 } as const;
+for (const operation of [
+  "download",
+  "object",
+  "objects",
+  "owner-share",
+  "owner-share-objects",
+  "owner-shares",
+] as const) {
+  mock.faults.fail({ actor, operation }, failure);
+  mock.faults.hold({ actor, operation }).release();
+}
+// @ts-expect-error Read faults cannot fail pin operations.
+mock.faults.fail({ actor, operation: "pin" }, failure);
+// @ts-expect-error Read faults cannot hold pin operations.
+mock.faults.hold({ actor, operation: "pin" });
+// @ts-expect-error Read faults cannot fail upload operations.
+mock.faults.fail({ actor, operation: "upload" }, failure);
+// @ts-expect-error Read faults cannot hold upload operations.
+mock.faults.hold({ actor, operation: "upload" });
+// @ts-expect-error Read faults cannot fail delete operations.
+mock.faults.fail({ actor, operation: "delete" }, failure);
+// @ts-expect-error Read faults cannot hold delete operations.
+mock.faults.hold({ actor, operation: "delete" });
+// @ts-expect-error Read faults cannot fail inspect operations.
+mock.faults.fail({ actor, operation: "inspect" }, failure);
+// @ts-expect-error Read faults cannot hold inspect operations.
+mock.faults.hold({ actor, operation: "inspect" });
+// @ts-expect-error Read faults cannot fail events operations.
+mock.faults.fail({ actor, operation: "events" }, failure);
+// @ts-expect-error Read faults cannot hold events operations.
+mock.faults.hold({ actor, operation: "events" });
+for (const operation of ["pin", "upload", "delete"] as const) {
+  mock.mutationFaults.fail(
+    { actor, operation, stage: "beforeCommit" },
+    failure,
+  );
+  mock.mutationFaults
+    .hold({ actor, operation, stage: "beforeCommit" })
+    .release();
+}
+mock.mutationFaults.loseReply({ actor, operation: "pin" }, { times: 1 });
+
+type Operation = ReturnType<typeof mock.history>[number]["operation"];
+const operations: Operation[] = [
+  "delete",
+  "download",
+  "events",
+  "inspect",
+  "object",
+  "objects",
+  "owner-share",
+  "owner-share-objects",
+  "owner-shares",
+  "pin",
+  "upload",
+];
+declare const access: Parameters<typeof mock.reader>[0]["access"];
+const reader: ReadPort = mock.reader({ as: actor, access });
+const clientReader: ClientReadPort = reader;
+const directReader: ReadPort = clientReader;
+async function readObject(): Promise<ReadObject> {
+  const object: ClientReadObject = await directReader.object("object-id");
+  const directObject: ReadObject = object;
+  return directObject;
+}
+void operations;
+void readObject;
+
+const receiptLabel: string | undefined = mock.history()[0]?.actorLabel;
+const heldReceipt = mock.faults.hold({ actor, operation: "objects" });
+const startedLabel: Promise<string> = heldReceipt
+  .started()
+  .then((receipt) => receipt.actorLabel);
+const cancelledLabel: Promise<string> = heldReceipt
+  .cancelled()
+  .then((receipt) => receipt.actorLabel);
+void receiptLabel;
+void startedLabel;
+void cancelledLabel;

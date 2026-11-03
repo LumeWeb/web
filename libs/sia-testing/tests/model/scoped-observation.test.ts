@@ -5,7 +5,7 @@ import { createMockSia } from "../../src/testing/mock.js";
 it("an offline observer cancels its unfinished input before reporting failure", async () => {
   const mock = createMockSia();
   try {
-    const controls = createRequestControls();
+    const controls = createRequestControls([], () => "reader");
     const actor = mock.actor("reader");
     const receipt = await controls.begin(
       actor,

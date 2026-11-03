@@ -1,4 +1,5 @@
 /** Fetch uploads buffer bounded bytes only after the remote run reserves its allowance. */
+import { domainError } from "./diagnostics.js";
 import { readFixture } from "./files.js";
 import type { MockCredential } from "./runtime.js";
 import type { MockConnection } from "./transport.js";
@@ -59,16 +60,7 @@ export function createMockApplication(
       ...(callSignal ? { signal: callSignal } : {}),
     });
     const value: unknown = await response.json();
-    if (!response.ok)
-      throw Object.assign(new Error("Mock application request failed"), {
-        code:
-          value &&
-          typeof value === "object" &&
-          "code" in value &&
-          typeof value.code === "string"
-            ? value.code
-            : "unavailable",
-      });
+    if (!response.ok) throw domainError(operation, value);
     return value;
   }
   function ref(object: ApplicationObject) {

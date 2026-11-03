@@ -49,6 +49,29 @@ it("a finite fault affects only the selected object and actor", async () => {
     await mock.close();
   }
 });
+it.each(["delete", "events", "inspect", "pin", "upload"] as const)(
+  "read faults reject %s operations at runtime",
+  async (operation) => {
+    const mock = createMockSia();
+    try {
+      const actor = mock.actor("reader");
+      expect(() =>
+        mock.faults.fail(
+          // @ts-expect-error JavaScript callers can supply unsupported operations.
+          { actor, operation },
+          { code: "unavailable", times: 1 },
+        ),
+      ).toThrow(expect.objectContaining({ code: "invalid-input" }));
+      expect(() =>
+        // @ts-expect-error JavaScript callers can supply unsupported operations.
+        mock.faults.hold({ actor, operation }),
+      ).toThrow(expect.objectContaining({ code: "invalid-input" }));
+      expect(mock.history()).toEqual([]);
+    } finally {
+      await mock.close();
+    }
+  },
+);
 it("offline state applies to one actor and can recover", async () => {
   const mock = createMockSia();
   try {

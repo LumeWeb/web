@@ -6,6 +6,7 @@ import {
   type MockSdk,
 } from "../sdk/index.js";
 import { withAbort } from "../sdk/abort.js";
+import { invalidInput } from "./diagnostics.js";
 import { createMutationControls } from "./mutations.js";
 import type { ApplicationObject, ApplicationPort } from "./types.js";
 import { readFixture } from "./files.js";
@@ -88,9 +89,10 @@ export function createMockSia(options: MockOptions = {}): MockSia {
   const now = () =>
     new Date(start === undefined ? Date.now() : start + elapsed);
   const active = new Set<Context>();
-  const actors = new WeakSet<ActorRef>();
+  const actors = new WeakMap<ActorRef, string>();
+  const actorLabel = (actor: ActorRef) => actors.get(actor)!;
   const records: RequestReceipt[] = [];
-  const controls = createRequestControls(records);
+  const controls = createRequestControls(records, actorLabel);
   const credentials = new Map<string, BrowserAccess>();
   const grants = new WeakMap<BrowserAccess, Grant>();
   const objects = new WeakMap<
@@ -131,6 +133,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
       )
         throw failure("foreign-handle", "Unknown application object");
     },
+    actorLabel,
   );
   const shares = new WeakMap<
     TestShare,
@@ -279,7 +282,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
       if (!label.trim())
         throw failure("invalid-input", "Actor label must not be empty");
       const actor = Object.freeze({}) as ActorRef;
-      actors.add(actor);
+      actors.set(actor, label);
       return actor;
     },
     advanceTime(milliseconds) {
@@ -426,21 +429,21 @@ export function createMockSia(options: MockOptions = {}): MockSia {
         events(input) {
           return call(input.signal, (context) => {
             const { cursor, limit } = input;
+            if (!Number.isSafeInteger(limit) || limit < 1 || limit > 1000)
+              throw invalidInput(
+                "limit",
+                "limit must be an integer from 1 to 1000",
+              );
             if (
-              !Number.isSafeInteger(limit) ||
-              limit < 1 ||
-              limit > 1000 ||
-              (cursor !== null &&
-                (!cursor ||
-                  typeof cursor.after !== "string" ||
-                  !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.000Z$/.test(
-                    cursor.after,
-                  ) ||
-                  !Number.isFinite(Date.parse(cursor.after)) ||
-                  new Date(cursor.after).toISOString() !== cursor.after ||
-                  !/^[a-f0-9]{64}$/.test(cursor.id)))
+              cursor !== null &&
+              (!cursor ||
+                typeof cursor.after !== "string" ||
+                !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.000Z$/.test(cursor.after) ||
+                !Number.isFinite(Date.parse(cursor.after)) ||
+                new Date(cursor.after).toISOString() !== cursor.after ||
+                !/^[a-f0-9]{64}$/.test(cursor.id))
             )
-              throw failure("invalid-input", "Invalid event page");
+              throw invalidInput("cursor", "Invalid event cursor");
             const events = context
               .network!.model.objectEvents(context.id)
               .map((row) => ({
@@ -734,8 +737,8 @@ export function createMockSia(options: MockOptions = {}): MockSia {
           const context = authorize(id);
           describe(context, id);
           const { length, offset, signal: inputSignal } = range;
-          if (offset !== undefined) integer(offset);
-          if (length !== undefined) integer(length);
+          if (offset !== undefined) integer(offset, "offset");
+          if (length !== undefined) integer(length, "length");
           const callSignal = inputSignal
             ? AbortSignal.any([signal, inputSignal])
             : signal;
@@ -792,10 +795,10 @@ export function createMockSia(options: MockOptions = {}): MockSia {
             );
             try {
               authorize();
-              integer(offset);
-              integer(limit);
+              integer(offset, "offset");
+              integer(limit, "limit");
               if (limit === 0)
-                throw failure("invalid-input", "Page limit must be positive");
+                throw invalidInput("limit", "limit must be positive");
               const ids =
                 grant!.key === null
                   ? [...context.objects.values()]
@@ -1130,9 +1133,11 @@ function identifier(): string {
     .map((byte) => byte.toString(16).padStart(2, "0"))
     .join("");
 }
-function integer(value: number): void {
+function integer(value: number, field?: string): void {
   if (!Number.isSafeInteger(value) || value < 0)
-    throw failure("invalid-input", "Expected a nonnegative safe integer");
+    throw field
+      ? invalidInput(field, `${field} must be a nonnegative safe integer`)
+      : failure("invalid-input", "Expected a nonnegative safe integer");
 }
 function open(context: Context): void {
   if (context.state !== "open") throw failure("closed", "Run is closed");

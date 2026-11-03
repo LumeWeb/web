@@ -1,4 +1,5 @@
 /** Owner inspection joins held reads before their run can release its state. */
+import { invalidInput } from "./diagnostics.js";
 import type { createRequestControls, RequestSelector } from "./controls.js";
 import type {
   ActorRef,
@@ -99,13 +100,8 @@ export function ownerPage<T>(
   };
 }
 export function validateOwnerPage({ limit, offset }: PageRequest): void {
-  if (
-    !Number.isSafeInteger(offset) ||
-    offset < 0 ||
-    !Number.isSafeInteger(limit) ||
-    limit <= 0
-  )
-    throw Object.assign(new Error("Invalid owner page"), {
-      code: "invalid-input",
-    });
+  if (!Number.isSafeInteger(offset) || offset < 0)
+    throw invalidInput("offset", "offset must be a nonnegative safe integer");
+  if (!Number.isSafeInteger(limit) || limit <= 0)
+    throw invalidInput("limit", "limit must be a positive safe integer");
 }
