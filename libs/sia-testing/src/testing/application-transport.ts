@@ -278,7 +278,22 @@ export function createApplicationTransport(mock: MockSia) {
       if (operation === "app-inspect")
         return Response.json(await writer.inspect(object, { signal }));
       if (operation === "app-pin") {
-        await writer.pin(object, { signal });
+        let metadata: Uint8Array | undefined;
+        if (body.metadata !== undefined) {
+          if (
+            !Array.isArray(body.metadata) ||
+            body.metadata.length > 1024 ||
+            !body.metadata.every(
+              (byte: unknown) =>
+                Number.isInteger(byte) &&
+                (byte as number) >= 0 &&
+                (byte as number) <= 255,
+            )
+          )
+            invalid();
+          metadata = Uint8Array.from(body.metadata as number[]);
+        }
+        await writer.pin(object, { metadata, signal });
         return Response.json(null);
       }
       if (operation === "app-delete") {

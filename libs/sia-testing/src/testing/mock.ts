@@ -1,4 +1,5 @@
 /** Managed mock runs bind readers to owner or recipient access and clean only their own fixtures. */
+import { snapshotApplicationMetadata } from "./application-metadata.js";
 import { createIndexdModel } from "../model/index.js";
 import {
   createMockNetwork,
@@ -322,18 +323,28 @@ export function createMockSia(options: MockOptions = {}): MockSia {
       function call<T>(
         signal: AbortSignal | undefined,
         action: (context: Context, signal: AbortSignal) => Promise<T> | T,
+        prepare?: () => void,
       ): Promise<T> {
         const callSignal = AbortSignal.any([
           abort.signal,
           ...(grant ? [grant.context.signal] : []),
           ...(signal ? [signal] : []),
         ]);
+        let preparationError: unknown;
+        let preparationFailed = false;
         const promise = Promise.resolve().then(() => {
+          if (preparationFailed) throw preparationError;
           callSignal.throwIfAborted();
           const context = authorize();
           return track(context, () => action(context, callSignal));
         });
         pending.add(promise);
+        try {
+          prepare?.();
+        } catch (error) {
+          preparationFailed = true;
+          preparationError = error;
+        }
         void promise.then(
           () => pending.delete(promise),
           (error: unknown) => {
@@ -484,25 +495,45 @@ export function createMockSia(options: MockOptions = {}): MockSia {
           });
         },
         pin(object, options = {}) {
-          return call(options.signal, async (context, signal) => {
-            const record = owned(context, object);
-            if (record.deleted) throw failure("not-found", "Object is missing");
-            await mutate(
-              context,
-              signal,
-              "pin",
-              record.handle.id,
-              async (receipt) => {
-                if (record.deleted)
-                  throw failure("not-found", "Object is missing");
-                await context.sdk!.pinObject(
-                  { id: () => record.handle.id },
-                  { signal },
-                );
-                receipt.committed = true;
-              },
-            );
-          });
+          let metadata: Uint8Array | undefined;
+          return call(
+            options.signal,
+            async (context, signal) => {
+              const record = owned(context, object);
+              if (record.deleted)
+                throw failure("not-found", "Object is missing");
+              await mutate(
+                context,
+                signal,
+                "pin",
+                record.handle.id,
+                async (receipt) => {
+                  if (record.deleted)
+                    throw failure("not-found", "Object is missing");
+                  await context.sdk!.pinObject(
+                    { id: () => record.handle.id },
+                    {
+                      prepareCommit: () => {
+                        if (record.deleted)
+                          throw failure("not-found", "Object is missing");
+                        return () => {
+                          if (metadata !== undefined)
+                            record.metadata = metadata;
+                          receipt.committed = true;
+                        };
+                      },
+                      signal,
+                    },
+                  );
+                },
+              );
+            },
+            () => {
+              const source = options.metadata;
+              if (source !== undefined)
+                metadata = snapshotApplicationMetadata(source);
+            },
+          );
         },
         upload(input) {
           return call(input.signal, async (context, signal) => {
@@ -515,20 +546,9 @@ export function createMockSia(options: MockOptions = {}): MockSia {
             let name = input.name;
             // oxlint-disable-next-line typescript/prefer-nullish-coalescing -- Null must reject rather than select the file label.
             if (name === undefined) name = file.name;
-            const sourceMetadata = input.metadata;
-            if (
-              !(sourceMetadata instanceof Uint8Array) ||
-              Object.getOwnPropertyDescriptor(
-                Object.getPrototypeOf(Uint8Array.prototype),
-                "byteLength",
-              )!.get!.call(sourceMetadata) > 1024
-            )
-              throw failure("invalid-input", "Invalid application metadata");
-            const metadata = new Uint8Array(sourceMetadata);
+            const metadata = snapshotApplicationMetadata(input.metadata);
             integer(file.sizeBytes);
             if (
-              !(input.metadata instanceof Uint8Array) ||
-              metadata.length > 1024 ||
               typeof name !== "string" ||
               !name ||
               name.length > 1024 ||

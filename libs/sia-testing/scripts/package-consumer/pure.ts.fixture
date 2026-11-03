@@ -29,6 +29,10 @@ export async function typedConsumer() {
     void run.objects.upload({ file });
     const staged: "missing" | "uploaded" | "pinned" = await writer.inspect(pending);
     await writer.pin(pending);
+    await writer.pin(pending, { signal: new AbortController().signal });
+    await writer.pin(pending, { metadata: Uint8Array.of(1) });
+    await writer.pin(pending, { metadata: undefined });
+    await writer.pin(pending, { metadata: new Uint8Array() });
     const cursor = (await writer.events({cursor:null,limit:1})).nextCursor;
     await writer.events({cursor,limit:1});
     // @ts-expect-error fixture handles do not authorize application writes

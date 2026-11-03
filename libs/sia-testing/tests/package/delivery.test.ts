@@ -35,7 +35,7 @@ beforeEach(async () => {
       export declare function createMockApplication(connection: MockConnection, credential: MockCredential): {
         upload(input: {file: TestFile; name?: string | undefined; metadata: Uint8Array}): Promise<ApplicationObject>;
         inspect(object: ApplicationObject): Promise<"missing" | "uploaded" | "pinned">;
-        pin(object: ApplicationObject): Promise<void>;
+        pin(object: ApplicationObject, options?: { metadata?: Uint8Array | undefined; signal?: AbortSignal }): Promise<void>;
         delete(object: ApplicationObject): Promise<void>;
         events(input: {cursor: null | {after: string; id: string}; limit: number}): Promise<{nextCursor: null | {after: string; id: string}}>;
         close(): Promise<void>;

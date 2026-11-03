@@ -46,7 +46,7 @@ test("the recipient reads a managed fixture", async ({ signal }) => {
 });
 ```
 
-The test driver owns the fixtures. `run.objects.upload` uploads and pins before returning. An application's `ApplicationPort.upload` stages bytes until the application calls `pin`; publication is a separate driver action. The optional upload `name` defaults to the snapshotted `TestFile.name` label; it does not set an application filename. Metadata stays required and is passed through as opaque bytes. Empty metadata is intentional here, not a usable file record for every application. These ports do not replace the full storage SDK or model packed finalization and later metadata updates.
+The test driver owns the fixtures. `run.objects.upload` uploads and pins before returning. An application's `ApplicationPort.upload` stages bytes until the application calls `pin`; publication is a separate driver action. The optional upload `name` defaults to the snapshotted `TestFile.name` label; it does not set an application filename. Metadata stays required and is passed through as opaque bytes. Empty metadata is intentional here, not a usable file record for every application. These synthetic ports do not replace the full storage SDK or model native packed finalization.
 
 `fileFixture(path)` from `/node` streams a local file and records its digest. Upload rejects changed bytes. Files are limited to 16 MiB. Mock runs default to 8 object reservations, 8 share reservations, and 16 MiB of logical uploads. Deletion does not refund these allowances.
 
@@ -144,7 +144,14 @@ test("publishes a pinned application object explicitly", async ({ signal }) => {
           const file = await bytesFixture({ name: "document", bytes: Uint8Array.of(4) });
           const pending = await writer.upload({ file, metadata: new Uint8Array() });
           expect(await writer.inspect(pending)).toBe("uploaded");
-          await writer.pin(pending);
+          const selected = new TextEncoder().encode('{"name":"chosen-at-pin"}');
+          await writer.pin(pending, { metadata: selected });
+          const reader = mock.reader({ access: run.ownerAccess, as: mock.actor("owner-reader") });
+          try {
+            expect((await reader.object(pending.id)).metadata).toEqual(selected);
+          } finally {
+            await reader.close();
+          }
           expect(await writer.inspect(pending)).toBe("pinned");
           expect((await writer.events({ cursor: null, limit: 10 })).events).toEqual([]);
           mock.advanceTime(1000);
@@ -160,6 +167,8 @@ test("publishes a pinned application object explicitly", async ({ signal }) => {
   }
 });
 ```
+
+`pin(object, { metadata })` snapshots up to 1024 opaque bytes at invocation. Upload metadata remains required. Omitted or explicit `undefined` metadata preserves the last committed value; an empty `Uint8Array` clears it. Successful repins replace metadata at the same effect as pin membership. Failure or cancellation before commit leaves the prior value unchanged; losing a reply after commit retains the replacement. Reads return detached copies. Concurrent pins follow actual commit order, and `inspect` reports membership only, not which metadata update won. Events still need explicit publication. This option is mock-only and adds no native storage capability.
 
 Handles and actors grant authority by their original reference, not copied fields or equal labels. Recipient reads check current attachments and keys. Revocation blocks fresh reads but cannot erase downloaded plaintext. No automatic retries or idempotency guarantee is provided. A lost pin acknowledgement can follow a committed effect: reconcile with `inspect`, not a blind retry. Publication remains explicit after reconciliation.
 

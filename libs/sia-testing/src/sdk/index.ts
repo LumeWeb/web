@@ -61,7 +61,10 @@ export interface MockSdk {
   object(id: string, options?: MockCallOptions): Promise<MockObject>;
   pinObject(
     object: Pick<MockObject, "id">,
-    options?: MockCallOptions,
+    options?: MockCallOptions & {
+      /** Checks ownership before the effect and returns a nonthrowing completion. */
+      prepareCommit?: () => () => void;
+    },
   ): Promise<void>;
   pruneSlabs(options?: MockCallOptions): Promise<void>;
   upload(
@@ -352,7 +355,12 @@ export function createMockNetwork(
           return run(
             "pinObject",
             id,
-            () => pin(accountId, id),
+            () => {
+              const committed = call.prepareCommit?.();
+              pin(accountId, id);
+              // Awaiting the SDK Promise before completion would expose the old metadata on a pinned object.
+              committed?.();
+            },
             false,
             call.signal,
           );

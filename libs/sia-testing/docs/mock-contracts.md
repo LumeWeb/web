@@ -74,6 +74,19 @@ and pins in one call.
 
 See the complete [manual-clock test](../README.md#publish-application-writes).
 
+`writer.pin(object, { metadata, signal })` optionally replaces committed metadata.
+The byte view is copied once at invocation, before holds or transport dispatch.
+Metadata must be a `Uint8Array` of at most 1024 bytes. Omission and explicit
+`undefined` preserve the current committed bytes, including on repin; empty bytes
+clear them. Membership, replacement bytes and the committed receipt change in one
+synchronous effect. Before that effect, owner reads see the prior value (or no
+object on a first pin). A failed or cancelled attempt before commit preserves it.
+A lost reply after commit retains the replacement. Concurrent attempts follow
+commit order; omission cannot reset another attempt's committed replacement.
+`inspect` reports membership only and cannot identify a concurrent metadata
+commit. Publication, event fields and second-based coalescing remain unchanged.
+This is synthetic application metadata, not native encrypted object metadata.
+
 `inspect` reads `"missing"`, `"uploaded"` or `"pinned"` from owned state;
 `delete` accepts only an application's original object reference. Fixture
 handles, copied references and foreign-run references grant no write authority.
