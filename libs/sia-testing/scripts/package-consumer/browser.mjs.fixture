@@ -3,3 +3,14 @@ import * as mock from "@lumeweb/sia-testing/mock";
 import * as client from "@lumeweb/sia-testing/client";
 import * as msw from "@lumeweb/sia-testing/msw";
 console.log(mock, client, msw);
+
+// Keep owner calls reachable through public portable entries in the browser graph.
+export async function inspectOwner(connection) {
+  const owner = client.createMockOwnerShares(connection, connection.credential);
+  try {
+    const page = await owner.list({ offset: 0, limit: 1 });
+    if (!page.items.length) return [];
+    await owner.detail(page.items[0].ref);
+    return (await owner.objects(page.items[0].ref, { offset: 0, limit: 1 })).items;
+  } finally { await owner.close(); }
+}

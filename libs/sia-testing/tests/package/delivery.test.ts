@@ -26,12 +26,15 @@ beforeEach(async () => {
   const files: Record<string, string> = {
     "client.d.ts": `
       import type { MockConnection } from "./http.js";
+      import type { OwnerPort } from "./mock.js";
+      export declare function createMockOwnerShares(connection: MockConnection, credential: MockCredential): OwnerPort;
       export interface MockCredential { kind: "app-key"; keyHex: string; }
       export declare function createMockReader(connection: MockConnection, credential: MockCredential): {
         object(id: string): Promise<{id: string; sizeBytes: number}>;
         close(): Promise<void>;
       };`,
-    "client.js": `export const createMockReader = (connection) => ({
+    "client.js": `export const createMockOwnerShares = (connection) => connection.mock.ownerShares();
+    export const createMockReader = (connection) => ({
       object: async (id) => connection.mock.data.get(id),
       download: async (object) => new Blob([object.bytes]).stream(), close: async () => {}
     });`,
@@ -47,16 +50,29 @@ beforeEach(async () => {
     "mock.d.ts": `
       export interface TestFile { name: string; sizeBytes: number; }
       export interface TestObject { id: string; sizeBytes: number; }
-      export interface MockRun { mock: MockSia; ownerAccess: object; objects: { upload(input: {file: TestFile; metadata: Uint8Array; name: string}): Promise<TestObject> }; }
-      export interface MockSia { actor(label: string): object; run<T>(options: unknown, use: (run: MockRun) => Promise<T>): Promise<{value: T}>; close(): Promise<void>; }
+      export interface OwnerPort {
+        list(page: {offset: number; limit: number}): Promise<{items: {ref: object; description: string}[]}>;
+        detail(ref: object): Promise<{statistics: {objectCount: number; logicalBytes: number}}>;
+        objects(ref: object, page: {offset: number; limit: number}): Promise<{items: {id: string; sizeBytes: number; metadata: Uint8Array}[]}>;
+        close(): Promise<void>;
+      }
+      export interface MockRun { shares: { create(input: {objects: TestObject[]; description?: string}): Promise<object> }; mock: MockSia; ownerAccess: object; objects: { upload(input: {file: TestFile; metadata: Uint8Array; name: string}): Promise<TestObject> }; }
+      export interface MockSia { ownerShares(input: {access: object; as: object}): OwnerPort; actor(label: string): object; run<T>(options: unknown, use: (run: MockRun) => Promise<T>): Promise<{value: T}>; close(): Promise<void>; }
       export declare function createMockSia(): MockSia;
       export declare function bytesFixture(input: {bytes: Uint8Array; name: string}): Promise<TestFile>;`,
     "mock.js": `
       export async function bytesFixture({bytes, name}) { return {bytes, name, sizeBytes: bytes.length}; }
       export function createMockSia() {
         const data = new Map();
-        const mock = { data, actor: () => ({}), close: async () => {}, async run(_options, use) {
-          const run = {mock, ownerAccess: {}, objects: {async upload({file, metadata}) {
+        let share;
+        const ownerShares = () => ({
+          list: async () => ({items: [{ref: {}, description: share.description}]}),
+          detail: async () => ({statistics: {objectCount: share.objects.length, logicalBytes: share.objects.reduce((sum, item) => sum + item.sizeBytes, 0)}}),
+          objects: async () => ({items: share.objects.map(({id, metadata, sizeBytes}) => ({id, metadata, sizeBytes}))}),
+          close: async () => {}
+        });
+        const mock = { data, ownerShares, actor: () => ({}), close: async () => {}, async run(_options, use) {
+          const run = {mock, shares: {create: async (input) => (share = input)}, ownerAccess: {}, objects: {async upload({file, metadata}) {
             const object = { id: String(data.size), sizeBytes: file.sizeBytes, metadata, bytes: file.bytes };
             data.set(object.id, object); return object;
           }}};

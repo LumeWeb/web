@@ -48,6 +48,10 @@ export interface IndexdModel {
   getSharingKey(ownerId: string, publicKey: string): SharingKey;
   getSlab(accountId: string, slabId: string): ModelSlab;
   hosts(accountId: string, filter?: HostFilter): ModelHost[];
+  listOwnedSharedObjects(
+    ownerId: string,
+    publicKey: string,
+  ): SharingAttachment[];
   listRecipientObjects(
     recipientId: string,
     publicKey: string,
@@ -475,6 +479,12 @@ export function createIndexdModel(
             (!filter.publicKey || host.publicKey === filter.publicKey),
         )
         .map(copyHost);
+    },
+    // Expiry removes recipient authority, but owners still need to inspect expired attachments.
+    listOwnedSharedObjects(ownerId, publicKey) {
+      const record = ownedShare(ownerId, publicKey);
+      if (record.revoked) throw new Error("sharing key unavailable");
+      return [...record.attachments.values()].map((item) => ({ ...item }));
     },
     listRecipientObjects(recipientId, publicKey) {
       const record = recipientShare(recipientId, publicKey);

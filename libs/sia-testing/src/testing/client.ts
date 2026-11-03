@@ -3,10 +3,10 @@ import type { MockCredential } from "./runtime.js";
 import type { MockConnection } from "./transport.js";
 import type { ReadObject, ReadPort } from "./types.js";
 
-export function createMockReader(
+export function createMockCalls(
   connection: MockConnection,
   credential: MockCredential,
-): ReadPort {
+) {
   const root = new URL(connection.url);
   if (
     !["http:", "https:"].includes(root.protocol) ||
@@ -48,6 +48,13 @@ export function createMockReader(
     }
     return response;
   };
+  return { call, lifetime };
+}
+export function createMockReader(
+  connection: MockConnection,
+  credential: MockCredential,
+): ReadPort {
+  const { call, lifetime } = createMockCalls(connection, credential);
   return {
     close() {
       lifetime.abort();
@@ -133,7 +140,7 @@ export function createMockReader(
     },
   };
 }
-function readObject(value: unknown): ReadObject {
+export function readObject(value: unknown): ReadObject {
   if (
     !value ||
     typeof value !== "object" ||

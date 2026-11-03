@@ -1,6 +1,6 @@
 /** Checks scoped run and reader declarations without MSW or Playwright installed. */
 import { createMockSia, bytesFixture } from "@lumeweb/sia-testing/mock";
-import { createMockReader } from "@lumeweb/sia-testing/client";
+import { createMockOwnerShares, createMockReader } from "@lumeweb/sia-testing/client";
 import { startMockServer } from "@lumeweb/sia-testing/http";
 import { withSiaRun } from "@lumeweb/sia-testing/node";
 export const mock = createMockSia();
@@ -12,9 +12,16 @@ export async function typedConsumer() {
     const server = await startMockServer(run.mock);
     const binding = server.connection({ access: run.ownerAccess, as: run.mock.actor("typed") });
     const reader = createMockReader(binding, binding.credential);
+    const owner = createMockOwnerShares(binding, binding.credential);
+    await run.shares.create({ objects: [object], description: "Typed" });
+    const ref = (await owner.list({ offset: 0, limit: 1 })).items[0]!.ref;
+    const logicalBytes: number = (await owner.detail(ref)).statistics.logicalBytes;
+    const contents = await owner.objects(ref, { offset: 0, limit: 1 });
+    const objectSize: number = contents.items[0]!.sizeBytes;
+    await owner.close();
     const size: number = (await reader.object(object.id)).sizeBytes;
     await reader.close();
     await server.close();
-    return size;
+    return size + logicalBytes + objectSize;
   });
 }
