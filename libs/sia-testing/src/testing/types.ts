@@ -1,4 +1,5 @@
 /** Scoped storage contracts keep fixture mutation handles separate from readable object data. */
+import type { MockMutationFaults } from "./mutations.js";
 import type { MockFaults, RequestReceipt } from "./controls.js";
 declare const ownership: unique symbol;
 export type ActorRef = Owned<"actor">;
@@ -9,7 +10,41 @@ export interface AppDefinition {
   readonly name: string;
   readonly serviceUrl: string;
 }
+export type ApplicationObject = Owned<"application-object"> & {
+  readonly id: string;
+};
+export interface ApplicationPort {
+  close(): Promise<void>;
+  delete(
+    object: ApplicationObject,
+    options?: { readonly signal?: AbortSignal },
+  ): Promise<void>;
+  events(input: {
+    readonly cursor: null | ObjectCursor;
+    readonly limit: number;
+    readonly signal?: AbortSignal;
+  }): Promise<EventPage>;
+  inspect(
+    object: ApplicationObject,
+    options?: { readonly signal?: AbortSignal },
+  ): Promise<"missing" | "pinned" | "uploaded">;
+  pin(
+    object: ApplicationObject,
+    options?: { readonly signal?: AbortSignal },
+  ): Promise<void>;
+  upload(input: {
+    readonly file: TestFile;
+    readonly metadata: Uint8Array;
+    readonly name: string;
+    readonly signal?: AbortSignal;
+  }): Promise<ApplicationObject>;
+}
 export type BrowserAccess = Owned<"access">;
+export interface EventPage {
+  readonly done: boolean;
+  readonly events: readonly ObjectEvent[];
+  readonly nextCursor: null | ObjectCursor;
+}
 export interface LiveRun {
   readonly backend: "live";
   readonly id: string;
@@ -83,13 +118,19 @@ export interface MockRunSummary {
 export interface MockSia {
   actor(label: string): ActorRef;
   advanceTime(milliseconds: number): void;
+  application(input: {
+    readonly access: BrowserAccess;
+    readonly as: ActorRef;
+  }): ApplicationPort;
   close(): Promise<void>;
   readonly faults: MockFaults;
   history(): readonly RequestReceipt[];
+  readonly mutationFaults: MockMutationFaults;
   ownerShares(input: {
     readonly access: BrowserAccess;
     readonly as: ActorRef;
   }): OwnerSharePort;
+  publish(input: { readonly access: BrowserAccess }): Promise<void>;
   reader(input: {
     readonly access: BrowserAccess;
     readonly as: ActorRef;
@@ -98,6 +139,15 @@ export interface MockSia {
     options: MockRunOptions,
     use: (run: MockRun) => Promise<T>,
   ): Promise<RunResult<T, MockRunSummary>>;
+}
+export interface ObjectCursor {
+  readonly after: string;
+  readonly id: string;
+}
+export interface ObjectEvent {
+  readonly deleted: boolean;
+  readonly id: string;
+  readonly updatedAt: string;
 }
 export interface OwnerShareDetails {
   readonly description: string;

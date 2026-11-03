@@ -99,3 +99,113 @@ pnpm --filter @lumeweb/sia-testing test:browser
 pnpm --filter @lumeweb/sia-testing test:package
 pnpm --filter @lumeweb/sia-testing test:consumers
 ```
+
+## Application writes (mock only)
+
+`mock.application({ access: run.ownerAccess, as: actor })` returns an
+`ApplicationPort`. Give that port to application code; keep the run and
+`mock.publish` in the test driver. Managed `run.objects.upload` still uploads
+and pins in one call.
+
+```ts
+const actor = mock.actor("uploader");
+const writer = mock.application({ access: run.ownerAccess, as: actor });
+try {
+  const pending = await writer.upload({ file, name: file.name, metadata: new Uint8Array() });
+  // inspect returns "uploaded"; owner readers cannot read an unpinned payload.
+  const hold = mock.mutationFaults.hold({ actor, object: pending, operation: "pin", stage: "beforeCommit" });
+  const pinning = writer.pin(pending);
+  await hold.started();
+  hold.release();
+  await pinning;
+  // Pin acknowledgement does not publish an event.
+  mock.advanceTime(1000); // requires a manual mock clock
+  await mock.publish({ access: run.ownerAccess });
+  const page = await writer.events({ cursor: null, limit: 10 });
+  await writer.events({ cursor: page.nextCursor, limit: 10 });
+} finally {
+  await writer.close();
+}
+```
+
+`inspect` reads `"missing"`, `"uploaded"` or `"pinned"` from owned state;
+`delete` accepts only an application's original object reference. Fixture
+handles, copied references and foreign-run references grant no write authority.
+Deleting a pending upload discards only its owned slab; deleting a pinned object
+queues a tombstone. All pending and acknowledged payloads belong to the run.
+
+`mutationFaults.hold` is one-shot. `mutationFaults.fail(selector, { code,
+times })` accepts `denied` or `unavailable` and a positive finite integer count.
+Both target `upload`, `pin` or `delete` at `beforeCommit`. Selectors may name an
+owned actor and application object (upload has no object yet). Holds expose
+`started()`, `cancelled()` and `release()`. Receipts record `committed` separately
+from settlement, without source bytes, file names or private metadata.
+Cancellation or rejection before commit changes no payload or model state;
+closing a direct port cancels and joins its sources and holds. Cancellation after
+an effect does not undo it. No write retries, lost-reply recovery or idempotency
+promise is provided.
+
+Application uploads allow files up to 16 MiB, metadata up to 1024 bytes and names
+up to 1024 UTF-8 bytes. Run object-attempt and logical-byte allowances are
+reserved before the source opens. Failed application uploads release active byte
+reservations; object attempts stay charged. Committed bytes stay charged after
+deletion. Managed fixture allowance behavior is unchanged.
+
+Events use the run's existing account feed, including managed fixture events.
+Use a fresh run or explicitly published fixture cursor as your baseline.
+Pages accept limits from 1 to 1000. A cursor is `{ after, id }`, with a canonical
+whole-second ISO timestamp and a lowercase 64-character hexadecimal object ID.
+Continuation is exclusive in timestamp/ID order. `nextCursor` is the last row,
+or the input cursor on an empty page; a full page has `done: false` and may need
+an empty continuation. Publication coalesces each object's current event and
+requires a later clock second after a prior publication. Later publication can
+move a lower-ID object past an older cursor. Publication targets only the
+owner-authenticated run; it never acknowledges an application ledger.
+
+### Fetch-backed application ports
+
+Import `createMockApplication` from `@lumeweb/sia-testing/client` and pass a
+connection from the existing HTTP or MSW endpoint plus the application's current
+credential. The same scoped dispatcher implements these ports; this protocol
+is not native Indexd compatibility. Publication remains a test-driver action.
+
+The upload client obtains a private, authenticated one-use admission before
+opening `file`. It then buffers at most the admitted file size, checks its hash,
+and sends raw bytes, without base64 expansion or streaming Fetch request bodies.
+The server counts the incoming stream independently of `Content-Length` and
+rejects oversize or incomplete bodies before any upload effect. File bodies have
+the same admitted logical/raw limit of 16 MiB; other routes retain their
+16,384-byte body limit. Admissions expire after 30 seconds of real time. They
+cannot be replayed or moved between connections or credentials.
+
+Close the client port before leaving the backend run when immediate local source
+teardown matters. Client close cancels and joins its collector; its original
+admission deadline also cancels collection. Backend run or endpoint close
+invalidates admissions and joins backend-owned work, but cannot synchronously
+stop JavaScript collecting a file in a remote client. A client left open can
+collect only until its admission deadline and cannot commit with an invalidated
+token. HTTP server close and MSW endpoint `close()` invalidate outstanding
+admissions; the application never receives fixture or publication controls.
+Application endpoint close also cancels and joins its active dispatches, including
+held mutations and admission JSON reads.
+
+Object selectors accept only backend-owned references returned by a direct
+`mock.application` port, as in the example above. HTTP/MSW clients materialize
+client-local references; those references, JSON copies and foreign mock handles
+cannot arm backend object controls. For a transport client, allocate an actor
+per binding and select its next operation instead:
+
+```ts
+const hold = mock.mutationFaults.hold({ actor, operation: "pin", stage: "beforeCommit" });
+const pinning = writer.pin(pending); // writer may be an HTTP or MSW client
+await hold.started();
+hold.release();
+await pinning;
+```
+
+| Operation | Direct mock port | HTTP/MSW client |
+| --- | --- | --- |
+| Upload, pin, inspect, delete, events | Supported | Supported |
+| Finite actor/operation mutation controls | Supported | Supported |
+| Backend object selector | Original direct reference | Client-local reference rejected |
+| Publication | Test driver only | No publication route |

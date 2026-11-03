@@ -24,6 +24,7 @@ export interface RequestHold {
 export interface RequestReceipt {
   actor: ActorRef;
   bytes: number;
+  committed?: boolean;
   id: string;
   objectId?: string;
   operation: RequestSelector["operation"];
@@ -33,22 +34,30 @@ export interface RequestSelector {
   actor?: ActorRef;
   object?: TestObject;
   operation:
+    | "delete"
     | "download"
+    | "events"
+    | "inspect"
     | "object"
     | "objects"
     | "owner-share"
     | "owner-share-objects"
-    | "owner-shares";
+    | "owner-shares"
+    | "pin"
+    | "upload";
 }
 interface Held {
   cancel(record: RequestReceipt): void;
   cancellation: Promise<RequestReceipt>;
   matched: boolean;
   released: boolean;
-  selector: RequestSelector;
+  selector: InternalSelector;
   start(record: RequestReceipt): void;
   started: Promise<RequestReceipt>;
   waiters: Set<() => void>;
+}
+interface InternalSelector extends Omit<RequestSelector, "object"> {
+  object?: { readonly id: string };
 }
 interface LinkState {
   latency: number;
@@ -56,7 +65,7 @@ interface LinkState {
   rate: null | number;
   transfer: ReturnType<typeof createTransferLink>;
 }
-export function createRequestControls() {
+export function createRequestControls(records: RequestReceipt[] = []) {
   const holds = new Set<Held>();
   const links = new Map<ActorRef, LinkState>();
   function link(actor: ActorRef): LinkState {
@@ -76,17 +85,22 @@ export function createRequestControls() {
   const faults: {
     code: string;
     remaining: number;
-    selector: RequestSelector;
+    selector: InternalSelector;
   }[] = [];
-  const records: RequestReceipt[] = [];
-  function matches(selector: RequestSelector, request: RequestReceipt) {
+  function matches(selector: InternalSelector, request: RequestReceipt) {
     return (
       selector.operation === request.operation &&
       (!selector.actor || selector.actor === request.actor) &&
       (!selector.object || selector.object.id === request.objectId)
     );
   }
-  const control: MockFaults = {
+  const control: Omit<MockFaults, "fail" | "hold"> & {
+    fail(
+      selector: InternalSelector,
+      options: Parameters<MockFaults["fail"]>[1],
+    ): void;
+    hold(selector: InternalSelector): RequestHold;
+  } = {
     fail(selector, options) {
       if (!Number.isSafeInteger(options.times) || options.times < 1)
         throw new Error("Fault count must be positive");
@@ -156,6 +170,9 @@ export function createRequestControls() {
       const record: RequestReceipt = {
         actor,
         bytes: 0,
+        ...(["delete", "pin", "upload"].includes(operation)
+          ? { committed: false }
+          : {}),
         id: crypto.randomUUID(),
         operation,
         status: "pending",

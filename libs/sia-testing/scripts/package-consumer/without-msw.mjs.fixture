@@ -1,7 +1,7 @@
 /** Runs scoped storage without either optional test peer. */
 import assert from "node:assert/strict";
 import { createMockSia, bytesFixture } from "@lumeweb/sia-testing/mock";
-import { createMockOwnerShares, createMockReader } from "@lumeweb/sia-testing/client";
+import { createMockApplication, createMockOwnerShares, createMockReader } from "@lumeweb/sia-testing/client";
 import { startMockServer } from "@lumeweb/sia-testing/http";
 import { withSiaRun } from "@lumeweb/sia-testing/node";
 const app = { description: "Packed fixture", id: "a".repeat(64), name: "Packed", serviceUrl: "https://example.invalid" };
@@ -13,6 +13,18 @@ try {
     const server = await startMockServer(mock);
     try {
       const binding = server.connection({ access: run.ownerAccess, as: mock.actor("consumer") });
+      const writer = createMockApplication(binding, binding.credential);
+      try {
+        const pending = await writer.upload({file,name:file.name,metadata:new Uint8Array()});
+        assert.equal(await writer.inspect(pending), "uploaded");
+        await writer.pin(pending);
+        assert.equal(await writer.inspect(pending), "pinned");
+        assert.deepEqual((await writer.events({cursor:null,limit:10})).events, []);
+        await mock.publish({access:run.ownerAccess});
+        assert.equal((await writer.events({cursor:null,limit:10})).events.length, 2);
+        await writer.delete(pending);
+        assert.equal(await writer.inspect(pending), "missing");
+      } finally { await writer.close(); }
       const reader = createMockReader(binding, binding.credential);
       assert.deepEqual([...new Uint8Array(await new Response(await reader.download(await reader.object(object.id))).arrayBuffer())], [4, 5]);
       await reader.close();

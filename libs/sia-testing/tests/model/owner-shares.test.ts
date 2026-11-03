@@ -54,7 +54,13 @@ async function connect(
             baseUrl: "https://owner.example.invalid/",
           });
     const interception =
-      "handlers" in endpoint ? setupServer(...endpoint.handlers) : undefined;
+      "handlers" in endpoint && Array.isArray(endpoint.handlers)
+        ? setupServer(
+            ...(endpoint.handlers as ReturnType<
+              typeof createMockHandlers
+            >["handlers"]),
+          )
+        : undefined;
     interception?.listen({ onUnhandledRequest: "error" });
     transport = {
       endpoint,

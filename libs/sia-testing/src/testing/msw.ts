@@ -10,6 +10,7 @@ export function createMockHandlers(
   const configured = createMockEndpoint(mock, options.baseUrl);
   return {
     ...configured.endpoint,
+    close: () => configured.close(),
     handlers: [
       http.all(`${configured.endpoint.url}*`, ({ request }) =>
         configured.dispatch(request),

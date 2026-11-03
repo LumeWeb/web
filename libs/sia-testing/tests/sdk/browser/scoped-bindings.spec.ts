@@ -66,3 +66,56 @@ test("bindings isolate browser storage and enforce revoked recipient access", as
   await sia.shares.revoke(share);
   expect(await read()).toBe(403);
 });
+test("a browser uploads an admitted raw body over the loopback listener", async ({
+  sia,
+}) => {
+  const clientEntry = `/@fs${new URL("../../../src/client.ts", import.meta.url).pathname}`;
+  const mockEntry = `/@fs${new URL("../../../src/mock.ts", import.meta.url).pathname}`;
+  let result: unknown;
+  await sia.browser.open({
+    access: sia.ownerAccess,
+    async apply(page, connection) {
+      await page.goto("/scoped.html");
+      result = await page.evaluate(
+        async ({ backend, clientEntry, mockEntry }) => {
+          const { createMockApplication } = (await import(
+            clientEntry
+          )) as typeof import("../../../src/client.js");
+          const { bytesFixture } = (await import(
+            mockEntry
+          )) as typeof import("../../../src/mock.js");
+          const writer = createMockApplication(
+            backend.connection,
+            backend.credential,
+          );
+          try {
+            const file = await bytesFixture({
+              bytes: new Uint8Array(20_000).fill(7),
+              name: "browser",
+            });
+            const object = await writer.upload({
+              file,
+              metadata: new Uint8Array(),
+              name: file.name,
+            });
+            const uploaded = await writer.inspect(object);
+            await writer.pin(object);
+            return {
+              events: (await writer.events({ cursor: null, limit: 10 })).events,
+              pinned: await writer.inspect(object),
+              uploaded,
+            };
+          } finally {
+            await writer.close();
+          }
+        },
+        { backend: connection.backend, clientEntry, mockEntry },
+      );
+    },
+  });
+  expect(result).toEqual({
+    events: [],
+    pinned: "pinned",
+    uploaded: "uploaded",
+  });
+});

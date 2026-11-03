@@ -1,4 +1,5 @@
 /** HTTP and MSW readers use one dispatcher and authenticate the application's current credential. */
+import { createApplicationTransport } from "./application-transport.js";
 import { type MockCredential, mockRuntime } from "./runtime.js";
 import type {
   ActorRef,
@@ -27,12 +28,14 @@ export function createMockEndpoint(mock: MockSia, base: string) {
     string,
     {
       actor: ActorRef;
+      credential: string;
       kind: MockCredential["kind"];
       shares: Map<string, OwnerShareRef>;
       tokens: WeakMap<OwnerShareRef, string>;
     }
   >();
   const runtime = mockRuntime(mock);
+  const application = createApplicationTransport(mock);
   const endpoint: MockEndpoint = {
     connection({ access, as }) {
       const credential = runtime.credential(access);
@@ -41,6 +44,7 @@ export function createMockEndpoint(mock: MockSia, base: string) {
       const client = crypto.randomUUID();
       clients.set(client, {
         actor: as,
+        credential: credential.keyHex,
         kind: credential.kind,
         shares: new Map(),
         tokens: new WeakMap(),
@@ -62,8 +66,9 @@ export function createMockEndpoint(mock: MockSia, base: string) {
     const parts = url.pathname.substring(root.pathname.length).split("/");
     const client = parts.length === 2 && clients.get(parts[0]!);
     if (!client) return Response.json({ code: "denied" }, { status: 403 });
+    const isApplication = parts[1]?.startsWith("app-");
     const isAuth = parts[1]?.startsWith("auth-");
-    if (request.method !== (isAuth ? "POST" : "GET"))
+    if (request.method !== (isAuth || isApplication ? "POST" : "GET"))
       return Response.json({ code: "invalid-input" }, { status: 405 });
     try {
       const header = request.headers.get("authorization") ?? "";
@@ -96,6 +101,26 @@ export function createMockEndpoint(mock: MockSia, base: string) {
         ...credential,
         kind: client.kind === "registration" ? "app-key" : client.kind,
       });
+      if (isApplication) {
+        if (
+          client.kind !== "app-key" ||
+          client.credential !== credential.keyHex
+        )
+          throw Object.assign(new Error("Owner connection required"), {
+            code: "denied",
+          });
+        for (const key of url.searchParams.keys())
+          if (key !== "token" || url.searchParams.getAll(key).length !== 1)
+            throw Object.assign(new Error("Invalid parameter"), {
+              code: "invalid-input",
+            });
+        return await application.dispatch(request, parts[1]!, {
+          access,
+          actor: client.actor,
+          client,
+          credential: credential.keyHex,
+        });
+      }
       const allowed =
         parts[1] === "owner-shares"
           ? ["offset", "limit"]
@@ -239,7 +264,7 @@ export function createMockEndpoint(mock: MockSia, base: string) {
       detach?.();
     }
   }
-  return { dispatch, endpoint };
+  return { close: () => application.close(), dispatch, endpoint };
 }
 function wireObject(object: ReadObject) {
   return { ...object, metadata: [...object.metadata] };

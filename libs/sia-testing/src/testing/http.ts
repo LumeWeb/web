@@ -7,6 +7,7 @@ import {
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { createMockEndpoint, type MockEndpoint } from "./transport.js";
+import { incomingBody } from "./http-body.js";
 import { mockRuntime } from "./runtime.js";
 import type { BrowserAccess, MockSia } from "./types.js";
 export { createMockReader } from "./client.js";
@@ -59,22 +60,38 @@ export async function startMockServer(
     calls.add(abort);
     outgoing.once("close", cancel);
     try {
+      const pathname = new URL(incoming.url ?? "/", "http://localhost")
+        .pathname;
+      const root = new URL(configured.endpoint.url).pathname;
+      const parts = pathname.startsWith(root)
+        ? pathname.substring(root.length).split("/")
+        : [];
+      const rawUpload =
+        parts.length === 2 &&
+        /^[a-f0-9-]{36}$/.test(parts[0]!) &&
+        parts[1] === "app-upload-body";
       const chunks: Buffer[] = [];
       let size = 0;
-      for await (const value of incoming as AsyncIterable<Buffer>) {
-        size += value.length;
-        if (size > 16_384) {
-          outgoing.writeHead(413).end();
-          return;
+      if (!rawUpload)
+        for await (const value of incoming as AsyncIterable<Buffer>) {
+          size += value.length;
+          if (size > 16_384) {
+            outgoing.writeHead(413).end();
+            return;
+          }
+          chunks.push(value);
         }
-        chunks.push(value);
-      }
       const request = new Request(
         `http://${incoming.headers.host}${incoming.url}`,
         {
           ...(["GET", "HEAD"].includes(incoming.method ?? "GET")
             ? {}
-            : { body: Buffer.concat(chunks) }),
+            : rawUpload
+              ? {
+                  body: incomingBody(incoming, abort.signal),
+                  duplex: "half",
+                }
+              : { body: Buffer.concat(chunks) }),
           headers: Object.entries(incoming.headers).flatMap(([key, value]) =>
             value === undefined
               ? []
@@ -127,11 +144,21 @@ export async function startMockServer(
   return {
     ...configured.endpoint,
     close() {
-      closing ??= new Promise<void>((resolve, reject) => {
-        for (const call of calls) call.abort();
-        server.close((error) => (error ? reject(error) : resolve()));
-        server.closeIdleConnections();
-      });
+      closing ??= (async () => {
+        const results = await Promise.allSettled([
+          configured.close(),
+          new Promise<void>((resolve, reject) => {
+            for (const call of calls) call.abort();
+            server.close((error) => (error ? reject(error) : resolve()));
+            server.closeIdleConnections();
+          }),
+        ]);
+        const errors = results.flatMap((result) =>
+          result.status === "rejected" ? [result.reason as unknown] : [],
+        );
+        if (errors.length)
+          throw new AggregateError(errors, "Mock listener cleanup failed");
+      })();
       return closing;
     },
   };

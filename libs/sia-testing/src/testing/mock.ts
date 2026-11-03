@@ -5,8 +5,15 @@ import {
   type MockNetwork,
   type MockSdk,
 } from "../sdk/index.js";
+import { withAbort } from "../sdk/abort.js";
+import { createMutationControls } from "./mutations.js";
+import type { ApplicationObject, ApplicationPort } from "./types.js";
 import { readFixture } from "./files.js";
-import { createRequestControls } from "./controls.js";
+import {
+  createRequestControls,
+  type RequestReceipt,
+  type RequestSelector,
+} from "./controls.js";
 import {
   createOwnerSharePort,
   ownerPage,
@@ -35,6 +42,7 @@ interface Context {
   abort: AbortController;
   authentication?: ReturnType<typeof createMockAuthentication>;
   cleanup?: Promise<void>;
+  cleanupErrors: unknown[];
   credentials: Set<string>;
   id: string;
   limits: RunLimits;
@@ -81,13 +89,29 @@ export function createMockSia(options: MockOptions = {}): MockSia {
     new Date(start === undefined ? Date.now() : start + elapsed);
   const active = new Set<Context>();
   const actors = new WeakSet<ActorRef>();
-  const controls = createRequestControls();
+  const records: RequestReceipt[] = [];
+  const controls = createRequestControls(records);
   const credentials = new Map<string, BrowserAccess>();
   const grants = new WeakMap<BrowserAccess, Grant>();
   const objects = new WeakMap<
     TestObject,
     { context: Context; record: ObjectRecord }
   >();
+  const applicationObjects = new WeakMap<
+    ApplicationObject,
+    { context: Context; record: ObjectRecord }
+  >();
+  const mutations = createMutationControls((selector) => {
+    if (
+      selector.stage !== "beforeCommit" ||
+      !["delete", "pin", "upload"].includes(selector.operation)
+    )
+      throw failure("invalid-input", "Invalid mutation selector");
+    if (selector.actor && !actors.has(selector.actor))
+      throw failure("foreign-handle", "Unknown actor");
+    if (selector.object && !applicationObjects.has(selector.object))
+      throw failure("foreign-handle", "Unknown application object");
+  }, records);
   const shares = new WeakMap<
     TestShare,
     { context: Context; record: ShareRecord }
@@ -102,7 +126,11 @@ export function createMockSia(options: MockOptions = {}): MockSia {
   /** Read projections must not let callers mutate the fixture's stored metadata. */
   function describe(context: Context, id: string): ReadObject {
     const record = context.objects.get(id);
-    if (!record || record.deleted)
+    if (
+      !record ||
+      record.deleted ||
+      !context.network!.model.object(context.id, id)
+    )
       throw failure("not-found", "Object is missing");
     return {
       id,
@@ -177,7 +205,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
     context.abort.abort();
     context.cleanup = (async () => {
       await Promise.allSettled([...context.pending]);
-      const errors: unknown[] = [];
+      const errors: unknown[] = [...context.cleanupErrors];
       for (const record of context.shares.values()) {
         if (record.revoked) continue;
         try {
@@ -213,6 +241,18 @@ export function createMockSia(options: MockOptions = {}): MockSia {
     return context.cleanup;
   }
 
+  function validateReadSelector(selector: RequestSelector) {
+    if (selector.actor && !actors.has(selector.actor))
+      throw failure("foreign-handle", "Unknown actor");
+    if (selector.object && !objects.has(selector.object))
+      throw failure("foreign-handle", "Unknown fixture object");
+    if (
+      ["delete", "events", "inspect", "pin", "upload"].includes(
+        selector.operation,
+      )
+    )
+      throw failure("invalid-input", "Read control required");
+  }
   const environment: MockSia = {
     actor(label) {
       environmentOpen();
@@ -234,6 +274,284 @@ export function createMockSia(options: MockOptions = {}): MockSia {
         throw failure("invalid-input", "Mock clock is outside the date range");
       elapsed += milliseconds;
     },
+    application({ access: handle, as: actor }): ApplicationPort {
+      environmentOpen();
+      if (!actors.has(actor)) throw failure("foreign-handle", "Unknown actor");
+      const grant = grants.get(handle);
+      const abort = new AbortController();
+      const pending = new Set<Promise<unknown>>();
+      let closing: Promise<void> | undefined;
+      const cleanupErrors: unknown[] = [];
+      function authorize() {
+        if (abort.signal.aborted)
+          throw failure("closed", "Application port is closed");
+        if (!grant || grant.key !== null || grant.credential.kind !== "app-key")
+          throw failure("denied", "Owner access is unavailable");
+        open(grant.context);
+        return grant.context;
+      }
+      function owned(context: Context, object: ApplicationObject) {
+        const value = applicationObjects.get(object);
+        if (!value || value.context !== context)
+          throw failure("foreign-handle", "Unknown application object");
+        return value.record;
+      }
+      function call<T>(
+        signal: AbortSignal | undefined,
+        action: (context: Context, signal: AbortSignal) => Promise<T> | T,
+      ): Promise<T> {
+        const callSignal = AbortSignal.any([
+          abort.signal,
+          ...(grant ? [grant.context.signal] : []),
+          ...(signal ? [signal] : []),
+        ]);
+        const promise = Promise.resolve().then(() => {
+          callSignal.throwIfAborted();
+          const context = authorize();
+          return track(context, () => action(context, callSignal));
+        });
+        pending.add(promise);
+        void promise.then(
+          () => pending.delete(promise),
+          (error: unknown) => {
+            pending.delete(promise);
+            if (error instanceof AggregateError) {
+              cleanupErrors.push(error);
+              grant?.context.cleanupErrors.push(error);
+            }
+          },
+        );
+        return promise;
+      }
+      async function mutate<T>(
+        _context: Context,
+        signal: AbortSignal,
+        operation: "delete" | "pin" | "upload",
+        objectId: string | undefined,
+        action: (receipt: RequestReceipt) => Promise<T>,
+      ): Promise<T> {
+        const receipt = await mutations.begin(
+          actor,
+          operation,
+          objectId,
+          signal,
+        );
+        try {
+          signal.throwIfAborted();
+          authorize();
+          const value = await action(receipt);
+          receipt.status = "completed";
+          return value;
+        } catch (error) {
+          receipt.status = signal.aborted ? "cancelled" : "failed";
+          throw error;
+        }
+      }
+      return {
+        close() {
+          abort.abort();
+          return (closing ??= Promise.allSettled([...pending]).then(() => {
+            if (cleanupErrors.length)
+              throw new AggregateError(
+                cleanupErrors,
+                "Application source cleanup failed",
+              );
+          }));
+        },
+        delete(object, options = {}) {
+          return call(options.signal, async (context, signal) => {
+            const record = owned(context, object);
+            await mutate(
+              context,
+              signal,
+              "delete",
+              record.handle.id,
+              async (receipt) => {
+                // Sharing the SDK call's signal or receipt would attribute one caller's cancellation to another.
+                while (record.deletion) {
+                  await withAbort(
+                    record.deletion.catch(() => undefined),
+                    signal,
+                  );
+                }
+                signal.throwIfAborted();
+                authorize();
+                if (record.deleted) return;
+                const deletion = (record.deletion = (async () => {
+                  if (
+                    context.network!.model.object(context.id, record.handle.id)
+                  )
+                    await context.sdk!.deleteObject(record.handle.id, {
+                      signal,
+                    });
+                  else
+                    context.network!.discardUpload(
+                      context.id,
+                      record.handle.id,
+                    );
+                  receipt.committed = true;
+                  record.deleted = true;
+                  record.metadata = new Uint8Array();
+                })());
+                try {
+                  await deletion;
+                } finally {
+                  if (record.deletion === deletion) delete record.deletion;
+                }
+              },
+            );
+          });
+        },
+        events(input) {
+          return call(input.signal, (context) => {
+            const { cursor, limit } = input;
+            if (
+              !Number.isSafeInteger(limit) ||
+              limit < 1 ||
+              limit > 1000 ||
+              (cursor !== null &&
+                (!cursor ||
+                  typeof cursor.after !== "string" ||
+                  !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.000Z$/.test(
+                    cursor.after,
+                  ) ||
+                  !Number.isFinite(Date.parse(cursor.after)) ||
+                  new Date(cursor.after).toISOString() !== cursor.after ||
+                  !/^[a-f0-9]{64}$/.test(cursor.id)))
+            )
+              throw failure("invalid-input", "Invalid event page");
+            const events = context
+              .network!.model.objectEvents(context.id)
+              .map((row) => ({
+                deleted: row.deleted,
+                id: row.key,
+                updatedAt: row.updatedAt,
+              }))
+              .sort(
+                (a, b) =>
+                  a.updatedAt.localeCompare(b.updatedAt) ||
+                  a.id.localeCompare(b.id),
+              )
+              .filter(
+                (row) =>
+                  !cursor ||
+                  row.updatedAt > cursor.after ||
+                  (row.updatedAt === cursor.after && row.id > cursor.id),
+              )
+              .slice(0, limit);
+            const last = events.at(-1);
+            return {
+              done: events.length < limit,
+              events,
+              nextCursor: last
+                ? { after: last.updatedAt, id: last.id }
+                : cursor,
+            };
+          });
+        },
+        inspect(object, options = {}) {
+          return call(options.signal, (context) => {
+            const record = owned(context, object);
+            return record.deleted
+              ? "missing"
+              : context.network!.model.object(context.id, record.handle.id)
+                ? "pinned"
+                : "uploaded";
+          });
+        },
+        pin(object, options = {}) {
+          return call(options.signal, async (context, signal) => {
+            const record = owned(context, object);
+            if (record.deleted) throw failure("not-found", "Object is missing");
+            await mutate(
+              context,
+              signal,
+              "pin",
+              record.handle.id,
+              async (receipt) => {
+                if (record.deleted)
+                  throw failure("not-found", "Object is missing");
+                await context.sdk!.pinObject(
+                  { id: () => record.handle.id },
+                  { signal },
+                );
+                receipt.committed = true;
+              },
+            );
+          });
+        },
+        upload(input) {
+          return call(input.signal, async (context, signal) => {
+            const file = {
+              name: input.file.name,
+              open: input.file.open.bind(input.file),
+              sha256: input.file.sha256,
+              sizeBytes: input.file.sizeBytes,
+            };
+            const name = input.name;
+            const sourceMetadata = input.metadata;
+            if (
+              !(sourceMetadata instanceof Uint8Array) ||
+              Object.getOwnPropertyDescriptor(
+                Object.getPrototypeOf(Uint8Array.prototype),
+                "byteLength",
+              )!.get!.call(sourceMetadata) > 1024
+            )
+              throw failure("invalid-input", "Invalid application metadata");
+            const metadata = new Uint8Array(sourceMetadata);
+            integer(file.sizeBytes);
+            if (
+              !(input.metadata instanceof Uint8Array) ||
+              metadata.length > 1024 ||
+              typeof name !== "string" ||
+              !name ||
+              name.length > 1024 ||
+              new TextEncoder().encode(name).length > 1024 ||
+              file.sizeBytes > 16 * 1024 * 1024 ||
+              !/^[0-9a-f]{64}$/.test(file.sha256)
+            )
+              throw failure("invalid-input", "Invalid application upload");
+            if (
+              context.objectAttempts >= context.limits.maxObjects ||
+              file.sizeBytes >
+                context.limits.maxLogicalUploadBytes - context.reservedBytes
+            )
+              throw failure("limit", "Run upload allowance exceeded");
+            context.objectAttempts++;
+            context.reservedBytes += file.sizeBytes;
+            let committed = false;
+            try {
+              const bytes = await readFixture(file, signal);
+              return await mutate(
+                context,
+                signal,
+                "upload",
+                undefined,
+                async (receipt) => {
+                  const id = identifier();
+                  await context.sdk!.upload(bytes, { id, signal });
+                  committed = true;
+                  receipt.committed = true;
+                  const internal = Object.freeze({
+                    id,
+                    sha256: file.sha256,
+                    sizeBytes: bytes.length,
+                  }) as TestObject;
+                  const record = { deleted: false, handle: internal, metadata };
+                  const object = Object.freeze({ id }) as ApplicationObject;
+                  context.objects.set(id, record);
+                  applicationObjects.set(object, { context, record });
+                  context.uploadedBytes += bytes.length;
+                  return object;
+                },
+              );
+            } finally {
+              if (!committed) context.reservedBytes -= file.sizeBytes;
+            }
+          });
+        },
+      };
+    },
     async close() {
       closed = true;
       const results = await Promise.allSettled([...active].map(cleanup));
@@ -243,8 +561,25 @@ export function createMockSia(options: MockOptions = {}): MockSia {
       if (errors.length)
         throw new AggregateError(errors, "Mock environment cleanup failed");
     },
-    faults: controls.control,
+    faults: {
+      fail(selector, options) {
+        selector = { ...selector };
+        validateReadSelector(selector);
+        controls.control.fail(selector, options);
+      },
+      hold(selector) {
+        selector = { ...selector };
+        validateReadSelector(selector);
+        return controls.control.hold(selector);
+      },
+      setLink(actor, input) {
+        if (!actors.has(actor))
+          throw failure("foreign-handle", "Unknown actor");
+        controls.control.setLink(actor, input);
+      },
+    },
     history: controls.history,
+    mutationFaults: mutations.control,
     ownerShares({ access: handle, as: actor }) {
       environmentOpen();
       if (!actors.has(actor))
@@ -328,6 +663,14 @@ export function createMockSia(options: MockOptions = {}): MockSia {
         },
         signal: grant?.context.signal ?? new AbortController().signal,
         track: (action) => track(authorize(), action),
+      });
+    },
+    async publish({ access: handle }) {
+      const grant = grants.get(handle);
+      if (!grant || grant.key !== null || grant.credential.kind !== "app-key")
+        throw failure("denied", "Owner access is unavailable");
+      return track(grant.context, () => {
+        grant.context.network!.model.publishObjectEvents();
       });
     },
     reader({ access: handle, as: actor }) {
@@ -492,6 +835,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
       const abort = new AbortController();
       const context: Context = {
         abort,
+        cleanupErrors: [],
         credentials: new Set(),
         id,
         limits,
