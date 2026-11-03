@@ -43,6 +43,13 @@ export interface ManagedShares {
   detach(share: TestShare, object: TestObject): Promise<void>;
   revoke(share: TestShare): Promise<void>;
 }
+export interface MockManagedShares extends ManagedShares {
+  create(
+    input: Parameters<ManagedShares["create"]>[0] & {
+      readonly description?: string;
+    },
+  ): Promise<TestShare>;
+}
 export interface MockOptions {
   readonly clock?: "realtime" | { readonly start: string };
   readonly quotaBytes?: number;
@@ -60,7 +67,7 @@ export interface MockRun {
   readonly mock: MockSia;
   readonly objects: ManagedObjects;
   readonly ownerAccess: BrowserAccess;
-  readonly shares: ManagedShares;
+  readonly shares: MockManagedShares;
 }
 export interface MockRunOptions {
   readonly app: AppDefinition;
@@ -79,6 +86,10 @@ export interface MockSia {
   close(): Promise<void>;
   readonly faults: MockFaults;
   history(): readonly RequestReceipt[];
+  ownerShares(input: {
+    readonly access: BrowserAccess;
+    readonly as: ActorRef;
+  }): OwnerSharePort;
   reader(input: {
     readonly access: BrowserAccess;
     readonly as: ActorRef;
@@ -88,10 +99,42 @@ export interface MockSia {
     use: (run: MockRun) => Promise<T>,
   ): Promise<RunResult<T, MockRunSummary>>;
 }
+export interface OwnerShareDetails {
+  readonly description: string;
+  readonly expiresAt?: string;
+  readonly ref: OwnerShareRef;
+  readonly statistics: {
+    readonly logicalBytes: number;
+    readonly objectCount: number;
+  };
+}
+export interface OwnerSharePort {
+  close(): Promise<void>;
+  detail(
+    share: OwnerShareRef,
+    options?: { readonly signal?: AbortSignal },
+  ): Promise<OwnerShareDetails>;
+  list(page: PageRequest): Promise<ReadPage<OwnerShareDetails>>;
+  objects(
+    share: OwnerShareRef,
+    page: PageRequest,
+  ): Promise<ReadPage<ReadObject>>;
+}
+export type OwnerShareRef = Owned<"owner-share">;
+export interface PageRequest {
+  readonly limit: number;
+  readonly offset: number;
+  readonly signal?: AbortSignal;
+}
 export interface ReadObject {
   readonly id: string;
   readonly metadata: Uint8Array;
   readonly sizeBytes: number;
+}
+export interface ReadPage<T> {
+  readonly done: boolean;
+  readonly items: readonly T[];
+  readonly nextOffset: number;
 }
 export interface ReadPort {
   close(): Promise<void>;

@@ -1,7 +1,7 @@
 /** Runs scoped storage without either optional test peer. */
 import assert from "node:assert/strict";
 import { createMockSia, bytesFixture } from "@lumeweb/sia-testing/mock";
-import { createMockReader } from "@lumeweb/sia-testing/client";
+import { createMockOwnerShares, createMockReader } from "@lumeweb/sia-testing/client";
 import { startMockServer } from "@lumeweb/sia-testing/http";
 import { withSiaRun } from "@lumeweb/sia-testing/node";
 const app = { description: "Packed fixture", id: "a".repeat(64), name: "Packed", serviceUrl: "https://example.invalid" };
@@ -16,6 +16,16 @@ try {
       const reader = createMockReader(binding, binding.credential);
       assert.deepEqual([...new Uint8Array(await new Response(await reader.download(await reader.object(object.id))).arrayBuffer())], [4, 5]);
       await reader.close();
+      await run.shares.create({ objects: [object], description: "Packed owner" });
+      const direct = mock.ownerShares({ access: run.ownerAccess, as: mock.actor("direct owner") });
+      const owner = createMockOwnerShares(binding, binding.credential);
+      try {
+        assert.equal((await direct.list({ offset: 0, limit: 1 })).items[0].description, "Packed owner");
+        const page = await owner.list({ offset: 0, limit: 1 });
+        const ref = page.items[0].ref;
+        assert.deepEqual((await owner.detail(ref)).statistics, { objectCount: 1, logicalBytes: 2 });
+        assert.deepEqual((await owner.objects(ref, { offset: 0, limit: 1 })).items, [{ id: object.id, metadata: Uint8Array.of(6), sizeBytes: 2 }]);
+      } finally { await owner.close(); await direct.close(); }
     } finally { await server.close(); }
   });
 } finally { await mock.close(); }

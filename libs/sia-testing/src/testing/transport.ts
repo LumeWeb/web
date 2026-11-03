@@ -1,6 +1,12 @@
 /** HTTP and MSW readers use one dispatcher and authenticate the application's current credential. */
 import { type MockCredential, mockRuntime } from "./runtime.js";
-import type { ActorRef, BrowserAccess, MockSia, ReadObject } from "./types.js";
+import type {
+  ActorRef,
+  BrowserAccess,
+  MockSia,
+  OwnerShareRef,
+  ReadObject,
+} from "./types.js";
 
 export interface MockConnection {
   readonly client: string;
@@ -19,7 +25,12 @@ export function createMockEndpoint(mock: MockSia, base: string) {
   const root = new URL("./sia-test/", base.endsWith("/") ? base : base + "/");
   const clients = new Map<
     string,
-    { actor: ActorRef; kind: MockCredential["kind"] }
+    {
+      actor: ActorRef;
+      kind: MockCredential["kind"];
+      shares: Map<string, OwnerShareRef>;
+      tokens: WeakMap<OwnerShareRef, string>;
+    }
   >();
   const runtime = mockRuntime(mock);
   const endpoint: MockEndpoint = {
@@ -28,7 +39,12 @@ export function createMockEndpoint(mock: MockSia, base: string) {
       const reader = mock.reader({ access, as });
       void reader.close();
       const client = crypto.randomUUID();
-      clients.set(client, { actor: as, kind: credential.kind });
+      clients.set(client, {
+        actor: as,
+        kind: credential.kind,
+        shares: new Map(),
+        tokens: new WeakMap(),
+      });
       return Object.freeze({
         client,
         credential: Object.freeze(credential),
@@ -80,19 +96,18 @@ export function createMockEndpoint(mock: MockSia, base: string) {
         ...credential,
         kind: client.kind === "registration" ? "app-key" : client.kind,
       });
-      const reader = mock.reader({ access, as: client.actor });
-      const cancelled = () => {
-        void reader.close();
-      };
-      request.signal.addEventListener("abort", cancelled, { once: true });
-      detach = () => request.signal.removeEventListener("abort", cancelled);
-      if (request.signal.aborted) cancelled();
       const allowed =
-        parts[1] === "objects"
+        parts[1] === "owner-shares"
           ? ["offset", "limit"]
-          : parts[1] === "download"
-            ? ["id", "offset", "length"]
-            : ["id"];
+          : parts[1] === "owner-share"
+            ? ["ref"]
+            : parts[1] === "owner-share-objects"
+              ? ["ref", "offset", "limit"]
+              : parts[1] === "objects"
+                ? ["offset", "limit"]
+                : parts[1] === "download"
+                  ? ["id", "offset", "length"]
+                  : ["id"];
       for (const key of url.searchParams.keys())
         if (!allowed.includes(key) || url.searchParams.getAll(key).length !== 1)
           throw Object.assign(new Error("Invalid parameter"), {
@@ -107,6 +122,63 @@ export function createMockEndpoint(mock: MockSia, base: string) {
           });
         return Number(value);
       };
+      if (
+        ["owner-share", "owner-share-objects", "owner-shares"].includes(
+          parts[1]!,
+        )
+      ) {
+        // Registration connections can authenticate readers after linking, but cannot become owner ports.
+        if (client.kind !== "app-key")
+          throw Object.assign(new Error("Owner connection required"), {
+            code: "denied",
+          });
+        const owner = mock.ownerShares({ access, as: client.actor });
+        const cancelled = () => {
+          void owner.close();
+        };
+        request.signal.addEventListener("abort", cancelled, { once: true });
+        const wire = (details: Awaited<ReturnType<typeof owner.detail>>) => {
+          let token = client.tokens.get(details.ref);
+          if (!token) {
+            token = crypto.randomUUID();
+            client.tokens.set(details.ref, token);
+            client.shares.set(token, details.ref);
+          }
+          return { ...details, ref: token };
+        };
+        try {
+          if (request.signal.aborted) cancelled();
+          const page = {
+            limit: number("limit", 100),
+            offset: number("offset", 0),
+            signal: request.signal,
+          };
+          const ref = client.shares.get(url.searchParams.get("ref") ?? "")!;
+          if (parts[1] === "owner-share")
+            return Response.json(
+              wire(await owner.detail(ref, { signal: request.signal })),
+            );
+          if (parts[1] === "owner-shares") {
+            const result = await owner.list(page);
+            return Response.json({ ...result, items: result.items.map(wire) });
+          }
+          const result = await owner.objects(ref, page);
+          return Response.json({
+            ...result,
+            items: result.items.map(wireObject),
+          });
+        } finally {
+          request.signal.removeEventListener("abort", cancelled);
+          await owner.close();
+        }
+      }
+      const reader = mock.reader({ access, as: client.actor });
+      const cancelled = () => {
+        void reader.close();
+      };
+      request.signal.addEventListener("abort", cancelled, { once: true });
+      detach = () => request.signal.removeEventListener("abort", cancelled);
+      if (request.signal.aborted) cancelled();
       const id = url.searchParams.get("id");
       if (parts[1] === "objects") {
         const page = await reader.objects({

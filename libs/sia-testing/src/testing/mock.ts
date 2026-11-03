@@ -7,6 +7,11 @@ import {
 } from "../sdk/index.js";
 import { readFixture } from "./files.js";
 import { createRequestControls } from "./controls.js";
+import {
+  createOwnerSharePort,
+  ownerPage,
+  validateOwnerPage,
+} from "./owner-shares.js";
 import { createMockAuthentication, fixturePhrase } from "./authentication.js";
 import { type MockCredential, registerRuntime } from "./runtime.js";
 import type {
@@ -16,6 +21,8 @@ import type {
   MockRun,
   MockRunOptions,
   MockSia,
+  OwnerShareDetails,
+  OwnerShareRef,
   ReadObject,
   ReadPort,
   RunLimits,
@@ -56,6 +63,7 @@ interface ObjectRecord {
 }
 interface ShareRecord {
   handle: TestShare;
+  ownerRef: OwnerShareRef;
   revoked: boolean;
 }
 
@@ -85,6 +93,23 @@ export function createMockSia(options: MockOptions = {}): MockSia {
     { context: Context; record: ShareRecord }
   >();
 
+  // Retained references must not keep a closed run and its payload state alive.
+  const ownerReferences = new WeakMap<
+    OwnerShareRef,
+    { contextId: string; shareId: string }
+  >();
+
+  /** Read projections must not let callers mutate the fixture's stored metadata. */
+  function describe(context: Context, id: string): ReadObject {
+    const record = context.objects.get(id);
+    if (!record || record.deleted)
+      throw failure("not-found", "Object is missing");
+    return {
+      id,
+      metadata: new Uint8Array(record.metadata),
+      sizeBytes: record.handle.sizeBytes,
+    };
+  }
   function environmentOpen(): void {
     if (closed) throw failure("closed", "Mock environment is closed");
   }
@@ -220,6 +245,91 @@ export function createMockSia(options: MockOptions = {}): MockSia {
     },
     faults: controls.control,
     history: controls.history,
+    ownerShares({ access: handle, as: actor }) {
+      environmentOpen();
+      if (!actors.has(actor))
+        throw failure("invalid-input", "Unknown mock actor");
+      const grant = grants.get(handle);
+      function authorize(): Context {
+        if (grant && grant.context.state !== "open")
+          throw failure("closed", "Run is closed");
+        if (!grant || grant.credential.kind !== "app-key" || grant.key !== null)
+          throw failure("denied", "Owner access is unavailable");
+        return grant.context;
+      }
+      function project(ref: OwnerShareRef) {
+        const context = authorize();
+        const identity = ownerReferences.get(ref);
+        if (!identity || identity.contextId !== context.id)
+          throw failure(
+            "foreign-handle",
+            "Share reference does not belong to this run",
+          );
+        const record = context.shares.get(identity.shareId);
+        if (!record || record.revoked)
+          throw failure("not-found", "Sharing key is missing");
+        const key = context.network!.model.getSharingKey(
+          context.id,
+          identity.shareId,
+        );
+        const ids = context
+          .network!.model.listOwnedSharedObjects(context.id, identity.shareId)
+          .map((attachment) => attachment.objectID)
+          .sort((a, b) => a.localeCompare(b));
+        return { context, ids, key };
+      }
+      // Statistics use owned sizes so catalogue reads never allocate attachment metadata copies.
+      function details(ref: OwnerShareRef): OwnerShareDetails {
+        const { context, ids, key } = project(ref);
+        return {
+          description: key.description,
+          ref,
+          ...(key.expiresAt === undefined ? {} : { expiresAt: key.expiresAt }),
+          statistics: {
+            logicalBytes: ids.reduce(
+              (bytes, id) => bytes + context.objects.get(id)!.handle.sizeBytes,
+              0,
+            ),
+            objectCount: ids.length,
+          },
+        };
+      }
+      return createOwnerSharePort({
+        actor,
+        authorize,
+        controls,
+        read: {
+          detail(ref) {
+            return Promise.resolve(details(ref));
+          },
+          list(page) {
+            validateOwnerPage(page);
+            const context = authorize();
+            const keys = context
+              .network!.model.listSharingKeys(context.id)
+              .sort((a, b) => a.publicKey.localeCompare(b.publicKey));
+            const selected = ownerPage(keys, page);
+            return Promise.resolve({
+              ...selected,
+              items: selected.items.map((key) =>
+                details(context.shares.get(key.publicKey)!.ownerRef),
+              ),
+            });
+          },
+          objects(ref, page) {
+            validateOwnerPage(page);
+            const { context, ids } = project(ref);
+            const selected = ownerPage(ids, page);
+            return Promise.resolve({
+              ...selected,
+              items: selected.items.map((id) => describe(context, id)),
+            });
+          },
+        },
+        signal: grant?.context.signal ?? new AbortController().signal,
+        track: (action) => track(authorize(), action),
+      });
+    },
     reader({ access: handle, as: actor }) {
       environmentOpen();
       if (!actors.has(actor))
@@ -248,16 +358,6 @@ export function createMockSia(options: MockOptions = {}): MockSia {
           }
         }
         return context;
-      }
-      function describe(context: Context, id: string): ReadObject {
-        const record = context.objects.get(id);
-        if (!record || record.deleted)
-          throw failure("not-found", "Object is missing");
-        return {
-          id,
-          metadata: new Uint8Array(record.metadata),
-          sizeBytes: record.handle.sizeBytes,
-        };
       }
       const reader: ReadPort = {
         close() {
@@ -512,6 +612,9 @@ export function createMockSia(options: MockOptions = {}): MockSia {
           },
           async create(input) {
             return track(context, () => {
+              const description = input.description ?? "";
+              if (typeof description !== "string")
+                throw failure("invalid-input", "Invalid share description");
               for (const object of input.objects) {
                 if (ownedObject(context, object).deleted)
                   throw failure("not-found", "Object is missing");
@@ -534,13 +637,18 @@ export function createMockSia(options: MockOptions = {}): MockSia {
                 id: key,
               }) as TestShare;
               context.network!.model.createSharingKey(id, {
+                description,
                 nonce: identifier(),
                 publicKey: key,
                 ...(input.expiresAt
                   ? { expiresAt: input.expiresAt.toISOString() }
                   : {}),
               });
-              const record = { handle, revoked: false };
+              const ownerRef = Object.freeze(
+                Object.create(null),
+              ) as OwnerShareRef;
+              const record = { handle, ownerRef, revoked: false };
+              ownerReferences.set(ownerRef, { contextId: id, shareId: key });
               context.shares.set(key, record);
               shares.set(handle, { context, record });
               for (const object of input.objects)

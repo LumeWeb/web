@@ -32,7 +32,13 @@ export interface RequestReceipt {
 export interface RequestSelector {
   actor?: ActorRef;
   object?: TestObject;
-  operation: "download" | "object" | "objects";
+  operation:
+    | "download"
+    | "object"
+    | "objects"
+    | "owner-share"
+    | "owner-share-objects"
+    | "owner-shares";
 }
 interface Held {
   cancel(record: RequestReceipt): void;
