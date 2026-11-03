@@ -30,7 +30,10 @@ export interface ApplicationPort {
   ): Promise<"missing" | "pinned" | "uploaded">;
   pin(
     object: ApplicationObject,
-    options?: { readonly signal?: AbortSignal },
+    options?: {
+      readonly metadata?: Uint8Array | undefined;
+      readonly signal?: AbortSignal;
+    },
   ): Promise<void>;
   upload(input: {
     readonly file: TestFile;

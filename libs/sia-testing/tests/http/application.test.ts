@@ -810,3 +810,82 @@ it("a lost pin reply closes the socket without completing an HTTP acknowledgemen
     await mock.close();
   }
 });
+it("raw app-pin JSON rejects malformed or oversized metadata without pinning", async () => {
+  const mock = createMockSia();
+  const server = await startMockServer(mock);
+  try {
+    await mock.run({ app }, async (run) => {
+      const connection = server.connection({
+        access: run.ownerAccess,
+        as: mock.actor("raw"),
+      });
+      const file = await bytesFixture({ bytes: Uint8Array.of(1), name: "n" });
+      const headers = {
+        authorization: `Bearer ${connection.credential.keyHex}`,
+      };
+      const post = (
+        operation: string,
+        body: string | Uint8Array<ArrayBuffer>,
+      ) =>
+        fetch(new URL(`${connection.client}/${operation}`, connection.url), {
+          body,
+          headers,
+          method: "POST",
+        });
+      const admission = await post(
+        "app-upload-admit",
+        JSON.stringify({
+          metadata: [10],
+          name: "n",
+          sha256: file.sha256,
+          sizeBytes: 1,
+        }),
+      );
+      const { token } = (await admission.json()) as { token: string };
+      const uploaded = await post(
+        `app-upload-body?token=${token}`,
+        Uint8Array.of(1),
+      );
+      const { id, ref } = (await uploaded.json()) as {
+        id: string;
+        ref: string;
+      };
+      for (const metadata of [
+        null,
+        {},
+        "bytes",
+        [-1],
+        [256],
+        [1.5],
+        ["1"],
+        new Array(1025).fill(1),
+      ]) {
+        const response = await post(
+          "app-pin",
+          JSON.stringify({ metadata, ref }),
+        );
+        expect(response.status).toBe(400);
+        expect(await response.json()).toMatchObject({ code: "invalid-input" });
+        expect(
+          await (await post("app-inspect", JSON.stringify({ ref }))).json(),
+        ).toBe("uploaded");
+      }
+      expect(
+        (await post("app-pin", JSON.stringify({ metadata: [20], ref }))).status,
+      ).toBe(200);
+      expect((await post("app-pin", JSON.stringify({ ref }))).status).toBe(200);
+      const reader = mock.reader({
+        access: run.ownerAccess,
+        as: mock.actor("reader"),
+      });
+      try {
+        expect((await reader.object(id)).metadata).toEqual(Uint8Array.of(20));
+      } finally {
+        await reader.close();
+      }
+    });
+  } finally {
+    await server.close();
+    await mock.close();
+  }
+});

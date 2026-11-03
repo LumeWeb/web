@@ -1,4 +1,5 @@
 /** Fetch uploads buffer bounded bytes only after the remote run reserves its allowance. */
+import { snapshotApplicationMetadata } from "./application-metadata.js";
 import { domainError } from "./diagnostics.js";
 import { readFixture } from "./files.js";
 import type { MockCredential } from "./runtime.js";
@@ -26,9 +27,23 @@ export function createMockApplication(
       code: "unavailable",
     });
   }
-  function track<T>(action: () => Promise<T>): Promise<T> {
-    const promise = Promise.resolve().then(action);
+  function track<T>(
+    action: () => Promise<T>,
+    prepare?: () => void,
+  ): Promise<T> {
+    let preparationError: unknown;
+    let preparationFailed = false;
+    const promise = Promise.resolve().then(() => {
+      if (preparationFailed) throw preparationError;
+      return action();
+    });
     pending.add(promise);
+    try {
+      prepare?.();
+    } catch (error) {
+      preparationFailed = true;
+      preparationError = error;
+    }
     void promise.then(
       () => pending.delete(promise),
       (error: unknown) => {
@@ -162,11 +177,26 @@ export function createMockApplication(
       });
     },
     pin(object, options = {}) {
-      return track(async () => {
-        const s = signal(options.signal);
-        s.throwIfAborted();
-        await call("app-pin", JSON.stringify({ ref: ref(object) }), s);
-      });
+      let metadata: Uint8Array | undefined;
+      return track(
+        async () => {
+          const s = signal(options.signal);
+          s.throwIfAborted();
+          await call(
+            "app-pin",
+            JSON.stringify({
+              metadata: metadata === undefined ? undefined : [...metadata],
+              ref: ref(object),
+            }),
+            s,
+          );
+        },
+        () => {
+          const source = options.metadata;
+          if (source !== undefined)
+            metadata = snapshotApplicationMetadata(source);
+        },
+      );
     },
     upload(input) {
       return track(async () => {
@@ -178,19 +208,11 @@ export function createMockApplication(
           sha256: input.file.sha256,
           sizeBytes: input.file.sizeBytes,
         };
-        const metadata = input.metadata;
-        const size: number =
-          metadata instanceof Uint8Array
-            ? (Object.getOwnPropertyDescriptor(
-                Object.getPrototypeOf(Uint8Array.prototype),
-                "byteLength",
-              )!.get!.call(metadata) as number)
-            : Infinity;
+        const metadata = snapshotApplicationMetadata(input.metadata);
         let name = input.name;
         // oxlint-disable-next-line typescript/prefer-nullish-coalescing -- Null must reject rather than select the file label.
         if (name === undefined) name = file.name;
         if (
-          size > 1024 ||
           typeof name !== "string" ||
           !name ||
           name.length > 1024 ||

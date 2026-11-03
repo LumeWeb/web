@@ -9,6 +9,28 @@ import {
 import { createIndexdModel } from "../../src/model/index.js";
 import * as sdkAPI from "../../src/sdk/index.js";
 
+// Keep SDK calls unexecuted while TypeScript checks each adapter's pin options.
+void ((
+  local: ReturnType<sdkAPI.MockNetwork["createSdk"]>,
+  remote: ReturnType<typeof sdkAPI.createRemoteMockSdk>,
+  signal: AbortSignal,
+) => {
+  const object = { id: () => "typed-object" };
+  void local.pinObject(object, {
+    prepareCommit: () => () => undefined,
+    signal,
+  });
+  void remote.pinObject(object, { signal });
+  const remoteHasNoCommit: "prepareCommit" extends keyof NonNullable<
+    Parameters<typeof remote.pinObject>[1]
+  >
+    ? false
+    : true = true;
+  void remoteHasNoCommit;
+  // @ts-expect-error Remote pins accept cancellation, not local commit callbacks.
+  void remote.pinObject(object, { prepareCommit: () => () => undefined });
+});
+
 const servers: IndexdHttpServer[] = [];
 afterEach(async () => {
   await Promise.all(servers.splice(0).map((server) => server.close()));
