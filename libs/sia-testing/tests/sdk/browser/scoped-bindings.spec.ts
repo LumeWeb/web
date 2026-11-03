@@ -119,3 +119,62 @@ test("a browser uploads an admitted raw body over the loopback listener", async 
     uploaded: "uploaded",
   });
 });
+test("a browser inspects its known object after the pin connection drops", async ({
+  sia,
+}) => {
+  const actor = sia.mock.actor("browser-writer");
+  sia.mock.mutationFaults.loseReply({ actor, operation: "pin" }, { times: 1 });
+  const clientEntry = `/@fs${new URL("../../../src/client.ts", import.meta.url).pathname}`;
+  const mockEntry = `/@fs${new URL("../../../src/mock.ts", import.meta.url).pathname}`;
+  let result: unknown;
+  await sia.browser.open({
+    access: sia.ownerAccess,
+    async apply(page, connection) {
+      await page.goto("/scoped.html");
+      result = await page.evaluate(
+        async ({ backend, clientEntry, mockEntry }) => {
+          const { createMockApplication } = (await import(
+            clientEntry
+          )) as typeof import("../../../src/client.js");
+          const { bytesFixture } = (await import(
+            mockEntry
+          )) as typeof import("../../../src/mock.js");
+          const writer = createMockApplication(
+            backend.connection,
+            backend.credential,
+          );
+          try {
+            const file = await bytesFixture({
+              bytes: Uint8Array.of(1),
+              name: "browser",
+            });
+            const object = await writer.upload({
+              file,
+              metadata: new Uint8Array(),
+              name: file.name,
+            });
+            let networkFailure = false;
+            try {
+              await writer.pin(object);
+            } catch (error) {
+              networkFailure = error instanceof TypeError;
+            }
+            return {
+              events: (await writer.events({ cursor: null, limit: 10 })).events,
+              networkFailure,
+              state: await writer.inspect(object),
+            };
+          } finally {
+            await writer.close();
+          }
+        },
+        { backend: connection.backend, clientEntry, mockEntry },
+      );
+    },
+    mockActor: actor,
+  });
+  expect(result).toEqual({ events: [], networkFailure: true, state: "pinned" });
+  expect(
+    sia.mock.history().filter((row) => row.operation === "pin"),
+  ).toMatchObject([{ committed: true, status: "failed" }]);
+});

@@ -19,7 +19,64 @@ export function applicationScenarios(
     run: MockRun,
     actor: ActorRef,
   ) => Promise<{ close: () => Promise<void>; writer: ApplicationPort }>,
+  transport = false,
 ) {
+  it("a lost pin reply requires inspection and stays unpublished", async () => {
+    const mock = createMockSia();
+    try {
+      await mock.run({ app }, async (run) => {
+        const actor = mock.actor("writer");
+        const { close, writer } = await connect(mock, run, actor);
+        try {
+          const file = await bytesFixture({
+            bytes: Uint8Array.of(1),
+            name: "n",
+          });
+          const object = await writer.upload({
+            file,
+            metadata: new Uint8Array(),
+            name: "n",
+          });
+          mock.mutationFaults.loseReply(
+            { actor, operation: "pin" },
+            { times: 1 },
+          );
+          const outcome = await writer
+            .pin(object)
+            .catch((error: unknown) => error);
+          if (transport) {
+            expect(outcome).toBeInstanceOf(TypeError);
+            expect(outcome).not.toHaveProperty("code", "unavailable");
+          } else expect(outcome).toMatchObject({ code: "unavailable" });
+          expect(await writer.inspect(object)).toBe("pinned");
+          expect(
+            (await writer.events({ cursor: null, limit: 10 })).events,
+          ).toEqual([]);
+          expect(
+            mock.history().filter((row) => row.operation === "pin"),
+          ).toMatchObject([{ committed: true, status: "failed" }]);
+          await mock.publish({ access: run.ownerAccess });
+          expect(
+            (await writer.events({ cursor: null, limit: 10 })).events.map(
+              (row) => row.id,
+            ),
+          ).toEqual([object.id]);
+          const next = await writer.upload({
+            file,
+            metadata: new Uint8Array(),
+            name: "n",
+          });
+          await writer.pin(next);
+          expect(await writer.inspect(next)).toBe("pinned");
+        } finally {
+          await writer.close();
+          await close();
+        }
+      });
+    } finally {
+      await mock.close();
+    }
+  });
   it("a held pin publishes only when the driver publishes its account", async () => {
     const mock = createMockSia({ clock: { start: "2026-01-01T00:00:00Z" } });
     try {
