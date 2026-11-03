@@ -49,7 +49,7 @@ it("an HTTP upload waits for admission before opening its source", async () => {
     await mock.close();
   }
 });
-import { applicationScenarios } from "../harness/application-scenarios.js";
+import { app, applicationScenarios } from "../harness/application-scenarios.js";
 applicationScenarios(async (mock, run, actor) => {
   const server = await startMockServer(mock);
   const connection = server.connection({ access: run.ownerAccess, as: actor });
@@ -57,7 +57,7 @@ applicationScenarios(async (mock, run, actor) => {
     close: () => server.close(),
     writer: createMockApplication(connection, connection.credential),
   };
-});
+}, true);
 it("admission tokens reject replay and another connection before consuming bytes", async () => {
   const mock = createMockSia();
   const server = await startMockServer(mock);
@@ -750,6 +750,63 @@ it("endpoint close waits for an upload writer still finishing failed admission c
     finish();
     replacement.mockRestore();
     await endpoint.close().catch(() => undefined);
+    await mock.close();
+  }
+});
+it("a lost pin reply closes the socket without completing an HTTP acknowledgement or retrying", async () => {
+  const mock = createMockSia();
+  const server = await startMockServer(mock);
+  const fetches = vi.spyOn(globalThis, "fetch");
+  try {
+    await mock.run({ app }, async (run) => {
+      const actor = mock.actor("writer");
+      const connection = server.connection({
+        access: run.ownerAccess,
+        as: actor,
+      });
+      const writer = createMockApplication(connection, connection.credential);
+      try {
+        const file = await bytesFixture({ bytes: Uint8Array.of(1), name: "n" });
+        const object = await writer.upload({
+          file,
+          metadata: new Uint8Array(),
+          name: "n",
+        });
+        for (const ref of [object, { ...object }]) {
+          expect(() =>
+            mock.mutationFaults.loseReply(
+              { actor, object: ref, operation: "pin" },
+              { times: 1 },
+            ),
+          ).toThrow();
+        }
+        mock.mutationFaults.loseReply(
+          { actor, operation: "pin" },
+          { times: 1 },
+        );
+        const error: unknown = await writer
+          .pin(object)
+          .catch((failure: unknown) => failure);
+        expect(error).toBeInstanceOf(TypeError);
+        expect(error).toMatchObject({ cause: { code: "UND_ERR_SOCKET" } });
+        expect(
+          fetches.mock.calls.filter(([url]) =>
+            (url instanceof Request ? url.url : url.toString()).endsWith(
+              "/app-pin",
+            ),
+          ),
+        ).toHaveLength(1);
+        expect(await writer.inspect(object)).toBe("pinned");
+        expect(
+          (await writer.events({ cursor: null, limit: 10 })).events,
+        ).toEqual([]);
+      } finally {
+        await writer.close();
+      }
+    });
+  } finally {
+    fetches.mockRestore();
+    await server.close();
     await mock.close();
   }
 });

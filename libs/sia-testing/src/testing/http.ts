@@ -7,6 +7,7 @@ import {
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { createMockEndpoint, type MockEndpoint } from "./transport.js";
+import { isLostReply } from "./reply-loss.js";
 import { incomingBody } from "./http-body.js";
 import { mockRuntime } from "./runtime.js";
 import type { BrowserAccess, MockSia } from "./types.js";
@@ -119,8 +120,16 @@ export async function startMockServer(
     }
   }
   const server = createServer((incoming, outgoing) => {
-    void respond(incoming, outgoing).catch(() => {
-      if (outgoing.headersSent) outgoing.destroy();
+    void respond(incoming, outgoing).catch((error: unknown) => {
+      if (isLostReply(error)) {
+        // An empty socket close lets browsers replay POST on a reused connection.
+        // Flush an incomplete body so delivery fails without repeating the effect.
+        outgoing.writeHead(200, {
+          "content-length": "4",
+          "content-type": "application/json",
+        });
+        outgoing.write("n", () => outgoing.destroy());
+      } else if (outgoing.headersSent) outgoing.destroy();
       else outgoing.writeHead(500).end();
     });
   });

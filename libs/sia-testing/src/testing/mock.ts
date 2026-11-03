@@ -101,17 +101,37 @@ export function createMockSia(options: MockOptions = {}): MockSia {
     ApplicationObject,
     { context: Context; record: ObjectRecord }
   >();
-  const mutations = createMutationControls((selector) => {
-    if (
-      selector.stage !== "beforeCommit" ||
-      !["delete", "pin", "upload"].includes(selector.operation)
-    )
-      throw failure("invalid-input", "Invalid mutation selector");
-    if (selector.actor && !actors.has(selector.actor))
-      throw failure("foreign-handle", "Unknown actor");
-    if (selector.object && !applicationObjects.has(selector.object))
-      throw failure("foreign-handle", "Unknown application object");
-  }, records);
+  const mutations = createMutationControls(
+    (selector) => {
+      if (
+        selector.stage !== "beforeCommit" ||
+        !["delete", "pin", "upload"].includes(selector.operation)
+      )
+        throw failure("invalid-input", "Invalid mutation selector");
+      if (selector.actor && !actors.has(selector.actor))
+        throw failure("foreign-handle", "Unknown actor");
+      if (selector.object && !applicationObjects.has(selector.object))
+        throw failure("foreign-handle", "Unknown application object");
+    },
+    records,
+    (selector) => {
+      if (
+        selector.operation !== "pin" ||
+        !selector.actor ||
+        Object.keys(selector).some(
+          (key) => !["actor", "object", "operation"].includes(key),
+        )
+      )
+        throw failure("invalid-input", "Invalid pin reply selector");
+      if (!actors.has(selector.actor))
+        throw failure("foreign-handle", "Unknown actor");
+      if (
+        selector.object !== undefined &&
+        !applicationObjects.has(selector.object)
+      )
+        throw failure("foreign-handle", "Unknown application object");
+    },
+  );
   const shares = new WeakMap<
     TestShare,
     { context: Context; record: ShareRecord }
@@ -340,6 +360,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
           signal.throwIfAborted();
           authorize();
           const value = await action(receipt);
+          mutations.afterCommit(receipt);
           receipt.status = "completed";
           return value;
         } catch (error) {

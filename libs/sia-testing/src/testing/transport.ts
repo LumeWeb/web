@@ -1,4 +1,5 @@
 /** HTTP and MSW readers use one dispatcher and authenticate the application's current credential. */
+import { isLostReply } from "./reply-loss.js";
 import { createApplicationTransport } from "./application-transport.js";
 import { type MockCredential, mockRuntime } from "./runtime.js";
 import type {
@@ -240,6 +241,7 @@ export function createMockEndpoint(mock: MockSia, base: string) {
         headers: { "content-type": "application/octet-stream" },
       });
     } catch (error) {
+      if (isLostReply(error)) throw error;
       const code =
         error &&
         typeof error === "object" &&

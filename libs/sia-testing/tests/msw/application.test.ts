@@ -19,7 +19,7 @@ applicationScenarios((mock, run, actor) => {
     },
     writer: createMockApplication(connection, connection.credential),
   });
-});
+}, true);
 import { expect, it, vi } from "vitest";
 import { createMockSia } from "../../src/mock.js";
 import { app } from "../harness/application-scenarios.js";
@@ -253,6 +253,117 @@ it("client close joins local source cancellation before settling", async () => {
     });
   } finally {
     finish();
+    await endpoint.close();
+    server.close();
+    await mock.close();
+  }
+});
+it("endpoint close joins post-effect delivery work without rolling back the pin", async () => {
+  const mock = createMockSia();
+  const endpoint = createMockHandlers(mock, {
+    baseUrl: "https://delivery.example.invalid/",
+  });
+  const server = setupServer(...endpoint.handlers);
+  server.listen({ onUnhandledRequest: "error" });
+  let release!: () => void;
+  const released = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let effect!: () => void;
+  const effected = new Promise<void>((resolve) => {
+    effect = resolve;
+  });
+  const application = mock.application.bind(mock);
+  // Delay adapter delivery after the real pin settles; no public post-commit hold is needed.
+  const replace = vi.spyOn(mock, "application").mockImplementation((input) => {
+    const port = application(input);
+    return {
+      ...port,
+      async pin(object, options) {
+        try {
+          await port.pin(object, options);
+        } finally {
+          effect();
+          await released;
+        }
+      },
+    };
+  });
+  try {
+    await mock.run({ app }, async (run) => {
+      const actor = mock.actor("writer");
+      const connection = endpoint.connection({
+        access: run.ownerAccess,
+        as: actor,
+      });
+      const writer = createMockApplication(connection, connection.credential);
+      try {
+        const file = await bytesFixture({ bytes: Uint8Array.of(1), name: "n" });
+        const object = await writer.upload({
+          file,
+          metadata: new Uint8Array(),
+          name: "n",
+        });
+        for (const ref of [object, { ...object }]) {
+          expect(() =>
+            mock.mutationFaults.loseReply(
+              { actor, object: ref, operation: "pin" },
+              { times: 1 },
+            ),
+          ).toThrow();
+        }
+        mock.mutationFaults.loseReply(
+          { actor, operation: "pin" },
+          { times: 1 },
+        );
+        const abort = new AbortController();
+        const pending = writer
+          .pin(object, { signal: abort.signal })
+          .catch((error: unknown) => error);
+        await effected;
+        expect(await writer.inspect(object)).toBe("pinned");
+        expect(
+          (await writer.events({ cursor: null, limit: 10 })).events,
+        ).toEqual([]);
+        let closed = false;
+        const closing = endpoint.close();
+        void closing.then(() => {
+          closed = true;
+        });
+        abort.abort();
+        await new Promise<void>((resolve) => setTimeout(resolve, 0));
+        expect(closed).toBe(false);
+        release();
+        await closing;
+        expect(await pending).toBeInstanceOf(Error);
+        expect(
+          mock.history().filter((row) => row.operation === "pin"),
+        ).toMatchObject([{ committed: true, status: "failed" }]);
+        const observer = application({
+          access: run.ownerAccess,
+          as: mock.actor("observer"),
+        });
+        try {
+          expect(
+            (await observer.events({ cursor: null, limit: 10 })).events,
+          ).toEqual([]);
+          await mock.publish({ access: run.ownerAccess });
+          expect(
+            (await observer.events({ cursor: null, limit: 10 })).events.map(
+              (row) => row.id,
+            ),
+          ).toEqual([object.id]);
+        } finally {
+          await observer.close();
+        }
+      } finally {
+        release();
+        await writer.close();
+      }
+    });
+  } finally {
+    release();
+    replace.mockRestore();
     await endpoint.close();
     server.close();
     await mock.close();

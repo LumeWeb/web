@@ -94,6 +94,16 @@ export function createRequestControls(records: RequestReceipt[] = []) {
       (!selector.object || selector.object.id === request.objectId)
     );
   }
+  function takeFailure(record: RequestReceipt): string | undefined {
+    const index = faults.findIndex(
+      (entry) => entry.remaining > 0 && matches(entry.selector, record),
+    );
+    const fault = faults[index];
+    if (!fault) return;
+    fault.remaining--;
+    if (fault.remaining === 0) faults.splice(index, 1);
+    return fault.code;
+  }
   const control: Omit<MockFaults, "fail" | "hold"> & {
     fail(
       selector: InternalSelector,
@@ -232,17 +242,9 @@ export function createRequestControls(records: RequestReceipt[] = []) {
             if (signal.aborted) abort();
           });
         signal.throwIfAborted();
-        const faultIndex = faults.findIndex(
-          (entry) => entry.remaining > 0 && matches(entry.selector, record),
-        );
-        const fault = faults[faultIndex];
-        if (fault) {
-          fault.remaining--;
-          if (fault.remaining === 0) faults.splice(faultIndex, 1);
-          throw Object.assign(new Error("Injected mock failure"), {
-            code: fault.code,
-          });
-        }
+        const code = takeFailure(record);
+        if (code)
+          throw Object.assign(new Error("Injected mock failure"), { code });
         return record;
       } catch (error) {
         record.status = signal.aborted ? "cancelled" : "failed";
@@ -331,5 +333,6 @@ export function createRequestControls(records: RequestReceipt[] = []) {
         { highWaterMark: 0 },
       );
     },
+    takeFailure,
   };
 }

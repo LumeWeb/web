@@ -142,8 +142,40 @@ owned actor and application object (upload has no object yet). Holds expose
 from settlement, without source bytes, file names or private metadata.
 Cancellation or rejection before commit changes no payload or model state;
 closing a direct port cancels and joins its sources and holds. Cancellation after
-an effect does not undo it. No write retries, lost-reply recovery or idempotency
-promise is provided.
+an effect does not undo it. No automatic write retries or idempotency promise
+is provided.
+
+### Lost pin acknowledgements
+
+`mock.mutationFaults.loseReply({ actor, object?, operation: "pin" }, { times })`
+drops acknowledgement after a successful pin commits. `actor` is required;
+`times` is a positive safe integer. The optional object must be an original
+backend reference from a direct application port. HTTP and MSW clients use
+actor/operation selection because their object references are client-local.
+Upload, delete and read reply losses are unsupported. A rejection or cancellation
+before commit does not consume a reply loss.
+
+```ts
+const known = await writer.upload({ file, name: file.name, metadata: new Uint8Array() });
+mock.mutationFaults.loseReply({ actor, operation: "pin" }, { times: 1 });
+try {
+  await writer.pin(known);
+} catch (error) {
+  // A direct port rejects with code "unavailable". Fetch clients get a network error.
+  const state = await writer.inspect(known);
+  if (state !== "pinned") throw error;
+}
+// The application has reconciled the pin; no event exists until the driver publishes.
+const unpublished = await writer.events({ cursor: null, limit: 10 });
+```
+
+Inspection confirms the object's current state without publication or driver
+receipts. It does not report which earlier call committed. HTTP destroys the
+owned response connection; MSW returns a network failure. Native Fetch errors
+retain their platform's class and fields. Nothing retries, resends or rolls back
+the pin. Driver receipts may record `committed: true` with a failed caller outcome;
+those receipts are not an application recovery API. Explicit publication keeps
+the same event-coalescing behavior as an acknowledged pin.
 
 Application uploads allow files up to 16 MiB, metadata up to 1024 bytes and names
 up to 1024 UTF-8 bytes. Run object-attempt and logical-byte allowances are
