@@ -1,13 +1,16 @@
 {
   "name": "@lumeweb/sia-testing",
   "version": "0.1.0",
-  "description": "Scoped fixtures and mock application ports for Sia playback tests",
+  "description": "Scoped fixtures and mock application ports for Sia application tests",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "docs/live-runs.md",
+    "docs/live-auth.md",
+    "docs/mock-contracts.md"
   ],
   "exports": {
     "./node": {
