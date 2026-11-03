@@ -1,0 +1,21 @@
+/** Assertion failures must still close retained application ports. */
+import { expect, test } from "vitest";
+import { createMockSia, type ApplicationPort } from "@lumeweb/sia-testing/mock";
+
+test("assertion failure closes retained ports", async () => {
+  const mock = createMockSia();
+  let retained: ApplicationPort | undefined;
+  try {
+    await expect(mock.run({ app: {
+      id: "d".repeat(64), name: "Cleanup tests", description: "Synthetic fixtures",
+      serviceUrl: "https://example.invalid",
+    } }, async (run) => {
+      retained = mock.application({ access: run.ownerAccess, as: mock.actor("writer") });
+      expect(1).toBe(2);
+    })).rejects.toThrow("expected 1 to be 2");
+    expect(retained).toBeDefined();
+    await expect(retained!.events({ cursor: null, limit: 10 })).rejects.toMatchObject({ name: "AbortError" });
+  } finally {
+    await mock.close();
+  }
+});

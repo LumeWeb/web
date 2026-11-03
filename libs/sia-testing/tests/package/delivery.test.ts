@@ -19,6 +19,8 @@ beforeEach(async () => {
   temp = await mkdtemp(join(tmpdir(), "sia-delivery-test-"));
   packed = join(temp, "package");
   await mkdir(packed);
+  await cp("README.md", join(packed, "README.md"));
+  await cp("docs", join(packed, "docs"), { recursive: true });
   const metadata = JSON.parse(await readFile("package.json", "utf8")) as {
     exports: Record<string, unknown>;
   };

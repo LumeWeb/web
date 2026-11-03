@@ -1,0 +1,197 @@
+# Mock application contracts
+
+Use these contracts when testing writes or transport adapters. For complete runnable setup, see the [Vitest tests](../README.md).
+
+## Inspect mock shares as their owner
+
+Inside a `mock.run({ app }, async (run) => { ... })` callback, use owner access rather than recipient access:
+
+```ts
+const share = await run.shares.create({ objects: [], description: "Reading list" });
+const owner = mock.ownerShares({ access: run.ownerAccess, as: mock.actor("owner UI") });
+try {
+  const page = await owner.list({ offset: 0, limit: 10 });
+  const row = page.items[0]!;
+  console.log((await owner.detail(row.ref)).description);
+  console.log((await owner.objects(row.ref, { offset: 0, limit: 10 })).items);
+} finally {
+  await owner.close();
+}
+```
+
+`description` is a mock-only fixture option; live managed shares retain their existing interface. Owner details report current attachment count and logical payload bytes, not slab sizes or physical storage usage. Contents return detached metadata copies. Expired shares remain inspectable by owners, while recipients lose fresh access. Revoked shares disappear from the catalogue and stale references fail.
+
+For the same reads over an owned HTTP or MSW endpoint:
+
+```ts
+import { createMockOwnerShares } from "@lumeweb/sia-testing/client";
+
+const connection = endpoint.connection({ access: run.ownerAccess, as: mock.actor("owner HTTP") });
+const owner = createMockOwnerShares(connection, connection.credential);
+try {
+  console.log(await owner.list({ offset: 0, limit: 10 }));
+} finally {
+  await owner.close();
+}
+```
+
+References are opaque runtime-owned handles, not share IDs or recipient credentials. Direct references belong to their mock run. Transport references belong to the authenticated connection and local client that materialized them; copied JSON and references from another client cannot be used as handles. Wire tokens alone grant no authority. Recipient and registration connections cannot upgrade to owner inspection by substituting an owner key.
+
+Pages are current reads, not snapshots across edits. Ordering is deterministic for unchanged state. Offsets must be nonnegative safe integers and limits positive safe integers. Responses contain at most the requested limit, subject to the run's fixture allowances. `nextOffset` advances by the returned item count; `done` is true when fewer than `limit` items are returned, so an exactly full final page needs an empty follow-up page. `list`, `detail` and `objects` accept an abort signal. Repeated `close()` is safe, cancels held requests and joins pending calls. Run cleanup cancels retained ports before releasing state. Owner reads use the finite actor-selected `owner-shares`, `owner-share` and `owner-share-objects` controls.
+
+## Driver diagnostics
+
+`actor(label)` keeps the label as driver-visible diagnostic text. Request receipts
+from `history()`, `hold.started()` and `hold.cancelled()` include `actorLabel` for
+reads and mutations. Labels grant no authority: actors with equal labels remain
+distinct, and selectors require the original actor reference. Choose labels that
+can appear in test failure reports; do not put credentials or private data in them.
+History retains the latest 256 requests in start order. A held request can leave
+history before it finishes; its hold still returns labelled snapshots.
+
+Invalid fault `times` and invalid link rates or latency throw errors with
+`code: "invalid-input"`. Page validation messages identify `offset` or `limit`.
+Fetch domain errors include the local operation and a known invalid field when
+available, without forwarding callback messages or request values. Error codes
+remain available on the error's `code` property; narrow an unknown error before
+reading that property.
+
+Closing the loopback listener cancels its owned requests. If it can still deliver
+a domain response, the caller receives `code: "closed"`. A mutation cancelled
+before its effect retains `committed: false`; cancellation cannot undo an effect
+that already committed. Closing the listener does not close other direct ports
+in the run. Caller aborts and client close keep native cancellation behavior.
+Actual response loss remains a native Fetch error, including lost pin replies;
+cleanup failures can still reject with `AggregateError`. The package does not
+retry or publish events in response to errors.
+
+## Application writes (mock only)
+
+`mock.application({ access: run.ownerAccess, as: actor })` returns an
+`ApplicationPort`. Give that port to application code; keep the run and
+`mock.publish` in the test driver. Managed `run.objects.upload` still uploads
+and pins in one call.
+
+See the complete [manual-clock test](../README.md#publish-application-writes).
+
+`inspect` reads `"missing"`, `"uploaded"` or `"pinned"` from owned state;
+`delete` accepts only an application's original object reference. Fixture
+handles, copied references and foreign-run references grant no write authority.
+Deleting a pending upload discards only its owned slab; deleting a pinned object
+queues a tombstone. All pending and acknowledged payloads belong to the run.
+
+`mutationFaults.hold` is one-shot. `mutationFaults.fail(selector, { code,
+times })` accepts `denied` or `unavailable` and a positive finite integer count.
+Both target `upload`, `pin` or `delete` at `beforeCommit`. Selectors may name an
+owned actor and application object (upload has no object yet). Holds expose
+`started()`, `cancelled()` and `release()`. Receipts record `committed` separately
+from settlement, without source bytes, file names or private metadata.
+Cancellation or rejection before commit changes no payload or model state;
+closing a direct port cancels and joins its sources and holds. Cancellation after
+an effect does not undo it. No automatic write retries or idempotency promise
+is provided.
+
+### Lost pin acknowledgements
+
+`mock.mutationFaults.loseReply({ actor, object?, operation: "pin" }, { times })`
+drops acknowledgement after a successful pin commits. `actor` is required;
+`times` is a positive safe integer. The optional object must be an original
+backend reference from a direct application port. HTTP and MSW clients use
+actor/operation selection because their object references are client-local.
+Upload, delete and read reply losses are unsupported. A rejection or cancellation
+before commit does not consume a reply loss.
+
+```ts
+const known = await writer.upload({ file, name: file.name, metadata: new Uint8Array() });
+mock.mutationFaults.loseReply({ actor, operation: "pin" }, { times: 1 });
+try {
+  await writer.pin(known);
+} catch (error) {
+  // A direct port rejects with code "unavailable". Fetch clients get a network error.
+  const state = await writer.inspect(known);
+  if (state !== "pinned") throw error;
+}
+// The application has reconciled the pin; no event exists until the driver publishes.
+const unpublished = await writer.events({ cursor: null, limit: 10 });
+```
+
+Inspection confirms the object's current state without publication or driver
+receipts. It does not report which earlier call committed. HTTP destroys the
+owned response connection; MSW returns a network failure. Native Fetch errors
+retain their platform's class and fields. Nothing retries, resends or rolls back
+the pin. Driver receipts may record `committed: true` with a failed caller outcome;
+those receipts are not an application recovery API. Explicit publication keeps
+the same event-coalescing behavior as an acknowledged pin.
+
+Application uploads allow files up to 16 MiB, metadata up to 1024 bytes and names
+up to 1024 UTF-8 bytes. Run object-attempt and logical-byte allowances are
+reserved before the source opens. Failed application uploads release active byte
+reservations; object attempts stay charged. Committed bytes stay charged after
+deletion. Managed fixture allowance behavior is unchanged.
+
+Events use the run's existing account feed, including managed fixture events.
+Use a fresh run or explicitly published fixture cursor as your baseline.
+Pages accept limits from 1 to 1000. A cursor is `{ after, id }`, with a canonical
+whole-second ISO timestamp and a lowercase 64-character hexadecimal object ID.
+Continuation is exclusive in timestamp/ID order. `nextCursor` is the last row,
+or the input cursor on an empty page; a full page has `done: false` and may need
+an empty continuation. Publication coalesces each object's current event and
+requires a later clock second after a prior publication. Later publication can
+move a lower-ID object past an older cursor. Publication targets only the
+owner-authenticated run; it never acknowledges an application ledger.
+
+### Fetch-backed application ports
+
+Import `createMockApplication` from `@lumeweb/sia-testing/client` and pass a
+connection from the existing HTTP or MSW endpoint plus the application's current
+credential. The same scoped dispatcher implements these ports; this protocol
+is not native Indexd compatibility. Publication remains a test-driver action.
+
+The upload client obtains a private, authenticated one-use admission before
+opening `file`. It then buffers at most the admitted file size, checks its hash,
+and sends raw bytes, without base64 expansion or streaming Fetch request bodies.
+The server counts the incoming stream independently of `Content-Length` and
+rejects oversize or incomplete bodies before any upload effect. File bodies have
+the same admitted logical/raw limit of 16 MiB; other routes retain their
+16,384-byte body limit. Admissions expire after 30 seconds of real time. They
+cannot be replayed or moved between connections or credentials.
+
+Close the client port before leaving the backend run when immediate local source
+teardown matters. Client close cancels and joins its collector; its original
+admission deadline also cancels collection. Backend run or endpoint close
+invalidates admissions and joins backend-owned work, but cannot synchronously
+stop JavaScript collecting a file in a remote client. A client left open can
+collect only until its admission deadline and cannot commit with an invalidated
+token. HTTP server close and MSW endpoint `close()` invalidate outstanding
+admissions; the application never receives fixture or publication controls.
+Application endpoint close also cancels and joins its active dispatches, including
+held mutations and admission JSON reads.
+
+Object selectors accept only backend-owned references returned by a direct
+`mock.application` port, as in the example above. HTTP/MSW clients materialize
+client-local references; those references, JSON copies and foreign mock handles
+cannot arm backend object controls. For a transport client, allocate an actor
+per binding and select its next operation instead:
+
+```ts
+const hold = mock.mutationFaults.hold({ actor, operation: "pin", stage: "beforeCommit" });
+const pinning = writer.pin(pending); // writer may be an HTTP or MSW client
+await hold.started();
+hold.release();
+await pinning;
+```
+
+| Operation                                | Direct mock port          | HTTP/MSW client                 |
+| ---------------------------------------- | ------------------------- | ------------------------------- |
+| Upload, pin, inspect, delete, events     | Supported                 | Supported                       |
+| Finite actor/operation mutation controls | Supported                 | Supported                       |
+| Backend object selector                  | Original direct reference | Client-local reference rejected |
+| Publication                              | Test driver only          | No publication route            |
+
+## Connect applications
+
+`endpoint.connection({ access, as })` materializes a fake mock credential for an application adapter. Pass the application's current credential to `createMockReader`; a recipient endpoint rejects owner-key substitution. `createMockAuth` accepts the connection's credential or an explicit credential. Requests use the driver's approval state rather than injecting connected UI state.
+
+Playwright bindings receive connection data in `apply(page, privateConnection)` and configure the app before navigation. The factory closes binding resources and private contexts before deleting run objects. Do not put credentials in test configuration.
+
+The low-level fixture, model, and SDK exports and the `/msw/node` wrapper are not available. There are no compatibility aliases.

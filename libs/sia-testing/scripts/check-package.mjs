@@ -24,6 +24,8 @@ import {
   withTemporaryDirectory,
 } from "./workspace.mjs";
 
+import { checkDocumentation } from "./documentation.mjs";
+
 const require = createRequire(import.meta.url);
 const usage = "Usage: check-package.mjs [--unpacked <directory>] [--help]";
 const environment = {
@@ -135,6 +137,7 @@ async function checkNodeGraph(consumer, name) {
  * @param {string} directory
  */
 async function checkPackage(unpacked, directory) {
+  await checkDocumentation(unpacked);
   const metadata = await readPackageMetadata(unpacked);
   const consumer = join(directory, "consumer");
   // Copy package code rather than symlinking it so Node resolves imports inside the consumer.

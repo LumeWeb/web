@@ -15,6 +15,8 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { linkDirectory, withTemporaryDirectory } from "./workspace.mjs";
 
+import { checkVitestDocs } from "./check-vitest-docs.mjs";
+
 const repo = fileURLToPath(new URL("../../../", import.meta.url));
 const cache = join(repo, "node_modules/.pnpm");
 const entries = await readdir(cache);
@@ -114,6 +116,7 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
     join(repo, "libs/sia-testing"),
     join(directory, "testing-tarball"),
   );
+  await checkVitestDocs(testingTarball, directory);
   await cp(testingTarball, testing, { recursive: true });
   await linkDirectory(
     dependency("@playwright/test", "^1.61.1"),

@@ -3,29 +3,32 @@
 `withSiaRun` accepts a private live profile and explicit consent. It owns only the fixture objects and sharing keys that its SDK agent creates. It does not deploy services, fund an account or prune an account's slabs.
 
 ```ts
-import { fileFixture, withSiaRun } from '@lumeweb/sia-testing/node';
+import { fileFixture, withSiaRun } from "@lumeweb/sia-testing/node";
 
-await withSiaRun({
-  backend: {
-    kind: 'live',
-    profileFile: '/private/sia/profile.json',
-    consent: {
-      apiBaseUrl: 'https://indexd.example/',
-      mutations: true,
-      transfers: true,
+await withSiaRun(
+  {
+    backend: {
+      kind: "live",
+      profileFile: "/private/sia/profile.json",
+      consent: {
+        apiBaseUrl: "https://indexd.example.invalid/",
+        mutations: true,
+        transfers: true,
+      },
     },
+    journalFile: "/private/sia/run-unique.jsonl",
   },
-  journalFile: '/private/sia/run-unique.jsonl',
-}, async (run) => {
-  const file = await fileFixture('/fixtures/video.mp4');
-  const object = await run.objects.upload({
-    file,
-    name: file.name,
-    metadata: new TextEncoder().encode('video fixture'),
-  });
-  const share = await run.shares.create({ objects: [object] });
-  await run.shares.revoke(share);
-});
+  async (run) => {
+    const file = await fileFixture("/fixtures/video.mp4");
+    const object = await run.objects.upload({
+      file,
+      name: file.name,
+      metadata: new TextEncoder().encode("video fixture"),
+    });
+    const share = await run.shares.create({ objects: [object] });
+    await run.shares.revoke(share);
+  },
+);
 ```
 
 The application callback must await its work and close resources it creates outside the framework. A run deadline stops owned SDK work; arbitrary JavaScript started by the callback can continue. Mutation methods reject after the run closes.
@@ -51,19 +54,19 @@ Creation records can use 16 MiB of journal space; cleanup and completion records
 Journals contain credentials and sealed object data. They are created exclusively with mode `0600` under a private directory outside the checkout. Do not attach them to CI artifacts. The default journal directory is under the operating system's temporary directory; supply a private persistent path if recovery must survive temporary-directory cleanup. Keep the reported journal path when a run fails.
 
 ```ts
-import { recoverSiaRun } from '@lumeweb/sia-testing/node';
+import { recoverSiaRun } from "@lumeweb/sia-testing/node";
 
 await recoverSiaRun({
   backend: {
-    kind: 'live',
-    profileFile: '/private/sia/profile.json',
+    kind: "live",
+    profileFile: "/private/sia/profile.json",
     consent: {
-      apiBaseUrl: 'https://indexd.example/',
+      apiBaseUrl: "https://indexd.example.invalid/",
       mutations: true,
       transfers: true,
     },
   },
-  journalFile: '/private/sia/run-unique.jsonl',
+  journalFile: "/private/sia/run-unique.jsonl",
 });
 ```
 

@@ -1,0 +1,44 @@
+/** Expected failures confirm that test cancellation stops held package calls, not unrelated promises. */
+siaTest("timeout cancels a held fixture read", async ({ sia, onTestFinished, signal }) => {
+  const actor = sia.mock.actor("held timeout");
+  const reader = sia.mock.reader({ access: sia.ownerAccess, as: actor });
+  const hold = sia.mock.faults.hold({ actor, operation: "objects" });
+  onTestFinished(async () => {
+    expect(signal.aborted).toBe(true);
+    expect(await hold.cancelled()).toMatchObject({ status: "cancelled" });
+    await reader.close();
+    console.log("HELD_CALL_CANCELLED");
+  });
+  await reader.objects({ offset: 0, limit: 10 });
+}, 100);
+
+test("timeout cannot join unrelated callback JavaScript", async ({ signal, onTestFinished }) => {
+  const mock = createMockSia();
+  let finished = false;
+  let release!: () => void;
+  let pending: Promise<unknown>;
+  onTestFinished(async () => {
+    try {
+      expect(signal.aborted).toBe(true);
+      expect(finished).toBe(false);
+      await mock.close();
+      expect(finished).toBe(false);
+    } finally {
+      release();
+      await pending;
+      await mock.close();
+    }
+    expect(finished).toBe(true);
+    console.log("UNRELATED_CALLBACK_RELEASED");
+  });
+  pending = mock.run({ app: {
+    id: "e".repeat(64), name: "Callback tests", description: "Synthetic fixtures",
+    serviceUrl: "https://example.invalid",
+  }, signal }, async () => {
+    await new Promise<void>((resolve) => { release = resolve; });
+    finished = true;
+  }).catch((error: unknown) => {
+    if (error !== signal.reason) throw error;
+  });
+  await pending;
+}, 100);
