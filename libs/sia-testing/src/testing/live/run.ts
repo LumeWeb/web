@@ -1,5 +1,6 @@
 /** A live run owns its fixture mutations and journals their outcomes before returning handles. */
 import { randomUUID } from "node:crypto";
+import { boundedByteView } from "../byte-view.js";
 import { readFixture } from "../files.js";
 import type {
   BrowserAccess,
@@ -236,20 +237,18 @@ export async function withLiveRun<T>(
               !name ||
               !Number.isSafeInteger(file.sizeBytes) ||
               file.sizeBytes < 0 ||
-              !/^[a-f0-9]{64}$/.test(file.sha256) ||
-              !(suppliedMetadata instanceof Uint8Array)
+              !/^[a-f0-9]{64}$/.test(file.sha256)
             )
               throw failure("invalid-input");
-            // Typed-array subclasses can override byteLength; the intrinsic getter ignores that override.
-            const metadataBytes = Reflect.get(
-              Uint8Array.prototype,
-              "byteLength",
-              suppliedMetadata,
-            );
-            if (metadataBytes > maximumMetadataBytes)
+            // Caller byteLength overrides must not bypass the client metadata bound.
+            let metadata: Uint8Array;
+            try {
+              metadata = new Uint8Array(
+                boundedByteView(suppliedMetadata, maximumMetadataBytes),
+              );
+            } catch {
               throw failure("invalid-input");
-            const metadata = new Uint8Array(metadataBytes);
-            metadata.set(suppliedMetadata);
+            }
             if (
               objectAttempts >= document.limits.maxObjects ||
               file.sizeBytes >

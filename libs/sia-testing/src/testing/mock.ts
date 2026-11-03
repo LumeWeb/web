@@ -1,4 +1,5 @@
 /** Managed mock runs bind readers to owner or recipient access and clean only their own fixtures. */
+import { boundedByteView } from "./byte-view.js";
 import { snapshotApplicationMetadata } from "./application-metadata.js";
 import { createIndexdModel } from "../model/index.js";
 import { createMockNetwork, type MockNetwork } from "../sdk/index.js";
@@ -960,10 +961,16 @@ export function createMockSia(options: MockOptions = {}): MockSia {
               if (
                 typeof name !== "string" ||
                 !name ||
-                !/^[0-9a-f]{64}$/.test(file.sha256) ||
-                !(input.metadata instanceof Uint8Array)
+                !/^[0-9a-f]{64}$/.test(file.sha256)
               )
                 throw failure("invalid-input", "Invalid upload descriptor");
+              const suppliedMetadata = input.metadata;
+              let metadataView: Uint8Array;
+              try {
+                metadataView = boundedByteView(suppliedMetadata, Infinity);
+              } catch {
+                throw failure("invalid-input", "Invalid upload descriptor");
+              }
               if (
                 context.objectAttempts >= limits.maxObjects ||
                 file.sizeBytes >
@@ -972,7 +979,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
                 throw failure("limit", "Run upload allowance exceeded");
               context.objectAttempts++;
               context.reservedBytes += file.sizeBytes;
-              const metadata = new Uint8Array(input.metadata);
+              const metadata = new Uint8Array(metadataView);
               const bytes = await readFixture(file, context.signal);
               open(context);
               const handle = Object.freeze({

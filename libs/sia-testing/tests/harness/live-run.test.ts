@@ -4,6 +4,11 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { expect, it, vi } from "vitest";
+import {
+  emptyManagedMetadata,
+  invalidManagedMetadata,
+  managedMetadataInputs,
+} from "./managed-metadata.js";
 import { foreignMetadata } from "./foreign-metadata.js";
 import { bytesFixture } from "../../src/testing/files.js";
 import { recoverLiveRun } from "../../src/testing/live/recovery.js";
@@ -32,6 +37,7 @@ async function fixture(
     state: () => Promise<FixtureState>,
   ) => Promise<void>,
   maxLogicalUploadBytes = 100,
+  maxObjects = 8,
 ) {
   const directory = await mkdtemp(join(tmpdir(), "sia-live-owned-"));
   try {
@@ -68,6 +74,7 @@ async function fixture(
           cleanupDeadlineMs: 1000,
           deadlineMs: 2000,
           maxLogicalUploadBytes,
+          maxObjects,
         },
         version: 1,
       }),
@@ -630,3 +637,128 @@ it.each(["foreign", "padding", "overwrite"])(
       expect(result.summary.cleanup).toBe("clean");
     }),
 );
+
+it("live managed client snapshots selected metadata bytes before opening the source", () =>
+  fixture(async (options, state) => {
+    const result = await withLiveRun(options, async (run) => {
+      const descriptor = await bytesFixture({
+        bytes: Uint8Array.of(1, 2, 3),
+        name: "payload",
+      });
+      for (const metadata of managedMetadataInputs()) {
+        let reads = 0;
+        const object = await run.objects.upload({
+          file: {
+            ...descriptor,
+            open() {
+              metadata[0] = 90;
+              return descriptor.open();
+            },
+          },
+          get metadata() {
+            reads++;
+            return metadata;
+          },
+          name: "explicit",
+        });
+        expect(reads).toBe(1);
+        metadata[1] = 80;
+        const first = (await state()).objects.find(
+          (row) => row.id === object.id,
+        )!;
+        expect(first).toMatchObject({
+          metadata: [10, 20],
+          payload: [1, 2, 3],
+          pinned: true,
+        });
+        first.metadata!.fill(0);
+        expect(
+          (await state()).objects.find((row) => row.id === object.id)!.metadata,
+        ).toEqual([10, 20]);
+      }
+    });
+    expect(result.summary.cleanup).toBe("clean");
+    expect((await state()).objects).toEqual([
+      { id: "f".repeat(64), pinned: true },
+    ]);
+  }));
+
+it.each(["maximum", "empty"])(
+  "live managed client accepts %s metadata",
+  (kind) =>
+    fixture(async (options, state) => {
+      const result = await withLiveRun(options, async (run) => {
+        const file = await bytesFixture({
+          bytes: Uint8Array.of(1),
+          name: "payload",
+        });
+        const maximum = new Uint8Array(16384);
+        Object.defineProperty(maximum, "byteLength", { value: 1000000 });
+        for (const metadata of kind === "maximum"
+          ? [maximum]
+          : emptyManagedMetadata()) {
+          const expected = Array.from(metadata);
+          const object = await run.objects.upload({ file, metadata });
+          expect(
+            (await state()).objects.find((row) => row.id === object.id),
+          ).toMatchObject({ metadata: expected, pinned: true });
+        }
+      });
+      expect(result.summary.cleanup).toBe("clean");
+      expect((await state()).objects).toHaveLength(1);
+    }),
+);
+
+it("live managed client rejects invalid metadata before source opening or dispatch without consuming allowance", () =>
+  fixture(
+    async (options, state) => {
+      const result = await withLiveRun(options, async (run) => {
+        const descriptor = await bytesFixture({
+          bytes: Uint8Array.of(1),
+          name: "payload",
+        });
+        let opens = 0;
+        const file = {
+          ...descriptor,
+          open() {
+            opens++;
+            return descriptor.open();
+          },
+        };
+        const callerError = new Error("metadata getter failed");
+        await expect(
+          run.objects.upload({
+            file,
+            get metadata(): Uint8Array {
+              throw callerError;
+            },
+          }),
+        ).rejects.toBe(callerError);
+        const oversized = foreignMetadata("new Uint8Array(16385)");
+        Object.defineProperty(oversized, "byteLength", { value: 0 });
+        for (const metadata of [oversized, ...invalidManagedMetadata()]) {
+          await expect(
+            run.objects.upload({
+              file,
+              // @ts-expect-error Invalid caller values must reject at the upload boundary.
+              metadata,
+            }),
+          ).rejects.toMatchObject({ code: "invalid-input" });
+        }
+        expect(opens).toBe(0);
+        expect((await state()).calls).toEqual(["authenticate"]);
+        const object = await run.objects.upload({
+          file,
+          metadata: new Uint8Array(),
+        });
+        expect(opens).toBe(1);
+        expect(
+          (await state()).objects.find((row) => row.id === object.id)!.pinned,
+        ).toBe(true);
+      });
+      expect(result.summary.cleanup).toBe("clean");
+      expect((await state()).objects).toHaveLength(1);
+    },
+    100,
+    1,
+  ));

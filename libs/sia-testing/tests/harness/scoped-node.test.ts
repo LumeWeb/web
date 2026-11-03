@@ -2,6 +2,11 @@
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import {
+  emptyManagedMetadata,
+  invalidManagedMetadata,
+  managedMetadataInputs,
+} from "./managed-metadata.js";
 import { foreignMetadata } from "./foreign-metadata.js";
 import { bytesFixture } from "../../src/testing/files.js";
 import { expect, it } from "vitest";
@@ -184,3 +189,136 @@ it.each(["foreign", "padding", "overwrite"])(
     expect(result.summary.cleanup).toBe("clean");
   },
 );
+
+const metadataOptions = {
+  backend: {
+    app: {
+      description: "Metadata",
+      id: "a".repeat(64),
+      name: "Metadata",
+      serviceUrl: "https://example.invalid",
+    },
+    kind: "mock" as const,
+  },
+};
+
+it("managed mock snapshots selected metadata bytes before opening the source", async () => {
+  const result = await withSiaRun(metadataOptions, async (run) => {
+    const descriptor = await bytesFixture({
+      bytes: Uint8Array.of(1, 2, 3),
+      name: "payload",
+    });
+    const reader = run.mock.reader({
+      access: run.ownerAccess,
+      as: run.mock.actor("reader"),
+    });
+    for (const metadata of managedMetadataInputs()) {
+      let reads = 0;
+      const object = await run.objects.upload({
+        file: {
+          ...descriptor,
+          open() {
+            metadata[0] = 90;
+            return descriptor.open();
+          },
+        },
+        get metadata() {
+          reads++;
+          return metadata;
+        },
+        name: "explicit",
+      });
+      expect(reads).toBe(1);
+      metadata[1] = 80;
+      const first = await reader.object(object.id);
+      expect(first.metadata).toEqual(Uint8Array.of(10, 20));
+      first.metadata.fill(0);
+      expect((await reader.object(object.id)).metadata).toEqual(
+        Uint8Array.of(10, 20),
+      );
+      expect(
+        new Uint8Array(
+          await new Response(await reader.download(first)).arrayBuffer(),
+        ),
+      ).toEqual(Uint8Array.of(1, 2, 3));
+      expect(await run.objects.inspect(object)).toBe("present");
+    }
+    await reader.close();
+  });
+  expect(result.summary.cleanup).toBe("clean");
+});
+
+it.each(["large", "empty"])(
+  "managed mock keeps %s metadata valid",
+  async (kind) => {
+    const result = await withSiaRun(metadataOptions, async (run) => {
+      const file = await bytesFixture({
+        bytes: Uint8Array.of(1),
+        name: "payload",
+      });
+      const reader = run.mock.reader({
+        access: run.ownerAccess,
+        as: run.mock.actor("reader"),
+      });
+      for (const metadata of kind === "large"
+        ? [new Uint8Array(1025), new Uint8Array(16385)]
+        : emptyManagedMetadata()) {
+        const expected = new Uint8Array(metadata);
+        const object = await run.objects.upload({ file, metadata });
+        expect((await reader.object(object.id)).metadata).toEqual(expected);
+      }
+      await reader.close();
+    });
+    expect(result.summary.cleanup).toBe("clean");
+  },
+);
+
+it("managed mock rejects invalid metadata without opening the source or consuming allowance", async () => {
+  const result = await withSiaRun(
+    { ...metadataOptions, limits: { maxObjects: 1 } },
+    async (run) => {
+      const descriptor = await bytesFixture({
+        bytes: Uint8Array.of(1),
+        name: "payload",
+      });
+      let opens = 0;
+      const file = {
+        ...descriptor,
+        open() {
+          opens++;
+          return descriptor.open();
+        },
+      };
+      const callerError = new Error("metadata getter failed");
+      await expect(
+        run.objects.upload({
+          file,
+          get metadata(): Uint8Array {
+            throw callerError;
+          },
+        }),
+      ).rejects.toBe(callerError);
+      for (const metadata of invalidManagedMetadata()) {
+        await expect(
+          run.objects.upload({
+            file,
+            // @ts-expect-error Invalid caller values must reject at the upload boundary.
+            metadata,
+          }),
+        ).rejects.toMatchObject({ code: "invalid-input" });
+      }
+      expect(opens).toBe(0);
+      const reader = run.mock.reader({
+        access: run.ownerAccess,
+        as: run.mock.actor("reader"),
+      });
+      expect(await reader.objects({ limit: 10, offset: 0 })).toMatchObject({
+        objects: [],
+      });
+      await reader.close();
+      await run.objects.upload({ file, metadata: new Uint8Array() });
+      expect(opens).toBe(1);
+    },
+  );
+  expect(result.summary.cleanup).toBe("clean");
+});
