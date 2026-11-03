@@ -4,6 +4,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { checkDocumentation, recipes } from "./documentation.mjs";
 import {
   linkDirectory,
@@ -204,7 +205,7 @@ export default class {
   );
 }
 
-if (process.argv[1] === new URL(import.meta.url).pathname) {
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
   await withTemporaryDirectory("sia-vitest-docs-", async (directory) => {
     const output = execFileSync(
       "npm",
