@@ -1,4 +1,5 @@
 /** Every advertised adapter runs these state changes against the owned model. */
+import { foreignMetadata } from "./foreign-metadata.js";
 import { expect, it, vi } from "vitest";
 import { bytesFixture, createMockSia } from "../../src/mock.js";
 import type {
@@ -21,6 +22,72 @@ export function applicationScenarios(
   ) => Promise<{ close: () => Promise<void>; writer: ApplicationPort }>,
   transport = false,
 ) {
+  it.each(["upload and pin", "pin"])(
+    "accepts foreign Uint8Array metadata for %s",
+    async (operation) => {
+      const mock = createMockSia();
+      try {
+        await mock.run({ app }, async (run) => {
+          const { close, writer } = await connect(
+            mock,
+            run,
+            mock.actor("writer"),
+          );
+          const reader = mock.reader({
+            access: run.ownerAccess,
+            as: mock.actor("reader"),
+          });
+          try {
+            const file = await bytesFixture({
+              bytes: Uint8Array.of(1, 2, 3),
+              name: "n",
+            });
+            const uploaded: Uint8Array =
+              operation === "pin"
+                ? Uint8Array.of(10, 20)
+                : foreignMetadata(
+                    "Uint8Array.of(99, 10, 20, 88).subarray(1, 3)",
+                  );
+            const object = await writer.upload({ file, metadata: uploaded });
+            uploaded.fill(90);
+            await writer.pin(object);
+            expect((await reader.object(object.id)).metadata).toEqual(
+              Uint8Array.of(10, 20),
+            );
+            const pinned: Uint8Array = foreignMetadata(
+              "Uint8Array.of(77, 30, 40, 66).subarray(1, 3)",
+            );
+            expect(pinned instanceof Uint8Array).toBe(false);
+            let reads = 0;
+            const pinning = writer.pin(object, {
+              get metadata() {
+                reads++;
+                return pinned;
+              },
+            });
+            pinned.fill(80);
+            await pinning;
+            expect(reads).toBe(1);
+            const first = await reader.object(object.id);
+            expect(first.metadata).toEqual(Uint8Array.of(30, 40));
+            first.metadata.fill(70);
+            expect((await reader.object(object.id)).metadata).toEqual(
+              Uint8Array.of(30, 40),
+            );
+            expect(
+              await new Response(await reader.download(object)).arrayBuffer(),
+            ).toEqual(Uint8Array.of(1, 2, 3).buffer);
+          } finally {
+            await reader.close();
+            await writer.close();
+            await close();
+          }
+        });
+      } finally {
+        await mock.close();
+      }
+    },
+  );
   it("out-of-bounds metadata cannot replace pinned bytes or dispatch a request", async () => {
     const mock = createMockSia();
     try {
