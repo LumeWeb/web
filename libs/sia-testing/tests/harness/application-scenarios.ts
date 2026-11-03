@@ -22,6 +22,118 @@ export function applicationScenarios(
   ) => Promise<{ close: () => Promise<void>; writer: ApplicationPort }>,
   transport = false,
 ) {
+  it.each(["foreign", "hooks", "padding", "overwrite"])(
+    "validates %s fixture chunks using their actual bytes",
+    async (kind) => {
+      const mock = createMockSia();
+      try {
+        await mock.run({ app }, async (run) => {
+          const { close, writer } = await connect(
+            mock,
+            run,
+            mock.actor("writer"),
+          );
+          const reader = mock.reader({
+            access: run.ownerAccess,
+            as: mock.actor("reader"),
+          });
+          try {
+            const expected =
+              kind === "padding"
+                ? Uint8Array.of(1, 0)
+                : kind === "overwrite"
+                  ? Uint8Array.of(1, 3)
+                  : Uint8Array.of(1, 2, 3);
+            const descriptor = await bytesFixture({
+              bytes: expected,
+              name: "bytes",
+            });
+            class Bytes extends Uint8Array {}
+            const chunk =
+              kind === "foreign"
+                ? foreignMetadata(
+                    "Uint8Array.of(99, 1, 2, 3, 88).subarray(1, 4)",
+                  )
+                : new Bytes(
+                    kind === "padding"
+                      ? [1]
+                      : kind === "overwrite"
+                        ? [1, 2]
+                        : [1, 2, 3],
+                  );
+            if (kind === "padding" || kind === "overwrite") {
+              Object.defineProperty(chunk, "byteLength", {
+                value: kind === "padding" ? 2 : 1,
+              });
+            } else if (kind === "hooks") {
+              for (const key of [
+                "byteLength",
+                "byteOffset",
+                "buffer",
+                "length",
+                "constructor",
+                "slice",
+                "subarray",
+                Symbol.iterator,
+                Symbol.toStringTag,
+              ]) {
+                Object.defineProperty(chunk, key, {
+                  get() {
+                    throw new Error("input hook read");
+                  },
+                });
+              }
+            }
+            const stream = new ReadableStream<Uint8Array>({
+              start(controller) {
+                controller.enqueue(chunk);
+                if (kind === "overwrite") controller.enqueue(Uint8Array.of(3));
+                controller.close();
+              },
+            });
+            const upload = writer.upload({
+              file: { ...descriptor, open: () => stream },
+              metadata: new Uint8Array(),
+            });
+            if (kind === "padding" || kind === "overwrite") {
+              await expect(upload).rejects.toMatchObject({
+                code: "invalid-input",
+              });
+              expect(
+                await reader.objects({ limit: 10, offset: 0 }),
+              ).toMatchObject({ objects: [] });
+              expect(
+                mock
+                  .history()
+                  .filter(
+                    (row) =>
+                      row.operation === "upload" || row.operation === "pin",
+                  ),
+              ).toEqual([]);
+            } else {
+              const object = await upload;
+              await writer.pin(object);
+              const payload = new Uint8Array(
+                await new Response(await reader.download(object)).arrayBuffer(),
+              );
+              expect(payload).toEqual(expected);
+              expect(
+                (await bytesFixture({ bytes: payload, name: "download" }))
+                  .sha256,
+              ).toBe(descriptor.sha256);
+            }
+            expect(stream.locked).toBe(false);
+          } finally {
+            await reader.close();
+            await writer.close();
+            await close();
+          }
+        });
+      } finally {
+        await mock.close();
+      }
+    },
+  );
   it.each(["upload and pin", "pin"])(
     "accepts foreign Uint8Array metadata for %s",
     async (operation) => {

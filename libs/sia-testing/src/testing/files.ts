@@ -1,5 +1,6 @@
 /** Replayable byte fixtures detach caller memory before hashing or opening streams. */
 import type { TestFile } from "./types.js";
+import { boundedByteView } from "./byte-view.js";
 
 export async function bytesFixture(input: {
   bytes: Uint8Array;
@@ -55,13 +56,14 @@ export async function readFixture(
       const next = await reader.read();
       signal.throwIfAborted();
       if (next.done) break;
-      if (
-        !(next.value instanceof Uint8Array) ||
-        length + next.value.byteLength > file.sizeBytes
-      )
+      let view: Uint8Array;
+      try {
+        view = boundedByteView(next.value, file.sizeBytes - length);
+      } catch {
         throw invalidFile();
-      bytes.set(next.value, length);
-      length += next.value.byteLength;
+      }
+      bytes.set(view, length);
+      length += view.byteLength;
     }
     if (length !== file.sizeBytes) throw invalidFile();
     complete = true;

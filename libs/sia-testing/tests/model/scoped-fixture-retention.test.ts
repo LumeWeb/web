@@ -10,15 +10,20 @@ import { expect, it } from "vitest";
 it("empty fixture chunks do not accumulate while the source is unfinished", async () => {
   const directory = await mkdtemp(join(tmpdir(), "sia-fixture-retention-"));
   try {
-    const source = await readFile(resolve("src/testing/files.ts"), "utf8");
-    const compiled = ts.transpileModule(source, {
-      compilerOptions: {
-        module: ts.ModuleKind.ESNext,
-        target: ts.ScriptTarget.ES2022,
-      },
-    });
     const target = join(directory, "files.mjs");
-    await writeFile(target, compiled.outputText);
+    for (const [sourceName, output] of [
+      ["files.ts", target],
+      ["byte-view.ts", join(directory, "byte-view.js")],
+    ] as const) {
+      const source = await readFile(resolve("src/testing", sourceName), "utf8");
+      const compiled = ts.transpileModule(source, {
+        compilerOptions: {
+          module: ts.ModuleKind.ESNext,
+          target: ts.ScriptTarget.ES2022,
+        },
+      });
+      await writeFile(output, compiled.outputText);
+    }
     for (const retain of [true, false]) {
       const result = await promisify(execFile)(
         process.execPath,

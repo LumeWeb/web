@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { expect, it, vi } from "vitest";
+import { foreignMetadata } from "./foreign-metadata.js";
 import { bytesFixture } from "../../src/testing/files.js";
 import { recoverLiveRun } from "../../src/testing/live/recovery.js";
 import { readJournal } from "../../src/testing/live/journal.js";
@@ -580,3 +581,52 @@ it("a failed application callback still cleans its exact owned resources", () =>
       { id: "f".repeat(64), pinned: true },
     ]);
   }));
+
+it.each(["foreign", "padding", "overwrite"])(
+  "live collector sends only actual %s fixture bytes",
+  (kind) =>
+    fixture(async (options, state) => {
+      const expected =
+        kind === "padding"
+          ? Uint8Array.of(1, 0)
+          : kind === "overwrite"
+            ? Uint8Array.of(1, 3)
+            : Uint8Array.of(1, 2, 3);
+      const descriptor = await bytesFixture({ bytes: expected, name: "bytes" });
+      const chunk =
+        kind === "foreign"
+          ? foreignMetadata("Uint8Array.of(1, 2, 3)")
+          : Uint8Array.from(kind === "padding" ? [1] : [1, 2]);
+      if (kind !== "foreign")
+        Object.defineProperty(chunk, "byteLength", {
+          value: kind === "padding" ? 2 : 1,
+        });
+      const stream = new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(chunk);
+          if (kind === "overwrite") controller.enqueue(Uint8Array.of(3));
+          controller.close();
+        },
+      });
+      const result = await withLiveRun(options, async (run) => {
+        const uploading = run.objects.upload({
+          file: { ...descriptor, open: () => stream },
+          metadata: new Uint8Array(),
+        });
+        if (kind === "foreign") {
+          const object = await uploading;
+          expect(
+            (await state()).objects.find((row) => row.id === object.id),
+          ).toMatchObject({ payload: [1, 2, 3], pinned: true });
+        } else {
+          await expect(uploading).rejects.toMatchObject({
+            code: "invalid-input",
+          });
+          expect((await state()).calls).toEqual(["authenticate"]);
+          expect((await state()).objects).toHaveLength(1);
+        }
+        expect(stream.locked).toBe(false);
+      });
+      expect(result.summary.cleanup).toBe("clean");
+    }),
+);
