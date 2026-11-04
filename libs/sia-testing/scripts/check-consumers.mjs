@@ -1,4 +1,4 @@
-/** Builds copied consumer pages using cached dependencies, never installs or contacts a service. */
+/** Runs packed Vitest environment checks and builds copied consumer pages without installations or service access. */
 import { execFileSync } from "node:child_process";
 import {
   chmod,

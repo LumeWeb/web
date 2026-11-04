@@ -63,6 +63,12 @@ The test driver owns the fixtures. `run.objects.upload` uploads and pins before 
 
 No Vitest plugin is required. MSW and Playwright are optional peers. Portable mock and client imports contain no Node, test-runner, or storage SDK runtime. HTTP and MSW speak a synthetic fixture protocol, not native Indexd. The package does not deploy services or fund accounts.
 
+## Select a simulated DOM environment
+
+The complete tests on this page also run with `--environment jsdom` or `--environment happy-dom` instead of `--environment node`. Install `jsdom` or `happy-dom` yourself as a development dependency when choosing that environment. For MSW-backed Fetch tests, install the optional `msw` peer too. No package plugin or global shims are needed.
+
+These environments simulate a DOM inside Node; they are not Vitest browser providers. Compare opaque metadata by byte contents, as in the publication recipe, because typed arrays can come from different realms.
+
 ## Use native Vitest fixtures for direct controls
 
 Save this complete recipe in its own test file. Each test, including concurrent tests, gets a separate mock and run.
@@ -148,7 +154,7 @@ test("publishes a pinned application object explicitly", async ({ signal }) => {
           await writer.pin(pending, { metadata: selected });
           const reader = mock.reader({ access: run.ownerAccess, as: mock.actor("owner-reader") });
           try {
-            expect((await reader.object(pending.id)).metadata).toEqual(selected);
+            expect([...(await reader.object(pending.id)).metadata]).toEqual([...selected]);
           } finally {
             await reader.close();
           }
@@ -184,4 +190,4 @@ pnpm --filter @lumeweb/sia-testing test:package
 pnpm --filter @lumeweb/sia-testing test:consumers
 ```
 
-Consumer checks extract and execute the complete README tests against the packed public exports with Node and Vitest 4.1.9. They also check timeout cancellation in an expected-failure child process. They do not certify every Vitest version or browser provider.
+Consumer checks extract and execute the complete README tests against the packed public exports in `node`, `jsdom`, and `happy-dom`. Each environment runs six ordinary tests (the recipes, assertion-failure cleanup, and one Fetch/MSW transport smoke), then two expected timeout failures to check cancellation and cleanup. The checked combination is Node 26.13.0, Vitest 4.1.9, jsdom 29.1.1, happy-dom 20.10.6, and MSW 2.14.6. These checks do not certify other versions, browser providers, or native storage compatibility.

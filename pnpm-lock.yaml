@@ -2681,6 +2681,12 @@ importers:
       '@types/node':
         specifier: ^26.1.0
         version: 26.1.0
+      happy-dom:
+        specifier: 'catalog:'
+        version: 20.10.6
+      jsdom:
+        specifier: 29.1.1
+        version: 29.1.1(@noble/hashes@2.4.0)
       msw:
         specifier: 'catalog:'
         version: 2.14.6(@types/node@26.1.0)(typescript@6.0.3)

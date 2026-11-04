@@ -73,6 +73,8 @@
     "@playwright/test": "^1.61.1",
     "@siafoundation/sia-storage": "0.1.4",
     "@types/node": "catalog:",
+    "happy-dom": "catalog:",
+    "jsdom": "29.1.1",
     "msw": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:",

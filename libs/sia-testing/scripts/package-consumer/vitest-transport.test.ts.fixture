@@ -1,0 +1,85 @@
+/** Fetch and MSW preserve staged writes and selected pin metadata through public ports. */
+import { expect, test } from "vitest";
+import { setupServer } from "msw/node";
+import { bytesFixture, createMockSia } from "@lumeweb/sia-testing/mock";
+import {
+  createMockApplication,
+  createMockReader,
+} from "@lumeweb/sia-testing/client";
+import { createMockHandlers } from "@lumeweb/sia-testing/msw";
+
+test("Fetch reads selected metadata after a lost pin reply", async ({
+  signal,
+}) => {
+  const mock = createMockSia();
+  const endpoint = createMockHandlers(mock, {
+    baseUrl: "https://transport.example.invalid/",
+  });
+  const server = setupServer(...endpoint.handlers);
+  try {
+    server.listen({ onUnhandledRequest: "error" });
+    await mock.run(
+      {
+        app: {
+          id: "e".repeat(64),
+          name: "Transport tests",
+          description: "Synthetic transport fixtures",
+          serviceUrl: "https://transport.example.invalid/",
+        },
+        signal,
+      },
+      async (run) => {
+        const actor = mock.actor("writer");
+        const connection = endpoint.connection({
+          access: run.ownerAccess,
+          as: actor,
+        });
+        const writer = createMockApplication(connection, connection.credential);
+        const readConnection = endpoint.connection({
+          access: run.ownerAccess,
+          as: mock.actor("reader"),
+        });
+        const reader = createMockReader(
+          readConnection,
+          readConnection.credential,
+        );
+        try {
+          const file = await bytesFixture({
+            name: "document",
+            bytes: Uint8Array.of(4, 5),
+          });
+          const object = await writer.upload({
+            file,
+            metadata: new Uint8Array(),
+          });
+          expect(await writer.inspect(object)).toBe("uploaded");
+          const metadata = new TextEncoder().encode("selected at pin");
+          mock.mutationFaults.loseReply(
+            { actor, operation: "pin" },
+            { times: 1 },
+          );
+          await expect(writer.pin(object, { metadata })).rejects.toThrow(
+            "Failed to fetch",
+          );
+          expect(await writer.inspect(object)).toBe("pinned");
+          const view = await reader.object(object.id);
+          expect(view.sizeBytes).toBe(2);
+          expect([...view.metadata]).toEqual([...metadata]);
+        } finally {
+          try {
+            await reader.close();
+          } finally {
+            await writer.close();
+          }
+        }
+      },
+    );
+  } finally {
+    try {
+      await endpoint.close();
+    } finally {
+      server.close();
+      await mock.close();
+    }
+  }
+});
