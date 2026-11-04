@@ -6,7 +6,16 @@ export async function bytesFixture(input: {
   bytes: Uint8Array;
   name: string;
 }): Promise<TestFile> {
-  const stored = new Uint8Array(input.bytes);
+  const bytes = input.bytes;
+  let view: Uint8Array;
+  try {
+    view = boundedByteView(bytes, Number.POSITIVE_INFINITY);
+  } catch {
+    throw Object.assign(new Error("Fixture bytes must be a valid Uint8Array"), {
+      code: "invalid-input",
+    });
+  }
+  const stored = new Uint8Array(view);
   return Object.freeze({
     name: input.name,
     open: () =>
