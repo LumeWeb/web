@@ -1,4 +1,4 @@
-/** Hosts scoped mock read ports on a loopback listener with owned request cancellation. */
+/** Hosts scoped mock ports on a loopback listener with owned request cancellation. */
 import {
   createServer,
   type IncomingMessage,
@@ -34,8 +34,72 @@ export async function startMockServer(
       code: "invalid-input",
     });
   const calls = new Set<AbortController>();
-  const dispatch = (request: Request) => configured.dispatch(request);
-  async function respond(incoming: IncomingMessage, outgoing: ServerResponse) {
+  interface SocketState {
+    bodies: Map<IncomingMessage, ServerResponse>;
+    replies: Set<ServerResponse>;
+  }
+  const sockets = new Map<IncomingMessage["socket"], SocketState>();
+  let stopping = false;
+  function socketState(socket: IncomingMessage["socket"]) {
+    let state = sockets.get(socket);
+    if (!state) {
+      state = { bodies: new Map(), replies: new Set() };
+      sockets.set(socket, state);
+    }
+    return state;
+  }
+  function releaseSocket(
+    socket: IncomingMessage["socket"],
+    state: SocketState,
+  ) {
+    // A keep-alive request or reclaimed raw body may already own a newer record.
+    if (
+      !state.bodies.size &&
+      !state.replies.size &&
+      sockets.get(socket) === state
+    )
+      sockets.delete(socket);
+  }
+  function ownBody(incoming: IncomingMessage, outgoing: ServerResponse) {
+    const socket = incoming.socket;
+    const state = socketState(socket);
+    state.bodies.set(incoming, outgoing);
+    let released = false;
+    const releaseBody = () => {
+      if (released) return;
+      released = true;
+      state.bodies.delete(incoming);
+      incoming.removeListener("end", releaseBody);
+      incoming.removeListener("close", releaseBody);
+      releaseSocket(socket, state);
+    };
+    incoming.once("end", releaseBody);
+    incoming.once("close", releaseBody);
+    return releaseBody;
+  }
+  function cancelBodies(state: SocketState) {
+    if (!stopping) return;
+    for (const [incoming, outgoing] of state.bodies) {
+      if (incoming.complete || incoming.destroyed) continue;
+      // Destroying a later pipelined request also destroys earlier replies.
+      // Let those replies, and any early response to this body, flush first.
+      const ownReply = state.replies.has(outgoing);
+      const waiting =
+        state.replies.size > (ownReply ? 1 : 0) ||
+        (ownReply && outgoing.headersSent);
+      if (!waiting) incoming.destroy();
+    }
+  }
+  // Body completion can outlive close while an earlier pipelined reply flushes.
+  const dispatch = (request: Request) =>
+    stopping
+      ? Promise.resolve(Response.json({ code: "closed" }, { status: 410 }))
+      : configured.dispatch(request);
+  async function respond(
+    incoming: IncomingMessage,
+    outgoing: ServerResponse,
+    releaseBody: () => void,
+  ) {
     const origin = incoming.headers.origin;
     if (origin) {
       const permitted =
@@ -60,6 +124,8 @@ export async function startMockServer(
     const abort = new AbortController();
     const cancel = () => abort.abort();
     calls.add(abort);
+    // A request parsed after close starts missed the controller cancellation pass.
+    if (stopping) abort.abort(endpointShutdown());
     outgoing.once("close", cancel);
     try {
       const pathname = new URL(incoming.url ?? "/", "http://localhost")
@@ -103,7 +169,17 @@ export async function startMockServer(
           signal: abort.signal,
         },
       );
-      const response = await dispatch(request);
+      // Streaming uploads transfer cancellation to the endpoint's body collector.
+      releaseBody();
+      let response: Response;
+      try {
+        response = await dispatch(request);
+      } finally {
+        // Rejections before a streaming collector attaches leave the body unread.
+        // Dispatch must settle before the listener can own cancellation again.
+        if (rawUpload && !incoming.complete && !incoming.destroyed)
+          ownBody(incoming, outgoing);
+      }
       outgoing.statusCode = response.status;
       response.headers.forEach((value, key) => outgoing.setHeader(key, value));
       outgoing.flushHeaders();
@@ -121,7 +197,21 @@ export async function startMockServer(
     }
   }
   const server = createServer((incoming, outgoing) => {
-    void respond(incoming, outgoing).catch((error: unknown) => {
+    const releaseBody = ownBody(incoming, outgoing);
+    // Queued pipelined replies have no response socket until earlier replies finish.
+    const socket = incoming.socket;
+    const state = socketState(socket);
+    state.replies.add(outgoing);
+    const releaseReply = () => {
+      if (!state.replies.delete(outgoing)) return;
+      outgoing.removeListener("finish", releaseReply);
+      outgoing.removeListener("close", releaseReply);
+      cancelBodies(state);
+      releaseSocket(socket, state);
+    };
+    outgoing.once("finish", releaseReply);
+    outgoing.once("close", releaseReply);
+    void respond(incoming, outgoing, releaseBody).catch((error: unknown) => {
       if (isLostReply(error)) {
         // An empty socket close lets browsers replay POST on a reused connection.
         // Flush an incomplete body so delivery fails without repeating the effect.
@@ -133,6 +223,7 @@ export async function startMockServer(
       } else if (outgoing.headersSent) outgoing.destroy();
       else outgoing.writeHead(500).end();
     });
+    cancelBodies(state);
   });
   await new Promise<void>((resolve, reject) => {
     server.once("error", reject);
@@ -155,10 +246,12 @@ export async function startMockServer(
     ...configured.endpoint,
     close() {
       closing ??= (async () => {
+        stopping = true;
         const results = await Promise.allSettled([
           configured.close(),
           new Promise<void>((resolve, reject) => {
             for (const call of calls) call.abort(endpointShutdown());
+            for (const state of sockets.values()) cancelBodies(state);
             server.close((error) => (error ? reject(error) : resolve()));
             server.closeIdleConnections();
           }),
