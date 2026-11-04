@@ -21,7 +21,12 @@ interface Lease {
   send: (stream: ReadableStream<Uint8Array>) => void;
   token: string;
 }
-export function createApplicationTransport(mock: MockSia) {
+export function createApplicationTransport(
+  mock: MockSia,
+  requestBody: (request: Request) => null | ReadableStream<Uint8Array> = (
+    request,
+  ) => request.body,
+) {
   const active = new Set<Lease>();
   const pending = new Set<Promise<Response>>();
   const lifetime = new AbortController();
@@ -42,12 +47,12 @@ export function createApplicationTransport(mock: MockSia) {
     throw Object.assign(new Error("Invalid application request"), { code });
   }
   async function json(
-    request: Request,
+    body: null | ReadableStream<Uint8Array>,
     signal: AbortSignal,
   ): Promise<Record<string, unknown>> {
     signal.throwIfAborted();
-    if (!request.body) invalid();
-    const reader = request.body.getReader();
+    if (!body) invalid();
+    const reader = body.getReader();
     const chunks: Uint8Array[] = [];
     let length = 0;
     let cancellation: Promise<void> | undefined;
@@ -104,6 +109,7 @@ export function createApplicationTransport(mock: MockSia) {
     operation: string,
     input: DispatchInput,
     signal: AbortSignal,
+    bodyStream: null | ReadableStream<Uint8Array>,
   ): Promise<Response> {
     if (closed) invalid("closed");
     signal.throwIfAborted();
@@ -123,7 +129,7 @@ export function createApplicationTransport(mock: MockSia) {
         await lease.result.catch(() => undefined);
         return Response.json(null);
       }
-      if (!request.body) {
+      if (!bodyStream) {
         lease.abort.abort();
         invalid();
       }
@@ -131,7 +137,7 @@ export function createApplicationTransport(mock: MockSia) {
       signal.addEventListener("abort", abort, { once: true });
       try {
         signal.throwIfAborted();
-        lease.send(request.body);
+        lease.send(bodyStream);
         const object = await lease.result;
         const ref = crypto.randomUUID();
         refs.set(ref, object);
@@ -140,7 +146,7 @@ export function createApplicationTransport(mock: MockSia) {
         signal.removeEventListener("abort", abort);
       }
     }
-    const body = await json(request, signal);
+    const body = await json(bodyStream, signal);
     if (closed) invalid("closed");
     signal.throwIfAborted();
     if (operation === "app-upload-admit") {
@@ -334,16 +340,17 @@ export function createApplicationTransport(mock: MockSia) {
         );
       const signal = AbortSignal.any([request.signal, lifetime.signal]);
       const work = Promise.resolve().then(async () => {
+        const body = requestBody(request);
         const failures: unknown[] = [];
         let response: Response | undefined;
         try {
-          response = await execute(request, operation, input, signal);
+          response = await execute(request, operation, input, signal, body);
         } catch (error) {
           failures.push(error);
         }
-        if (signal.aborted && request.body && !request.body.locked) {
+        if (signal.aborted && body && !body.locked) {
           try {
-            await request.body.cancel(signal.reason);
+            await body.cancel(signal.reason);
           } catch (error) {
             if (!failures.includes(error)) failures.push(error);
           }
