@@ -302,7 +302,7 @@ it("listener close leaves a late-completing registration unconsumed while preser
 });
 
 it.each(["partial", "upload-method"])(
-  "listener reclaims a reused connection's %s body while an unrelated reply is unread",
+  "listener reclaims a reused connection's %s body but waits for an unread reply to drain",
   async (mode) => {
     const mock = createMockSia();
     const server = await startMockServer(mock);
@@ -415,6 +415,9 @@ it.each(["partial", "upload-method"])(
             response.once("end", resolve);
           });
         });
+        void rejected.catch(() => {
+          // Awaited method rejections below still report delivery failures.
+        });
         client.flushHeaders();
         await bounded(continued, "partial request headers were not accepted");
         expect(client.socket).toBe(reusedSocket);
@@ -423,11 +426,22 @@ it.each(["partial", "upload-method"])(
           await bounded(rejected, "raw rejection did not end");
         const history = mock.history();
         closing = server.close();
+        let closeSettled = false;
+        void closing.then(
+          () => {
+            closeSettled = true;
+          },
+          () => {
+            closeSettled = true;
+          },
+        );
         await bounded(
           closed.at(-1)!,
           "unrelated reply blocked body reclamation",
         );
+        // The other peer's close proves shutdown progressed without draining this reply.
         expect(large.complete).toBe(false);
+        expect(closeSettled).toBe(false);
         expect(mock.history()).toEqual(history);
         large.resume();
         await bounded(largeEnded, "unrelated reply did not end");

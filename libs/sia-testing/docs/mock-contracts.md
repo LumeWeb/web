@@ -56,11 +56,12 @@ available, without forwarding callback messages or request values. Error codes
 remain available on the error's `code` property; narrow an unknown error before
 reading that property.
 
-Closing the loopback listener cancels its owned requests. If it can still deliver
-a domain response, the caller receives `code: "closed"`. A mutation cancelled
-before its effect retains `committed: false`; cancellation cannot undo an effect
-that already committed. Closing the listener does not close other direct ports
-in the run. Caller aborts and client close keep native cancellation behavior.
+Closing the loopback listener rejects new backend dispatch and cancels pending
+owned requests. It preserves already-started response delivery. If cancellation
+can still deliver a domain response, the caller receives `code: "closed"`.
+A mutation cancelled before its effect retains `committed: false`; cancellation
+cannot undo an effect that already committed. Closing the listener does not close
+other direct ports in the run. Caller aborts and client close keep native cancellation behavior.
 Actual response loss remains a native Fetch error, including lost pin replies;
 cleanup failures can still reject with `AggregateError`. The package does not
 retry or publish events in response to errors.
@@ -200,6 +201,25 @@ await pinning;
 | Finite actor/operation mutation controls | Supported                 | Supported                       |
 | Backend object selector                  | Original direct reference | Client-local reference rejected |
 | Publication                              | Test driver only          | No publication route            |
+
+### Loopback response lifetime
+
+The listener returned by `startMockServer` closes gracefully: cancelling backend
+work does not cancel buffered JSON already being delivered. A successful backend
+request can finish before its response body reaches the caller. If a raw HTTP client leaves that
+body unread, listener close can remain pending until the peer drains or
+disconnects. Close does not guarantee that every response flushes, or join
+unrelated JavaScript in a remote client. Streaming producers can still react to
+the request's abort signal.
+
+Before awaiting listener close, close the client port or consume or cancel raw
+responses. The Fetch-backed ports consume JSON response bodies; their `close()`
+aborts pending Fetch calls. For a raw Fetch response, consume its body or cancel
+`response.body`; if the stream is locked, cancel its reader instead. For Node
+`http`, drain the response with `resume()` or destroy the response and client.
+The Playwright binding factory closes its owned binding resources and private
+contexts before the listener. External clients remain responsible for their own
+response lifetimes.
 
 ## Connect applications
 
