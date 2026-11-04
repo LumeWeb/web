@@ -228,3 +228,89 @@ response lifetimes.
 Playwright bindings receive connection data in `apply(page, privateConnection)` and configure the app before navigation. The factory closes binding resources and private contexts before deleting run objects. Do not put credentials in test configuration.
 
 The low-level fixture, model, and SDK exports and the `/msw/node` wrapper are not available. There are no compatibility aliases.
+
+## Edit an explicitly granted share
+
+Share edits are mock-only. The driver issues a grant for one share and one
+original actor, then installs it on an application or endpoint connection:
+
+```ts
+const actor = mock.actor("share editor");
+const share = await run.shares.create({ objects: [] });
+const grant = await run.shares.grant(share, {
+  as: actor,
+  label: "reading-list",
+  operations: ["add", "remove", "end"],
+});
+const app = mock.application({
+  access: run.ownerAccess,
+  as: actor,
+  shareGrants: [grant],
+});
+const [target] = await app.shares.targets();
+const object = await app.upload({ file, metadata: new Uint8Array() });
+await app.pin(object);
+await app.shares.add(target!.ref, object);
+await app.shares.remove(target!.ref, object.id);
+await app.shares.end(target!.ref);
+const ended = await app.shares.inspect(target!.ref, null);
+// ended is { state: "ended", contains: null }.
+await app.close();
+```
+
+`ApplicationPort.shares` provides `targets(options?)`,
+`inspect(ref, objectId: string | null, options?)`, `add(ref, object, options?)`,
+`remove(ref, objectId, options?)`, and `end(ref, options?)`. Each options object
+accepts `signal?: AbortSignal`. Targets contain a client-bound opaque `ref`, the
+driver's `label`, an operations snapshot, and an optional canonical ISO
+`expiresAt`. Owner share refs remain read-only and cannot authorize edits.
+Copied refs, fixture handles, IDs, and receipts do not grant mutation authority.
+Omitting `shareGrants` installs no authority. Labels must differ within an
+installed set; labels do not authorize requests.
+
+`grant` requires nonempty, unique operations from `add`, `remove`, and `end`.
+It snapshots the operations and optional `expiresAt: Date`. An explicit deadline
+must be finite and future; without one the grant lasts until withdrawal or run
+cleanup. Issuance requires an active share and the original actor. A grant can
+be installed on several clients for its actor. `run.shares.revokeGrant(grant)`
+withdraws only that grant from every installation and is a no-op when repeated.
+It does not revoke the share or other grants.
+
+Add requires a genuine, pinned, undeleted application object in the same run.
+It never pins or changes metadata. Direct ports retain their existing run-scoped
+object acceptance; Fetch object handles remain client-local. Remove's ID selects
+membership under the grant and grants no object access. End revokes recipient
+access without deleting owned payloads or changing sibling shares. Already-open
+download streams keep their existing behavior.
+
+Inspection requires a valid grant, even after End. It returns `active`, `expired`,
+or `ended`, with current membership as `contains` for a supplied object ID.
+Lifecycle-only inspection and ended shares return `contains: null`. Expired
+shares remain inspectable but reject mutations. End takes precedence over share
+expiry; repeated End with valid End permission succeeds without a change.
+Revoked or deadline-reached grants deny inspection and mutations and disappear
+from targets. An ended share stays in the roster while its grant is valid.
+
+Before-effect mutation selectors support `share-add`, `share-remove`, and
+`share-end`; read selectors support `share-targets` and `share-inspect`.
+`share-inspect` and share mutations can select the original driver grant with
+`share: grant`, across all installations. Diagnostic share IDs are not selectors.
+Calls validate before controls and recheck authority, lifecycle, cancellation,
+and Add's object eligibility after a hold. No-op calls still pass through controls.
+Receipts report `committed: true` only when membership or revocation changes;
+repeated Add, absent Remove, and repeated End report false without rewriting
+timestamps. Effects, fixture state, and receipt attribution finish synchronously.
+Share edits create no account object events and do not publish.
+
+For HTTP or MSW, pass `shareGrants` to the existing `endpoint.connection` call.
+Application code receives only its connection and credential and uses
+`createMockApplication(connection, credential)`. First targets establishes a
+private session; subsequent calls reuse it. Each application instance has its
+own refs, even on one connection. A raw holder of a credential and a complete
+session token has bearer authority; sessions do not isolate browser processes.
+Client close aborts and joins local requests and discards local share refs,
+without remotely revoking bearer tokens. Run cleanup aborts and joins its work
+and removes only its entries; endpoint close joins all remaining work and
+releases registrations. A lost first targets reply can leave an unreferenced
+session until run or endpoint cleanup. Calls do not retry or recover sessions
+automatically.

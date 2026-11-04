@@ -32,7 +32,20 @@ beforeEach(async () => {
       export type { ReadObject, ReadPort } from "./mock.js";
       declare const applicationBrand: unique symbol;
       export interface ApplicationObject { id: string; readonly [applicationBrand]: true; }
+      export type ShareOperation = "add" | "remove" | "end";
+      declare const shareBrand: unique symbol;
+      export interface ApplicationShareRef { readonly [shareBrand]: true; }
+      export interface ApplicationShareTarget { ref: ApplicationShareRef; label: string; operations: readonly ShareOperation[]; }
+      export interface ShareInspection { state: "active" | "expired" | "ended"; contains: boolean | null; }
+      export interface ApplicationShares {
+        targets(): Promise<readonly ApplicationShareTarget[]>;
+        inspect(ref: ApplicationShareRef, objectId: string | null): Promise<ShareInspection>;
+        add(ref: ApplicationShareRef, object: ApplicationObject): Promise<void>;
+        remove(ref: ApplicationShareRef, objectId: string): Promise<void>;
+        end(ref: ApplicationShareRef): Promise<void>;
+      }
       export declare function createMockApplication(connection: MockConnection, credential: MockCredential): {
+        shares: ApplicationShares;
         upload(input: {file: TestFile; name?: string | undefined; metadata: Uint8Array}): Promise<ApplicationObject>;
         inspect(object: ApplicationObject): Promise<"missing" | "uploaded" | "pinned">;
         pin(object: ApplicationObject, options?: { metadata?: Uint8Array | undefined; signal?: AbortSignal }): Promise<void>;
@@ -48,7 +61,15 @@ beforeEach(async () => {
       };`,
     "client.js": `export const createMockApplication = (connection) => {
       const mock = connection.mock;
+      const grant = connection.shareGrants?.[0];
       return {
+        shares: {
+          targets: async () => grant && !grant.revoked ? [{ref: grant, label: grant.label, operations: grant.operations}] : [],
+          add: async (ref, object) => { ref.share.objects.push(object); },
+          remove: async (ref, id) => { ref.share.objects = ref.share.objects.filter(object => object.id !== id); },
+          end: async ref => { ref.share.ended = true; },
+          inspect: async (ref, id) => ({ state: ref.share.ended ? "ended" : "active", contains: ref.share.ended || id === null ? null : ref.share.objects.some(object => object.id === id) })
+        },
         upload: async ({file}) => { const object = {id: String(mock.data.size), state: "uploaded"}; mock.data.set(object.id, object); return object; },
         inspect: async (object) => object.state,
         pin: async (object) => { object.state = "pinned"; },
@@ -68,9 +89,9 @@ beforeEach(async () => {
       export interface MockConnection { credential: MockCredential; mock: MockSia; }
       export declare function startMockServer(mock: MockSia): Promise<{
         close(): Promise<void>;
-        connection(input: {access: object; as: object}): MockConnection;
+        connection(input: {access: object; as: object; shareGrants?: readonly import("./mock.js").MockShareGrant[]}): MockConnection;
       }>;`,
-    "http.js": `import "node:http"; export const startMockServer = async (mock) => ({close: async () => {}, connection: () => ({mock, credential: {kind: "app-key", keyHex: "a".repeat(64)}})});`,
+    "http.js": `import "node:http"; export const startMockServer = async (mock) => ({close: async () => {}, connection: input => ({mock, shareGrants: input.shareGrants, credential: {kind: "app-key", keyHex: "a".repeat(64)}})});`,
     "mock.d.ts": `
       export interface TestFile { name: string; sizeBytes: number; }
       declare const fixtureBrand: unique symbol;
@@ -81,7 +102,12 @@ beforeEach(async () => {
         objects(ref: object, page: {offset: number; limit: number}): Promise<{items: {id: string; sizeBytes: number; metadata: Uint8Array}[]}>;
         close(): Promise<void>;
       }
-      export interface MockRun { shares: { create(input: {objects: TestObject[]; description?: string}): Promise<object> }; mock: MockSia; ownerAccess: object; objects: { delete(object: TestObject): Promise<void>; upload(input: {file: TestFile; metadata: Uint8Array; name?: string | undefined}): Promise<TestObject> }; }
+      declare const grantBrand: unique symbol;
+      export interface MockShareGrant { readonly [grantBrand]: true; }
+      export interface MockRun { shares: {
+        grant(share: object, input: {as: object; label: string; operations: readonly import("./client.js").ShareOperation[]; expiresAt?: Date}): Promise<MockShareGrant>;
+        revokeGrant(grant: MockShareGrant): Promise<void>;
+        create(input: {objects: TestObject[]; description?: string}): Promise<object> }; mock: MockSia; ownerAccess: object; objects: { delete(object: TestObject): Promise<void>; upload(input: {file: TestFile; metadata: Uint8Array; name?: string | undefined}): Promise<TestObject> }; }
       export interface ReadObject { id: string; sizeBytes: number; }
       export interface ReadPort { object(id: string): Promise<ReadObject>; close(): Promise<void>; }
       interface ReadSelector { actor?: object; operation: "download" | "object" | "objects" | "owner-share" | "owner-share-objects" | "owner-shares"; }
@@ -118,7 +144,7 @@ beforeEach(async () => {
           close: async () => {}
         });
         const mock = { data, ownerShares, publish: async () => { mock.published = [...data.values()]; }, actor: () => ({}), close: async () => {}, async run(_options, use) {
-          const run = {mock, shares: {create: async (input) => (share = input)}, ownerAccess: {}, objects: {async upload({file, metadata}) {
+          const run = {mock, shares: {create: async (input) => (share = input), grant: async (share, input) => ({share, ...input}), revokeGrant: async grant => { grant.revoked = true; }}, ownerAccess: {}, objects: {async upload({file, metadata}) {
             const object = { id: String(data.size), sizeBytes: file.sizeBytes, metadata, bytes: file.bytes };
             data.set(object.id, object); return object;
           }}};

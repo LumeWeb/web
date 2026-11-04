@@ -1,10 +1,18 @@
-/** Fetch uploads buffer bounded bytes only after the remote run reserves its allowance. */
+/** Fetch-backed ports own local refs and request lifetimes; upload sources open only after admission. */
 import { snapshotApplicationMetadata } from "./application-metadata.js";
 import { domainError } from "./diagnostics.js";
 import { readFixture } from "./files.js";
 import type { MockCredential } from "./runtime.js";
 import type { MockConnection } from "./transport.js";
-import type { ApplicationObject, ApplicationPort, EventPage } from "./types.js";
+import type {
+  ApplicationObject,
+  ApplicationPort,
+  ApplicationShareRef,
+  ApplicationShareTarget,
+  EventPage,
+  ShareInspection,
+  ShareOperation,
+} from "./types.js";
 export function createMockApplication(
   connection: MockConnection,
   credential: MockCredential,
@@ -19,6 +27,16 @@ export function createMockApplication(
     throw new Error("Invalid mock connection");
   const lifetime = new AbortController();
   const refs = new WeakMap<ApplicationObject, string>();
+  let shareRefs = new WeakMap<ApplicationShareRef, string>();
+  const tokenRefs = new Map<string, ApplicationShareRef>();
+  let session: string | undefined;
+  let bootstrap:
+    | undefined
+    | {
+        abort: AbortController;
+        waiters: number;
+        work: Promise<readonly ApplicationShareTarget[]>;
+      };
   const pending = new Set<Promise<unknown>>();
   const cleanupErrors: unknown[] = [];
   let closing: Promise<void> | undefined;
@@ -78,7 +96,7 @@ export function createMockApplication(
     if (!response.ok) throw domainError(operation, value);
     return value;
   }
-  function ref(object: ApplicationObject) {
+  function objectRef(object: ApplicationObject) {
     const value = refs.get(object);
     if (!value)
       throw Object.assign(new Error("Unknown application object"), {
@@ -86,10 +104,145 @@ export function createMockApplication(
       });
     return value;
   }
+  function shareRef(ref: ApplicationShareRef) {
+    const token = shareRefs.get(ref);
+    if (!token)
+      throw Object.assign(new Error("Unknown application share"), {
+        code: "foreign-handle",
+      });
+    return token;
+  }
+  async function targets(
+    s: AbortSignal,
+  ): Promise<readonly ApplicationShareTarget[]> {
+    const value = await call(
+      "app-share-targets",
+      JSON.stringify({ session }),
+      s,
+    );
+    if (
+      !value ||
+      typeof value !== "object" ||
+      !("session" in value) ||
+      typeof value.session !== "string" ||
+      !/^[a-f0-9-]{36}$/.test(value.session) ||
+      (session && session !== value.session) ||
+      !("targets" in value) ||
+      !Array.isArray(value.targets)
+    )
+      invalid();
+    const labels = new Set<string>();
+    const tokens = new Set<string>();
+    const result = value.targets.map(
+      (target: unknown): ApplicationShareTarget => {
+        if (
+          !target ||
+          typeof target !== "object" ||
+          !("ref" in target) ||
+          typeof target.ref !== "string" ||
+          !/^[a-f0-9-]{36}$/.test(target.ref) ||
+          tokens.has(target.ref) ||
+          !("label" in target) ||
+          typeof target.label !== "string" ||
+          !target.label.trim() ||
+          labels.has(target.label) ||
+          !("operations" in target) ||
+          !Array.isArray(target.operations) ||
+          !target.operations.length ||
+          new Set(target.operations).size !== target.operations.length ||
+          target.operations.some(
+            (op: unknown) =>
+              typeof op !== "string" || !["add", "end", "remove"].includes(op),
+          ) ||
+          ("expiresAt" in target &&
+            (typeof target.expiresAt !== "string" ||
+              !Number.isFinite(Date.parse(target.expiresAt)) ||
+              new Date(target.expiresAt).toISOString() !== target.expiresAt))
+        )
+          invalid();
+        labels.add(target.label);
+        tokens.add(target.ref);
+        let ref = tokenRefs.get(target.ref);
+        if (!ref) {
+          ref = Object.freeze(Object.create(null)) as ApplicationShareRef;
+          tokenRefs.set(target.ref, ref);
+          shareRefs.set(ref, target.ref);
+        }
+        return {
+          label: target.label,
+          operations: [...(target.operations as ShareOperation[])],
+          ref,
+          ...("expiresAt" in target
+            ? { expiresAt: target.expiresAt as string }
+            : {}),
+        };
+      },
+    );
+    s.throwIfAborted();
+    session = value.session;
+    return result;
+  }
+  function waitForTargets(
+    current: NonNullable<typeof bootstrap>,
+    signal: AbortSignal,
+  ) {
+    current.waiters++;
+    return new Promise<readonly ApplicationShareTarget[]>((resolve, reject) => {
+      let waiting = true;
+      const detach = () => {
+        if (!waiting) return false;
+        waiting = false;
+        signal.removeEventListener("abort", abort);
+        current.waiters--;
+        return true;
+      };
+      const abort = () => {
+        if (!detach()) return;
+        if (!current.waiters) {
+          if (bootstrap === current) bootstrap = undefined;
+          current.abort.abort(signal.reason);
+        }
+        // oxlint-disable-next-line typescript/prefer-promise-reject-errors -- Preserve caller cancellation identity, including values from other realms.
+        reject(signal.reason);
+      };
+      signal.addEventListener("abort", abort, { once: true });
+      void current.work.then(
+        (value) => {
+          if (detach()) resolve(value);
+        },
+        (error: unknown) => {
+          if (!detach()) return;
+          // oxlint-disable-next-line typescript/prefer-promise-reject-errors -- Native Fetch failures must reach callers without translation.
+          reject(error);
+        },
+      );
+      if (signal.aborted) abort();
+    });
+  }
+  function shareCall(
+    operation: string,
+    ref: ApplicationShareRef,
+    body: Record<string, unknown>,
+    input?: AbortSignal,
+  ) {
+    return track(async () => {
+      const s = signal(input);
+      s.throwIfAborted();
+      const value = await call(
+        operation,
+        JSON.stringify({ ...body, ref: shareRef(ref), session }),
+        s,
+      );
+      return value;
+    });
+  }
   return {
     close() {
       lifetime.abort();
       return (closing ??= Promise.allSettled([...pending]).then(() => {
+        shareRefs = new WeakMap();
+        tokenRefs.clear();
+        session = undefined;
         if (cleanupErrors.length)
           throw new AggregateError(
             cleanupErrors,
@@ -101,7 +254,7 @@ export function createMockApplication(
       return track(async () => {
         const s = signal(options.signal);
         s.throwIfAborted();
-        await call("app-delete", JSON.stringify({ ref: ref(object) }), s);
+        await call("app-delete", JSON.stringify({ ref: objectRef(object) }), s);
       });
     },
     events(input) {
@@ -168,7 +321,7 @@ export function createMockApplication(
         s.throwIfAborted();
         const state = await call(
           "app-inspect",
-          JSON.stringify({ ref: ref(object) }),
+          JSON.stringify({ ref: objectRef(object) }),
           s,
         );
         if (state !== "uploaded" && state !== "pinned" && state !== "missing")
@@ -186,7 +339,7 @@ export function createMockApplication(
             "app-pin",
             JSON.stringify({
               metadata: metadata === undefined ? undefined : [...metadata],
-              ref: ref(object),
+              ref: objectRef(object),
             }),
             s,
           );
@@ -197,6 +350,73 @@ export function createMockApplication(
             metadata = snapshotApplicationMetadata(source);
         },
       );
+    },
+    shares: {
+      add(ref, object, options = {}) {
+        return track(async () => {
+          signal(options.signal).throwIfAborted();
+          await shareCall(
+            "app-share-add",
+            ref,
+            { object: objectRef(object) },
+            options.signal,
+          );
+        });
+      },
+      async end(ref, options = {}) {
+        await shareCall("app-share-end", ref, {}, options.signal);
+      },
+      inspect(ref, objectId, options = {}) {
+        return track(async () => {
+          const value = await shareCall(
+            "app-share-inspect",
+            ref,
+            { objectId },
+            options.signal,
+          );
+          if (
+            !value ||
+            typeof value !== "object" ||
+            !("state" in value) ||
+            !["active", "ended", "expired"].includes(value.state as string) ||
+            !("contains" in value) ||
+            (value.contains !== null && typeof value.contains !== "boolean") ||
+            ((objectId === null || value.state === "ended") &&
+              value.contains !== null) ||
+            (objectId !== null &&
+              value.state !== "ended" &&
+              typeof value.contains !== "boolean")
+          )
+            invalid();
+          return value as ShareInspection;
+        });
+      },
+      async remove(ref, objectId, options = {}) {
+        await shareCall("app-share-remove", ref, { objectId }, options.signal);
+      },
+      targets(options = {}) {
+        return track(async () => {
+          const s = signal(options.signal);
+          s.throwIfAborted();
+          if (session) return targets(s);
+          if (!bootstrap) {
+            const abort = new AbortController();
+            const current = {
+              abort,
+              waiters: 0,
+              work: track(() =>
+                targets(AbortSignal.any([lifetime.signal, abort.signal])),
+              ),
+            };
+            bootstrap = current;
+            const settled = () => {
+              if (bootstrap === current) bootstrap = undefined;
+            };
+            void current.work.then(settled, settled);
+          }
+          return waitForTargets(bootstrap, s);
+        });
+      },
     },
     upload(input) {
       return track(async () => {

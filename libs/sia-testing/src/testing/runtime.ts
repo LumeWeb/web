@@ -1,5 +1,11 @@
 /** Transport adapters share private credential resolution without exporting fixture authority. */
-import type { BrowserAccess, MockSia } from "./types.js";
+import type {
+  ActorRef,
+  ApplicationPort,
+  BrowserAccess,
+  MockShareGrant,
+  MockSia,
+} from "./types.js";
 
 export interface MockCredential {
   readonly keyHex: string;
@@ -14,6 +20,12 @@ export interface MockRuntime {
     baseUrl: string,
   ): unknown;
   credential(access: BrowserAccess): MockCredential;
+  installShareGrants(
+    access: BrowserAccess,
+    actor: ActorRef,
+    grants: readonly MockShareGrant[],
+  ): () => ApplicationPort;
+  onRunCleanup(access: BrowserAccess, close: () => Promise<void>): () => void;
 }
 const runtimes = new WeakMap<MockSia, MockRuntime>();
 export function mockRuntime(mock: MockSia): MockRuntime {

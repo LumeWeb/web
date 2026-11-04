@@ -1,7 +1,7 @@
 /** Request receipts outlive bounded history, and aborted holds remove their waiters. */
 import { invalidInput } from "./diagnostics.js";
 import { createTransferLink } from "../sdk/link.js";
-import type { ActorRef, TestObject } from "./types.js";
+import type { ActorRef, MockShareGrant, TestObject } from "./types.js";
 export interface MockFaults {
   fail(
     selector: ReadRequestSelector,
@@ -31,6 +31,7 @@ export interface RequestReceipt {
   id: string;
   objectId?: string;
   operation: RequestSelector["operation"];
+  shareId?: string;
   status: "cancelled" | "completed" | "failed" | "pending";
 }
 export interface RequestSelector {
@@ -47,7 +48,13 @@ export interface RequestSelector {
     | "owner-share-objects"
     | "owner-shares"
     | "pin"
+    | "share-add"
+    | "share-end"
+    | "share-inspect"
+    | "share-remove"
+    | "share-targets"
     | "upload";
+  share?: MockShareGrant;
 }
 interface Held {
   cancel(record: RequestReceipt): void;
@@ -75,13 +82,16 @@ interface ReadRequestSelector extends RequestSelector {
     | "objects"
     | "owner-share"
     | "owner-share-objects"
-    | "owner-shares";
+    | "owner-shares"
+    | "share-inspect"
+    | "share-targets";
 }
 export function createRequestControls(
   records: RequestReceipt[],
   actorLabel: (actor: ActorRef) => string,
 ) {
   const holds = new Set<Held>();
+  const receiptGrants = new WeakMap<RequestReceipt, MockShareGrant>();
   const links = new Map<ActorRef, LinkState>();
   function link(actor: ActorRef): LinkState {
     let value = links.get(actor);
@@ -106,7 +116,8 @@ export function createRequestControls(
     return (
       selector.operation === request.operation &&
       (!selector.actor || selector.actor === request.actor) &&
-      (!selector.object || selector.object.id === request.objectId)
+      (!selector.object || selector.object.id === request.objectId) &&
+      (!selector.share || selector.share === receiptGrants.get(request))
     );
   }
   function takeFailure(record: RequestReceipt): string | undefined {
@@ -196,13 +207,21 @@ export function createRequestControls(
       operation: RequestSelector["operation"],
       objectId: string | undefined,
       signal: AbortSignal,
+      share?: { grant: MockShareGrant; id: string },
     ) {
       signal.throwIfAborted();
       const record: RequestReceipt = {
         actor,
         actorLabel: actorLabel(actor),
         bytes: 0,
-        ...(["delete", "pin", "upload"].includes(operation)
+        ...([
+          "delete",
+          "pin",
+          "share-add",
+          "share-end",
+          "share-remove",
+          "upload",
+        ].includes(operation)
           ? { committed: false }
           : {}),
         id: crypto.randomUUID(),
@@ -210,6 +229,10 @@ export function createRequestControls(
         status: "pending",
         ...(objectId === undefined ? {} : { objectId }),
       };
+      if (share) {
+        record.shareId = share.id;
+        receiptGrants.set(record, share.grant);
+      }
       records.push(record);
       if (records.length > 256) records.shift();
       const hold = [...holds].find(

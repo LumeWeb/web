@@ -50,6 +50,14 @@ The test driver owns the fixtures. `run.objects.upload` uploads and pins before 
 
 `fileFixture(path)` from `/node` streams a local file and records its digest. Upload rejects changed bytes. Files are limited to 16 MiB. Mock runs default to 8 object reservations, 8 share reservations, and 16 MiB of logical uploads. Deletion does not refund these allowances.
 
+Applications can edit mock shares only through explicit per-share grants.
+`run.shares.grant` binds an actor, label, and permitted operations; install the
+handle with `shareGrants` on `mock.application` or an endpoint connection.
+`ApplicationPort.shares` lists granted targets, inspects lifecycle and membership,
+and supports Add, Remove, and End. End withdraws sharing without deleting owned
+payloads. [Share grant contracts](docs/mock-contracts.md#edit-an-explicitly-granted-share)
+describe deadlines, cancellation, and cleanup.
+
 ## Choose an entry
 
 | Entry         | Use it for                                                               |
