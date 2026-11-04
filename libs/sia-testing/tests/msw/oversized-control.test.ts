@@ -229,3 +229,100 @@ it("an oversized admitted MSW body releases bytes without refunding its attempt"
     }
   }
 });
+
+it.each([true, false])(
+  "retains observed cancellation failures without joining the logging branch (cancel before close: %s)",
+  async (cancelBeforeClose) => {
+    const mock = createMockSia();
+    const endpoint = createMockHandlers(mock, {
+      baseUrl: "https://cancel-error.example.invalid/",
+    });
+    const failure = new Error("Request producer cancellation failed");
+    let cancellations = 0;
+    let logging: null | ReadableStream<Uint8Array> | undefined;
+    try {
+      await mock.run({ app }, async (run) => {
+        const connection = endpoint.connection({
+          access: run.ownerAccess,
+          as: mock.actor("writer"),
+        });
+        const body = new ReadableStream<Uint8Array>({
+          cancel() {
+            cancellations++;
+            throw failure;
+          },
+          start(controller) {
+            controller.enqueue(new Uint8Array(16_385));
+          },
+        });
+        const request = new Request(
+          new URL(`${connection.client}/app-events`, connection.url),
+          {
+            body,
+            duplex: "half",
+            headers: {
+              authorization: `Bearer ${connection.credential.keyHex}`,
+            },
+            method: "POST",
+          } as RequestInit,
+        );
+        // run exposes the logging request to its caller; this test owns its cleanup.
+        const execution = await observe(
+          endpoint.handlers[0]!.run({ request, requestId: "cancel-error" }),
+        );
+        expect(execution.state).toBe("fulfilled");
+        if (execution.state !== "fulfilled") return;
+        logging = execution.value?.request.body;
+        expect(execution.value?.response?.status).toBe(400);
+        expect(await execution.value?.response?.json()).toEqual({
+          code: "invalid-input",
+        });
+        expect(request.body?.locked).toBe(false);
+        expect(cancellations).toBe(0);
+        expect(logging).toBeTruthy();
+        if (cancelBeforeClose) {
+          expect(await observe(logging!.cancel())).toEqual({
+            error: failure,
+            state: "rejected",
+          });
+          expect(cancellations).toBe(1);
+          const cleanup = await observe(endpoint.close());
+          expect(cleanup.state).toBe("rejected");
+          if (cleanup.state === "rejected") {
+            expect(cleanup.error).toBeInstanceOf(AggregateError);
+            const errors = (cleanup.error as AggregateError).errors;
+            expect(errors).toHaveLength(1);
+            expect(errors[0]).toBe(failure);
+          }
+        } else {
+          const close = endpoint.close();
+          expect(await observe(close)).toEqual({
+            state: "fulfilled",
+            value: undefined,
+          });
+          expect(cancellations).toBe(0);
+          expect(await observe(logging!.cancel())).toEqual({
+            error: failure,
+            state: "rejected",
+          });
+          expect(cancellations).toBe(1);
+          // Completed close remains idempotent even when shared work fails later.
+          expect(await observe(endpoint.close())).toEqual({
+            state: "fulfilled",
+            value: undefined,
+          });
+        }
+      });
+    } finally {
+      try {
+        await logging?.cancel().catch(() => undefined);
+      } finally {
+        try {
+          await observe(endpoint.close());
+        } finally {
+          await mock.close();
+        }
+      }
+    }
+  },
+);

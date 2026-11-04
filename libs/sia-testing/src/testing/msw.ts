@@ -26,7 +26,10 @@ export function createMockHandlers(
 }
 
 /** MSW owns a logging clone, so upstream cancellation cannot be joined by the resolver. */
-function applicationBody(request: Request): null | ReadableStream<Uint8Array> {
+function applicationBody(
+  request: Request,
+  onCleanupError: (error: unknown) => void,
+): null | ReadableStream<Uint8Array> {
   const body = request.body;
   if (!body) return null;
   let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
@@ -41,7 +44,7 @@ function applicationBody(request: Request): null | ReadableStream<Uint8Array> {
         stopped = true;
         reader ??= body.getReader();
         // cancel closes this branch synchronously; its promise also waits for MSW's sibling.
-        void reader.cancel(reason).catch(() => undefined);
+        void reader.cancel(reason).catch(onCleanupError);
         release();
       },
       async pull(controller) {

@@ -31,7 +31,10 @@ export interface MockEndpoint {
 export function createMockEndpoint(
   mock: MockSia,
   base: string,
-  requestBody?: (request: Request) => null | ReadableStream<Uint8Array>,
+  requestBody?: (
+    request: Request,
+    onCleanupError: (error: unknown) => void,
+  ) => null | ReadableStream<Uint8Array>,
 ) {
   const root = new URL("./sia-test/", base.endsWith("/") ? base : base + "/");
   const clients = new Map<

@@ -23,9 +23,10 @@ interface Lease {
 }
 export function createApplicationTransport(
   mock: MockSia,
-  requestBody: (request: Request) => null | ReadableStream<Uint8Array> = (
-    request,
-  ) => request.body,
+  requestBody: (
+    request: Request,
+    onCleanupError: (error: unknown) => void,
+  ) => null | ReadableStream<Uint8Array> = (request) => request.body,
 ) {
   const active = new Set<Lease>();
   const pending = new Set<Promise<Response>>();
@@ -340,7 +341,9 @@ export function createApplicationTransport(
         );
       const signal = AbortSignal.any([request.signal, lifetime.signal]);
       const work = Promise.resolve().then(async () => {
-        const body = requestBody(request);
+        const body = requestBody(request, (error) => {
+          if (!cleanupErrors.includes(error)) cleanupErrors.push(error);
+        });
         const failures: unknown[] = [];
         let response: Response | undefined;
         try {
