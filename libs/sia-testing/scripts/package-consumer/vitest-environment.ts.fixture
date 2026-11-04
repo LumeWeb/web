@@ -1,0 +1,32 @@
+/** Rejects fallback environments before any public recipe runs. */
+import assert from "node:assert/strict";
+import { writeFileSync } from "node:fs";
+
+const environment = process.env.SIA_TEST_ENV;
+let identity: string;
+if (environment === "node") {
+  assert.equal(typeof window, "undefined", "node must not expose window");
+  assert.equal(typeof document, "undefined", "node must not expose document");
+  identity = "node";
+} else {
+  assert.ok(environment === "jsdom" || environment === "happy-dom");
+  assert.equal(window.document, document);
+  const element = document.createElement("button");
+  element.textContent = "environment check";
+  document.body.append(element);
+  assert.equal(document.querySelector("button"), element);
+  assert.equal(element.ownerDocument.defaultView, window);
+  element.remove();
+  const agent = window.navigator.userAgent;
+  assert.ok(
+    environment === "jsdom"
+      ? /jsdom\//i.test(agent)
+      : /HappyDOM\//i.test(agent),
+    `wrong environment: requested ${environment}, received ${agent}`,
+  );
+  identity = environment;
+}
+writeFileSync(
+  `${process.env.SIA_TEST_PHASE}-${environment}-identity.json`,
+  JSON.stringify({ environment, identity }),
+);
