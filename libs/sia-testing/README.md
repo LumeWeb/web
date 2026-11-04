@@ -193,3 +193,5 @@ pnpm --filter @lumeweb/sia-testing test:consumers
 ```
 
 Consumer checks extract and execute the complete README tests against the packed public exports in `node`, `jsdom`, and `happy-dom`. Each environment runs six ordinary tests (the recipes, assertion-failure cleanup, and one Fetch/MSW transport smoke), then two expected timeout failures to check cancellation and cleanup. The checked combination is Node 26.13.0, Vitest 4.1.9, jsdom 29.1.1, happy-dom 20.10.6, and MSW 2.14.6. These checks do not certify other versions, browser providers, or native storage compatibility.
+
+The scoped Chromium tests also exercise same-origin iframe-created byte views and abort signals. They check fixture bytes, managed metadata, application upload metadata acceptance, pin metadata capture, and held-read cancellation before reader cleanup through direct mocks and loopback Fetch. These tests import the public source facades through Vite, not the packed exports. The empty scoped page does not initialize the storage SDK. This coverage does not establish other browser families, workers, cross-origin frames, or native storage behavior.
