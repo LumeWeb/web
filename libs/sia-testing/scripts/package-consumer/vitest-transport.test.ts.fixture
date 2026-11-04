@@ -1,4 +1,4 @@
-/** Fetch and MSW preserve staged writes and selected pin metadata through public ports. */
+/** Public ports preserve selected metadata and cancel held reads with caller-owned signals. */
 import { expect, test } from "vitest";
 import { setupServer } from "msw/node";
 import { bytesFixture, createMockSia } from "@lumeweb/sia-testing/mock";
@@ -8,7 +8,25 @@ import {
 } from "@lumeweb/sia-testing/client";
 import { createMockHandlers } from "@lumeweb/sia-testing/msw";
 
-test("Fetch reads selected metadata after a lost pin reply", async ({
+/** A missed cancellation must fail before teardown can cancel the request. */
+async function bounded<T>(pending: Promise<T>, label: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      pending,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error(`${label} did not settle before cleanup`)),
+          1_000,
+        );
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+test("public readers keep selected metadata and cancel caller-held reads", async ({
   signal,
 }) => {
   const mock = createMockSia();
@@ -65,6 +83,104 @@ test("Fetch reads selected metadata after a lost pin reply", async ({
           const view = await reader.object(object.id);
           expect(view.sizeBytes).toBe(2);
           expect([...view.metadata]).toEqual([...metadata]);
+          const controllers = [
+            { label: "global", create: () => new AbortController() },
+          ];
+          if (typeof window !== "undefined") {
+            console.log("caller controller identity", {
+              environment: process.env.SIA_TEST_ENV,
+              sameController: AbortController === window.AbortController,
+              sameSignal: AbortSignal === window.AbortSignal,
+            });
+            controllers.push({
+              label: "window",
+              create: () => new window.AbortController(),
+            });
+          }
+          for (const controller of controllers) {
+            for (const transport of ["direct", "fetch"]) {
+              const label = `${controller.label} ${transport}`;
+              const heldActor = mock.actor(label);
+              const heldConnection = endpoint.connection({
+                access: run.ownerAccess,
+                as: heldActor,
+              });
+              const heldReader =
+                transport === "direct"
+                  ? mock.reader({ access: run.ownerAccess, as: heldActor })
+                  : createMockReader(heldConnection, heldConnection.credential);
+              const abort = controller.create();
+              const reason = new Error(`${label} caller stopped`);
+              const hold = mock.faults.hold({
+                actor: heldActor,
+                operation: "objects",
+              });
+              // Handle rejection before waiting for start: incompatible signals can reject before a request exists.
+              const pending = heldReader
+                .objects({ limit: 10, offset: 0, signal: abort.signal })
+                .then(
+                  (value) => ({ status: "fulfilled", value }),
+                  (error: unknown) => ({ status: "rejected", error }),
+                );
+              try {
+                expect(
+                  await bounded(
+                    Promise.race([
+                      hold.started().then(() => ({ status: "started" })),
+                      pending,
+                    ]),
+                    `${label} start`,
+                  ),
+                ).toEqual({ status: "started" });
+                abort.abort(reason);
+                const outcome = await bounded(pending, `${label} caller abort`);
+                expect(outcome.status).toBe("rejected");
+                if (transport === "direct" && "error" in outcome) {
+                  expect(outcome.error).toBe(reason);
+                }
+                expect(
+                  await bounded(hold.cancelled(), `${label} receipt`),
+                ).toMatchObject({
+                  actorLabel: label,
+                  operation: "objects",
+                  status: "cancelled",
+                });
+                for (const activeReader of [heldReader, reader]) {
+                  expect(
+                    (
+                      await bounded(
+                        activeReader.objects({ limit: 10, offset: 0 }),
+                        `${label} reader after abort`,
+                      )
+                    ).objects.map((item) => item.id),
+                  ).toEqual([object.id]);
+                }
+                const alreadyAborted = controller.create();
+                alreadyAborted.abort(reason);
+                const early = heldReader.objects({
+                  limit: 10,
+                  offset: 0,
+                  signal: alreadyAborted.signal,
+                });
+                await bounded(
+                  transport === "direct"
+                    ? expect(early).rejects.toBe(reason)
+                    : expect(early).rejects.toBeDefined(),
+                  `${label} pre-aborted`,
+                );
+                console.log(
+                  `caller cancellation passed before cleanup: ${label}`,
+                );
+              } finally {
+                hold.release();
+                try {
+                  await bounded(pending, `${label} released read`);
+                } finally {
+                  await heldReader.close();
+                }
+              }
+            }
+          }
         } finally {
           try {
             await reader.close();
