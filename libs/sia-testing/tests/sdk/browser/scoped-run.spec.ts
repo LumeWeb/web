@@ -79,3 +79,252 @@ test("a browser scoped run reads attached bytes and denies private bytes", async
     logicalUploadedBytes: 6,
   });
 });
+
+test("iframe bytes retain selected contents and snapshot managed metadata", async ({
+  page,
+}) => {
+  await page.goto("/scoped.html");
+  const entry = `/@fs${new URL("../../../src/mock.ts", import.meta.url).pathname}`;
+  const result = await page.evaluate(async (url) => {
+    const { bytesFixture, createMockSia } = (await import(
+      url
+    )) as typeof import("../../../src/mock.js");
+    const frame = document.createElement("iframe");
+    const loaded = new Promise<void>((resolve) => {
+      frame.onload = () => resolve();
+    });
+    frame.src = "/scoped.html";
+    document.body.append(frame);
+    await loaded;
+    const foreign = frame.contentWindow as typeof globalThis & Window;
+    let hooks = 0;
+    function bytes() {
+      const value = foreign.Uint8Array.of(99, 1, 2, 3, 88).subarray(1, 4);
+      for (const key of [
+        "buffer",
+        "byteLength",
+        "byteOffset",
+        Symbol.iterator,
+        Symbol.toStringTag,
+      ]) {
+        Object.defineProperty(value, key, {
+          get() {
+            hooks++;
+            throw new Error("shadow hook read");
+          },
+        });
+      }
+      return value;
+    }
+    const source = bytes();
+    const identity = {
+      constructorDiffers: foreign.Uint8Array !== Uint8Array,
+      foreignInstance: source instanceof foreign.Uint8Array,
+      hostInstance: source instanceof Uint8Array,
+      streamConstructorDiffers: foreign.ReadableStream !== ReadableStream,
+    };
+    const mock = createMockSia();
+    try {
+      const pending = bytesFixture({ bytes: source, name: "foreign" });
+      source.fill(77);
+      const file = await pending;
+      const replay = async (stream: ReadableStream<Uint8Array>) => [
+        ...new Uint8Array(await new Response(stream).arrayBuffer()),
+      ];
+      const factory = await replay(file.open());
+      const chunk = bytes();
+      const stream = new foreign.ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(chunk);
+          controller.close();
+        },
+      });
+      const streamIdentity =
+        stream instanceof foreign.ReadableStream &&
+        !(stream instanceof ReadableStream);
+      const run = await mock.run(
+        {
+          app: {
+            description: "Iframe bytes",
+            id: "a".repeat(64),
+            name: "Iframe",
+            serviceUrl: location.origin,
+          },
+        },
+        async (run) => {
+          const metadata = bytes();
+          const uploading = run.objects.upload({
+            file: { ...file, open: () => stream },
+            metadata,
+          });
+          metadata.fill(66);
+          const object = await uploading;
+          const reader = mock.reader({
+            access: run.ownerAccess,
+            as: mock.actor("reader"),
+          });
+          try {
+            const resolved = await reader.object(object.id);
+            const collected = await replay(await reader.download(resolved));
+            return {
+              collected,
+              managedMetadata: [...resolved.metadata],
+              sizeBytes: resolved.sizeBytes,
+            };
+          } finally {
+            await reader.close();
+          }
+        },
+      );
+      return {
+        factory,
+        hooks,
+        identity,
+        streamIdentity,
+        uploadedBytes: run.summary.logicalUploadedBytes,
+        value: run.value,
+      };
+    } finally {
+      await mock.close();
+      frame.remove();
+    }
+  }, entry);
+  expect(result).toEqual({
+    factory: [1, 2, 3],
+    hooks: 0,
+    identity: {
+      constructorDiffers: true,
+      foreignInstance: true,
+      hostInstance: false,
+      streamConstructorDiffers: true,
+    },
+    streamIdentity: true,
+    uploadedBytes: 3,
+    value: { collected: [1, 2, 3], managedMetadata: [1, 2, 3], sizeBytes: 3 },
+  });
+});
+
+test("an iframe caller abort cancels a held direct read before readers close", async ({
+  page,
+}) => {
+  await page.goto("/scoped.html");
+  const entry = `/@fs${new URL("../../../src/mock.ts", import.meta.url).pathname}`;
+  const result = await page.evaluate(async (url) => {
+    const { createMockSia } = (await import(
+      url
+    )) as typeof import("../../../src/mock.js");
+    async function bounded<T>(work: Promise<T>, label: string): Promise<T> {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        return await Promise.race([
+          work,
+          new Promise<never>((_, reject) => {
+            timer = setTimeout(() => reject(new Error(label)), 3000);
+          }),
+        ]);
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+    const frame = document.createElement("iframe");
+    const loaded = new Promise<void>((resolve) => {
+      frame.onload = () => resolve();
+    });
+    frame.src = "/scoped.html";
+    document.body.append(frame);
+    await loaded;
+    const foreign = frame.contentWindow as typeof globalThis & Window;
+    const controller = new foreign.AbortController();
+    const identity = {
+      constructorDiffers: foreign.AbortController !== AbortController,
+      foreignInstance: controller.signal instanceof foreign.AbortSignal,
+      hostInstance: controller.signal instanceof AbortSignal,
+      signalConstructorDiffers: foreign.AbortSignal !== AbortSignal,
+    };
+    const mock = createMockSia();
+    try {
+      const run = await mock.run(
+        {
+          app: {
+            description: "Iframe abort",
+            id: "a".repeat(64),
+            name: "Iframe",
+            serviceUrl: location.origin,
+          },
+        },
+        async (run) => {
+          const actor = mock.actor("held-reader");
+          const reader = mock.reader({ access: run.ownerAccess, as: actor });
+          const independent = mock.reader({
+            access: run.ownerAccess,
+            as: mock.actor("independent"),
+          });
+          const hold = mock.faults.hold({ actor, operation: "objects" });
+          const reason = new Error("caller stopped");
+          const pending = reader
+            .objects({ limit: 1, offset: 0, signal: controller.signal })
+            .then(
+              () => ({ rejected: false, sameReason: false }),
+              (error: unknown) => ({
+                rejected: true,
+                sameReason: error === reason,
+              }),
+            );
+          try {
+            await bounded(hold.started(), "direct read did not start");
+            controller.abort(reason);
+            const rejected = await bounded(
+              pending,
+              "caller abort did not reject direct read",
+            );
+            const receipt = await bounded(
+              hold.cancelled(),
+              "caller abort did not cancel direct read",
+            );
+            const pre = new foreign.AbortController();
+            pre.abort(reason);
+            const preAborted = await reader
+              .objects({ limit: 1, offset: 0, signal: pre.signal })
+              .then(
+                () => false,
+                (error: unknown) => error === reason,
+              );
+            return {
+              ...rejected,
+              independent: (await independent.objects({ limit: 1, offset: 0 }))
+                .done,
+              preAborted,
+              sameReader: (await reader.objects({ limit: 1, offset: 0 })).done,
+              status: receipt.status,
+            };
+          } finally {
+            hold.release();
+            await pending;
+            await reader.close();
+            await independent.close();
+          }
+        },
+      );
+      return { identity, value: run.value };
+    } finally {
+      await mock.close();
+      frame.remove();
+    }
+  }, entry);
+  expect(result).toEqual({
+    identity: {
+      constructorDiffers: true,
+      foreignInstance: true,
+      hostInstance: false,
+      signalConstructorDiffers: true,
+    },
+    value: {
+      independent: true,
+      preAborted: true,
+      rejected: true,
+      sameReader: true,
+      sameReason: true,
+      status: "cancelled",
+    },
+  });
+});
