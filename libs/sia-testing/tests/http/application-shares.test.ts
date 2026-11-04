@@ -14,6 +14,6 @@ shareScenarios(async (mock, run, actor, shareGrants) => {
     sibling: createMockApplication(connection, connection.credential),
     writer: createMockApplication(connection, connection.credential),
   };
-});
+}, true);
 import { shareWireScenarios } from "../harness/share-wire-scenarios.js";
 shareWireScenarios(startMockServer);

@@ -89,9 +89,9 @@ interface ReadRequestSelector extends RequestSelector {
 export function createRequestControls(
   records: RequestReceipt[],
   actorLabel: (actor: ActorRef) => string,
+  receiptGrants = new WeakMap<RequestReceipt, MockShareGrant>(),
 ) {
   const holds = new Set<Held>();
-  const receiptGrants = new WeakMap<RequestReceipt, MockShareGrant>();
   const links = new Map<ActorRef, LinkState>();
   function link(actor: ActorRef): LinkState {
     let value = links.get(actor);

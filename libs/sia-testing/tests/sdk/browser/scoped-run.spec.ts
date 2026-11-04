@@ -329,7 +329,7 @@ test("an iframe caller abort cancels a held direct read before readers close", a
   });
 });
 
-test("a browser edits and inspects a granted share over HTTP", async ({
+test("a browser reconciles lost share Add and delete replies over HTTP", async ({
   page,
 }) => {
   const { createMockSia } = await import("../../../src/mock.js");
@@ -359,6 +359,14 @@ test("a browser edits and inspects a granted share over HTTP", async ({
           as: actor,
           shareGrants: [grant],
         });
+        mock.mutationFaults.loseReply(
+          { actor, operation: "share-add", share: grant },
+          { times: 1 },
+        );
+        mock.mutationFaults.loseReply(
+          { actor, operation: "delete" },
+          { times: 1 },
+        );
         await page.goto("/scoped.html");
         const entry = `/@fs${new URL("../../../src/client.ts", import.meta.url).pathname}`;
         const fixtures = `/@fs${new URL("../../../src/mock.ts", import.meta.url).pathname}`;
@@ -384,7 +392,15 @@ test("a browser edits and inspects a granted share over HTTP", async ({
                 metadata: new Uint8Array(),
               });
               await writer.pin(object);
-              await writer.shares.add(target!.ref, object);
+              const addError = await writer.shares
+                .add(target!.ref, object)
+                .then(
+                  () => null,
+                  (error: unknown) => ({
+                    code: (error as { code?: string }).code ?? null,
+                    native: error instanceof Error,
+                  }),
+                );
               const added = await writer.shares.inspect(target!.ref, object.id);
               await writer.shares.remove(target!.ref, object.id);
               const removed = await writer.shares.inspect(
@@ -392,8 +408,17 @@ test("a browser edits and inspects a granted share over HTTP", async ({
                 object.id,
               );
               await writer.shares.end(target!.ref);
+              const deleteError = await writer.delete(object).then(
+                () => null,
+                (error: unknown) => ({
+                  code: (error as { code?: string }).code ?? null,
+                  native: error instanceof Error,
+                }),
+              );
               return {
                 added,
+                addError,
+                deleteError,
                 ended: await writer.shares.inspect(target!.ref, null),
                 label: target!.label,
                 object: await writer.inspect(object),
@@ -407,11 +432,24 @@ test("a browser edits and inspects a granted share over HTTP", async ({
         );
         expect(result).toEqual({
           added: { contains: true, state: "active" },
+          addError: { code: null, native: true },
+          deleteError: { code: null, native: true },
           ended: { contains: null, state: "ended" },
           label: "reading",
-          object: "pinned",
+          object: "missing",
           removed: { contains: false, state: "active" },
         });
+        expect(
+          mock
+            .history()
+            .filter(
+              (row) =>
+                row.operation === "share-add" || row.operation === "delete",
+            ),
+        ).toMatchObject([
+          { committed: true, operation: "share-add", status: "failed" },
+          { committed: true, operation: "delete", status: "failed" },
+        ]);
       },
     );
   } finally {

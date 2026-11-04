@@ -140,15 +140,25 @@ export function createMockSia(options: MockOptions = {}): MockSia {
     records,
     (selector) => {
       if (
-        selector.operation !== "pin" ||
+        !["delete", "pin", "share-add", "share-end", "share-remove"].includes(
+          selector.operation,
+        ) ||
         !selector.actor ||
         Object.keys(selector).some(
-          (key) => !["actor", "object", "operation"].includes(key),
+          (key) =>
+            !(
+              selector.operation.startsWith("share-")
+                ? ["actor", "share", "operation"]
+                : ["actor", "object", "operation"]
+            ).includes(key),
         )
       )
-        throw failure("invalid-input", "Invalid pin reply selector");
+        throw failure("invalid-input", "Invalid mutation reply selector");
       if (!actors.has(selector.actor))
         throw failure("foreign-handle", "Unknown actor");
+      if (selector.share !== undefined && !shareGrants.has(selector.share))
+        throw failure("foreign-handle", "Unknown share grant");
+      validateShareSelector(selector);
       if (
         selector.object !== undefined &&
         !applicationObjects.has(selector.object)
@@ -566,6 +576,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
               receipt.committed = true;
             }
           }
+          mutations.afterCommit(receipt);
           receipt.status = "completed";
         } catch (error) {
           receipt.status = signal.aborted ? "cancelled" : "failed";

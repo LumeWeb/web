@@ -90,7 +90,6 @@ it("loss selectors reject copied references and unsupported operations without a
           { actor: foreign.actor("foreign"), operation: "pin" },
           { actor, object: { ...object }, operation: "pin" },
           { actor, operation: "upload" },
-          { actor, operation: "delete" },
           { actor, operation: "inspect" },
           { actor, operation: "pin", stage: "beforeCommit" },
         ])

@@ -105,15 +105,21 @@ closing a direct port cancels and joins its sources and holds. Cancellation afte
 an effect does not undo it. No automatic write retries or idempotency promise
 is provided.
 
-### Lost pin acknowledgements
+### Lost mutation acknowledgements
 
-`mock.mutationFaults.loseReply({ actor, object?, operation: "pin" }, { times })`
-drops acknowledgement after a successful pin commits. `actor` is required;
-`times` is a positive safe integer. The optional object must be an original
-backend reference from a direct application port. HTTP and MSW clients use
-actor/operation selection because their object references are client-local.
-Upload, delete and read reply losses are unsupported. A rejection or cancellation
-before commit does not consume a reply loss.
+`mock.mutationFaults.loseReply(selector, { times })` drops acknowledgement after
+a successful pin, delete, share Add, Remove or End commits. `MutationReplySelector`
+and the source-compatible `PinReplySelector` are exported from `mock`. Every
+selector requires the original actor; `times` is a positive safe integer.
+For `operation: "pin" | "delete"`, an optional `object` must be an original
+backend reference from a direct application port. HTTP and MSW object references
+are client-local, so those clients use actor/operation selection.
+For `operation: "share-add" | "share-remove" | "share-end"`, optional `share`
+selects an original driver grant across all its installations. Another grant for
+the same share does not match. Share selectors accept neither objects nor IDs.
+Selectors and options are snapshotted when installed.
+Upload and read reply losses are unsupported. Rejection or cancellation before
+the effect and successful no-ops leave the fault armed.
 
 ```ts
 const known = await writer.upload({ file, name: file.name, metadata: new Uint8Array() });
@@ -130,12 +136,27 @@ const unpublished = await writer.events({ cursor: null, limit: 10 });
 ```
 
 Inspection confirms the object's current state without publication or driver
-receipts. It does not report which earlier call committed. HTTP destroys the
-owned response connection; MSW returns a network failure. Native Fetch errors
-retain their platform's class and fields. Nothing retries, resends or rolls back
-the pin. Driver receipts may record `committed: true` with a failed caller outcome;
+receipts. It does not report which earlier call committed. HTTP sends a deliberately
+incomplete response prefix before destroying the owned connection to prevent
+browser POST replay; MSW returns a network failure. Native Fetch errors retain
+their platform's class and fields. Nothing retries, resends or rolls back
+the mutation. Driver receipts may record `committed: true` with a failed caller outcome;
 those receipts are not an application recovery API. Explicit publication keeps
 the same event-coalescing behavior as an acknowledged pin.
+
+After a lost delete reply, retain the original application object and explicitly
+call `writer.inspect(object)`; committed deletion reports `"missing"`. Staged
+discard creates no event. Pinned deletion removes membership, metadata and payload
+and queues the existing tombstone for explicit publication. Deletion refunds
+neither committed bytes nor object attempts.
+
+After lost Add or Remove replies, explicitly call
+`writer.shares.inspect(ref, object.id)` to inspect current selected membership.
+After lost End, inspect lifecycle with `writer.shares.inspect(ref, null)`; a valid
+grant reports `"ended"` without restoring recipient access. A later mutation can
+change membership before inspection, so inspection does not prove which request
+won. Withdrawing the grant denies inspection and leaves the caller's outcome
+unknown. No automatic inspection or resend occurs.
 
 Application uploads allow files up to 16 MiB, metadata up to 1024 bytes and names
 up to 1024 UTF-8 bytes. Run object-attempt and logical-byte allowances are

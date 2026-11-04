@@ -24,18 +24,22 @@ try {
         assert.equal(await writer.inspect(pending), "pinned");
         const [target] = await writer.shares.targets();
         assert.equal(target.label, "packed-list");
-        await writer.shares.add(target.ref, pending);
+        mock.mutationFaults.loseReply({ actor, operation: "share-add", share: grant }, { times: 1 });
+        await assert.rejects(writer.shares.add(target.ref, pending), error => error instanceof Error && error.code === undefined);
         assert.deepEqual(await writer.shares.inspect(target.ref, pending.id), { state: "active", contains: true });
-        await writer.shares.remove(target.ref, pending.id);
+        mock.mutationFaults.loseReply({ actor, operation: "share-remove", share: grant }, { times: 1 });
+        await assert.rejects(writer.shares.remove(target.ref, pending.id), error => error instanceof Error && error.code === undefined);
         assert.deepEqual(await writer.shares.inspect(target.ref, pending.id), { state: "active", contains: false });
-        await writer.shares.end(target.ref);
+        mock.mutationFaults.loseReply({ actor, operation: "share-end", share: grant }, { times: 1 });
+        await assert.rejects(writer.shares.end(target.ref), error => error instanceof Error && error.code === undefined);
         assert.deepEqual(await writer.shares.inspect(target.ref, null), { state: "ended", contains: null });
         await run.shares.revokeGrant(grant);
         assert.deepEqual(await writer.shares.targets(), []);
         assert.deepEqual((await writer.events({cursor:null,limit:10})).events, []);
         await mock.publish({access:run.ownerAccess});
         assert.equal((await writer.events({cursor:null,limit:10})).events.length, 2);
-        await writer.delete(pending);
+        mock.mutationFaults.loseReply({ actor, operation: "delete" }, { times: 1 });
+        await assert.rejects(writer.delete(pending), error => error instanceof Error && error.code === undefined);
         assert.equal(await writer.inspect(pending), "missing");
       } finally { await writer.close(); }
       const reader = createMockReader(binding, binding.credential);

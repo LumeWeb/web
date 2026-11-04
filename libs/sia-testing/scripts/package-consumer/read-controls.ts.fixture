@@ -1,6 +1,6 @@
 /** Read faults accept read operations; mutation controls and receipts retain mutation operations. */
 import { createMockSia } from "@lumeweb/sia-testing/mock";
-import type { ReadObject, ReadPort } from "@lumeweb/sia-testing/mock";
+import type { ApplicationObject, MockShareGrant, MutationReplySelector, PinReplySelector, ReadObject, ReadPort } from "@lumeweb/sia-testing/mock";
 import type {
   ReadObject as ClientReadObject,
   ReadPort as ClientReadPort,
@@ -49,7 +49,25 @@ for (const operation of ["pin", "upload", "delete"] as const) {
     .hold({ actor, operation, stage: "beforeCommit" })
     .release();
 }
-mock.mutationFaults.loseReply({ actor, operation: "pin" }, { times: 1 });
+const pin: PinReplySelector = { actor, operation: "pin" };
+const compatible: MutationReplySelector = pin;
+mock.mutationFaults.loseReply(compatible, { times: 1 });
+declare const grant: MockShareGrant;
+declare const object: ApplicationObject;
+mock.mutationFaults.loseReply({ actor, operation: "delete", object }, { times: 1 });
+for (const operation of ["share-add", "share-remove", "share-end"] as const) {
+  mock.mutationFaults.loseReply({ actor, operation, share: grant }, { times: 1 });
+}
+// @ts-expect-error Reply selection requires an original actor.
+mock.mutationFaults.loseReply({ operation: "delete" }, { times: 1 });
+// @ts-expect-error Share reply selection cannot select an application object.
+mock.mutationFaults.loseReply({ actor, operation: "share-add", object }, { times: 1 });
+// @ts-expect-error Delete reply selection cannot select a grant.
+mock.mutationFaults.loseReply({ actor, operation: "delete", share: grant }, { times: 1 });
+// @ts-expect-error A share ID is not a grant.
+mock.mutationFaults.loseReply({ actor, operation: "share-end", share: "id" }, { times: 1 });
+// @ts-expect-error Upload reply loss is not supported.
+mock.mutationFaults.loseReply({ actor, operation: "upload" }, { times: 1 });
 
 type Operation = ReturnType<typeof mock.history>[number]["operation"];
 const operations: Operation[] = [
