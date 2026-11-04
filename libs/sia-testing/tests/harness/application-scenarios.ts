@@ -1179,6 +1179,132 @@ export function applicationScenarios(
       await mock.close();
     }
   });
+  it("a committed upload loss returns no handle and publication cannot recover it", async () => {
+    const mock = createMockSia();
+    try {
+      const result = await mock.run(
+        { app, limits: { maxLogicalUploadBytes: 1, maxObjects: 3 } },
+        async (run) => {
+          const actor = mock.actor("lost-upload");
+          const { close, writer } = await connect(mock, run, actor);
+          const reader = mock.reader({
+            access: run.ownerAccess,
+            as: mock.actor("reader"),
+          });
+          let fresh: Awaited<ReturnType<typeof connect>> | undefined;
+          try {
+            const empty = await bytesFixture({
+              bytes: new Uint8Array(),
+              name: "empty",
+            });
+            const control = await writer.upload({
+              file: empty,
+              metadata: Uint8Array.of(5),
+            });
+            await writer.pin(control);
+            const file = await bytesFixture({
+              bytes: Uint8Array.of(7),
+              name: "lost",
+            });
+            const open = vi.fn(file.open.bind(file));
+            mock.mutationFaults.loseReply(
+              { actor, operation: "upload" },
+              { times: 1 },
+            );
+            let returned = false;
+            const outcome = await writer
+              .upload({ file: { ...file, open }, metadata: Uint8Array.of(9) })
+              .then(
+                (value) => {
+                  returned = true;
+                  return value;
+                },
+                (error: unknown) => error,
+              );
+            expect(returned).toBe(false);
+            expect(open).toHaveBeenCalledTimes(1);
+            expect(outcome).toBeInstanceOf(Error);
+            if (!transport)
+              expect(outcome).toMatchObject({ code: "unavailable" });
+            else expect(outcome).not.toHaveProperty("code", "unavailable");
+            expect(outcome).not.toHaveProperty("objectId");
+            expect(outcome).not.toHaveProperty("ref");
+            const rows = mock
+              .history()
+              .filter((row) => row.operation === "upload");
+            expect(rows).toMatchObject([
+              { committed: true, status: "completed" },
+              {
+                committed: true,
+                objectId: expect.any(String) as unknown,
+                status: "failed",
+              },
+            ]);
+            const id = rows[1]!.objectId!;
+            expect(String(outcome)).not.toContain(id);
+            const forged = { id } as Parameters<typeof writer.inspect>[0];
+            await expect(writer.inspect(forged)).rejects.toMatchObject({
+              code: "foreign-handle",
+            });
+            await expect(writer.pin(forged)).rejects.toMatchObject({
+              code: "foreign-handle",
+            });
+            await expect(reader.object(id)).rejects.toBeDefined();
+            expect(
+              (await writer.events({ cursor: null, limit: 10 })).events,
+            ).toEqual([]);
+            await mock.publish({ access: run.ownerAccess });
+            expect(
+              (await writer.events({ cursor: null, limit: 10 })).events.map(
+                (row) => row.id,
+              ),
+            ).toEqual([control.id]);
+            await expect(reader.object(id)).rejects.toBeDefined();
+            expect((await reader.object(control.id)).metadata).toEqual(
+              Uint8Array.of(5),
+            );
+            const blockedOpen = vi.fn(file.open.bind(file));
+            await expect(
+              writer.upload({
+                file: { ...file, open: blockedOpen },
+                metadata: new Uint8Array(),
+              }),
+            ).rejects.toMatchObject({ code: "limit" });
+            expect(blockedOpen).not.toHaveBeenCalled();
+            const next = await writer.upload({
+              file: empty,
+              metadata: new Uint8Array(),
+            });
+            expect(await writer.inspect(next)).toBe("uploaded");
+            const emptyOpen = vi.fn(empty.open.bind(empty));
+            await expect(
+              writer.upload({
+                file: { ...empty, open: emptyOpen },
+                metadata: new Uint8Array(),
+              }),
+            ).rejects.toMatchObject({ code: "limit" });
+            expect(emptyOpen).not.toHaveBeenCalled();
+            expect(await writer.inspect(control)).toBe("pinned");
+            fresh = await connect(mock, run, mock.actor("fresh"));
+            await expect(fresh.writer.inspect(forged)).rejects.toMatchObject({
+              code: "foreign-handle",
+            });
+          } finally {
+            if (fresh) {
+              await fresh.writer.close();
+              await fresh.close();
+            }
+            await reader.close();
+            await writer.close();
+            await close();
+          }
+        },
+      );
+      expect(result.summary.logicalUploadedBytes).toBe(1);
+    } finally {
+      await mock.close();
+    }
+  });
   it("a lost pin reply requires inspection and stays unpublished", async () => {
     const mock = createMockSia();
     try {

@@ -25,6 +25,11 @@ export type MutationReplySelector = { readonly actor: ActorRef } & (
       readonly operation: "share-add" | "share-end" | "share-remove";
       readonly share?: MockShareGrant;
     }
+  | {
+      readonly object?: never;
+      readonly operation: "upload";
+      readonly share?: never;
+    }
 );
 export type MutationSelector = {
   readonly actor?: ActorRef;

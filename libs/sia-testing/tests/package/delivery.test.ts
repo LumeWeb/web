@@ -70,8 +70,16 @@ beforeEach(async () => {
           end: async ref => { ref.share.ended = true; mock.reply("share-end"); },
           inspect: async (ref, id) => ({ state: ref.share.ended ? "ended" : "active", contains: ref.share.ended || id === null ? null : ref.share.objects.some(object => object.id === id) })
         },
-        upload: async ({file}) => { const object = {id: String(mock.data.size), state: "uploaded"}; mock.data.set(object.id, object); return object; },
-        inspect: async (object) => object.state,
+        upload: async ({file}) => {
+          file.open();
+          const object = {id: String(mock.data.size), state: "uploaded"};
+          mock.data.set(object.id, object);
+          const row = { actor: connection.actor, operation: "upload", objectId: object.id, committed: true, status: "completed" };
+          mock.rows.push(row);
+          try { mock.reply("upload"); } catch (error) { row.status = "failed"; throw error; }
+          return object;
+        },
+        inspect: async (object) => { if (mock.data.get(object.id) !== object) throw Object.assign(new Error("Foreign object"), { code: "foreign-handle" }); return object.state; },
         pin: async (object) => { object.state = "pinned"; },
         delete: async (object) => { object.state = "missing"; mock.reply("delete"); },
         events: async () => ({events: mock.published || [], nextCursor: null}),
@@ -91,13 +99,14 @@ beforeEach(async () => {
         close(): Promise<void>;
         connection(input: {access: object; as: object; shareGrants?: readonly import("./mock.js").MockShareGrant[]}): MockConnection;
       }>;`,
-    "http.js": `import "node:http"; export const startMockServer = async (mock) => ({close: async () => {}, connection: input => ({mock, shareGrants: input.shareGrants, credential: {kind: "app-key", keyHex: "a".repeat(64)}})});`,
+    "http.js": `import "node:http"; export const startMockServer = async (mock) => ({close: async () => {}, connection: input => ({mock, actor: input.as, shareGrants: input.shareGrants, credential: {kind: "app-key", keyHex: "a".repeat(64)}})});`,
     "mock.d.ts": `
       export type { ApplicationObject } from "./client.js";
       export interface PinReplySelector { actor: object; operation: "pin"; object?: import("./client.js").ApplicationObject; }
       export type MutationReplySelector = { actor: object } & (
         { operation: "pin" | "delete"; object?: import("./client.js").ApplicationObject; share?: never } |
-        { operation: "share-add" | "share-remove" | "share-end"; share?: MockShareGrant; object?: never }
+        { operation: "share-add" | "share-remove" | "share-end"; share?: MockShareGrant; object?: never } |
+        { operation: "upload"; object?: never; share?: never }
       );
       export interface TestFile { name: string; sizeBytes: number; }
       declare const fixtureBrand: unique symbol;
@@ -139,7 +148,7 @@ beforeEach(async () => {
       export declare function createMockSia(): MockSia;
       export declare function bytesFixture(input: {bytes: Uint8Array; name: string}): Promise<TestFile>;`,
     "mock.js": `
-      export async function bytesFixture({bytes, name}) { return {bytes, name, sizeBytes: bytes.length}; }
+      export async function bytesFixture({bytes, name}) { return {bytes, name, sizeBytes: bytes.length, open: () => new Blob([bytes]).stream()}; }
       export function createMockSia() {
         const data = new Map();
         const losses = new Map();
@@ -154,7 +163,7 @@ beforeEach(async () => {
           objects: async () => ({items: share.objects.map(({id, metadata, sizeBytes}) => ({id, metadata, sizeBytes}))}),
           close: async () => {}
         });
-        const mock = { data, ownerShares, reply, mutationFaults: { loseReply: (selector, options) => losses.set(selector.operation, options.times) }, publish: async () => { mock.published = [...data.values()]; }, actor: () => ({}), close: async () => {}, async run(_options, use) {
+        const mock = { data, rows: [], history: () => mock.rows, ownerShares, reply, mutationFaults: { loseReply: (selector, options) => losses.set(selector.operation, options.times) }, publish: async () => { mock.published = [...data.values()].filter(object => object.state !== "uploaded"); }, actor: () => ({}), close: async () => {}, async run(_options, use) {
           const run = {mock, shares: {create: async (input) => (share = input), grant: async (share, input) => ({share, ...input}), revokeGrant: async grant => { grant.revoked = true; }}, ownerAccess: {}, objects: {async upload({file, metadata}) {
             const object = { id: String(data.size), sizeBytes: file.sizeBytes, metadata, bytes: file.bytes };
             data.set(object.id, object); return object;

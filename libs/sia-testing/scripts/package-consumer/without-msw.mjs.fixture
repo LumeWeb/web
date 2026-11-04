@@ -18,6 +18,17 @@ try {
       const binding = server.connection({ access: run.ownerAccess, as: actor, shareGrants: [grant] });
       const writer = createMockApplication(binding, binding.credential);
       try {
+        mock.mutationFaults.loseReply({ actor, operation: "upload" }, { times: 1 });
+        let opened = 0;
+        await assert.rejects(writer.upload({ file: { ...file, open() { opened++; return file.open(); } }, metadata: Uint8Array.of(17) }), error => error instanceof Error && error.code === undefined);
+        assert.equal(opened, 1);
+        const lost = mock.history().filter(row => row.operation === "upload" && row.actor === actor);
+        assert.equal(lost.length, 1);
+        assert.equal(lost[0].committed, true);
+        assert.equal(lost[0].status, "failed");
+        assert.equal(typeof lost[0].objectId, "string");
+        await assert.rejects(writer.inspect({ id: lost[0].objectId }), { code: "foreign-handle" });
+        assert.deepEqual((await writer.events({ cursor: null, limit: 10 })).events, []);
         const pending = await writer.upload({file,name:file.name,metadata:new Uint8Array()});
         assert.equal(await writer.inspect(pending), "uploaded");
         await writer.pin(pending);

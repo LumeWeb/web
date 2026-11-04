@@ -71,7 +71,10 @@ export interface MockSdk {
 }
 
 /** Mutation completion shares the in-process model effect and cannot run atomically over Fetch. */
-interface LocalMockSdk extends Omit<MockSdk, "deleteObject" | "pinObject"> {
+interface LocalMockSdk extends Omit<
+  MockSdk,
+  "deleteObject" | "pinObject" | "upload"
+> {
   deleteObject(
     id: string,
     options?: MockCallOptions & {
@@ -86,6 +89,14 @@ interface LocalMockSdk extends Omit<MockSdk, "deleteObject" | "pinObject"> {
       prepareCommit?: () => () => void;
     },
   ): Promise<void>;
+  upload(
+    bytes: Uint8Array,
+    options: MockCallOptions & {
+      id: string;
+      /** Checks ownership before staging and returns a nonthrowing completion. */
+      prepareCommit?: () => () => void;
+    },
+  ): Promise<MockObject>;
 }
 
 /** Shares payloads between SDK clients while the supplied model owns account and pin rules. */
@@ -399,7 +410,7 @@ export function createMockNetwork(
             call.signal,
           );
         },
-        async upload(bytes, { id, signal }) {
+        async upload(bytes, { id, prepareCommit, signal }) {
           const owned = bytes.slice();
           return run(
             "upload",
@@ -408,7 +419,10 @@ export function createMockNetwork(
               await controls.upload(owned.byteLength, signal);
               signal?.throwIfAborted();
               controls.checkOnline(device);
+              const committed = prepareCommit?.();
               const object = upload(accountId, id, owned);
+              // Bookkeeping must precede observers and SDK Promise delivery.
+              committed?.();
               request.bytes = owned.byteLength;
               return object;
             },

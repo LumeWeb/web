@@ -268,7 +268,7 @@ it("invalid reply selectors reject before arming any loss", async () => {
       { actor, object: undefined, operation: "share-remove" },
       { actor, operation: "delete", share: grant },
       { actor, operation: "share-end", stage: "beforeCommit" },
-      { actor, operation: "upload" },
+      { actor, operation: "upload", share: grant },
       { actor, object: { ...object }, operation: "delete" },
     ])
       expect(() =>

@@ -108,7 +108,7 @@ is provided.
 ### Lost mutation acknowledgements
 
 `mock.mutationFaults.loseReply(selector, { times })` drops acknowledgement after
-a successful pin, delete, share Add, Remove or End commits. `MutationReplySelector`
+a successful upload, pin, delete, share Add, Remove or End commits. `MutationReplySelector`
 and the source-compatible `PinReplySelector` are exported from `mock`. Every
 selector requires the original actor; `times` is a positive safe integer.
 For `operation: "pin" | "delete"`, an optional `object` must be an original
@@ -118,8 +118,9 @@ For `operation: "share-add" | "share-remove" | "share-end"`, optional `share`
 selects an original driver grant across all its installations. Another grant for
 the same share does not match. Share selectors accept neither objects nor IDs.
 Selectors and options are snapshotted when installed.
-Upload and read reply losses are unsupported. Rejection or cancellation before
-the effect and successful no-ops leave the fault armed.
+For `operation: "upload"`, neither `object` nor `share` is accepted. Read reply
+losses are unsupported. Rejection or cancellation before the effect and
+successful no-ops leave the fault armed.
 
 ```ts
 const known = await writer.upload({ file, name: file.name, metadata: new Uint8Array() });
@@ -144,6 +145,23 @@ the mutation. Driver receipts may record `committed: true` with a failed caller 
 those receipts are not an application recovery API. Explicit publication keeps
 the same event-coalescing behavior as an acknowledged pin.
 
+A lost upload acknowledgement can reject without returning any application
+object. Collected bytes, explicit metadata and committed logical-byte charges
+remain owned by the run. Upload does not pin, create a catalogue row or queue an
+account object event; explicit publication cannot reveal the staged upload.
+Inspection requires an original application handle. Neither a generated ID in a
+driver receipt, a copied object nor a fresh client can recover that missing
+handle. The outcome stays unknown to the application. Another explicit upload
+is a new attempt, not a retry with deduplication. Port close joins work without
+discarding committed uploads; run cleanup discards unpinned payloads and clears
+their records and metadata.
+
+Upload `beforeCommit` holds and failures run after source collection and hash
+verification. Validation and allowance rejection before collection open no
+source. The local SDK stages payloads and synchronously completes application
+record, metadata, accounting and receipt bookkeeping before Promise observers.
+Post-effect cancellation does not release the committed byte reservation.
+
 After a lost delete reply, retain the original application object and explicitly
 call `writer.inspect(object)`; committed deletion reports `"missing"`. Staged
 discard creates no event. Pinned deletion removes membership, metadata and payload
@@ -160,9 +178,9 @@ unknown. No automatic inspection or resend occurs.
 
 Application uploads allow files up to 16 MiB, metadata up to 1024 bytes and names
 up to 1024 UTF-8 bytes. Run object-attempt and logical-byte allowances are
-reserved before the source opens. Failed application uploads release active byte
-reservations; object attempts stay charged. Committed bytes stay charged after
-deletion. Managed fixture allowance behavior is unchanged.
+reserved before the source opens. Application uploads that fail before the
+effect release active byte reservations; object attempts stay charged. Committed
+bytes stay charged after lost acknowledgement, cancellation or deletion. Managed fixture allowance behavior is unchanged.
 
 Events use the run's existing account feed, including managed fixture events.
 Use a fresh run or explicitly published fixture cursor as your baseline.

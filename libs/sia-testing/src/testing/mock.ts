@@ -140,16 +140,23 @@ export function createMockSia(options: MockOptions = {}): MockSia {
     records,
     (selector) => {
       if (
-        !["delete", "pin", "share-add", "share-end", "share-remove"].includes(
-          selector.operation,
-        ) ||
+        ![
+          "delete",
+          "pin",
+          "share-add",
+          "share-end",
+          "share-remove",
+          "upload",
+        ].includes(selector.operation) ||
         !selector.actor ||
         Object.keys(selector).some(
           (key) =>
             !(
               selector.operation.startsWith("share-")
                 ? ["actor", "share", "operation"]
-                : ["actor", "object", "operation"]
+                : selector.operation === "upload"
+                  ? ["actor", "operation"]
+                  : ["actor", "object", "operation"]
             ).includes(key),
         )
       )
@@ -283,6 +290,9 @@ export function createMockSia(options: MockOptions = {}): MockSia {
         try {
           if (context.network!.model.object(context.id, record.handle.id))
             await context.sdk!.deleteObject(record.handle.id);
+          else if (!record.deleted)
+            // Reset invalidates slab identities but does not release the network's cached bytes.
+            context.network!.discardUpload(context.id, record.handle.id);
           record.deleted = true;
         } catch (error) {
           errors.push(error);
@@ -845,19 +855,35 @@ export function createMockSia(options: MockOptions = {}): MockSia {
               undefined,
               async (receipt) => {
                 const id = identifier();
-                await context.sdk!.upload(bytes, { id, signal });
-                committed = true;
-                receipt.committed = true;
-                const internal = Object.freeze({
+                let object!: ApplicationObject;
+                await context.sdk!.upload(bytes, {
                   id,
-                  sha256: file.sha256,
-                  sizeBytes: bytes.length,
-                }) as TestObject;
-                const record = { deleted: false, handle: internal, metadata };
-                const object = Object.freeze({ id }) as ApplicationObject;
-                context.objects.set(id, record);
-                applicationObjects.set(object, { context, record });
-                context.uploadedBytes += bytes.length;
+                  prepareCommit: () => {
+                    signal.throwIfAborted();
+                    authorize();
+                    const internal = Object.freeze({
+                      id,
+                      sha256: file.sha256,
+                      sizeBytes: bytes.length,
+                    }) as TestObject;
+                    const record = {
+                      deleted: false,
+                      handle: internal,
+                      metadata,
+                    };
+                    object = Object.freeze({ id }) as ApplicationObject;
+                    const binding = { context, record };
+                    return () => {
+                      context.objects.set(id, record);
+                      applicationObjects.set(object, binding);
+                      context.uploadedBytes += bytes.length;
+                      committed = true;
+                      receipt.committed = true;
+                      receipt.objectId = id;
+                    };
+                  },
+                  signal,
+                });
                 return object;
               },
             );
