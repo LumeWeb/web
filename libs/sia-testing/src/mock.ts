@@ -1,6 +1,10 @@
 /** Portable fixtures share one scoped backend without starting a listener. */
 export { bytesFixture, createMockSia } from "./testing/mock.js";
 export type {
+  MutationReplySelector,
+  PinReplySelector,
+} from "./testing/mutations.js";
+export type {
   ActorRef,
   AppDefinition,
   ApplicationObject,

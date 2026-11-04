@@ -25,7 +25,107 @@ export function shareScenarios(
     sibling: ApplicationPort;
     writer: ApplicationPort;
   }>,
+  nativeFailure = false,
 ) {
+  for (const operation of [
+    "share-add",
+    "share-remove",
+    "share-end",
+    "delete",
+  ] as const) {
+    it(`a committed ${operation} loss allows explicit inspection without another write`, async () => {
+      const mock = createMockSia();
+      try {
+        await mock.run({ app: shareApp }, async (run) => {
+          const actor = mock.actor("editor");
+          const share = await run.shares.create({ objects: [] });
+          const grant = await run.shares.grant(share, {
+            as: actor,
+            label: "selected",
+            operations: ["add", "remove", "end"],
+          });
+          const connection = await connect(mock, run, actor, [grant]);
+          const { sibling, writer } = connection;
+          const recipient = mock.reader({
+            access: share.access,
+            as: mock.actor("recipient"),
+          });
+          try {
+            const [target] = await writer.shares.targets();
+            const object = await writer.upload({
+              file: await bytesFixture({
+                bytes: Uint8Array.of(3),
+                name: "note",
+              }),
+              metadata: Uint8Array.of(7),
+            });
+            await writer.pin(object);
+            if (operation !== "share-add")
+              await writer.shares.add(target!.ref, object);
+            mock.mutationFaults.loseReply(
+              operation === "delete"
+                ? { actor, operation }
+                : { actor, operation, share: grant },
+              { times: 1 },
+            );
+            const before = mock
+              .history()
+              .filter((row) => row.operation === operation).length;
+            const mutation =
+              operation === "share-add"
+                ? writer.shares.add(target!.ref, object)
+                : operation === "share-remove"
+                  ? writer.shares.remove(target!.ref, object.id)
+                  : operation === "share-end"
+                    ? writer.shares.end(target!.ref)
+                    : writer.delete(object);
+            const error = await mutation.then(
+              () => {
+                throw new Error("Expected lost reply");
+              },
+              (error: unknown) => error,
+            );
+            expect(error).toBeInstanceOf(Error);
+            if (nativeFailure) expect(error).not.toHaveProperty("code");
+            else expect(error).toMatchObject({ code: "unavailable" });
+            if (operation === "delete")
+              expect(await writer.inspect(object)).toBe("missing");
+            expect(await writer.shares.inspect(target!.ref, object.id)).toEqual(
+              {
+                contains:
+                  operation === "share-end" ? null : operation === "share-add",
+                state: operation === "share-end" ? "ended" : "active",
+              },
+            );
+            if (operation !== "delete")
+              expect(await writer.inspect(object)).toBe("pinned");
+            expect(
+              mock
+                .history()
+                .filter((row) => row.operation === operation)
+                .slice(before),
+            ).toMatchObject([{ committed: true, status: "failed" }]);
+            if (operation === "share-end") {
+              await expect(recipient.object(object.id)).rejects.toMatchObject({
+                code: "denied",
+              });
+              await run.shares.revokeGrant(grant);
+              await expect(
+                writer.shares.inspect(target!.ref, null),
+              ).rejects.toMatchObject({ code: "denied" });
+            }
+          } finally {
+            await recipient.close();
+            await writer.close();
+            await sibling.close();
+            await connection.close();
+          }
+        });
+      } finally {
+        await mock.close();
+      }
+    });
+  }
   it("share edits require installed permissions and preserve sibling recipient access", async () => {
     const mock = createMockSia();
     try {

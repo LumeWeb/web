@@ -5,7 +5,7 @@ export function isLostReply(error: unknown): boolean {
 }
 export function lostReply(): Error & { code: "unavailable" } {
   const error = Object.assign(
-    new Error("Mock pin acknowledgement unavailable"),
+    new Error("Mock mutation acknowledgement unavailable"),
     {
       code: "unavailable" as const,
     },

@@ -1,4 +1,4 @@
-/** Mutation failures precede effects; pin reply losses consume only committed effects. */
+/** Mutation failures precede effects; reply losses consume only committed effects. */
 import {
   createRequestControls,
   type RequestHold,
@@ -12,8 +12,20 @@ export interface MockMutationFaults {
     options: { code: "denied" | "unavailable"; times: number },
   ): void;
   hold(selector: MutationSelector): RequestHold;
-  loseReply(selector: PinReplySelector, options: { times: number }): void;
+  loseReply(selector: MutationReplySelector, options: { times: number }): void;
 }
+export type MutationReplySelector = { readonly actor: ActorRef } & (
+  | {
+      readonly object?: ApplicationObject;
+      readonly operation: "delete" | "pin";
+      readonly share?: never;
+    }
+  | {
+      readonly object?: never;
+      readonly operation: "share-add" | "share-end" | "share-remove";
+      readonly share?: MockShareGrant;
+    }
+);
 export type MutationSelector = {
   readonly actor?: ActorRef;
   readonly stage: "beforeCommit";
@@ -42,11 +54,12 @@ export interface PinReplySelector {
 export function createMutationControls(
   validate: (selector: MutationSelector) => void,
   records: RequestReceipt[] = [],
-  validateReply: (selector: PinReplySelector) => void,
+  validateReply: (selector: MutationReplySelector) => void,
   actorLabel: (actor: ActorRef) => string,
 ) {
-  const controls = createRequestControls(records, actorLabel);
-  const replies = createRequestControls([], actorLabel);
+  const receiptGrants = new WeakMap<RequestReceipt, MockShareGrant>();
+  const controls = createRequestControls(records, actorLabel, receiptGrants);
+  const replies = createRequestControls([], actorLabel, receiptGrants);
   const control: MockMutationFaults = {
     fail(selector, options) {
       selector = { ...selector };
@@ -76,12 +89,7 @@ export function createMutationControls(
   return {
     ...controls,
     afterCommit(receipt: RequestReceipt) {
-      if (
-        receipt.operation === "pin" &&
-        receipt.committed &&
-        replies.takeFailure(receipt)
-      )
-        throw lostReply();
+      if (receipt.committed && replies.takeFailure(receipt)) throw lostReply();
     },
     control,
   };
