@@ -9,7 +9,7 @@ import {
 import { createIndexdModel } from "../../src/model/index.js";
 import * as sdkAPI from "../../src/sdk/index.js";
 
-// Keep SDK calls unexecuted while TypeScript checks each adapter's pin options.
+// Keep SDK calls unexecuted while TypeScript checks each adapter's mutation options.
 void ((
   local: ReturnType<sdkAPI.MockNetwork["createSdk"]>,
   remote: ReturnType<typeof sdkAPI.createRemoteMockSdk>,
@@ -21,6 +21,21 @@ void ((
     signal,
   });
   void remote.pinObject(object, { signal });
+  void local.deleteObject("typed-object", {
+    prepareCommit: () => () => undefined,
+    signal,
+  });
+  void remote.deleteObject("typed-object", { signal });
+  const remoteDeleteHasNoCommit: "prepareCommit" extends keyof NonNullable<
+    Parameters<typeof remote.deleteObject>[1]
+  >
+    ? false
+    : true = true;
+  void remoteDeleteHasNoCommit;
+  void remote.deleteObject("typed-object", {
+    // @ts-expect-error Remote deletes cannot complete atomically with local effects.
+    prepareCommit: () => () => undefined,
+  });
   const remoteHasNoCommit: "prepareCommit" extends keyof NonNullable<
     Parameters<typeof remote.pinObject>[1]
   >

@@ -22,6 +22,122 @@ export function applicationScenarios(
   ) => Promise<{ close: () => Promise<void>; writer: ApplicationPort }>,
   transport = false,
 ) {
+  it("rejects non-string event cursor IDs without coercing them", async () => {
+    const mock = createMockSia();
+    try {
+      await mock.run({ app }, async (run) => {
+        const { close, writer } = await connect(
+          mock,
+          run,
+          mock.actor("writer"),
+        );
+        try {
+          const coerce = vi.fn(() => "a".repeat(64));
+          const id = transport ? ["a".repeat(64)] : { toString: coerce };
+          const outcome = await writer
+            .events({
+              cursor: {
+                after: "2026-01-01T00:00:00.000Z",
+                id: id as unknown as string,
+              },
+              limit: 1,
+            })
+            .catch((error: unknown) => error);
+          expect(coerce).not.toHaveBeenCalled();
+          expect(outcome).toMatchObject({ code: "invalid-input" });
+          if (transport)
+            expect(outcome).toMatchObject({
+              message: "app-events.cursor: invalid input",
+            });
+          expect(outcome).not.toHaveProperty("nextCursor");
+        } finally {
+          await writer.close();
+          await close();
+        }
+      });
+    } finally {
+      await mock.close();
+    }
+  });
+  it.each([false, true])(
+    "failed and cancelled deletes preserve the object before commit (pinned: %s)",
+    async (pinned) => {
+      const mock = createMockSia();
+      try {
+        await mock.run({ app }, async (run) => {
+          const actor = mock.actor("writer");
+          const { close, writer } = await connect(mock, run, actor);
+          const reader = mock.reader({
+            access: run.ownerAccess,
+            as: mock.actor("reader"),
+          });
+          try {
+            const object = await writer.upload({
+              file: await bytesFixture({ bytes: Uint8Array.of(1), name: "n" }),
+              metadata: Uint8Array.of(20),
+            });
+            if (pinned) await writer.pin(object);
+            mock.mutationFaults.fail(
+              { actor, operation: "delete", stage: "beforeCommit" },
+              { code: "unavailable", times: 1 },
+            );
+            await expect(writer.delete(object)).rejects.toMatchObject({
+              code: "unavailable",
+            });
+            const hold = mock.mutationFaults.hold({
+              actor,
+              operation: "delete",
+              stage: "beforeCommit",
+            });
+            const abort = new AbortController();
+            const pending = writer
+              .delete(object, { signal: abort.signal })
+              .catch((error: unknown) => error);
+            try {
+              await hold.started();
+              abort.abort();
+              await hold.cancelled();
+              expect(await pending).toBeInstanceOf(Error);
+            } finally {
+              hold.release();
+              await pending;
+            }
+            expect(await writer.inspect(object)).toBe(
+              pinned ? "pinned" : "uploaded",
+            );
+            if (!pinned) await writer.pin(object);
+            expect((await reader.object(object.id)).metadata).toEqual(
+              Uint8Array.of(20),
+            );
+            const stream = await reader.download(object);
+            expect((await stream.getReader().read()).value).toEqual(
+              Uint8Array.of(1),
+            );
+            expect(
+              mock
+                .history()
+                .filter((row) => row.operation === "delete")
+                .map((row) => ({
+                  committed: row.committed,
+                  status: row.status,
+                })),
+            ).toEqual([
+              { committed: false, status: "failed" },
+              { committed: false, status: "cancelled" },
+            ]);
+            await writer.delete(object);
+            expect(await writer.inspect(object)).toBe("missing");
+          } finally {
+            await reader.close();
+            await writer.close();
+            await close();
+          }
+        });
+      } finally {
+        await mock.close();
+      }
+    },
+  );
   it.each(["foreign", "hooks", "padding", "overwrite"])(
     "validates %s fixture chunks using their actual bytes",
     async (kind) => {

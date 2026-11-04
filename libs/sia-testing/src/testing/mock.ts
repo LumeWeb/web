@@ -410,20 +410,28 @@ export function createMockSia(options: MockOptions = {}): MockSia {
                 authorize();
                 if (record.deleted) return;
                 const deletion = (record.deletion = (async () => {
+                  const complete = () => {
+                    receipt.committed = true;
+                    record.deleted = true;
+                    record.metadata = new Uint8Array();
+                  };
                   if (
                     context.network!.model.object(context.id, record.handle.id)
                   )
                     await context.sdk!.deleteObject(record.handle.id, {
+                      prepareCommit: () => {
+                        authorize();
+                        return complete;
+                      },
                       signal,
                     });
-                  else
+                  else {
                     context.network!.discardUpload(
                       context.id,
                       record.handle.id,
                     );
-                  receipt.committed = true;
-                  record.deleted = true;
-                  record.metadata = new Uint8Array();
+                    complete();
+                  }
                 })());
                 try {
                   await deletion;
@@ -449,6 +457,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
                 !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.000Z$/.test(cursor.after) ||
                 !Number.isFinite(Date.parse(cursor.after)) ||
                 new Date(cursor.after).toISOString() !== cursor.after ||
+                typeof cursor.id !== "string" ||
                 !/^[a-f0-9]{64}$/.test(cursor.id))
             )
               throw invalidInput("cursor", "Invalid event cursor");

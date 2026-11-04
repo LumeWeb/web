@@ -70,8 +70,15 @@ export interface MockSdk {
   ): Promise<MockObject>;
 }
 
-/** Pin completion shares the in-process model effect and cannot run atomically over Fetch. */
-interface LocalMockSdk extends Omit<MockSdk, "pinObject"> {
+/** Mutation completion shares the in-process model effect and cannot run atomically over Fetch. */
+interface LocalMockSdk extends Omit<MockSdk, "deleteObject" | "pinObject"> {
+  deleteObject(
+    id: string,
+    options?: MockCallOptions & {
+      /** Checks ownership before the effect and returns a nonthrowing completion. */
+      prepareCommit?: () => () => void;
+    },
+  ): Promise<void>;
   pinObject(
     object: Pick<MockObject, "id">,
     options?: MockCallOptions & {
@@ -254,7 +261,10 @@ export function createMockNetwork(
             "deleteObject",
             id,
             () => {
+              const committed = call.prepareCommit?.();
               model.deleteObject(accountId, id);
+              // Completion must precede Promise observers of the removed membership.
+              committed?.();
               discardStalePayloads(
                 accountId,
                 retirementTrackers.get(accountId)?.takeRetired() ?? [],
