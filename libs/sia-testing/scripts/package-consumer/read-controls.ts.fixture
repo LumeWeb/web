@@ -66,8 +66,13 @@ mock.mutationFaults.loseReply({ actor, operation: "share-add", object }, { times
 mock.mutationFaults.loseReply({ actor, operation: "delete", share: grant }, { times: 1 });
 // @ts-expect-error A share ID is not a grant.
 mock.mutationFaults.loseReply({ actor, operation: "share-end", share: "id" }, { times: 1 });
-// @ts-expect-error Upload reply loss is not supported.
 mock.mutationFaults.loseReply({ actor, operation: "upload" }, { times: 1 });
+// @ts-expect-error Upload reply selection cannot select an application object.
+mock.mutationFaults.loseReply({ actor, operation: "upload", object }, { times: 1 });
+// @ts-expect-error Upload reply selection cannot select a share grant.
+mock.mutationFaults.loseReply({ actor, operation: "upload", share: grant }, { times: 1 });
+// @ts-expect-error Upload reply selection requires an actor.
+mock.mutationFaults.loseReply({ operation: "upload" }, { times: 1 });
 
 type Operation = ReturnType<typeof mock.history>[number]["operation"];
 const operations: Operation[] = [

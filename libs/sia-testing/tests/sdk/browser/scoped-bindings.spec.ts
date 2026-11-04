@@ -449,3 +449,103 @@ test("iframe upload accepts foreign metadata and pin copies it before caller mut
     uploaded: [4, 5],
   });
 });
+
+test("a browser upload reply loss leaves no handle and opens its source once", async ({
+  sia,
+}) => {
+  const actor = sia.mock.actor("browser-upload-loss");
+  sia.mock.mutationFaults.loseReply(
+    { actor, operation: "upload" },
+    { times: 1 },
+  );
+  const clientEntry = `/@fs${new URL("../../../src/client.ts", import.meta.url).pathname}`;
+  const mockEntry = `/@fs${new URL("../../../src/mock.ts", import.meta.url).pathname}`;
+  let result: unknown;
+  await sia.browser.open({
+    access: sia.ownerAccess,
+    async apply(page, connection) {
+      await page.goto("/scoped.html");
+      result = await page.evaluate(
+        async ({ backend, clientEntry, mockEntry }) => {
+          const { createMockApplication } = (await import(
+            clientEntry
+          )) as typeof import("../../../src/client.js");
+          const { bytesFixture } = (await import(
+            mockEntry
+          )) as typeof import("../../../src/mock.js");
+          const writer = createMockApplication(
+            backend.connection,
+            backend.credential,
+          );
+          let opened = 0;
+          let handle = false;
+          let failed = false;
+          try {
+            const file = await bytesFixture({
+              bytes: Uint8Array.of(7),
+              name: "browser-lost",
+            });
+            try {
+              await writer.upload({
+                file: {
+                  ...file,
+                  open() {
+                    opened++;
+                    return file.open();
+                  },
+                },
+                metadata: Uint8Array.of(19),
+              });
+              handle = true;
+            } catch (error) {
+              failed = error instanceof Error;
+            }
+            return {
+              events: (await writer.events({ cursor: null, limit: 10 })).events,
+              failed,
+              handle,
+              opened,
+            };
+          } finally {
+            await writer.close();
+          }
+        },
+        { backend: connection.backend, clientEntry, mockEntry },
+      );
+    },
+    mockActor: actor,
+  });
+  expect(result).toEqual({
+    events: [],
+    failed: true,
+    handle: false,
+    opened: 1,
+  });
+  const uploads = sia.mock
+    .history()
+    .filter((row) => row.operation === "upload");
+  expect(uploads).toMatchObject([
+    { committed: true, objectId: expect.any(String), status: "failed" },
+  ]);
+  const writer = sia.mock.application({ access: sia.ownerAccess, as: actor });
+  const reader = sia.mock.reader({ access: sia.ownerAccess, as: actor });
+  try {
+    const forged = { id: uploads[0]!.objectId! } as Parameters<
+      typeof writer.inspect
+    >[0];
+    await expect(writer.inspect(forged)).rejects.toMatchObject({
+      code: "foreign-handle",
+    });
+    await sia.mock.publish({ access: sia.ownerAccess });
+    expect((await writer.events({ cursor: null, limit: 10 })).events).toEqual(
+      [],
+    );
+    await expect(reader.object(forged.id)).rejects.toBeDefined();
+    expect(
+      sia.mock.history().filter((row) => row.operation === "upload"),
+    ).toHaveLength(1);
+  } finally {
+    await writer.close();
+    await reader.close();
+  }
+});

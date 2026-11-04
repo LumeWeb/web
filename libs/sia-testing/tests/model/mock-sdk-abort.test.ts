@@ -103,3 +103,55 @@ test("cancelling an opened download errors its pending read and clears link time
     status: "cancelled",
   });
 });
+
+test("local upload preparation rejects before staging and completion precedes model microtasks", async () => {
+  const network = createMockNetwork();
+  const account = network.model.createAccount({ publicKey: "upload-owner" });
+  const sdk = network.createSdk({ accountId: account.id });
+  const reason = new Error("preparation refused");
+  await expect(
+    sdk.upload(Uint8Array.of(2), {
+      id: "refused",
+      prepareCommit: () => {
+        throw reason;
+      },
+    }),
+  ).rejects.toBe(reason);
+  expect(network.model.listSlabs(account.id)).toEqual([]);
+  let completed = false;
+  let observed = false;
+  const pinSlab = network.model.pinSlab.bind(network.model);
+  const stage = vi
+    .spyOn(network.model, "pinSlab")
+    .mockImplementation((...args) => {
+      pinSlab(...args);
+      queueMicrotask(() => {
+        observed = completed;
+      });
+    });
+  try {
+    const bytes = Uint8Array.of(3);
+    const uploading = sdk.upload(bytes, {
+      id: "owned",
+      prepareCommit: () => () => {
+        completed = true;
+      },
+    });
+    bytes[0] = 9;
+    await uploading;
+    expect(observed).toBe(true);
+    expect(stage).toHaveBeenCalledTimes(1);
+    expect(
+      new Uint8Array(
+        await new Response(
+          await sdk.download({ id: () => "owned" }),
+        ).arrayBuffer(),
+      ),
+    ).toEqual(Uint8Array.of(3));
+    network.discardUpload(account.id, "owned");
+    expect(network.model.listSlabs(account.id)).toEqual([]);
+  } finally {
+    stage.mockRestore();
+    network.model.reset();
+  }
+});
