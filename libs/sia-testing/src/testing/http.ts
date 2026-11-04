@@ -1,4 +1,4 @@
-/** Hosts scoped mock read ports on a loopback listener with owned request cancellation. */
+/** Hosts scoped mock ports on a loopback listener with owned request cancellation. */
 import {
   createServer,
   type IncomingMessage,
@@ -34,8 +34,45 @@ export async function startMockServer(
       code: "invalid-input",
     });
   const calls = new Set<AbortController>();
-  const dispatch = (request: Request) => configured.dispatch(request);
-  async function respond(incoming: IncomingMessage, outgoing: ServerResponse) {
+  const bodies = new Map<IncomingMessage, ServerResponse>();
+  // Queued pipelined replies have no response socket until earlier replies finish.
+  const replies = new Map<ServerResponse, IncomingMessage["socket"]>();
+  let stopping = false;
+  function ownBody(incoming: IncomingMessage, outgoing: ServerResponse) {
+    bodies.set(incoming, outgoing);
+    const releaseBody = () => {
+      bodies.delete(incoming);
+      incoming.removeListener("end", releaseBody);
+      incoming.removeListener("close", releaseBody);
+    };
+    incoming.once("end", releaseBody);
+    incoming.once("close", releaseBody);
+    return releaseBody;
+  }
+  function cancelBodies() {
+    if (!stopping) return;
+    for (const [incoming, outgoing] of bodies) {
+      if (incoming.complete || incoming.destroyed) continue;
+      // Destroying a later pipelined request also destroys earlier replies.
+      // Let those replies, and any early response to this body, flush first.
+      const waiting = [...replies].some(
+        ([reply, socket]) =>
+          socket === incoming.socket &&
+          (reply !== outgoing || reply.headersSent),
+      );
+      if (!waiting) incoming.destroy();
+    }
+  }
+  // Body completion can outlive close while an earlier pipelined reply flushes.
+  const dispatch = (request: Request) =>
+    stopping
+      ? Promise.resolve(Response.json({ code: "closed" }, { status: 410 }))
+      : configured.dispatch(request);
+  async function respond(
+    incoming: IncomingMessage,
+    outgoing: ServerResponse,
+    releaseBody: () => void,
+  ) {
     const origin = incoming.headers.origin;
     if (origin) {
       const permitted =
@@ -60,6 +97,8 @@ export async function startMockServer(
     const abort = new AbortController();
     const cancel = () => abort.abort();
     calls.add(abort);
+    // A request parsed after close starts missed the controller cancellation pass.
+    if (stopping) abort.abort(endpointShutdown());
     outgoing.once("close", cancel);
     try {
       const pathname = new URL(incoming.url ?? "/", "http://localhost")
@@ -103,7 +142,17 @@ export async function startMockServer(
           signal: abort.signal,
         },
       );
-      const response = await dispatch(request);
+      // Streaming uploads transfer cancellation to the endpoint's body collector.
+      releaseBody();
+      let response: Response;
+      try {
+        response = await dispatch(request);
+      } finally {
+        // Rejections before a streaming collector attaches leave the body unread.
+        // Dispatch must settle before the listener can own cancellation again.
+        if (rawUpload && !incoming.complete && !incoming.destroyed)
+          ownBody(incoming, outgoing);
+      }
       outgoing.statusCode = response.status;
       response.headers.forEach((value, key) => outgoing.setHeader(key, value));
       outgoing.flushHeaders();
@@ -121,7 +170,17 @@ export async function startMockServer(
     }
   }
   const server = createServer((incoming, outgoing) => {
-    void respond(incoming, outgoing).catch((error: unknown) => {
+    const releaseBody = ownBody(incoming, outgoing);
+    replies.set(outgoing, incoming.socket);
+    const releaseReply = () => {
+      replies.delete(outgoing);
+      outgoing.removeListener("finish", releaseReply);
+      outgoing.removeListener("close", releaseReply);
+      cancelBodies();
+    };
+    outgoing.once("finish", releaseReply);
+    outgoing.once("close", releaseReply);
+    void respond(incoming, outgoing, releaseBody).catch((error: unknown) => {
       if (isLostReply(error)) {
         // An empty socket close lets browsers replay POST on a reused connection.
         // Flush an incomplete body so delivery fails without repeating the effect.
@@ -133,6 +192,7 @@ export async function startMockServer(
       } else if (outgoing.headersSent) outgoing.destroy();
       else outgoing.writeHead(500).end();
     });
+    cancelBodies();
   });
   await new Promise<void>((resolve, reject) => {
     server.once("error", reject);
@@ -155,10 +215,12 @@ export async function startMockServer(
     ...configured.endpoint,
     close() {
       closing ??= (async () => {
+        stopping = true;
         const results = await Promise.allSettled([
           configured.close(),
           new Promise<void>((resolve, reject) => {
             for (const call of calls) call.abort(endpointShutdown());
+            cancelBodies();
             server.close((error) => (error ? reject(error) : resolve()));
             server.closeIdleConnections();
           }),
