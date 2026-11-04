@@ -34,32 +34,59 @@ export async function startMockServer(
       code: "invalid-input",
     });
   const calls = new Set<AbortController>();
-  const bodies = new Map<IncomingMessage, ServerResponse>();
-  // Queued pipelined replies have no response socket until earlier replies finish.
-  const replies = new Map<ServerResponse, IncomingMessage["socket"]>();
+  interface SocketState {
+    bodies: Map<IncomingMessage, ServerResponse>;
+    replies: Set<ServerResponse>;
+  }
+  const sockets = new Map<IncomingMessage["socket"], SocketState>();
   let stopping = false;
+  function socketState(socket: IncomingMessage["socket"]) {
+    let state = sockets.get(socket);
+    if (!state) {
+      state = { bodies: new Map(), replies: new Set() };
+      sockets.set(socket, state);
+    }
+    return state;
+  }
+  function releaseSocket(
+    socket: IncomingMessage["socket"],
+    state: SocketState,
+  ) {
+    // A keep-alive request or reclaimed raw body may already own a newer record.
+    if (
+      !state.bodies.size &&
+      !state.replies.size &&
+      sockets.get(socket) === state
+    )
+      sockets.delete(socket);
+  }
   function ownBody(incoming: IncomingMessage, outgoing: ServerResponse) {
-    bodies.set(incoming, outgoing);
+    const socket = incoming.socket;
+    const state = socketState(socket);
+    state.bodies.set(incoming, outgoing);
+    let released = false;
     const releaseBody = () => {
-      bodies.delete(incoming);
+      if (released) return;
+      released = true;
+      state.bodies.delete(incoming);
       incoming.removeListener("end", releaseBody);
       incoming.removeListener("close", releaseBody);
+      releaseSocket(socket, state);
     };
     incoming.once("end", releaseBody);
     incoming.once("close", releaseBody);
     return releaseBody;
   }
-  function cancelBodies() {
+  function cancelBodies(state: SocketState) {
     if (!stopping) return;
-    for (const [incoming, outgoing] of bodies) {
+    for (const [incoming, outgoing] of state.bodies) {
       if (incoming.complete || incoming.destroyed) continue;
       // Destroying a later pipelined request also destroys earlier replies.
       // Let those replies, and any early response to this body, flush first.
-      const waiting = [...replies].some(
-        ([reply, socket]) =>
-          socket === incoming.socket &&
-          (reply !== outgoing || reply.headersSent),
-      );
+      const ownReply = state.replies.has(outgoing);
+      const waiting =
+        state.replies.size > (ownReply ? 1 : 0) ||
+        (ownReply && outgoing.headersSent);
       if (!waiting) incoming.destroy();
     }
   }
@@ -171,12 +198,16 @@ export async function startMockServer(
   }
   const server = createServer((incoming, outgoing) => {
     const releaseBody = ownBody(incoming, outgoing);
-    replies.set(outgoing, incoming.socket);
+    // Queued pipelined replies have no response socket until earlier replies finish.
+    const socket = incoming.socket;
+    const state = socketState(socket);
+    state.replies.add(outgoing);
     const releaseReply = () => {
-      replies.delete(outgoing);
+      if (!state.replies.delete(outgoing)) return;
       outgoing.removeListener("finish", releaseReply);
       outgoing.removeListener("close", releaseReply);
-      cancelBodies();
+      cancelBodies(state);
+      releaseSocket(socket, state);
     };
     outgoing.once("finish", releaseReply);
     outgoing.once("close", releaseReply);
@@ -192,7 +223,7 @@ export async function startMockServer(
       } else if (outgoing.headersSent) outgoing.destroy();
       else outgoing.writeHead(500).end();
     });
-    cancelBodies();
+    cancelBodies(state);
   });
   await new Promise<void>((resolve, reject) => {
     server.once("error", reject);
@@ -220,7 +251,7 @@ export async function startMockServer(
           configured.close(),
           new Promise<void>((resolve, reject) => {
             for (const call of calls) call.abort(endpointShutdown());
-            cancelBodies();
+            for (const state of sockets.values()) cancelBodies(state);
             server.close((error) => (error ? reject(error) : resolve()));
             server.closeIdleConnections();
           }),

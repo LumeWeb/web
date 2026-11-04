@@ -300,3 +300,149 @@ it("listener close leaves a late-completing registration unconsumed while preser
     }
   }
 });
+
+it.each(["partial", "upload-method"])(
+  "listener reclaims a reused connection's %s body while an unrelated reply is unread",
+  async (mode) => {
+    const mock = createMockSia();
+    const server = await startMockServer(mock);
+    const agent = new Agent({ keepAlive: true, maxSockets: 1 });
+    const clients: ReturnType<typeof request>[] = [];
+    const closed: Promise<void>[] = [];
+    let large: IncomingMessage | undefined;
+    let closing: Promise<void> | undefined;
+    function track(client: ReturnType<typeof request>) {
+      clients.push(client);
+      client.on("error", () => {
+        // Reclaiming an incomplete body can reset its connection.
+      });
+      closed.push(
+        new Promise<void>((resolve) => client.once("close", resolve)),
+      );
+      return client;
+    }
+    try {
+      await mock.run({ app }, async (run) => {
+        const file = await bytesFixture({
+          bytes: Uint8Array.of(1),
+          name: "independent reply",
+        });
+        // Keep a real response pending beyond the loopback socket's write buffer.
+        await run.objects.upload({
+          file,
+          metadata: new Uint8Array(16 * 1024 * 1024),
+          name: file.name,
+        });
+        const connection = server.connection({
+          access: run.ownerAccess,
+          as: mock.actor("independent connections"),
+        });
+        const headers = {
+          authorization: `Bearer ${connection.credential.keyHex}`,
+        };
+        let reusedSocket: ReturnType<typeof request>["socket"] = null;
+        for (let index = 0; index < 2; index++) {
+          const client = track(
+            request(
+              new URL(`${connection.client}/app-events`, connection.url),
+              {
+                agent,
+                headers,
+                method: "POST",
+              },
+            ),
+          );
+          const ended = new Promise<void>((resolve, reject) => {
+            client.once("response", (response) => {
+              expect(response.statusCode).toBe(200);
+              if (index === 0) reusedSocket = client.socket;
+              else expect(client.socket).toBe(reusedSocket);
+              response.on("error", reject);
+              response.resume();
+              response.once("end", resolve);
+            });
+            client.once("error", reject);
+          });
+          client.end('{"cursor":null,"limit":1}');
+          await bounded(ended, "keep-alive request did not end");
+        }
+        const bigClient = track(
+          request(
+            new URL(
+              `${connection.client}/objects?offset=0&limit=1`,
+              connection.url,
+            ),
+            { agent: false, headers },
+          ),
+        );
+        const received = once(bigClient, "response");
+        bigClient.end();
+        [large] = (await bounded(received, "large reply did not start")) as [
+          IncomingMessage,
+        ];
+        expect(large.statusCode).toBe(200);
+        expect(bigClient.socket).not.toBe(reusedSocket);
+        const largeEnded = new Promise<void>((resolve, reject) => {
+          large!.on("error", reject);
+          large!.once("end", resolve);
+        });
+        void largeEnded.catch(() => {
+          // Delivery is checked after the unrelated body has been reclaimed.
+        });
+        const client = track(
+          request(
+            new URL(
+              `${connection.client}/${mode === "partial" ? "app-events" : "app-upload-body"}`,
+              connection.url,
+            ),
+            {
+              agent,
+              headers: {
+                ...headers,
+                "content-length": 64,
+                "expect": "100-continue",
+              },
+              method: mode === "partial" ? "POST" : "GET",
+            },
+          ),
+        );
+        const continued = once(client, "continue");
+        const rejected = new Promise<void>((resolve, reject) => {
+          client.on("response", (response) => {
+            expect(response.statusCode).toBe(405);
+            response.on("error", reject);
+            response.resume();
+            response.once("end", resolve);
+          });
+        });
+        client.flushHeaders();
+        await bounded(continued, "partial request headers were not accepted");
+        expect(client.socket).toBe(reusedSocket);
+        client.write('{"cursor":');
+        if (mode === "upload-method")
+          await bounded(rejected, "raw rejection did not end");
+        const history = mock.history();
+        closing = server.close();
+        await bounded(
+          closed.at(-1)!,
+          "unrelated reply blocked body reclamation",
+        );
+        expect(large.complete).toBe(false);
+        expect(mock.history()).toEqual(history);
+        large.resume();
+        await bounded(largeEnded, "unrelated reply did not end");
+        await bounded(closing, "listener did not close after reply delivery");
+      });
+    } finally {
+      large?.destroy();
+      for (const client of clients) client.destroy();
+      agent.destroy();
+      try {
+        await bounded(closing ?? server.close(), "listener did not close");
+        await bounded(Promise.all(closed), "clients did not close");
+      } finally {
+        await mock.close();
+      }
+    }
+  },
+);
