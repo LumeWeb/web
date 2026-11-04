@@ -121,6 +121,8 @@ for (const label of ["left", "right"]) {
 
 Pass `TestContext.signal` so a timeout cancels owned work. `onTestFinished` also closes the mock if the test fails or times out; `finally` closes it when the fixture finishes. Close is safe to repeat. Run cleanup closes retained ports before deleting fixture state, including after assertion failures.
 
+Caller-created controllers can cancel individual reads without closing the reader or run. The packed Vitest checks cover current-global `AbortController` in Node, jsdom, and happy-dom, plus `window.AbortController` in both DOM environments, through direct readers and MSW-backed Fetch readers. In the tested versions, those DOM environments expose the same constructors through `globalThis` and `window`; these checks do not establish compatibility between Node signals and a separately created jsdom window's signal implementation.
+
 Cancellation cannot force an unrelated user promise to settle. Await your work and make callbacks cooperate with cancellation. Application and owner-share ports cancel and join their pending calls on close. For both direct and fetch-backed readers, `close()` aborts requests without waiting for those calls to settle. Close a fetch application client in `finally` to join its local upload collector; backend teardown cannot synchronously stop collection in a remote client.
 
 ## Publish application writes
