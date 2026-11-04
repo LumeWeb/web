@@ -5,7 +5,7 @@ import {
   type RequestReceipt,
 } from "./controls.js";
 import { lostReply } from "./reply-loss.js";
-import type { ActorRef, ApplicationObject } from "./types.js";
+import type { ActorRef, ApplicationObject, MockShareGrant } from "./types.js";
 export interface MockMutationFaults {
   fail(
     selector: MutationSelector,
@@ -14,12 +14,26 @@ export interface MockMutationFaults {
   hold(selector: MutationSelector): RequestHold;
   loseReply(selector: PinReplySelector, options: { times: number }): void;
 }
-export interface MutationSelector {
+export type MutationSelector = {
   readonly actor?: ActorRef;
-  readonly object?: ApplicationObject;
-  readonly operation: "delete" | "pin" | "upload";
   readonly stage: "beforeCommit";
-}
+} & (
+  | {
+      readonly object?: ApplicationObject;
+      readonly operation: "delete" | "pin";
+      readonly share?: never;
+    }
+  | {
+      readonly object?: never;
+      readonly operation: "share-add" | "share-end" | "share-remove";
+      readonly share?: MockShareGrant;
+    }
+  | {
+      readonly object?: never;
+      readonly operation: "upload";
+      readonly share?: never;
+    }
+);
 export interface PinReplySelector {
   readonly actor: ActorRef;
   readonly object?: ApplicationObject;

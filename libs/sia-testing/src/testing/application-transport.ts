@@ -1,8 +1,11 @@
-/** Private one-use admissions reserve the run before a client opens its upload source. */
+/** Private share sessions bind tokens; one-use admissions reserve allowance before clients open upload sources. */
 import { endpointShutdown } from "./diagnostics.js";
+import { mockRuntime } from "./runtime.js";
 import type {
   ActorRef,
   ApplicationObject,
+  ApplicationPort,
+  ApplicationShareRef,
   BrowserAccess,
   MockSia,
 } from "./types.js";
@@ -10,7 +13,9 @@ interface DispatchInput {
   access: BrowserAccess;
   actor: ActorRef;
   client: object;
+  createApplication: () => ApplicationPort;
   credential: string;
+  signal: AbortSignal;
 }
 interface Lease {
   abort: AbortController;
@@ -28,6 +33,17 @@ export function createApplicationTransport(
     onCleanupError: (error: unknown) => void,
   ) => null | ReadableStream<Uint8Array> = (request) => request.body,
 ) {
+  const sessions = new Map<
+    string,
+    {
+      client: object;
+      credential: string;
+      refs: Map<string, ApplicationShareRef>;
+      release: () => void;
+      tokens: WeakMap<ApplicationShareRef, string>;
+      writer: ApplicationPort;
+    }
+  >();
   const active = new Set<Lease>();
   const pending = new Set<Promise<Response>>();
   const lifetime = new AbortController();
@@ -150,6 +166,78 @@ export function createApplicationTransport(
     const body = await json(bodyStream, signal);
     if (closed) invalid("closed");
     signal.throwIfAborted();
+    if (operation.startsWith("app-share-")) {
+      let sessionId =
+        typeof body.session === "string" ? body.session : undefined;
+      if (!sessionId && operation !== "app-share-targets") invalid("denied");
+      let session = sessionId ? sessions.get(sessionId) : undefined;
+      if (
+        sessionId &&
+        (!session ||
+          session.client !== input.client ||
+          session.credential !== input.credential)
+      )
+        invalid("denied");
+      if (!session) {
+        sessionId = crypto.randomUUID();
+        const writer = input.createApplication();
+        const key = sessionId;
+        const release = mockRuntime(mock).onRunCleanup(
+          input.access,
+          async () => {
+            sessions.delete(key);
+            await writer.close();
+          },
+        );
+        session = {
+          client: input.client,
+          credential: input.credential,
+          refs: new Map(),
+          release,
+          tokens: new WeakMap(),
+          writer,
+        };
+        sessions.set(sessionId, session);
+      }
+      const writer = session.writer;
+      if (operation === "app-share-targets") {
+        const targets = await writer.shares.targets({ signal });
+        return Response.json({
+          session: sessionId,
+          targets: targets.map((target) => {
+            let token = session.tokens.get(target.ref);
+            if (!token) {
+              token = crypto.randomUUID();
+              session.tokens.set(target.ref, token);
+              session.refs.set(token, target.ref);
+            }
+            return { ...target, ref: token };
+          }),
+        });
+      }
+      const ref = session.refs.get(
+        typeof body.ref === "string" ? body.ref : "",
+      );
+      if (!ref) invalid("foreign-handle");
+      if (operation === "app-share-inspect")
+        return Response.json(
+          await writer.shares.inspect(ref, body.objectId as null | string, {
+            signal,
+          }),
+        );
+      if (operation === "app-share-add") {
+        const object = refs.get(
+          typeof body.object === "string" ? body.object : "",
+        );
+        if (!object) invalid("foreign-handle");
+        await writer.shares.add(ref, object, { signal });
+      } else if (operation === "app-share-remove") {
+        await writer.shares.remove(ref, body.objectId as string, { signal });
+      } else if (operation === "app-share-end") {
+        await writer.shares.end(ref, { signal });
+      } else invalid();
+      return Response.json(null);
+    }
     if (operation === "app-upload-admit") {
       if (
         typeof body.name !== "string" ||
@@ -317,6 +405,18 @@ export function createApplicationTransport(
       if (closing) return closing;
       closed = true;
       closing = Promise.resolve().then(async () => {
+        const installed = [...sessions.values()];
+        sessions.clear();
+        for (const session of installed) session.release();
+        const sessionResults = await Promise.allSettled(
+          installed.map((session) => session.writer.close()),
+        );
+        for (const result of sessionResults)
+          if (
+            result.status === "rejected" &&
+            !cleanupErrors.includes(result.reason)
+          )
+            cleanupErrors.push(result.reason);
         const leases = [...active];
         for (const lease of leases) lease.abort.abort();
         await Promise.allSettled([
@@ -339,7 +439,11 @@ export function createApplicationTransport(
             code: "closed",
           }),
         );
-      const signal = AbortSignal.any([request.signal, lifetime.signal]);
+      const signal = AbortSignal.any([
+        request.signal,
+        lifetime.signal,
+        input.signal,
+      ]);
       const work = Promise.resolve().then(async () => {
         const body = requestBody(request, (error) => {
           if (!cleanupErrors.includes(error)) cleanupErrors.push(error);

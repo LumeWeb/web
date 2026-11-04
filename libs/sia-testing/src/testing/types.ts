@@ -35,6 +35,7 @@ export interface ApplicationPort {
       readonly signal?: AbortSignal;
     },
   ): Promise<void>;
+  readonly shares: ApplicationShares;
   upload(input: {
     readonly file: TestFile;
     readonly metadata: Uint8Array;
@@ -42,6 +43,37 @@ export interface ApplicationPort {
     readonly name?: string | undefined;
     readonly signal?: AbortSignal;
   }): Promise<ApplicationObject>;
+}
+export type ApplicationShareRef = Owned<"application-share">;
+export interface ApplicationShares {
+  add(
+    ref: ApplicationShareRef,
+    object: ApplicationObject,
+    options?: { readonly signal?: AbortSignal },
+  ): Promise<void>;
+  end(
+    ref: ApplicationShareRef,
+    options?: { readonly signal?: AbortSignal },
+  ): Promise<void>;
+  inspect(
+    ref: ApplicationShareRef,
+    objectId: null | string,
+    options?: { readonly signal?: AbortSignal },
+  ): Promise<ShareInspection>;
+  remove(
+    ref: ApplicationShareRef,
+    objectId: string,
+    options?: { readonly signal?: AbortSignal },
+  ): Promise<void>;
+  targets(options?: {
+    readonly signal?: AbortSignal;
+  }): Promise<readonly ApplicationShareTarget[]>;
+}
+export interface ApplicationShareTarget {
+  readonly expiresAt?: string;
+  readonly label: string;
+  readonly operations: readonly ShareOperation[];
+  readonly ref: ApplicationShareRef;
 }
 export type BrowserAccess = Owned<"access">;
 export interface EventPage {
@@ -89,6 +121,16 @@ export interface MockManagedShares extends ManagedShares {
       readonly description?: string;
     },
   ): Promise<TestShare>;
+  grant(
+    share: TestShare,
+    input: {
+      readonly as: ActorRef;
+      readonly expiresAt?: Date;
+      readonly label: string;
+      readonly operations: readonly ShareOperation[];
+    },
+  ): Promise<MockShareGrant>;
+  revokeGrant(grant: MockShareGrant): Promise<void>;
 }
 export interface MockOptions {
   readonly clock?: "realtime" | { readonly start: string };
@@ -120,6 +162,7 @@ export interface MockRunSummary {
   readonly id: string;
   readonly logicalUploadedBytes: number;
 }
+export type MockShareGrant = Owned<"mock-share-grant">;
 export interface MockSia {
   /** The label appears in driver receipts; only the returned reference selects this actor. */
   actor(label: string): ActorRef;
@@ -127,6 +170,7 @@ export interface MockSia {
   application(input: {
     readonly access: BrowserAccess;
     readonly as: ActorRef;
+    readonly shareGrants?: readonly MockShareGrant[];
   }): ApplicationPort;
   close(): Promise<void>;
   readonly faults: MockFaults;
@@ -226,6 +270,11 @@ export interface RunResult<T, Summary extends RunSummary = RunSummary> {
   readonly value: T;
 }
 export type RunSummary = LiveRunSummary | MockRunSummary;
+export interface ShareInspection {
+  readonly contains: boolean | null;
+  readonly state: "active" | "ended" | "expired";
+}
+export type ShareOperation = "add" | "end" | "remove";
 export type SiaRun = LiveRun | MockRun;
 export interface TestFile {
   readonly name: string;

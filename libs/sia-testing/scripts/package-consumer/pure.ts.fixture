@@ -1,6 +1,8 @@
 /** Checks scoped run and reader declarations without MSW or Playwright installed. */
 import { createMockSia, bytesFixture } from "@lumeweb/sia-testing/mock";
 import { createMockApplication, createMockOwnerShares, createMockReader } from "@lumeweb/sia-testing/client";
+import type { ApplicationShares, ApplicationShareRef, ApplicationShareTarget, ShareInspection, ShareOperation } from "@lumeweb/sia-testing/client";
+import type { MockShareGrant } from "@lumeweb/sia-testing/mock";
 import { startMockServer } from "@lumeweb/sia-testing/http";
 import { withSiaRun } from "@lumeweb/sia-testing/node";
 export const mock = createMockSia();
@@ -45,4 +47,26 @@ export async function typedConsumer() {
     await server.close();
     return size + logicalBytes + objectSize;
   });
+}
+
+export async function typedShareConsumer(run: import("@lumeweb/sia-testing/mock").MockRun) {
+  const actor = run.mock.actor("share editor");
+  const share = await run.shares.create({ objects: [] });
+  const operations: readonly ShareOperation[] = ["add", "remove", "end"];
+  const grant: MockShareGrant = await run.shares.grant(share, { as: actor, label: "list", operations, expiresAt: new Date(Date.now() + 10000) });
+  const server = await startMockServer(run.mock);
+  try {
+    const connection = server.connection({ access: run.ownerAccess, as: actor, shareGrants: [grant] });
+    const writer = createMockApplication(connection, connection.credential);
+    const shares: ApplicationShares = writer.shares;
+    const target: ApplicationShareTarget = (await shares.targets())[0]!;
+    const ref: ApplicationShareRef = target.ref;
+    const inspection: ShareInspection = await shares.inspect(ref, null);
+    await shares.end(ref);
+    // @ts-expect-error Driver grants are not application refs.
+    await shares.end(grant);
+    await writer.close();
+    await run.shares.revokeGrant(grant);
+    return inspection;
+  } finally { await server.close(); }
 }

@@ -22,16 +22,21 @@ import { createMockAuthentication, fixturePhrase } from "./authentication.js";
 import { type MockCredential, registerRuntime } from "./runtime.js";
 import type {
   ActorRef,
+  ApplicationShareRef,
+  ApplicationShareTarget,
   BrowserAccess,
   MockOptions,
   MockRun,
   MockRunOptions,
+  MockShareGrant,
   MockSia,
   OwnerShareDetails,
   OwnerShareRef,
   ReadObject,
   ReadPort,
   RunLimits,
+  ShareInspection,
+  ShareOperation,
   TestObject,
   TestShare,
 } from "./types.js";
@@ -55,6 +60,7 @@ interface Context {
   shares: Map<string, ShareRecord>;
   signal: AbortSignal;
   state: "closed" | "closing" | "open";
+  transportCleanup: Set<() => Promise<void>>;
   uploadedBytes: number;
 }
 interface Grant {
@@ -67,6 +73,15 @@ interface ObjectRecord {
   deletion?: Promise<void>;
   handle: TestObject;
   metadata: Uint8Array;
+}
+interface ShareGrantRecord {
+  actor: ActorRef;
+  context: Context;
+  expiresAt?: string;
+  label: string;
+  operations: readonly ShareOperation[];
+  revoked: boolean;
+  share: ShareRecord;
 }
 interface ShareRecord {
   handle: TestShare;
@@ -101,15 +116,24 @@ export function createMockSia(options: MockOptions = {}): MockSia {
     ApplicationObject,
     { context: Context; record: ObjectRecord }
   >();
+  const shareGrants = new WeakMap<MockShareGrant, ShareGrantRecord>();
   const mutations = createMutationControls(
     (selector) => {
       if (
         selector.stage !== "beforeCommit" ||
-        !["delete", "pin", "upload"].includes(selector.operation)
+        ![
+          "delete",
+          "pin",
+          "share-add",
+          "share-end",
+          "share-remove",
+          "upload",
+        ].includes(selector.operation)
       )
         throw failure("invalid-input", "Invalid mutation selector");
       if (selector.actor && !actors.has(selector.actor))
         throw failure("foreign-handle", "Unknown actor");
+      validateShareSelector(selector);
       if (selector.object && !applicationObjects.has(selector.object))
         throw failure("foreign-handle", "Unknown application object");
     },
@@ -225,6 +249,15 @@ export function createMockSia(options: MockOptions = {}): MockSia {
     context.state = "closing";
     context.abort.abort();
     context.cleanup = (async () => {
+      const transport = await Promise.allSettled(
+        [...context.transportCleanup].map((close) => close()),
+      );
+      context.cleanupErrors.push(
+        ...transport.flatMap((result) =>
+          result.status === "rejected" ? [result.reason as unknown] : [],
+        ),
+      );
+      context.transportCleanup.clear();
       await Promise.allSettled([...context.pending]);
       const errors: unknown[] = [...context.cleanupErrors];
       for (const record of context.shares.values()) {
@@ -262,17 +295,567 @@ export function createMockSia(options: MockOptions = {}): MockSia {
     return context.cleanup;
   }
 
+  function validateShareSelector(selector: {
+    actor?: ActorRef;
+    object?: unknown;
+    operation: string;
+    share?: MockShareGrant;
+  }) {
+    if (selector.share) {
+      const value = shareGrants.get(selector.share);
+      if (!value) throw failure("foreign-handle", "Unknown share grant");
+      open(value.context);
+      if (selector.actor && selector.actor !== value.actor)
+        throw failure("foreign-handle", "Grant actor does not match");
+      if (
+        !["share-add", "share-end", "share-inspect", "share-remove"].includes(
+          selector.operation,
+        )
+      )
+        throw failure("invalid-input", "Invalid share selector");
+    }
+    if (selector.operation.startsWith("share-") && selector.object)
+      throw failure("invalid-input", "Invalid share selector");
+  }
+  function grantAvailable(value: ShareGrantRecord): boolean {
+    return (
+      !value.revoked &&
+      value.context.state === "open" &&
+      (!value.expiresAt || now().getTime() < Date.parse(value.expiresAt))
+    );
+  }
+  function installedGrants(
+    handle: BrowserAccess,
+    actor: ActorRef,
+    input: readonly MockShareGrant[],
+  ) {
+    const owner = grants.get(handle);
+    if (!owner || owner.key !== null || owner.credential.kind !== "app-key")
+      throw failure("denied", "Owner access is unavailable");
+    open(owner.context);
+    const labels = new Set<string>();
+    return input.map((handle) => {
+      const value = shareGrants.get(handle);
+      if (!value || value.context !== owner.context || value.actor !== actor)
+        throw failure("foreign-handle", "Unknown share grant");
+      if (!grantAvailable(value))
+        throw failure("denied", "Share grant is unavailable");
+      if (labels.has(value.label))
+        throw failure("invalid-input", "Duplicate grant label");
+      labels.add(value.label);
+      return { handle, value };
+    });
+  }
   function validateReadSelector(selector: RequestSelector) {
+    validateShareSelector(selector);
     if (selector.actor && !actors.has(selector.actor))
       throw failure("foreign-handle", "Unknown actor");
     if (selector.object && !objects.has(selector.object))
       throw failure("foreign-handle", "Unknown fixture object");
     if (
-      ["delete", "events", "inspect", "pin", "upload"].includes(
-        selector.operation,
-      )
+      [
+        "delete",
+        "events",
+        "inspect",
+        "pin",
+        "share-add",
+        "share-end",
+        "share-remove",
+        "upload",
+      ].includes(selector.operation)
     )
       throw failure("invalid-input", "Read control required");
+  }
+  function createApplication(
+    handle: BrowserAccess,
+    actor: ActorRef,
+    bindings: ReturnType<typeof installedGrants>,
+  ): ApplicationPort {
+    environmentOpen();
+    if (!actors.has(actor)) throw failure("foreign-handle", "Unknown actor");
+    const shareRefs = new WeakMap<
+      ApplicationShareRef,
+      (typeof bindings)[number]
+    >();
+    const targets: ApplicationShareTarget[] = bindings.map((binding) => {
+      const ref = Object.freeze(Object.create(null)) as ApplicationShareRef;
+      shareRefs.set(ref, binding);
+      return {
+        label: binding.value.label,
+        operations: [...binding.value.operations],
+        ref,
+        ...(binding.value.expiresAt
+          ? { expiresAt: binding.value.expiresAt }
+          : {}),
+      };
+    });
+    const grant = grants.get(handle);
+    const abort = new AbortController();
+    const pending = new Set<Promise<unknown>>();
+    let closing: Promise<void> | undefined;
+    const cleanupErrors: unknown[] = [];
+    function authorize() {
+      if (abort.signal.aborted)
+        throw failure("closed", "Application port is closed");
+      if (!grant || grant.key !== null || grant.credential.kind !== "app-key")
+        throw failure("denied", "Owner access is unavailable");
+      open(grant.context);
+      return grant.context;
+    }
+    function owned(context: Context, object: ApplicationObject) {
+      const value = applicationObjects.get(object);
+      if (!value || value.context !== context)
+        throw failure("foreign-handle", "Unknown application object");
+      return value.record;
+    }
+    function call<T>(
+      signal: AbortSignal | undefined,
+      action: (context: Context, signal: AbortSignal) => Promise<T> | T,
+      prepare?: () => void,
+    ): Promise<T> {
+      const callSignal = AbortSignal.any([
+        abort.signal,
+        ...(grant ? [grant.context.signal] : []),
+        ...(signal ? [signal] : []),
+      ]);
+      let preparationError: unknown;
+      let preparationFailed = false;
+      const promise = Promise.resolve().then(() => {
+        if (preparationFailed) throw preparationError;
+        callSignal.throwIfAborted();
+        const context = authorize();
+        return track(context, () => action(context, callSignal));
+      });
+      pending.add(promise);
+      try {
+        prepare?.();
+      } catch (error) {
+        preparationFailed = true;
+        preparationError = error;
+      }
+      void promise.then(
+        () => pending.delete(promise),
+        (error: unknown) => {
+          pending.delete(promise);
+          if (error instanceof AggregateError) {
+            cleanupErrors.push(error);
+            grant?.context.cleanupErrors.push(error);
+          }
+        },
+      );
+      return promise;
+    }
+    async function mutate<T>(
+      _context: Context,
+      signal: AbortSignal,
+      operation: "delete" | "pin" | "upload",
+      objectId: string | undefined,
+      action: (receipt: RequestReceipt) => Promise<T>,
+    ): Promise<T> {
+      const receipt = await mutations.begin(actor, operation, objectId, signal);
+      try {
+        signal.throwIfAborted();
+        authorize();
+        const value = await action(receipt);
+        mutations.afterCommit(receipt);
+        receipt.status = "completed";
+        return value;
+      } catch (error) {
+        receipt.status = signal.aborted ? "cancelled" : "failed";
+        throw error;
+      }
+    }
+    function shareAuthority(
+      context: Context,
+      ref: ApplicationShareRef,
+      operation?: ShareOperation,
+    ) {
+      const binding = shareRefs.get(ref);
+      if (!binding)
+        throw failure("foreign-handle", "Unknown application share");
+      const value = binding.value;
+      if (value.context !== context || !grantAvailable(value))
+        throw failure("denied", "Share grant is unavailable");
+      if (operation && !value.operations.includes(operation))
+        throw failure("denied", "Share operation is unavailable");
+      return binding;
+    }
+    function lifecycle(
+      context: Context,
+      value: ShareGrantRecord,
+    ): ShareInspection["state"] {
+      if (value.share.revoked) return "ended";
+      const expiry = context.network!.model.getSharingKey(
+        context.id,
+        value.share.handle.id,
+      ).expiresAt;
+      return expiry && now().getTime() >= Date.parse(expiry)
+        ? "expired"
+        : "active";
+    }
+    function objectId(id: null | string) {
+      if (id !== null && (typeof id !== "string" || !/^[a-f0-9]{64}$/.test(id)))
+        throw failure("invalid-input", "Invalid object ID");
+    }
+    function shareMutation(
+      ref: ApplicationShareRef,
+      operation: ShareOperation,
+      signal: AbortSignal | undefined,
+      object?: ApplicationObject,
+      selectedId?: string,
+    ) {
+      return call(signal, async (context, signal) => {
+        const binding = shareAuthority(context, ref, operation);
+        if (operation === "remove") {
+          if (selectedId === null)
+            throw failure("invalid-input", "Invalid object ID");
+          objectId(selectedId!);
+        }
+        const record =
+          operation === "add" ? owned(context, object!) : undefined;
+        const check = () => {
+          signal.throwIfAborted();
+          authorize();
+          shareAuthority(context, ref, operation);
+          const state = lifecycle(context, binding.value);
+          if (state === "expired" || (state === "ended" && operation !== "end"))
+            throw failure("denied", "Sharing key is unavailable");
+          if (
+            record &&
+            (record.deleted ||
+              !context.network!.model.object(context.id, record.handle.id))
+          )
+            throw failure("denied", "Add requires a pinned object");
+          return state;
+        };
+        check();
+        const id = record?.handle.id ?? selectedId;
+        const receipt = await mutations.begin(
+          actor,
+          `share-${operation}`,
+          id,
+          signal,
+          { grant: binding.handle, id: binding.value.share.handle.id },
+        );
+        try {
+          const state = check();
+          const model = context.network!.model;
+          const shareId = binding.value.share.handle.id;
+          // No await may separate current authority, model effects, fixture state and receipt attribution.
+          if (operation === "end") {
+            if (state !== "ended") {
+              model.revokeSharingKey(context.id, shareId);
+              binding.value.share.revoked = true;
+              receipt.committed = true;
+            }
+          } else {
+            const contains = model.hasOwnedSharedObject(
+              context.id,
+              shareId,
+              id!,
+            );
+            if (operation === "add" && !contains) {
+              model.attachSharedObject(context.id, shareId, {
+                dataSignature: "mock",
+                encryptedDataKey: "mock",
+                objectID: id!,
+              });
+              receipt.committed = true;
+            } else if (operation === "remove" && contains) {
+              model.detachSharedObject(context.id, shareId, id!);
+              receipt.committed = true;
+            }
+          }
+          receipt.status = "completed";
+        } catch (error) {
+          receipt.status = signal.aborted ? "cancelled" : "failed";
+          throw error;
+        }
+      });
+    }
+    return {
+      close() {
+        abort.abort();
+        return (closing ??= Promise.allSettled([...pending]).then(() => {
+          if (cleanupErrors.length)
+            throw new AggregateError(
+              cleanupErrors,
+              "Application source cleanup failed",
+            );
+        }));
+      },
+      delete(object, options = {}) {
+        return call(options.signal, async (context, signal) => {
+          const record = owned(context, object);
+          await mutate(
+            context,
+            signal,
+            "delete",
+            record.handle.id,
+            async (receipt) => {
+              // Sharing the SDK call's signal or receipt would attribute one caller's cancellation to another.
+              while (record.deletion) {
+                await withAbort(
+                  record.deletion.catch(() => undefined),
+                  signal,
+                );
+              }
+              signal.throwIfAborted();
+              authorize();
+              if (record.deleted) return;
+              const deletion = (record.deletion = (async () => {
+                const complete = () => {
+                  receipt.committed = true;
+                  record.deleted = true;
+                  record.metadata = new Uint8Array();
+                };
+                if (context.network!.model.object(context.id, record.handle.id))
+                  await context.sdk!.deleteObject(record.handle.id, {
+                    prepareCommit: () => {
+                      authorize();
+                      return complete;
+                    },
+                    signal,
+                  });
+                else {
+                  context.network!.discardUpload(context.id, record.handle.id);
+                  complete();
+                }
+              })());
+              try {
+                await deletion;
+              } finally {
+                if (record.deletion === deletion) delete record.deletion;
+              }
+            },
+          );
+        });
+      },
+      events(input) {
+        return call(input.signal, (context) => {
+          const { cursor, limit } = input;
+          if (!Number.isSafeInteger(limit) || limit < 1 || limit > 1000)
+            throw invalidInput(
+              "limit",
+              "limit must be an integer from 1 to 1000",
+            );
+          if (
+            cursor !== null &&
+            (!cursor ||
+              typeof cursor.after !== "string" ||
+              !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.000Z$/.test(cursor.after) ||
+              !Number.isFinite(Date.parse(cursor.after)) ||
+              new Date(cursor.after).toISOString() !== cursor.after ||
+              typeof cursor.id !== "string" ||
+              !/^[a-f0-9]{64}$/.test(cursor.id))
+          )
+            throw invalidInput("cursor", "Invalid event cursor");
+          const events = context
+            .network!.model.objectEvents(context.id)
+            .map((row) => ({
+              deleted: row.deleted,
+              id: row.key,
+              updatedAt: row.updatedAt,
+            }))
+            .sort(
+              (a, b) =>
+                a.updatedAt.localeCompare(b.updatedAt) ||
+                a.id.localeCompare(b.id),
+            )
+            .filter(
+              (row) =>
+                !cursor ||
+                row.updatedAt > cursor.after ||
+                (row.updatedAt === cursor.after && row.id > cursor.id),
+            )
+            .slice(0, limit);
+          const last = events.at(-1);
+          return {
+            done: events.length < limit,
+            events,
+            nextCursor: last ? { after: last.updatedAt, id: last.id } : cursor,
+          };
+        });
+      },
+      inspect(object, options = {}) {
+        return call(options.signal, (context) => {
+          const record = owned(context, object);
+          return record.deleted
+            ? "missing"
+            : context.network!.model.object(context.id, record.handle.id)
+              ? "pinned"
+              : "uploaded";
+        });
+      },
+      pin(object, options = {}) {
+        let metadata: Uint8Array | undefined;
+        return call(
+          options.signal,
+          async (context, signal) => {
+            const record = owned(context, object);
+            if (record.deleted) throw failure("not-found", "Object is missing");
+            await mutate(
+              context,
+              signal,
+              "pin",
+              record.handle.id,
+              async (receipt) => {
+                if (record.deleted)
+                  throw failure("not-found", "Object is missing");
+                await context.sdk!.pinObject(
+                  { id: () => record.handle.id },
+                  {
+                    prepareCommit: () => {
+                      if (record.deleted)
+                        throw failure("not-found", "Object is missing");
+                      return () => {
+                        if (metadata !== undefined) record.metadata = metadata;
+                        receipt.committed = true;
+                      };
+                    },
+                    signal,
+                  },
+                );
+              },
+            );
+          },
+          () => {
+            const source = options.metadata;
+            if (source !== undefined)
+              metadata = snapshotApplicationMetadata(source);
+          },
+        );
+      },
+      shares: {
+        add(ref, object, options = {}) {
+          return shareMutation(ref, "add", options.signal, object);
+        },
+        end(ref, options = {}) {
+          return shareMutation(ref, "end", options.signal);
+        },
+        inspect(ref, id, options = {}) {
+          return call(options.signal, async (context, signal) => {
+            const binding = shareAuthority(context, ref);
+            objectId(id);
+            const receipt = await controls.begin(
+              actor,
+              "share-inspect",
+              id ?? undefined,
+              signal,
+              { grant: binding.handle, id: binding.value.share.handle.id },
+            );
+            try {
+              signal.throwIfAborted();
+              authorize();
+              shareAuthority(context, ref);
+              const state = lifecycle(context, binding.value);
+              const contains =
+                state === "ended" || id === null
+                  ? null
+                  : context.network!.model.hasOwnedSharedObject(
+                      context.id,
+                      binding.value.share.handle.id,
+                      id,
+                    );
+              receipt.status = "completed";
+              return { contains, state };
+            } catch (error) {
+              receipt.status = signal.aborted ? "cancelled" : "failed";
+              throw error;
+            }
+          });
+        },
+        remove(ref, id, options = {}) {
+          return shareMutation(ref, "remove", options.signal, undefined, id);
+        },
+        targets(options = {}) {
+          return call(options.signal, async (_context, signal) => {
+            const receipt = await controls.begin(
+              actor,
+              "share-targets",
+              undefined,
+              signal,
+            );
+            try {
+              signal.throwIfAborted();
+              authorize();
+              const result = targets
+                .filter((_, index) => grantAvailable(bindings[index]!.value))
+                .map((target) => ({
+                  ...target,
+                  operations: [...target.operations],
+                }));
+              receipt.status = "completed";
+              return result;
+            } catch (error) {
+              receipt.status = signal.aborted ? "cancelled" : "failed";
+              throw error;
+            }
+          });
+        },
+      },
+      upload(input) {
+        return call(input.signal, async (context, signal) => {
+          const file = {
+            name: input.file.name,
+            open: input.file.open.bind(input.file),
+            sha256: input.file.sha256,
+            sizeBytes: input.file.sizeBytes,
+          };
+          let name = input.name;
+          // oxlint-disable-next-line typescript/prefer-nullish-coalescing -- Null must reject rather than select the file label.
+          if (name === undefined) name = file.name;
+          const metadata = snapshotApplicationMetadata(input.metadata);
+          integer(file.sizeBytes);
+          if (
+            typeof name !== "string" ||
+            !name ||
+            name.length > 1024 ||
+            new TextEncoder().encode(name).length > 1024 ||
+            file.sizeBytes > 16 * 1024 * 1024 ||
+            !/^[0-9a-f]{64}$/.test(file.sha256)
+          )
+            throw failure("invalid-input", "Invalid application upload");
+          if (
+            context.objectAttempts >= context.limits.maxObjects ||
+            file.sizeBytes >
+              context.limits.maxLogicalUploadBytes - context.reservedBytes
+          )
+            throw failure("limit", "Run upload allowance exceeded");
+          context.objectAttempts++;
+          context.reservedBytes += file.sizeBytes;
+          let committed = false;
+          try {
+            const bytes = await readFixture(file, signal);
+            return await mutate(
+              context,
+              signal,
+              "upload",
+              undefined,
+              async (receipt) => {
+                const id = identifier();
+                await context.sdk!.upload(bytes, { id, signal });
+                committed = true;
+                receipt.committed = true;
+                const internal = Object.freeze({
+                  id,
+                  sha256: file.sha256,
+                  sizeBytes: bytes.length,
+                }) as TestObject;
+                const record = { deleted: false, handle: internal, metadata };
+                const object = Object.freeze({ id }) as ApplicationObject;
+                context.objects.set(id, record);
+                applicationObjects.set(object, { context, record });
+                context.uploadedBytes += bytes.length;
+                return object;
+              },
+            );
+          } finally {
+            if (!committed) context.reservedBytes -= file.sizeBytes;
+          }
+        });
+      },
+    };
   }
   const environment: MockSia = {
     actor(label) {
@@ -295,314 +878,12 @@ export function createMockSia(options: MockOptions = {}): MockSia {
         throw failure("invalid-input", "Mock clock is outside the date range");
       elapsed += milliseconds;
     },
-    application({ access: handle, as: actor }): ApplicationPort {
-      environmentOpen();
-      if (!actors.has(actor)) throw failure("foreign-handle", "Unknown actor");
-      const grant = grants.get(handle);
-      const abort = new AbortController();
-      const pending = new Set<Promise<unknown>>();
-      let closing: Promise<void> | undefined;
-      const cleanupErrors: unknown[] = [];
-      function authorize() {
-        if (abort.signal.aborted)
-          throw failure("closed", "Application port is closed");
-        if (!grant || grant.key !== null || grant.credential.kind !== "app-key")
-          throw failure("denied", "Owner access is unavailable");
-        open(grant.context);
-        return grant.context;
-      }
-      function owned(context: Context, object: ApplicationObject) {
-        const value = applicationObjects.get(object);
-        if (!value || value.context !== context)
-          throw failure("foreign-handle", "Unknown application object");
-        return value.record;
-      }
-      function call<T>(
-        signal: AbortSignal | undefined,
-        action: (context: Context, signal: AbortSignal) => Promise<T> | T,
-        prepare?: () => void,
-      ): Promise<T> {
-        const callSignal = AbortSignal.any([
-          abort.signal,
-          ...(grant ? [grant.context.signal] : []),
-          ...(signal ? [signal] : []),
-        ]);
-        let preparationError: unknown;
-        let preparationFailed = false;
-        const promise = Promise.resolve().then(() => {
-          if (preparationFailed) throw preparationError;
-          callSignal.throwIfAborted();
-          const context = authorize();
-          return track(context, () => action(context, callSignal));
-        });
-        pending.add(promise);
-        try {
-          prepare?.();
-        } catch (error) {
-          preparationFailed = true;
-          preparationError = error;
-        }
-        void promise.then(
-          () => pending.delete(promise),
-          (error: unknown) => {
-            pending.delete(promise);
-            if (error instanceof AggregateError) {
-              cleanupErrors.push(error);
-              grant?.context.cleanupErrors.push(error);
-            }
-          },
-        );
-        return promise;
-      }
-      async function mutate<T>(
-        _context: Context,
-        signal: AbortSignal,
-        operation: "delete" | "pin" | "upload",
-        objectId: string | undefined,
-        action: (receipt: RequestReceipt) => Promise<T>,
-      ): Promise<T> {
-        const receipt = await mutations.begin(
-          actor,
-          operation,
-          objectId,
-          signal,
-        );
-        try {
-          signal.throwIfAborted();
-          authorize();
-          const value = await action(receipt);
-          mutations.afterCommit(receipt);
-          receipt.status = "completed";
-          return value;
-        } catch (error) {
-          receipt.status = signal.aborted ? "cancelled" : "failed";
-          throw error;
-        }
-      }
-      return {
-        close() {
-          abort.abort();
-          return (closing ??= Promise.allSettled([...pending]).then(() => {
-            if (cleanupErrors.length)
-              throw new AggregateError(
-                cleanupErrors,
-                "Application source cleanup failed",
-              );
-          }));
-        },
-        delete(object, options = {}) {
-          return call(options.signal, async (context, signal) => {
-            const record = owned(context, object);
-            await mutate(
-              context,
-              signal,
-              "delete",
-              record.handle.id,
-              async (receipt) => {
-                // Sharing the SDK call's signal or receipt would attribute one caller's cancellation to another.
-                while (record.deletion) {
-                  await withAbort(
-                    record.deletion.catch(() => undefined),
-                    signal,
-                  );
-                }
-                signal.throwIfAborted();
-                authorize();
-                if (record.deleted) return;
-                const deletion = (record.deletion = (async () => {
-                  const complete = () => {
-                    receipt.committed = true;
-                    record.deleted = true;
-                    record.metadata = new Uint8Array();
-                  };
-                  if (
-                    context.network!.model.object(context.id, record.handle.id)
-                  )
-                    await context.sdk!.deleteObject(record.handle.id, {
-                      prepareCommit: () => {
-                        authorize();
-                        return complete;
-                      },
-                      signal,
-                    });
-                  else {
-                    context.network!.discardUpload(
-                      context.id,
-                      record.handle.id,
-                    );
-                    complete();
-                  }
-                })());
-                try {
-                  await deletion;
-                } finally {
-                  if (record.deletion === deletion) delete record.deletion;
-                }
-              },
-            );
-          });
-        },
-        events(input) {
-          return call(input.signal, (context) => {
-            const { cursor, limit } = input;
-            if (!Number.isSafeInteger(limit) || limit < 1 || limit > 1000)
-              throw invalidInput(
-                "limit",
-                "limit must be an integer from 1 to 1000",
-              );
-            if (
-              cursor !== null &&
-              (!cursor ||
-                typeof cursor.after !== "string" ||
-                !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.000Z$/.test(cursor.after) ||
-                !Number.isFinite(Date.parse(cursor.after)) ||
-                new Date(cursor.after).toISOString() !== cursor.after ||
-                typeof cursor.id !== "string" ||
-                !/^[a-f0-9]{64}$/.test(cursor.id))
-            )
-              throw invalidInput("cursor", "Invalid event cursor");
-            const events = context
-              .network!.model.objectEvents(context.id)
-              .map((row) => ({
-                deleted: row.deleted,
-                id: row.key,
-                updatedAt: row.updatedAt,
-              }))
-              .sort(
-                (a, b) =>
-                  a.updatedAt.localeCompare(b.updatedAt) ||
-                  a.id.localeCompare(b.id),
-              )
-              .filter(
-                (row) =>
-                  !cursor ||
-                  row.updatedAt > cursor.after ||
-                  (row.updatedAt === cursor.after && row.id > cursor.id),
-              )
-              .slice(0, limit);
-            const last = events.at(-1);
-            return {
-              done: events.length < limit,
-              events,
-              nextCursor: last
-                ? { after: last.updatedAt, id: last.id }
-                : cursor,
-            };
-          });
-        },
-        inspect(object, options = {}) {
-          return call(options.signal, (context) => {
-            const record = owned(context, object);
-            return record.deleted
-              ? "missing"
-              : context.network!.model.object(context.id, record.handle.id)
-                ? "pinned"
-                : "uploaded";
-          });
-        },
-        pin(object, options = {}) {
-          let metadata: Uint8Array | undefined;
-          return call(
-            options.signal,
-            async (context, signal) => {
-              const record = owned(context, object);
-              if (record.deleted)
-                throw failure("not-found", "Object is missing");
-              await mutate(
-                context,
-                signal,
-                "pin",
-                record.handle.id,
-                async (receipt) => {
-                  if (record.deleted)
-                    throw failure("not-found", "Object is missing");
-                  await context.sdk!.pinObject(
-                    { id: () => record.handle.id },
-                    {
-                      prepareCommit: () => {
-                        if (record.deleted)
-                          throw failure("not-found", "Object is missing");
-                        return () => {
-                          if (metadata !== undefined)
-                            record.metadata = metadata;
-                          receipt.committed = true;
-                        };
-                      },
-                      signal,
-                    },
-                  );
-                },
-              );
-            },
-            () => {
-              const source = options.metadata;
-              if (source !== undefined)
-                metadata = snapshotApplicationMetadata(source);
-            },
-          );
-        },
-        upload(input) {
-          return call(input.signal, async (context, signal) => {
-            const file = {
-              name: input.file.name,
-              open: input.file.open.bind(input.file),
-              sha256: input.file.sha256,
-              sizeBytes: input.file.sizeBytes,
-            };
-            let name = input.name;
-            // oxlint-disable-next-line typescript/prefer-nullish-coalescing -- Null must reject rather than select the file label.
-            if (name === undefined) name = file.name;
-            const metadata = snapshotApplicationMetadata(input.metadata);
-            integer(file.sizeBytes);
-            if (
-              typeof name !== "string" ||
-              !name ||
-              name.length > 1024 ||
-              new TextEncoder().encode(name).length > 1024 ||
-              file.sizeBytes > 16 * 1024 * 1024 ||
-              !/^[0-9a-f]{64}$/.test(file.sha256)
-            )
-              throw failure("invalid-input", "Invalid application upload");
-            if (
-              context.objectAttempts >= context.limits.maxObjects ||
-              file.sizeBytes >
-                context.limits.maxLogicalUploadBytes - context.reservedBytes
-            )
-              throw failure("limit", "Run upload allowance exceeded");
-            context.objectAttempts++;
-            context.reservedBytes += file.sizeBytes;
-            let committed = false;
-            try {
-              const bytes = await readFixture(file, signal);
-              return await mutate(
-                context,
-                signal,
-                "upload",
-                undefined,
-                async (receipt) => {
-                  const id = identifier();
-                  await context.sdk!.upload(bytes, { id, signal });
-                  committed = true;
-                  receipt.committed = true;
-                  const internal = Object.freeze({
-                    id,
-                    sha256: file.sha256,
-                    sizeBytes: bytes.length,
-                  }) as TestObject;
-                  const record = { deleted: false, handle: internal, metadata };
-                  const object = Object.freeze({ id }) as ApplicationObject;
-                  context.objects.set(id, record);
-                  applicationObjects.set(object, { context, record });
-                  context.uploadedBytes += bytes.length;
-                  return object;
-                },
-              );
-            } finally {
-              if (!committed) context.reservedBytes -= file.sizeBytes;
-            }
-          });
-        },
-      };
+    application({ access: handle, as: actor, shareGrants: installed = [] }) {
+      return createApplication(
+        handle,
+        actor,
+        installed.length ? installedGrants(handle, actor, installed) : [],
+      );
     },
     async close() {
       closed = true;
@@ -903,6 +1184,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
           ? AbortSignal.any([abort.signal, runOptions.signal])
           : abort.signal,
         state: "open",
+        transportCleanup: new Set(),
         uploadedBytes: 0,
       };
       active.add(context);
@@ -1073,12 +1355,65 @@ export function createMockSia(options: MockOptions = {}): MockSia {
               );
             });
           },
+          async grant(share, input) {
+            return track(context, () => {
+              const record = ownedShare(context, share);
+              if (!actors.has(input.as))
+                throw failure("foreign-handle", "Unknown actor");
+              const expiry = context.network!.model.getSharingKey(
+                id,
+                share.id,
+              ).expiresAt;
+              if (
+                record.revoked ||
+                (expiry && now().getTime() >= Date.parse(expiry))
+              )
+                throw failure("denied", "Sharing key is unavailable");
+              const operations = [...input.operations];
+              const deadline = input.expiresAt?.getTime();
+              if (
+                typeof input.label !== "string" ||
+                !input.label.trim() ||
+                !operations.length ||
+                new Set(operations).size !== operations.length ||
+                operations.some(
+                  (op) => !["add", "end", "remove"].includes(op),
+                ) ||
+                (deadline !== undefined &&
+                  (!Number.isFinite(deadline) || deadline <= now().getTime()))
+              )
+                throw failure("invalid-input", "Invalid share grant");
+              const handle = Object.freeze(
+                Object.create(null),
+              ) as MockShareGrant;
+              shareGrants.set(handle, {
+                actor: input.as,
+                context,
+                label: input.label,
+                operations,
+                revoked: false,
+                share: record,
+                ...(deadline === undefined
+                  ? {}
+                  : { expiresAt: new Date(deadline).toISOString() }),
+              });
+              return handle;
+            });
+          },
           async revoke(share) {
             return track(context, () => {
               const record = ownedShare(context, share);
               if (!record.revoked)
                 context.network!.model.revokeSharingKey(id, share.id);
               record.revoked = true;
+            });
+          },
+          async revokeGrant(handle) {
+            return track(context, () => {
+              const value = shareGrants.get(handle);
+              if (!value || value.context !== context)
+                throw failure("foreign-handle", "Unknown share grant");
+              value.revoked = true;
             });
           },
         },
@@ -1158,6 +1493,22 @@ export function createMockSia(options: MockOptions = {}): MockSia {
       if (!grant || grant.context.state !== "open")
         throw failure("denied", "Read access is unavailable");
       return { ...grant.credential };
+    },
+    installShareGrants(handle, actor, installed) {
+      // Lazy sessions retain installed identities; withdrawal changes roster visibility, not installation validity.
+      const bindings = installed.length
+        ? installedGrants(handle, actor, installed)
+        : [];
+      return () => createApplication(handle, actor, bindings);
+    },
+    onRunCleanup(handle, close) {
+      const value = grants.get(handle);
+      if (!value) throw failure("denied", "Owner access is unavailable");
+      open(value.context);
+      value.context.transportCleanup.add(close);
+      return () => {
+        value.context.transportCleanup.delete(close);
+      };
     },
   });
   return environment;

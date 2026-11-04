@@ -18,8 +18,13 @@ export type { ReadObject, ReadPort } from "./testing/types.js";
 export type {
   ApplicationObject,
   ApplicationPort,
+  ApplicationShareRef,
+  ApplicationShares,
+  ApplicationShareTarget,
   EventPage,
   ObjectCursor,
   ObjectEvent,
+  ShareInspection,
+  ShareOperation,
   TestFile,
 } from "./testing/types.js";

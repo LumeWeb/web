@@ -328,3 +328,94 @@ test("an iframe caller abort cancels a held direct read before readers close", a
     },
   });
 });
+
+test("a browser edits and inspects a granted share over HTTP", async ({
+  page,
+}) => {
+  const { createMockSia } = await import("../../../src/mock.js");
+  const { startMockServer } = await import("../../../src/testing/http.js");
+  const mock = createMockSia();
+  const server = await startMockServer(mock);
+  try {
+    await mock.run(
+      {
+        app: {
+          description: "Browser grants",
+          id: "a".repeat(64),
+          name: "Grants",
+          serviceUrl: "https://example.invalid",
+        },
+      },
+      async (run) => {
+        const actor = mock.actor("browser editor");
+        const share = await run.shares.create({ objects: [] });
+        const grant = await run.shares.grant(share, {
+          as: actor,
+          label: "reading",
+          operations: ["add", "remove", "end"],
+        });
+        const connection = server.connection({
+          access: run.ownerAccess,
+          as: actor,
+          shareGrants: [grant],
+        });
+        await page.goto("/scoped.html");
+        const entry = `/@fs${new URL("../../../src/client.ts", import.meta.url).pathname}`;
+        const fixtures = `/@fs${new URL("../../../src/mock.ts", import.meta.url).pathname}`;
+        const result = await page.evaluate(
+          async ({ connection, entry, fixtures }) => {
+            const { createMockApplication } = (await import(
+              entry
+            )) as typeof import("../../../src/client.js");
+            const { bytesFixture } = (await import(
+              fixtures
+            )) as typeof import("../../../src/mock.js");
+            const writer = createMockApplication(
+              connection,
+              connection.credential,
+            );
+            try {
+              const [target] = await writer.shares.targets();
+              const object = await writer.upload({
+                file: await bytesFixture({
+                  bytes: Uint8Array.of(8, 9),
+                  name: "note",
+                }),
+                metadata: new Uint8Array(),
+              });
+              await writer.pin(object);
+              await writer.shares.add(target!.ref, object);
+              const added = await writer.shares.inspect(target!.ref, object.id);
+              await writer.shares.remove(target!.ref, object.id);
+              const removed = await writer.shares.inspect(
+                target!.ref,
+                object.id,
+              );
+              await writer.shares.end(target!.ref);
+              return {
+                added,
+                ended: await writer.shares.inspect(target!.ref, null),
+                label: target!.label,
+                object: await writer.inspect(object),
+                removed,
+              };
+            } finally {
+              await writer.close();
+            }
+          },
+          { connection, entry, fixtures },
+        );
+        expect(result).toEqual({
+          added: { contains: true, state: "active" },
+          ended: { contains: null, state: "ended" },
+          label: "reading",
+          object: "pinned",
+          removed: { contains: false, state: "active" },
+        });
+      },
+    );
+  } finally {
+    await server.close();
+    await mock.close();
+  }
+});

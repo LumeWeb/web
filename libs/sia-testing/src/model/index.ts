@@ -47,6 +47,11 @@ export interface IndexdModel {
   ): void;
   getSharingKey(ownerId: string, publicKey: string): SharingKey;
   getSlab(accountId: string, slabId: string): ModelSlab;
+  hasOwnedSharedObject(
+    ownerId: string,
+    publicKey: string,
+    objectId: string,
+  ): boolean;
   hosts(accountId: string, filter?: HostFilter): ModelHost[];
   listOwnedSharedObjects(
     ownerId: string,
@@ -467,6 +472,11 @@ export function createIndexdModel(
       if (!accountSlabs.get(accountId)!.has(slabId) || !slabs.has(slabId))
         throw new Error(`slab ${slabId} not found`);
       return { ...slabs.get(slabId)! };
+    },
+    hasOwnedSharedObject(ownerId, publicKey, objectId) {
+      const record = ownedShare(ownerId, publicKey);
+      if (record.revoked) throw new Error("sharing key unavailable");
+      return record.attachments.has(objectId);
     },
     hosts(accountId, filter = {}) {
       requireAccount(accountId);

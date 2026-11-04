@@ -9,7 +9,9 @@ import { createApplicationTransport } from "./application-transport.js";
 import { type MockCredential, mockRuntime } from "./runtime.js";
 import type {
   ActorRef,
+  ApplicationPort,
   BrowserAccess,
+  MockShareGrant,
   MockSia,
   OwnerShareRef,
   ReadObject,
@@ -25,6 +27,7 @@ export interface MockEndpoint {
   connection(input: {
     readonly access: BrowserAccess;
     readonly as: ActorRef;
+    readonly shareGrants?: readonly MockShareGrant[];
   }): MockConnection & { readonly credential: MockCredential };
   readonly url: string;
 }
@@ -40,25 +43,65 @@ export function createMockEndpoint(
   const clients = new Map<
     string,
     {
+      abort: AbortController;
       actor: ActorRef;
+      cleanupErrors: Set<AggregateError>;
+      createApplication: () => ApplicationPort;
       credential: string;
       kind: MockCredential["kind"];
+      pending: Set<Promise<Response>>;
+      release: () => void;
       shares: Map<string, OwnerShareRef>;
       tokens: WeakMap<OwnerShareRef, string>;
     }
   >();
   const runtime = mockRuntime(mock);
   const application = createApplicationTransport(mock, requestBody);
+  let closed = false;
   const endpoint: MockEndpoint = {
-    connection({ access, as }) {
+    connection({ access, as, shareGrants = [] }) {
+      if (closed)
+        throw Object.assign(new Error("Mock endpoint is closed"), {
+          code: "closed",
+        });
       const credential = runtime.credential(access);
+      const createApplication = runtime.installShareGrants(
+        access,
+        as,
+        shareGrants,
+      );
       const reader = mock.reader({ access, as });
       void reader.close();
       const client = crypto.randomUUID();
+      const abort = new AbortController();
+      const pending = new Set<Promise<Response>>();
+      const cleanupErrors = new Set<AggregateError>();
+      const release = runtime.onRunCleanup(access, async () => {
+        clients.delete(client);
+        abort.abort();
+        const results = await Promise.allSettled([...pending]);
+        for (const result of results) {
+          if (
+            result.status === "rejected" &&
+            result.reason instanceof AggregateError
+          )
+            cleanupErrors.add(result.reason);
+        }
+        if (cleanupErrors.size)
+          throw new AggregateError(
+            [...cleanupErrors],
+            "Application run cleanup failed",
+          );
+      });
       clients.set(client, {
+        abort,
         actor: as,
+        cleanupErrors,
+        createApplication,
         credential: credential.keyHex,
         kind: credential.kind,
+        pending,
+        release,
         shares: new Map(),
         tokens: new WeakMap(),
       });
@@ -127,12 +170,23 @@ export function createMockEndpoint(
             throw Object.assign(new Error("Invalid parameter"), {
               code: "invalid-input",
             });
-        return await application.dispatch(request, parts[1]!, {
+        const work = application.dispatch(request, parts[1]!, {
           access,
           actor: client.actor,
           client,
+          createApplication: client.createApplication,
           credential: credential.keyHex,
+          signal: client.abort.signal,
         });
+        client.pending.add(work);
+        try {
+          return await work;
+        } catch (error) {
+          if (error instanceof AggregateError) client.cleanupErrors.add(error);
+          throw error;
+        } finally {
+          client.pending.delete(work);
+        }
       }
       const allowed =
         parts[1] === "owner-shares"
@@ -280,7 +334,16 @@ export function createMockEndpoint(
       detach?.();
     }
   }
-  return { close: () => application.close(), dispatch, endpoint };
+  return {
+    close: () => {
+      closed = true;
+      for (const client of clients.values()) client.release();
+      clients.clear();
+      return application.close();
+    },
+    dispatch,
+    endpoint,
+  };
 }
 function wireObject(object: ReadObject) {
   return { ...object, metadata: [...object.metadata] };
