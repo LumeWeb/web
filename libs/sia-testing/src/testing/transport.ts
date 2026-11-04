@@ -28,7 +28,14 @@ export interface MockEndpoint {
   }): MockConnection & { readonly credential: MockCredential };
   readonly url: string;
 }
-export function createMockEndpoint(mock: MockSia, base: string) {
+export function createMockEndpoint(
+  mock: MockSia,
+  base: string,
+  requestBody?: (
+    request: Request,
+    onCleanupError: (error: unknown) => void,
+  ) => null | ReadableStream<Uint8Array>,
+) {
   const root = new URL("./sia-test/", base.endsWith("/") ? base : base + "/");
   const clients = new Map<
     string,
@@ -41,7 +48,7 @@ export function createMockEndpoint(mock: MockSia, base: string) {
     }
   >();
   const runtime = mockRuntime(mock);
-  const application = createApplicationTransport(mock);
+  const application = createApplicationTransport(mock, requestBody);
   const endpoint: MockEndpoint = {
     connection({ access, as }) {
       const credential = runtime.credential(access);
