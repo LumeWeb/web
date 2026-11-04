@@ -1,6 +1,6 @@
 module go.lumeweb.com/lbry-sdk/wasm
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/lbryio/lbcd v0.22.119
@@ -13,6 +13,6 @@ require (
 	github.com/btcsuite/btclog v0.0.0-20170628155309-84c8d2346e9f // indirect
 	github.com/lbryio/lbcutil v1.0.202 // indirect
 	github.com/mr-tron/base58 v1.2.0 // indirect
-	golang.org/x/crypto v0.44.0 // indirect
-	golang.org/x/text v0.31.0 // indirect
+	golang.org/x/crypto v0.52.0 // indirect
+	golang.org/x/text v0.37.0 // indirect
 )
