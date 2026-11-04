@@ -1,3 +1,5 @@
+import { setupServer } from "msw/node";
+import { createMockHandlers } from "../../src/msw.js";
 import { expect, it, vi } from "vitest";
 import { bytesFixture, createMockSia } from "../../src/mock.js";
 import { createMockApplication } from "../../src/client.js";
@@ -810,82 +812,228 @@ it("a lost pin reply closes the socket without completing an HTTP acknowledgemen
     await mock.close();
   }
 });
-it("raw app-pin JSON rejects malformed or oversized metadata without pinning", async () => {
-  const mock = createMockSia();
-  const server = await startMockServer(mock);
-  try {
-    await mock.run({ app }, async (run) => {
-      const connection = server.connection({
-        access: run.ownerAccess,
-        as: mock.actor("raw"),
-      });
-      const file = await bytesFixture({ bytes: Uint8Array.of(1), name: "n" });
-      const headers = {
-        authorization: `Bearer ${connection.credential.keyHex}`,
-      };
-      const post = (
-        operation: string,
-        body: string | Uint8Array<ArrayBuffer>,
-      ) =>
-        fetch(new URL(`${connection.client}/${operation}`, connection.url), {
-          body,
-          headers,
-          method: "POST",
+it.each(["http", "msw"] as const)(
+  "%s raw app-pin JSON rejects malformed bodies without pinning",
+  async (mode) => {
+    const mock = createMockSia();
+    const server =
+      mode === "http"
+        ? await startMockServer(mock)
+        : createMockHandlers(mock, { baseUrl: "https://raw.example.invalid/" });
+    const interception =
+      "handlers" in server && Array.isArray(server.handlers)
+        ? setupServer(
+            ...(server.handlers as ReturnType<
+              typeof createMockHandlers
+            >["handlers"]),
+          )
+        : undefined;
+    interception?.listen({ onUnhandledRequest: "error" });
+    try {
+      await mock.run({ app }, async (run) => {
+        const connection = server.connection({
+          access: run.ownerAccess,
+          as: mock.actor("raw"),
         });
-      const admission = await post(
-        "app-upload-admit",
-        JSON.stringify({
-          metadata: [10],
-          name: "n",
-          sha256: file.sha256,
-          sizeBytes: 1,
-        }),
-      );
-      const { token } = (await admission.json()) as { token: string };
-      const uploaded = await post(
-        `app-upload-body?token=${token}`,
-        Uint8Array.of(1),
-      );
-      const { id, ref } = (await uploaded.json()) as {
-        id: string;
-        ref: string;
-      };
-      for (const metadata of [
-        null,
-        {},
-        "bytes",
-        [-1],
-        [256],
-        [1.5],
-        ["1"],
-        new Array(1025).fill(1),
-      ]) {
-        const response = await post(
-          "app-pin",
-          JSON.stringify({ metadata, ref }),
+        const file = await bytesFixture({ bytes: Uint8Array.of(1), name: "n" });
+        const headers = {
+          authorization: `Bearer ${connection.credential.keyHex}`,
+        };
+        const post = (
+          operation: string,
+          body: string | Uint8Array<ArrayBuffer>,
+        ) =>
+          fetch(new URL(`${connection.client}/${operation}`, connection.url), {
+            body,
+            headers,
+            method: "POST",
+          });
+        const admission = await post(
+          "app-upload-admit",
+          JSON.stringify({
+            metadata: [10],
+            name: "n",
+            sha256: file.sha256,
+            sizeBytes: 1,
+          }),
         );
-        expect(response.status).toBe(400);
-        expect(await response.json()).toMatchObject({ code: "invalid-input" });
+        const { token } = (await admission.json()) as { token: string };
+        const uploaded = await post(
+          `app-upload-body?token=${token}`,
+          Uint8Array.of(1),
+        );
+        const { id, ref } = (await uploaded.json()) as {
+          id: string;
+          ref: string;
+        };
+        for (const metadata of [
+          null,
+          {},
+          "bytes",
+          [-1],
+          [256],
+          [1.5],
+          ["1"],
+          new Array(1025).fill(1),
+        ]) {
+          const response = await post(
+            "app-pin",
+            JSON.stringify({ metadata, ref }),
+          );
+          expect(response.status).toBe(400);
+          expect(await response.json()).toMatchObject({
+            code: "invalid-input",
+          });
+          expect(
+            await (await post("app-inspect", JSON.stringify({ ref }))).json(),
+          ).toBe("uploaded");
+        }
+        for (const body of ["{", "null", "[]"]) {
+          const response = await post("app-pin", body);
+          expect(response.status).toBe(400);
+          expect(await response.json()).toEqual({ code: "invalid-input" });
+          expect(
+            await (await post("app-inspect", JSON.stringify({ ref }))).json(),
+          ).toBe("uploaded");
+        }
+        const url = new URL(`${connection.client}/app-pin`, connection.url);
+        const wrongMethod = await fetch(url, { headers, method: "GET" });
+        expect(wrongMethod.status).toBe(405);
+        expect(await wrongMethod.json()).toEqual({ code: "invalid-input" });
+        const unauthenticated = await fetch(url, { body: "{", method: "POST" });
+        expect(unauthenticated.status).toBe(403);
+        expect(await unauthenticated.json()).toEqual({ code: "denied" });
+        expect(mock.history().filter((row) => row.operation === "pin")).toEqual(
+          [],
+        );
         expect(
-          await (await post("app-inspect", JSON.stringify({ ref }))).json(),
-        ).toBe("uploaded");
-      }
-      expect(
-        (await post("app-pin", JSON.stringify({ metadata: [20], ref }))).status,
-      ).toBe(200);
-      expect((await post("app-pin", JSON.stringify({ ref }))).status).toBe(200);
-      const reader = mock.reader({
-        access: run.ownerAccess,
-        as: mock.actor("reader"),
+          (await post("app-pin", JSON.stringify({ metadata: [20], ref })))
+            .status,
+        ).toBe(200);
+        expect((await post("app-pin", JSON.stringify({ ref }))).status).toBe(
+          200,
+        );
+        const reader = mock.reader({
+          access: run.ownerAccess,
+          as: mock.actor("reader"),
+        });
+        try {
+          expect((await reader.object(id)).metadata).toEqual(Uint8Array.of(20));
+        } finally {
+          await reader.close();
+        }
       });
-      try {
-        expect((await reader.object(id)).metadata).toEqual(Uint8Array.of(20));
-      } finally {
-        await reader.close();
-      }
-    });
-  } finally {
-    await server.close();
-    await mock.close();
-  }
-});
+    } finally {
+      await server.close();
+      interception?.close();
+      await mock.close();
+    }
+  },
+);
+
+it.each(["http", "msw"] as const)(
+  "%s incomplete raw bodies release admitted bytes and consume their token",
+  async (mode) => {
+    const mock = createMockSia();
+    const endpoint =
+      mode === "http"
+        ? await startMockServer(mock)
+        : createMockHandlers(mock, {
+            baseUrl: "https://raw-size.example.invalid/",
+          });
+    const interception =
+      "handlers" in endpoint && Array.isArray(endpoint.handlers)
+        ? setupServer(
+            ...(endpoint.handlers as ReturnType<
+              typeof createMockHandlers
+            >["handlers"]),
+          )
+        : undefined;
+    interception?.listen({ onUnhandledRequest: "error" });
+    try {
+      await mock.run(
+        { app, limits: { maxLogicalUploadBytes: 2, maxObjects: 2 } },
+        async (run) => {
+          const connection = endpoint.connection({
+            access: run.ownerAccess,
+            as: mock.actor("writer"),
+          });
+          // A zero tail lets a padded short body pass the digest check, so its byte count must reject it.
+          const file = await bytesFixture({
+            bytes: Uint8Array.of(1, 0),
+            name: "n",
+          });
+          const headers = {
+            authorization: `Bearer ${connection.credential.keyHex}`,
+          };
+          const admit = async () => {
+            const response = await fetch(
+              new URL(`${connection.client}/app-upload-admit`, connection.url),
+              {
+                body: JSON.stringify({
+                  metadata: [],
+                  name: "n",
+                  sha256: file.sha256,
+                  sizeBytes: 2,
+                }),
+                headers,
+                method: "POST",
+              },
+            );
+            expect(response.status).toBe(200);
+            return ((await response.json()) as { token: string }).token;
+          };
+          const post = (token: string, chunks: number[][]) =>
+            fetch(
+              new URL(
+                `${connection.client}/app-upload-body?token=${token}`,
+                connection.url,
+              ),
+              {
+                body: new ReadableStream<Uint8Array>({
+                  start(controller) {
+                    for (const chunk of chunks)
+                      controller.enqueue(Uint8Array.from(chunk));
+                    controller.close();
+                  },
+                }),
+                headers,
+                method: "POST",
+                ...{ duplex: "half" },
+              },
+            );
+          const token = await admit();
+          const incomplete = await post(token, [[1]]);
+          expect(incomplete.status).toBe(400);
+          expect(await incomplete.json()).toEqual({ code: "invalid-input" });
+          expect(
+            mock.history().filter((row) => row.operation === "upload"),
+          ).toEqual([]);
+          const replay = await post(token, [[1], [0]]);
+          expect(replay.status).toBe(403);
+          expect(await replay.json()).toEqual({ code: "denied" });
+          const exact = await post(await admit(), [[1], [0]]);
+          expect(exact.status).toBe(200);
+          const object = (await exact.json()) as { ref: string };
+          const pinned = await fetch(
+            new URL(`${connection.client}/app-pin`, connection.url),
+            {
+              body: JSON.stringify({ ref: object.ref }),
+              headers,
+              method: "POST",
+            },
+          );
+          expect(pinned.status).toBe(200);
+          await pinned.json();
+          expect(
+            mock.history().filter((row) => row.operation === "upload"),
+          ).toMatchObject([{ committed: true, status: "completed" }]);
+        },
+      );
+    } finally {
+      await endpoint.close();
+      interception?.close();
+      await mock.close();
+    }
+  },
+);

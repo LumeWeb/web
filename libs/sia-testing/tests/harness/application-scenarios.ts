@@ -22,6 +22,173 @@ export function applicationScenarios(
   ) => Promise<{ close: () => Promise<void>; writer: ApplicationPort }>,
   transport = false,
 ) {
+  it("quota rejection preserves staged bytes and upload metadata for a later pin", async () => {
+    const mock = createMockSia({ quotaBytes: 1 });
+    try {
+      await mock.run({ app }, async (run) => {
+        const { close, writer } = await connect(
+          mock,
+          run,
+          mock.actor("writer"),
+        );
+        const reader = mock.reader({
+          access: run.ownerAccess,
+          as: mock.actor("reader"),
+        });
+        try {
+          const occupying = await writer.upload({
+            file: await bytesFixture({
+              bytes: Uint8Array.of(1),
+              name: "occupied",
+            }),
+            metadata: new Uint8Array(),
+          });
+          await writer.pin(occupying);
+          const object = await writer.upload({
+            file: await bytesFixture({
+              bytes: Uint8Array.of(2),
+              name: "staged",
+            }),
+            metadata: Uint8Array.of(10),
+          });
+          await expect(
+            writer.pin(object, { metadata: Uint8Array.of(20) }),
+          ).rejects.toBeDefined();
+          expect(await writer.inspect(object)).toBe("uploaded");
+          await expect(reader.object(object.id)).rejects.toMatchObject({
+            code: "not-found",
+          });
+          expect(
+            mock.history().filter((row) => row.operation === "pin"),
+          ).toMatchObject([
+            { committed: true, status: "completed" },
+            { committed: false, status: "failed" },
+          ]);
+          expect(
+            (await writer.events({ cursor: null, limit: 10 })).events,
+          ).toEqual([]);
+          await mock.publish({ access: run.ownerAccess });
+          expect(
+            (await writer.events({ cursor: null, limit: 10 })).events.map(
+              (row) => row.id,
+            ),
+          ).toEqual([occupying.id]);
+          await writer.delete(occupying);
+          await writer.pin(object);
+          expect(await writer.inspect(object)).toBe("pinned");
+          expect((await reader.object(object.id)).metadata).toEqual(
+            Uint8Array.of(10),
+          );
+          expect(
+            new Uint8Array(
+              await new Response(await reader.download(object)).arrayBuffer(),
+            ),
+          ).toEqual(Uint8Array.of(2));
+        } finally {
+          await reader.close();
+          await writer.close();
+          await close();
+        }
+      });
+    } finally {
+      await mock.close();
+    }
+  });
+  it.each(["incomplete", "aborted"] as const)(
+    "a held %s source reserves bytes, then releases bytes without refunding its attempt",
+    async (ending) => {
+      const mock = createMockSia();
+      try {
+        await mock.run(
+          { app, limits: { maxLogicalUploadBytes: 1, maxObjects: 3 } },
+          async (run) => {
+            const { close, writer } = await connect(
+              mock,
+              run,
+              mock.actor("writer"),
+            );
+            const file = await bytesFixture({
+              bytes: Uint8Array.of(1),
+              name: "n",
+            });
+            let opened!: () => void;
+            const opening = new Promise<void>((resolve) => {
+              opened = resolve;
+            });
+            let controller!: ReadableStreamDefaultController<Uint8Array>;
+            const stream = new ReadableStream<Uint8Array>({
+              start(value) {
+                controller = value;
+              },
+            });
+            const abort = new AbortController();
+            const pending = writer
+              .upload({
+                file: {
+                  ...file,
+                  open() {
+                    opened();
+                    return stream;
+                  },
+                },
+                metadata: new Uint8Array(),
+                signal: abort.signal,
+              })
+              .catch((error: unknown) => error);
+            let otherOpens = 0;
+            const counted = {
+              ...file,
+              open() {
+                otherOpens++;
+                return file.open();
+              },
+            };
+            try {
+              await opening;
+              await expect(
+                writer.upload({ file: counted, metadata: new Uint8Array() }),
+              ).rejects.toMatchObject({ code: "limit" });
+              expect(otherOpens).toBe(0);
+              if (ending === "aborted") abort.abort();
+              else controller.close();
+              expect(await pending).toBeInstanceOf(Error);
+              expect(stream.locked).toBe(false);
+              await expect(
+                writer.upload({ file: counted, metadata: new Uint8Array() }),
+              ).resolves.toHaveProperty("id");
+              expect(otherOpens).toBe(1);
+              const empty = await bytesFixture({
+                bytes: new Uint8Array(),
+                name: "empty",
+              });
+              await writer.upload({ file: empty, metadata: new Uint8Array() });
+              let emptyOpens = 0;
+              await expect(
+                writer.upload({
+                  file: {
+                    ...empty,
+                    open() {
+                      emptyOpens++;
+                      return empty.open();
+                    },
+                  },
+                  metadata: new Uint8Array(),
+                }),
+              ).rejects.toMatchObject({ code: "limit" });
+              expect(emptyOpens).toBe(0);
+            } finally {
+              abort.abort();
+              await pending;
+              await writer.close();
+              await close();
+            }
+          },
+        );
+      } finally {
+        await mock.close();
+      }
+    },
+  );
   it("rejects non-string event cursor IDs without coercing them", async () => {
     const mock = createMockSia();
     try {

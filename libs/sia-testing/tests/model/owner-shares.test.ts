@@ -609,3 +609,114 @@ it.each(modes)(
       expect(mock.history()).toHaveLength(before);
     }),
 );
+
+it.each(modes)("%s owner totals count an attached zero-byte object", (mode) =>
+  fixture(mode, async (_mock, run, port) => {
+    const file = await bytesFixture({ bytes: new Uint8Array(), name: "empty" });
+    const object = await run.objects.upload({
+      file,
+      metadata: Uint8Array.of(7),
+      name: file.name,
+    });
+    const share = await run.shares.create({ objects: [] });
+    const ref = (await port.list({ limit: 1, offset: 0 })).items[0]!.ref;
+    expect((await port.detail(ref)).statistics).toEqual({
+      logicalBytes: 0,
+      objectCount: 0,
+    });
+    await run.shares.attach(share, object);
+    expect((await port.detail(ref)).statistics).toEqual({
+      logicalBytes: 0,
+      objectCount: 1,
+    });
+    expect((await port.objects(ref, { limit: 2, offset: 0 })).items).toEqual([
+      { id: object.id, metadata: Uint8Array.of(7), sizeBytes: 0 },
+    ]);
+  }),
+);
+
+it.each(modes)(
+  "%s full final contents pages require an empty continuation",
+  (mode) =>
+    fixture(mode, async (_mock, run, port) => {
+      const file = await bytesFixture({ bytes: Uint8Array.of(1), name: "n" });
+      const object = await run.objects.upload({
+        file,
+        metadata: new Uint8Array(),
+        name: file.name,
+      });
+      await run.shares.create({ objects: [object] });
+      const ref = (await port.list({ limit: 1, offset: 0 })).items[0]!.ref;
+      const first = await port.objects(ref, { limit: 1, offset: 0 });
+      expect(first).toEqual({
+        done: false,
+        items: [{ id: object.id, metadata: new Uint8Array(), sizeBytes: 1 }],
+        nextOffset: 1,
+      });
+      expect(await port.objects(ref, { limit: 1, offset: 1 })).toEqual({
+        done: true,
+        items: [],
+        nextOffset: 1,
+      });
+      expect(await port.objects(ref, { limit: 1, offset: 0 })).toEqual(first);
+    }),
+);
+
+it.each(modes)(
+  "%s owner pages read current membership and catalogue after edits",
+  (mode) =>
+    fixture(mode, async (_mock, run, port) => {
+      const file = await bytesFixture({ bytes: Uint8Array.of(1), name: "n" });
+      const objects = [];
+      for (let i = 0; i < 2; i++)
+        objects.push(
+          await run.objects.upload({
+            file,
+            metadata: new Uint8Array(),
+            name: file.name,
+          }),
+        );
+      const attached = await run.shares.create({
+        description: "attached",
+        objects,
+      });
+      const empty = await run.shares.create({
+        description: "empty",
+        objects: [],
+      });
+      const firstCatalogue = await port.list({ limit: 1, offset: 0 });
+      const catalogue = await port.list({ limit: 2, offset: 0 });
+      expect(catalogue.items.map((row) => row.description).sort()).toEqual([
+        "attached",
+        "empty",
+      ]);
+      const ref = catalogue.items.find(
+        (row) => row.description === "attached",
+      )!.ref;
+      const first = await port.objects(ref, { limit: 1, offset: 0 });
+      const removed = objects.find(
+        (object) => object.id === first.items[0]!.id,
+      )!;
+      const remaining = objects.find((object) => object !== removed)!;
+      await run.shares.detach(attached, removed);
+      expect(
+        await port.objects(ref, { limit: 1, offset: first.nextOffset }),
+      ).toEqual({ done: true, items: [], nextOffset: 1 });
+      expect((await port.objects(ref, { limit: 2, offset: 0 })).items).toEqual([
+        { id: remaining.id, metadata: new Uint8Array(), sizeBytes: 1 },
+      ]);
+      const firstShare =
+        firstCatalogue.items[0]!.description === "attached" ? attached : empty;
+      const remainingDescription =
+        firstShare === attached ? "empty" : "attached";
+      await run.shares.revoke(firstShare);
+      expect(
+        await port.list({ limit: 1, offset: firstCatalogue.nextOffset }),
+      ).toEqual({ done: true, items: [], nextOffset: 1 });
+      expect(
+        (await port.list({ limit: 2, offset: 0 })).items.map(
+          (row) => row.description,
+        ),
+      ).toEqual([remainingDescription]);
+    }),
+);
