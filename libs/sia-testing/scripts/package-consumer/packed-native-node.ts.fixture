@@ -4,6 +4,7 @@ import type {
   PackedUpload,
   PinnedObject,
   AppKey,
+  SealedObject,
 } from "@siafoundation/sia-storage";
 import type {
   PackedSdk,
@@ -31,6 +32,22 @@ export type MetadataInput = Assert<
 export type Key = Assert<Equal<ReturnType<Sdk["appKey"]>, AppKey>>;
 export type NativeSealArgument = Assert<
   Equal<Parameters<PinnedObject["seal"]>, [AppKey]>
+>;
+export type NativeSealOutput = Assert<
+  Equal<ReturnType<PinnedObject["seal"]>, SealedObject>
+>;
+export type NativeId = Assert<Equal<ReturnType<PinnedObject["id"]>, string>>;
+export type NativeMetadataRead = Assert<
+  Equal<ReturnType<PinnedObject["metadata"]>, Buffer>
+>;
+export type NativeDownload = Assert<
+  Equal<ReturnType<Sdk["download"]>, ReadableStream>
+>;
+export type NativeObjectRead = Assert<
+  Equal<ReturnType<Sdk["object"]>, Promise<PinnedObject>>
+>;
+export type NativeDelete = Assert<
+  Equal<ReturnType<Sdk["deleteObject"]>, Promise<void>>
 >;
 export type MockSealOutput = Assert<
   Equal<ReturnType<PackedObject["seal"]>, void>
