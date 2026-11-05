@@ -31,27 +31,36 @@ export type MutationReplySelector = { readonly actor: ActorRef } & (
       readonly share?: never;
     }
 );
-export type MutationSelector = {
-  readonly actor?: ActorRef;
-  readonly stage: "beforeCommit";
-} & (
+export type MutationSelector =
   | {
-      readonly object?: ApplicationObject;
-      readonly operation: "delete" | "pin";
-      readonly share?: never;
-    }
-  | {
+      readonly actor: ActorRef;
+      readonly afterBytes: number;
       readonly object?: never;
-      readonly operation:
-        "metadata" | "packed-add" | "packed-finalize" | "upload";
+      readonly operation: "packed-add" | "upload";
       readonly share?: never;
+      readonly stage: "collect";
     }
-  | {
-      readonly object?: never;
-      readonly operation: "share-add" | "share-end" | "share-remove";
-      readonly share?: MockShareGrant;
-    }
-);
+  | ({
+      readonly actor?: ActorRef;
+      readonly stage: "beforeCommit";
+    } & (
+      | {
+          readonly object?: ApplicationObject;
+          readonly operation: "delete" | "pin";
+          readonly share?: never;
+        }
+      | {
+          readonly object?: never;
+          readonly operation:
+            "metadata" | "packed-add" | "packed-finalize" | "upload";
+          readonly share?: never;
+        }
+      | {
+          readonly object?: never;
+          readonly operation: "share-add" | "share-end" | "share-remove";
+          readonly share?: MockShareGrant;
+        }
+    ));
 export interface PinReplySelector {
   readonly actor: ActorRef;
   readonly object?: ApplicationObject;
@@ -96,6 +105,39 @@ export function createMutationControls(
     ...controls,
     afterCommit(receipt: RequestReceipt) {
       if (receipt.committed && replies.takeFailure(receipt)) throw lostReply();
+    },
+    async collect<T>(
+      actor: ActorRef,
+      operation: "packed-add" | "upload",
+      signal: AbortSignal,
+      work: (checkpoint: (bytes: number) => Promise<void>) => Promise<T>,
+    ): Promise<T> {
+      const receipt = controls.createReceipt(
+        actor,
+        operation,
+        undefined,
+        undefined,
+        false,
+      );
+      receipt.stage = "collect";
+      try {
+        const result = await work(async (bytes) => {
+          receipt.bytes = bytes;
+          await controls.begin(
+            actor,
+            operation,
+            undefined,
+            signal,
+            undefined,
+            receipt,
+          );
+        });
+        receipt.status = "completed";
+        return result;
+      } catch (error) {
+        receipt.status = signal.aborted ? "cancelled" : "failed";
+        throw error;
+      }
     },
     control,
   };

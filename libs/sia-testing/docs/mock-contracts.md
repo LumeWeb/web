@@ -453,3 +453,62 @@ recovery capability. Code needing sealed output is unsupported by this mock.
 The surface is not assignable to full native nominal classes. Package checks
 separately check the consumed Node/browser 0.1.4 signatures and the intentional
 seal output omission; no compatibility with SDK 0.0.12 is established.
+
+### Chunked fixtures and collection controls
+
+`chunkedFixture({ name, sizeBytes, chunkSizeBytes, pattern })`, exported by
+`mock` and `node`, repeats a snapshotted nonempty byte pattern by absolute
+position. Each open generates detached chunks on pull without prefetching.
+Generation and incremental SHA-256 hashing use chunk-sized working storage,
+plus the pattern and hash state. Size must be a safe integer from zero through
+16 MiB; chunk size and pattern length are limited to 1 through 65,536 bytes.
+These limits apply to this fixture constructor only. Existing byte and file
+fixture policies are unchanged.
+
+```ts
+const file = await chunkedFixture({
+  name: "pattern",
+  sizeBytes: 7,
+  chunkSizeBytes: 3,
+  pattern: Uint8Array.of(1, 2),
+});
+const hold = mock.mutationFaults.hold({
+  actor,
+  operation: "upload",
+  stage: "collect",
+  afterBytes: 2,
+});
+const pending = writer.upload({ file, metadata: new Uint8Array() });
+const receipt = await hold.started(); // bytes is 3 for this direct producer
+hold.release();
+await pending;
+```
+
+Collection selectors require an owned actor, operation `upload` or `packed-add`,
+and a nonnegative safe-integer `afterBytes`. Existing finite `fail` options
+apply. Unknown and cross-stage fields reject before arming. Zero opens the
+source but holds or fails before the first read. Positive thresholds match the
+first validated, copied whole-chunk boundary reaching or exceeding the count.
+An oversized chunk may already have been read; thresholds do not split chunks.
+EOF below a threshold leaves the fault armed. A reached failure consumes one
+configured occurrence. Validation, admission, source and hash failures leave
+unreached faults armed. Empty chunks do not increase the accepted byte count.
+
+The collector awaits controls before another read. Producer-owned chunk bytes
+are copied before that wait. Caller, port, packed session or run cancellation
+cancels the owned reader and joins producer cleanup; cleanup failures are
+reported separately from repeated errors of an already errored reader.
+`started()` and `cancelled()` expose snapshots with `stage: "collect"`, accepted
+bytes and a stable receipt ID. Collection receipts stay outside `history()`;
+its existing effect receipts remain unchanged and have different IDs.
+`beforeCommit` still runs after full collection and hash checking where the
+upload descriptor has a hash. No failed collection stages objects, metadata or
+events. Attempts remain charged; uncommitted byte reservations are released.
+
+Application uploads still buffer up to the existing 16 MiB limit. Fetch clients
+collect and hash the original file before sending. HTTP and MSW controls affect
+the admitted backend request body, so they cannot pace or cancel that original
+client producer retroactively. Transport chunk boundaries can differ from file
+chunk boundaries. Packed SDK simulation remains direct-only. These fixtures do
+not establish end-to-end streaming, native upload behavior or browser producer
+backpressure. Observation deadlines do not cancel owned work.

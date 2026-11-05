@@ -162,10 +162,7 @@ it("retains the exact producer error and releases the source lock", async () => 
     { ...descriptor, open: () => stream },
     new AbortController().signal,
   ).catch((error: unknown) => error);
-  if (!(error instanceof AggregateError)) throw new Error("Expected aggregate");
-  expect(error.errors[0]).toBe(failure);
-  expect(error.errors[1]).toBe(failure);
-  expect(error.cause).toBe(failure);
+  expect(error).toBe(failure);
   expect(stream.locked).toBe(false);
 });
 

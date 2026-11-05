@@ -32,6 +32,7 @@ export interface RequestReceipt {
   objectId?: string;
   operation: RequestSelector["operation"];
   shareId?: string;
+  stage?: "collect";
   status: "cancelled" | "completed" | "failed" | "pending";
 }
 export interface RequestSelector {
@@ -70,7 +71,9 @@ interface Held {
   waiters: Set<() => void>;
 }
 interface InternalSelector extends Omit<RequestSelector, "object"> {
+  afterBytes?: number;
   object?: { readonly id: string };
+  stage?: "beforeCommit" | "collect";
 }
 interface LinkState {
   latency: number;
@@ -118,6 +121,10 @@ export function createRequestControls(
   function matches(selector: InternalSelector, request: RequestReceipt) {
     return (
       selector.operation === request.operation &&
+      (selector.stage ?? "beforeCommit") ===
+        (request.stage ?? "beforeCommit") &&
+      (selector.afterBytes === undefined ||
+        request.bytes >= selector.afterBytes) &&
       (!selector.actor || selector.actor === request.actor) &&
       (!selector.object || selector.object.id === request.objectId) &&
       (!selector.share || selector.share === receiptGrants.get(request))
@@ -204,6 +211,42 @@ export function createRequestControls(
       if (input.online !== undefined) current.online = input.online;
     },
   };
+  function createReceipt(
+    actor: ActorRef,
+    operation: RequestSelector["operation"],
+    objectId?: string,
+    share?: { grant: MockShareGrant; id: string },
+    recorded = true,
+  ): RequestReceipt {
+    const record: RequestReceipt = {
+      actor,
+      actorLabel: actorLabel(actor),
+      bytes: 0,
+      ...([
+        "delete",
+        "pin",
+        "share-add",
+        "share-end",
+        "share-remove",
+        "upload",
+      ].includes(operation)
+        ? { committed: false }
+        : {}),
+      id: crypto.randomUUID(),
+      operation,
+      status: "pending",
+      ...(objectId === undefined ? {} : { objectId }),
+    };
+    if (share) {
+      record.shareId = share.id;
+      receiptGrants.set(record, share.grant);
+    }
+    if (recorded) {
+      records.push(record);
+      if (records.length > 256) records.shift();
+    }
+    return record;
+  }
   return {
     async begin(
       actor: ActorRef,
@@ -211,37 +254,17 @@ export function createRequestControls(
       objectId: string | undefined,
       signal: AbortSignal,
       share?: { grant: MockShareGrant; id: string },
+      existing?: RequestReceipt,
     ) {
       signal.throwIfAborted();
-      const record: RequestReceipt = {
-        actor,
-        actorLabel: actorLabel(actor),
-        bytes: 0,
-        ...([
-          "delete",
-          "pin",
-          "share-add",
-          "share-end",
-          "share-remove",
-          "upload",
-        ].includes(operation)
-          ? { committed: false }
-          : {}),
-        id: crypto.randomUUID(),
-        operation,
-        status: "pending",
-        ...(objectId === undefined ? {} : { objectId }),
-      };
-      if (share) {
-        record.shareId = share.id;
-        receiptGrants.set(record, share.grant);
-      }
-      records.push(record);
-      if (records.length > 256) records.shift();
-      const hold = [...holds].find(
+      const record =
+        existing ?? createReceipt(actor, operation, objectId, share);
+      const matchingHolds = [...holds].filter(
         (entry) => !entry.matched && matches(entry.selector, record),
       );
-      if (hold) {
+      const reachedHolds =
+        record.stage === "collect" ? matchingHolds : matchingHolds.slice(0, 1);
+      for (const hold of reachedHolds) {
         hold.matched = true;
         hold.start(record);
       }
@@ -256,11 +279,8 @@ export function createRequestControls(
             const aborted = () => {
               clearTimeout(timer);
               signal.removeEventListener("abort", aborted);
-              reject(
-                signal.reason instanceof Error
-                  ? signal.reason
-                  : new DOMException("Operation aborted", "AbortError"),
-              );
+              // oxlint-disable-next-line typescript/prefer-promise-reject-errors -- Abort reasons retain caller identity.
+              reject(signal.reason);
             };
             const timer = setTimeout(() => {
               signal.removeEventListener("abort", aborted);
@@ -269,26 +289,27 @@ export function createRequestControls(
             signal.addEventListener("abort", aborted, { once: true });
             if (signal.aborted) aborted();
           });
-        if (hold && !hold.released)
-          await new Promise<void>((resolve, reject) => {
-            const finish = () => {
-              signal.removeEventListener("abort", abort);
-              hold.waiters.delete(finish);
-              resolve();
-            };
-            const abort = () => {
-              signal.removeEventListener("abort", abort);
-              hold.waiters.delete(finish);
-              reject(
-                signal.reason instanceof Error
-                  ? signal.reason
-                  : new DOMException("Operation aborted", "AbortError"),
-              );
-            };
-            hold.waiters.add(finish);
-            signal.addEventListener("abort", abort, { once: true });
-            if (signal.aborted) abort();
-          });
+        await Promise.all(
+          reachedHolds.map((hold) => {
+            if (hold.released) return Promise.resolve();
+            return new Promise<void>((resolve, reject) => {
+              const finish = () => {
+                signal.removeEventListener("abort", abort);
+                hold.waiters.delete(finish);
+                resolve();
+              };
+              const abort = () => {
+                signal.removeEventListener("abort", abort);
+                hold.waiters.delete(finish);
+                // oxlint-disable-next-line typescript/prefer-promise-reject-errors -- Abort reasons retain caller identity.
+                reject(signal.reason);
+              };
+              hold.waiters.add(finish);
+              signal.addEventListener("abort", abort, { once: true });
+              if (signal.aborted) abort();
+            });
+          }),
+        );
         signal.throwIfAborted();
         const code = takeFailure(record);
         if (code)
@@ -296,11 +317,13 @@ export function createRequestControls(
         return record;
       } catch (error) {
         record.status = signal.aborted ? "cancelled" : "failed";
-        if (record.status === "cancelled") hold?.cancel(record);
+        if (record.status === "cancelled")
+          for (const hold of reachedHolds) hold.cancel(record);
         throw error;
       }
     },
     control,
+    createReceipt,
     history: () => records.map((record) => ({ ...record })),
     observe(
       record: RequestReceipt,

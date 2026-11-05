@@ -44,25 +44,41 @@ export async function digest(bytes: Uint8Array): Promise<string> {
 export async function readFixture(
   file: TestFile,
   signal: AbortSignal,
+  checkpoint?: (bytes: number) => Promise<void>,
+  cleanupError?: (error: unknown) => void,
 ): Promise<Uint8Array> {
   signal.throwIfAborted();
   const reader = file.open().getReader();
+  const closed = reader.closed.then(
+    () => ({ failed: false as const }),
+    (error: unknown) => ({ error, failed: true as const }),
+  );
+  let readFailure: undefined | { error: unknown };
   let cancellation: Promise<void> | undefined;
-  const cancel = () => {
-    cancellation ??= reader.cancel(signal.reason);
+  const cancel = (reason: unknown = signal.reason) => {
+    cancellation ??= reader.cancel(reason);
     void cancellation.catch(() => undefined);
   };
-  signal.addEventListener("abort", cancel, { once: true });
+  const abort = () => cancel();
+  signal.addEventListener("abort", abort, { once: true });
   let complete = false;
+  let cancellationFailed = false;
   const failures: unknown[] = [];
   let result: Uint8Array | undefined;
   try {
     // The accepted byte length also bounds storage when a source emits arbitrarily many empty chunks.
     const bytes = new Uint8Array(file.sizeBytes);
     let length = 0;
+    await checkpoint?.(0);
     for (;;) {
       signal.throwIfAborted();
-      const next = await reader.read();
+      let next: ReadableStreamReadResult<Uint8Array>;
+      try {
+        next = await reader.read();
+      } catch (error) {
+        readFailure = { error };
+        throw error;
+      }
       signal.throwIfAborted();
       if (next.done) break;
       let view: Uint8Array;
@@ -73,6 +89,7 @@ export async function readFixture(
       }
       bytes.set(view, length);
       length += view.byteLength;
+      await checkpoint?.(length);
     }
     if (length !== file.sizeBytes) throw invalidFile();
     complete = true;
@@ -82,22 +99,34 @@ export async function readFixture(
   } catch (error) {
     failures.push(error);
   }
-  signal.removeEventListener("abort", cancel);
-  if (!complete) cancel();
+  signal.removeEventListener("abort", abort);
+  if (!complete) cancel(failures[0]);
   try {
     await cancellation;
   } catch (error) {
-    failures.push(error);
+    const state = await closed;
+    const repeatedReaderError =
+      (readFailure !== undefined && Object.is(readFailure.error, error)) ||
+      (state.failed && Object.is(state.error, error));
+    if (!repeatedReaderError) {
+      cancellationFailed = true;
+      failures.push(error);
+    }
   } finally {
     reader.releaseLock();
   }
-  if (failures.length === 1) throw failures[0];
-  if (failures.length > 1)
-    throw new AggregateError(
-      failures,
-      "Fixture read and source cancellation failed",
-      { cause: failures[1] },
-    );
+  if (failures.length) {
+    const failure =
+      failures.length === 1
+        ? failures[0]
+        : new AggregateError(
+            failures,
+            "Fixture read and source cancellation failed",
+            { cause: failures[1] },
+          );
+    if (cancellationFailed) cleanupError?.(failure);
+    throw failure;
+  }
   return result!;
 }
 

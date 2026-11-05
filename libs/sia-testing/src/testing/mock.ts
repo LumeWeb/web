@@ -122,7 +122,24 @@ export function createMockSia(options: MockOptions = {}): MockSia {
   const mutations = createMutationControls(
     (selector) => {
       if (
-        selector.stage !== "beforeCommit" ||
+        (selector.stage !== "beforeCommit" && selector.stage !== "collect") ||
+        (selector.stage === "collect" &&
+          (!selector.actor ||
+            !["packed-add", "upload"].includes(selector.operation) ||
+            !Number.isSafeInteger(selector.afterBytes) ||
+            selector.afterBytes < 0)) ||
+        Object.keys(selector).some(
+          (key) =>
+            !(
+              selector.stage === "collect"
+                ? ["actor", "operation", "stage", "afterBytes"]
+                : selector.operation.startsWith("share-")
+                  ? ["actor", "operation", "stage", "share"]
+                  : ["delete", "pin"].includes(selector.operation)
+                    ? ["actor", "operation", "stage", "object"]
+                    : ["actor", "operation", "stage"]
+            ).includes(key),
+        ) ||
         ![
           "delete",
           "metadata",
@@ -462,12 +479,8 @@ export function createMockSia(options: MockOptions = {}): MockSia {
       }
       void promise.then(
         () => pending.delete(promise),
-        (error: unknown) => {
+        () => {
           pending.delete(promise);
-          if (error instanceof AggregateError) {
-            cleanupErrors.push(error);
-            grant?.context.cleanupErrors.push(error);
-          }
         },
       );
       return promise;
@@ -854,7 +867,16 @@ export function createMockSia(options: MockOptions = {}): MockSia {
           context.reservedBytes += file.sizeBytes;
           let committed = false;
           try {
-            const bytes = await readFixture(file, signal);
+            const bytes = await mutations.collect(
+              actor,
+              "upload",
+              signal,
+              (checkpoint) =>
+                readFixture(file, signal, checkpoint, (error) => {
+                  cleanupErrors.push(error);
+                  context.cleanupErrors.push(error);
+                }),
+            );
             return await mutate(
               context,
               signal,
@@ -1081,6 +1103,8 @@ export function createMockSia(options: MockOptions = {}): MockSia {
             if (!context.cleanupErrors.includes(error))
               context.cleanupErrors.push(error);
           },
+          collect: (signal, work) =>
+            mutations.collect(actor, "packed-add", signal, work),
           metadata(id, bytes) {
             authorize();
             const record = context.objects.get(id)!;
