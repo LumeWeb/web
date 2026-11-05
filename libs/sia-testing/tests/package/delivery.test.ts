@@ -175,7 +175,10 @@ beforeEach(async () => {
           objects: async () => ({items: share.objects.map(({id, metadata, sizeBytes}) => ({id, metadata, sizeBytes}))}),
           close: async () => {}
         });
-        const mock = { data, packedSdk: ({platform}) => {
+        const mock = { data, application: () => ({
+          upload: async ({file, metadata}) => {const id = String(data.size); const object = {id}; data.set(id, {id, bytes: file.bytes, sizeBytes: file.sizeBytes, metadata}); return object;},
+          pin: async () => {}, close: async () => {}
+        }), packedSdk: ({platform}) => {
           const owned = new WeakSet();
           const key = {};
           return {
@@ -194,7 +197,7 @@ beforeEach(async () => {
               };
             }
           };
-        }, rows: [], history: () => mock.rows, ownerShares, reader: () => ({ object: async id => data.get(id), download: async record => new Blob([data.get(record.id).bytes]).stream(), close: async () => {} }), reply, mutationFaults: { fail: (selector, options) => losses.set(selector.operation, options.times), loseReply: (selector, options) => losses.set(selector.operation, options.times) }, publish: async () => { mock.published = [...data.values()].filter(object => object.state !== "uploaded"); }, actor: () => ({}), close: async () => {}, async run(_options, use) {
+        }, rows: [], history: () => mock.rows, ownerShares, reader: () => ({ object: async id => data.get(id), download: async (record, range = {}) => new Blob([data.get(record.id).bytes.subarray(range.offset || 0, range.length === undefined ? undefined : (range.offset || 0) + range.length)]).stream(), close: async () => {} }), reply, mutationFaults: { fail: (selector, options) => losses.set(selector.operation, options.times), loseReply: (selector, options) => losses.set(selector.operation, options.times) }, publish: async () => { mock.published = [...data.values()].filter(object => object.state !== "uploaded"); }, actor: () => ({}), close: async () => {}, async run(_options, use) {
           const run = {mock, shares: {create: async (input) => (share = input), grant: async (share, input) => ({share, ...input}), revokeGrant: async grant => { grant.revoked = true; }}, ownerAccess: {}, objects: {async upload({file, metadata}) {
             const object = { id: String(data.size), sizeBytes: file.sizeBytes, metadata, bytes: file.bytes };
             data.set(object.id, object); return object;
@@ -204,8 +207,17 @@ beforeEach(async () => {
       }`,
     "msw.d.ts": `import type { HttpHandler } from "msw"; export declare function createMockHandlers(mock: unknown, options: {baseUrl: string}): {handlers: HttpHandler[]};`,
     "msw.js": `import {http} from "msw"; export const createMockHandlers = () => ({handlers: [http.get("*", () => new Response())]});`,
-    "node.d.ts": `import type { MockRun } from "./mock.js"; export declare function withSiaRun<T>(options: unknown, use: (run: MockRun) => Promise<T>): Promise<{value: T}>;`,
-    "node.js": `import {createMockSia} from "./mock.js"; export const withSiaRun = (options, use) => createMockSia().run(options, use);`,
+    "node.d.ts": `import type { MockRun } from "./mock.js"; export declare function withSiaRun<T>(options: {backend: {kind: "mock"; app: unknown; payloadStorage?: {kind: "temporary-files"; limits: {maxObjectBytes: number; maxLogicalUploadBytes: number; maxRetainedBytes: number; maxUploadAttempts: number}}}; limits?: {maxLogicalUploadBytes?: number}}, use: (run: MockRun) => Promise<T>): Promise<{value: T}>;`,
+    "node.js": `import {createMockSia} from "./mock.js"; export const withSiaRun = async (options, use) => {
+      const storage = options.backend?.payloadStorage;
+      if (storage && (storage.limits.maxUploadAttempts > 16 || options.limits && options.limits.maxLogicalUploadBytes !== storage.limits.maxLogicalUploadBytes)) throw Error("invalid storage limits");
+      const mock = createMockSia();
+      if (storage) {
+        const packedSdk = mock.packedSdk;
+        mock.packedSdk = options => { if (options.platform !== "node") throw Error("Node required"); return packedSdk(options); };
+      }
+      return mock.run(options, use);
+    };`,
     "playwright.d.ts": `import {test} from "@playwright/test"; export declare function createSiaTest(options: unknown): typeof test;`,
     "playwright.js": `import {test} from "@playwright/test"; export const createSiaTest = () => test;`,
   };

@@ -510,8 +510,14 @@ it("recovery refuses an active run's lease before contacting the SDK", () =>
       expect((await state()).calls).toHaveLength(calls);
     });
   }));
-it("a stalled application close preserves storage instead of blocking cleanup forever", () =>
-  fixture(async (options, state) => {
+it("a stalled application close preserves storage instead of blocking cleanup forever", ({
+  onTestFinished,
+}) => {
+  let release!: () => void;
+  const blocked = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const testing = fixture(async (options, state) => {
     const document = profileDocument(options.profile);
     const path = join(dirname(options.journalFile), "short-profile.json");
     await writeFile(
@@ -527,39 +533,66 @@ it("a stalled application close preserves storage instead of blocking cleanup fo
       mutations: true,
       transfers: true,
     });
-    let release!: () => void;
-    const blocked = new Promise<void>((resolve) => {
-      release = resolve;
+    let closeStarted = false;
+    let closeFinished = false;
+    const closing = blocked.then(() => {
+      closeFinished = true;
     });
-    let fallbackReleased = false;
-    const fallback = setTimeout(() => {
-      fallbackReleased = true;
-      release();
-    }, 300);
+    let stored!: FixtureState;
+    const running = withLiveRun(
+      {
+        ...options,
+        beforeCleanup: () => {
+          closeStarted = true;
+          return closing;
+        },
+        profile,
+      },
+      async (run) => {
+        const file = await bytesFixture({
+          bytes: new Uint8Array([4]),
+          name: "clip",
+        });
+        const object = await run.objects.upload({
+          file,
+          metadata: new Uint8Array(),
+          name: file.name,
+        });
+        stored = await state();
+        expect(stored.objects).toEqual([
+          { id: "f".repeat(64), pinned: true },
+          { bytes: 1, id: object.id, metadata: [], payload: [4], pinned: true },
+        ]);
+      },
+    );
+    const settled = running.then(
+      () => undefined,
+      () => undefined,
+    );
     try {
-      await expect(
-        withLiveRun(
-          { ...options, beforeCleanup: () => blocked, profile },
-          async (run) => {
-            const file = await bytesFixture({
-              bytes: new Uint8Array([4]),
-              name: "clip",
-            });
-            await run.objects.upload({
-              file,
-              metadata: new Uint8Array(),
-              name: file.name,
-            });
-          },
-        ),
-      ).rejects.toMatchObject({ summary: { cleanup: "uncertain" } });
-      expect(fallbackReleased).toBe(false);
-      expect((await state()).objects).toHaveLength(2);
+      await expect(running).rejects.toMatchObject({
+        summary: { cleanup: "uncertain" },
+      });
+      await expect(running).rejects.toHaveProperty("errors", [
+        expect.objectContaining({ name: "TimeoutError" }),
+      ]);
+      expect(closeStarted).toBe(true);
+      expect(closeFinished).toBe(false);
+      expect(await state()).toEqual(stored);
     } finally {
-      clearTimeout(fallback);
       release();
+      await closing;
+      await settled;
     }
-  }));
+    expect(await state()).toEqual(stored);
+  });
+  // Test timeouts do not cancel promises; release and join before fixture removal finishes.
+  onTestFinished(async () => {
+    release();
+    await Promise.allSettled([testing]);
+  });
+  return testing;
+});
 it("a failed application callback still cleans its exact owned resources", () =>
   fixture(async (options, state) => {
     const primary = new Error("application failed");

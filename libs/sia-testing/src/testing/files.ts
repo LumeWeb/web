@@ -1,6 +1,6 @@
 /** Replayable byte fixtures detach caller memory before hashing or opening streams. */
 import type { TestFile } from "./types.js";
-import { boundedByteView } from "./byte-view.js";
+import { boundedByteView, createPayloadSourceValidator } from "./byte-view.js";
 
 export async function bytesFixture(input: {
   bytes: Uint8Array;
@@ -46,8 +46,13 @@ export async function readFixture(
   signal: AbortSignal,
   checkpoint?: (bytes: number) => Promise<void> | void,
   cleanupError?: (error: unknown) => void,
+  sourcePolicy?: "bounded-payload",
 ): Promise<Uint8Array> {
   signal.throwIfAborted();
+  const validate =
+    sourcePolicy === "bounded-payload"
+      ? createPayloadSourceValidator()
+      : boundedByteView;
   const reader = file.open().getReader();
   const closed = reader.closed.then(
     () => ({ failed: false as const }),
@@ -84,7 +89,7 @@ export async function readFixture(
       if (next.done) break;
       let view: Uint8Array;
       try {
-        view = boundedByteView(next.value, file.sizeBytes - length);
+        view = validate(next.value, file.sizeBytes - length);
       } catch {
         throw invalidFile();
       }

@@ -1,30 +1,220 @@
 /** Runs the direct packed simulation from the extracted tarball without native initialization. */
 import assert from "node:assert/strict";
-import { createMockSia } from "@lumeweb/sia-testing/mock";
+import { bytesFixture, createMockSia } from "@lumeweb/sia-testing/mock";
 const mock = createMockSia();
-const app = { id: "a".repeat(64), name: "Packed", description: "Consumed bytes", serviceUrl: "https://example.invalid" };
+const app = {
+  id: "a".repeat(64),
+  name: "Packed",
+  description: "Consumed bytes",
+  serviceUrl: "https://example.invalid",
+};
 try {
-  await mock.run({ app }, async run => {
+  await mock.run({ app }, async (run) => {
     const actor = mock.actor("writer");
-    const sdk = mock.packedSdk({ access: run.ownerAccess, as: actor, platform: "node", maxBytes: 8, maxObjects: 1 });
+    const sdk = mock.packedSdk({
+      access: run.ownerAccess,
+      as: actor,
+      platform: "node",
+      maxBytes: 8,
+      maxObjects: 1,
+    });
     const packed = sdk.uploadPacked({ dataShards: 1, parityShards: 1 });
     let consumed = 0;
-    assert.equal(await packed.add(new ReadableStream({ pull(c) { consumed++; c.enqueue(Uint8Array.of(1, 2, 3)); c.close(); } }, { highWaterMark: 0 })), 3n);
+    assert.equal(
+      await packed.add(
+        new ReadableStream(
+          {
+            pull(c) {
+              consumed++;
+              c.enqueue(Uint8Array.of(1, 2, 3));
+              c.close();
+            },
+          },
+          { highWaterMark: 0 },
+        ),
+      ),
+      3n,
+    );
     assert.equal(consumed, 1);
     const [object] = await packed.finalize();
     object.updateMetadata(Buffer.from([7]));
-    mock.mutationFaults.fail({ actor, operation: "metadata", stage: "beforeCommit" }, { code: "unavailable", times: 1 });
-    await assert.rejects(sdk.updateObjectMetadata(object), { code: "unavailable" });
+    mock.mutationFaults.fail(
+      { actor, operation: "metadata", stage: "beforeCommit" },
+      { code: "unavailable", times: 1 },
+    );
+    await assert.rejects(sdk.updateObjectMetadata(object), {
+      code: "unavailable",
+    });
     await sdk.updateObjectMetadata(object);
     await sdk.pinObject(object);
     assert.equal(object.seal(sdk.appKey()), undefined);
-    await assert.rejects(sdk.pinObject({ ...object }), { code: "foreign-handle" });
-    const reader = mock.reader({ access: run.ownerAccess, as: mock.actor("reader") });
+    await assert.rejects(sdk.pinObject({ ...object }), {
+      code: "foreign-handle",
+    });
+    const reader = mock.reader({
+      access: run.ownerAccess,
+      as: mock.actor("reader"),
+    });
     assert.deepEqual([...(await reader.object(object.id())).metadata], [7]);
-    assert.deepEqual([...await new Response(await reader.download({ id: object.id() })).bytes()], [1, 2, 3]);
+    assert.deepEqual(
+      [
+        ...(await new Response(
+          await reader.download({ id: object.id() }),
+        ).bytes()),
+      ],
+      [1, 2, 3],
+    );
     await sdk.close();
     assert.equal((await reader.object(object.id())).sizeBytes, 3);
     await reader.close();
   });
-} finally { await mock.close(); }
+} finally {
+  await mock.close();
+}
 console.log("packed SDK-shaped direct simulation passed");
+
+// The extracted Node entry must select the real temporary-file mode, not a source alias.
+const { withSiaRun } = await import("@lumeweb/sia-testing/node");
+const storage = {
+  kind: "temporary-files",
+  limits: {
+    maxObjectBytes: 32,
+    maxLogicalUploadBytes: 64,
+    maxRetainedBytes: 64,
+    maxUploadAttempts: 4,
+  },
+};
+await withSiaRun(
+  { backend: { kind: "mock", app, payloadStorage: storage } },
+  async (run) => {
+    const actor = run.mock.actor("disk writer");
+    assert.throws(() =>
+      run.mock.packedSdk({
+        access: run.ownerAccess,
+        as: actor,
+        platform: "browser",
+        maxBytes: 8,
+        maxObjects: 1,
+      }),
+    );
+    const sdk = run.mock.packedSdk({
+      access: run.ownerAccess,
+      as: actor,
+      platform: "node",
+      maxBytes: 8,
+      maxObjects: 2,
+    });
+    try {
+      const upload = sdk.uploadPacked();
+      assert.equal(
+        await upload.add(
+          new ReadableStream({
+            start(c) {
+              c.enqueue(Uint8Array.of(8, 9));
+              c.close();
+            },
+          }),
+        ),
+        2n,
+      );
+      assert.equal(
+        await upload.add(
+          new ReadableStream({
+            start(c) {
+              c.close();
+            },
+          }),
+        ),
+        0n,
+      );
+      const objects = await upload.finalize();
+      assert.equal(objects.length, 2);
+      assert.notEqual(objects[0].id(), objects[1].id());
+      for (const object of objects) {
+        assert.equal(object.seal(sdk.appKey()), undefined);
+        object.updateMetadata(Uint8Array.of(6));
+        await sdk.updateObjectMetadata(object);
+        await sdk.pinObject(object);
+      }
+      const reader = run.mock.reader({
+        access: run.ownerAccess,
+        as: run.mock.actor("disk reader"),
+      });
+      try {
+        assert.deepEqual(
+          [...(await reader.object(objects[0].id())).metadata],
+          [6],
+        );
+        assert.deepEqual(
+          [
+            ...(await new Response(
+              await reader.download(
+                { id: objects[0].id() },
+                { offset: 1, length: 1 },
+              ),
+            ).bytes()),
+          ],
+          [9],
+        );
+        assert.deepEqual(
+          [
+            ...(await new Response(
+              await reader.download({ id: objects[1].id() }),
+            ).bytes()),
+          ],
+          [],
+        );
+      } finally {
+        await reader.close();
+      }
+    } finally {
+      await sdk.close();
+    }
+    const writer = run.mock.application({ access: run.ownerAccess, as: actor });
+    try {
+      const file = await bytesFixture({
+        name: "replay",
+        bytes: Uint8Array.of(4),
+      });
+      const first = await writer.upload({ file, metadata: Uint8Array.of(5) });
+      const second = await writer.upload({ file, metadata: Uint8Array.of(5) });
+      assert.notEqual(first.id, second.id);
+      await writer.pin(first);
+      await writer.pin(second);
+    } finally {
+      await writer.close();
+    }
+  },
+);
+await assert.rejects(
+  withSiaRun(
+    {
+      backend: {
+        kind: "mock",
+        app,
+        payloadStorage: {
+          ...storage,
+          limits: { ...storage.limits, maxUploadAttempts: 17 },
+        },
+      },
+    },
+    async () => {},
+  ),
+);
+await assert.rejects(
+  withSiaRun(
+    {
+      backend: { kind: "mock", app, payloadStorage: storage },
+      limits: { maxLogicalUploadBytes: 63 },
+    },
+    async () => {},
+  ),
+);
+console.log("packed Node temporary-file mode passed");
+
+await assert.rejects(
+  withSiaRun(
+    { backend: { kind: "mock", app, payloadStorage: { kind: "buffered" } } },
+    async () => {},
+  ),
+);
