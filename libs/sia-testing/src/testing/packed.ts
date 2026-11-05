@@ -104,11 +104,7 @@ export function createPackedSdk<P extends "browser" | "node">(
     pending.add(result);
     void result.then(
       () => pending.delete(result),
-      (error: unknown) => {
-        pending.delete(result);
-        if (error instanceof AggregateError && !errors.includes(error))
-          errors.push(error);
-      },
+      () => pending.delete(result),
     );
     return result;
   }
@@ -234,9 +230,8 @@ export function createPackedSdk<P extends "browser" | "node">(
           () => {
             busy = false;
           },
-          (error: unknown) => {
+          () => {
             busy = false;
-            if (error instanceof AggregateError) failures.push(error);
           },
         );
         return result;
@@ -250,6 +245,10 @@ export function createPackedSdk<P extends "browser" | "node">(
               stream,
               options.maxBytes - bytes,
               uploadSignal,
+              (failure) => {
+                if (!failures.includes(failure)) failures.push(failure);
+                if (!errors.includes(failure)) errors.push(failure);
+              },
             );
             return effect("packed-add", uploadSignal, () => {
               inputs.push(input);
@@ -346,6 +345,7 @@ async function collect(
   stream: ReadableStream<Uint8Array>,
   limit: number,
   signal: AbortSignal,
+  cleanupError: (error: unknown) => void,
 ): Promise<Uint8Array> {
   signal.throwIfAborted();
   const reader = stream.getReader();
@@ -355,11 +355,14 @@ async function collect(
     void cancellation.catch(() => undefined);
   };
   signal.addEventListener("abort", cancel, { once: true });
-  const chunks: Uint8Array[] = [];
   const errors: unknown[] = [];
+  let bytes!: Uint8Array;
   let length = 0;
   let complete = false;
+  let cancellationFailed = false;
   try {
+    // One admitted buffer avoids retaining an allocation for every producer chunk.
+    bytes = new Uint8Array(limit);
     for (;;) {
       signal.throwIfAborted();
       const next = await reader.read();
@@ -367,11 +370,11 @@ async function collect(
       if (next.done) break;
       let chunk: Uint8Array;
       try {
-        chunk = new Uint8Array(boundedByteView(next.value, limit - length));
+        chunk = boundedByteView(next.value, limit - length);
       } catch {
         throw fail("limit", "Packed byte allowance exceeded or invalid chunk");
       }
-      if (chunk.length) chunks.push(chunk);
+      bytes.set(chunk, length);
       length += chunk.length;
     }
     complete = true;
@@ -384,21 +387,23 @@ async function collect(
     await cancellation;
   } catch (error) {
     // An errored reader rejects cancel with the same read error without invoking source cleanup.
-    if (!errors.includes(error)) errors.push(error);
+    if (!errors.includes(error)) {
+      errors.push(error);
+      cancellationFailed = true;
+    }
   } finally {
     reader.releaseLock();
   }
-  if (errors.length === 1) throw errors[0];
-  if (errors.length > 1)
-    throw new AggregateError(
-      errors,
-      "Packed read and source cancellation failed",
-    );
-  const result = new Uint8Array(length);
-  let offset = 0;
-  for (const chunk of chunks) {
-    result.set(chunk, offset);
-    offset += chunk.length;
+  if (errors.length) {
+    const failure =
+      errors.length === 1
+        ? errors[0]
+        : new AggregateError(
+            errors,
+            "Packed read and source cancellation failed",
+          );
+    if (cancellationFailed) cleanupError(failure);
+    throw failure;
   }
-  return result;
+  return length === bytes.length ? bytes : bytes.slice(0, length);
 }
