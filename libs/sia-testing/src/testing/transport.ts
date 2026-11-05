@@ -56,6 +56,7 @@ export function createMockEndpoint(
     }
   >();
   const runtime = mockRuntime(mock);
+  runtime.assertTransport();
   const application = createApplicationTransport(mock, requestBody);
   let closed = false;
   const endpoint: MockEndpoint = {

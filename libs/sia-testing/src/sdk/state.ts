@@ -19,7 +19,7 @@ interface NetworkState {
 export function payloadIsCurrent(
   model: IndexdModel,
   accountId: string,
-  payload: PayloadRecord,
+  payload: Pick<PayloadRecord, "identity" | "slabId">,
 ): boolean {
   try {
     return model.slabIdentity(accountId, payload.slabId) === payload.identity;

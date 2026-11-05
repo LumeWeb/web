@@ -1,3 +1,5 @@
+import { collectPayload } from "./streaming-source.js";
+import type { FinishedPayload, PayloadSpool } from "../sdk/payload-store.js";
 /** Bounded direct packed simulation; handles carry session authority, never native crypto state. */
 import { boundedByteView } from "./byte-view.js";
 import { snapshotApplicationMetadata } from "./application-metadata.js";
@@ -63,8 +65,14 @@ export interface PackedUpload<P extends "browser" | "node"> {
   finalize(): Promise<PackedObject[]>;
 }
 interface Reservation {
+  admit?(limit: number): Promise<PayloadSpool>;
+  discard?(token: FinishedPayload): Promise<void>;
   release(): void;
-  stage(bytes: Uint8Array, signal: AbortSignal): Promise<string>;
+  stage(
+    bytes: FinishedPayload | Uint8Array,
+    signal: AbortSignal,
+    onCommit?: (id: string) => void,
+  ): Promise<string>;
 }
 /** Carries only original objects acknowledged before a later finalization failure. */
 export class PackedFinalizeError extends Error {
@@ -115,7 +123,7 @@ export function createPackedSdk<P extends "browser" | "node">(
   async function effect<T>(
     operation: "metadata" | "packed-add" | "packed-finalize" | "pin",
     callSignal: AbortSignal,
-    work: () => Promise<T> | T,
+    work: (receipt: RequestReceipt) => Promise<T> | T,
     id?: string,
   ) {
     authorize();
@@ -123,7 +131,7 @@ export function createPackedSdk<P extends "browser" | "node">(
     try {
       callSignal.throwIfAborted();
       authorize();
-      const result = await work();
+      const result = await work(receipt);
       receipt.committed = true;
       if (operation === "pin") backend.afterCommit(receipt);
       receipt.status = "completed";
@@ -206,7 +214,7 @@ export function createPackedSdk<P extends "browser" | "node">(
       const reservation = backend.reserve();
       const cancelled = new AbortController();
       const uploadSignal = AbortSignal.any([signal, cancelled.signal]);
-      const inputs: Uint8Array[] = [];
+      const inputs: (FinishedPayload | Uint8Array)[] = [];
       const failures: unknown[] = [];
       let bytes = 0;
       let busy = false;
@@ -240,32 +248,79 @@ export function createPackedSdk<P extends "browser" | "node">(
         );
         return result;
       }
+      async function discardInputs() {
+        const settled = await Promise.allSettled(
+          inputs.map(
+            (input) =>
+              reservation.discard?.(input as FinishedPayload) ??
+              Promise.resolve(),
+          ),
+        );
+        inputs.length = 0;
+        for (const result of settled)
+          if (result.status === "rejected") {
+            failures.push(result.reason as unknown);
+            errors.push(result.reason as unknown);
+          }
+      }
       const upload: PackedUpload<P> = {
         add(stream) {
           return run(async () => {
             if (inputs.length >= options.maxObjects)
               throw fail("limit", "Packed object allowance exceeded");
-            const input = await backend.collect(uploadSignal, (checkpoint) =>
-              collect(
-                stream,
-                options.maxBytes - bytes,
-                uploadSignal,
-                (failure) => {
-                  if (!failures.includes(failure)) failures.push(failure);
-                  if (!errors.includes(failure)) errors.push(failure);
-                },
-                checkpoint,
-              ),
+            const cleanup = (failure: unknown) => {
+              failures.push(failure);
+              errors.push(failure);
+            };
+            const input = await backend.collect(
+              uploadSignal,
+              async (checkpoint) => {
+                if (reservation.admit) {
+                  const spool = await reservation.admit(
+                    options.maxBytes - bytes,
+                  );
+                  return collectPayload(
+                    () => stream,
+                    spool,
+                    uploadSignal,
+                    checkpoint,
+                    cleanup,
+                  );
+                }
+                return collect(
+                  stream,
+                  options.maxBytes - bytes,
+                  uploadSignal,
+                  cleanup,
+                  checkpoint,
+                );
+              },
             );
-            return effect("packed-add", uploadSignal, () => {
-              inputs.push(input);
-              bytes += input.length;
-              return (
-                options.platform === "node"
-                  ? BigInt(input.length)
-                  : input.length
-              ) as P extends "node" ? bigint : number;
-            });
+            try {
+              return await effect("packed-add", uploadSignal, () => {
+                inputs.push(input);
+                bytes += input.length;
+                return (
+                  options.platform === "node"
+                    ? BigInt(input.length)
+                    : input.length
+                ) as P extends "node" ? bigint : number;
+              });
+            } catch (error) {
+              try {
+                await reservation.discard?.(input as FinishedPayload);
+              } catch (cleanup) {
+                failures.push(cleanup);
+                errors.push(cleanup);
+                // oxlint-disable-next-line preserve-caught-error -- Both original failures are retained in errors.
+                throw new AggregateError(
+                  [error, cleanup],
+                  "Packed add and discard failed",
+                  { cause: cleanup },
+                );
+              }
+              throw error;
+            }
           });
         },
         cancel() {
@@ -276,9 +331,14 @@ export function createPackedSdk<P extends "browser" | "node">(
           cancelled.abort();
           disposal = (async () => {
             await Promise.allSettled(current ? [current] : []);
-            inputs.length = 0;
+            await discardInputs();
             ended = true;
-            reservation.release();
+            try {
+              reservation.release();
+            } catch (error) {
+              failures.push(error);
+              errors.push(error);
+            }
             uploads.delete(upload);
             if (failures.length)
               throw new AggregateError(
@@ -292,50 +352,89 @@ export function createPackedSdk<P extends "browser" | "node">(
           return run(async () => {
             ended = true;
             const result: PackedObject[] = [];
+            const completionErrors: unknown[] = [];
             try {
               if (!inputs.length)
                 await effect("packed-finalize", uploadSignal, () => undefined);
               for (const input of inputs) {
-                await effect("packed-finalize", uploadSignal, async () => {
-                  const id = await reservation.stage(input, uploadSignal);
-                  const record: { id: string; metadata: Uint8Array } = {
-                    id,
-                    metadata: new Uint8Array(),
-                  };
-                  const object = Object.freeze(
-                    Object.assign(Object.create(null), {
-                      id: () => id,
-                      seal(this: PackedObject, selected: PackedAppKey) {
-                        if (this !== object)
-                          throw fail("foreign-handle", "Unknown packed object");
-                        owned(object);
-                        if (selected !== key)
-                          throw fail(
-                            "foreign-handle",
-                            "Unknown packed app key",
-                          );
+                await effect(
+                  "packed-finalize",
+                  uploadSignal,
+                  async (receipt) => {
+                    const id = await reservation.stage(
+                      input,
+                      uploadSignal,
+                      (id) => {
+                        receipt.committed = true;
+                        receipt.objectId = id;
                       },
-                      updateMetadata(this: PackedObject, metadata: Uint8Array) {
-                        if (this !== object)
-                          throw fail("foreign-handle", "Unknown packed object");
-                        owned(object);
-                        record.metadata = snapshotApplicationMetadata(metadata);
-                      },
-                    }),
-                  ) as PackedObject;
-                  objects.set(object, record);
-                  result.push(object);
-                });
+                    );
+                    const record: { id: string; metadata: Uint8Array } = {
+                      id,
+                      metadata: new Uint8Array(),
+                    };
+                    const object = Object.freeze(
+                      Object.assign(Object.create(null), {
+                        id: () => id,
+                        seal(this: PackedObject, selected: PackedAppKey) {
+                          if (this !== object)
+                            throw fail(
+                              "foreign-handle",
+                              "Unknown packed object",
+                            );
+                          owned(object);
+                          if (selected !== key)
+                            throw fail(
+                              "foreign-handle",
+                              "Unknown packed app key",
+                            );
+                        },
+                        updateMetadata(
+                          this: PackedObject,
+                          metadata: Uint8Array,
+                        ) {
+                          if (this !== object)
+                            throw fail(
+                              "foreign-handle",
+                              "Unknown packed object",
+                            );
+                          owned(object);
+                          record.metadata =
+                            snapshotApplicationMetadata(metadata);
+                        },
+                      }),
+                    ) as PackedObject;
+                    objects.set(object, record);
+                    result.push(object);
+                  },
+                );
               }
-              return result;
             } catch (error) {
-              if (result.length) throw new PackedFinalizeError(error, result);
-              throw error;
+              completionErrors.push(error);
             } finally {
-              inputs.length = 0;
-              reservation.release();
+              const beforeCleanup = failures.length;
+              await discardInputs();
+              try {
+                reservation.release();
+              } catch (error) {
+                failures.push(error);
+                errors.push(error);
+              }
+              completionErrors.push(...failures.slice(beforeCleanup));
               uploads.delete(upload);
             }
+            if (completionErrors.length) {
+              const cause =
+                completionErrors.length === 1
+                  ? completionErrors[0]
+                  : new AggregateError(
+                      completionErrors,
+                      "Packed finalization and cleanup failed",
+                    );
+              if (result.length) throw new PackedFinalizeError(cause, result);
+              throw cause;
+            }
+            return result;
           });
         },
       };

@@ -1,10 +1,17 @@
+import type { MockPayloadBackend, MockPayloadFactory } from "./mock-backend.js";
+import type { FinishedPayload } from "../sdk/payload-store.js";
+import { collectPayload } from "./streaming-source.js";
 /** Managed mock runs bind readers to owner or recipient access and clean only their own fixtures. */
 import { createPackedSdk } from "./packed.js";
 import { digest } from "./files.js";
 import { boundedByteView } from "./byte-view.js";
 import { snapshotApplicationMetadata } from "./application-metadata.js";
 import { createIndexdModel } from "../model/index.js";
-import { createMockNetwork, type MockNetwork } from "../sdk/index.js";
+import {
+  createMockNetwork,
+  type MockNetwork,
+  type PayloadNetwork,
+} from "../sdk/index.js";
 import { withAbort } from "../sdk/abort.js";
 import { invalidInput } from "./diagnostics.js";
 import { createMutationControls } from "./mutations.js";
@@ -52,9 +59,10 @@ interface Context {
   credentials: Set<string>;
   id: string;
   limits: RunLimits;
-  network: MockNetwork | undefined;
+  network: MockNetwork | PayloadNetwork | undefined;
   objectAttempts: number;
   objects: Map<string, ObjectRecord>;
+  payload?: MockPayloadBackend;
   pending: Set<Promise<unknown>>;
   reservedBytes: number;
   sdk: ReturnType<MockNetwork["createSdk"]> | undefined;
@@ -93,6 +101,13 @@ interface ShareRecord {
 
 /** Store ownership is per run so closing one account cannot reset another active run. */
 export function createMockSia(options: MockOptions = {}): MockSia {
+  return createMockSiaWithBackend(options);
+}
+
+export function createMockSiaWithBackend(
+  options: MockOptions = {},
+  payloadFactory?: MockPayloadFactory,
+): MockSia {
   const start =
     options.clock && options.clock !== "realtime"
       ? Date.parse(options.clock.start)
@@ -316,12 +331,19 @@ export function createMockSia(options: MockOptions = {}): MockSia {
             await context.sdk!.deleteObject(record.handle.id);
           else if (!record.deleted)
             // Reset invalidates slab identities but does not release the network's cached bytes.
-            context.network!.discardUpload(context.id, record.handle.id);
+            await context.network!.discardUpload(context.id, record.handle.id);
           record.deleted = true;
         } catch (error) {
           errors.push(error);
         }
         record.metadata = new Uint8Array();
+      }
+      if (context.payload) {
+        try {
+          await context.payload.owner.close();
+        } catch (error) {
+          errors.push(error);
+        }
       }
       // The entire account is private to this mock run, including uploads that never reached pinning.
       context.network!.model.reset();
@@ -659,8 +681,12 @@ export function createMockSia(options: MockOptions = {}): MockSia {
                     signal,
                   });
                 else {
-                  context.network!.discardUpload(context.id, record.handle.id);
+                  const retirement = context.network!.discardUpload(
+                    context.id,
+                    record.handle.id,
+                  );
                   complete();
+                  await retirement;
                 }
               })());
               try {
@@ -853,7 +879,10 @@ export function createMockSia(options: MockOptions = {}): MockSia {
             !name ||
             name.length > 1024 ||
             new TextEncoder().encode(name).length > 1024 ||
-            file.sizeBytes > 16 * 1024 * 1024 ||
+            file.sizeBytes >
+              (context.payload
+                ? payloadFactory!.limits.maxObjectBytes
+                : 16 * 1024 * 1024) ||
             !/^[0-9a-f]{64}$/.test(file.sha256)
           )
             throw failure("invalid-input", "Invalid application upload");
@@ -863,21 +892,42 @@ export function createMockSia(options: MockOptions = {}): MockSia {
               context.limits.maxLogicalUploadBytes - context.reservedBytes
           )
             throw failure("limit", "Run upload allowance exceeded");
+          const reservation = context.payload?.owner.reserveUpload(
+            file.sizeBytes,
+          );
           context.objectAttempts++;
           context.reservedBytes += file.sizeBytes;
           let committed = false;
+          let collected: FinishedPayload | Uint8Array | undefined;
+          let result!: ApplicationObject;
+          const failures: unknown[] = [];
           try {
-            const bytes = await mutations.collect(
+            const bytes = await mutations.collect<FinishedPayload | Uint8Array>(
               actor,
               "upload",
               signal,
               (checkpoint) =>
-                readFixture(file, signal, checkpoint, (error) => {
-                  cleanupErrors.push(error);
-                  context.cleanupErrors.push(error);
-                }),
+                context.payload
+                  ? reservation!.admitSource(file.sizeBytes).then((spool) =>
+                      collectPayload(
+                        file.open,
+                        spool,
+                        signal,
+                        checkpoint,
+                        (error) => {
+                          cleanupErrors.push(error);
+                          context.cleanupErrors.push(error);
+                        },
+                        file,
+                      ),
+                    )
+                  : readFixture(file, signal, checkpoint, (error) => {
+                      cleanupErrors.push(error);
+                      context.cleanupErrors.push(error);
+                    }),
             );
-            return await mutate(
+            collected = bytes;
+            result = await mutate(
               context,
               signal,
               "upload",
@@ -885,7 +935,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
               async (receipt) => {
                 const id = identifier();
                 let object!: ApplicationObject;
-                await context.sdk!.upload(bytes, {
+                const uploadOptions = {
                   id,
                   prepareCommit: () => {
                     signal.throwIfAborted();
@@ -912,13 +962,46 @@ export function createMockSia(options: MockOptions = {}): MockSia {
                     };
                   },
                   signal,
-                });
+                };
+                if (context.payload)
+                  await context.payload.network
+                    .createSdk({ accountId: context.id })
+                    .uploadPayload(bytes as FinishedPayload, uploadOptions);
+                else
+                  await context.sdk!.upload(bytes as Uint8Array, uploadOptions);
                 return object;
               },
             );
-          } finally {
-            if (!committed) context.reservedBytes -= file.sizeBytes;
+          } catch (error) {
+            failures.push(error);
           }
+          if (!committed) {
+            context.reservedBytes -= file.sizeBytes;
+            try {
+              if (collected && context.payload)
+                await context.payload.owner.discardUncommitted(
+                  collected as FinishedPayload,
+                );
+            } catch (error) {
+              failures.push(error);
+              cleanupErrors.push(error);
+              context.cleanupErrors.push(error);
+            }
+          }
+          try {
+            reservation?.release();
+          } catch (error) {
+            failures.push(error);
+            cleanupErrors.push(error);
+            context.cleanupErrors.push(error);
+          }
+          if (failures.length === 1) throw failures[0];
+          if (failures.length)
+            throw new AggregateError(
+              failures,
+              "Application upload and payload cleanup failed",
+            );
+          return result;
         });
       },
     };
@@ -1087,11 +1170,19 @@ export function createMockSia(options: MockOptions = {}): MockSia {
         !["browser", "node"].includes(platform) ||
         !Number.isSafeInteger(maxBytes) ||
         maxBytes < 1 ||
-        maxBytes > 16 * 1024 * 1024 ||
+        maxBytes >
+          (context.payload
+            ? payloadFactory!.limits.maxLogicalUploadBytes
+            : 16 * 1024 * 1024) ||
         !Number.isSafeInteger(maxObjects) ||
         maxObjects < 1
       )
         throw failure("invalid-input", "Invalid packed allowance");
+      if (context.payload && platform !== "node")
+        throw failure(
+          "unsupported",
+          "Temporary-file packed storage requires Node platform",
+        );
       return createPackedSdk(
         { access: handle, as: actor, maxBytes, maxObjects, platform },
         {
@@ -1128,6 +1219,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
                 context.limits.maxLogicalUploadBytes - context.reservedBytes
             )
               throw failure("limit", "Run upload allowance exceeded");
+            const physical = context.payload?.owner.reserveUpload(maxBytes);
             const sequence = context.objectAttempts;
             context.objectAttempts += maxObjects;
             context.reservedBytes += maxBytes;
@@ -1138,16 +1230,32 @@ export function createMockSia(options: MockOptions = {}): MockSia {
               release() {
                 if (released) return;
                 released = true;
+                physical?.release();
                 context.reservedBytes -= maxBytes - committed;
               },
-              async stage(bytes, signal) {
+              ...(physical
+                ? {
+                    admit: (remaining: number) =>
+                      physical.admitSource(
+                        Math.min(
+                          remaining,
+                          payloadFactory!.limits.maxObjectBytes,
+                        ),
+                      ),
+                    discard: (token: FinishedPayload) =>
+                      context.payload!.owner.discardUncommitted(token),
+                  }
+                : {}),
+              async stage(bytes, signal, onCommit) {
                 const id = await digest(
                   new TextEncoder().encode(
                     `${context.id}:packed:${sequence + ordinal++}`,
                   ),
                 );
-                const sha256 = await digest(bytes);
-                await context.sdk!.upload(bytes, {
+                const sha256 = context.payload
+                  ? (bytes as FinishedPayload).sha256
+                  : await digest(bytes as Uint8Array);
+                const uploadOptions = {
                   id,
                   prepareCommit() {
                     signal.throwIfAborted();
@@ -1167,10 +1275,17 @@ export function createMockSia(options: MockOptions = {}): MockSia {
                       objects.set(handle, { context, record });
                       context.uploadedBytes += bytes.length;
                       committed += bytes.length;
+                      onCommit?.(id);
                     };
                   },
                   signal,
-                });
+                };
+                if (context.payload)
+                  await context.payload.network
+                    .createSdk({ accountId: context.id })
+                    .uploadPayload(bytes as FinishedPayload, uploadOptions);
+                else
+                  await context.sdk!.upload(bytes as Uint8Array, uploadOptions);
                 return id;
               },
             };
@@ -1217,43 +1332,82 @@ export function createMockSia(options: MockOptions = {}): MockSia {
         }
         return context;
       }
+      const streams = new Set<ReadableStream<Uint8Array>>();
+      const pendingDownloads = new Set<Promise<unknown>>();
+      const closeErrors: unknown[] = [];
+      let closing: Promise<void> | undefined;
       const reader: ReadPort = {
         close() {
+          if (closing) return closing;
           abort.abort();
-          return Promise.resolve();
-        },
-        async download(object, range = {}) {
-          // Getter-backed descriptors must use the same ID for authorization and the SDK lookup.
-          const id = object.id;
-          const context = authorize(id);
-          describe(context, id);
-          const { length, offset, signal: inputSignal } = range;
-          if (offset !== undefined) integer(offset, "offset");
-          if (length !== undefined) integer(length, "length");
-          const callSignal = inputSignal
-            ? AbortSignal.any([signal, inputSignal])
-            : signal;
-          const request = await controls.begin(
-            actor,
-            "download",
-            id,
-            callSignal,
-          );
-          try {
-            authorize(id);
-            const body = await context.sdk!.download(
-              { id: () => id },
-              {
-                ...(offset === undefined ? {} : { offset }),
-                ...(length === undefined ? {} : { length }),
-                signal: callSignal,
-              },
+          if (!grant?.context.payload) return Promise.resolve();
+          closing = (async () => {
+            await Promise.allSettled(pendingDownloads);
+            await Promise.allSettled(
+              Array.from(streams, (stream) =>
+                grant.context.payload!.network.closeDownload(stream),
+              ),
             );
-            return controls.observe(request, body, callSignal);
-          } catch (error) {
-            request.status = callSignal.aborted ? "cancelled" : "failed";
-            throw error;
-          }
+            streams.clear();
+            if (closeErrors.length)
+              throw new AggregateError(
+                closeErrors,
+                "Reader descriptor cleanup failed",
+              );
+          })();
+          void closing.catch(() => undefined);
+          return closing;
+        },
+        download(object, range = {}) {
+          const operation = (async () => {
+            // Getter-backed descriptors must use the same ID for authorization and the SDK lookup.
+            const id = object.id;
+            const context = authorize(id);
+            describe(context, id);
+            const { length, offset, signal: inputSignal } = range;
+            if (offset !== undefined) integer(offset, "offset");
+            if (length !== undefined) integer(length, "length");
+            const callSignal = inputSignal
+              ? AbortSignal.any([signal, inputSignal])
+              : signal;
+            const request = await controls.begin(
+              actor,
+              "download",
+              id,
+              callSignal,
+            );
+            try {
+              authorize(id);
+              const body = await context.sdk!.download(
+                { id: () => id },
+                {
+                  ...(offset === undefined ? {} : { offset }),
+                  ...(length === undefined ? {} : { length }),
+                  signal: callSignal,
+                },
+              );
+              if (context.payload) {
+                streams.add(body);
+                void context.payload.network.downloadDone(body).then(
+                  () => streams.delete(body),
+                  (error) => {
+                    streams.delete(body);
+                    closeErrors.push(error);
+                  },
+                );
+              }
+              return controls.observe(request, body, callSignal);
+            } catch (error) {
+              request.status = callSignal.aborted ? "cancelled" : "failed";
+              throw error;
+            }
+          })();
+          pendingDownloads.add(operation);
+          void operation.then(
+            () => pendingDownloads.delete(operation),
+            () => pendingDownloads.delete(operation),
+          );
+          return operation;
         },
         async object(id, options = {}) {
           const context = authorize(id);
@@ -1324,27 +1478,41 @@ export function createMockSia(options: MockOptions = {}): MockSia {
           });
         },
       };
+      if (grant?.context.payload)
+        grant.context.transportCleanup.add(() => reader.close());
       return reader;
     },
     async run(runOptions, use) {
       environmentOpen();
       validateOptions(runOptions);
       const limits = {
-        maxLogicalUploadBytes: 16 * 1024 * 1024,
+        maxLogicalUploadBytes:
+          payloadFactory?.limits.maxLogicalUploadBytes ?? 16 * 1024 * 1024,
         maxObjects: 8,
         maxShares: 8,
         ...runOptions.limits,
       };
       for (const value of Object.values(limits)) integer(value);
-      const network = createMockNetwork({
-        model: createIndexdModel({
-          eventPublication: "manual",
-          now,
-          ...(options.quotaBytes === undefined
-            ? {}
-            : { quotaBytes: options.quotaBytes }),
-        }),
+      if (
+        payloadFactory &&
+        limits.maxLogicalUploadBytes !==
+          payloadFactory.limits.maxLogicalUploadBytes
+      )
+        throw failure(
+          "invalid-input",
+          "Run and payload logical budgets must match",
+        );
+      const model = createIndexdModel({
+        eventPublication: "manual",
+        now,
+        ...(options.quotaBytes === undefined
+          ? {}
+          : { quotaBytes: options.quotaBytes }),
       });
+      const payload = payloadFactory
+        ? await payloadFactory.create(model)
+        : undefined;
+      const network = payload?.network ?? createMockNetwork({ model });
       const id = identifier();
       network.model.createAccount({ publicKey: id });
       const abort = new AbortController();
@@ -1357,6 +1525,7 @@ export function createMockSia(options: MockOptions = {}): MockSia {
         network,
         objectAttempts: 0,
         objects: new Map(),
+        ...(payload ? { payload } : {}),
         pending: new Set(),
         reservedBytes: 0,
         sdk: network.createSdk({ accountId: id }),
@@ -1450,9 +1619,99 @@ export function createMockSia(options: MockOptions = {}): MockSia {
                   limits.maxLogicalUploadBytes - context.reservedBytes
               )
                 throw failure("limit", "Run upload allowance exceeded");
+              if (
+                context.payload &&
+                file.sizeBytes > payloadFactory!.limits.maxObjectBytes
+              )
+                throw failure("limit", "Payload object allowance exceeded");
+              const reservation = context.payload?.owner.reserveUpload(
+                file.sizeBytes,
+              );
               context.objectAttempts++;
               context.reservedBytes += file.sizeBytes;
               const metadata = new Uint8Array(metadataView);
+              if (context.payload) {
+                const errors: unknown[] = [];
+                let token: FinishedPayload | undefined;
+                let committed = false;
+                let result: TestObject | undefined;
+                let spool:
+                  | Awaited<
+                      ReturnType<NonNullable<typeof reservation>["admitSource"]>
+                    >
+                  | undefined;
+                try {
+                  spool = await reservation!.admitSource(file.sizeBytes);
+                  const bytes = await readFixture(
+                    file,
+                    context.signal,
+                    undefined,
+                    (error) => {
+                      context.cleanupErrors.push(error);
+                    },
+                    "bounded-payload",
+                  );
+                  for (let offset = 0; offset < bytes.length; offset += 65536)
+                    await spool.append(
+                      new Uint8Array(
+                        bytes.subarray(
+                          offset,
+                          Math.min(offset + 65536, bytes.length),
+                        ),
+                      ),
+                    );
+                  token = await spool.finish();
+                  open(context);
+                  const handle = Object.freeze({
+                    id: identifier(),
+                    sha256: token.sha256,
+                    sizeBytes: token.length,
+                  }) as TestObject;
+                  const record = { deleted: false, handle, metadata };
+                  const sdk = context.payload.network.createSdk({
+                    accountId: context.id,
+                  });
+                  const uploaded = await sdk.uploadPayload(token, {
+                    id: handle.id,
+                    prepareCommit() {
+                      open(context);
+                      return () => {
+                        context.objects.set(handle.id, record);
+                        objects.set(handle, { context, record });
+                        context.uploadedBytes += handle.sizeBytes;
+                        committed = true;
+                      };
+                    },
+                    signal: context.signal,
+                  });
+                  await context.sdk!.pinObject(uploaded, {
+                    signal: context.signal,
+                  });
+                  result = handle;
+                } catch (error) {
+                  errors.push(error);
+                }
+                if (!committed) {
+                  try {
+                    if (token) await context.payload.owner.retire(token);
+                    else await spool?.discard();
+                  } catch (error) {
+                    errors.push(error);
+                  }
+                }
+                try {
+                  reservation!.release();
+                } catch (error) {
+                  errors.push(error);
+                }
+                if (errors.length === 1) throw errors[0];
+                if (errors.length)
+                  throw new AggregateError(
+                    errors,
+                    "Managed upload and payload cleanup failed",
+                  );
+                return result!;
+              }
               const bytes = await readFixture(file, context.signal);
               open(context);
               const handle = Object.freeze({
@@ -1641,6 +1900,13 @@ export function createMockSia(options: MockOptions = {}): MockSia {
     },
   };
   registerRuntime(environment, {
+    assertTransport() {
+      if (payloadFactory)
+        throw failure(
+          "unsupported",
+          "Temporary-file payload storage supports direct Node calls only",
+        );
+    },
     authenticate(credential) {
       environmentOpen();
       const handle = credentials.get(credential.keyHex);

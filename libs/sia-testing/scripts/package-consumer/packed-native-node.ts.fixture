@@ -1,36 +1,147 @@
 /** Checks only consumed native 0.1.4 calls; seal output is deliberately excluded from the mock. */
-import type { Sdk, PackedUpload, PinnedObject, AppKey } from "@siafoundation/sia-storage";
-import type { PackedSdk, PackedObject, PackedAppKey, PackedOptions } from "@lumeweb/sia-testing/mock";
-type Equal<A, B> = (<T>() => T extends A ? 1 : 2) extends (<T>() => T extends B ? 1 : 2) ? true : false;
+import type {
+  Sdk,
+  PackedUpload,
+  PinnedObject,
+  AppKey,
+} from "@siafoundation/sia-storage";
+import type {
+  PackedSdk,
+  PackedObject,
+  PackedAppKey,
+  PackedOptions,
+} from "@lumeweb/sia-testing/mock";
+type Equal<A, B> =
+  (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2
+    ? true
+    : false;
 type Assert<T extends true> = T;
-export type Count = Assert<Equal<ReturnType<PackedUpload["add"]>, Promise<bigint>>>;
-export type SyncUpload = Assert<Equal<ReturnType<Sdk["uploadPacked"]>, PackedUpload>>;
-export type Finalize = Assert<Equal<ReturnType<PackedUpload["finalize"]>, Promise<PinnedObject[]>>>;
-export type MetadataInput = Assert<Equal<Parameters<PinnedObject["updateMetadata"]>, [Buffer]>>;
+export type Count = Assert<
+  Equal<ReturnType<PackedUpload["add"]>, Promise<bigint>>
+>;
+export type SyncUpload = Assert<
+  Equal<ReturnType<Sdk["uploadPacked"]>, PackedUpload>
+>;
+export type Finalize = Assert<
+  Equal<ReturnType<PackedUpload["finalize"]>, Promise<PinnedObject[]>>
+>;
+export type MetadataInput = Assert<
+  Equal<Parameters<PinnedObject["updateMetadata"]>, [Buffer]>
+>;
 export type Key = Assert<Equal<ReturnType<Sdk["appKey"]>, AppKey>>;
-export type NativeSealArgument = Assert<Equal<Parameters<PinnedObject["seal"]>, [AppKey]>>;
-export type MockSealOutput = Assert<Equal<ReturnType<PackedObject["seal"]>, void>>;
-export type NativePin = Assert<Equal<Parameters<Sdk["pinObject"]>, [PinnedObject]>>;
-export type NativeMetadata = Assert<Equal<Parameters<Sdk["updateObjectMetadata"]>, [PinnedObject]>>;
-export type NativePinResult = Assert<Equal<ReturnType<Sdk["pinObject"]>, Promise<void>>>;
-export type NativeMetadataResult = Assert<Equal<ReturnType<Sdk["updateObjectMetadata"]>, Promise<void>>>;
-export async function calls(native: Sdk, mock: PackedSdk<"node">, key: PackedAppKey) {
-  const options = { dataShards: 1, parityShards: 1, maxBufferedSlabs: 1 } satisfies NonNullable<Parameters<Sdk["uploadPacked"]>[0]> & PackedOptions;
+export type NativeSealArgument = Assert<
+  Equal<Parameters<PinnedObject["seal"]>, [AppKey]>
+>;
+export type MockSealOutput = Assert<
+  Equal<ReturnType<PackedObject["seal"]>, void>
+>;
+export type NativePin = Assert<
+  Equal<Parameters<Sdk["pinObject"]>, [PinnedObject]>
+>;
+export type NativeMetadata = Assert<
+  Equal<Parameters<Sdk["updateObjectMetadata"]>, [PinnedObject]>
+>;
+export type NativePinResult = Assert<
+  Equal<ReturnType<Sdk["pinObject"]>, Promise<void>>
+>;
+export type NativeMetadataResult = Assert<
+  Equal<ReturnType<Sdk["updateObjectMetadata"]>, Promise<void>>
+>;
+export async function calls(
+  native: Sdk,
+  mock: PackedSdk<"node">,
+  key: PackedAppKey,
+) {
+  const options = {
+    dataShards: 1,
+    parityShards: 1,
+    maxBufferedSlabs: 1,
+  } satisfies NonNullable<Parameters<Sdk["uploadPacked"]>[0]> & PackedOptions;
   const nativeUpload = native.uploadPacked(options);
   const mockUpload = mock.uploadPacked(options);
   const nativeCount: bigint = await nativeUpload.add(new ReadableStream());
-  const mockCount: bigint = await mockUpload.add(new ReadableStream<Uint8Array>());
+  const mockCount: bigint = await mockUpload.add(
+    new ReadableStream<Uint8Array>(),
+  );
   for (const object of await nativeUpload.finalize()) {
     object.updateMetadata(Buffer.from([1]));
-    await native.updateObjectMetadata(object); await native.pinObject(object);
+    await native.updateObjectMetadata(object);
+    await native.pinObject(object);
     object.seal(native.appKey());
   }
   for (const object of await mockUpload.finalize()) {
     object.updateMetadata(Buffer.from([1]));
-    await mock.updateObjectMetadata(object); await mock.pinObject(object);
-    const noRecord: void = object.seal(key); void noRecord;
+    await mock.updateObjectMetadata(object);
+    await mock.pinObject(object);
+    const noRecord: void = object.seal(key);
+    void noRecord;
     // @ts-expect-error Narrow simulated objects are not native objects.
     await native.pinObject(object);
   }
   return nativeCount + mockCount;
 }
+
+import { withSiaRun } from "@lumeweb/sia-testing/node";
+const app = {
+  id: "a".repeat(64),
+  name: "Node",
+  description: "Types",
+  serviceUrl: "https://example.invalid",
+};
+export async function diskNodeCalls() {
+  await withSiaRun(
+    {
+      backend: {
+        kind: "mock",
+        app,
+        payloadStorage: {
+          kind: "temporary-files",
+          limits: {
+            maxObjectBytes: 8,
+            maxLogicalUploadBytes: 16,
+            maxRetainedBytes: 16,
+            maxUploadAttempts: 2,
+          },
+        },
+      },
+    },
+    async (run) => {
+      const sdk = run.mock.packedSdk({
+        access: run.ownerAccess,
+        as: run.mock.actor("node"),
+        platform: "node",
+        maxBytes: 8,
+        maxObjects: 1,
+      });
+      try {
+        const upload = sdk.uploadPacked();
+        const count: bigint = await upload.add(
+          new ReadableStream<Uint8Array>(),
+        );
+        const [object] = await upload.finalize();
+        if (object) {
+          const noRecord: void = object.seal(sdk.appKey());
+          void noRecord;
+        }
+        void count;
+      } finally {
+        await sdk.close();
+      }
+    },
+  );
+}
+
+const missingBudgets = {
+  kind: "mock" as const,
+  app,
+  payloadStorage: { kind: "temporary-files" as const },
+};
+// @ts-expect-error Temporary-file selection requires explicit byte and attempt budgets.
+void withSiaRun({ backend: missingBudgets }, async () => {});
+const unsupportedStorage = {
+  kind: "mock" as const,
+  app,
+  payloadStorage: { kind: "buffered" as const },
+};
+// @ts-expect-error The Node option has no public custom-store or buffered selector.
+void withSiaRun({ backend: unsupportedStorage }, async () => {});

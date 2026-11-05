@@ -514,3 +514,49 @@ client producer retroactively. Transport chunk boundaries can differ from file
 chunk boundaries. Packed SDK simulation remains direct-only. These fixtures do
 not establish end-to-end streaming, native upload behavior or browser producer
 backpressure. Observation deadlines do not cancel owned work.
+
+## Direct Node temporary-file payloads
+
+`withSiaRun` from `/node` accepts `backend.payloadStorage` with kind
+`temporary-files` and required `limits`: `maxObjectBytes`,
+`maxLogicalUploadBytes`, `maxRetainedBytes`, and `maxUploadAttempts`.
+The ceilings are 64 MiB per object, 128 MiB cumulative logical uploads,
+128 MiB retained reservation, and 16 admitted source acquisitions per run.
+An explicit run logical allowance must equal the storage logical allowance.
+Omitting storage options preserves buffered mode and its existing defaults.
+
+This mode supports direct application calls and packed SDK sessions with
+`platform: "node"`. HTTP, MSW, Playwright bindings and browser-shaped packed
+sessions reject. Fixture factory limits, metadata policies, authority and
+mock slab layout do not change. This is Node simulation, not native packing,
+streaming Fetch or browser storage.
+
+Application and packed sources use bounded temporary spools and incremental
+SHA-256. Each source view and its backing ArrayBuffer must be at most 64 KiB;
+shared, resizable and detached backing storage rejects. Every admitted source,
+including each failed or empty packed add, spends an attempt. Each source is
+limited to 131072 chunks, including empty chunks. One upload reservation
+(including an idle packed handle) and two download descriptor leases may be
+active. Managed uploads remain buffered, but acquire the same physical
+admission before source opening. Their buffers and uncapped managed metadata
+are excluded from the bounded streaming-payload claim.
+
+Retained capacity includes incomplete files, uncommitted inputs, unused packed
+allowance and failed-removal residue. Logical committed bytes are cumulative;
+deleting an object does not refund them. Serialization in temporary-file mode
+always rejects. Buffered V1 snapshots remain supported in buffered mode.
+
+Explicit cancel, disposal and close join owned work. No automatic operation,
+download or idle deadline is added. Uncooperative source cancellation can keep
+close pending. A rejected descriptor close retains its lease and makes that
+run reject new uploads/downloads; other runs remain independent. Failed unlink
+retains its entry and reservation, including an empty file. Cleanup attempts
+independent resources and reports original failures and residue rather than a
+clean summary. Physical operations are not automatically retried. Catching a
+cleanup error does not make final run cleanup clean.
+
+The backend owns a fresh private temporary root and random filenames, assumes
+a trusted temporary parent and operating-system account, and accepts no caller
+root or user paths. There is no crash recovery or residue sweep. Payload byte
+quotas do not measure filesystem overhead, page cache, caller buffers or total
+process memory.
