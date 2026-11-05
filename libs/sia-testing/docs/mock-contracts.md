@@ -193,6 +193,39 @@ requires a later clock second after a prior publication. Later publication can
 move a lower-ID object past an older cursor. Publication targets only the
 owner-authenticated run; it never acknowledges an application ledger.
 
+### Recreate clients against a retained mock backend
+
+Retain acknowledged object IDs and event cursors as application data. Close the
+original clients, keep the same run and backend open, then create new clients
+with valid access. Use `mock.reader({ access, as })` directly, or
+`createMockReader(connection, credential)` from `@lumeweb/sia-testing/client`
+with a new HTTP/MSW connection. `reader.object(id)` returns current pinned
+membership, metadata and size; `reader.download({ id })` reads the bytes. These
+reads can reconcile a known pin whose reply was lost without repeating a write.
+They do not identify which concurrent request committed. An unpinned or deleted
+object has no readable row. Recipient reads still require current share access;
+revocation denies fresh reads.
+
+`ApplicationPort.events({ cursor, limit })` accepts a retained cursor on a new
+authorized client. Events require explicit driver publication, so an absent event
+does not establish that a pin failed. Read current membership and metadata through
+the reader rather than treating an old event or receipt as current state.
+
+Readable IDs, rows, cursors and diagnostic receipts never create mutation handles.
+Direct application object references belong to the run and can be used by another
+owner-authorized direct port in that run, even after the originating port closes.
+Fetch application references belong to their local client; a recreated client
+rejects the old references. Packed objects and keys belong to their SDK session.
+Retained packed IDs can locate authorized reads after SDK close, but a new SDK
+cannot mutate the old objects. Preserve every acknowledged packed identity;
+reading one pinned result does not establish that all results were pinned.
+Unknown uploads without an acknowledged handle remain unknown; owner enumeration
+is not a handle recovery method.
+
+This supports client recreation within one retained mock run. It does not prove
+backend restart durability, browser reload persistence, native SDK behavior or
+consumer checkpoint policy.
+
 ### Fetch-backed application ports
 
 Import `createMockApplication` from `@lumeweb/sia-testing/client` and pass a

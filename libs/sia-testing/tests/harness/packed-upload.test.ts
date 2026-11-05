@@ -264,7 +264,7 @@ it("only original session capabilities can mutate and invalid admission reads no
   }
 });
 
-it("failed finalization exposes original objects already staged before cancellation", async () => {
+it("acknowledged partial finalization IDs remain readable after closing the SDK session", async () => {
   const mock = createMockSia();
   const stop = new AbortController();
   try {
@@ -324,6 +324,26 @@ it("failed finalization exposes original objects already staged before cancellat
               ).bytes(),
             ).toEqual(Uint8Array.of(1));
             await reader.close();
+            const id = result.error.objects[0]!.id();
+            await sdk.close();
+            const recreatedReader = mock.reader({
+              access: run.ownerAccess,
+              as: mock.actor("recreated partial reader"),
+            });
+            try {
+              expect(await recreatedReader.object(id)).toEqual({
+                id,
+                metadata: new Uint8Array(),
+                sizeBytes: 1,
+              });
+              expect(
+                await new Response(
+                  await recreatedReader.download({ id }),
+                ).bytes(),
+              ).toEqual(Uint8Array.of(1));
+            } finally {
+              await recreatedReader.close();
+            }
           }
         }
         expect(
