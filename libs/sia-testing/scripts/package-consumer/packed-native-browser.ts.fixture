@@ -1,34 +1,97 @@
 /** Checks only consumed native 0.1.4 calls; seal output is deliberately excluded from the mock. */
-import type { Sdk, PackedUpload, PinnedObject, AppKey } from "@siafoundation/sia-storage";
-import type { PackedSdk, PackedObject, PackedAppKey, PackedOptions } from "@lumeweb/sia-testing/mock";
-type Equal<A, B> = (<T>() => T extends A ? 1 : 2) extends (<T>() => T extends B ? 1 : 2) ? true : false;
+import type {
+  Sdk,
+  PackedUpload,
+  PinnedObject,
+  AppKey,
+  SealedObject,
+} from "@siafoundation/sia-storage";
+import type {
+  PackedSdk,
+  PackedObject,
+  PackedAppKey,
+  PackedOptions,
+} from "@lumeweb/sia-testing/mock";
+type Equal<A, B> =
+  (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2
+    ? true
+    : false;
 type Assert<T extends true> = T;
-export type Count = Assert<Equal<ReturnType<PackedUpload["add"]>, Promise<number>>>;
-export type SyncUpload = Assert<Equal<ReturnType<Sdk["uploadPacked"]>, PackedUpload>>;
-export type Finalize = Assert<Equal<ReturnType<PackedUpload["finalize"]>, Promise<PinnedObject[]>>>;
-export type MetadataInput = Assert<Equal<Parameters<PinnedObject["updateMetadata"]>, [Uint8Array]>>;
+export type Count = Assert<
+  Equal<ReturnType<PackedUpload["add"]>, Promise<number>>
+>;
+export type SyncUpload = Assert<
+  Equal<ReturnType<Sdk["uploadPacked"]>, PackedUpload>
+>;
+export type Finalize = Assert<
+  Equal<ReturnType<PackedUpload["finalize"]>, Promise<PinnedObject[]>>
+>;
+export type MetadataInput = Assert<
+  Equal<Parameters<PinnedObject["updateMetadata"]>, [Uint8Array]>
+>;
 export type Key = Assert<Equal<ReturnType<Sdk["appKey"]>, AppKey>>;
-export type NativeSealArgument = Assert<Equal<Parameters<PinnedObject["seal"]>, [AppKey]>>;
-export type MockSealOutput = Assert<Equal<ReturnType<PackedObject["seal"]>, void>>;
-export type NativePin = Assert<Equal<Parameters<Sdk["pinObject"]>, [PinnedObject]>>;
-export type NativeMetadata = Assert<Equal<Parameters<Sdk["updateObjectMetadata"]>, [PinnedObject]>>;
-export type NativePinResult = Assert<Equal<ReturnType<Sdk["pinObject"]>, Promise<void>>>;
-export type NativeMetadataResult = Assert<Equal<ReturnType<Sdk["updateObjectMetadata"]>, Promise<void>>>;
-export async function calls(native: Sdk, mock: PackedSdk<"browser">, key: PackedAppKey) {
-  const options = { dataShards: 1, parityShards: 1, maxBufferedSlabs: 1 } satisfies NonNullable<Parameters<Sdk["uploadPacked"]>[0]> & PackedOptions;
+export type NativeSealArgument = Assert<
+  Equal<Parameters<PinnedObject["seal"]>, [AppKey]>
+>;
+export type NativeSealOutput = Assert<
+  Equal<ReturnType<PinnedObject["seal"]>, SealedObject>
+>;
+export type NativeId = Assert<Equal<ReturnType<PinnedObject["id"]>, string>>;
+export type NativeMetadataRead = Assert<
+  Equal<ReturnType<PinnedObject["metadata"]>, Uint8Array>
+>;
+export type NativeDownload = Assert<
+  Equal<ReturnType<Sdk["download"]>, ReadableStream>
+>;
+export type NativeObjectRead = Assert<
+  Equal<ReturnType<Sdk["object"]>, Promise<PinnedObject>>
+>;
+export type NativeDelete = Assert<
+  Equal<ReturnType<Sdk["deleteObject"]>, Promise<void>>
+>;
+export type MockSealOutput = Assert<
+  Equal<ReturnType<PackedObject["seal"]>, void>
+>;
+export type NativePin = Assert<
+  Equal<Parameters<Sdk["pinObject"]>, [PinnedObject]>
+>;
+export type NativeMetadata = Assert<
+  Equal<Parameters<Sdk["updateObjectMetadata"]>, [PinnedObject]>
+>;
+export type NativePinResult = Assert<
+  Equal<ReturnType<Sdk["pinObject"]>, Promise<void>>
+>;
+export type NativeMetadataResult = Assert<
+  Equal<ReturnType<Sdk["updateObjectMetadata"]>, Promise<void>>
+>;
+export async function calls(
+  native: Sdk,
+  mock: PackedSdk<"browser">,
+  key: PackedAppKey,
+) {
+  const options = {
+    dataShards: 1,
+    parityShards: 1,
+    maxBufferedSlabs: 1,
+  } satisfies NonNullable<Parameters<Sdk["uploadPacked"]>[0]> & PackedOptions;
   const nativeUpload = native.uploadPacked(options);
   const mockUpload = mock.uploadPacked(options);
   const nativeCount: number = await nativeUpload.add(new ReadableStream());
-  const mockCount: number = await mockUpload.add(new ReadableStream<Uint8Array>());
+  const mockCount: number = await mockUpload.add(
+    new ReadableStream<Uint8Array>(),
+  );
   for (const object of await nativeUpload.finalize()) {
     object.updateMetadata(Uint8Array.from([1]));
-    await native.updateObjectMetadata(object); await native.pinObject(object);
+    await native.updateObjectMetadata(object);
+    await native.pinObject(object);
     object.seal(native.appKey());
   }
   for (const object of await mockUpload.finalize()) {
     object.updateMetadata(Uint8Array.from([1]));
-    await mock.updateObjectMetadata(object); await mock.pinObject(object);
-    const noRecord: void = object.seal(key); void noRecord;
+    await mock.updateObjectMetadata(object);
+    await mock.pinObject(object);
+    const noRecord: void = object.seal(key);
+    void noRecord;
     // @ts-expect-error Narrow simulated objects are not native objects.
     await native.pinObject(object);
   }
