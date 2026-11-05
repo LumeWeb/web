@@ -13,7 +13,11 @@ export default defineConfig(
       "src/testing/live/agent.ts",
     ],
     {
-      deps: { neverBundle: [/^node:/], skipNodeModulesBundle: true },
+      deps: {
+        alwaysBundle: [/^@noble\/hashes/],
+        neverBundle: [/^node:/],
+        onlyBundle: [/^@noble\/hashes/],
+      },
       sourcemap: false,
     },
   ),

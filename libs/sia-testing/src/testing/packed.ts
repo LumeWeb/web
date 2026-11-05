@@ -17,6 +17,10 @@ export interface PackedBackend {
     id?: string,
   ): Promise<RequestReceipt>;
   cleanupError(error: unknown): void;
+  collect<T>(
+    signal: AbortSignal,
+    work: (checkpoint: (bytes: number) => Promise<void> | void) => Promise<T>,
+  ): Promise<T>;
   metadata(id: string, bytes: Uint8Array): void;
   pin(id: string, signal: AbortSignal): Promise<void>;
   register(close: () => Promise<void>): () => void;
@@ -241,14 +245,17 @@ export function createPackedSdk<P extends "browser" | "node">(
           return run(async () => {
             if (inputs.length >= options.maxObjects)
               throw fail("limit", "Packed object allowance exceeded");
-            const input = await collect(
-              stream,
-              options.maxBytes - bytes,
-              uploadSignal,
-              (failure) => {
-                if (!failures.includes(failure)) failures.push(failure);
-                if (!errors.includes(failure)) errors.push(failure);
-              },
+            const input = await backend.collect(uploadSignal, (checkpoint) =>
+              collect(
+                stream,
+                options.maxBytes - bytes,
+                uploadSignal,
+                (failure) => {
+                  if (!failures.includes(failure)) failures.push(failure);
+                  if (!errors.includes(failure)) errors.push(failure);
+                },
+                checkpoint,
+              ),
             );
             return effect("packed-add", uploadSignal, () => {
               inputs.push(input);
@@ -346,6 +353,7 @@ async function collect(
   limit: number,
   signal: AbortSignal,
   cleanupError: (error: unknown) => void,
+  checkpoint: (bytes: number) => Promise<void> | void,
 ): Promise<Uint8Array> {
   signal.throwIfAborted();
   const reader = stream.getReader();
@@ -355,11 +363,12 @@ async function collect(
   );
   let readFailure: undefined | { error: unknown };
   let cancellation: Promise<void> | undefined;
-  const cancel = () => {
-    cancellation ??= reader.cancel(signal.reason);
+  const cancel = (reason: unknown = signal.reason) => {
+    cancellation ??= reader.cancel(reason);
     void cancellation.catch(() => undefined);
   };
-  signal.addEventListener("abort", cancel, { once: true });
+  const abort = () => cancel();
+  signal.addEventListener("abort", abort, { once: true });
   const errors: unknown[] = [];
   let bytes!: Uint8Array;
   let length = 0;
@@ -367,6 +376,8 @@ async function collect(
   let cancellationFailed = false;
   try {
     bytes = new Uint8Array();
+    const initial = checkpoint(0);
+    if (initial) await initial;
     for (;;) {
       signal.throwIfAborted();
       let next: ReadableStreamReadResult<Uint8Array>;
@@ -397,13 +408,15 @@ async function collect(
       }
       bytes.set(chunk, length);
       length = needed;
+      const pending = checkpoint(length);
+      if (pending) await pending;
     }
     complete = true;
   } catch (error) {
     errors.push(error);
   }
-  signal.removeEventListener("abort", cancel);
-  if (!complete) cancel();
+  signal.removeEventListener("abort", abort);
+  if (!complete) cancel(errors[0]);
   try {
     await cancellation;
   } catch (error) {

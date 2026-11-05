@@ -549,3 +549,66 @@ test("a browser upload reply loss leaves no handle and opens its source once", a
     await reader.close();
   }
 });
+
+test("chunked browser fixtures reach a backend collection hold before the upload commits", async ({
+  sia,
+}) => {
+  const actor = sia.mock.actor("chunked-browser");
+  const hold = sia.mock.mutationFaults.hold({
+    actor,
+    afterBytes: 3,
+    operation: "upload",
+    stage: "collect",
+  });
+  const clientEntry = `/@fs${new URL("../../../src/client.ts", import.meta.url).pathname}`;
+  const mockEntry = `/@fs${new URL("../../../src/mock.ts", import.meta.url).pathname}`;
+  let completed!: Promise<unknown>;
+  await sia.browser.open({
+    access: sia.ownerAccess,
+    async apply(page, connection) {
+      await page.goto("/scoped.html");
+      completed = page.evaluate(
+        async ({ backend, clientEntry, mockEntry }) => {
+          const { createMockApplication } = (await import(
+            clientEntry
+          )) as typeof import("../../../src/client.js");
+          const { chunkedFixture } = (await import(
+            mockEntry
+          )) as typeof import("../../../src/mock.js");
+          const file = await chunkedFixture({
+            chunkSizeBytes: 3,
+            name: "chunks",
+            pattern: Uint8Array.of(1, 2),
+            sizeBytes: 7,
+          });
+          const writer = createMockApplication(
+            backend.connection,
+            backend.credential,
+          );
+          try {
+            const object = await writer.upload({
+              file,
+              metadata: new Uint8Array(),
+            });
+            return { hash: file.sha256, state: await writer.inspect(object) };
+          } finally {
+            await writer.close();
+          }
+        },
+        { backend: connection.backend, clientEntry, mockEntry },
+      );
+    },
+    mockActor: actor,
+  });
+  const started = await hold.started();
+  expect(started.stage).toBe("collect");
+  expect(started.bytes).toBeGreaterThanOrEqual(3);
+  expect(
+    sia.mock.history().filter((row) => row.operation === "upload"),
+  ).toHaveLength(0);
+  hold.release();
+  expect(await completed).toMatchObject({ state: "uploaded" });
+  expect(
+    sia.mock.history().filter((row) => row.operation === "upload"),
+  ).toHaveLength(1);
+});
