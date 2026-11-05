@@ -19,7 +19,7 @@ export interface PackedBackend {
   cleanupError(error: unknown): void;
   collect<T>(
     signal: AbortSignal,
-    work: (checkpoint: (bytes: number) => Promise<void>) => Promise<T>,
+    work: (checkpoint: (bytes: number) => Promise<void> | void) => Promise<T>,
   ): Promise<T>;
   metadata(id: string, bytes: Uint8Array): void;
   pin(id: string, signal: AbortSignal): Promise<void>;
@@ -353,7 +353,7 @@ async function collect(
   limit: number,
   signal: AbortSignal,
   cleanupError: (error: unknown) => void,
-  checkpoint: (bytes: number) => Promise<void>,
+  checkpoint: (bytes: number) => Promise<void> | void,
 ): Promise<Uint8Array> {
   signal.throwIfAborted();
   const reader = stream.getReader();
@@ -376,7 +376,8 @@ async function collect(
   let cancellationFailed = false;
   try {
     bytes = new Uint8Array();
-    await checkpoint(0);
+    const initial = checkpoint(0);
+    if (initial) await initial;
     for (;;) {
       signal.throwIfAborted();
       let next: ReadableStreamReadResult<Uint8Array>;
@@ -407,7 +408,8 @@ async function collect(
       }
       bytes.set(chunk, length);
       length = needed;
-      await checkpoint(length);
+      const pending = checkpoint(length);
+      if (pending) await pending;
     }
     complete = true;
   } catch (error) {

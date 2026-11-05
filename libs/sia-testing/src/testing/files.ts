@@ -44,7 +44,7 @@ export async function digest(bytes: Uint8Array): Promise<string> {
 export async function readFixture(
   file: TestFile,
   signal: AbortSignal,
-  checkpoint?: (bytes: number) => Promise<void>,
+  checkpoint?: (bytes: number) => Promise<void> | void,
   cleanupError?: (error: unknown) => void,
 ): Promise<Uint8Array> {
   signal.throwIfAborted();
@@ -69,7 +69,8 @@ export async function readFixture(
     // The accepted byte length also bounds storage when a source emits arbitrarily many empty chunks.
     const bytes = new Uint8Array(file.sizeBytes);
     let length = 0;
-    await checkpoint?.(0);
+    const initial = checkpoint?.(0);
+    if (initial) await initial;
     for (;;) {
       signal.throwIfAborted();
       let next: ReadableStreamReadResult<Uint8Array>;
@@ -89,7 +90,8 @@ export async function readFixture(
       }
       bytes.set(view, length);
       length += view.byteLength;
-      await checkpoint?.(length);
+      const pending = checkpoint?.(length);
+      if (pending) await pending;
     }
     if (length !== file.sizeBytes) throw invalidFile();
     complete = true;

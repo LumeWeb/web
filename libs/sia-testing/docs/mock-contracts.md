@@ -459,9 +459,11 @@ seal output omission; no compatibility with SDK 0.0.12 is established.
 `chunkedFixture({ name, sizeBytes, chunkSizeBytes, pattern })`, exported by
 `mock` and `node`, repeats a snapshotted nonempty byte pattern by absolute
 position. Each open generates detached chunks on pull without prefetching.
-Generation and incremental SHA-256 hashing use chunk-sized working storage,
-plus the pattern and hash state. Size must be a safe integer from zero through
-16 MiB; chunk size and pattern length are limited to 1 through 65,536 bytes.
+Output generation uses output-chunk-sized working storage. Incremental SHA-256
+hashing reuses a block of at most 65,536 bytes independently of output chunk
+size, plus the pattern and hash state. Fixture construction still hashes the
+actual bytes synchronously before its promise resolves. Size must be a safe
+integer from zero through 16 MiB; chunk size and pattern length are limited to 1 through 65,536 bytes.
 These limits apply to this fixture constructor only. Existing byte and file
 fixture policies are unchanged.
 

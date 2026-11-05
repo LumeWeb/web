@@ -97,7 +97,7 @@ export function createRequestControls(
   actorLabel: (actor: ActorRef) => string,
   receiptGrants = new WeakMap<RequestReceipt, MockShareGrant>(),
 ) {
-  const holds = new Set<Held>();
+  const holds: Held[] = [];
   const links = new Map<ActorRef, LinkState>();
   function link(actor: ActorRef): LinkState {
     let value = links.get(actor);
@@ -140,6 +140,19 @@ export function createRequestControls(
     if (fault.remaining === 0) faults.splice(index, 1);
     return fault.code;
   }
+  /* oxlint-disable typescript/prefer-for-of -- Boundary checks use indexed storage without constructing iterators. */
+  function hasMatchingControl(record: RequestReceipt): boolean {
+    for (let i = 0; i < holds.length; i++) {
+      const hold = holds[i]!;
+      if (!hold.matched && matches(hold.selector, record)) return true;
+    }
+    for (let i = 0; i < faults.length; i++) {
+      const fault = faults[i]!;
+      if (fault.remaining > 0 && matches(fault.selector, record)) return true;
+    }
+    return false;
+  }
+  /* oxlint-enable typescript/prefer-for-of */
   const control: Omit<MockFaults, "fail" | "hold"> & {
     fail(
       selector: InternalSelector,
@@ -173,12 +186,13 @@ export function createRequestControls(
         }),
         waiters: new Set(),
       };
-      holds.add(hold);
+      holds.push(hold);
       return {
         cancelled: () => hold.cancellation,
         release() {
           hold.released = true;
-          holds.delete(hold);
+          const index = holds.indexOf(hold);
+          if (index >= 0) holds.splice(index, 1);
           for (const resolve of hold.waiters) resolve();
           hold.waiters.clear();
         },
@@ -247,7 +261,7 @@ export function createRequestControls(
     }
     return record;
   }
-  return {
+  const controls = {
     async begin(
       actor: ActorRef,
       operation: RequestSelector["operation"],
@@ -321,6 +335,23 @@ export function createRequestControls(
           for (const hold of reachedHolds) hold.cancel(record);
         throw error;
       }
+    },
+    checkpoint(
+      record: RequestReceipt,
+      signal: AbortSignal,
+    ): Promise<void> | void {
+      signal.throwIfAborted();
+      if (!hasMatchingControl(record)) return;
+      return controls
+        .begin(
+          record.actor,
+          record.operation,
+          undefined,
+          signal,
+          undefined,
+          record,
+        )
+        .then(() => undefined);
     },
     control,
     createReceipt,
@@ -406,4 +437,5 @@ export function createRequestControls(
     },
     takeFailure,
   };
+  return controls;
 }

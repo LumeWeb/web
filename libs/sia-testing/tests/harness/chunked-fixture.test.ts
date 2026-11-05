@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { expect, it } from "vitest";
+import { expect, it, vi } from "vitest";
+import { _SHA256 } from "@noble/hashes/sha2.js";
 import * as fixtures from "../../src/mock.js";
 
 it("chunked fixtures replay detached patterned chunks and an independently checked digest", async () => {
@@ -83,4 +84,49 @@ it("hashes across block and chunk boundaries with pattern offsets independent of
   );
   expect(file.sha256).toBe(createHash("sha256").update(expected).digest("hex"));
   expect(await new Response(file.open()).bytes()).toEqual(expected);
+});
+
+it("tiny output chunks hash through a shared bounded block with a partial final update", async () => {
+  // oxlint-disable-next-line typescript/unbound-method -- The delegate below calls the original with the actual hash instance.
+  const update = _SHA256.prototype.update;
+  const updates: Uint8Array[] = [];
+  const spy = vi
+    .spyOn(_SHA256.prototype, "update")
+    .mockImplementation(function (this: _SHA256, bytes) {
+      if (typeof bytes !== "string") updates.push(bytes);
+      return update.call(this, bytes);
+    });
+  try {
+    const pattern = Uint8Array.from({ length: 257 }, (_, i) => i % 251);
+    const expected = Uint8Array.from(
+      { length: 65539 },
+      (_, i) => (i % 257) % 251,
+    );
+    const file = await fixtures.chunkedFixture({
+      chunkSizeBytes: 1,
+      name: "tiny",
+      pattern,
+      sizeBytes: 65539,
+    });
+    expect(file.sha256).toBe(
+      createHash("sha256").update(expected).digest("hex"),
+    );
+    expect(updates.map((bytes) => bytes.byteLength)).toEqual([65536, 3]);
+    expect(updates[0]!.buffer).toBe(updates[1]!.buffer);
+    expect(updates[0]!.buffer.byteLength).toBe(65536);
+    const reader = file.open().getReader();
+    try {
+      const first = (await reader.read()).value!;
+      expect(first).toEqual(Uint8Array.of(0));
+      first[0] = 9;
+      expect((await reader.read()).value).toEqual(Uint8Array.of(1));
+      expect((await reader.read()).value).toEqual(Uint8Array.of(2));
+    } finally {
+      await reader.cancel();
+      reader.releaseLock();
+    }
+    expect(updates).toHaveLength(2);
+  } finally {
+    spy.mockRestore();
+  }
 });

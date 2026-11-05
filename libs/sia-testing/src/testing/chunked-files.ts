@@ -1,4 +1,4 @@
-/** Portable patterned fixtures generate and hash one chunk at a time. */
+/** Patterned fixtures generate output chunks and hash through a reusable bounded block. */
 import { sha256 } from "@noble/hashes/sha2.js";
 import type { TestFile } from "./types.js";
 import { boundedByteView } from "./byte-view.js";
@@ -39,8 +39,13 @@ export async function chunkedFixture(input: {
     return bytes;
   };
   const hash = sha256.create();
-  for (let offset = 0; offset < sizeBytes; offset += chunkSizeBytes)
-    hash.update(chunk(offset));
+  const hashBlock = new Uint8Array(Math.min(65536, sizeBytes));
+  for (let offset = 0; offset < sizeBytes; offset += hashBlock.length) {
+    const length = Math.min(hashBlock.length, sizeBytes - offset);
+    for (let i = 0; i < length; i++)
+      hashBlock[i] = pattern[(offset + i) % pattern.length]!;
+    hash.update(hashBlock.subarray(0, length));
+  }
   const hex = Array.from(hash.digest(), (byte) =>
     byte.toString(16).padStart(2, "0"),
   ).join("");

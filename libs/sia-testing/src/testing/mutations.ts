@@ -110,7 +110,7 @@ export function createMutationControls(
       actor: ActorRef,
       operation: "packed-add" | "upload",
       signal: AbortSignal,
-      work: (checkpoint: (bytes: number) => Promise<void>) => Promise<T>,
+      work: (checkpoint: (bytes: number) => Promise<void> | void) => Promise<T>,
     ): Promise<T> {
       const receipt = controls.createReceipt(
         actor,
@@ -121,16 +121,9 @@ export function createMutationControls(
       );
       receipt.stage = "collect";
       try {
-        const result = await work(async (bytes) => {
+        const result = await work((bytes) => {
           receipt.bytes = bytes;
-          await controls.begin(
-            actor,
-            operation,
-            undefined,
-            signal,
-            undefined,
-            receipt,
-          );
+          return controls.checkpoint(receipt, signal);
         });
         receipt.status = "completed";
         return result;
