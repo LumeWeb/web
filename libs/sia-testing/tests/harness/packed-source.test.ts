@@ -10,7 +10,7 @@ const app = {
   serviceUrl: "https://example.invalid",
 };
 const containsIdentity = (value: unknown, target: unknown): boolean =>
-  value === target ||
+  Object.is(value, target) ||
   (value instanceof AggregateError &&
     value.errors.some((item: unknown) => containsIdentity(item, target)));
 afterEach(() => vi.restoreAllMocks());
@@ -59,6 +59,8 @@ it.each([
 );
 
 it.each([
+  undefined,
+  NaN,
   new Error("source cancel failed"),
   new AggregateError([new Error("cancel item")], "source cancel failed"),
 ])(
@@ -88,6 +90,7 @@ it.each([
                 {
                   cancel() {
                     cancelCalls++;
+                    // oxlint-disable-next-line typescript/only-throw-error -- Arbitrary producer rejection must remain observable.
                     throw cancelError;
                   },
                   pull() {
@@ -351,7 +354,10 @@ it("collection snapshots reused producer memory and preserves empty inputs and e
   }
 });
 
+const detachedChunk = new Uint8Array(1);
+structuredClone(detachedChunk.buffer, { transfer: [detachedChunk.buffer] });
 it.each([
+  { chunk: detachedChunk, label: "detached" },
   { chunk: Uint8Array.of(1, 2, 3), label: "overlong" },
   { chunk: { byteLength: 1 }, label: "invalid" },
 ])(
@@ -393,3 +399,153 @@ it.each([
     }
   },
 );
+
+it("empty and tiny inputs do not allocate their large admitted ceiling", async () => {
+  const mock = createMockSia();
+  try {
+    await mock.run({ app }, async (run) => {
+      const sdk = mock.packedSdk({
+        access: run.ownerAccess,
+        as: mock.actor("writer"),
+        maxBytes: 1024 * 1024,
+        maxObjects: 4,
+        platform: "browser",
+      });
+      const upload = sdk.uploadPacked();
+      const payloads = [
+        new Uint8Array(),
+        Uint8Array.of(1),
+        Uint8Array.of(2, 3, 4),
+        new Uint8Array(257).fill(5),
+      ];
+      const Original = Uint8Array;
+      const capacities: number[] = [];
+      const intercepted = new Proxy(Original, {
+        construct(target, args, newTarget) {
+          if (typeof args[0] === "number") capacities.push(args[0]);
+          else if (ArrayBuffer.isView(args[0]))
+            capacities.push(args[0].byteLength);
+          return Reflect.construct(target, args, newTarget) as Uint8Array;
+        },
+      });
+      try {
+        vi.stubGlobal("Uint8Array", intercepted);
+        for (const payload of payloads) {
+          const before = capacities.length;
+          await upload.add(
+            new ReadableStream<Uint8Array>(
+              {
+                pull(controller) {
+                  controller.enqueue(payload);
+                  controller.close();
+                },
+              },
+              { highWaterMark: 0 },
+            ),
+          );
+          const allocated = capacities
+            .slice(before)
+            .reduce((sum, capacity) => sum + capacity, 0);
+          expect(allocated).toBeLessThanOrEqual(
+            payload.length === 0 ? 0 : 1024,
+          );
+        }
+      } finally {
+        vi.unstubAllGlobals();
+      }
+      const objects = await upload.finalize();
+      const reader = mock.reader({
+        access: run.ownerAccess,
+        as: mock.actor("reader"),
+      });
+      try {
+        expect(objects).toHaveLength(payloads.length);
+        for (const [index, object] of objects.entries()) {
+          await sdk.pinObject(object);
+          expect(
+            await new Response(
+              await reader.download({ id: object.id() }),
+            ).bytes(),
+          ).toEqual(payloads[index]);
+        }
+      } finally {
+        await reader.close();
+        await sdk.close();
+      }
+    });
+  } finally {
+    vi.unstubAllGlobals();
+    await mock.close();
+  }
+});
+
+it("growth across one-byte chunks stays proportional to observed bytes rather than the ceiling or chunk count", async () => {
+  const mock = createMockSia();
+  try {
+    await mock.run({ app }, async (run) => {
+      const sdk = mock.packedSdk({
+        access: run.ownerAccess,
+        as: mock.actor("writer"),
+        maxBytes: 64 * 1024,
+        maxObjects: 1,
+        platform: "browser",
+      });
+      const upload = sdk.uploadPacked();
+      const payload = Uint8Array.from(
+        { length: 4097 },
+        (_, index) => index % 251,
+      );
+      let position = 0;
+      const source = new ReadableStream<Uint8Array>(
+        {
+          pull(controller) {
+            if (position === payload.length) controller.close();
+            else controller.enqueue(payload.subarray(position, ++position));
+          },
+        },
+        { highWaterMark: 0 },
+      );
+      const Original = Uint8Array;
+      const capacities: number[] = [];
+      const intercepted = new Proxy(Original, {
+        construct(target, args, newTarget) {
+          if (typeof args[0] === "number") capacities.push(args[0]);
+          else if (ArrayBuffer.isView(args[0]))
+            capacities.push(args[0].byteLength);
+          return Reflect.construct(target, args, newTarget) as Uint8Array;
+        },
+      });
+      try {
+        vi.stubGlobal("Uint8Array", intercepted);
+        expect(await upload.add(source)).toBe(payload.length);
+      } finally {
+        vi.unstubAllGlobals();
+      }
+      expect(capacities.length).toBeLessThanOrEqual(
+        1 + Math.ceil(Math.log2(payload.length)),
+      );
+      expect(
+        capacities.reduce((sum, capacity) => sum + capacity, 0),
+      ).toBeLessThanOrEqual(4 * payload.length);
+      const [object] = await upload.finalize();
+      await sdk.pinObject(object!);
+      const reader = mock.reader({
+        access: run.ownerAccess,
+        as: mock.actor("reader"),
+      });
+      try {
+        expect(
+          await new Response(
+            await reader.download({ id: object!.id() }),
+          ).bytes(),
+        ).toEqual(payload);
+      } finally {
+        await reader.close();
+        await sdk.close();
+      }
+    });
+  } finally {
+    vi.unstubAllGlobals();
+    await mock.close();
+  }
+});

@@ -349,6 +349,11 @@ async function collect(
 ): Promise<Uint8Array> {
   signal.throwIfAborted();
   const reader = stream.getReader();
+  const closed = reader.closed.then(
+    () => ({ failed: false as const }),
+    (error: unknown) => ({ error, failed: true as const }),
+  );
+  let readFailure: undefined | { error: unknown };
   let cancellation: Promise<void> | undefined;
   const cancel = () => {
     cancellation ??= reader.cancel(signal.reason);
@@ -361,11 +366,16 @@ async function collect(
   let complete = false;
   let cancellationFailed = false;
   try {
-    // One admitted buffer avoids retaining an allocation for every producer chunk.
-    bytes = new Uint8Array(limit);
+    bytes = new Uint8Array();
     for (;;) {
       signal.throwIfAborted();
-      const next = await reader.read();
+      let next: ReadableStreamReadResult<Uint8Array>;
+      try {
+        next = await reader.read();
+      } catch (error) {
+        readFailure = { error };
+        throw error;
+      }
       signal.throwIfAborted();
       if (next.done) break;
       let chunk: Uint8Array;
@@ -374,8 +384,19 @@ async function collect(
       } catch {
         throw fail("limit", "Packed byte allowance exceeded or invalid chunk");
       }
+      const needed = length + chunk.length;
+      if (needed > bytes.length) {
+        // Geometric growth avoids allocating storage for every producer chunk.
+        const capacity = Math.min(
+          limit,
+          Math.max(needed, 1024, bytes.length * 2),
+        );
+        const grown = new Uint8Array(capacity);
+        grown.set(bytes.subarray(0, length));
+        bytes = grown;
+      }
       bytes.set(chunk, length);
-      length += chunk.length;
+      length = needed;
     }
     complete = true;
   } catch (error) {
@@ -386,10 +407,15 @@ async function collect(
   try {
     await cancellation;
   } catch (error) {
-    // An errored reader rejects cancel with the same read error without invoking source cleanup.
-    if (!errors.includes(error)) {
-      errors.push(error);
+    const state = await closed;
+    // Producer cancellation closes the reader even when it rejects with the abort reason.
+    // A previously errored reader instead repeats its error without invoking the producer.
+    const repeatedReaderError =
+      (readFailure !== undefined && Object.is(readFailure.error, error)) ||
+      (state.failed && Object.is(state.error, error));
+    if (!repeatedReaderError) {
       cancellationFailed = true;
+      if (!errors.includes(error)) errors.push(error);
     }
   } finally {
     reader.releaseLock();
