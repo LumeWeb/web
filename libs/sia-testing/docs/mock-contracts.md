@@ -353,3 +353,103 @@ and removes only its entries; endpoint close joins all remaining work and
 releases registrations. A lost first targets reply can leave an unreferenced
 session until run or endpoint cleanup. Calls do not retry or recover sessions
 automatically.
+
+## Direct SDK-shaped packed simulation
+
+`mock.packedSdk({ access, as, platform, maxBytes, maxObjects })` uses original
+owner access and actor capabilities. `platform` is `"node"` or `"browser"`;
+`add(stream)` returns `Promise<bigint>` or `Promise<number>` respectively,
+matching that part of SDK 0.1.4. The handle from `uploadPacked(options?)` is
+synchronous. The supported options are positive safe integer `dataShards`,
+`parityShards` and `maxBufferedSlabs`. They validate caller configuration;
+they do not change simulated storage layout. Host progress callbacks are
+unsupported and reject before admission.
+
+```ts
+const sdk = mock.packedSdk({
+  access: run.ownerAccess,
+  as: mock.actor("packed writer"),
+  platform: "browser",
+  maxBytes: 1024,
+  maxObjects: 1,
+});
+try {
+  const packed = sdk.uploadPacked({ dataShards: 1, parityShards: 1 });
+  await packed.add(
+    new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(Uint8Array.of(1, 2));
+        controller.close();
+      },
+    }),
+  );
+  for (const object of await packed.finalize()) {
+    object.updateMetadata(Uint8Array.of(7));
+    await sdk.updateObjectMetadata(object);
+    await sdk.pinObject(object);
+    object.seal(sdk.appKey());
+  }
+} finally {
+  await sdk.close();
+}
+```
+
+Each successful add produces one independently pinnable object, including a
+zero-byte input. No adds produces no objects. IDs use the run identity and
+reserved object ordinal; repeated equal inputs do not alias. Sources are
+collected in memory with an aggregate maximum of 16 MiB. This path does not
+prove bounded-memory streaming, real slabs, encryption, host transfer or native
+packed correctness. It is available only on the direct mock; HTTP and MSW do
+not expose SDK-shaped packed calls.
+
+Each `uploadPacked` reserves `maxBytes` and `maxObjects` against the same run
+allowances as application and managed uploads before it locks a source. Invalid
+configuration, owner access and exhausted run admission read no source. Object
+attempts are not refunded, including empty or failed finalization. Finalization
+and disposal release unused byte reservations; acknowledged uploaded bytes
+remain charged. Failed adds consume no object slot within that packed handle.
+Source byte overflow fails and cancels the source. This does not raise existing
+application limits or change managed mock metadata (uncapped) or managed live
+metadata (16384 bytes).
+
+`updateMetadata(Uint8Array)` copies up to 1024 bytes locally. This deliberately
+accepts a wider input than native Node's `Buffer` signature. No native-shaped
+`metadata()` method is exposed. `updateObjectMetadata` snapshots local bytes at
+invocation and commits through the existing object store; reads through the
+owner reader return detached copies after pinning. Local changes alone do not
+change stored metadata. Concurrent metadata calls follow commit order.
+Publication remains explicit.
+
+`mutationFaults` accepts `packed-add`, `packed-finalize` and `metadata` with
+`stage: "beforeCommit"` and optional original actor. Add controls run after
+collection, finalize controls run before each result's staging (once for an
+empty batch), and metadata controls run before the metadata effect. Existing
+`pin` holds, failures and reply losses also apply. These selectors do not accept
+packed object IDs as authority. Existing application upload `beforeCommit`
+still runs after collection and hashing.
+
+Only one add or finalize may run per upload; overlap rejects with `code: "busy"`.
+A failed add permits another add. Finalize is one-shot, including failure.
+If finalization fails after staging results, `PackedFinalizeError.objects`
+contains the original acknowledged object capabilities and `cause` retains the
+original failure. A failure before any result propagates unchanged. No rollback,
+retry or publication runs automatically. The caller may pin acknowledged partial
+objects explicitly while the SDK session remains open.
+
+`cancel()` interrupts reads and held work. `dispose()` cancels and joins that
+upload, releases its buffers and unused byte reservation, and retains source
+cancellation errors. `sdk.close()` does the same for every unfinished upload
+and joins metadata and pin calls. Neither deletes acknowledged objects. Run
+cleanup closes sessions and then deletes run-owned resources; it continues after
+source cleanup errors and reports them. Closing one session does not close its
+siblings. A source failure plus a cancellation failure is an `AggregateError`
+containing both actual errors.
+
+Packed objects and app keys belong to their original SDK session. Copies,
+read records, guessed IDs, diagnostics and keys from sibling sessions cannot
+mutate or seal. `seal(key)` validates the original object and key and returns
+`void`. It does not create a sealed record, signature, encryption proof or
+recovery capability. Code needing sealed output is unsupported by this mock.
+The surface is not assignable to full native nominal classes. Package checks
+separately check the consumed Node/browser 0.1.4 signatures and the intentional
+seal output omission; no compatibility with SDK 0.0.12 is established.

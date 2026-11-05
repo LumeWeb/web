@@ -5,6 +5,17 @@ export type {
   PinReplySelector,
 } from "./testing/mutations.js";
 export type {
+  PackedAppKey,
+  PackedObject,
+  PackedOptions,
+  PackedSdk,
+  PackedSdkOptions,
+  PackedUpload,
+} from "./testing/packed.js";
+
+export { PackedFinalizeError } from "./testing/packed.js";
+
+export type {
   ActorRef,
   AppDefinition,
   ApplicationObject,
