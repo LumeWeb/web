@@ -42,13 +42,14 @@ export type MutationSelector = {
     }
   | {
       readonly object?: never;
-      readonly operation: "share-add" | "share-end" | "share-remove";
-      readonly share?: MockShareGrant;
+      readonly operation:
+        "metadata" | "packed-add" | "packed-finalize" | "upload";
+      readonly share?: never;
     }
   | {
       readonly object?: never;
-      readonly operation: "upload";
-      readonly share?: never;
+      readonly operation: "share-add" | "share-end" | "share-remove";
+      readonly share?: MockShareGrant;
     }
 );
 export interface PinReplySelector {

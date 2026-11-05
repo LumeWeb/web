@@ -1,0 +1,30 @@
+/** Runs the direct packed simulation from the extracted tarball without native initialization. */
+import assert from "node:assert/strict";
+import { createMockSia } from "@lumeweb/sia-testing/mock";
+const mock = createMockSia();
+const app = { id: "a".repeat(64), name: "Packed", description: "Consumed bytes", serviceUrl: "https://example.invalid" };
+try {
+  await mock.run({ app }, async run => {
+    const actor = mock.actor("writer");
+    const sdk = mock.packedSdk({ access: run.ownerAccess, as: actor, platform: "node", maxBytes: 8, maxObjects: 1 });
+    const packed = sdk.uploadPacked({ dataShards: 1, parityShards: 1 });
+    let consumed = 0;
+    assert.equal(await packed.add(new ReadableStream({ pull(c) { consumed++; c.enqueue(Uint8Array.of(1, 2, 3)); c.close(); } }, { highWaterMark: 0 })), 3n);
+    assert.equal(consumed, 1);
+    const [object] = await packed.finalize();
+    object.updateMetadata(Buffer.from([7]));
+    mock.mutationFaults.fail({ actor, operation: "metadata", stage: "beforeCommit" }, { code: "unavailable", times: 1 });
+    await assert.rejects(sdk.updateObjectMetadata(object), { code: "unavailable" });
+    await sdk.updateObjectMetadata(object);
+    await sdk.pinObject(object);
+    assert.equal(object.seal(sdk.appKey()), undefined);
+    await assert.rejects(sdk.pinObject({ ...object }), { code: "foreign-handle" });
+    const reader = mock.reader({ access: run.ownerAccess, as: mock.actor("reader") });
+    assert.deepEqual([...(await reader.object(object.id())).metadata], [7]);
+    assert.deepEqual([...await new Response(await reader.download({ id: object.id() })).bytes()], [1, 2, 3]);
+    await sdk.close();
+    assert.equal((await reader.object(object.id())).sizeBytes, 3);
+    await reader.close();
+  });
+} finally { await mock.close(); }
+console.log("packed SDK-shaped direct simulation passed");

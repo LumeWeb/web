@@ -1,4 +1,6 @@
 /** Managed mock runs bind readers to owner or recipient access and clean only their own fixtures. */
+import { createPackedSdk } from "./packed.js";
+import { digest } from "./files.js";
 import { boundedByteView } from "./byte-view.js";
 import { snapshotApplicationMetadata } from "./application-metadata.js";
 import { createIndexdModel } from "../model/index.js";
@@ -123,6 +125,9 @@ export function createMockSia(options: MockOptions = {}): MockSia {
         selector.stage !== "beforeCommit" ||
         ![
           "delete",
+          "metadata",
+          "packed-add",
+          "packed-finalize",
           "pin",
           "share-add",
           "share-end",
@@ -269,11 +274,13 @@ export function createMockSia(options: MockOptions = {}): MockSia {
       const transport = await Promise.allSettled(
         [...context.transportCleanup].map((close) => close()),
       );
-      context.cleanupErrors.push(
-        ...transport.flatMap((result) =>
-          result.status === "rejected" ? [result.reason as unknown] : [],
-        ),
-      );
+      for (const result of transport) {
+        if (
+          result.status === "rejected" &&
+          !context.cleanupErrors.includes(result.reason)
+        )
+          context.cleanupErrors.push(result.reason as unknown);
+      }
       context.transportCleanup.clear();
       await Promise.allSettled([...context.pending]);
       const errors: unknown[] = [...context.cleanupErrors];
@@ -1034,6 +1041,120 @@ export function createMockSia(options: MockOptions = {}): MockSia {
         signal: grant?.context.signal ?? new AbortController().signal,
         track: (action) => track(authorize(), action),
       });
+    },
+    packedSdk(input) {
+      environmentOpen();
+      const {
+        access: handle,
+        as: actor,
+        maxBytes,
+        maxObjects,
+        platform,
+      } = input;
+      if (!actors.has(actor)) throw failure("foreign-handle", "Unknown actor");
+      const grant = grants.get(handle);
+      if (!grant || grant.key !== null || grant.credential.kind !== "app-key")
+        throw failure("denied", "Owner access is unavailable");
+      const context = grant.context;
+      const authorize = () => {
+        environmentOpen();
+        open(context);
+      };
+      authorize();
+      if (
+        !["browser", "node"].includes(platform) ||
+        !Number.isSafeInteger(maxBytes) ||
+        maxBytes < 1 ||
+        maxBytes > 16 * 1024 * 1024 ||
+        !Number.isSafeInteger(maxObjects) ||
+        maxObjects < 1
+      )
+        throw failure("invalid-input", "Invalid packed allowance");
+      return createPackedSdk(
+        { access: handle, as: actor, maxBytes, maxObjects, platform },
+        {
+          afterCommit: (receipt) => mutations.afterCommit(receipt),
+          authorize,
+          before: (operation, signal, id) =>
+            mutations.begin(actor, operation, id, signal),
+          cleanupError(error) {
+            if (!context.cleanupErrors.includes(error))
+              context.cleanupErrors.push(error);
+          },
+          metadata(id, bytes) {
+            authorize();
+            const record = context.objects.get(id)!;
+            if (record.deleted) throw failure("not-found", "Object is missing");
+            record.metadata = bytes;
+          },
+          async pin(id, signal) {
+            await context.sdk!.pinObject({ id: () => id }, { signal });
+          },
+          register: (close) => {
+            context.transportCleanup.add(close);
+            return () => {
+              context.transportCleanup.delete(close);
+            };
+          },
+          reserve() {
+            authorize();
+            if (
+              context.objectAttempts + maxObjects > context.limits.maxObjects ||
+              maxBytes >
+                context.limits.maxLogicalUploadBytes - context.reservedBytes
+            )
+              throw failure("limit", "Run upload allowance exceeded");
+            const sequence = context.objectAttempts;
+            context.objectAttempts += maxObjects;
+            context.reservedBytes += maxBytes;
+            let committed = 0;
+            let ordinal = 0;
+            let released = false;
+            return {
+              release() {
+                if (released) return;
+                released = true;
+                context.reservedBytes -= maxBytes - committed;
+              },
+              async stage(bytes, signal) {
+                const id = await digest(
+                  new TextEncoder().encode(
+                    `${context.id}:packed:${sequence + ordinal++}`,
+                  ),
+                );
+                const sha256 = await digest(bytes);
+                await context.sdk!.upload(bytes, {
+                  id,
+                  prepareCommit() {
+                    signal.throwIfAborted();
+                    authorize();
+                    const handle = Object.freeze({
+                      id,
+                      sha256,
+                      sizeBytes: bytes.length,
+                    }) as TestObject;
+                    const record = {
+                      deleted: false,
+                      handle,
+                      metadata: new Uint8Array(),
+                    };
+                    return () => {
+                      context.objects.set(id, record);
+                      objects.set(handle, { context, record });
+                      context.uploadedBytes += bytes.length;
+                      committed += bytes.length;
+                    };
+                  },
+                  signal,
+                });
+                return id;
+              },
+            };
+          },
+          signal: context.signal,
+          track: (work) => track(context, work),
+        },
+      );
     },
     async publish({ access: handle }) {
       const grant = grants.get(handle);
