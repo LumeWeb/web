@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { emitLog, milestoneLevel } from '../session/sia-composition.ts';
+import { type WorkerToMainMessage, WorkerToMainMessageType } from '../protocol.ts';
 import { fakeObject, fakeSdk } from './fixtures/sdk.ts';
 import { isReadStalledError, isShardShortageError, isTransportReadError, LruChunkCache, RangedReader, ReadTransportError, type SiaSdkLike } from '../ranged-reader.ts';
 
@@ -709,6 +711,57 @@ function flakySdk(payload: Uint8Array, failCount: number): { requests: { length:
 // attempt budget, and never fire for a superseded/stalled run or a throwing
 // onChunk.
 describe('RangedReader retries on transient read failure', () => {
+  it.each([
+    new Error('download https://share.example/object#secret-key failed with status 503'),
+    'download sia://object/secret-key failed with status 503',
+  ])('redacts share URLs in retry callbacks and worker logs while retaining the original failure: %s', async (failure) => {
+    const milestones: { detail: Readonly<Record<string, unknown>>; name: string }[] = [];
+    const logs: WorkerToMainMessage[] = [];
+    const errors: unknown[] = [];
+    let attempts = 0;
+    const delivered: Uint8Array[] = [];
+    const reader = new RangedReader({
+      maxAttempts: 2,
+      object: fakeObject(PAYLOAD.length),
+      onChunk: (bytes) => delivered.push(bytes),
+      onError: (error) => errors.push(error),
+      onMilestone: (name, requestId, detail) => {
+        milestones.push({ detail, name });
+        const level = milestoneLevel(name);
+        if (level) emitLog((message) => logs.push(message), 'debug', level, name, detail, requestId);
+      },
+      requestId: 42,
+      retryBackoffMs: 0,
+      sdk: { download: () => {
+        attempts++;
+        // The string fixture covers SDK rejections that do not carry an Error object.
+        // oxlint-disable-next-line typescript/prefer-promise-reject-errors
+        return Promise.reject(failure);
+      } },
+    });
+
+    reader.start(0, PAYLOAD.length);
+    await settle();
+    await settle();
+
+    expect(attempts).toBe(2);
+    expect(delivered).toEqual([]);
+    expect(errors).toHaveLength(1);
+    expect((errors[0] as ReadTransportError).cause).toBe(failure);
+    const detail = {
+      attempt: 2,
+      error: 'download [redacted] failed with status 503',
+      expectedBytes: PAYLOAD.length,
+      position: 0,
+    };
+    expect(milestones.find((event) => event.name === 'read.retry')?.detail).toEqual(detail);
+    expect(logs.find((event) => event.type === WorkerToMainMessageType.LOG && event.name === 'read.retry')).toMatchObject({
+      detail, level: 'debug', requestId: 42,
+    });
+    expect(JSON.stringify({ logs, milestones })).not.toContain('secret-key');
+    if (failure instanceof Error) expect(failure.message).toContain('secret-key');
+  });
+
   it('recovers a zero-byte download failure on attempt 2, delivering the whole window once', async () => {
     const delivered: Delivered[] = [];
     const errors: unknown[] = [];

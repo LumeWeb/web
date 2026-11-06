@@ -18,6 +18,7 @@
  *   `SOURCE_OK.info` capability fields stay optional.
  */
 
+import { redactUrls } from '../redact-urls.ts';
 import type { PlaybackCapabilities } from '../capabilities/browser-capabilities.ts';
 import {
   type RequestId,
@@ -467,16 +468,4 @@ function disposeSdk(sdk: unknown): void {
         /* best-effort teardown; never propagates */
       });
   }
-}
-
-/**
- * Scrubs URL-shaped runs out of a diagnostic string before it enters `LOG`
- * detail. Share URLs embed the object decryption key in the fragment, and an
- * SDK/fetch error message can carry the resolved share URL verbatim; replacing
- * any http(s)/`sia://` URL-ish run with `[redacted]` keeps the key (and the
- * object identity) out of worker logs while leaving the rest of the message
- * readable. Over-replacement is fine here — lossy only for an attacker.
- */
-function redactUrls(text: string): string {
-  return text.replace(/(?:https?|sia):\/\/\S+/g, '[redacted]');
 }
