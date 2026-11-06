@@ -18,6 +18,7 @@
  *   `SOURCE_OK.info` capability fields stay optional.
  */
 
+import { sha256 } from '@noble/hashes/sha2.js';
 import { redactUrls } from '../redact-urls.ts';
 import type { PlaybackCapabilities } from '../capabilities/browser-capabilities.ts';
 import {
@@ -192,14 +193,15 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
   const byteSourceOptions: SiaByteSourceFactoryOptions | undefined = onMilestone
     ? { ...byteSource, onMilestone }
     : byteSource;
+  const lazySource = deps.createSdk
+    ? createLazySiaByteSourceFactory({ byteSource: byteSourceOptions, createSdk: deps.createSdk, handshake, logSink })
+    : undefined;
   const createSource: (
     src: string,
     requestId?: null | RequestId,
     sourceKind?: 'app' | 'shared',
     refresh?: boolean,
-  ) => Promise<ByteSource> = deps.createSdk
-    ? createLazySiaByteSourceFactory({ byteSource: byteSourceOptions, createSdk: deps.createSdk, handshake, logSink })
-    : createSiaByteSourceFactory(sdk!, byteSourceOptions);
+  ) => Promise<ByteSource> = lazySource?.createSource ?? createSiaByteSourceFactory(sdk!, byteSourceOptions);
   // Worker MSE is used only when the runtime can construct it in a dedicated
   // worker AND a worker MSE binding is supplied; otherwise the coordinator
   // keeps its default main-mode CHUNK posting sink (the Firefox fallback).
@@ -277,6 +279,7 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
   // reason it knows at each call site through this existing hook — the most
   // precise fact honestly convertible, never a heuristic guess.
   const onAbandon = (reason?: WorkerAbandonReason): void => {
+    if (reason === 'destroy') lazySource?.destroy();
     if (workerMseSupported && workerMseRoot) workerMseRoot.teardown();
     else deps.onAbandon?.();
     if (loadAccepted) {
@@ -370,20 +373,21 @@ export function milestoneLevel(name: string): undefined | WorkerLogLevel {
   }
 }
 
+/** Compares seed values after the handshake has scrubbed replaced credential arrays. */
 function connectionEquals(
   cached: {
     config: undefined | WorkerConfig;
-    seed: null | Uint8Array;
-    sharingSeed: null | Uint8Array;
+    seedFingerprint: null | Uint8Array;
+    sharingSeedFingerprint: null | Uint8Array;
   },
   config: undefined | WorkerConfig,
-  seed: null | Uint8Array,
-  sharingSeed: null | Uint8Array,
+  seedFingerprint: null | Uint8Array,
+  sharingSeedFingerprint: null | Uint8Array,
 ): boolean {
   return (
     workerConfigsEqual(cached.config, config) &&
-    appKeySeedsEqual(cached.seed, seed) &&
-    appKeySeedsEqual(cached.sharingSeed, sharingSeed)
+    appKeySeedsEqual(cached.seedFingerprint, seedFingerprint) &&
+    appKeySeedsEqual(cached.sharingSeedFingerprint, sharingSeedFingerprint)
   );
 }
 
@@ -405,67 +409,123 @@ function createLazySiaByteSourceFactory(deps: {
   ) => Promise<SiaByteSourceSdk>;
   readonly handshake: Pick<SessionHandshake, 'config' | 'log' | 'seed' | 'sharingSeed'>;
   readonly logSink?: WorkerLogSink;
-}): (
-  src: string,
-  requestId?: null | RequestId,
-  sourceKind?: 'app' | 'shared',
-  refresh?: boolean,
-) => Promise<ByteSource> {
+}): {
+  createSource: NonNullable<Parameters<typeof createSessionCoordinator>[0]['createSource']>;
+  destroy: () => void;
+} {
   const { byteSource, createSdk, handshake, logSink } = deps;
-  let cached: null | {
-    config: undefined | WorkerConfig;
+  interface Connection {
+    createSource: ReturnType<typeof createSiaByteSourceFactory>;
     sdk: SiaByteSourceSdk;
-    seed: null | Uint8Array;
-    sharingSeed: null | Uint8Array;
+  }
+  interface CachedConnection extends Connection {
+    config: undefined | WorkerConfig;
+    seedFingerprint: null | Uint8Array;
+    sharingSeedFingerprint: null | Uint8Array;
+  }
+  let cached: CachedConnection | null = null;
+
+  let destroyed = false;
+  const released = new WeakSet<SiaByteSourceSdk>();
+  // Obsolete builds can return the same SDK as the current connection.
+  const release = (sdk: SiaByteSourceSdk): void => {
+    if (sdk === cached?.sdk || released.has(sdk)) return;
+    released.add(sdk);
+    disposeSdk(sdk);
+  };
+  let buildGeneration = 0;
+  let pending: null | {
+    config: undefined | WorkerConfig;
+    promise: Promise<Connection>;
+    seedFingerprint: null | Uint8Array;
+    sharingSeedFingerprint: null | Uint8Array;
   } = null;
 
-  return async (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared', refresh?: boolean): Promise<ByteSource> => {
+  const createSource = async (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared', refresh?: boolean): Promise<ByteSource> => {
+    if (destroyed) throw new Error('SDK factory destroyed');
     const config = handshake.config;
     const seed = handshake.seed ?? null;
     const sharingSeed = handshake.sharingSeed ?? null;
-    // Availability recovery bypasses the memo so renter hosts are resolved
-    // again on an unchanged connection.
-    let sdk = cached && !refresh && connectionEquals(cached, config, seed, sharingSeed) ? cached.sdk : null;
-    if (!sdk) {
-      try {
-        sdk = await createSdk(config, seed, sharingSeed);
-      } catch (error) {
-        // A rejected SDK bootstrap is otherwise invisible (it only surfaces as
-        // a generic ERROR after the fact); report it as its own error milestone
-        // with the scalar message before rethrowing so the caller's existing
-        // failure path is unchanged. The message may carry the resolved share
-        // URL (which embeds the object decryption key), so URL-shaped runs are
-        // scrubbed before they reach the LOG detail.
-        emitLog(logSink, handshake.log, workerLogLevel.error, workerLogEventName.sdkBuildFailed, {
-          message: redactUrls(describeError(error)),
-        });
-        throw error;
-      }
-      // A fresh SDK build for this connection: report it at connection level
-      // (no owning request), carrying only the indexer identity — never seeds
-      // or share-URL strings (share URLs embed encryption keys).
-      emitLog(logSink, handshake.log, workerLogLevel.info, workerLogEventName.sdkBuilt, { indexerUrl: config?.indexerUrl });
-      const previous = cached?.sdk;
-      cached = { config, sdk, seed, sharingSeed };
-      // Defer the call so a synchronous throw inside dispose() never escapes a
-      // next-load failure as a rejection of the new SDK build.
-      if (previous && previous !== sdk) {
-        queueMicrotask(() => disposeSdk(previous));
-      }
+    // Hash before yielding: APP_KEY can scrub these arrays while createSdk is pending.
+    // Digests preserve value semantics when injected getters return fresh arrays.
+    const seedFingerprint = seed === null ? null : sha256(seed);
+    const sharingSeedFingerprint = sharingSeed === null ? null : sha256(sharingSeed);
+    // A refresh must replace even a matching pending build; later ordinary
+    // SOURCEs join that replacement rather than reuse the older cached SDK.
+    let connection: Connection;
+    if (!refresh && pending && connectionEquals(pending, config, seedFingerprint, sharingSeedFingerprint)) {
+      connection = await pending.promise;
+    } else if (!refresh && !pending && cached && connectionEquals(cached, config, seedFingerprint, sharingSeedFingerprint)) {
+      connection = cached;
+    } else {
+      const buildSeed = seed === null ? null : new Uint8Array(seed);
+      const buildSharingSeed = sharingSeed === null ? null : new Uint8Array(sharingSeed);
+      const generation = ++buildGeneration;
+      const promise = Promise.resolve().then(async () => {
+        let built: SiaByteSourceSdk;
+        try {
+          built = await createSdk(config, buildSeed, buildSharingSeed);
+        } catch (error) {
+          // A separate milestone identifies bootstrap failures before the generic ERROR.
+          // Bootstrap errors may contain share URLs with decryption keys.
+          emitLog(logSink, handshake.log, workerLogLevel.error, workerLogEventName.sdkBuildFailed, {
+            message: redactUrls(describeError(error)),
+          });
+          throw error;
+        } finally {
+          buildSeed?.fill(0);
+          buildSharingSeed?.fill(0);
+        }
+        // Coordinator load checks happen after this factory returns. Reject a
+        // superseded build here before it can replace or dispose the current SDK.
+        if (generation !== buildGeneration) {
+          release(built);
+          throw new Error('SDK build superseded');
+        }
+        // SDK builds belong to the connection, without an owning SOURCE request.
+        // Only indexer identity is safe here; share URLs contain decryption keys.
+        emitLog(logSink, handshake.log, workerLogLevel.info, workerLogEventName.sdkBuilt, { indexerUrl: config?.indexerUrl });
+        const previous = cached?.sdk;
+        const connection = { createSource: createSiaByteSourceFactory(built, byteSource), sdk: built };
+        cached = { ...connection, config, seedFingerprint, sharingSeedFingerprint };
+        // Defer disposal so a synchronous throw cannot reject the new build.
+        if (previous && previous !== built) queueMicrotask(() => release(previous));
+        return connection;
+      }).finally(() => {
+        // An older rejection must not clear a replacement that is still building.
+        if (generation === buildGeneration) pending = null;
+      });
+      pending = { config, promise, seedFingerprint, sharingSeedFingerprint };
+      connection = await promise;
     }
+    // Destroy can release the cached SDK before the awaiting source resumes.
+    if (destroyed) throw new Error('SDK factory destroyed');
     // The SOURCE requestId travels into the per-load source so its milestones
     // keep the owning load's identity even though the SDK is connection-scoped.
-    return createSiaByteSourceFactory(sdk, byteSource)(src, requestId, sourceKind);
+    return connection.createSource(src, requestId, sourceKind);
+  };
+  return {
+    createSource,
+    destroy: () => {
+      if (destroyed) return;
+      destroyed = true;
+      ++buildGeneration;
+      pending = null;
+      const sdk = cached?.sdk;
+      cached = null;
+      if (sdk) release(sdk);
+    },
   };
 }
 
+/** Calls receiver-dependent SDK teardown and consumes asynchronous failures. */
 function disposeSdk(sdk: unknown): void {
-  const dispose = (sdk as { dispose?: () => unknown }).dispose;
-  if (typeof dispose === 'function') {
-    void Promise.resolve()
-      .then(dispose)
-      .catch(() => {
-        /* best-effort teardown; never propagates */
-      });
-  }
+  void Promise.resolve()
+    .then(() => {
+      const dispose = (sdk as { dispose?: () => unknown }).dispose;
+      if (typeof dispose === 'function') return dispose.call(sdk);
+    })
+    .catch(() => {
+      /* best-effort teardown; never propagates */
+    });
 }

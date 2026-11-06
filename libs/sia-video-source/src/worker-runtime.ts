@@ -83,8 +83,9 @@ export interface SiaVideoWorkerOptions {
    * the worker-local registration flow driven by the `HELLO` config plus the
    * decrypted `APP_KEY` seeds; apps that own SDK registration elsewhere inject
    * a resolved `SiaVideoSdk` here. Both seed arguments are the worker's
-   * decrypted copies and stay inside this isolate — they must not be forwarded
-   * anywhere. The `sharingSeed` argument is new (keyless playback, ADR 0008);
+   * build-owned copies and stay inside this isolate. They are scrubbed when
+   * the factory settles; lazy factories must retain their own private copies.
+   * The `sharingSeed` argument is new (keyless playback, ADR 0008);
    * injected factories written against the old two-argument shape keep working
    * (unused trailing arguments are ignored).
    */
@@ -159,10 +160,12 @@ export async function createDefaultSdk(
   // fails at createDefaultSdk — it surfaces on the route's first source
   // resolution, which stream-controller's error reporting already handles.
   if (hasSharing && hasAppKey) {
-    return createDualSourceSdk(
-      () => connectAppKeySdk(config, appKeySeed),
-      () => connectSharedSdk(config, sharingSeed),
-    );
+    const appRoute = ownedCredentialRoute(appKeySeed, (seed) => connectAppKeySdk(config, seed));
+    const sharedRoute = ownedCredentialRoute(sharingSeed, (seed) => connectSharedSdk(config, seed));
+    return createDualSourceSdk(appRoute.connect, sharedRoute.connect, () => {
+      appRoute.dispose();
+      sharedRoute.dispose();
+    });
   }
 
   // Keyless path (ADR 0008): a sharing-key seed grants read-only access to the
@@ -320,6 +323,7 @@ async function connectSharedSdk(config: WorkerConfig, sharingSeed: Uint8Array): 
 function createDualSourceSdk(
   connectAppKey: () => Promise<SiaVideoSdk>,
   connectShared: () => Promise<SiaVideoSdk>,
+  disposeCredentials: () => void,
 ): SiaVideoSdk {
   const ownerOf = new WeakMap<object, SiaVideoSdk>();
   // Resolved SDKs, captured as each route's connect settles. These are the
@@ -403,6 +407,7 @@ function createDualSourceSdk(
   function release(): Promise<void> {
     if (released) return Promise.resolve();
     released = true;
+    disposeCredentials();
     // Await any in-flight first-use creation so its connect settles and the
     // SDK lands in `connectedAppKey`/`connectedShared` before release checks
     // them, then release exactly the SDKs that exist. An untouched route is
@@ -412,6 +417,30 @@ function createDualSourceSdk(
       void Promise.resolve(connectedShared?.dispose?.());
     });
   }
+}
+
+/** Retains retry credentials until connection succeeds or the lazy adapter is disposed. */
+function ownedCredentialRoute(seed: Uint8Array, connect: (seed: Uint8Array) => Promise<SiaVideoSdk>) {
+  const retained = new Uint8Array(seed);
+  let disposed = false;
+  return {
+    connect: async (): Promise<SiaVideoSdk> => {
+      if (disposed) throw new Error('SDK disposed');
+      // Disposal may scrub retained bytes while an asynchronous connect still reads its argument.
+      const attempt = new Uint8Array(retained);
+      try {
+        const sdk = await connect(attempt);
+        retained.fill(0);
+        return sdk;
+      } finally {
+        attempt.fill(0);
+      }
+    },
+    dispose: (): void => {
+      disposed = true;
+      retained.fill(0);
+    },
+  };
 }
 
 /**
