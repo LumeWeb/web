@@ -27,6 +27,8 @@ export function GateScreen() {
   const setIndexerUrl = useStore(useAuthStore, (s) => s.setIndexerUrl);
   const setSharingKeySeed = useStore(useAuthStore, (s) => s.setSharingKeySeed);
   const sharingError = useStore(useAuthStore, (s) => s.sharingError);
+  const reconnect = useStore(useAuthStore, (s) => s.reconnect);
+  const reconnectError = useStore(useAuthStore, (s) => s.reconnectError);
   const storedIndexer = useStore(useAuthStore, (s) => s.indexerUrl);
   const [shareInput, setShareInput] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -51,6 +53,12 @@ export function GateScreen() {
   return (
     <>
       <section className="bg-canvas-subtle border-border-default mb-4 rounded-lg border p-5">
+        {reconnectError ? (
+          <div className="mb-3">
+            <p className="text-danger text-xs" role="alert">{reconnectError}</p>
+            <button onClick={() => void reconnect()} type="button">Retry connection</button>
+          </div>
+        ) : null}
         <h2 className="mt-0 mb-1 text-lg">Open a share</h2>
         <p className="text-fg-muted mt-0 mb-3 text-[13px]">
           Paste a sharing link or key to list the objects it unlocks.
