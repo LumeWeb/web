@@ -31,7 +31,7 @@ import {
   type WorkerToMainMessage,
   WorkerToMainMessageType,
 } from '../protocol.ts';
-import { type SiaObjectLike } from '../ranged-reader.ts';
+import { LruChunkCache, type SiaObjectLike } from '../ranged-reader.ts';
 import { createSiaWorkerComposition } from '../session/sia-composition.ts';
 import {
   createSessionHandshake,
@@ -48,6 +48,7 @@ import {
   containsInOrder,
   FakeLoadPipeline,
   FakeMediaPlayback,
+  fakeObject,
   fakeSiaSdk,
   flush,
   permissiveCapabilities,
@@ -532,6 +533,84 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
     },
     indexerUrl: 'https://indexer.example',
   };
+
+  it.each(['app', 'sharing'] as const)(
+    'reuses downloaded windows until the %s connection changes', async (keyType) => {
+      for (const injected of [false, true]) {
+        const cache = injected ? new LruChunkCache() : undefined;
+        const downloads: string[] = [];
+        const routes: string[] = [];
+        const sdk: SiaByteSourceSdk = {
+          download: (object, options) => {
+            downloads.push(object.id());
+            expect(options?.offset).toBe(0);
+            expect(options?.length).toBe(4);
+            return new ReadableStream<Uint8Array>({ start(controller) {
+              controller.enqueue(new Uint8Array(4).fill(object.id() === 'a' ? 7 : 9));
+              controller.close();
+            } });
+          },
+          object: (key) => {
+            routes.push(`app:${key}`);
+            return Promise.resolve({ ...fakeObject(16), id: () => key });
+          },
+          objectFromSharedKey: (key) => {
+            routes.push(`sharing:${key}`);
+            return Promise.resolve({ ...fakeObject(16), id: () => key });
+          },
+        };
+        const delivered: Uint8Array[] = [];
+        const messages: WorkerToMainMessage[] = [];
+        const logs: WorkerToMainMessage[] = [];
+        const createSdk = vi.fn(() => Promise.resolve(sdk));
+        const coordinator = createSiaWorkerComposition({
+          byteSource: { cache },
+          capabilities: permissiveCapabilities(),
+          createSdk,
+          loadPipeline: { async run(request) {
+            const chunks: Uint8Array[] = [];
+            for await (const chunk of request.source.read({ length: 4, offset: 0 }, request)) chunks.push(chunk);
+            delivered.push(concatBytes(chunks));
+            return readyLoadResult();
+          } },
+          logSink: (message) => logs.push(message),
+          post: (message) => messages.push(message),
+          supportsWorkerMse: () => false,
+        });
+        let requestId = 0;
+        const connect = async (indexerUrl: string, seed: number) => {
+          await coordinator.handleMessage({ config: { ...WORKER_CONFIG, indexerUrl }, log: 'debug', requestId: ++requestId, type: MainToWorkerMessageType.HELLO });
+          const hello = messages.find((message) => message.type === WorkerToMainMessageType.HELLO_OK);
+          if (hello?.type !== WorkerToMainMessageType.HELLO_OK) throw new Error('Missing HELLO_OK');
+          await coordinator.handleMessage({ envelope: await encryptToWorker(hello.publicKey, new Uint8Array(32).fill(seed), keyType), requestId: ++requestId, type: MainToWorkerMessageType.APP_KEY });
+        };
+        const load = async (src = 'a', refreshSdk = false) => {
+          const before = delivered.length;
+          await coordinator.handleMessage({ preload: 'auto', refreshSdk, requestId: ++requestId, sourceKind: keyType === 'sharing' ? 'shared' : 'app', src, type: MainToWorkerMessageType.SOURCE });
+          expect(logs.filter((message) => message.type === WorkerToMainMessageType.LOG && message.name === 'object.resolved').at(-1)?.requestId).toBe(requestId);
+          expect(delivered).toHaveLength(before + 1);
+          expect(delivered.at(-1)).toEqual(new Uint8Array(4).fill(src === 'a' ? 7 : 9));
+        };
+        await connect('https://one.example', 1);
+        await load();
+        await load();
+        expect(downloads).toEqual(['a']);
+        await load('b');
+        expect(downloads).toEqual(['a', 'b']);
+        await load('a', true);
+        expect(downloads).toHaveLength(injected ? 2 : 3);
+        await connect('https://two.example', 1);
+        await load();
+        expect(downloads).toHaveLength(injected ? 2 : 4);
+        await connect('https://two.example', 2);
+        await load();
+        expect(downloads).toHaveLength(injected ? 2 : 5);
+        expect(createSdk).toHaveBeenCalledTimes(4);
+        expect(routes).toEqual(['a', 'a', 'b', 'a', 'a', 'a'].map((key) => `${keyType}:${key}`));
+        if (cache) expect(cache.size).toBe(2);
+      }
+    },
+  );
 
   // Deferred SDK construction exposes completion order without contacting a renter.
   async function pendingSdkSession(keyType: 'app' | 'sharing' = 'app', freshSeeds = false) {

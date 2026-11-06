@@ -413,12 +413,16 @@ function createLazySiaByteSourceFactory(deps: {
   destroy: () => void;
 } {
   const { byteSource, createSdk, handshake, logSink } = deps;
-  let cached: null | {
-    config: undefined | WorkerConfig;
+  interface Connection {
+    createSource: ReturnType<typeof createSiaByteSourceFactory>;
     sdk: SiaByteSourceSdk;
+  }
+  interface CachedConnection extends Connection {
+    config: undefined | WorkerConfig;
     seedFingerprint: null | Uint8Array;
     sharingSeedFingerprint: null | Uint8Array;
-  } = null;
+  }
+  let cached: CachedConnection | null = null;
 
   let destroyed = false;
   const released = new WeakSet<SiaByteSourceSdk>();
@@ -431,7 +435,7 @@ function createLazySiaByteSourceFactory(deps: {
   let buildGeneration = 0;
   let pending: null | {
     config: undefined | WorkerConfig;
-    promise: Promise<SiaByteSourceSdk>;
+    promise: Promise<Connection>;
     seedFingerprint: null | Uint8Array;
     sharingSeedFingerprint: null | Uint8Array;
   } = null;
@@ -447,11 +451,11 @@ function createLazySiaByteSourceFactory(deps: {
     const sharingSeedFingerprint = sharingSeed === null ? null : sha256(sharingSeed);
     // A refresh must replace even a matching pending build; later ordinary
     // SOURCEs join that replacement rather than reuse the older cached SDK.
-    let sdk: SiaByteSourceSdk;
+    let connection: Connection;
     if (!refresh && pending && connectionEquals(pending, config, seedFingerprint, sharingSeedFingerprint)) {
-      sdk = await pending.promise;
+      connection = await pending.promise;
     } else if (!refresh && !pending && cached && connectionEquals(cached, config, seedFingerprint, sharingSeedFingerprint)) {
-      sdk = cached.sdk;
+      connection = cached;
     } else {
       const generation = ++buildGeneration;
       const promise = Promise.resolve().then(async () => {
@@ -476,22 +480,23 @@ function createLazySiaByteSourceFactory(deps: {
         // Only indexer identity is safe here; share URLs contain decryption keys.
         emitLog(logSink, handshake.log, workerLogLevel.info, workerLogEventName.sdkBuilt, { indexerUrl: config?.indexerUrl });
         const previous = cached?.sdk;
-        cached = { config, sdk: built, seedFingerprint, sharingSeedFingerprint };
+        const connection = { createSource: createSiaByteSourceFactory(built, byteSource), sdk: built };
+        cached = { ...connection, config, seedFingerprint, sharingSeedFingerprint };
         // Defer disposal so a synchronous throw cannot reject the new build.
         if (previous && previous !== built) queueMicrotask(() => release(previous));
-        return built;
+        return connection;
       }).finally(() => {
         // An older rejection must not clear a replacement that is still building.
         if (generation === buildGeneration) pending = null;
       });
       pending = { config, promise, seedFingerprint, sharingSeedFingerprint };
-      sdk = await promise;
+      connection = await promise;
     }
     // Destroy can release the cached SDK before the awaiting source resumes.
     if (destroyed) throw new Error('SDK factory destroyed');
     // The SOURCE requestId travels into the per-load source so its milestones
     // keep the owning load's identity even though the SDK is connection-scoped.
-    return createSiaByteSourceFactory(sdk, byteSource)(src, requestId, sourceKind);
+    return connection.createSource(src, requestId, sourceKind);
   };
   return {
     createSource,
