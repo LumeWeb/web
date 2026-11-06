@@ -11,6 +11,28 @@ test("worker-only playback never prepares native streaming", async ({ fixture, p
   expect(page.workers().length).toBeGreaterThan(0);
 });
 
+test("worker playback stays mounted while native preparation is pending", async ({ fixture, page }) => {
+  await page.addInitScript(() => {
+    window.__siaDemoNative = { mode: "held", preparations: 0, releases: 0 };
+  });
+  await openShare(page, fixture);
+  await page.getByRole("button", { name: "Long demo video.mp4" }).click();
+  const video = page.locator("video");
+  await expectDecodedProgress(video);
+  const original = await video.elementHandle();
+  try {
+    await page.getByLabel("Disable native (service-worker) playback", { exact: true }).uncheck();
+    await expect.poll(() => page.evaluate(() => window.__siaDemoNative?.preparations ?? 0)).toBeGreaterThan(0);
+    expect(await original!.evaluate((element) => element.isConnected)).toBe(true);
+    await expectDecodedProgress(video);
+    await page.evaluate(() => window.__siaDemoNative?.releasePreparation?.());
+    await expect.poll(() => video.evaluate((element: HTMLVideoElement) => element.currentSrc)).toContain("browser-decodable-long.mp4");
+    expect(await original!.evaluate((element) => element.isConnected)).toBe(true);
+  } finally {
+    await page.evaluate(() => window.__siaDemoNative?.releasePreparation?.()).catch(() => undefined);
+  }
+});
+
 test("available native playback decodes and releases the selected stream", async ({ fixture, page }) => {
   await openShare(page, fixture, false);
   await page.getByRole("button", { name: "Long demo video.mp4" }).click();
@@ -39,7 +61,7 @@ for (const mode of ["unavailable", "rejected"] as const) {
     await expectDecodedProgress(video);
     expect(page.workers().length).toBeGreaterThan(0);
     expect(await page.evaluate(() => window.__siaDemoNative?.preparations ?? 0)).toBeGreaterThan(0);
-    expect(fixture.mock.history().some((request) =>
+    await expect.poll(() => fixture.mock.history().some((request) =>
       request.actor === fixture.actor && request.operation === "download" &&
       request.objectId === fixture.object.id && request.status === "completed",
     )).toBe(true);

@@ -280,21 +280,27 @@ describe("SiaVideoMount preparation effect", () => {
     expect(preparation.prepareCalls).toBe(0);
   });
 
-  it("prepares native playback when the worker-only option is cleared", async () => {
+  it("retains the worker player until native preparation settles", async () => {
     useDeveloperOptionsStore.getState().setDisableNativePlayback(true);
     root!.render(createElement(MountWithCapture));
     await flush();
     expect(preparation.prepareCalls).toBe(0);
-    expect(container!.querySelector("video")).not.toBeNull();
+    const video = container!.querySelector("video");
+    const media = observedMedia;
+    expect(video).not.toBeNull();
 
     useDeveloperOptionsStore.getState().setDisableNativePlayback(false);
     await flush();
     expect(preparation.prepareCalls).toBe(1);
-    expect(container!.querySelector("video")).toBeNull();
+    expect(container!.querySelector("video")).toBe(video);
+    expect(observedMedia).toBe(media);
+    expect(media!.backend).toBe(SIA_PLAYBACK_BACKENDS.MEDIA_WORKER);
 
     preparation.resolve();
     await flush();
-    expect(container!.querySelector("video")).not.toBeNull();
+    expect(container!.querySelector("video")).toBe(video);
+    expect(observedMedia).toBe(media);
+    expect(media!.backend).toBe(SIA_PLAYBACK_BACKENDS.AUTO);
   });
 
   it("applies changed indexer configuration through an in-place worker reload", async () => {

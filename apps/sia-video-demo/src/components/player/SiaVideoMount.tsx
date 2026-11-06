@@ -171,10 +171,14 @@ export function SiaVideoMount({
   useStore(useEventLogStore, (s) => s.verbose);
   const [streamingPrepared, setStreamingPrepared] = useState(false);
   const [preparationFailed, setPreparationFailed] = useState(false);
+  const [wasWorkerOnly, setWasWorkerOnly] = useState(disableNativePlayback);
   useEffect(() => {
     setStreamingPrepared(false);
     setPreparationFailed(false);
-    if (disableNativePlayback) return;
+    if (disableNativePlayback) {
+      setWasWorkerOnly(true);
+      return;
+    }
     let active = true;
     void getDemoNativeStreamService()
       .prepare()
@@ -197,10 +201,11 @@ export function SiaVideoMount({
   }, [disableNativePlayback]);
   const backend = useMemo(
     () =>
-      preparationFailed && !disableWorkerPlayback
+      // Remounting during preparation loses the player's consumed play intent.
+      (preparationFailed || (wasWorkerOnly && !streamingPrepared)) && !disableWorkerPlayback
         ? SIA_PLAYBACK_BACKENDS.MEDIA_WORKER
         : resolvePlaybackBackend({ disableNativePlayback, disableWorkerPlayback }),
-    [disableNativePlayback, disableWorkerPlayback, preparationFailed],
+    [disableNativePlayback, disableWorkerPlayback, preparationFailed, streamingPrepared, wasWorkerOnly],
   );
   const mount = useMemo(
     () =>

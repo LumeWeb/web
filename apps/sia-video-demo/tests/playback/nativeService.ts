@@ -7,8 +7,9 @@ import { useAuthStore } from "../../src/stores/auth";
 declare global {
   interface Window {
     __siaDemoNative?: {
-      mode: "available" | "rejected" | "unavailable";
+      mode: "available" | "held" | "rejected" | "unavailable";
       preparations: number;
+      releasePreparation?: () => void;
       releases: number;
     };
   }
@@ -22,6 +23,9 @@ const service: SiaNativeStreamService<ReadPort> = {
   isAvailable: () => Promise.resolve(state().mode !== "unavailable"),
   prepare() {
     state().preparations++;
+    if (state().mode === "held") return new Promise<void>((resolve) => {
+      state().releasePreparation = resolve;
+    });
     return state().mode === "rejected"
       ? Promise.reject(new Error("Synthetic native preparation failed"))
       : Promise.resolve();
