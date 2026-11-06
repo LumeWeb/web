@@ -369,7 +369,9 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
     const cancelled = () => {
       clearTimeout(timer);
       signal?.removeEventListener("abort", cancelled);
-      reject(signal?.reason instanceof Error ? signal.reason : new DOMException("Listing cancelled", "AbortError"));
+      // Wrapping a primitive reason would make retries differ from throwIfAborted().
+      // oxlint-disable-next-line typescript/prefer-promise-reject-errors
+      reject(signal?.reason);
     };
     const timer = setTimeout(() => {
       signal?.removeEventListener("abort", cancelled);
@@ -422,6 +424,7 @@ async function walkPages(
       rows: fresh,
       totalRows: rows.length,
     });
+    options.signal?.throwIfAborted();
     if (end) break;
     offset += options.pageSize;
     pageIndex += 1;
