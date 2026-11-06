@@ -62,7 +62,7 @@ test("an account can play a managed video after registration and reconnect", asy
   await page.getByRole("button", { exact: true, name: "Play" }).first().click();
   await expect.poll(() => video.evaluate((element: HTMLVideoElement) => element.paused)).toBe(false);
   await expectDecodedProgress(video);
-  expect(fixture.mock.history().some((request) =>
+  await expect.poll(() => fixture.mock.history().some((request) =>
     request.actor === fixture.actor && request.objectId === fixture.object.id &&
     request.operation === "download" && request.status === "completed",
   )).toBe(true);
