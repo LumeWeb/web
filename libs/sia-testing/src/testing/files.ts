@@ -1,5 +1,6 @@
 /** Replayable byte fixtures detach caller memory before hashing or opening streams. */
 import type { TestFile } from "./types.js";
+import { ownReaderLifetime } from "./reader-lifetime.js";
 import { boundedByteView, createPayloadSourceValidator } from "./byte-view.js";
 
 export async function bytesFixture(input: {
@@ -54,20 +55,8 @@ export async function readFixture(
       ? createPayloadSourceValidator()
       : boundedByteView;
   const reader = file.open().getReader();
-  const closed = reader.closed.then(
-    () => ({ failed: false as const }),
-    (error: unknown) => ({ error, failed: true as const }),
-  );
-  let readFailure: undefined | { error: unknown };
-  let cancellation: Promise<void> | undefined;
-  const cancel = (reason: unknown = signal.reason) => {
-    cancellation ??= reader.cancel(reason);
-    void cancellation.catch(() => undefined);
-  };
-  const abort = () => cancel();
-  signal.addEventListener("abort", abort, { once: true });
+  const lifetime = ownReaderLifetime(reader, signal);
   let complete = false;
-  let cancellationFailed = false;
   const failures: unknown[] = [];
   let result: Uint8Array | undefined;
   try {
@@ -82,7 +71,7 @@ export async function readFixture(
       try {
         next = await reader.read();
       } catch (error) {
-        readFailure = { error };
+        lifetime.readFailed(error);
         throw error;
       }
       signal.throwIfAborted();
@@ -106,21 +95,9 @@ export async function readFixture(
   } catch (error) {
     failures.push(error);
   }
-  signal.removeEventListener("abort", abort);
-  if (!complete) cancel(failures[0]);
-  try {
-    await cancellation;
-  } catch (error) {
-    const state = await closed;
-    const repeatedReaderError =
-      (readFailure !== undefined && Object.is(readFailure.error, error)) ||
-      (state.failed && Object.is(state.error, error));
-    if (!repeatedReaderError) {
-      cancellationFailed = true;
-      failures.push(error);
-    }
-  } finally {
-    reader.releaseLock();
+  const cancellation = await lifetime.finish(complete, failures[0]);
+  if (cancellation.failed) {
+    failures.push(cancellation.error);
   }
   if (failures.length) {
     const failure =
@@ -131,7 +108,7 @@ export async function readFixture(
             "Fixture read and source cancellation failed",
             { cause: failures[1] },
           );
-    if (cancellationFailed) cleanupError?.(failure);
+    if (cancellation.failed) cleanupError?.(failure);
     throw failure;
   }
   return result!;

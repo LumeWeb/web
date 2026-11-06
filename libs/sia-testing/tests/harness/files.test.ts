@@ -215,3 +215,108 @@ it("digest mismatch releases a completed source without cancelling it", async ()
   expect(cancel).not.toHaveBeenCalled();
   expect(stream.locked).toBe(false);
 });
+
+it.each([undefined, NaN, new Error("source failure")])(
+  "fixture read rejection %s does not become a cancellation failure",
+  async (reason) => {
+    const descriptor = { name: "failed", sha256: "0".repeat(64), sizeBytes: 0 };
+    for (const racingAbort of [false, true]) {
+      const abort = new AbortController();
+      const cleanup = vi.fn();
+      const cancel = vi.fn();
+      const stream = new ReadableStream<Uint8Array>(
+        {
+          cancel,
+          pull(controller) {
+            controller.error(reason);
+            if (racingAbort)
+              abort.abort(new Error("aborted after source error"));
+          },
+        },
+        { highWaterMark: 0 },
+      );
+      const outcome = await readFixture(
+        { ...descriptor, open: () => stream },
+        abort.signal,
+        undefined,
+        cleanup,
+      ).then(
+        () => ({ ok: true as const }),
+        (error: unknown) => ({ error, ok: false as const }),
+      );
+      expect(outcome.ok).toBe(false);
+      if (!outcome.ok) expect(outcome.error).toBe(reason);
+      expect(cancel).not.toHaveBeenCalled();
+      expect(cleanup).not.toHaveBeenCalled();
+      expect(stream.locked).toBe(false);
+    }
+  },
+);
+
+it.each([undefined, NaN, new Error("checkpoint and cancellation failure")])(
+  "fixture cancellation rejecting the operation's exact %s is joined and reported twice",
+  async (reason) => {
+    let release!: () => void;
+    let started!: () => void;
+    const cancelling = new Promise<void>((resolve) => {
+      started = resolve;
+    });
+    const finish = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const cleanup = vi.fn();
+    const cancel = vi.fn(async () => {
+      started();
+      await finish;
+      // oxlint-disable-next-line typescript/only-throw-error -- Producer rejection must preserve falsy values.
+      throw reason;
+    });
+    const stream = new ReadableStream<Uint8Array>(
+      { cancel },
+      { highWaterMark: 0 },
+    );
+    let settled = false;
+    const reading = readFixture(
+      {
+        name: "failed",
+        open: () => stream,
+        sha256: "0".repeat(64),
+        sizeBytes: 0,
+      },
+      new AbortController().signal,
+      () => {
+        // oxlint-disable-next-line typescript/only-throw-error -- Checkpoint failure must preserve falsy values.
+        throw reason;
+      },
+      cleanup,
+    )
+      .then(
+        () => ({ ok: true as const }),
+        (error: unknown) => ({ error, ok: false as const }),
+      )
+      .finally(() => {
+        settled = true;
+      });
+    try {
+      await cancelling;
+      expect(cancel).toHaveBeenCalledOnce();
+      expect(stream.locked).toBe(true);
+      expect(settled).toBe(false);
+      expect(cleanup).not.toHaveBeenCalled();
+    } finally {
+      release();
+      await reading;
+    }
+    const outcome = await reading;
+    expect(outcome.ok).toBe(false);
+    if (outcome.ok || !(outcome.error instanceof AggregateError))
+      throw new Error("Expected fixture aggregate failure");
+    expect(outcome.error.errors).toHaveLength(2);
+    expect(outcome.error.errors[0]).toBe(reason);
+    expect(outcome.error.errors[1]).toBe(reason);
+    expect(outcome.error.cause).toBe(reason);
+    expect(cleanup).toHaveBeenCalledExactlyOnceWith(outcome.error);
+    expect(cancel).toHaveBeenCalledOnce();
+    expect(stream.locked).toBe(false);
+  },
+);
