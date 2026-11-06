@@ -2,6 +2,7 @@
 import { execFile } from "node:child_process";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
+import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
@@ -23,6 +24,7 @@ test("deleted payload records are collected while their network stays alive", as
       "sdk/index",
       "sdk/link",
       "sdk/object",
+      "sdk/payload-store",
       "sdk/protocol",
       "sdk/remote",
       "sdk/state",
@@ -36,7 +38,17 @@ test("deleted payload records are collected while their network stays alive", as
       });
       const target = join(directory, `${name}.js`);
       await mkdir(dirname(target), { recursive: true });
-      await writeFile(target, compiled.outputText);
+      await writeFile(
+        target,
+        compiled.outputText.replace(
+          '"@noble/hashes/sha2.js"',
+          JSON.stringify(
+            pathToFileURL(
+              createRequire(import.meta.url).resolve("@noble/hashes/sha2.js"),
+            ).href,
+          ),
+        ),
+      );
     }
     const result = await promisify(execFile)(
       process.execPath,

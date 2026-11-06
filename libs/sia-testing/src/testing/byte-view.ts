@@ -19,3 +19,27 @@ export function boundedByteView(value: unknown, maximum: number): Uint8Array {
     length,
   );
 }
+
+/** Each admitted disk source counts its original chunks before a collector can flatten them. */
+export function createPayloadSourceValidator(): (
+  value: unknown,
+  maximum: number,
+) => Uint8Array {
+  let chunks = 0;
+  return (value, maximum) => {
+    if (++chunks > 131072)
+      throw new Error("Payload source chunk limit exceeded");
+    const view = boundedByteView(value, Math.min(maximum, 65536));
+    const backingLength = Object.getOwnPropertyDescriptor(
+      ArrayBuffer.prototype,
+      "byteLength",
+    )!.get!.call(view.buffer) as number;
+    const resizable = Object.getOwnPropertyDescriptor(
+      ArrayBuffer.prototype,
+      "resizable",
+    )?.get?.call(view.buffer) as boolean | undefined;
+    if (resizable || backingLength > 65536)
+      throw new Error("Invalid bounded payload backing storage");
+    return view;
+  };
+}

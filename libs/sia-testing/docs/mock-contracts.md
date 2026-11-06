@@ -193,6 +193,39 @@ requires a later clock second after a prior publication. Later publication can
 move a lower-ID object past an older cursor. Publication targets only the
 owner-authenticated run; it never acknowledges an application ledger.
 
+### Recreate clients against a retained mock backend
+
+Retain acknowledged object IDs and event cursors as application data. Close the
+original clients, keep the same run and backend open, then create new clients
+with valid access. Use `mock.reader({ access, as })` directly, or
+`createMockReader(connection, credential)` from `@lumeweb/sia-testing/client`
+with a new HTTP/MSW connection. `reader.object(id)` returns current pinned
+membership, metadata and size; `reader.download({ id })` reads the bytes. These
+reads can reconcile a known pin whose reply was lost without repeating a write.
+They do not identify which concurrent request committed. An unpinned or deleted
+object has no readable row. Recipient reads still require current share access;
+revocation denies fresh reads.
+
+`ApplicationPort.events({ cursor, limit })` accepts a retained cursor on a new
+authorized client. Events require explicit driver publication, so an absent event
+does not establish that a pin failed. Read current membership and metadata through
+the reader rather than treating an old event or receipt as current state.
+
+Readable IDs, rows, cursors and diagnostic receipts never create mutation handles.
+Direct application object references belong to the run and can be used by another
+owner-authorized direct port in that run, even after the originating port closes.
+Fetch application references belong to their local client; a recreated client
+rejects the old references. Packed objects and keys belong to their SDK session.
+Retained packed IDs can locate authorized reads after SDK close, but a new SDK
+cannot mutate the old objects. Preserve every acknowledged packed identity;
+reading one pinned result does not establish that all results were pinned.
+Unknown uploads without an acknowledged handle remain unknown; owner enumeration
+is not a handle recovery method.
+
+This supports client recreation within one retained mock run. It does not prove
+backend restart durability, browser reload persistence, native SDK behavior or
+consumer checkpoint policy.
+
 ### Fetch-backed application ports
 
 Import `createMockApplication` from `@lumeweb/sia-testing/client` and pass a
@@ -353,3 +386,210 @@ and removes only its entries; endpoint close joins all remaining work and
 releases registrations. A lost first targets reply can leave an unreferenced
 session until run or endpoint cleanup. Calls do not retry or recover sessions
 automatically.
+
+## Direct SDK-shaped packed simulation
+
+`mock.packedSdk({ access, as, platform, maxBytes, maxObjects })` uses original
+owner access and actor capabilities. `platform` is `"node"` or `"browser"`;
+`add(stream)` returns `Promise<bigint>` or `Promise<number>` respectively,
+matching that part of SDK 0.1.4. The handle from `uploadPacked(options?)` is
+synchronous. The supported options are positive safe integer `dataShards`,
+`parityShards` and `maxBufferedSlabs`. They validate caller configuration;
+they do not change simulated storage layout. Host progress callbacks are
+unsupported and reject before admission.
+
+```ts
+const sdk = mock.packedSdk({
+  access: run.ownerAccess,
+  as: mock.actor("packed writer"),
+  platform: "browser",
+  maxBytes: 1024,
+  maxObjects: 1,
+});
+try {
+  const packed = sdk.uploadPacked({ dataShards: 1, parityShards: 1 });
+  await packed.add(
+    new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(Uint8Array.of(1, 2));
+        controller.close();
+      },
+    }),
+  );
+  for (const object of await packed.finalize()) {
+    object.updateMetadata(Uint8Array.of(7));
+    await sdk.updateObjectMetadata(object);
+    await sdk.pinObject(object);
+    object.seal(sdk.appKey());
+  }
+} finally {
+  await sdk.close();
+}
+```
+
+Each successful add produces one independently pinnable object, including a
+zero-byte input. No adds produces no objects. IDs use the run identity and
+reserved object ordinal; repeated equal inputs do not alias. Sources are
+collected in memory with an aggregate maximum of 16 MiB. This path does not
+prove bounded-memory streaming, real slabs, encryption, host transfer or native
+packed correctness. It is available only on the direct mock; HTTP and MSW do
+not expose SDK-shaped packed calls.
+
+Each `uploadPacked` reserves `maxBytes` and `maxObjects` against the same run
+allowances as application and managed uploads before it locks a source. Invalid
+configuration, owner access and exhausted run admission read no source. Object
+attempts are not refunded, including empty or failed finalization. Finalization
+and disposal release unused byte reservations; acknowledged uploaded bytes
+remain charged. Failed adds consume no object slot within that packed handle.
+Source byte overflow fails and cancels the source. This does not raise existing
+application limits or change managed mock metadata (uncapped) or managed live
+metadata (16384 bytes).
+
+`updateMetadata(Uint8Array)` copies up to 1024 bytes locally. This deliberately
+accepts a wider input than native Node's `Buffer` signature. No native-shaped
+`metadata()` method is exposed. `updateObjectMetadata` snapshots local bytes at
+invocation and commits through the existing object store; reads through the
+owner reader return detached copies after pinning. Local changes alone do not
+change stored metadata. Concurrent metadata calls follow commit order.
+Publication remains explicit.
+
+`mutationFaults` accepts `packed-add`, `packed-finalize` and `metadata` with
+`stage: "beforeCommit"` and optional original actor. Add controls run after
+collection, finalize controls run before each result's staging (once for an
+empty batch), and metadata controls run before the metadata effect. Existing
+`pin` holds, failures and reply losses also apply. These selectors do not accept
+packed object IDs as authority. Existing application upload `beforeCommit`
+still runs after collection and hashing.
+
+Only one add or finalize may run per upload; overlap rejects with `code: "busy"`.
+A failed add permits another add. Finalize is one-shot, including failure.
+If finalization fails after staging results, `PackedFinalizeError.objects`
+contains the original acknowledged object capabilities and `cause` retains the
+original failure. A failure before any result propagates unchanged. No rollback,
+retry or publication runs automatically. The caller may pin acknowledged partial
+objects explicitly while the SDK session remains open.
+
+`cancel()` interrupts reads and held work. `dispose()` cancels and joins that
+upload, releases its buffers and unused byte reservation, and retains source
+cancellation errors. `sdk.close()` does the same for every unfinished upload
+and joins metadata and pin calls. Neither deletes acknowledged objects. Run
+cleanup closes sessions and then deletes run-owned resources; it continues after
+source cleanup errors and reports them. Closing one session does not close its
+siblings. A source failure plus a cancellation failure is an `AggregateError`
+containing both actual errors.
+
+Packed objects and app keys belong to their original SDK session. Copies,
+read records, guessed IDs, diagnostics and keys from sibling sessions cannot
+mutate or seal. `seal(key)` validates the original object and key and returns
+`void`. It does not create a sealed record, signature, encryption proof or
+recovery capability. Code needing sealed output is unsupported by this mock.
+The surface is not assignable to full native nominal classes. Package checks
+separately check the consumed Node/browser 0.1.4 signatures and the intentional
+seal output omission; no compatibility with SDK 0.0.12 is established.
+
+### Chunked fixtures and collection controls
+
+`chunkedFixture({ name, sizeBytes, chunkSizeBytes, pattern })`, exported by
+`mock` and `node`, repeats a snapshotted nonempty byte pattern by absolute
+position. Each open generates detached chunks on pull without prefetching.
+Output generation uses output-chunk-sized working storage. Incremental SHA-256
+hashing reuses a block of at most 65,536 bytes independently of output chunk
+size, plus the pattern and hash state. Fixture construction still hashes the
+actual bytes synchronously before its promise resolves. Size must be a safe
+integer from zero through 16 MiB; chunk size and pattern length are limited to 1 through 65,536 bytes.
+These limits apply to this fixture constructor only. Existing byte and file
+fixture policies are unchanged.
+
+```ts
+const file = await chunkedFixture({
+  name: "pattern",
+  sizeBytes: 7,
+  chunkSizeBytes: 3,
+  pattern: Uint8Array.of(1, 2),
+});
+const hold = mock.mutationFaults.hold({
+  actor,
+  operation: "upload",
+  stage: "collect",
+  afterBytes: 2,
+});
+const pending = writer.upload({ file, metadata: new Uint8Array() });
+const receipt = await hold.started(); // bytes is 3 for this direct producer
+hold.release();
+await pending;
+```
+
+Collection selectors require an owned actor, operation `upload` or `packed-add`,
+and a nonnegative safe-integer `afterBytes`. Existing finite `fail` options
+apply. Unknown and cross-stage fields reject before arming. Zero opens the
+source but holds or fails before the first read. Positive thresholds match the
+first validated, copied whole-chunk boundary reaching or exceeding the count.
+An oversized chunk may already have been read; thresholds do not split chunks.
+EOF below a threshold leaves the fault armed. A reached failure consumes one
+configured occurrence. Validation, admission, source and hash failures leave
+unreached faults armed. Empty chunks do not increase the accepted byte count.
+
+The collector awaits controls before another read. Producer-owned chunk bytes
+are copied before that wait. Caller, port, packed session or run cancellation
+cancels the owned reader and joins producer cleanup; cleanup failures are
+reported separately from repeated errors of an already errored reader.
+`started()` and `cancelled()` expose snapshots with `stage: "collect"`, accepted
+bytes and a stable receipt ID. Collection receipts stay outside `history()`;
+its existing effect receipts remain unchanged and have different IDs.
+`beforeCommit` still runs after full collection and hash checking where the
+upload descriptor has a hash. No failed collection stages objects, metadata or
+events. Attempts remain charged; uncommitted byte reservations are released.
+
+Application uploads still buffer up to the existing 16 MiB limit. Fetch clients
+collect and hash the original file before sending. HTTP and MSW controls affect
+the admitted backend request body, so they cannot pace or cancel that original
+client producer retroactively. Transport chunk boundaries can differ from file
+chunk boundaries. Packed SDK simulation remains direct-only. These fixtures do
+not establish end-to-end streaming, native upload behavior or browser producer
+backpressure. Observation deadlines do not cancel owned work.
+
+## Direct Node temporary-file payloads
+
+`withSiaRun` from `/node` accepts `backend.payloadStorage` with kind
+`temporary-files` and required `limits`: `maxObjectBytes`,
+`maxLogicalUploadBytes`, `maxRetainedBytes`, and `maxUploadAttempts`.
+The ceilings are 64 MiB per object, 128 MiB cumulative logical uploads,
+128 MiB retained reservation, and 16 admitted source acquisitions per run.
+An explicit run logical allowance must equal the storage logical allowance.
+Omitting storage options preserves buffered mode and its existing defaults.
+
+This mode supports direct application calls and packed SDK sessions with
+`platform: "node"`. HTTP, MSW, Playwright bindings and browser-shaped packed
+sessions reject. Fixture factory limits, metadata policies, authority and
+mock slab layout do not change. This is Node simulation, not native packing,
+streaming Fetch or browser storage.
+
+Application and packed sources use bounded temporary spools and incremental
+SHA-256. Each source view and its backing ArrayBuffer must be at most 64 KiB;
+shared, resizable and detached backing storage rejects. Every admitted source,
+including each failed or empty packed add, spends an attempt. Each source is
+limited to 131072 chunks, including empty chunks. One upload reservation
+(including an idle packed handle) and two download descriptor leases may be
+active. Managed uploads remain buffered, but acquire the same physical
+admission before source opening. Their buffers and uncapped managed metadata
+are excluded from the bounded streaming-payload claim.
+
+Retained capacity includes incomplete files, uncommitted inputs, unused packed
+allowance and failed-removal residue. Logical committed bytes are cumulative;
+deleting an object does not refund them. Serialization in temporary-file mode
+always rejects. Buffered V1 snapshots remain supported in buffered mode.
+
+Explicit cancel, disposal and close join owned work. No automatic operation,
+download or idle deadline is added. Uncooperative source cancellation can keep
+close pending. A rejected descriptor close retains its lease and makes that
+run reject new uploads/downloads; other runs remain independent. Failed unlink
+retains its entry and reservation, including an empty file. Cleanup attempts
+independent resources and reports original failures and residue rather than a
+clean summary. Physical operations are not automatically retried. Catching a
+cleanup error does not make final run cleanup clean.
+
+The backend owns a fresh private temporary root and random filenames, assumes
+a trusted temporary parent and operating-system account, and accepts no caller
+root or user paths. There is no crash recovery or residue sweep. Payload byte
+quotas do not measure filesystem overhead, page cache, caller buffers or total
+process memory.

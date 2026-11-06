@@ -1,4 +1,5 @@
 /** Scoped storage contracts keep fixture mutation handles separate from readable object data. */
+import type { PackedSdk, PackedSdkOptions } from "./packed.js";
 import type { MockMutationFaults } from "./mutations.js";
 import type { MockFaults, RequestReceipt } from "./controls.js";
 declare const ownership: unique symbol;
@@ -180,6 +181,9 @@ export interface MockSia {
     readonly access: BrowserAccess;
     readonly as: ActorRef;
   }): OwnerSharePort;
+  packedSdk<P extends "browser" | "node">(
+    input: PackedSdkOptions<P>,
+  ): PackedSdk<P>;
   publish(input: { readonly access: BrowserAccess }): Promise<void>;
   reader(input: {
     readonly access: BrowserAccess;
