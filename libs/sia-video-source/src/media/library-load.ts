@@ -634,7 +634,7 @@ async function prepareConversion(options: {
           assembly.fault = new Error('moov arrived without ftyp');
           return;
         }
-        const init = concatBytes(lead, copyBytes(data));
+        const init = concatBytes(lead, data);
         const sink = assembly.sink;
         if (init !== null && sink !== null) {
           sink.append({ bytes: init, kind: 'init' });
