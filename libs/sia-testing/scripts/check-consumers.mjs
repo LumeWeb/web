@@ -185,6 +185,15 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
       join(library, "check-playback-build.mjs"),
     );
     run(join(library, "check-playback-build.mjs"), [], library);
+    /** @type {Map<string, string>} */
+    const sourceCollections = new Map();
+    for (const root of [library, demo]) {
+      sourceCollections.set(root, run(
+        join(repo, "node_modules/@playwright/test/cli.js"),
+        ["test", "--config", "playwright.mock.config.ts", "--list"],
+        root,
+      ));
+    }
     const packedLibrary = await pack(
       library,
       join(directory, "library-tarball"),
@@ -236,12 +245,7 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
         ["test", "--config", "playwright.mock.config.ts", "--list"],
         root,
       );
-      const original = join(repo, root === library ? "libs/sia-video-source" : "apps/sia-video-demo");
-      const sourceOutput = run(
-        join(repo, "node_modules/@playwright/test/cli.js"),
-        ["test", "--config", "playwright.mock.config.ts", "--list"],
-        original,
-      );
+      const sourceOutput = sourceCollections.get(root) ?? "";
       const summary = /^Total: [1-9]\d* tests? in [1-9]\d* files?$/m;
       const expected = summary.exec(sourceOutput)?.[0];
       if (!expected || summary.exec(output)?.[0] !== expected)
