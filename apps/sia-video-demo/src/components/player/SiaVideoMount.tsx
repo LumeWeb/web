@@ -172,9 +172,10 @@ export function SiaVideoMount({
   const [streamingPrepared, setStreamingPrepared] = useState(false);
   const [preparationFailed, setPreparationFailed] = useState(false);
   useEffect(() => {
-    let active = true;
     setStreamingPrepared(false);
     setPreparationFailed(false);
+    if (disableNativePlayback) return;
+    let active = true;
     void getDemoNativeStreamService()
       .prepare()
       .then(
@@ -193,7 +194,7 @@ export function SiaVideoMount({
     return () => {
       active = false;
     };
-  }, []);
+  }, [disableNativePlayback]);
   const backend = useMemo(
     () =>
       preparationFailed && !disableWorkerPlayback

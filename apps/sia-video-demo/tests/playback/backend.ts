@@ -85,7 +85,7 @@ export async function openAuthRequest(
     waitForApproval: () => auth.waitForApproval(request),
   };
 }
-function connection(
+export function connection(
   indexerUrl: string,
   kind: MockCredential["kind"],
 ): MockConnection {
