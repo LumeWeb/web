@@ -322,6 +322,89 @@ describe('MemoryByteSource', () => {
 });
 
 describe('SiaByteSource', () => {
+  it('opens no SDK download for a nonempty read whose signal is already aborted', async () => {
+    const recording = recordingSdk(PAYLOAD);
+    const source = newSiaSource(PAYLOAD, recording.sdk);
+    const controller = new AbortController();
+    const reason = new Error('read cancelled');
+    controller.abort(reason);
+
+    const outcome = await readAll(source.read(
+      { length: 16, offset: 0 },
+      { loadGeneration: 1, signal: controller.signal },
+    ));
+
+    expect(recording.requests).toEqual([]);
+    expect(outcome.chunks).toHaveLength(0);
+    expect(outcome.done).toBe(false);
+    expect(outcome.error).toBe(reason);
+  });
+
+  it.each([undefined, 'read cancelled'])('preserves cancellation errors for a pre-aborted signal with reason %s', async (reason) => {
+    const recording = recordingSdk(PAYLOAD);
+    const controller = new AbortController();
+    controller.abort(reason);
+    const outcome = await readAll(newSiaSource(PAYLOAD, recording.sdk).read(
+      { length: 16, offset: 0 },
+      { loadGeneration: 1, signal: controller.signal },
+    ));
+
+    expect(recording.requests).toEqual([]);
+    expect(outcome.chunks).toHaveLength(0);
+    if (reason === undefined) {
+      expect(outcome.error).toBe(controller.signal.reason);
+      expect((outcome.error as Error).name).toBe('AbortError');
+    } else {
+      expect(outcome.error).toBeInstanceOf(ByteSourceSupersededError);
+      expect((outcome.error as Error).message).toBe(reason);
+    }
+  });
+
+  it('keeps pre-aborted empty ranges closed without opening downloads', async () => {
+    const recording = recordingSdk(PAYLOAD);
+    const source = newSiaSource(PAYLOAD, recording.sdk);
+    const controller = new AbortController();
+    controller.abort();
+
+    for (const range of [{ length: 0, offset: 0 }, { length: 16, offset: PAYLOAD.length }]) {
+      const outcome = await readAll(source.read(range, { loadGeneration: 1, signal: controller.signal }));
+      expect(outcome.done).toBe(true);
+      expect(outcome.error).toBeUndefined();
+      expect(outcome.chunks).toHaveLength(0);
+    }
+    expect(recording.requests).toEqual([]);
+  });
+
+  it('accepts a pre-aborted newer generation before rejecting older reads and allows source reuse', async () => {
+    const held = releaseableSdk(PAYLOAD);
+    const source = newSiaSource(PAYLOAD, held.sdk);
+    const older = readAll(source.read({ length: 16, offset: 0 }, { loadGeneration: 1 }));
+    const controller = new AbortController();
+    const reason = new Error('read cancelled');
+    controller.abort(reason);
+    const aborted = await readAll(source.read(
+      { length: 16, offset: 16 },
+      { loadGeneration: 2, signal: controller.signal },
+    ));
+    expect(aborted.error).toBe(reason);
+    expect((await older).error).toBeInstanceOf(ByteSourceSupersededError);
+
+    const stale = await readAll(source.read(
+      { length: 16, offset: 32 },
+      { loadGeneration: 1, signal: controller.signal },
+    ));
+    expect(stale.error).toBeInstanceOf(ByteSourceSupersededError);
+    expect((stale.error as Error).message).toBe('stale load generation 1');
+    expect(held.requests).toEqual([0]);
+
+    source.cancel('source replaced');
+    const reused = readAll(source.read({ length: 16, offset: 32 }, { loadGeneration: 1 }));
+    held.releaseAll();
+    const outcome = await reused;
+    expect(outcome.error).toBeUndefined();
+    expect(join(outcome.chunks)).toEqual(PAYLOAD.slice(32, 48));
+  });
+
   it('delivers the exact requested range through the Sia transport', async () => {
     const source = newSiaSource(PAYLOAD, fakeSdk(PAYLOAD));
     const outcome = await readAll(source.read({ length: 4096, offset: 1024 }, { loadGeneration: 1 }));

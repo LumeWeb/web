@@ -1,9 +1,22 @@
+export { chunkedFixture } from "./testing/chunked-files.js";
 /** Portable fixtures share one scoped backend without starting a listener. */
 export { bytesFixture, createMockSia } from "./testing/mock.js";
 export type {
   MutationReplySelector,
   PinReplySelector,
 } from "./testing/mutations.js";
+
+export type {
+  PackedAppKey,
+  PackedObject,
+  PackedOptions,
+  PackedSdk,
+  PackedSdkOptions,
+  PackedUpload,
+} from "./testing/packed.js";
+
+export { PackedFinalizeError } from "./testing/packed.js";
+
 export type {
   ActorRef,
   AppDefinition,

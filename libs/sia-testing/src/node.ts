@@ -1,3 +1,4 @@
+export { chunkedFixture } from "./testing/chunked-files.js";
 /** Managed Node runs close application resources before deleting their fixture resources. */
 export { fileFixture, recoverSiaRun, withSiaRun } from "./testing/node.js";
 export type {
@@ -6,6 +7,7 @@ export type {
   RecoveryOptions,
   RunOptions,
 } from "./testing/node.js";
+
 export type {
   LiveRun,
   LiveRunSummary,

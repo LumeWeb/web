@@ -70,3 +70,25 @@ export async function typedShareConsumer(run: import("@lumeweb/sia-testing/mock"
     return inspection;
   } finally { await server.close(); }
 }
+
+export async function typedPackedConsumer(run: import("@lumeweb/sia-testing/mock").MockRun) {
+  const sdk = run.mock.packedSdk({ access: run.ownerAccess, as: run.mock.actor("packed"), platform: "browser", maxBytes: 8, maxObjects: 1 });
+  const packed = sdk.uploadPacked({ dataShards: 1, parityShards: 1 });
+  const bytes: number = await packed.add(new ReadableStream<Uint8Array>());
+  // @ts-expect-error Browser counts are not Node bigint counts.
+  const wrongCount: bigint = bytes;
+  const [object] = await packed.finalize();
+  if (object) {
+    object.updateMetadata(Uint8Array.of(1));
+    await sdk.updateObjectMetadata(object);
+    await sdk.pinObject(object);
+    const result: void = object.seal(sdk.appKey());
+    // @ts-expect-error Read records cannot grant packed mutation authority.
+    await sdk.pinObject({ id: object.id(), metadata: new Uint8Array(), sizeBytes: 1 });
+    // @ts-expect-error IDs cannot grant seal authority.
+    object.seal({ id: "key" });
+    void result;
+  }
+  await sdk.close();
+  return wrongCount;
+}

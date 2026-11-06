@@ -33,6 +33,7 @@ export async function startMockServer(
     throw Object.assign(new Error("Mock listener host must be loopback"), {
       code: "invalid-input",
     });
+  mockRuntime(mock).assertTransport();
   const calls = new Set<AbortController>();
   interface SocketState {
     bodies: Map<IncomingMessage, ServerResponse>;

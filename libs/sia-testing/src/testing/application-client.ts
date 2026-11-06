@@ -64,9 +64,8 @@ export function createMockApplication(
     }
     void promise.then(
       () => pending.delete(promise),
-      (error: unknown) => {
+      () => {
         pending.delete(promise);
-        if (error instanceof AggregateError) cleanupErrors.push(error);
       },
     );
     return promise;
@@ -476,7 +475,14 @@ export function createMockApplication(
         let completed = false;
         try {
           const bodySignal = AbortSignal.any([callSignal, expiry.signal]);
-          const bytes = await readFixture(file, bodySignal);
+          const bytes = await readFixture(
+            file,
+            bodySignal,
+            undefined,
+            (error) => {
+              cleanupErrors.push(error);
+            },
+          );
           const value = await call(
             "app-upload-body",
             new Uint8Array(bytes),
