@@ -18,6 +18,7 @@
  *   `SOURCE_OK.info` capability fields stay optional.
  */
 
+import { sha256 } from '@noble/hashes/sha2.js';
 import type { PlaybackCapabilities } from '../capabilities/browser-capabilities.ts';
 import {
   type RequestId,
@@ -369,20 +370,21 @@ export function milestoneLevel(name: string): undefined | WorkerLogLevel {
   }
 }
 
+/** Compares seed values after the handshake has scrubbed replaced credential arrays. */
 function connectionEquals(
   cached: {
     config: undefined | WorkerConfig;
-    seed: null | Uint8Array;
-    sharingSeed: null | Uint8Array;
+    seedFingerprint: null | Uint8Array;
+    sharingSeedFingerprint: null | Uint8Array;
   },
   config: undefined | WorkerConfig,
-  seed: null | Uint8Array,
-  sharingSeed: null | Uint8Array,
+  seedFingerprint: null | Uint8Array,
+  sharingSeedFingerprint: null | Uint8Array,
 ): boolean {
   return (
     workerConfigsEqual(cached.config, config) &&
-    appKeySeedsEqual(cached.seed, seed) &&
-    appKeySeedsEqual(cached.sharingSeed, sharingSeed)
+    appKeySeedsEqual(cached.seedFingerprint, seedFingerprint) &&
+    appKeySeedsEqual(cached.sharingSeedFingerprint, sharingSeedFingerprint)
   );
 }
 
@@ -414,43 +416,67 @@ function createLazySiaByteSourceFactory(deps: {
   let cached: null | {
     config: undefined | WorkerConfig;
     sdk: SiaByteSourceSdk;
-    seed: null | Uint8Array;
-    sharingSeed: null | Uint8Array;
+    seedFingerprint: null | Uint8Array;
+    sharingSeedFingerprint: null | Uint8Array;
+  } = null;
+
+  let buildGeneration = 0;
+  let pending: null | {
+    config: undefined | WorkerConfig;
+    promise: Promise<SiaByteSourceSdk>;
+    seedFingerprint: null | Uint8Array;
+    sharingSeedFingerprint: null | Uint8Array;
   } = null;
 
   return async (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared', refresh?: boolean): Promise<ByteSource> => {
     const config = handshake.config;
     const seed = handshake.seed ?? null;
     const sharingSeed = handshake.sharingSeed ?? null;
-    // Availability recovery bypasses the memo so renter hosts are resolved
-    // again on an unchanged connection.
-    let sdk = cached && !refresh && connectionEquals(cached, config, seed, sharingSeed) ? cached.sdk : null;
-    if (!sdk) {
-      try {
-        sdk = await createSdk(config, seed, sharingSeed);
-      } catch (error) {
-        // A rejected SDK bootstrap is otherwise invisible (it only surfaces as
-        // a generic ERROR after the fact); report it as its own error milestone
-        // with the scalar message before rethrowing so the caller's existing
-        // failure path is unchanged. The message may carry the resolved share
-        // URL (which embeds the object decryption key), so URL-shaped runs are
-        // scrubbed before they reach the LOG detail.
-        emitLog(logSink, handshake.log, workerLogLevel.error, workerLogEventName.sdkBuildFailed, {
-          message: redactUrls(describeError(error)),
-        });
-        throw error;
-      }
-      // A fresh SDK build for this connection: report it at connection level
-      // (no owning request), carrying only the indexer identity — never seeds
-      // or share-URL strings (share URLs embed encryption keys).
-      emitLog(logSink, handshake.log, workerLogLevel.info, workerLogEventName.sdkBuilt, { indexerUrl: config?.indexerUrl });
-      const previous = cached?.sdk;
-      cached = { config, sdk, seed, sharingSeed };
-      // Defer the call so a synchronous throw inside dispose() never escapes a
-      // next-load failure as a rejection of the new SDK build.
-      if (previous && previous !== sdk) {
-        queueMicrotask(() => disposeSdk(previous));
-      }
+    // Hash before yielding: APP_KEY can scrub these arrays while createSdk is pending.
+    // Retaining only digests preserves injected getters' value semantics without seed copies.
+    const seedFingerprint = seed === null ? null : sha256(seed);
+    const sharingSeedFingerprint = sharingSeed === null ? null : sha256(sharingSeed);
+    // A refresh must replace even a matching pending build; later ordinary
+    // SOURCEs join that replacement rather than reuse the older cached SDK.
+    let sdk: SiaByteSourceSdk;
+    if (!refresh && pending && connectionEquals(pending, config, seedFingerprint, sharingSeedFingerprint)) {
+      sdk = await pending.promise;
+    } else if (!refresh && !pending && cached && connectionEquals(cached, config, seedFingerprint, sharingSeedFingerprint)) {
+      sdk = cached.sdk;
+    } else {
+      const generation = ++buildGeneration;
+      const promise = Promise.resolve().then(async () => {
+        let built: SiaByteSourceSdk;
+        try {
+          built = await createSdk(config, seed, sharingSeed);
+        } catch (error) {
+          // A separate milestone identifies bootstrap failures before the generic ERROR.
+          // Bootstrap errors may contain share URLs with decryption keys.
+          emitLog(logSink, handshake.log, workerLogLevel.error, workerLogEventName.sdkBuildFailed, {
+            message: redactUrls(describeError(error)),
+          });
+          throw error;
+        }
+        // Coordinator load checks happen after this factory returns. Reject a
+        // superseded build here before it can replace or dispose the current SDK.
+        if (generation !== buildGeneration) {
+          if (built !== cached?.sdk) disposeSdk(built);
+          throw new Error('SDK build superseded');
+        }
+        // SDK builds belong to the connection, without an owning SOURCE request.
+        // Only indexer identity is safe here; share URLs contain decryption keys.
+        emitLog(logSink, handshake.log, workerLogLevel.info, workerLogEventName.sdkBuilt, { indexerUrl: config?.indexerUrl });
+        const previous = cached?.sdk;
+        cached = { config, sdk: built, seedFingerprint, sharingSeedFingerprint };
+        // Defer disposal so a synchronous throw cannot reject the new build.
+        if (previous && previous !== built) queueMicrotask(() => disposeSdk(previous));
+        return built;
+      }).finally(() => {
+        // An older rejection must not clear a replacement that is still building.
+        if (generation === buildGeneration) pending = null;
+      });
+      pending = { config, promise, seedFingerprint, sharingSeedFingerprint };
+      sdk = await promise;
     }
     // The SOURCE requestId travels into the per-load source so its milestones
     // keep the owning load's identity even though the SDK is connection-scoped.
