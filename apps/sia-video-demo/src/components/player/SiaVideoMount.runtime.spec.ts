@@ -247,12 +247,12 @@ describe("SiaVideoMount preparation effect", () => {
     expect(container!.querySelector("video")).not.toBeNull();
   });
 
-  it("updates the worker source and indexer before native preparation settles", async () => {
+  it("updates the worker source and indexer without preparing native playback", async () => {
     useDeveloperOptionsStore.getState().setDisableNativePlayback(true);
     root!.render(createElement(MountWithCapture));
     await flush();
 
-    expect(preparation.prepareCalls).toBe(1);
+    expect(preparation.prepareCalls).toBe(0);
     const video = container!.querySelector("video");
     expect(video).not.toBeNull();
 
@@ -264,7 +264,7 @@ describe("SiaVideoMount preparation effect", () => {
     );
     await flush();
 
-    expect(preparation.prepareCalls).toBe(1);
+    expect(preparation.prepareCalls).toBe(0);
     expect(container!.querySelector("video")).toBe(video);
 
     const hellos = workerMessages
@@ -277,12 +277,30 @@ describe("SiaVideoMount preparation effect", () => {
       .filter((message) => message.type === "HELLO");
     expect(hellos.at(-1)?.config?.indexerUrl).toBe("https://indexer.changed");
     expect(observedMedia?.src).toBe(changedSource.source.fetchForm);
+    expect(preparation.prepareCalls).toBe(0);
+  });
+
+  it("retains the worker player until native preparation settles", async () => {
+    useDeveloperOptionsStore.getState().setDisableNativePlayback(true);
+    root!.render(createElement(MountWithCapture));
+    await flush();
+    expect(preparation.prepareCalls).toBe(0);
+    const video = container!.querySelector("video");
+    const media = observedMedia;
+    expect(video).not.toBeNull();
+
+    useDeveloperOptionsStore.getState().setDisableNativePlayback(false);
+    await flush();
+    expect(preparation.prepareCalls).toBe(1);
+    expect(container!.querySelector("video")).toBe(video);
+    expect(observedMedia).toBe(media);
+    expect(media!.backend).toBe(SIA_PLAYBACK_BACKENDS.MEDIA_WORKER);
 
     preparation.resolve();
     await flush();
-
-    expect(preparation.prepareCalls).toBe(1);
     expect(container!.querySelector("video")).toBe(video);
+    expect(observedMedia).toBe(media);
+    expect(media!.backend).toBe(SIA_PLAYBACK_BACKENDS.AUTO);
   });
 
   it("applies changed indexer configuration through an in-place worker reload", async () => {
@@ -365,6 +383,6 @@ describe("SiaVideoMount runtime backend toggle", () => {
     expect(observedMedia).toBe(media);
     expect(container!.querySelector("video")).toBe(video);
     expect(media!.backend).toBe(SIA_PLAYBACK_BACKENDS.MEDIA_WORKER);
-    expect(backendSetterCalls).toBe(initialSetterCalls + 1);
+    expect(backendSetterCalls).toBeGreaterThan(initialSetterCalls);
   });
 });

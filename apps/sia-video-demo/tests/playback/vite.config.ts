@@ -1,4 +1,4 @@
-/** Serves the production demo entry; playback fixtures replace only its worker SDK factory. */
+/** Serves the demo with managed auth/read ports and synthetic native stream URLs. */
 import { fileURLToPath } from "node:url";
 import { defineConfig, mergeConfig, type Plugin } from "vite";
 import applicationConfig from "../../vite.config";
@@ -29,6 +29,10 @@ export default defineConfig((environment) => {
         {
           find: /^(?:.*\/)?storageBackend(?:\.ts)?$/,
           replacement: fixtureBackend,
+        },
+        {
+          find: /^(?:.*\/)?streamService(?:\.ts)?$/,
+          replacement: fileURLToPath(new URL("./nativeService.ts", import.meta.url)),
         },
       ],
     },
