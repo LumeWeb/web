@@ -281,7 +281,7 @@ describe('installSiaVideoSourceWorker (default Sia composition root)', () => {
     const { sdk } = fakeSiaSdk(boundedIndexedFmp4Payload());
     const createSdk: (config: undefined | WorkerConfig, seed: null | Uint8Array) => Promise<SiaByteSourceSdk> = vi.fn(
       (config: undefined | WorkerConfig, seed: null | Uint8Array) => {
-        built.push({ config, seed });
+        built.push({ config, seed: seed === null ? null : new Uint8Array(seed) });
         return Promise.resolve(sdk);
       },
     );

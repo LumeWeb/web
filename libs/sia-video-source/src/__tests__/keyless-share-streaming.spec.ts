@@ -32,20 +32,24 @@ import {
 } from '../app-key-handshake.ts';
 import { parseSiaShareUrl } from '../share-url.ts';
 import { createSessionHandshake } from '../session/session-coordinator.ts';
-import type { WorkerConfig } from '../protocol.ts';
+import { MainToWorkerMessageType, type WorkerConfig, type WorkerToMainMessage, WorkerToMainMessageType } from '../protocol.ts';
+import { createSiaWorkerComposition } from '../session/sia-composition.ts';
 import type { SiaVideoSdk } from '../worker-runtime.ts';
 import { createDefaultSdk } from '../worker-runtime.ts';
-import { shareSrc } from './fixtures/fmp4-fixture.ts';
+import { FakeLoadPipeline, flush, permissiveCapabilities, shareSrc } from './fixtures/fmp4-fixture.ts';
 
 /** Recorded side effects of the mocked sia-storage SDK, captured per test. */
 const mocks = vi.hoisted(() => ({
+  appConnectResultOverride: undefined as null | undefined,
   appFreeCalls: 0,
   appKeyCtorSeeds: [] as Uint8Array[],
+  appKeyCtorValues: [] as number[][],
   appSdkDownloadCalls: 0,
   appSdkObjectCalls: [] as string[],
   appSdkShareFormCalls: [] as string[],
   builderConnectedCalls: [] as unknown[],
   builderCtorCalls: [] as unknown[],
+  initPending: undefined as Promise<void> | undefined,
   sharedConnectCalls: [] as [string, string][],
   sharedConnectResultOverride: undefined as null | undefined,
   sharedDownloadCalls: 0,
@@ -86,6 +90,7 @@ vi.mock('@siafoundation/sia-storage', () => {
   class Builder {
     connected = vi.fn((appKey: unknown) => {
       mocks.builderConnectedCalls.push(appKey);
+      if (mocks.appConnectResultOverride === null) return null;
       return {
         download: () => {
           mocks.appSdkDownloadCalls += 1;
@@ -111,9 +116,10 @@ vi.mock('@siafoundation/sia-storage', () => {
   class AppKey {
     constructor(seed: Uint8Array) {
       mocks.appKeyCtorSeeds.push(seed);
+      mocks.appKeyCtorValues.push(Array.from(seed));
     }
   }
-  return { AppKey, Builder, initSia: () => undefined, SharedSdk };
+  return { AppKey, Builder, initSia: () => mocks.initPending, SharedSdk };
 });
 
 const WORKER_CONFIG: WorkerConfig = {
@@ -136,8 +142,11 @@ function bytesToHex(bytes: Uint8Array): string {
 }
 
 function resetMocks(): void {
+  mocks.initPending = undefined;
+  mocks.appConnectResultOverride = undefined;
   mocks.appFreeCalls = 0;
   mocks.appKeyCtorSeeds.length = 0;
+  mocks.appKeyCtorValues.length = 0;
   mocks.appSdkDownloadCalls = 0;
   mocks.appSdkObjectCalls.length = 0;
   mocks.appSdkShareFormCalls.length = 0;
@@ -240,6 +249,216 @@ describe('createSessionHandshake keyType routing', () => {
 describe('createDefaultSdk (worker SDK resolution)', () => {
   afterEach(() => {
     resetMocks();
+  });
+
+  it.each([
+    ['app', false], ['sharing', false], ['app', true], ['sharing', true],
+  ] as const)('reads the original %s bytes after initSia pauses across credential replacement (return=%s)', async (keyType, returnToOriginal) => {
+    let finishInit!: () => void;
+    mocks.initPending = new Promise<void>((resolve) => { finishInit = resolve; });
+    const handshake = createSessionHandshake();
+    const messages: WorkerToMainMessage[] = [];
+    const inputs: (null | Uint8Array)[] = [];
+    const coordinator = createSiaWorkerComposition({
+      capabilities: permissiveCapabilities(),
+      createSdk: (config, app, sharing) => {
+        inputs.push(keyType === 'app' ? app : sharing);
+        return createDefaultSdk(config, app, sharing);
+      },
+      handshake,
+      loadPipeline: new FakeLoadPipeline(),
+      post: (message) => messages.push(message),
+      supportsWorkerMse: () => false,
+    });
+    await coordinator.handleMessage({ config: WORKER_CONFIG, requestId: 1, type: MainToWorkerMessageType.HELLO });
+    const hello = messages.find((message) => message.type === WorkerToMainMessageType.HELLO_OK);
+    if (hello?.type !== WorkerToMainMessageType.HELLO_OK) throw new Error('Missing HELLO_OK');
+    const key = async (value: number) => coordinator.handleMessage({
+      envelope: await encryptToWorker(hello.publicKey, new Uint8Array<number>(32).fill(value), keyType),
+      requestId: 2, type: MainToWorkerMessageType.APP_KEY,
+    });
+    const source = (requestId: number) => coordinator.handleMessage({
+      preload: 'auto', requestId, src: keyType === 'app' ? 'pinned' : shareSrc(), type: MainToWorkerMessageType.SOURCE,
+    });
+    await key(9);
+    const originalHandshakeBytes = keyType === 'app' ? handshake.seed : handshake.sharingSeed;
+    const first = source(3);
+    await flush();
+    await key(4);
+    if (returnToOriginal) await key(9);
+    const second = source(4);
+    await flush();
+    expect(inputs[0]).not.toBe(originalHandshakeBytes);
+    expect(Array.from(originalHandshakeBytes!)).toEqual(Array(32).fill(0));
+    expect(Array.from(inputs[0]!)).toEqual(Array(32).fill(9));
+    finishInit();
+    await Promise.all([first, second]);
+    const expected = returnToOriginal ? [9] : [9, 4];
+    if (keyType === 'app') {
+      expect(mocks.appKeyCtorValues).toEqual(expected.map((value) => Array<number>(32).fill(value)));
+    } else {
+      expect(mocks.sharedConnectCalls.map((call) => call[1])).toEqual(expected.map((value) => value === 9 ? '09'.repeat(32) : '04'.repeat(32)));
+    }
+    expect(inputs.every((seed) => seed!.every((byte) => byte === 0))).toBe(true);
+    coordinator.destroy();
+  });
+
+  it('keeps the original dual sharing credential for late use after replacement during initSia', async () => {
+    let finishInit!: () => void;
+    mocks.initPending = new Promise<void>((resolve) => { finishInit = resolve; });
+    const messages: WorkerToMainMessage[] = [];
+    let built!: SiaVideoSdk;
+    let inputSharing!: Uint8Array;
+    const coordinator = createSiaWorkerComposition({
+      capabilities: permissiveCapabilities(),
+      createSdk: async (config, app, sharing) => {
+        inputSharing = sharing!;
+        built = await createDefaultSdk(config, app, sharing);
+        return built;
+      },
+      loadPipeline: new FakeLoadPipeline(),
+      post: (message) => messages.push(message),
+      supportsWorkerMse: () => false,
+    });
+    await coordinator.handleMessage({ config: WORKER_CONFIG, requestId: 1, type: MainToWorkerMessageType.HELLO });
+    const hello = messages.find((message) => message.type === WorkerToMainMessageType.HELLO_OK);
+    if (hello?.type !== WorkerToMainMessageType.HELLO_OK) throw new Error('Missing HELLO_OK');
+    const key = async (value: number, keyType: 'app' | 'sharing') => coordinator.handleMessage({
+      envelope: await encryptToWorker(hello.publicKey, new Uint8Array(32).fill(value), keyType),
+      requestId: 2, type: MainToWorkerMessageType.APP_KEY,
+    });
+    await key(9, 'app');
+    await key(4, 'sharing');
+    const source = coordinator.handleMessage({ preload: 'auto', requestId: 3, src: 'pinned', type: MainToWorkerMessageType.SOURCE });
+    await flush();
+    await key(6, 'sharing');
+    finishInit();
+    await source;
+    expect(Array.from(inputSharing)).toEqual(Array(32).fill(0));
+    expect(mocks.appKeyCtorValues).toEqual([Array(32).fill(9)]);
+    expect(mocks.sharedConnectCalls).toEqual([]);
+    await built.objectFromSharedKey!('late');
+    expect(mocks.sharedConnectCalls).toEqual([[WORKER_CONFIG.indexerUrl, '04'.repeat(32)]]);
+    await built.dispose?.();
+    coordinator.destroy();
+  });
+
+  it.each([false, true])('coordinator destruction scrubs unused dual credentials with initSia pending=%s', async (pendingInit) => {
+    let finishInit!: () => void;
+    if (pendingInit) mocks.initPending = new Promise<void>((resolve) => { finishInit = resolve; });
+    const handshake = createSessionHandshake();
+    const messages: WorkerToMainMessage[] = [];
+    const buildInputs: Uint8Array[] = [];
+    let built!: SiaVideoSdk;
+    const coordinator = createSiaWorkerComposition({
+      capabilities: permissiveCapabilities(),
+      createSdk: async (config, app, sharing) => {
+        buildInputs.push(app!, sharing!);
+        built = await createDefaultSdk(config, app, sharing);
+        return built;
+      },
+      handshake,
+      loadPipeline: new FakeLoadPipeline(),
+      post: (message) => messages.push(message),
+      supportsWorkerMse: () => false,
+    });
+    await coordinator.handleMessage({ config: WORKER_CONFIG, requestId: 1, type: MainToWorkerMessageType.HELLO });
+    const hello = messages.find((message) => message.type === WorkerToMainMessageType.HELLO_OK);
+    if (hello?.type !== WorkerToMainMessageType.HELLO_OK) throw new Error('Missing HELLO_OK');
+    for (const [keyType, value] of [['app', 9], ['sharing', 4]] as const) {
+      await coordinator.handleMessage({
+        envelope: await encryptToWorker(hello.publicKey, new Uint8Array(32).fill(value), keyType),
+        requestId: 2, type: MainToWorkerMessageType.APP_KEY,
+      });
+    }
+    const handshakeInputs = [handshake.seed, handshake.sharingSeed];
+    const source = coordinator.handleMessage({ preload: 'auto', requestId: 3, src: 'pinned', type: MainToWorkerMessageType.SOURCE });
+    if (pendingInit) await flush();
+    else await source;
+    expect(buildInputs).toHaveLength(2);
+    expect(mocks.appKeyCtorValues).toEqual(pendingInit ? [] : [Array(32).fill(9)]);
+    expect(mocks.sharedConnectCalls).toEqual([]);
+
+    const scrubbed: { before: number[]; bytes: Uint8Array }[] = [];
+    const fill = Reflect.get(Uint8Array.prototype, 'fill');
+    const spy = vi.spyOn(Uint8Array.prototype, 'fill').mockImplementation(function (this: Uint8Array, value, start, end) {
+      // Exclude handshake and factory buffers so only SDK-owned copies prove cleanup.
+      if (value === 0 && !handshakeInputs.includes(this) && !buildInputs.includes(this)) {
+        scrubbed.push({ before: Array.from(this), bytes: this });
+      }
+      return fill.call(this, value, start, end);
+    });
+    try {
+      coordinator.destroy();
+      if (pendingInit) finishInit();
+      await source;
+      await flush();
+      expect(scrubbed.map((entry) => entry.before)).toEqual(
+        pendingInit ? [Array(32).fill(9), Array(32).fill(4)] : [Array(32).fill(0), Array(32).fill(4)],
+      );
+      expect(scrubbed.every((entry) => entry.bytes.every((byte) => byte === 0))).toBe(true);
+      expect(buildInputs.every((bytes) => bytes.every((byte) => byte === 0))).toBe(true);
+      expect(mocks.appKeyCtorValues).toEqual(pendingInit ? [] : [Array(32).fill(9)]);
+      expect(mocks.appFreeCalls).toBe(pendingInit ? 0 : 1);
+      expect(mocks.sharedConnectCalls).toEqual([]);
+      expect(mocks.sharedFreeCalls).toBe(0);
+      if (pendingInit) await expect(built.object('after-destroy')).rejects.toThrow('disposed');
+      await expect(built.objectFromSharedKey!('after-destroy')).rejects.toThrow('disposed');
+    } finally {
+      spy.mockRestore();
+      coordinator.destroy();
+    }
+  });
+
+  it('scrubs failed app connection arguments while retaining credentials for retry', async () => {
+    const sdk = await createDefaultSdk(WORKER_CONFIG, new Uint8Array(32).fill(9), new Uint8Array(32).fill(4));
+    mocks.appConnectResultOverride = null;
+    await expect(sdk.object('pinned')).rejects.toThrow('not registered');
+    expect(Array.from(mocks.appKeyCtorSeeds[0])).toEqual(Array(32).fill(0));
+    mocks.appConnectResultOverride = undefined;
+    await sdk.object('pinned');
+    expect(mocks.appKeyCtorValues).toEqual([Array(32).fill(9), Array(32).fill(9)]);
+    expect(Array.from(mocks.appKeyCtorSeeds[1])).toEqual(Array(32).fill(0));
+    await sdk.dispose?.();
+  });
+
+  it('scrubs both unused route credentials on disposal without connecting', async () => {
+    const sdk = await createDefaultSdk(WORKER_CONFIG, new Uint8Array(32).fill(9), new Uint8Array(32).fill(4));
+    const scrubbed: { before: number[]; bytes: Uint8Array }[] = [];
+    const fill = Reflect.get(Uint8Array.prototype, 'fill');
+    const spy = vi.spyOn(Uint8Array.prototype, 'fill').mockImplementation(function (this: Uint8Array, value, start, end) {
+      scrubbed.push({ before: Array.from(this), bytes: this });
+      return fill.call(this, value, start, end);
+    });
+    try {
+      await sdk.dispose?.();
+      expect(scrubbed.map((entry) => entry.before)).toEqual([Array(32).fill(9), Array(32).fill(4)]);
+      expect(scrubbed.every((entry) => entry.bytes.every((byte) => byte === 0))).toBe(true);
+      expect(mocks.builderConnectedCalls).toEqual([]);
+      expect(mocks.sharedConnectCalls).toEqual([]);
+      await expect(sdk.object('unused')).rejects.toThrow('disposed');
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('keeps lazy routes authenticated after factory input bytes are scrubbed', async () => {
+    const app = new Uint8Array(32).fill(9);
+    const sharing = new Uint8Array(32).fill(4);
+    const sdk = await createDefaultSdk(WORKER_CONFIG, app, sharing);
+    app.fill(0);
+    sharing.fill(0);
+    expect(mocks.builderConnectedCalls).toEqual([]);
+    expect(mocks.sharedConnectCalls).toEqual([]);
+    await sdk.object('pinned');
+    expect(mocks.appKeyCtorValues[0]).toEqual(Array(32).fill(9));
+    expect(Array.from(mocks.appKeyCtorSeeds[0])).toEqual(Array(32).fill(0));
+    mocks.sharedConnectResultOverride = null;
+    await expect(sdk.objectFromSharedKey!('shared')).rejects.toThrow();
+    mocks.sharedConnectResultOverride = undefined;
+    await sdk.objectFromSharedKey!('shared');
+    expect(mocks.sharedConnectCalls.map((call) => call[1])).toEqual(['04'.repeat(32), '04'.repeat(32)]);
+    await sdk.dispose?.();
   });
 
   it('connects via SharedSdk.connect(indexerUrl, hex seed) and routes a share URL through SharedSdk.object(objectKey)', async () => {

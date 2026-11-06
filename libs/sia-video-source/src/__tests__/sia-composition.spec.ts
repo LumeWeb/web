@@ -615,15 +615,17 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
   // Deferred SDK construction exposes completion order without contacting a renter.
   async function pendingSdkSession(keyType: 'app' | 'sharing' = 'app', freshSeeds = false) {
     const builds: { reject: (error: Error) => void; resolve: (sdk: SiaByteSourceSdk) => void }[] = [];
-    const createSdk = vi.fn(() => new Promise<SiaByteSourceSdk>((resolve, reject) => {
+    const createSdk = vi.fn((_config: unknown, _app: null | Uint8Array, _sharing: null | Uint8Array) => new Promise<SiaByteSourceSdk>((resolve, reject) => {
       builds.push({ reject, resolve });
     }));
     const messages: WorkerToMainMessage[] = [];
+    const handshake = createSessionHandshake();
     const coordinator = createSiaWorkerComposition({
       capabilities: permissiveCapabilities(),
       createSdk,
+      handshake,
       ...(freshSeeds ? {
-        handshake: new Proxy(createSessionHandshake(), {
+        handshake: new Proxy(handshake, {
           get(target, property) {
             const value = Reflect.get(target, property, target);
             return (property === 'seed' || property === 'sharingSeed') && value ? new Uint8Array(value) : value;
@@ -645,7 +647,7 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
     const source = (requestId: number, refreshSdk = false) => coordinator.handleMessage({
       preload: 'auto', refreshSdk, requestId, src: 'fmp4', type: MainToWorkerMessageType.SOURCE,
     });
-    return { builds, coordinator, createSdk, messages, publicKey: hello.publicKey, source };
+    return { builds, coordinator, createSdk, handshake, messages, publicKey: hello.publicKey, source };
   }
 
   it.each(['method', 'message'] as const)('releases the resolved SDK once on destroy by %s', async (path) => {
@@ -806,6 +808,36 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
     expect(onAbandon).toHaveBeenCalledTimes(2);
     expect(dispose).not.toHaveBeenCalled();
   });
+
+  it.each(['app', 'sharing'] as const)(
+    'keeps %s build bytes alive through encrypted credential changes and scrubs them after settlement', async (keyType) => {
+      const { builds, coordinator, createSdk, handshake, publicKey, source } = await pendingSdkSession(keyType);
+      const first = source(3);
+      await flush();
+      const supplied = createSdk.mock.calls[0][keyType === 'app' ? 1 : 2]!;
+      expect(supplied).not.toBe(keyType === 'app' ? handshake.seed : handshake.sharingSeed);
+      for (const value of [4, 9]) {
+        await coordinator.handleMessage({
+          envelope: await encryptToWorker(publicKey, new Uint8Array(32).fill(value), keyType),
+          requestId: 4, type: MainToWorkerMessageType.APP_KEY,
+        });
+      }
+      const second = source(5);
+      await flush();
+      expect(createSdk).toHaveBeenCalledTimes(1);
+      expect(Array.from(supplied)).toEqual(Array(32).fill(9));
+      builds[0].resolve(fakeSiaSdk(new Uint8Array(2048).fill(1)).sdk);
+      await Promise.all([first, second]);
+      expect(Array.from(supplied)).toEqual(Array(32).fill(0));
+      const retry = source(6, true);
+      await flush();
+      const rejected = createSdk.mock.calls[1][keyType === 'app' ? 1 : 2]!;
+      expect(Array.from(rejected)).toEqual(Array(32).fill(9));
+      builds[1].reject(new Error('connection failed'));
+      await retry;
+      expect(Array.from(rejected)).toEqual(Array(32).fill(0));
+    },
+  );
 
   it.each(['app', 'sharing'] as const)(
     'reuses SDKs when injected handshake getters return fresh equal %s seeds', async (keyType) => {
@@ -1031,7 +1063,7 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
     const built: { config: undefined | WorkerConfig; seed: null | Uint8Array }[] = [];
     const createSdk: (config: undefined | WorkerConfig, seed: null | Uint8Array) => Promise<SiaByteSourceSdk> = vi.fn(
       (config: undefined | WorkerConfig, seed: null | Uint8Array) => {
-        built.push({ config, seed });
+        built.push({ config, seed: seed?.slice() ?? null });
         return Promise.resolve(sdk);
       },
     );
@@ -1198,7 +1230,7 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
         seed: null | Uint8Array,
         sharingSeed: null | Uint8Array,
       ) => {
-        built.push({ seed, sharingSeed });
+        built.push({ seed: seed?.slice() ?? null, sharingSeed: sharingSeed?.slice() ?? null });
         const tag = sharingSeed === null ? 'B' : 'A';
         return Promise.resolve({
           ...(tag === 'A' ? sdkA : sdkB),
@@ -1252,7 +1284,7 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
         seed: null | Uint8Array,
         sharingSeed: null | Uint8Array,
       ) => {
-        built.push({ config, seed, sharingSeed });
+        built.push({ config, seed: seed?.slice() ?? null, sharingSeed: sharingSeed?.slice() ?? null });
         return Promise.resolve(sdk);
       },
     );
@@ -1297,7 +1329,7 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
         seed: null | Uint8Array,
         sharingSeed: null | Uint8Array,
       ) => {
-        built.push({ config, seed, sharingSeed });
+        built.push({ config, seed: seed?.slice() ?? null, sharingSeed: sharingSeed?.slice() ?? null });
         return Promise.resolve(sdk);
       },
     );

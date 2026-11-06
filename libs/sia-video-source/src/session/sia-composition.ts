@@ -446,7 +446,7 @@ function createLazySiaByteSourceFactory(deps: {
     const seed = handshake.seed ?? null;
     const sharingSeed = handshake.sharingSeed ?? null;
     // Hash before yielding: APP_KEY can scrub these arrays while createSdk is pending.
-    // Retaining only digests preserves injected getters' value semantics without seed copies.
+    // Digests preserve value semantics when injected getters return fresh arrays.
     const seedFingerprint = seed === null ? null : sha256(seed);
     const sharingSeedFingerprint = sharingSeed === null ? null : sha256(sharingSeed);
     // A refresh must replace even a matching pending build; later ordinary
@@ -457,11 +457,13 @@ function createLazySiaByteSourceFactory(deps: {
     } else if (!refresh && !pending && cached && connectionEquals(cached, config, seedFingerprint, sharingSeedFingerprint)) {
       connection = cached;
     } else {
+      const buildSeed = seed === null ? null : new Uint8Array(seed);
+      const buildSharingSeed = sharingSeed === null ? null : new Uint8Array(sharingSeed);
       const generation = ++buildGeneration;
       const promise = Promise.resolve().then(async () => {
         let built: SiaByteSourceSdk;
         try {
-          built = await createSdk(config, seed, sharingSeed);
+          built = await createSdk(config, buildSeed, buildSharingSeed);
         } catch (error) {
           // A separate milestone identifies bootstrap failures before the generic ERROR.
           // Bootstrap errors may contain share URLs with decryption keys.
@@ -469,6 +471,9 @@ function createLazySiaByteSourceFactory(deps: {
             message: redactUrls(describeError(error)),
           });
           throw error;
+        } finally {
+          buildSeed?.fill(0);
+          buildSharingSeed?.fill(0);
         }
         // Coordinator load checks happen after this factory returns. Reject a
         // superseded build here before it can replace or dispose the current SDK.
