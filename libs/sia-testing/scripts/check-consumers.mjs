@@ -243,8 +243,8 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
         original,
       );
       const summary = /^Total: [1-9]\d* tests? in [1-9]\d* files?$/m;
-      const expected = sourceOutput.match(summary)?.[0];
-      if (!expected || output.match(summary)?.[0] !== expected)
+      const expected = summary.exec(sourceOutput)?.[0];
+      if (!expected || summary.exec(output)?.[0] !== expected)
         throw new Error(`Unexpected consumer collection: ${output}\nSource collection: ${sourceOutput}`);
       console.log(`${root === library ? "Library" : "Demo"} consumer collection matches source: ${expected}`);
     }
