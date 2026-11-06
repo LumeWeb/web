@@ -9,7 +9,7 @@ declare global {
   }
 }
 
-test("the account UI approves, registers and reconnects through the mock auth port", async ({
+test("an account can play a managed video after registration and reconnect", async ({
   fixture,
   sia,
 }) => {
@@ -25,6 +25,7 @@ test("the account UI approves, registers and reconnects through the mock auth po
         window.__siaDemoTest = { credential };
       }, connection.backend.credential);
     },
+    mockActor: fixture.actor,
   });
   await openDemo(page, { ...fixture, url });
   await page
@@ -49,6 +50,22 @@ test("the account UI approves, registers and reconnects through the mock auth po
   await expect(
     page.getByRole("button", { exact: true, name: "Log out" }),
   ).toBeVisible();
+  await page.getByRole("button", { exact: true, name: "Show developer tools" }).click();
+  await page.getByLabel("Disable native (service-worker) playback", { exact: true }).check();
+  const shareUrl = new URL(`/objects/${fixture.object.id}/shared`, url);
+  shareUrl.hash = new URLSearchParams({
+    encryption_key: btoa(String.fromCharCode(...new Uint8Array(32).fill(7))),
+  }).toString();
+  await page.getByLabel("Sia share URL", { exact: true }).fill(shareUrl.href);
+  const video = page.locator("video");
+  await expect(video).toBeVisible();
+  await page.getByRole("button", { exact: true, name: "Play" }).first().click();
+  await expect.poll(() => video.evaluate((element: HTMLVideoElement) => element.paused)).toBe(false);
+  await expectDecodedProgress(video);
+  await expect.poll(() => fixture.mock.history().some((request) =>
+    request.actor === fixture.actor && request.objectId === fixture.object.id &&
+    request.operation === "download" && request.status === "completed",
+  )).toBe(true);
 });
 
 test("a well-formed unknown sharing seed cannot list the fixture", async ({

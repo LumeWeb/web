@@ -14,16 +14,15 @@ export function AuthFlow() {
   const status = useStore(useAuthStore, (s) => s.status);
   const userKeyHex = useStore(useAuthStore, (s) => s.userKeyHex);
   const reconnect = useStore(useAuthStore, (s) => s.reconnect);
+  const reconnectError = useStore(useAuthStore, (s) => s.reconnectError);
 
-  // A persisted app-key seed is reconnected whenever the store is in (or
-  // returns to) `Disconnected` while a user key is present, so a reloaded SSO
-  // session returns straight to the player and a transient failure re-arms the
-  // retry. The connection is idempotent: `reconnect` skips any non-disconnected
-  // store, so this effect only ever starts one in-flight attempt. A sharing key
-  // never waits on this (see `selectAuthStep`), so keyless sessions are skipped.
+  // Retaining the account key after failure must not rearm automatic reconnect.
+  // Sharing sessions use their own credential without opening an account SDK.
   useEffect(() => {
-    if (status === AuthStatus.Disconnected && userKeyHex) void reconnect();
-  }, [reconnect, status, userKeyHex]);
+    if (status === AuthStatus.Disconnected && userKeyHex && !sharingKeyHex && !reconnectError) {
+      void reconnect();
+    }
+  }, [reconnect, reconnectError, sharingKeyHex, status, userKeyHex]);
 
   const step = selectAuthStep({ sharingKeyHex, status });
 

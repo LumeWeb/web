@@ -243,7 +243,7 @@ it(
         path,
         JSON.stringify({
           ...document,
-          limits: { ...document.limits, deadlineMs: 10000, maxObjects: 64 },
+          limits: { ...document.limits, cleanupDeadlineMs: 10000, deadlineMs: 10000, maxObjects: 64 },
         }),
         { mode: 0o600 },
       );

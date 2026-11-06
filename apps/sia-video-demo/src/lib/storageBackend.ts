@@ -17,6 +17,7 @@ export interface ListingSession {
   objectSummaries(
     offset: number,
     limit: number,
+    signal?: AbortSignal,
   ): Promise<readonly ListingSummary[]>;
 }
 export type ListingSummary = Pick<

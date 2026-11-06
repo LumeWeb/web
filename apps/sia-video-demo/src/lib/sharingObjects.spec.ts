@@ -36,6 +36,74 @@ function row(id: string, name = id.slice(0, 6), size = 42): SharedObjectRow {
   return { id, name, size };
 }
 
+describe("listing cancellation", () => {
+  it("does not fetch a page when the signal is already aborted", async () => {
+    const abort = new AbortController();
+    abort.abort();
+    const fetchPage = vi.fn();
+    await expect(listSharedObjects({ fetchPage }, { signal: abort.signal })).rejects.toBe(abort.signal.reason);
+    expect(fetchPage).not.toHaveBeenCalled();
+  });
+
+  it("does not request another page after cancellation", async () => {
+    const abort = new AbortController();
+    const { calls, client } = clientFor([[row(A)], [row(B)]], 1);
+    const reason = new Error("listing replaced");
+    await expect(listSharedObjects(client, {
+      onPage: () => abort.abort(reason),
+      pageSize: 1,
+      signal: abort.signal,
+    })).rejects.toBe(reason);
+    expect(calls).toEqual([[0, 1]]);
+  });
+
+  it("rejects cancellation from the final page callback", async () => {
+    const abort = new AbortController();
+    const { client } = clientFor([[row(A)]], 2);
+    const reason = { message: "listing replaced" };
+    await expect(listSharedObjects(client, {
+      onPage: () => abort.abort(reason),
+      pageSize: 2,
+      signal: abort.signal,
+    })).rejects.toBe(reason);
+  });
+
+  it("preserves a non-Error reason during retry cancellation", async () => {
+    vi.useFakeTimers();
+    try {
+      const abort = new AbortController();
+      const reason = { message: "listing replaced" };
+      const fetchPage = vi.fn(() => Promise.reject(new Error("temporary failure")));
+      const pending = listSharedObjects({ fetchPage }, { signal: abort.signal });
+      const cancelled = expect(pending).rejects.toBe(reason);
+      await vi.advanceTimersByTimeAsync(0);
+      abort.abort(reason);
+      await cancelled;
+      expect(fetchPage).toHaveBeenCalledTimes(1);
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("cancels a retry delay without fetching again", async () => {
+    vi.useFakeTimers();
+    try {
+      const abort = new AbortController();
+      const fetchPage = vi.fn(() => Promise.reject(new Error("temporary failure")));
+      const pending = listSharedObjects({ fetchPage }, { signal: abort.signal });
+      const cancelled = expect(pending).rejects.toMatchObject({ name: "AbortError" });
+      await vi.advanceTimersByTimeAsync(0);
+      abort.abort();
+      await cancelled;
+      expect(fetchPage).toHaveBeenCalledTimes(1);
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
 describe("listSharedObjects — progressive paging and page views", () => {
   it("walks pages in order, emitting one onPage view per page with stats/cursor", async () => {
     const pagesSeen: SharedObjectPageView[] = [];

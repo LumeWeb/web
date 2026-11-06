@@ -77,6 +77,7 @@ export interface SharedObjectsListingOptions {
   readonly retryBaseDelayMs?: number;
   /** Cap for per-page retry delay in ms. Default 3000. */
   readonly retryMaxDelayMs?: number;
+  readonly signal?: AbortSignal;
 }
 
 export interface SharedObjectsListingResult {
@@ -92,7 +93,7 @@ export interface SharedObjectsListingResult {
  * `offset`. A thrown error is treated as transient and retried per page.
  */
 export interface SharedObjectsPageClient {
-  fetchPage(offset: number, pageSize: number): Promise<SharedObjectRow[]>;
+  fetchPage(offset: number, pageSize: number, signal?: AbortSignal): Promise<SharedObjectRow[]>;
 }
 
 /** The walker's resolved options: `listSharedObjects` defaults each field. */
@@ -102,6 +103,7 @@ interface WalkPagesOptions {
   readonly retries: number;
   readonly retryBaseDelayMs: number;
   readonly retryMaxDelayMs: number;
+  readonly signal?: AbortSignal;
 }
 
 /** A retryable listing failure, raised once one page's retries run out. */
@@ -150,10 +152,13 @@ export async function createSharedObjectsClient(
 ): Promise<SharedObjectsClientHandle> {
   const sdk = await connect(indexerUrl, seedHex);
   const client: SharedObjectsPageClient = {
-    fetchPage: async (offset, pageSize) =>
-      (await sdk.objectSummaries(offset, pageSize)).map((summary) =>
-        rowOf(summary),
-      ),
+    fetchPage: async (offset, pageSize, signal) => {
+      signal?.throwIfAborted();
+      const rows = (await sdk.objectSummaries(offset, pageSize, signal)).map(rowOf);
+      // Native SDK reads cannot be aborted; free every returned summary before cancellation escapes.
+      signal?.throwIfAborted();
+      return rows;
+    },
   };
   return {
     client,
@@ -229,6 +234,7 @@ export async function listSharedObjects(
     retries: options?.retries ?? DEFAULT_RETRIES,
     retryBaseDelayMs: options?.retryBaseDelayMs ?? DEFAULT_RETRY_BASE_MS,
     retryMaxDelayMs: options?.retryMaxDelayMs ?? DEFAULT_RETRY_MAX_MS,
+    signal: options?.signal,
   });
 }
 
@@ -263,12 +269,15 @@ async function fetchPageWithRetry(
   retries: number,
   retryBaseDelayMs: number,
   retryMaxDelayMs: number,
+  signal?: AbortSignal,
 ): Promise<SharedObjectRow[]> {
   let attemptCount = 0;
   for (;;) {
+    signal?.throwIfAborted();
     try {
-      return await client.fetchPage(offset, pageSize);
+      return await (signal ? client.fetchPage(offset, pageSize, signal) : client.fetchPage(offset, pageSize));
     } catch (cause) {
+      signal?.throwIfAborted();
       if (attemptCount >= retries) {
         throw new SharedObjectsListingError(
           pageIndex,
@@ -279,6 +288,7 @@ async function fetchPageWithRetry(
       }
       await sleep(
         retryDelayMs(attemptCount, retryBaseDelayMs, retryMaxDelayMs),
+        signal,
       );
       attemptCount += 1;
     }
@@ -354,9 +364,21 @@ function sanitizeDisplayName(name: string): string {
   return out.replace(/\s+/g, " ").trim();
 }
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const cancelled = () => {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", cancelled);
+      // Wrapping a primitive reason would make retries differ from throwIfAborted().
+      // oxlint-disable-next-line typescript/prefer-promise-reject-errors
+      reject(signal?.reason);
+    };
+    const timer = setTimeout(() => {
+      signal?.removeEventListener("abort", cancelled);
+      resolve();
+    }, ms);
+    signal?.addEventListener("abort", cancelled, { once: true });
+    if (signal?.aborted) cancelled();
   });
 }
 
@@ -381,7 +403,9 @@ async function walkPages(
       options.retries,
       options.retryBaseDelayMs,
       options.retryMaxDelayMs,
+      options.signal,
     );
+    options.signal?.throwIfAborted();
     const fresh: SharedObjectRow[] = [];
     for (const source of page) {
       const id = canonicalObjectKey(source.id);
@@ -400,6 +424,7 @@ async function walkPages(
       rows: fresh,
       totalRows: rows.length,
     });
+    options.signal?.throwIfAborted();
     if (end) break;
     offset += options.pageSize;
     pageIndex += 1;

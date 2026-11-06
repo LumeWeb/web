@@ -34,6 +34,7 @@ const base = createSiaTest({
     },
     kind: "mock",
   },
+  limits: { maxObjects: 24 },
 });
 export const test = base.extend<{ egress: Egress; fixture: Fixture }>({
   // Playwright requires destructured parameters for fixtures without dependencies.
@@ -109,7 +110,7 @@ export const test = base.extend<{ egress: Egress; fixture: Fixture }>({
     await use({ bypass: "127.0.0.1,localhost", server: egress.url });
   },
 });
-export async function openDemo(page: Page, fixture: Fixture) {
+export async function openDemo(page: Page, fixture: Fixture, disableNativePlayback = true) {
   await page.goto("/");
   await page
     .getByRole("button", { exact: true, name: "Show advanced" })
@@ -123,10 +124,10 @@ export async function openDemo(page: Page, fixture: Fixture) {
     .click();
   await page
     .getByLabel("Disable native (service-worker) playback", { exact: true })
-    .check();
+    .setChecked(disableNativePlayback);
 }
-export async function openShare(page: Page, fixture: Fixture) {
-  await openDemo(page, fixture);
+export async function openShare(page: Page, fixture: Fixture, disableNativePlayback = true) {
+  await openDemo(page, fixture, disableNativePlayback);
   await page
     .getByLabel("Sharing link or key", { exact: true })
     .fill(fixture.sharingSeed);

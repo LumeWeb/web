@@ -34,6 +34,17 @@ export async function connectAppKey(
     await auth.close();
   }
 }
+export function connection(
+  indexerUrl: string,
+  kind: MockCredential["kind"],
+): MockConnection {
+  const target = new URL(
+    indexerUrl.endsWith("/") ? indexerUrl : indexerUrl + "/",
+  );
+  const client = target.pathname.split("/").filter(Boolean).at(-1);
+  if (!client) throw new Error("Mock reader client is missing");
+  return { client, kind, url: new URL("../", target).href };
+}
 export function connectSharedObjects(
   indexerUrl: string,
   seedHex: string,
@@ -46,8 +57,8 @@ export function connectSharedObjects(
     free() {
       void reader.close();
     },
-    async objectSummaries(offset, limit) {
-      return (await reader.objects({ limit, offset })).objects.map(
+    async objectSummaries(offset, limit, signal) {
+      return (await reader.objects({ limit, offset, signal })).objects.map(
         (object) => ({
           free: () => undefined,
           id: object.id,
@@ -84,17 +95,6 @@ export async function openAuthRequest(
     responseUrl: () => request.responseUrl,
     waitForApproval: () => auth.waitForApproval(request),
   };
-}
-function connection(
-  indexerUrl: string,
-  kind: MockCredential["kind"],
-): MockConnection {
-  const target = new URL(
-    indexerUrl.endsWith("/") ? indexerUrl : indexerUrl + "/",
-  );
-  const client = target.pathname.split("/").filter(Boolean).at(-1);
-  if (!client) throw new Error("Mock reader client is missing");
-  return { client, kind, url: new URL("../", target).href };
 }
 function session(key: MockCredential): AuthSession {
   return {

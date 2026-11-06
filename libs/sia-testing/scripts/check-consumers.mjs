@@ -185,6 +185,15 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
       join(library, "check-playback-build.mjs"),
     );
     run(join(library, "check-playback-build.mjs"), [], library);
+    /** @type {Map<string, string>} */
+    const sourceCollections = new Map();
+    for (const root of [library, demo]) {
+      sourceCollections.set(root, run(
+        join(repo, "node_modules/@playwright/test/cli.js"),
+        ["test", "--config", "playwright.mock.config.ts", "--list"],
+        root,
+      ));
+    }
     const packedLibrary = await pack(
       library,
       join(directory, "library-tarball"),
@@ -236,12 +245,12 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
         ["test", "--config", "playwright.mock.config.ts", "--list"],
         root,
       );
-      const expected =
-        root === library
-          ? "Total: 34 tests in 2 files"
-          : "Total: 24 tests in 1 file";
-      if (!output.includes(expected))
-        throw new Error(`Unexpected consumer collection: ${output}`);
+      const sourceOutput = sourceCollections.get(root) ?? "";
+      const summary = /^Total: [1-9]\d* tests? in [1-9]\d* files?$/m;
+      const expected = summary.exec(sourceOutput)?.[0];
+      if (!expected || summary.exec(output)?.[0] !== expected)
+        throw new Error(`Unexpected consumer collection: ${output}\nSource collection: ${sourceOutput}`);
+      console.log(`${root === library ? "Library" : "Demo"} consumer collection matches source: ${expected}`);
     }
   } catch (error) {
     throw new Error(
@@ -255,6 +264,6 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
   );
   run(join(demo, "worker-setup-import.mjs"), [], demo);
   console.log(
-    "consumer checks passed: playback pages built and typed; 34 library and 24 demo mock tests collected; packed worker setup passed",
+    "consumer checks passed: playback pages built and typed; mock test collections match source; packed worker setup passed",
   );
 });
