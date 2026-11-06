@@ -44,6 +44,8 @@ export interface AuthState extends AuthActions {
    * NOT persisted (it is part of a share URL, not a credential).
    */
   objectKey: string;
+  /** A failed automatic reconnect waits for a user action instead of rearming the effect. */
+  reconnectError: null | string;
   /** The live connection request, held across the approval/registration screens. */
   request: AuthRequest | null;
   /**
@@ -67,6 +69,7 @@ const initialState: Pick<
   AuthState,
   | "indexerUrl"
   | "objectKey"
+  | "reconnectError"
   | "request"
   | "sharingError"
   | "sharingKeyHex"
@@ -75,6 +78,7 @@ const initialState: Pick<
 > = {
   indexerUrl: DEFAULT_INDEXER_URL,
   objectKey: "",
+  reconnectError: null,
   request: null,
   sharingError: null,
   sharingKeyHex: null,
@@ -133,7 +137,7 @@ export const useAuthStore = createStore<AuthState>()(
         // non-disconnected state: only an explicitly disconnected store may
         // (re)start the SSO-free app-key reconnect.
         if (status !== AuthStatus.Disconnected) return;
-        set({ status: AuthStatus.Reconnecting });
+        set({ reconnectError: null, status: AuthStatus.Reconnecting });
         try {
           const sdk = await connectAppKey(indexerUrl, userKeyHex);
           set({ status: AuthStatus.Connected });
@@ -142,7 +146,10 @@ export const useAuthStore = createStore<AuthState>()(
           // A transient failure ends the in-flight retry but must NOT discard
           // the persisted app-key credential: keep userKeyHex so the user can
           // retry or switch indexers from the gate screen.
-          set({ status: AuthStatus.Disconnected });
+          set({
+            reconnectError: "Could not reconnect your account. Retry or choose another indexer.",
+            status: AuthStatus.Disconnected,
+          });
         }
       },
 
@@ -155,7 +162,7 @@ export const useAuthStore = createStore<AuthState>()(
         appKey.free();
         disconnectSdk(sdk);
         request.free();
-        set({ request: null, status: "connected", userKeyHex });
+        set({ reconnectError: null, request: null, status: "connected", userKeyHex });
       },
 
       requestConnection: async (indexerUrl) => {
@@ -164,7 +171,7 @@ export const useAuthStore = createStore<AuthState>()(
       },
 
       setIndexerUrl: (indexerUrl) => {
-        set({ indexerUrl });
+        set({ indexerUrl, reconnectError: null });
       },
 
       setObjectKey: (objectKey) => {

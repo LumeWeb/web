@@ -1,6 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AuthState } from "./auth";
 
+const backend = vi.hoisted(() => ({ connectAppKey: vi.fn() }));
+vi.mock("../lib/storageBackend", () => ({
+  connectAppKey: backend.connectAppKey,
+  openAuthRequest: vi.fn(),
+}));
+
 const SEED = "d778398e336858ddc1a7de0c78ca22bbe9c821e2786d7b5a941c729e1e5ceb1f";
 const OBJECT =
   "a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90";
@@ -60,6 +66,8 @@ async function importStore() {
 }
 
 beforeEach(() => {
+  backend.connectAppKey.mockReset();
+  backend.connectAppKey.mockRejectedValue(new Error("Indexer unavailable"));
   storage = stubStorage();
   Object.defineProperty(globalThis, "localStorage", {
     configurable: true,
@@ -212,6 +220,9 @@ describe("reconnect", () => {
     await useAuthStore.getState().reconnect();
 
     expect(useAuthStore.getState().userKeyHex).toBe(SEED);
+    expect(useAuthStore.getState().status).toBe("disconnected");
+    expect(useAuthStore.getState().reconnectError).not.toBeNull();
+    expect(backend.connectAppKey).toHaveBeenCalledTimes(1);
   });
 });
 
