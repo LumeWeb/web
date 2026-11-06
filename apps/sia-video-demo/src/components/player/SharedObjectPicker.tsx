@@ -153,21 +153,24 @@ export function SharedObjectPicker({
   const [reloadKey, setReloadKey] = useState(0);
 
   // Progressively list the sharing key's objects; Retry re-runs the walk.
-  // The client handle is disposed when a run settles and on unmount.
+  // Native reads settle before their WASM session is freed; cancellation stops later pages.
   // Selection is owned by the player screen: row clicks only report up.
   useEffect(() => {
     let cancelled = false;
+    const abort = new AbortController();
     let handle: null | SharedObjectsClientHandle = null;
     setListing(emptySharedPickerListing());
     const run = async (): Promise<void> => {
       try {
         handle = await createSharedObjectsClient(indexerUrl, sharingKeyHex);
+        if (cancelled) return;
         const result = await listSharedObjects(handle.client, {
           onPage: (page) => {
             if (cancelled) return;
             setListing((current) => appendSharedPickerPage(current, page));
           },
           pageSize: SHARED_PICKER_PAGE_SIZE,
+          signal: abort.signal,
         });
         if (!cancelled) setListing(finishSharedPickerListing(result));
       } catch (error) {
@@ -182,6 +185,7 @@ export function SharedObjectPicker({
     void run();
     return () => {
       cancelled = true;
+      abort.abort();
     };
   }, [indexerUrl, reloadKey, sharingKeyHex]);
 

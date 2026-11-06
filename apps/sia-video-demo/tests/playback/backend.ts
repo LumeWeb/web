@@ -57,8 +57,8 @@ export function connectSharedObjects(
     free() {
       void reader.close();
     },
-    async objectSummaries(offset, limit) {
-      return (await reader.objects({ limit, offset })).objects.map(
+    async objectSummaries(offset, limit, signal) {
+      return (await reader.objects({ limit, offset, signal })).objects.map(
         (object) => ({
           free: () => undefined,
           id: object.id,
