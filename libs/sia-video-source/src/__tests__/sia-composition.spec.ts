@@ -569,6 +569,165 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
     return { builds, coordinator, createSdk, messages, publicKey: hello.publicKey, source };
   }
 
+  it.each(['method', 'message'] as const)('releases the resolved SDK once on destroy by %s', async (path) => {
+    const { builds, coordinator, source } = await pendingSdkSession();
+    const load = source(3);
+    await flush();
+    const sdk = {
+      ...fakeSiaSdk(new Uint8Array(2048)).sdk,
+      released: false,
+      dispose: vi.fn(function (this: { released: boolean }) { this.released = true; }),
+    };
+    builds[0].resolve(sdk);
+    await load;
+    if (path === 'method') coordinator.destroy();
+    else await coordinator.handleMessage({ requestId: 4, type: MainToWorkerMessageType.DESTROY });
+    coordinator.destroy();
+    await flush();
+    expect(sdk.dispose).toHaveBeenCalledTimes(1);
+    expect(sdk.released).toBe(true);
+  });
+
+  it('prevents object resolution when destroy follows SDK caching before source continuation', async () => {
+    const events: string[] = [];
+    const messages: WorkerToMainMessage[] = [];
+    const sdk = {
+      ...fakeSiaSdk(new Uint8Array(2048)).sdk,
+      dispose: vi.fn(() => { events.push('dispose'); }),
+    };
+    const object = vi.spyOn(sdk, 'object');
+    const download = vi.spyOn(sdk, 'download');
+    const createSdk = vi.fn(async () => sdk);
+    const coordinator = createSiaWorkerComposition({
+      capabilities: permissiveCapabilities(),
+      createSdk,
+      loadPipeline: new FakeLoadPipeline(),
+      logSink: (message) => {
+        if (message.name === 'sdk.built') {
+          events.push('built');
+          // The build caches the SDK before this microtask resumes the suspended source.
+          queueMicrotask(() => {
+            events.push('destroy');
+            coordinator.destroy();
+          });
+        }
+      },
+      post: (message) => messages.push(message),
+      supportsWorkerMse: () => false,
+    });
+    await coordinator.handleMessage({ config: WORKER_CONFIG, log: 'info', requestId: 1, type: MainToWorkerMessageType.HELLO });
+    const hello = messages.find((message) => message.type === WorkerToMainMessageType.HELLO_OK);
+    if (hello?.type !== WorkerToMainMessageType.HELLO_OK) throw new Error('Missing HELLO_OK');
+    await coordinator.handleMessage({
+      envelope: await encryptToWorker(hello.publicKey, new Uint8Array(32).fill(9)),
+      requestId: 2,
+      type: MainToWorkerMessageType.APP_KEY,
+    });
+
+    await coordinator.handleMessage({ preload: 'auto', requestId: 3, src: 'fmp4', type: MainToWorkerMessageType.SOURCE });
+    coordinator.destroy();
+    await coordinator.handleMessage({ preload: 'auto', requestId: 4, src: 'fmp4', type: MainToWorkerMessageType.SOURCE });
+    await flush();
+
+    expect(events).toEqual(['built', 'destroy', 'dispose']);
+    expect(createSdk).toHaveBeenCalledTimes(1);
+    expect(sdk.dispose).toHaveBeenCalledTimes(1);
+    expect(object).not.toHaveBeenCalled();
+    expect(download).not.toHaveBeenCalled();
+    expect(messages.filter((message) => message.type === WorkerToMainMessageType.SOURCE_OK ||
+      message.type === WorkerToMainMessageType.ERROR)).toEqual([]);
+  });
+
+  it.each([false, true])('releases pending and obsolete SDK results after destroy with shared result %s', async (shared) => {
+    const { builds, coordinator, messages, source } = await pendingSdkSession();
+    const first = source(3);
+    const second = source(4, true);
+    await flush();
+    coordinator.destroy();
+    const disposeOld = vi.fn();
+    const disposeLatest = vi.fn();
+    const latest = { ...fakeSiaSdk(new Uint8Array(2048)).sdk, dispose: disposeLatest };
+    builds[1].resolve(latest);
+    builds[0].resolve(shared ? latest : { ...fakeSiaSdk(new Uint8Array(2048)).sdk, dispose: disposeOld } as SiaByteSourceSdk);
+    await Promise.all([first, second]);
+    await flush();
+    expect(disposeOld).toHaveBeenCalledTimes(shared ? 0 : 1);
+    expect(disposeLatest).toHaveBeenCalledTimes(1);
+    expect(messages.filter((message) => message.type === WorkerToMainMessageType.SOURCE_OK ||
+      message.type === WorkerToMainMessageType.ERROR)).toEqual([]);
+  });
+
+  it('keeps a shared SDK owned until destroy and releases it once', async () => {
+    const { builds, coordinator, source } = await pendingSdkSession();
+    const first = source(3);
+    const second = source(4, true);
+    await flush();
+    const dispose = vi.fn();
+    const sdk = { ...fakeSiaSdk(new Uint8Array(2048)).sdk, dispose };
+    builds[1].resolve(sdk);
+    await second;
+    builds[0].resolve(sdk);
+    await first;
+    const third = source(5, true);
+    await flush();
+    builds[2].resolve(sdk);
+    await third;
+    await flush();
+    expect(dispose).not.toHaveBeenCalled();
+    coordinator.destroy();
+    await flush();
+    expect(dispose).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(['throws', 'rejects'] as const)('swallows SDK disposal that %s', async (failure) => {
+    const { builds, coordinator, source } = await pendingSdkSession();
+    const load = source(3);
+    await flush();
+    const dispose = vi.fn(() => {
+      if (failure === 'throws') throw new Error('dispose failed');
+      return Promise.reject(new Error('dispose failed'));
+    });
+    builds[0].resolve({ ...fakeSiaSdk(new Uint8Array(2048)).sdk, dispose } as SiaByteSourceSdk);
+    await load;
+    expect(() => coordinator.destroy()).not.toThrow();
+    await flush();
+    expect(dispose).toHaveBeenCalledTimes(1);
+  });
+
+  it('reuses the SDK after detach and reattach', async () => {
+    const { builds, coordinator, createSdk, source } = await pendingSdkSession();
+    const load = source(3);
+    await flush();
+    const dispose = vi.fn();
+    builds[0].resolve({ ...fakeSiaSdk(new Uint8Array(2048)).sdk, dispose } as SiaByteSourceSdk);
+    await load;
+    await coordinator.handleMessage({ requestId: 4, type: MainToWorkerMessageType.DETACH });
+    await coordinator.handleMessage({ requestId: 5, type: MainToWorkerMessageType.ATTACH });
+    await source(6);
+    expect(createSdk).toHaveBeenCalledTimes(1);
+    expect(dispose).not.toHaveBeenCalled();
+    coordinator.destroy();
+    await flush();
+    expect(dispose).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves a directly injected SDK with its caller and preserves abandonment', async () => {
+    const dispose = vi.fn();
+    const onAbandon = vi.fn();
+    const coordinator = createSiaWorkerComposition({
+      onAbandon,
+      post: () => undefined,
+      sdk: { ...fakeSiaSdk(new Uint8Array(2048)).sdk, dispose } as SiaByteSourceSdk,
+      supportsWorkerMse: () => false,
+    });
+    await coordinator.handleMessage({ requestId: 1, type: MainToWorkerMessageType.DETACH });
+    coordinator.destroy();
+    coordinator.destroy();
+    await flush();
+    expect(onAbandon).toHaveBeenCalledTimes(2);
+    expect(dispose).not.toHaveBeenCalled();
+  });
+
   it.each(['app', 'sharing'] as const)(
     'reuses SDKs when injected handshake getters return fresh equal %s seeds', async (keyType) => {
       const { builds, createSdk, messages, source } = await pendingSdkSession(keyType, true);

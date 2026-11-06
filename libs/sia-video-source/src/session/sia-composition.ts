@@ -192,14 +192,15 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
   const byteSourceOptions: SiaByteSourceFactoryOptions | undefined = onMilestone
     ? { ...byteSource, onMilestone }
     : byteSource;
+  const lazySource = deps.createSdk
+    ? createLazySiaByteSourceFactory({ byteSource: byteSourceOptions, createSdk: deps.createSdk, handshake, logSink })
+    : undefined;
   const createSource: (
     src: string,
     requestId?: null | RequestId,
     sourceKind?: 'app' | 'shared',
     refresh?: boolean,
-  ) => Promise<ByteSource> = deps.createSdk
-    ? createLazySiaByteSourceFactory({ byteSource: byteSourceOptions, createSdk: deps.createSdk, handshake, logSink })
-    : createSiaByteSourceFactory(sdk!, byteSourceOptions);
+  ) => Promise<ByteSource> = lazySource?.createSource ?? createSiaByteSourceFactory(sdk!, byteSourceOptions);
   // Worker MSE is used only when the runtime can construct it in a dedicated
   // worker AND a worker MSE binding is supplied; otherwise the coordinator
   // keeps its default main-mode CHUNK posting sink (the Firefox fallback).
@@ -277,6 +278,7 @@ export function createSiaWorkerComposition(deps: SiaWorkerCompositionDeps): Sess
   // reason it knows at each call site through this existing hook — the most
   // precise fact honestly convertible, never a heuristic guess.
   const onAbandon = (reason?: WorkerAbandonReason): void => {
+    if (reason === 'destroy') lazySource?.destroy();
     if (workerMseSupported && workerMseRoot) workerMseRoot.teardown();
     else deps.onAbandon?.();
     if (loadAccepted) {
@@ -406,12 +408,10 @@ function createLazySiaByteSourceFactory(deps: {
   ) => Promise<SiaByteSourceSdk>;
   readonly handshake: Pick<SessionHandshake, 'config' | 'log' | 'seed' | 'sharingSeed'>;
   readonly logSink?: WorkerLogSink;
-}): (
-  src: string,
-  requestId?: null | RequestId,
-  sourceKind?: 'app' | 'shared',
-  refresh?: boolean,
-) => Promise<ByteSource> {
+}): {
+  createSource: NonNullable<Parameters<typeof createSessionCoordinator>[0]['createSource']>;
+  destroy: () => void;
+} {
   const { byteSource, createSdk, handshake, logSink } = deps;
   let cached: null | {
     config: undefined | WorkerConfig;
@@ -420,6 +420,14 @@ function createLazySiaByteSourceFactory(deps: {
     sharingSeedFingerprint: null | Uint8Array;
   } = null;
 
+  let destroyed = false;
+  const released = new WeakSet<SiaByteSourceSdk>();
+  // Obsolete builds can return the same SDK as the current connection.
+  const release = (sdk: SiaByteSourceSdk): void => {
+    if (sdk === cached?.sdk || released.has(sdk)) return;
+    released.add(sdk);
+    disposeSdk(sdk);
+  };
   let buildGeneration = 0;
   let pending: null | {
     config: undefined | WorkerConfig;
@@ -428,7 +436,8 @@ function createLazySiaByteSourceFactory(deps: {
     sharingSeedFingerprint: null | Uint8Array;
   } = null;
 
-  return async (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared', refresh?: boolean): Promise<ByteSource> => {
+  const createSource = async (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared', refresh?: boolean): Promise<ByteSource> => {
+    if (destroyed) throw new Error('SDK factory destroyed');
     const config = handshake.config;
     const seed = handshake.seed ?? null;
     const sharingSeed = handshake.sharingSeed ?? null;
@@ -460,7 +469,7 @@ function createLazySiaByteSourceFactory(deps: {
         // Coordinator load checks happen after this factory returns. Reject a
         // superseded build here before it can replace or dispose the current SDK.
         if (generation !== buildGeneration) {
-          if (built !== cached?.sdk) disposeSdk(built);
+          release(built);
           throw new Error('SDK build superseded');
         }
         // SDK builds belong to the connection, without an owning SOURCE request.
@@ -469,7 +478,7 @@ function createLazySiaByteSourceFactory(deps: {
         const previous = cached?.sdk;
         cached = { config, sdk: built, seedFingerprint, sharingSeedFingerprint };
         // Defer disposal so a synchronous throw cannot reject the new build.
-        if (previous && previous !== built) queueMicrotask(() => disposeSdk(previous));
+        if (previous && previous !== built) queueMicrotask(() => release(previous));
         return built;
       }).finally(() => {
         // An older rejection must not clear a replacement that is still building.
@@ -478,21 +487,36 @@ function createLazySiaByteSourceFactory(deps: {
       pending = { config, promise, seedFingerprint, sharingSeedFingerprint };
       sdk = await promise;
     }
+    // Destroy can release the cached SDK before the awaiting source resumes.
+    if (destroyed) throw new Error('SDK factory destroyed');
     // The SOURCE requestId travels into the per-load source so its milestones
     // keep the owning load's identity even though the SDK is connection-scoped.
     return createSiaByteSourceFactory(sdk, byteSource)(src, requestId, sourceKind);
   };
+  return {
+    createSource,
+    destroy: () => {
+      if (destroyed) return;
+      destroyed = true;
+      ++buildGeneration;
+      pending = null;
+      const sdk = cached?.sdk;
+      cached = null;
+      if (sdk) release(sdk);
+    },
+  };
 }
 
+/** Calls receiver-dependent SDK teardown and consumes asynchronous failures. */
 function disposeSdk(sdk: unknown): void {
-  const dispose = (sdk as { dispose?: () => unknown }).dispose;
-  if (typeof dispose === 'function') {
-    void Promise.resolve()
-      .then(dispose)
-      .catch(() => {
-        /* best-effort teardown; never propagates */
-      });
-  }
+  void Promise.resolve()
+    .then(() => {
+      const dispose = (sdk as { dispose?: () => unknown }).dispose;
+      if (typeof dispose === 'function') return dispose.call(sdk);
+    })
+    .catch(() => {
+      /* best-effort teardown; never propagates */
+    });
 }
 
 /**
