@@ -12,6 +12,7 @@ export interface MockCredential {
   readonly kind: "app-key" | "registration" | "sharing-key";
 }
 export interface MockRuntime {
+  assertTransport(): void;
   authenticate(credential: MockCredential): BrowserAccess;
   authentication(
     credential: MockCredential,

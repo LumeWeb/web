@@ -1,6 +1,7 @@
 /** Replayable byte fixtures detach caller memory before hashing or opening streams. */
 import type { TestFile } from "./types.js";
-import { boundedByteView } from "./byte-view.js";
+import { ownReaderLifetime } from "./reader-lifetime.js";
+import { boundedByteView, createPayloadSourceValidator } from "./byte-view.js";
 
 export async function bytesFixture(input: {
   bytes: Uint8Array;
@@ -44,15 +45,17 @@ export async function digest(bytes: Uint8Array): Promise<string> {
 export async function readFixture(
   file: TestFile,
   signal: AbortSignal,
+  checkpoint?: (bytes: number) => Promise<void> | void,
+  cleanupError?: (error: unknown) => void,
+  sourcePolicy?: "bounded-payload",
 ): Promise<Uint8Array> {
   signal.throwIfAborted();
+  const validate =
+    sourcePolicy === "bounded-payload"
+      ? createPayloadSourceValidator()
+      : boundedByteView;
   const reader = file.open().getReader();
-  let cancellation: Promise<void> | undefined;
-  const cancel = () => {
-    cancellation ??= reader.cancel(signal.reason);
-    void cancellation.catch(() => undefined);
-  };
-  signal.addEventListener("abort", cancel, { once: true });
+  const lifetime = ownReaderLifetime(reader, signal);
   let complete = false;
   const failures: unknown[] = [];
   let result: Uint8Array | undefined;
@@ -60,19 +63,29 @@ export async function readFixture(
     // The accepted byte length also bounds storage when a source emits arbitrarily many empty chunks.
     const bytes = new Uint8Array(file.sizeBytes);
     let length = 0;
+    const initial = checkpoint?.(0);
+    if (initial) await initial;
     for (;;) {
       signal.throwIfAborted();
-      const next = await reader.read();
+      let next: ReadableStreamReadResult<Uint8Array>;
+      try {
+        next = await reader.read();
+      } catch (error) {
+        lifetime.readFailed(error);
+        throw error;
+      }
       signal.throwIfAborted();
       if (next.done) break;
       let view: Uint8Array;
       try {
-        view = boundedByteView(next.value, file.sizeBytes - length);
+        view = validate(next.value, file.sizeBytes - length);
       } catch {
         throw invalidFile();
       }
       bytes.set(view, length);
       length += view.byteLength;
+      const pending = checkpoint?.(length);
+      if (pending) await pending;
     }
     if (length !== file.sizeBytes) throw invalidFile();
     complete = true;
@@ -82,22 +95,22 @@ export async function readFixture(
   } catch (error) {
     failures.push(error);
   }
-  signal.removeEventListener("abort", cancel);
-  if (!complete) cancel();
-  try {
-    await cancellation;
-  } catch (error) {
-    failures.push(error);
-  } finally {
-    reader.releaseLock();
+  const cancellation = await lifetime.finish(complete, failures[0]);
+  if (cancellation.failed) {
+    failures.push(cancellation.error);
   }
-  if (failures.length === 1) throw failures[0];
-  if (failures.length > 1)
-    throw new AggregateError(
-      failures,
-      "Fixture read and source cancellation failed",
-      { cause: failures[1] },
-    );
+  if (failures.length) {
+    const failure =
+      failures.length === 1
+        ? failures[0]
+        : new AggregateError(
+            failures,
+            "Fixture read and source cancellation failed",
+            { cause: failures[1] },
+          );
+    if (cancellation.failed) cleanupError?.(failure);
+    throw failure;
+  }
   return result!;
 }
 

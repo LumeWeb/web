@@ -1,3 +1,9 @@
+import {
+  createNodePayloadOwner,
+  validatePayloadLimits,
+} from "./node-payload-store.js";
+import { createMockNetworkWithPayloadOwner } from "../sdk/index.js";
+import type { PayloadLimits } from "../sdk/payload-store.js";
 /** Node owns a run's local adapters and fixture descriptors; the portable backend owns storage cleanup. */
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
@@ -14,7 +20,7 @@ import { recoverLiveRun } from "./live/recovery.js";
 import type { LiveConsent } from "./live/types.js";
 import { Readable } from "node:stream";
 import { fileURLToPath } from "node:url";
-import { createMockSia } from "./mock.js";
+import { createMockSia, createMockSiaWithBackend } from "./mock.js";
 import { mockCredential, startMockServer } from "./http.js";
 import type {
   ActorRef,
@@ -46,6 +52,10 @@ export interface MockNodeRunOptions {
     readonly app: AppDefinition;
     readonly kind: "mock";
     readonly options?: MockOptions;
+    readonly payloadStorage?: {
+      readonly kind: "temporary-files";
+      readonly limits: PayloadLimits;
+    };
   };
   readonly limits?: Partial<RunLimits>;
   readonly signal?: AbortSignal;
@@ -188,7 +198,42 @@ export async function withSiaRun<T>(
     throw Object.assign(new Error("Unsupported test backend"), {
       code: "invalid-input",
     });
-  const mock = createMockSia(options.backend.options);
+  const storage = options.backend.payloadStorage;
+  if (storage && storage.kind !== "temporary-files")
+    throw new Error("Unsupported payload storage");
+  const budgets = storage ? validatePayloadLimits(storage.limits) : undefined;
+  if (
+    budgets &&
+    options.limits?.maxLogicalUploadBytes !== undefined &&
+    options.limits.maxLogicalUploadBytes !== budgets.maxLogicalUploadBytes
+  )
+    throw new Error("Run and payload logical budgets must match");
+  const mock = budgets
+    ? createMockSiaWithBackend(options.backend.options, {
+        async create(model) {
+          const owner = await createNodePayloadOwner(budgets);
+          try {
+            return {
+              network: createMockNetworkWithPayloadOwner({ model }, owner),
+              owner,
+            };
+          } catch (error) {
+            try {
+              await owner.close();
+            } catch (cleanup) {
+              // oxlint-disable-next-line preserve-caught-error -- Both construction and cleanup failures remain in errors.
+              throw new AggregateError(
+                [error, cleanup],
+                "Backend construction and cleanup failed",
+                { cause: cleanup },
+              );
+            }
+            throw error;
+          }
+        },
+        limits: budgets,
+      })
+    : createMockSia(options.backend.options);
   const failures: unknown[] = [];
   let result: RunResult<T, MockRunSummary> | undefined;
   try {
