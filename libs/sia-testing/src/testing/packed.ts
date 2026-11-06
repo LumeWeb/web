@@ -1,3 +1,4 @@
+import { ownReaderLifetime } from "./reader-lifetime.js";
 import { collectPayload } from "./streaming-source.js";
 import type { FinishedPayload, PayloadSpool } from "../sdk/payload-store.js";
 /** Bounded direct packed simulation; handles carry session authority, never native crypto state. */
@@ -456,23 +457,11 @@ async function collect(
 ): Promise<Uint8Array> {
   signal.throwIfAborted();
   const reader = stream.getReader();
-  const closed = reader.closed.then(
-    () => ({ failed: false as const }),
-    (error: unknown) => ({ error, failed: true as const }),
-  );
-  let readFailure: undefined | { error: unknown };
-  let cancellation: Promise<void> | undefined;
-  const cancel = (reason: unknown = signal.reason) => {
-    cancellation ??= reader.cancel(reason);
-    void cancellation.catch(() => undefined);
-  };
-  const abort = () => cancel();
-  signal.addEventListener("abort", abort, { once: true });
+  const lifetime = ownReaderLifetime(reader, signal);
   const errors: unknown[] = [];
   let bytes!: Uint8Array;
   let length = 0;
   let complete = false;
-  let cancellationFailed = false;
   try {
     bytes = new Uint8Array();
     const initial = checkpoint(0);
@@ -483,7 +472,7 @@ async function collect(
       try {
         next = await reader.read();
       } catch (error) {
-        readFailure = { error };
+        lifetime.readFailed(error);
         throw error;
       }
       signal.throwIfAborted();
@@ -514,23 +503,9 @@ async function collect(
   } catch (error) {
     errors.push(error);
   }
-  signal.removeEventListener("abort", abort);
-  if (!complete) cancel(errors[0]);
-  try {
-    await cancellation;
-  } catch (error) {
-    const state = await closed;
-    // Producer cancellation closes the reader even when it rejects with the abort reason.
-    // A previously errored reader instead repeats its error without invoking the producer.
-    const repeatedReaderError =
-      (readFailure !== undefined && Object.is(readFailure.error, error)) ||
-      (state.failed && Object.is(state.error, error));
-    if (!repeatedReaderError) {
-      cancellationFailed = true;
-      if (!errors.includes(error)) errors.push(error);
-    }
-  } finally {
-    reader.releaseLock();
+  const cancellation = await lifetime.finish(complete, errors[0]);
+  if (cancellation.failed) {
+    if (!errors.includes(cancellation.error)) errors.push(cancellation.error);
   }
   if (errors.length) {
     const failure =
@@ -540,7 +515,7 @@ async function collect(
             errors,
             "Packed read and source cancellation failed",
           );
-    if (cancellationFailed) cleanupError(failure);
+    if (cancellation.failed) cleanupError(failure);
     throw failure;
   }
   return length === bytes.length ? bytes : bytes.slice(0, length);
