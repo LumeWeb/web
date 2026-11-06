@@ -34,6 +34,7 @@ const base = createSiaTest({
     },
     kind: "mock",
   },
+  limits: { maxObjects: 24 },
 });
 export const test = base.extend<{ egress: Egress; fixture: Fixture }>({
   // Playwright requires destructured parameters for fixtures without dependencies.
