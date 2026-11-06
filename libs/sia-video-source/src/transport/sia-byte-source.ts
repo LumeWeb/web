@@ -148,6 +148,10 @@ export class SiaByteSource implements ByteSource {
     }
 
     const signal = options.signal;
+    if (signal?.aborted) {
+      this.#generationState.settle(handle);
+      return supersededStream(signal.reason);
+    }
     const onAbort = () => handle.stop(signal?.reason);
     signal?.addEventListener('abort', onAbort, { once: true });
 
