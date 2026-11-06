@@ -36,12 +36,6 @@ export interface LiveRunOptions {
   readonly profile: LiveProfile;
   readonly signal?: AbortSignal;
 }
-interface AccessRecord {
-  readonly kind: "owner" | "share";
-  readonly run: LiveRun;
-  readonly seedHex: string;
-  readonly share?: OwnedShare;
-}
 interface OwnedObject {
   deleted: boolean;
   readonly handle: TestObject;
@@ -52,20 +46,6 @@ interface OwnedShare {
   readonly handle: TestShare;
   revoked: boolean;
   readonly seedHex: string;
-}
-const accessRecords = new WeakMap<BrowserAccess, AccessRecord>();
-const liveProfiles = new WeakMap<LiveRun, LiveProfile>();
-const activeRuns = new WeakSet<LiveRun>();
-export function liveCredential(run: LiveRun, access: BrowserAccess) {
-  const record = accessRecords.get(access);
-  if (!record || record.run !== run) throw failure("foreign-handle");
-  if (!activeRuns.has(run)) throw failure("closed");
-  if (record.share?.revoked) throw failure("denied");
-  return {
-    apiBaseUrl: profileDocument(liveProfiles.get(run)!).apiBaseUrl,
-    kind: record.kind,
-    seedHex: record.seedHex,
-  };
 }
 export async function withLiveRun<T>(
   options: LiveRunOptions,
@@ -375,12 +355,6 @@ export async function withLiveRun<T>(
                 }) as TestShare;
                 record = { handle, revoked: false, seedHex: result.seedHex };
                 shares.set(handle, record);
-                accessRecords.set(access, {
-                  kind: "share",
-                  run: run!,
-                  seedHex: result.seedHex,
-                  share: record,
-                });
               },
             );
             for (const object of attached) await attach(record, object);
@@ -424,16 +398,12 @@ export async function withLiveRun<T>(
         },
       } satisfies ManagedShares,
     });
-    activeRuns.add(run);
-    liveProfiles.set(run, options.profile);
-    accessRecords.set(ownerAccess, { kind: "owner", run, seedHex: credential });
     value = await abortable(use(run), signal);
     await abortable(Promise.all([...pending]), signal);
   } catch (error) {
     errors.push(error);
   }
   opened = false;
-  if (run) activeRuns.delete(run);
   execution.abort();
   clearTimeout(timer);
   try {
