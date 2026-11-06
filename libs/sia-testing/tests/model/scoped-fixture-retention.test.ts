@@ -14,6 +14,7 @@ it("empty fixture chunks do not accumulate while the source is unfinished", asyn
     for (const [sourceName, output] of [
       ["files.ts", target],
       ["byte-view.ts", join(directory, "byte-view.js")],
+      ["reader-lifetime.ts", join(directory, "reader-lifetime.js")],
     ] as const) {
       const source = await readFile(resolve("src/testing", sourceName), "utf8");
       const compiled = ts.transpileModule(source, {

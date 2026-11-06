@@ -150,6 +150,7 @@ async function checkPackage(unpacked, directory) {
     await linkDependency(consumer, name);
 
   runNode(consumer, ["without-msw.mjs"]);
+  runNode(consumer, ["packed.mjs"]);
 
   await linkDependency(consumer, "@types/node");
   const tsc = require.resolve("typescript/bin/tsc");
@@ -191,6 +192,21 @@ async function checkPackage(unpacked, directory) {
     if (!allowedTypes.some((root) => file.startsWith(root + sep)))
       throw new Error(`declaration outside packed consumer ${file}`);
   }
+
+  await linkDependency(consumer, "@siafoundation/sia-storage");
+  const sdkMetadata = /** @type {{ version: string }} */ (
+    JSON.parse(
+      await readFile(
+        join(consumer, "node_modules/@siafoundation/sia-storage/package.json"),
+        "utf8",
+      ),
+    )
+  );
+  const sdkVersion = sdkMetadata.version;
+  if (sdkVersion !== "0.1.4")
+    throw new Error(`Unchecked storage SDK ${sdkVersion}`);
+  runNode(consumer, [tsc, "-p", "tsconfig.packed-node.json"]);
+  runNode(consumer, [tsc, "-p", "tsconfig.packed-browser.json"]);
 
   await linkDependency(consumer, "msw");
   await linkDependency(consumer, "@playwright/test");

@@ -13,6 +13,7 @@
  * and lets the caller own SDK registration.
  */
 
+import { redactUrls } from './redact-urls.ts';
 import type { Slab } from '@siafoundation/sia-storage';
 import { type RequestId, workerLogEventName } from './protocol.ts';
 
@@ -741,7 +742,7 @@ function entryKey(objectId: string, offset: number, length: number): string {
 
 /** Scalar, log-safe rendering of a caught failure for a `read.retry` milestone. */
 function errorDescription(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
+  return redactUrls(error instanceof Error ? error.message : String(error));
 }
 
 /**

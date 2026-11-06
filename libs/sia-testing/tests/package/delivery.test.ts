@@ -128,7 +128,19 @@ beforeEach(async () => {
       interface ReadSelector { actor?: object; operation: "download" | "object" | "objects" | "owner-share" | "owner-share-objects" | "owner-shares"; }
       interface MutationSelector { actor?: object; operation: "delete" | "pin" | "upload"; stage: "beforeCommit"; }
       interface Hold { release(): void; started(): Promise<{actorLabel: string}>; cancelled(): Promise<{actorLabel: string}>; }
+      declare const packedBrand: unique symbol;
+      export interface PackedAppKey { readonly [packedBrand]: "key"; }
+      export interface PackedObject { readonly [packedBrand]: "object"; id(): string; updateMetadata(bytes: Uint8Array): void; seal(key: PackedAppKey): void; }
+      export interface PackedOptions { dataShards?: number; parityShards?: number; maxBufferedSlabs?: number; }
+      export interface PackedSdk<P extends "node" | "browser"> {
+        appKey(): PackedAppKey;
+        pinObject(object: PackedObject): Promise<void>;
+        updateObjectMetadata(object: PackedObject): Promise<void>;
+        close(): Promise<void>;
+        uploadPacked(options?: PackedOptions): { add(stream: ReadableStream<Uint8Array>): Promise<P extends "node" ? bigint : number>; finalize(): Promise<PackedObject[]>; };
+      }
       export interface MockSia {
+        packedSdk<P extends "node" | "browser">(options: { access: object; as: object; platform: P; maxBytes: number; maxObjects: number }): PackedSdk<P>;
         faults: {
           fail(selector: ReadSelector, options: {code: "denied" | "not-found" | "unavailable"; times: number}): void;
           hold(selector: ReadSelector): Hold;
@@ -154,7 +166,7 @@ beforeEach(async () => {
         const losses = new Map();
         const reply = operation => {
           const remaining = losses.get(operation) || 0;
-          if (remaining) { losses.set(operation, remaining - 1); throw new Error("Fixture network failure"); }
+          if (remaining) { losses.set(operation, remaining - 1); throw Object.assign(new Error("Fixture network failure"), {code: operation === "metadata" ? "unavailable" : undefined}); }
         };
         let share;
         const ownerShares = () => ({
@@ -163,7 +175,29 @@ beforeEach(async () => {
           objects: async () => ({items: share.objects.map(({id, metadata, sizeBytes}) => ({id, metadata, sizeBytes}))}),
           close: async () => {}
         });
-        const mock = { data, rows: [], history: () => mock.rows, ownerShares, reply, mutationFaults: { loseReply: (selector, options) => losses.set(selector.operation, options.times) }, publish: async () => { mock.published = [...data.values()].filter(object => object.state !== "uploaded"); }, actor: () => ({}), close: async () => {}, async run(_options, use) {
+        const mock = { data, application: () => ({
+          upload: async ({file, metadata}) => {const id = String(data.size); const object = {id}; data.set(id, {id, bytes: file.bytes, sizeBytes: file.sizeBytes, metadata}); return object;},
+          pin: async () => {}, close: async () => {}
+        }), packedSdk: ({platform}) => {
+          const owned = new WeakSet();
+          const key = {};
+          return {
+            appKey: () => key, close: async () => {},
+            pinObject: async object => { if (!owned.has(object)) throw Object.assign(new Error("Foreign object"), {code: "foreign-handle"}); },
+            updateObjectMetadata: async object => { mock.reply("metadata"); data.get(object.id()).metadata = object.metadata; },
+            uploadPacked: () => {
+              const inputs = [];
+              return {
+                add: async stream => { const bytes = await new Response(stream).bytes(); inputs.push(bytes); return platform === "node" ? BigInt(bytes.length) : bytes.length; },
+                finalize: async () => inputs.map(bytes => {
+                  const id = String(data.size);
+                  const object = { id: () => id, updateMetadata(metadata) { object.metadata = metadata; }, seal: () => {} };
+                  owned.add(object); data.set(id, {id, bytes, sizeBytes: bytes.length, metadata: new Uint8Array()}); return object;
+                })
+              };
+            }
+          };
+        }, rows: [], history: () => mock.rows, ownerShares, reader: () => ({ object: async id => data.get(id), download: async (record, range = {}) => new Blob([data.get(record.id).bytes.subarray(range.offset || 0, range.length === undefined ? undefined : (range.offset || 0) + range.length)]).stream(), close: async () => {} }), reply, mutationFaults: { fail: (selector, options) => losses.set(selector.operation, options.times), loseReply: (selector, options) => losses.set(selector.operation, options.times) }, publish: async () => { mock.published = [...data.values()].filter(object => object.state !== "uploaded"); }, actor: () => ({}), close: async () => {}, async run(_options, use) {
           const run = {mock, shares: {create: async (input) => (share = input), grant: async (share, input) => ({share, ...input}), revokeGrant: async grant => { grant.revoked = true; }}, ownerAccess: {}, objects: {async upload({file, metadata}) {
             const object = { id: String(data.size), sizeBytes: file.sizeBytes, metadata, bytes: file.bytes };
             data.set(object.id, object); return object;
@@ -173,8 +207,17 @@ beforeEach(async () => {
       }`,
     "msw.d.ts": `import type { HttpHandler } from "msw"; export declare function createMockHandlers(mock: unknown, options: {baseUrl: string}): {handlers: HttpHandler[]};`,
     "msw.js": `import {http} from "msw"; export const createMockHandlers = () => ({handlers: [http.get("*", () => new Response())]});`,
-    "node.d.ts": `import type { MockRun } from "./mock.js"; export declare function withSiaRun<T>(options: unknown, use: (run: MockRun) => Promise<T>): Promise<{value: T}>;`,
-    "node.js": `import {createMockSia} from "./mock.js"; export const withSiaRun = (options, use) => createMockSia().run(options, use);`,
+    "node.d.ts": `import type { MockRun } from "./mock.js"; export declare function withSiaRun<T>(options: {backend: {kind: "mock"; app: unknown; payloadStorage?: {kind: "temporary-files"; limits: {maxObjectBytes: number; maxLogicalUploadBytes: number; maxRetainedBytes: number; maxUploadAttempts: number}}}; limits?: {maxLogicalUploadBytes?: number}}, use: (run: MockRun) => Promise<T>): Promise<{value: T}>;`,
+    "node.js": `import {createMockSia} from "./mock.js"; export const withSiaRun = async (options, use) => {
+      const storage = options.backend?.payloadStorage;
+      if (storage && (storage.limits.maxUploadAttempts > 16 || options.limits && options.limits.maxLogicalUploadBytes !== storage.limits.maxLogicalUploadBytes)) throw Error("invalid storage limits");
+      const mock = createMockSia();
+      if (storage) {
+        const packedSdk = mock.packedSdk;
+        mock.packedSdk = options => { if (options.platform !== "node") throw Error("Node required"); return packedSdk(options); };
+      }
+      return mock.run(options, use);
+    };`,
     "playwright.d.ts": `import {test} from "@playwright/test"; export declare function createSiaTest(options: unknown): typeof test;`,
     "playwright.js": `import {test} from "@playwright/test"; export const createSiaTest = () => test;`,
   };
@@ -392,4 +435,18 @@ test("rejects a Node declaration that resolves checkout-only types", async () =>
   const result = check();
   expect(result.status).toBe(1);
   expect(result.output).toContain("declaration outside packed consumer");
+}, 60000);
+
+test("rejects Node-shaped counts advertised as browser packed counts", async () => {
+  const file = join(packed, "dist/esm/mock.d.ts");
+  const original = await readFile(file, "utf8");
+  await writeFile(
+    file,
+    original.replace('P extends "node" ? bigint : number', "bigint"),
+  );
+  const result = check();
+  expect(result.status).toBe(1);
+  expect(result.output).toContain(
+    "Type 'bigint' is not assignable to type 'number'",
+  );
 }, 60000);

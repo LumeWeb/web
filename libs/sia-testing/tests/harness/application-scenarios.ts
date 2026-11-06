@@ -1,7 +1,7 @@
 /** Every advertised adapter runs these state changes against the owned model. */
 import { foreignMetadata } from "./foreign-metadata.js";
 import { expect, it, vi } from "vitest";
-import { bytesFixture, createMockSia } from "../../src/mock.js";
+import { bytesFixture, chunkedFixture, createMockSia } from "../../src/mock.js";
 import type {
   ActorRef,
   ApplicationPort,
@@ -22,6 +22,108 @@ export function applicationScenarios(
   ) => Promise<{ close: () => Promise<void>; writer: ApplicationPort }>,
   transport = false,
 ) {
+  it("collection holds and finite failures share the admitted backend upload path", async () => {
+    const mock = createMockSia();
+    try {
+      await mock.run({ app }, async (run) => {
+        const actor = mock.actor("collect-writer");
+        const { close, writer } = await connect(mock, run, actor);
+        try {
+          const file = await chunkedFixture({
+            chunkSizeBytes: 3,
+            name: "chunks",
+            pattern: Uint8Array.of(1, 2),
+            sizeBytes: 7,
+          });
+          const hold = mock.mutationFaults.hold({
+            actor,
+            afterBytes: 2,
+            operation: "upload",
+            stage: "collect",
+          });
+          const uploading = writer.upload({ file, metadata: new Uint8Array() });
+          const started = await hold.started();
+          expect(started.stage).toBe("collect");
+          expect(started.bytes).toBeGreaterThanOrEqual(2);
+          expect(started.bytes).toBeLessThanOrEqual(7);
+          expect(
+            mock.history().filter((row) => row.operation === "upload"),
+          ).toHaveLength(0);
+          hold.release();
+          const object = await uploading;
+          expect(await writer.inspect(object)).toBe("uploaded");
+          mock.mutationFaults.fail(
+            { actor, afterBytes: 1, operation: "upload", stage: "collect" },
+            { code: "unavailable", times: 1 },
+          );
+          await expect(
+            writer.upload({ file, metadata: new Uint8Array() }),
+          ).rejects.toMatchObject({ code: "unavailable" });
+          const retry = await writer.upload({
+            file,
+            metadata: new Uint8Array(),
+          });
+          expect(retry.id).not.toBe(object.id);
+          expect(
+            mock.history().filter((row) => row.operation === "upload"),
+          ).toHaveLength(2);
+        } finally {
+          await writer.close();
+          await close();
+        }
+      });
+    } finally {
+      await mock.close();
+    }
+  });
+  it("a producer AggregateError is not a source cleanup failure and leaves collection faults armed", async () => {
+    const mock = createMockSia();
+    try {
+      await mock.run({ app }, async (run) => {
+        const actor = mock.actor("producer-error");
+        const { close, writer } = await connect(mock, run, actor);
+        try {
+          const sourceFailure = new AggregateError(
+            [new Error("producer")],
+            "Producer aggregate",
+          );
+          const file = await bytesFixture({
+            bytes: Uint8Array.of(1),
+            name: "error",
+          });
+          mock.mutationFaults.fail(
+            { actor, afterBytes: 1, operation: "upload", stage: "collect" },
+            { code: "unavailable", times: 1 },
+          );
+          await expect(
+            writer.upload({
+              file: {
+                ...file,
+                open: () =>
+                  new ReadableStream(
+                    {
+                      pull(c) {
+                        c.error(sourceFailure);
+                      },
+                    },
+                    { highWaterMark: 0 },
+                  ),
+              },
+              metadata: new Uint8Array(),
+            }),
+          ).rejects.toBe(sourceFailure);
+          await expect(
+            writer.upload({ file, metadata: new Uint8Array() }),
+          ).rejects.toMatchObject({ code: "unavailable" });
+          await expect(writer.close()).resolves.toBeUndefined();
+        } finally {
+          await close();
+        }
+      });
+    } finally {
+      await mock.close();
+    }
+  });
   it("quota rejection preserves staged bytes and upload metadata for a later pin", async () => {
     const mock = createMockSia({ quotaBytes: 1 });
     try {
