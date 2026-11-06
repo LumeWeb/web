@@ -237,6 +237,15 @@ it("keeps caught zero-byte unlink residue charged and reports it again at final 
   const failure = new Error("injected unlink rejection");
   let owner!: Awaited<ReturnType<typeof createNodePayloadOwner>>;
   let calls = 0;
+  let callbackCompleted = false;
+  let portClosed = false;
+  const errors: unknown[] = [];
+  const checkFailure = (error: unknown): void => {
+    if (error instanceof AggregateError) {
+      expect(error.errors.length).toBeGreaterThan(0);
+      for (const leaf of error.errors) checkFailure(leaf);
+    } else expect(error).toBe(failure);
+  };
   const mock = createMockSiaWithBackend(
     {},
     {
@@ -274,7 +283,12 @@ it("keeps caught zero-byte unlink residue charged and reports it again at final 
             }),
             metadata: new Uint8Array(),
           });
-          await expect(port.delete(object)).rejects.toBeTruthy();
+          const deletion = await port.delete(object).then(
+            () => ({ error: undefined as unknown, failed: false }),
+            (error: unknown) => ({ error, failed: true }),
+          );
+          expect(deletion.failed).toBe(true);
+          checkFailure(deletion.error);
           expect(await port.inspect(object)).toBe("missing");
           expect(owner.resources()).toMatchObject({
             entries: 1,
@@ -282,24 +296,59 @@ it("keeps caught zero-byte unlink residue charged and reports it again at final 
             writers: 0,
           });
           expect(await fs.readdir(owner.root)).toHaveLength(1);
+          callbackCompleted = true;
+        } catch (error) {
+          errors.push(error);
         } finally {
-          await port.close();
+          try {
+            await port.close();
+            portClosed = true;
+          } catch (error) {
+            errors.push(error);
+          }
         }
       })
       .then(
         () => ({ error: undefined as unknown, failed: false }),
         (error: unknown) => ({ error, failed: true }),
       );
+    if (!callbackCompleted || !portClosed) errors.push(result.error);
+    expect(callbackCompleted).toBe(true);
+    expect(portClosed).toBe(true);
     expect(result.failed).toBe(true);
+    checkFailure(result.error);
     expect(contains(result.error)).toBe(true);
     expect(calls).toBe(1);
+  } catch (error) {
+    errors.push(error);
   } finally {
-    await mock.close();
-    // Only the deliberate failed-unlink residue is removed by the test after error assertions.
-    for (const name of await fs.readdir(owner.root))
-      await fs.unlink(`${owner.root}/${name}`);
-    await fs.rmdir(owner.root);
+    try {
+      await mock.close();
+    } catch (error) {
+      errors.push(error);
+    }
+    try {
+      await owner?.close();
+    } catch (error) {
+      try {
+        checkFailure(error);
+        expect(contains(error)).toBe(true);
+      } catch (unexpected) {
+        errors.push(unexpected);
+      }
+    }
+    // Failed unlink leaves a file owned by this test after both cleanup attempts.
+    if (owner) {
+      try {
+        for (const name of await fs.readdir(owner.root))
+          await fs.unlink(`${owner.root}/${name}`);
+        await fs.rmdir(owner.root);
+      } catch (error) {
+        errors.push(error);
+      }
+    }
   }
+  if (errors.length) throw new AggregateError(errors, "Unlink test failed");
 });
 
 it("keeps the actual committed token and receipt when SDK delivery aborts after adoption", async () => {
