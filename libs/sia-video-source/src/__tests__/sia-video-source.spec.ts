@@ -1887,12 +1887,18 @@ describe('availability (shard-shortage) failure recovery', () => {
     host.destroy();
   });
 
-  it.skipIf(!IN_BROWSER).each([workerErrorCode.shardShortage, workerErrorCode.readStalled])(
-    'reports $0 when the source fails before load acceptance',
-    (kind) => {
+  it.skipIf(!IN_BROWSER).each([
+    { kind: workerErrorCode.shardShortage, paused: false },
+    { kind: workerErrorCode.shardShortage, paused: true },
+    { kind: workerErrorCode.readStalled, paused: false },
+    { kind: workerErrorCode.readStalled, paused: true },
+  ])(
+    'reports $kind before load acceptance with paused=$paused',
+    ({ kind, paused }) => {
       const { host, target, worker } = attachAndHandshake();
       try {
         host.src = 'k';
+        if (paused) target.dispatchEvent(new Event('pause'));
         const requestId = newestSourceId(worker);
         worker.sent.length = 0;
         worker.reply({

@@ -79,6 +79,22 @@ describe.each([hostReportKind.shardShortage, hostReportKind.readStalled])('faile
     expect(machine.repairOwed).toBeNull();
   });
 
+  it('reports a paused opening failure and keeps repair for explicit play', () => {
+    const machine = fresh();
+    machine.send({ type: hostPlaybackEvent.sourceSet });
+    machine.send({ type: hostPlaybackEvent.pause });
+    expect(machine.preference).toBe(playbackPreference.paused);
+    expect(machine.send({ kind, resumeSeconds: 0, type: hostPlaybackEvent.loadFailed })).toEqual([
+      { error: kind, kind: hostDecisionKind.reportError },
+    ]);
+    expect(machine.current).toBe(hostPlaybackState.failed);
+    expect(machine.attempt).toBe(0);
+    expect(machine.repairOwed).toEqual({ reason: kind, seconds: 0 });
+    expect(machine.send({ type: hostPlaybackEvent.play })).toEqual([
+      { kind: hostDecisionKind.restartSource, reason: kind, resumeSeconds: 0, wantsPlay: true },
+    ]);
+  });
+
   it('reports a repeated opening failure after explicit reload and clears repair on replacement', () => {
     const machine = fresh();
     for (let opening = 0; opening < 2; opening++) {

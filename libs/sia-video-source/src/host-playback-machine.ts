@@ -743,7 +743,7 @@ function activeLoadTransitions(
       hostPlaybackEvent.loadFailed,
       hostPlaybackState.failed,
       guard((ctx: HostPlaybackState, event: MachineEvent) =>
-        self === hostPlaybackState.loading && isNeverStarted(ctx) &&
+        self === hostPlaybackState.loading && (isNeverStarted(ctx) || isPaused(ctx)) &&
         event.type === hostPlaybackEvent.loadFailed &&
         (event.kind === hostReportKind.shardShortage || event.kind === hostReportKind.readStalled)),
       recordExhausted(reasonForLoadFailure, kindForLoadFailure),
