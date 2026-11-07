@@ -12,6 +12,7 @@ export type {
   LiveRun,
   LiveRunSummary,
   MockRun,
+  RunLimits,
   RunResult,
   RunSummary,
   SiaRun,

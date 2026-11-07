@@ -5,9 +5,9 @@ import {
   type MockNodeRunOptions,
   ownRunResource,
   withSiaRun,
-} from "./node.js";
-import type { ActorRef, BrowserAccess, MockRun } from "./types.js";
-import type { privateConnection } from "./node.js";
+} from "../../../src/testing/node.js";
+import type { ActorRef, BrowserAccess, MockRun } from "../../../src/testing/types.js";
+import type { privateConnection } from "../../../src/testing/node.js";
 export interface BrowserBinding {
   readonly access: BrowserAccess;
   readonly apply: (

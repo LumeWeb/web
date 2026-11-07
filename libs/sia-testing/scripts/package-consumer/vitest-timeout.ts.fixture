@@ -1,4 +1,6 @@
 /** Expected failures confirm that test cancellation stops held package calls, not unrelated promises. */
+import { test } from "vitest";
+import { createMockSia } from "@lumeweb/sia-testing/mock";
 siaTest("timeout cancels a held fixture read", async ({ sia, onTestFinished, signal }) => {
   const actor = sia.mock.actor("held timeout");
   const reader = sia.mock.reader({ access: sia.ownerAccess, as: actor });
@@ -7,6 +9,9 @@ siaTest("timeout cancels a held fixture read", async ({ sia, onTestFinished, sig
     expect(signal.aborted).toBe(true);
     expect(await hold.cancelled()).toMatchObject({ status: "cancelled" });
     await reader.close();
+    const file = await bytesFixture({ name: "closed", bytes: Uint8Array.of(1) });
+    await expect(sia.objects.upload({ file, metadata: new Uint8Array() })).rejects.toMatchObject({ code: "closed" });
+    console.log("FIXTURE_CLOSED");
     console.log("HELD_CALL_CANCELLED");
   });
   await reader.objects({ offset: 0, limit: 10 });

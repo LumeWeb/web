@@ -33,9 +33,9 @@
       "types": "./dist/esm/msw.d.ts",
       "import": "./dist/esm/msw.js"
     },
-    "./playwright": {
-      "types": "./dist/esm/playwright.d.ts",
-      "import": "./dist/esm/playwright.js"
+    "./vitest": {
+      "types": "./dist/esm/vitest.d.ts",
+      "import": "./dist/esm/vitest.js"
     },
     "./package.json": "./package.json"
   },
@@ -44,6 +44,7 @@
     "check-types": "tsc --noEmit && tsc --noEmit -p tsconfig.native.json",
     "lint": "oxlint src tests scripts",
     "test": "vitest run --project unit",
+    "test:vitest-browser": "node scripts/check-vitest-browser.mjs",
     "test:browser": "playwright test --config playwright.ci.config.ts && playwright test --config playwright.loopback.config.ts",
     "test:native:helpers": "vitest run --project native-helpers",
     "test:native:control": "pnpm run build && vitest run --project native-control",
@@ -52,15 +53,15 @@
     "test:mutation": "node scripts/mutation-regression.mjs"
   },
   "peerDependencies": {
-    "@playwright/test": "^1.61.1",
     "@siafoundation/sia-storage": "0.1.4",
-    "msw": "^2.14.6"
+    "msw": "^2.14.6",
+    "vitest": "^4.1.9"
   },
   "peerDependenciesMeta": {
     "@siafoundation/sia-storage": {
       "optional": true
     },
-    "@playwright/test": {
+    "vitest": {
       "optional": true
     },
     "msw": {
@@ -73,6 +74,7 @@
     "@playwright/test": "^1.61.1",
     "@siafoundation/sia-storage": "0.1.4",
     "@types/node": "catalog:",
+    "@vitest/browser-playwright": "catalog:",
     "happy-dom": "catalog:",
     "jsdom": "29.1.1",
     "msw": "catalog:",

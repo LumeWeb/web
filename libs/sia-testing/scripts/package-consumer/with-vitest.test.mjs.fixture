@@ -1,0 +1,6 @@
+/** Packed exports retain native extension and lazy fixture behavior. */
+import { expect } from "vitest";
+import { createSiaTest } from "@lumeweb/sia-testing/vitest";
+const test = createSiaTest({ backend: { kind: "mock", app: { id: "a".repeat(64), name: "Packed", description: "Public fixture", serviceUrl: "https://example.invalid" } } });
+const extended = test.extend({ label: async ({ sia }, use) => { expect(sia).toBeDefined(); await use("public"); } });
+extended("extends the packed factory", ({ sia, label }) => { expect(sia).toBeDefined(); expect(label).toBe("public"); expect(sia.browser).toBeUndefined(); });

@@ -80,13 +80,7 @@ export async function checkVitestDocs(packed, directory) {
     env: environment,
     timeout: 60_000,
   };
-  // Use the documented fixture unchanged except for a cleanup confirmation after its final close.
-  const prefix = selected.fixture
-    .split("for (const label of")[0]
-    .replace(
-      "    } finally {\n      await mock.close();",
-      '    } finally {\n      await mock.close();\n      console.log("FIXTURE_CLOSED");',
-    );
+  const prefix = selected.fixture.split("for (const label of")[0];
   await writeFile(
     join(consumer, "timeout.expected.ts"),
     prefix +

@@ -289,15 +289,16 @@ responses. The Fetch-backed ports consume JSON response bodies; their `close()`
 aborts pending Fetch calls. For a raw Fetch response, consume its body or cancel
 `response.body`; if the stream is locked, cancel its reader instead. For Node
 `http`, drain the response with `resume()` or destroy the response and client.
-The Playwright binding factory closes its owned binding resources and private
-contexts before the listener. External clients remain responsible for their own
-response lifetimes.
+Playwright consumers must close their contexts before the listener. External
+clients remain responsible for their own response lifetimes.
 
 ## Connect applications
 
 `endpoint.connection({ access, as })` materializes a fake mock credential for an application adapter. Pass the application's current credential to `createMockReader`; a recipient endpoint rejects owner-key substitution. `createMockAuth` accepts the connection's credential or an explicit credential. Requests use the driver's approval state rather than injecting connected UI state.
 
-Playwright bindings receive connection data in `apply(page, privateConnection)` and configure the app before navigation. The factory closes binding resources and private contexts before deleting run objects. Do not put credentials in test configuration.
+Playwright tests compose `/node` `withSiaRun` with `/http` `startMockServer` and their own contexts. Install `endpoint.connection({ access, as }).credential` before navigation. Close contexts before the endpoint, then return from the managed run. Do not put credentials in test configuration.
+
+`/vitest` exports `createSiaTest`, a native Vitest `TestAPI<SiaTestFixtures>`. Each test requesting `sia` owns a fresh portable `MockRun`; fixture extension uses Vitest's `test.extend`. The runner signal and optional external signal cancel owned mock work. A shared external signal cancels all its users. The fixture does not own pages, listeners or arbitrary caller promises.
 
 The low-level fixture, model, and SDK exports and the `/msw/node` wrapper are not available. There are no compatibility aliases.
 
@@ -559,7 +560,7 @@ An explicit run logical allowance must equal the storage logical allowance.
 Omitting storage options preserves buffered mode and its existing defaults.
 
 This mode supports direct application calls and packed SDK sessions with
-`platform: "node"`. HTTP, MSW, Playwright bindings and browser-shaped packed
+`platform: "node"`. HTTP, MSW and browser-shaped packed
 sessions reject. Fixture factory limits, metadata policies, authority and
 mock slab layout do not change. This is Node simulation, not native packing,
 streaming Fetch or browser storage.

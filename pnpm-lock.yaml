@@ -2681,6 +2681,9 @@ importers:
       '@types/node':
         specifier: ^26.1.0
         version: 26.1.0
+      '@vitest/browser-playwright':
+        specifier: 'catalog:'
+        version: 4.1.9(msw@2.14.6(@types/node@26.1.0)(typescript@6.0.3))(playwright@1.61.1)(vite@8.0.16)(vitest@4.1.9)
       happy-dom:
         specifier: 'catalog:'
         version: 20.10.6

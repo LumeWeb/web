@@ -1,7 +1,8 @@
-/** Executes every declared export after the optional MSW peer is installed. */
+/** Loads non-runner exports after their optional peers are installed. */
 import metadata from "@lumeweb/sia-testing/package.json" with { type: "json" };
 
 for (const entry of Object.keys(metadata.exports)) {
+  if (entry === "./vitest") continue;
   const specifier = metadata.name + entry.slice(1);
   await import(
     specifier,

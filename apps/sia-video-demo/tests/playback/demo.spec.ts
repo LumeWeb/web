@@ -11,22 +11,10 @@ declare global {
 
 test("an account can play a managed video after registration and reconnect", async ({
   fixture,
+  registration,
   sia,
 }) => {
-  let url = "";
-  const page = await sia.browser.open({
-    access: sia.auth.registrationAccess,
-    async apply(page, connection) {
-      url = new URL(
-        `${connection.backend.connection.client}/`,
-        connection.backend.connection.url,
-      ).href;
-      await page.addInitScript((credential) => {
-        window.__siaDemoTest = { credential };
-      }, connection.backend.credential);
-    },
-    mockActor: fixture.actor,
-  });
+  const { page, url } = registration;
   await openDemo(page, { ...fixture, url });
   await page
     .getByRole("button", { exact: true, name: "Sign in with your Sia account" })
@@ -87,18 +75,12 @@ test("a well-formed unknown sharing seed cannot list the fixture", async ({
 });
 
 test("an owner credential cannot replace the sharing seed in the recipient UI", async ({
+  endpoint,
   fixture,
   page,
   sia,
 }) => {
-  let key = "";
-  await sia.browser.open({
-    access: sia.ownerAccess,
-    apply(_page, connection) {
-      key = connection.backend.credential.keyHex;
-      return Promise.resolve();
-    },
-  });
+  const key = endpoint.connection({ access: sia.ownerAccess, as: fixture.actor }).credential.keyHex;
   await openDemo(page, fixture);
   await page.getByLabel("Sharing link or key", { exact: true }).fill(key);
   await page.getByRole("button", { exact: true, name: "Apply" }).click();

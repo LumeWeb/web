@@ -218,8 +218,8 @@ beforeEach(async () => {
       }
       return mock.run(options, use);
     };`,
-    "playwright.d.ts": `import {test} from "@playwright/test"; export declare function createSiaTest(options: unknown): typeof test;`,
-    "playwright.js": `import {test} from "@playwright/test"; export const createSiaTest = () => test;`,
+    "vitest.d.ts": `import type { TestAPI } from "vitest"; import type { MockRun } from "./mock.js"; export interface SiaTestFixtures { readonly sia: MockRun } export type SiaTest = TestAPI<SiaTestFixtures>; export declare function createSiaTest(options: unknown): SiaTest;`,
+    "vitest.js": `import {test} from "vitest"; export const createSiaTest = () => test.extend({ sia: async ({}, use) => { await use({}); } });`,
   };
   for (const [path, content] of Object.entries(files)) {
     const file = join(packed, "dist/esm", path);
@@ -372,7 +372,7 @@ test("rejects a declaration that breaks the typed consumer", async () => {
   expect(result.status).not.toBe(0);
   expect(result.output).toContain("This expression is not callable");
 }, 60000);
-test.each(["msw.js", "playwright.js"])(
+test.each(["msw.js", "vitest.js"])(
   "rejects %s when it no longer requires the optional peer",
   async (entry) => {
     await writeFile(
@@ -385,7 +385,7 @@ test.each(["msw.js", "playwright.js"])(
   },
   60000,
 );
-test.each(["msw.js", "playwright.js"])(
+test.each(["msw.js", "vitest.js"])(
   "imports %s with the installed peer",
   async (entry) => {
     await append(
