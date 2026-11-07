@@ -45,6 +45,7 @@ import { ByteSourceSupersededError } from '../transport/byte-source.ts';
 import type { ContainerKind, PlaybackTrack } from './types.ts';
 import { mediaLibrarySource } from './library-source.ts';
 import { describeError } from '../shared-helpers.ts';
+import { isReadStalledError, isShardShortageError, isTransportReadError } from '../ranged-reader.ts';
 
 /** Minimum media-fragment duration in seconds; fragments break on keyframes. */
 const DEFAULT_FRAGMENT_SECONDS = 1;
@@ -228,7 +229,8 @@ class MseProbeFailure extends Error {}
  * with a stable reason for an object with no video track, with
  * codecs the MSE rejects, or with tracks a forced copy cannot place in CMAF;
  * `cancelled` when the reads were superseded or aborted; and `ready` with a
- * runnable playback otherwise.
+ * runnable playback otherwise. Read failures reject so the session can retain
+ * their transport error kinds.
  */
 export async function inspectMediaLibrary(
   source: ByteSource,
@@ -253,7 +255,13 @@ export async function inspectMediaLibrary(
   try {
     result = await prepareLoad(input, capabilities, producerGate, checkMime);
   } catch (error) {
-    if (error instanceof MseProbeFailure) {
+    // Read failures describe object availability, so treating them as format
+    // failures would hide the recovery kind from the host.
+    if (
+      error instanceof MseProbeFailure ||
+      (!isCancelledError(error) &&
+        (isReadStalledError(error) || isTransportReadError(error) || isShardShortageError(error)))
+    ) {
       input.dispose();
       throw error;
     }

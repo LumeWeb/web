@@ -746,13 +746,18 @@ function errorDescription(error: unknown): string {
 }
 
 /**
- * True when the caught error is the stall watchdog's own rejection, which
- * already fired `read.stalled` — the run's catch must not re-report it as a
- * generic `read.error`. Coupled to the message this module itself raises in
- * `#readWithStallWatchdog`, never to an SDK-provided string.
+ * The watchdog already emitted `read.stalled`; recognize its rejection through
+ * wrappers to avoid a second `read.error` and preserve the host recovery kind.
  */
-export function isReadStalledError(error: unknown): error is ReadStalledError {
-  return error instanceof ReadStalledError;
+export function isReadStalledError(error: unknown): boolean {
+  let current: unknown = error;
+  const seen = new Set<unknown>();
+  while (current instanceof Error && !seen.has(current)) {
+    if (current instanceof ReadStalledError) return true;
+    seen.add(current);
+    current = current.cause;
+  }
+  return false;
 }
 
 function isStallWatchdogError(error: unknown): boolean {
