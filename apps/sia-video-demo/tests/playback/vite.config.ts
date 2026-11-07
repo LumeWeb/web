@@ -1,6 +1,6 @@
 /** Serves the demo with managed auth/read ports and synthetic native stream URLs. */
 import { fileURLToPath } from "node:url";
-import { defineConfig, mergeConfig, type Plugin } from "vite";
+import { defineConfig, mergeConfig, type Plugin, searchForWorkspaceRoot } from "vite";
 import applicationConfig from "../../vite.config";
 
 const workerEntry = fileURLToPath(
@@ -8,6 +8,9 @@ const workerEntry = fileURLToPath(
 );
 const fixtureWorker = fileURLToPath(new URL("./worker.ts", import.meta.url));
 const fixtureBackend = fileURLToPath(new URL("./backend.ts", import.meta.url));
+const phraseWasm = fileURLToPath(
+  import.meta.resolve("@siafoundation/sia-storage/wasm/sia_storage_wasm_bg.wasm"),
+);
 
 function payloadWorker(): Plugin {
   return {
@@ -38,6 +41,13 @@ export default defineConfig((environment) => {
     },
     server: {
       forwardConsole: false,
+      // Linked dependencies can put the phrase parser outside the worktree.
+      fs: {
+        allow: [
+          searchForWorkspaceRoot(fileURLToPath(new URL("../../", import.meta.url))),
+          phraseWasm,
+        ],
+      },
       host: "127.0.0.1",
       port: 4195,
       strictPort: true,
