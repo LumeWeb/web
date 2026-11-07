@@ -30,6 +30,7 @@
  * HELLO implementation field retain local capability checks.
  */
 
+import { isReadStalledError, isShardShortageError, isTransportReadError } from '../ranged-reader.ts';
 import type { PlaybackCapabilities } from '../capabilities/browser-capabilities.ts';
 import { detectBrowserCapabilities } from '../capabilities/browser-capabilities.ts';
 import { mseImplementation, type MseImplementation, resolveMseCtor } from '../capabilities/mse-runtime.ts';
@@ -606,7 +607,14 @@ export class WorkerComposition implements SessionCoordinator {
         loadAbortController.abort();
         return;
       }
-      failed(workerErrorCode.network, describeError(error));
+      const kind = isReadStalledError(error)
+        ? workerErrorCode.readStalled
+        : isTransportReadError(error)
+          ? workerErrorCode.network
+          : isShardShortageError(error)
+            ? workerErrorCode.shardShortage
+            : workerErrorCode.network;
+      failed(kind, describeError(error));
       source.cancel();
       loadAbortController.abort();
       this.#loadAbortController = null;
