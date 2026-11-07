@@ -50,6 +50,9 @@ jobs:
       - uses: actions/checkout@v5
       - uses: LumeWeb/workflows/.github/actions/setup-all@develop
       - run: pnpm --filter=@lumeweb/sia-testing exec playwright install --with-deps chromium firefox
+      - run: pnpm --filter=@lumeweb/tsdown-config build:config
+      - run: pnpm --filter=@lumeweb/sia-testing build
+      - run: pnpm --filter=@lumeweb/sia-testing test:vitest-browser
       - run: pnpm --filter=@lumeweb/sia-testing test:browser
       - run: pnpm --filter=@lumeweb/sia-video-source test:e2e:mock
       - run: pnpm --filter=@lumeweb/sia-video-demo test:e2e:mock
