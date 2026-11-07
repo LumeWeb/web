@@ -2750,6 +2750,36 @@ describe('the typed recovery-change event', () => {
     return seen;
   }
 
+  it.skipIf(!IN_BROWSER).each([
+    { code: 4, kind: workerErrorCode.unsupported },
+    { code: 2, kind: workerErrorCode.network },
+  ])('closes recovery when the worker reports $kind', ({ code, kind }) => {
+    const { host, target, worker } = attachAndHandshake();
+    try {
+      const loadId = loadWithDuration(host, worker, 'k', 1800);
+      const seen = collect(host);
+      const elementSeen: Detail[] = [];
+      target.addEventListener(EVENT, (event) => elementSeen.push((event as CustomEvent<Detail>).detail));
+      target.dispatchEvent(new Event('play'));
+      target.currentTime = 1202.163412;
+      target.dispatchEvent(new Event('timeupdate'));
+      worker.reply({ context: 'not enough shards', kind: workerErrorCode.shardShortage, requestId: loadId, type: WorkerToMainMessageType.ERROR });
+      expect(seen).toEqual([{ active: true, reason: 'shard-shortage', resumeSeconds: 1202.163412, wantsPlay: true }]);
+      const recoveryLoadId = newestSourceId(worker);
+      worker.sent.length = 0;
+      worker.reply({ context: 'terminal failure', kind, requestId: recoveryLoadId, type: WorkerToMainMessageType.ERROR });
+      expect(seen).toEqual([
+        { active: true, reason: 'shard-shortage', resumeSeconds: 1202.163412, wantsPlay: true },
+        { active: false },
+      ]);
+      expect(elementSeen).toEqual(seen);
+      expect(host.error?.code).toBe(code);
+      expect(worker.sent.filter((message) => message.type === MainToWorkerMessageType.SOURCE)).toEqual([]);
+    } finally {
+      host.destroy();
+    }
+  });
+
   it.skipIf(!IN_BROWSER)('announces a recovery with its reason, position, and play choice exactly when it starts', () => {
     const { host, target, worker } = attachAndHandshake();
     loadWithDuration(host, worker, 'k', 60);

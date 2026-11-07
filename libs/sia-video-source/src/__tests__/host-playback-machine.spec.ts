@@ -922,6 +922,49 @@ describe('the churn guard on repeating auto recovery incidents', () => {
   });
 });
 
+describe('terminal failures during recovery', () => {
+  it.each([
+    hostReportKind.unsupported,
+    hostReportKind.network,
+    hostReportKind.device,
+    hostReportKind.quota,
+    hostReportKind.unavailable,
+  ])('%s closes recovery and reports its actual kind', (kind) => {
+    const machine = readyMachine();
+    machine.send({ type: hostPlaybackEvent.play });
+    expect(machine.send({ kind: hostReportKind.shardShortage, resumeSeconds: 1202.163412, type: hostPlaybackEvent.loadFailed }))
+      .toEqual([{ kind: hostDecisionKind.restartSource, reason: recoveryReason.shardShortage, resumeSeconds: 1202.163412, wantsPlay: true }]);
+    expect(machine.isRecovering).toBe(true);
+
+    expect(machine.send({ kind, resumeSeconds: 1202.163412, type: hostPlaybackEvent.loadFailed }))
+      .toEqual([{ error: kind, kind: hostDecisionKind.reportError }]);
+    expect(machine.current).toBe(hostPlaybackState.failed);
+    expect(machine.isRecovering).toBe(false);
+    expect(machine.recovery).toBeNull();
+    expect(machine.attempt).toBe(0);
+    expect(machine.repairOwed).toEqual(kind === hostReportKind.network ? { reason: recoveryReason.network, seconds: 1202.163412 } : null);
+  });
+
+  it.each([hostPlaybackEvent.play, hostPlaybackEvent.seek])('only network retries on explicit %s after a terminal recovery failure', (action) => {
+    for (const kind of [hostReportKind.network, hostReportKind.unsupported]) {
+      const machine = readyMachine();
+      machine.send({ type: hostPlaybackEvent.play });
+      machine.send({ kind: hostReportKind.shardShortage, resumeSeconds: 1202.163412, type: hostPlaybackEvent.loadFailed });
+      machine.send({ kind, resumeSeconds: 1202.163412, type: hostPlaybackEvent.loadFailed });
+      expect(machine.send({ type: hostPlaybackEvent.sourceReady })).toEqual([]);
+      expect(machine.send({ type: hostPlaybackEvent.visibilityVisible })).toEqual([]);
+      const decisions = machine.send(action === hostPlaybackEvent.play ? { type: action } : { seconds: 30, type: action });
+      expect(decisions).toEqual(kind === hostReportKind.network ? [{
+        kind: hostDecisionKind.restartSource,
+        reason: recoveryReason.network,
+        resumeSeconds: action === hostPlaybackEvent.play ? 1202.163412 : 30,
+        wantsPlay: action === hostPlaybackEvent.play,
+      }] : []);
+      expect(machine.current).toBe(kind === hostReportKind.network ? hostPlaybackState.recovering : hostPlaybackState.failed);
+    }
+  });
+});
+
 describe('transport failure', () => {
   it('surfaces a network error without reloading, then a fresh source starts on explicit play', () => {
     const machine = readyMachine();
