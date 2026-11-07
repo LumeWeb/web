@@ -683,6 +683,8 @@ export class SiaVideoSource extends HTMLVideoElementHost {
   // load boundaries and destroy, when a fresh source can make the position
   // servable again.
   #lastRetargetSeconds: null | number = null;
+  // Terminal cleanup writes currentTime and queues native seeking after recovery closes.
+  #cleanupSeekSeconds: null | number = null;
   // Whether the ACTIVE load's acceptance is currently announced as
   // `accepted: true`. Set exactly once per SOURCE_OK; reset (and announced
   // `accepted: false`, exactly once) at every load boundary, detach, and
@@ -1747,8 +1749,10 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     target.pause();
     const end = nativeBufferedEnd(target);
     try {
-      target.currentTime = end > 0 ? end : 0;
+      this.#cleanupSeekSeconds = end > 0 ? end : 0;
+      target.currentTime = this.#cleanupSeekSeconds;
     } catch {
+      this.#cleanupSeekSeconds = null;
       // A MediaSource mid-teardown can refuse writes; the error event that
       // accompanies the exhaust branch surfaces the failure regardless.
     }
@@ -2457,6 +2461,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     const target = this.target;
     if (!target || event.target !== target) return;
     this.#cancelPauseConfirm();
+    this.#cleanupSeekSeconds = null;
     this.#lastForwardedSeekSeconds = null;
     // If the machine was mid-recovery as a seek restart, its repositioning
     // seek resolving closes the window and restores the budget; a decode
@@ -2482,6 +2487,13 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     // double-set (or worse, restart once more).
     if (this.#machine.isRecovering) return;
     const seekSeconds = target.currentTime;
+    // Cleanup's asynchronous seeking must leave the terminal repair owed.
+    if (this.#cleanupSeekSeconds !== null) {
+      const cleanupSeconds = this.#cleanupSeekSeconds;
+      this.#cleanupSeekSeconds = null;
+      if (Math.abs(cleanupSeconds - seekSeconds) <= SEEK_DURATION_TOLERANCE_SECONDS)
+        return;
+    }
     // The load's pipeline died while the user was paused and a repair is
     // owed. This native seek is the user actively scrubbing the dead
     // resource: the machine consumes the owed repair NOW at the new target,
@@ -2770,6 +2782,7 @@ export class SiaVideoSource extends HTMLVideoElementHost {
     this.#durationSeconds = null;
     this.#workerBufferEndSeconds = 0;
     this.#workerBufferStartSeconds = 0;
+    this.#cleanupSeekSeconds = null;
     // A stale in-flight-seek marker must not name a target to a late
     // `unavailable` report.
     this.#lastForwardedSeekSeconds = null;
