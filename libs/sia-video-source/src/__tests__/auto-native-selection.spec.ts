@@ -9,7 +9,7 @@ import {
   type WorkerToMainMessage,
   WorkerToMainMessageType,
 } from "../protocol.ts";
-import { SiaVideoSource } from "../sia-video-source.ts";
+import { type RecoveryChangeDetail, siaRecoveryChange, SiaVideoSource } from "../sia-video-source.ts";
 
 class FakeVideoTarget extends EventTarget {
   currentTime = 0;
@@ -146,6 +146,65 @@ describe("auto backend selection", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+  });
+
+  it.each(["play", "seek"])("cleanup seeking preserves a terminal failure until user %s", async (retry) => {
+    const worker = new FakeWorker();
+    const target = new FakeVideoTarget() as FakeVideoTarget & { seeking: boolean };
+    Object.defineProperty(target, "buffered", { value: { end: () => 30, length: 1, start: () => 0 } });
+    target.seeking = false;
+    let seconds = 0;
+    Object.defineProperty(target, "currentTime", {
+      get: () => seconds,
+      set: (value: number) => {
+        seconds = value;
+        setTimeout(() => target.dispatchEvent(new Event("seeking")), 0);
+      },
+    });
+    const host = new SiaVideoSource({
+      backend: SIA_PLAYBACK_BACKENDS.MEDIA_WORKER,
+      createWorker: () => worker as unknown as Worker,
+      logger: nullLogger,
+    });
+    const seen: RecoveryChangeDetail[] = [];
+    host.addEventListener(siaRecoveryChange, (event: Event) => {
+      seen.push((event as CustomEvent<RecoveryChangeDetail>).detail);
+    });
+    const sources = () => worker.sent.filter((m) => m.type === MainToWorkerMessageType.SOURCE);
+    try {
+      host.attach(target as unknown as HTMLVideoElement);
+      replyToWorkerHandshake(worker);
+      host.src = "terminal-cleanup";
+      void target.play();
+      const first = sources().at(-1)!;
+      worker.reply({ requestId: first.requestId, type: WorkerToMainMessageType.ENDED });
+      target.seeking = true;
+      target.currentTime = 120;
+      await flush();
+      const recovery = sources().at(-1)!;
+      expect(recovery.requestId).not.toBe(first.requestId);
+      target.seeking = true;
+      worker.reply({ context: "network failure", kind: "network", requestId: recovery.requestId, type: WorkerToMainMessageType.ERROR });
+      expect(host.error?.code).toBe(2);
+      await flush();
+      expect(sources()).toHaveLength(2);
+      expect(host.error?.code).toBe(2);
+      expect(target.currentTime).toBe(30);
+      expect(seen).toEqual([
+        { active: true, reason: "seek", resumeSeconds: 120, wantsPlay: true },
+        { active: false },
+      ]);
+      target.seeking = false;
+      target.dispatchEvent(new Event("seeked"));
+      if (retry === "play") void target.play();
+      else target.currentTime = 17;
+      await flush();
+      expect(sources()).toHaveLength(3);
+      expect(target.paused).toBe(retry === "seek");
+      expect(sources().at(-1)!.requestId).not.toBe(recovery.requestId);
+    } finally {
+      host.destroy();
+    }
   });
 
   it("uses the native stream when the provider reports availability", async () => {

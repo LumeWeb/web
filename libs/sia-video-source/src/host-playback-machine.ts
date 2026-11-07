@@ -1031,7 +1031,7 @@ function recoveringTransitions(decisions: HostDecision[]): Transition<string>[] 
     // budget reports, a hidden document parks the restart (no budget spent),
     // or a retry-capped restart: the same precedence as a failure on a
     // healthy load.
-    transition(hostPlaybackEvent.loadFailed, hostPlaybackState.recovering, guard(isTerminalFailure), recordFatal()),
+    transition(hostPlaybackEvent.loadFailed, hostPlaybackState.failed, guard(isTerminalFailure), recordFatal()),
     transition(
       hostPlaybackEvent.loadFailed,
       hostPlaybackState.recovering,
