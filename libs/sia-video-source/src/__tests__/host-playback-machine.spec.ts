@@ -58,6 +58,59 @@ describe('the load-failure vocabulary', () => {
   });
 });
 
+describe.each([hostReportKind.shardShortage, hostReportKind.readStalled])('failed opening (%s)', (kind) => {
+  it('reports the opening failure and keeps an explicit repair without spending attempts', () => {
+    const machine = fresh();
+    machine.send({ type: hostPlaybackEvent.sourceSet });
+    expect(machine.send({ kind, resumeSeconds: 12, type: hostPlaybackEvent.loadFailed })).toEqual([
+      { error: kind, kind: hostDecisionKind.reportError },
+    ]);
+    expect(machine.current).toBe(hostPlaybackState.failed);
+    expect(machine.attempt).toBe(0);
+    expect(machine.repairOwed).toEqual({ reason: kind, seconds: 12 });
+    expect(machine.send({ resumeSeconds: 0, type: hostPlaybackEvent.nativeError })).toEqual([]);
+    expect(machine.send({ type: hostPlaybackEvent.pause })).toEqual([]);
+    expect(machine.send({ type: hostPlaybackEvent.play })).toEqual([
+      { kind: hostDecisionKind.restartSource, reason: kind, resumeSeconds: 12, wantsPlay: true },
+    ]);
+    machine.send({ type: hostPlaybackEvent.sourceReady });
+    machine.send({ type: hostPlaybackEvent.recoverPlayed });
+    expect(machine.current).toBe(hostPlaybackState.ready);
+    expect(machine.repairOwed).toBeNull();
+  });
+
+  it('reports a paused opening failure and keeps repair for explicit play', () => {
+    const machine = fresh();
+    machine.send({ type: hostPlaybackEvent.sourceSet });
+    machine.send({ type: hostPlaybackEvent.pause });
+    expect(machine.preference).toBe(playbackPreference.paused);
+    expect(machine.send({ kind, resumeSeconds: 0, type: hostPlaybackEvent.loadFailed })).toEqual([
+      { error: kind, kind: hostDecisionKind.reportError },
+    ]);
+    expect(machine.current).toBe(hostPlaybackState.failed);
+    expect(machine.attempt).toBe(0);
+    expect(machine.repairOwed).toEqual({ reason: kind, seconds: 0 });
+    expect(machine.send({ type: hostPlaybackEvent.play })).toEqual([
+      { kind: hostDecisionKind.restartSource, reason: kind, resumeSeconds: 0, wantsPlay: true },
+    ]);
+  });
+
+  it('reports a repeated opening failure after explicit reload and clears repair on replacement', () => {
+    const machine = fresh();
+    for (let opening = 0; opening < 2; opening++) {
+      machine.send({ type: hostPlaybackEvent.sourceSet });
+      expect(machine.send({ kind, resumeSeconds: 0, type: hostPlaybackEvent.loadFailed })).toEqual([
+        { error: kind, kind: hostDecisionKind.reportError },
+      ]);
+      expect(machine.attempt).toBe(0);
+    }
+    machine.send({ type: hostPlaybackEvent.sourceSet });
+    expect(machine.repairOwed).toBeNull();
+    machine.send({ type: hostPlaybackEvent.sourceReady });
+    expect(machine.current).toBe(hostPlaybackState.ready);
+  });
+});
+
 describe('a source without playback', () => {
   const idle = () => fresh();
 

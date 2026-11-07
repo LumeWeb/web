@@ -1887,6 +1887,72 @@ describe('availability (shard-shortage) failure recovery', () => {
     host.destroy();
   });
 
+  it.skipIf(!IN_BROWSER).each([
+    { kind: workerErrorCode.shardShortage, paused: false },
+    { kind: workerErrorCode.shardShortage, paused: true },
+    { kind: workerErrorCode.readStalled, paused: false },
+    { kind: workerErrorCode.readStalled, paused: true },
+  ])(
+    'reports $kind before load acceptance with paused=$paused',
+    ({ kind, paused }) => {
+      const { host, target, worker } = attachAndHandshake();
+      try {
+        host.src = 'k';
+        if (paused) target.dispatchEvent(new Event('pause'));
+        const requestId = newestSourceId(worker);
+        worker.sent.length = 0;
+        worker.reply({
+          context: kind === workerErrorCode.shardShortage ? 'not enough shards: 0/10' : 'Sia SDK read stalled: no bytes for 8000ms',
+          kind,
+          requestId,
+          type: WorkerToMainMessageType.ERROR,
+        });
+        expect(worker.sent.filter((message) => message.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+        expect(host.error?.code).toBe(2);
+        target.dispatchEvent(new Event('error'));
+        target.dispatchEvent(new Event('pause'));
+        expect(worker.sent.filter((message) => message.type === MainToWorkerMessageType.SOURCE)).toHaveLength(0);
+        target.dispatchEvent(new Event('play'));
+        expect(worker.sent.filter((message) => message.type === MainToWorkerMessageType.SOURCE)).toEqual([
+          expect.objectContaining({ refreshSdk: true, src: 'k' }),
+        ]);
+      } finally {
+        host.destroy();
+      }
+    },
+  );
+
+  it.skipIf(!IN_BROWSER)('closes recovery when both replacement loads fail before opening', () => {
+    const { host, target, worker } = attachAndHandshake();
+    try {
+      const loadId = loadAndAcknowledge(host, worker, 'k');
+      const recovery: RecoveryChangeDetail[] = [];
+      host.addEventListener(siaRecoveryChange, (event) => {
+        recovery.push((event as CustomEvent<RecoveryChangeDetail>).detail);
+      });
+      target.dispatchEvent(new Event('play'));
+      target.currentTime = 2424.818505;
+      target.dispatchEvent(new Event('timeupdate'));
+      worker.sent.length = 0;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        worker.reply({
+          context: 'not enough shards: 0/10',
+          kind: workerErrorCode.shardShortage,
+          requestId: attempt === 0 ? loadId : newestSourceId(worker),
+          type: WorkerToMainMessageType.ERROR,
+        });
+      }
+      expect(worker.sent.filter((message) => message.type === MainToWorkerMessageType.SOURCE)).toHaveLength(2);
+      expect(recovery).toEqual([
+        { active: true, reason: 'shard-shortage', resumeSeconds: 2424.818505, wantsPlay: true },
+        { active: false },
+      ]);
+      expect(host.error?.code).toBe(2);
+    } finally {
+      host.destroy();
+    }
+  });
+
   it.skipIf(!IN_BROWSER)('a decode error restart does not ask for an SDK refresh', () => {
     const { host, target, worker } = attachAndHandshake();
     const originalLoadId = loadAndAcknowledge(host, worker, 'k');

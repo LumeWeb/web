@@ -1,6 +1,6 @@
 /** UI selection must reach real decoded frames; deselection must stop server-observed reads. */
 import { expect } from "@playwright/test";
-import { expectDecodedProgress } from "@lumeweb/sia-video-source/testing";
+import { expectDecodedProgress, mediaFixture } from "@lumeweb/sia-video-source/testing";
 import { openDemo, openShare, test } from "./fixtures";
 
 declare global {
@@ -336,3 +336,56 @@ test("an invalid sharing key stays on the entry screen without loading video", a
       ),
   ).toBe(false);
 });
+
+for (const failure of ["shard-shortage", "read-stalled"] as const) {
+  test(`a failed ${failure} opening ends preparing and can be retried in place`, async ({
+    fixture,
+    page,
+    sia,
+  }) => {
+    test.setTimeout(60000);
+    const file = await mediaFixture("seekable-avc");
+    const healthy = await sia.objects.upload({
+      file,
+      metadata: new TextEncoder().encode(JSON.stringify({ filename: "Healthy video.mp4", type: "sialo-object-meta", version: 1 })),
+    });
+    await sia.shares.attach(fixture.share, healthy);
+    const failingUrl = new URL(fixture.url);
+    failingUrl.searchParams.set("openingFailure", failure);
+    failingUrl.searchParams.set("failedObject", fixture.object.id);
+    failingUrl.searchParams.set("failedOpenings", "2");
+    await openShare(page, { ...fixture, url: failingUrl.href });
+    const row = page.getByRole("button", { name: /Long demo video.mp4/ });
+    await row.click();
+    const video = page.locator("video");
+    await expect(video).toBeVisible();
+    await video.evaluate((element) => element.setAttribute("data-persistent-player", "true"));
+    const dialog = page.getByRole("alertdialog");
+    await expect(dialog).toBeVisible({ timeout: 15000 });
+    await expect(dialog).toContainText(failure === "shard-shortage" ? /not fully available/i : /stalled/i);
+    await expect(page.locator("[data-preparing-overlay]")).toHaveCount(0);
+    await expect(page.locator("[data-recovery-feedback]")).toHaveCount(0);
+    await page.getByRole("button", { exact: true, name: "OK" }).click();
+    // Dismissal must consume the old autoplay intent rather than resume preparing.
+    await expect(page.locator("[data-preparing-overlay]")).toHaveCount(0);
+    await page.getByRole("button", { exact: true, name: "Retry opening video" }).click();
+    await expect(dialog).toBeVisible({ timeout: 15000 });
+    await expect(video).toHaveAttribute("data-persistent-player", "true");
+    await expect(page.locator("[data-preparing-overlay]")).toHaveCount(0);
+    await expect(page.locator("[data-recovery-feedback]")).toHaveCount(0);
+    await page.getByRole("button", { exact: true, name: "OK" }).click();
+    expect(fixture.mock.history().filter((request) => request.actor === fixture.actor && request.objectId === fixture.object.id && request.operation === "object")).toHaveLength(2);
+    await page.getByRole("button", { exact: true, name: "Retry opening video" }).click();
+    await expectDecodedProgress(video);
+    await expect(video).toHaveAttribute("data-persistent-player", "true");
+    await expect(page.getByRole("button", { exact: true, name: "Retry opening video" })).toHaveCount(0);
+    await page.getByRole("button", { name: /Healthy video.mp4/ }).click();
+    await expect.poll(() => video.evaluate((element: HTMLVideoElement) => element.readyState)).toBe(4);
+    if (await video.evaluate((element: HTMLVideoElement) => element.paused)) {
+      await page.getByRole("button", { exact: true, name: "Play" }).first().click();
+    }
+    await expectDecodedProgress(video);
+    await expect(dialog).toHaveCount(0);
+    await expect(page.getByRole("button", { exact: true, name: "Retry opening video" })).toHaveCount(0);
+  });
+}

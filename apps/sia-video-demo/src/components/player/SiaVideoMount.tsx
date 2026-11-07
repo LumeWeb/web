@@ -110,6 +110,8 @@ export interface SiaVideoMountProps {
    * inside-Player UserPlayBridge, which plays once the Sia load is accepted.
    */
   readonly playRequested: boolean;
+  /** Display-safe counter for an explicit failed-opening retry. */
+  readonly retryRevision?: number;
   /** The display-safe selected source union; null mounts no player. */
   readonly selectedSource: null | SelectedSource;
 }
@@ -151,6 +153,7 @@ export function SiaVideoMount({
   onPlayConsumed,
   onStatus,
   playRequested,
+  retryRevision = 0,
   selectedSource,
 }: SiaVideoMountProps) {
   // The ONE centralized developer-options store: the mount reads it, never
@@ -229,7 +232,7 @@ export function SiaVideoMount({
         nativeSourceKind={selectedSource?.mode === "shared" ? "shared" : "app"}
         nativeStreamProvider={mount.nativeStreamProvider}
         preload="auto"
-        reloadKey={mount.reloadKey}
+        reloadKey={`${mount.reloadKey}|retry:${retryRevision}`}
         sia={mount.sia}
         src={mount.src}
       />
