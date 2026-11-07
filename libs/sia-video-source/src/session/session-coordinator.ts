@@ -607,14 +607,7 @@ export class WorkerComposition implements SessionCoordinator {
         loadAbortController.abort();
         return;
       }
-      const kind = isReadStalledError(error)
-        ? workerErrorCode.readStalled
-        : isTransportReadError(error)
-          ? workerErrorCode.network
-          : isShardShortageError(error)
-            ? workerErrorCode.shardShortage
-            : workerErrorCode.network;
-      failed(kind, describeError(error));
+      failed(inspectionErrorKind(error), describeError(error));
       source.cancel();
       loadAbortController.abort();
       this.#loadAbortController = null;
@@ -1041,4 +1034,16 @@ function chunkForPost(
     message: { bytes, kind: unit.kind, requestId, type: WorkerToMainMessageType.CHUNK },
     transfer: [bytes.buffer],
   };
+}
+
+/**
+ * Inspection exceptions include failed MIME capability probes, which must
+ * retain the network fallback rather than become unsupported media.
+ */
+function inspectionErrorKind(error: unknown): WorkerErrorCode {
+  if (isReadStalledError(error)) return workerErrorCode.readStalled;
+  // A transport wrapper owns the failure even when its cause reports too few shards.
+  if (isTransportReadError(error)) return workerErrorCode.network;
+  if (isShardShortageError(error)) return workerErrorCode.shardShortage;
+  return workerErrorCode.network;
 }

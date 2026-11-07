@@ -12,6 +12,8 @@ const failures = [
   { error: new Error('not enough shards: 0/10'), kind: 'shard-shortage' },
   { error: new ReadStalledError('read watchdog expired', { position: 0, stallTimeoutMs: 100 }), kind: 'read-stalled' },
   { error: new ReadTransportError('transport exhausted', { attempts: 3, expectedBytes: 1024, position: 0 }), kind: 'network' },
+  { error: new Error('wrapped watchdog failure', { cause: new ReadStalledError('read watchdog expired', { position: 0, stallTimeoutMs: 100 }) }), kind: 'read-stalled' },
+  { error: new ReadTransportError('transport exhausted', { attempts: 3, cause: new Error('not enough shards: 0/10'), expectedBytes: 1024, position: 0 }), kind: 'network' },
   { error: new Error('wrapped shard failure', { cause: new Error('not enough shards: 0/10') }), kind: 'shard-shortage' },
   { error: new Error('wrapped transport failure', { cause: new ReadTransportError('transport exhausted', { attempts: 3, expectedBytes: 1024, position: 0 }) }), kind: 'network' },
 ];
