@@ -939,6 +939,49 @@ describe('RangedReader retries on transient read failure', () => {
 // first attempt and surfaces the SDK's original error unwrapped, never a
 // ReadTransportError.
 describe('RangedReader does not retry persistent shard-shortage errors', () => {
+  it('reports a partially delivered read followed by zero available shards', async () => {
+    const error = new Error('not enough shards: 0/10');
+    const milestones: { detail: Readonly<Record<string, unknown>>; name: string; requestId: null | number }[] = [];
+    let attempts = 0;
+    let delivered = 0;
+    let finish!: (error: unknown) => void;
+    const failed = new Promise<unknown>((resolve) => { finish = resolve; });
+    const reader = new RangedReader({
+      object: fakeObject(2996402607),
+      onChunk: (bytes) => { delivered += bytes.byteLength; },
+      onError: finish,
+      onMilestone: (name, requestId, detail) => milestones.push({ detail, name, requestId }),
+      requestId: 19,
+      retryBackoffMs: 0,
+      sdk: {
+        download: () => {
+          attempts++;
+          let sent = false;
+          return new ReadableStream<Uint8Array>({
+            pull(controller) {
+              if (sent) controller.error(error);
+              else {
+                sent = true;
+                controller.enqueue(new Uint8Array(3112960));
+              }
+            },
+          });
+        },
+      },
+    });
+    try {
+      reader.start(524288, 6872908);
+      expect(await failed).toBe(error);
+      expect(attempts).toBe(1);
+      expect(delivered).toBe(3112960);
+      expect(milestones.filter(({ name }) => name === 'read.error')).toEqual([
+        { detail: { deliveredBytes: 3112960, expectedBytes: 6872908, position: 524288 }, name: 'read.error', requestId: 19 },
+      ]);
+    } finally {
+      reader.stop();
+    }
+  });
+
   it('tries once and surfaces the original download-open shortage error unwrapped', async () => {
     const original = new Error('not enough shards');
     const requests: { length: number; offset: number }[] = [];

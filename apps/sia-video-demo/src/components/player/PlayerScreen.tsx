@@ -143,6 +143,8 @@ export function PlayerScreen() {
   // request; the UserPlayBridge consumes it once the Sia load is accepted, and
   // a different armed source forces a fresh gesture.
   const [playRequested, setPlayRequested] = useState(false);
+  const [failedOpening, setFailedOpening] = useState(false);
+  const [retryRevision, setRetryRevision] = useState(0);
 
   // The armed source's display-safe reload identity, for resetting the play
   // request when the current source changes.
@@ -155,6 +157,7 @@ export function PlayerScreen() {
   // pending play request so the new source never inherits the old one.
   useEffect(() => {
     setPlayRequested(false);
+    setFailedOpening(false);
   }, [armedIdentity]);
 
   // A play request is also spent the moment the current source starts
@@ -168,6 +171,15 @@ export function PlayerScreen() {
   // Armed only by the two explicit user events; inert the moment the
   // selection leaves its key.
   const [autoplayIntent, setAutoplayIntent] = useState<null | string>(null);
+
+  // Dismissal clears Video.js's store error without opening the failed source.
+  // Consume old opening intent before dismissal can expose preparing again.
+  useEffect(() => {
+    if (!facts?.error.present) return;
+    setPlayRequested(false);
+    setAutoplayIntent(null);
+    if (!status?.load.accepted) setFailedOpening(true);
+  }, [facts?.error.present, status?.load.accepted]);
 
   // Share-fragment preselection is an arming event: the one-shot fragment
   // object key (boot-time ingest or a mid-session hashchange) arms the
@@ -256,7 +268,10 @@ export function PlayerScreen() {
         className="relative"
         onClick={() => {
           const started = facts?.playback.started ?? false;
-          if (selectedSource !== null && !started && !playRequested) {
+          if (
+            selectedSource !== null && !started && !playRequested &&
+            !failedOpening && !facts?.error.present
+          ) {
             setPlayRequested(true);
           }
         }}>
@@ -270,6 +285,7 @@ export function PlayerScreen() {
               onPlayConsumed={consumePlayRequest}
               onStatus={setStatus}
               playRequested={playRequested}
+              retryRevision={retryRevision}
               selectedSource={selectedSource}
             />
             <SourceSwitchCover
@@ -289,6 +305,17 @@ export function PlayerScreen() {
           </>
         ) : null}
       </div>
+      {selectedSource && failedOpening ? (
+        <button
+          onClick={() => {
+            setFailedOpening(false);
+            setRetryRevision((revision) => revision + 1);
+            setPlayRequested(true);
+          }}
+          type="button">
+          Retry opening video
+        </button>
+      ) : null}
       <p className="text-fg-muted m-0 text-xs">
         {selectedSource ? SOURCE_SELECTED_CAPTION : NO_SOURCE_SELECTED_CAPTION}
       </p>

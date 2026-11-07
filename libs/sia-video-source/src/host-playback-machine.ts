@@ -528,8 +528,8 @@ const makeRecordDeferWhileHidden = (decisions: HostDecision[]) =>
     });
 
 /**
- * A failure surfaced after the budget drained: the load is finished, but a
- * repair stays owed so an explicit user action may start a fresh source.
+ * A surfaced recoverable failure finishes the load, but keeps a repair owed
+ * so an explicit user action may start a fresh source.
  */
 const makeRecordExhausted = (decisions: HostDecision[]) =>
   (reason: ReasonOrResolver, kind: ((event: MachineEvent) => HostReportKind) | HostReportKind) =>
@@ -737,6 +737,17 @@ function activeLoadTransitions(
 
     // Transport and fatal failures surface immediately; they never reload.
     transition(hostPlaybackEvent.loadFailed, hostPlaybackState.failed, guard(isTerminalFailure), recordFatal()),
+    // Before acceptance, deferred repair cannot be consumed by play bridges
+    // waiting for SOURCE_OK. Surface availability failures without a restart.
+    transition(
+      hostPlaybackEvent.loadFailed,
+      hostPlaybackState.failed,
+      guard((ctx: HostPlaybackState, event: MachineEvent) =>
+        self === hostPlaybackState.loading && isNeverStarted(ctx) &&
+        event.type === hostPlaybackEvent.loadFailed &&
+        (event.kind === hostReportKind.shardShortage || event.kind === hostReportKind.readStalled)),
+      recordExhausted(reasonForLoadFailure, kindForLoadFailure),
+    ),
     // A decode failure on a healthy load: paused or never-started defers
     // (deferral never spends budget, so a paused or never-started load with a
     // drained budget still records a repair); a saturated session surfaces, a
