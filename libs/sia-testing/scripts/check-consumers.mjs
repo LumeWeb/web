@@ -118,10 +118,6 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
   );
   await checkVitestDocs(testingTarball, directory);
   await cp(testingTarball, testing, { recursive: true });
-  await linkDirectory(
-    dependency("@playwright/test", "^1.61.1"),
-    join(testing, "node_modules/@playwright/test"),
-  );
   for (const [source, target] of [
     ["libs/sia-video-source", library],
     ["apps/sia-video-demo", demo],

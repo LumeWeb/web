@@ -2,6 +2,10 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "rootDir": ".",
+    "paths": {
+      "@lumeweb/sia-testing/mock": ["./src/mock.ts"],
+      "@lumeweb/sia-testing/vitest": ["./src/vitest.ts"]
+    },
     "lib": ["esnext", "dom"],
     "noEmit": true,
     "strict": true,

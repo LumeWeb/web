@@ -17,14 +17,13 @@ test("closing a share cancels its held object listing", async ({ fixture, page }
   }
 });
 
-test("changing the sharing key cancels old listing work and shows only the replacement rows", async ({ fixture, page, sia }) => {
+test("changing the sharing key cancels old listing work and shows only the replacement rows", async ({ endpoint, fixture, page, sia }) => {
   const object = await sia.objects.upload({
     file: await bytesFixture({ bytes: Uint8Array.of(1), name: "replacement" }),
     metadata: new TextEncoder().encode("Replacement object"),
   });
   const share = await sia.shares.create({ objects: [object] });
-  let seed = "";
-  await sia.browser.open({ access: share.access, apply(_page, data) { seed = data.backend.credential.keyHex; return Promise.resolve(); } });
+  const seed = endpoint.connection({ access: share.access, as: fixture.actor }).credential.keyHex;
   const hold = fixture.mock.faults.hold({ actor: fixture.actor, operation: "objects" });
   try {
     await openShare(page, fixture);

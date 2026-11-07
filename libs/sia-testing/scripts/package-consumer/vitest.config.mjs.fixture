@@ -1,0 +1,3 @@
+/** The optional adapter must execute inside the runner that supplies its context. */
+import { defineConfig } from "vitest/config";
+export default defineConfig({ test: { include: ["with-vitest.test.mjs"] } });

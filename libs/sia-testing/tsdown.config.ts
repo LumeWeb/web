@@ -9,7 +9,7 @@ export default defineConfig(
       "src/client.ts",
       "src/http.ts",
       "src/msw.ts",
-      "src/playwright.ts",
+      "src/vitest.ts",
       "src/testing/live/agent.ts",
     ],
     {

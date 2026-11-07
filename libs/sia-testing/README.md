@@ -64,12 +64,12 @@ describe deadlines, cancellation, and cleanup.
 | ------------- | ------------------------------------------------------------------------ |
 | `/mock`       | Portable byte fixtures, direct application ports, and driver controls    |
 | `/node`       | Owned callback runs, local files, and explicitly consented live profiles |
-| `/playwright` | The Playwright-specific factory and private browser contexts             |
+| `/vitest`     | Native Vitest fixtures with a portable mock run per using test            |
 | `/client`     | Fetch-backed application ports and mock sign-in                          |
 | `/http`       | An optional owned loopback listener over a mock                          |
 | `/msw`        | An optional interceptor at an explicit base URL over a mock              |
 
-No Vitest plugin is required. MSW and Playwright are optional peers. Portable mock and client imports contain no Node, test-runner, or storage SDK runtime. HTTP and MSW speak a synthetic fixture protocol, not native Indexd. The package does not deploy services or fund accounts.
+No Vitest plugin is required. MSW and Vitest are optional peers. Portable mock and client imports contain no Node, test-runner, or storage SDK runtime. HTTP and MSW speak a synthetic fixture protocol, not native Indexd. The package does not deploy services or fund accounts.
 
 ## Select a simulated DOM environment
 
@@ -77,34 +77,24 @@ The complete tests on this page also run with `--environment jsdom` or `--enviro
 
 These environments simulate a DOM inside Node; they are not Vitest browser providers. Compare opaque metadata by byte contents, as in the publication recipe, because typed arrays can come from different realms.
 
-## Use native Vitest fixtures for direct controls
+## Use the Vitest factory for direct controls
 
 Save this complete recipe in its own test file. Each test, including concurrent tests, gets a separate mock and run.
 
 ```ts recipe=fixture
-import { expect, test } from "vitest";
-import { bytesFixture, createMockSia, type MockRun } from "@lumeweb/sia-testing/mock";
+import { expect } from "vitest";
+import { bytesFixture } from "@lumeweb/sia-testing/mock";
+import { createSiaTest } from "@lumeweb/sia-testing/vitest";
 
-const siaTest = test.extend<{ sia: MockRun }>({
-  sia: async ({ signal, onTestFinished }, use) => {
-    const mock = createMockSia();
-    onTestFinished(() => mock.close());
-    try {
-      await mock.run(
-        {
-          app: {
-            id: "b".repeat(64),
-            name: "Fixture tests",
-            description: "Isolated application fixtures",
-            serviceUrl: "https://example.invalid",
-          },
-          signal,
-        },
-        use,
-      );
-    } finally {
-      await mock.close();
-    }
+const siaTest = createSiaTest({
+  backend: {
+    kind: "mock",
+    app: {
+      id: "b".repeat(64),
+      name: "Fixture tests",
+      description: "Isolated application fixtures",
+      serviceUrl: "https://example.invalid",
+    },
   },
 });
 
@@ -127,11 +117,27 @@ for (const label of ["left", "right"]) {
 }
 ```
 
-Pass `TestContext.signal` so a timeout cancels owned work. `onTestFinished` also closes the mock if the test fails or times out; `finally` closes it when the fixture finishes. Close is safe to repeat. Run cleanup closes retained ports before deleting fixture state, including after assertion failures.
+The factory combines the runner cancellation signal with the optional external `signal`. An already-aborted signal prevents setup; sharing an external signal cancels every test using it. `onTestFinished` closes the mock after failure or timeout, including failed dependent teardown; `finally` also closes it after dynamic skip. Repeated cleanup shares one promise. Run cleanup closes retained ports before deleting fixture state, including after assertion failures.
 
 Caller-created controllers can cancel individual reads without closing the reader or run. The packed Vitest checks cover current-global `AbortController` in Node, jsdom, and happy-dom, plus `window.AbortController` in both DOM environments, through direct readers and MSW-backed Fetch readers. In the tested versions, those DOM environments expose the same constructors through `globalThis` and `window`; these checks do not establish compatibility between Node signals and a separately created jsdom window's signal implementation.
 
 Cancellation cannot force an unrelated user promise to settle. Await your work and make callbacks cooperate with cancellation. Application and owner-share ports cancel and join their pending calls on close. For both direct and fetch-backed readers, `close()` aborts requests without waiting for those calls to settle. Close a fetch application client in `finally` to join its local upload collector; backend teardown cannot synchronously stop collection in a remote client.
+
+## Migrate Playwright tests
+
+`/playwright`, `BrowserRun`, `BrowserBinding`, and `sia.browser.open` were removed.
+Use Playwright's `test.extend` to compose public `/node` `withSiaRun` and `/http`
+`startMockServer`. Create contexts with your context options, base URL, proxy,
+service-worker settings and empty storage state. Obtain credentials from
+`endpoint.connection({ access, as })` and install them before navigation.
+Use nested `try/finally` blocks to close contexts before the endpoint, and the
+endpoint before returning from `withSiaRun`, including partial setup failures.
+The portable Vitest fixture owns no browser contexts or navigation.
+
+Node tests needing `backend.payloadStorage: { kind: "temporary-files", limits }`
+keep using `/node` `withSiaRun` inside a native Vitest fixture or callback. This
+storage mode supports direct Node calls only; it rejects HTTP and browser use.
+`createSiaTest` accepts portable `MockOptions` and has no payload-storage option.
 
 ## Publish application writes
 

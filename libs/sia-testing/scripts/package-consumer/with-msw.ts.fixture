@@ -1,9 +1,20 @@
 /** Optional peer declarations must resolve from the copied consumer's installed dependencies. */
 import { createMockHandlers } from "@lumeweb/sia-testing/msw";
-import { createSiaTest } from "@lumeweb/sia-testing/playwright";
+import { createSiaTest } from "@lumeweb/sia-testing/vitest";
 import { mock } from "./pure.js";
 import metadata from "@lumeweb/sia-testing/package.json" with { type: "json" };
 export const handlers = createMockHandlers(mock, { baseUrl: "https://example.invalid" }).handlers;
 export const test = createSiaTest({ backend: { app: { description: "Typed fixture", id: "a".repeat(64), name: "Typed", serviceUrl: "https://example.invalid" }, kind: "mock" } });
 const name: string = metadata.name;
 void name;
+
+import type { TestAPI } from "vitest";
+import type { SiaTest, SiaTestFixtures } from "@lumeweb/sia-testing/vitest";
+const native: TestAPI<SiaTestFixtures> = test;
+const named: SiaTest = native;
+export const extended = named.extend<{ label: string }>({ label: async ({ sia }, use) => { void sia; await use("label"); } });
+
+// @ts-expect-error The Vitest adapter exports no Playwright run type.
+import type { BrowserRun } from "@lumeweb/sia-testing/vitest";
+// @ts-expect-error The Vitest adapter exports no Playwright binding type.
+import type { BrowserBinding } from "@lumeweb/sia-testing/vitest";

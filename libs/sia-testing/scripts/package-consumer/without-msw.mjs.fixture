@@ -10,6 +10,11 @@ try {
   await mock.run({ app }, async (run) => {
     const file = await bytesFixture({ bytes: Uint8Array.of(4, 5), name: "video" });
     const object = await run.objects.upload({ file, metadata: Uint8Array.of(6), name: file.name });
+    if (process.env.SIA_TEST_SKIP_HTTP === "1") {
+      assert.equal(object.sizeBytes, 2);
+      console.log("HTTP smoke omitted by SIA_TEST_SKIP_HTTP");
+      return;
+    }
     const server = await startMockServer(mock);
     try {
       const actor = mock.actor("consumer");
@@ -70,9 +75,9 @@ try {
   });
 } finally { await mock.close(); }
 assert.equal((await withSiaRun({ backend: { app, kind: "mock" } }, async () => "managed")).value, "managed");
-for (const entry of ["", "/fixtures", "/model", "/sdk", "/msw/node"]) {
+for (const entry of ["", "/fixtures", "/model", "/sdk", "/msw/node", "/playwright"]) {
   await assert.rejects(import("@lumeweb/sia-testing" + entry), { code: "ERR_PACKAGE_PATH_NOT_EXPORTED" });
 }
-for (const [entry, peer] of [["msw", "msw"], ["playwright", "@playwright/test"]]) {
+for (const [entry, peer] of [["msw", "msw"], ["vitest", "vitest"]]) {
   await assert.rejects(import("@lumeweb/sia-testing/" + entry), (error) => error.code === "ERR_MODULE_NOT_FOUND" && error.message.includes(peer), entry + " must require the optional " + peer + " peer");
 }

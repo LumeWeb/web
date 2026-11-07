@@ -3,10 +3,10 @@
  * files and undeclared imports must fail even when the checkout has enough source
  * and development dependencies to make its own tests pass.
  *
- * MSW and Playwright are optional peers. Storage entrypoints must load and
+ * MSW and Vitest are optional peers. Storage entrypoints must load and
  * type-check without them; their adapters must require the matching peer.
  * Browser entrypoints must also exclude Node built-ins and storage SDK code.
- * Test runners must stay out of that browser dependency graph.
+ * Test runners must stay out of the portable mock/client dependency graph.
  *
  * With no arguments, checks the current build through an npm tarball. --unpacked
  * applies the same checks to an extracted package. Neither mode installs
@@ -131,8 +131,8 @@ async function checkNodeGraph(consumer, name) {
 
 /**
  * Tests optional-peer compatibility in both runtime imports and declarations.
- * A missing-peer check must fail because MSW is absent; an unrelated import
- * crash would otherwise make a broken adapter look correctly optional.
+ * A missing-peer check must name the absent peer; an unrelated import crash
+ * would otherwise make a broken adapter look correctly optional.
  * @param {string} unpacked
  * @param {string} directory
  */
@@ -154,7 +154,7 @@ async function checkPackage(unpacked, directory) {
 
   await linkDependency(consumer, "@types/node");
   const tsc = require.resolve("typescript/bin/tsc");
-  // Compile before linking MSW so pure declarations cannot depend on the optional peer.
+  // Compile before linking optional peers so pure declarations cannot depend on them.
   runNode(consumer, [tsc, "-p", "tsconfig.json"]);
   const nodeTypes = dirname(require.resolve("@types/node/package.json"));
   const allowedTypes = [
@@ -209,9 +209,10 @@ async function checkPackage(unpacked, directory) {
   runNode(consumer, [tsc, "-p", "tsconfig.packed-browser.json"]);
 
   await linkDependency(consumer, "msw");
-  await linkDependency(consumer, "@playwright/test");
+  await linkDependency(consumer, "vitest");
   runNode(consumer, ["with-msw.mjs"]);
   runNode(consumer, [tsc, "-p", "tsconfig.msw.json"]);
+  runNode(consumer, [join(dirname(require.resolve("vitest/package.json")), "vitest.mjs"), "run", "--config", "vitest.config.mjs"]);
   await checkBrowser(consumer);
   console.log(
     `packed consumer checks passed (${Object.keys(metadata.exports).length} explicit exports)`,
@@ -324,6 +325,10 @@ async function readPackageMetadata(directory) {
     );
   if (metadata.name !== "@lumeweb/sia-testing")
     throw new Error("unexpected package name");
+  if (metadata.exports["./playwright"])
+    throw new Error("legacy Playwright entry must not be exported");
+  if (!metadata.exports["./vitest"])
+    throw new Error("Vitest entry must be exported");
   if (metadata.exports["."])
     throw new Error("root barrel must not be exported");
   for (const [specifier, conditions] of Object.entries(metadata.exports)) {

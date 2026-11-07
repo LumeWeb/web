@@ -1,6 +1,6 @@
 /** Owner and recipient pages must never inherit each other's storage or endpoint authority. */
 import { expect } from "@playwright/test";
-import { createSiaTest } from "../../../src/testing/playwright.js";
+import { createSiaTest } from "./playwright-fixture.js";
 import { bytesFixture } from "../../../src/testing/mock.js";
 const test = createSiaTest({
   backend: {

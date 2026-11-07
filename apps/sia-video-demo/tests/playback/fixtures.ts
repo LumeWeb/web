@@ -1,8 +1,10 @@
 /** The demo UI and worker read the same run-owned objects with the supplied recipient credential. */
 import { writeFile } from "node:fs/promises";
 import { createServer } from "node:net";
-import { type Page } from "@playwright/test";
-import { createSiaTest } from "@lumeweb/sia-testing/playwright";
+import { type Page, test as playwright } from "@playwright/test";
+import { withSiaRun } from "@lumeweb/sia-testing/node";
+import { startMockServer } from "@lumeweb/sia-testing/http";
+import type { MockRun } from "@lumeweb/sia-testing/mock";
 import {
   type ActorRef,
   type MockSia,
@@ -24,7 +26,7 @@ interface Egress {
   connections(): number;
   readonly url: string;
 }
-const base = createSiaTest({
+const runOptions = {
   backend: {
     app: {
       description: APP_DESCRIPTION,
@@ -32,11 +34,34 @@ const base = createSiaTest({
       name: APP_NAME,
       serviceUrl: "https://example.invalid",
     },
-    kind: "mock",
+    kind: "mock" as const,
   },
   limits: { maxObjects: 24 },
+};
+const base = playwright.extend<{ endpoint: Awaited<ReturnType<typeof startMockServer>>; sia: MockRun }>({
+  context: async ({ baseURL, browser, contextOptions, endpoint, proxy, serviceWorkers }, use) => {
+    // The endpoint dependency keeps HTTP available until this context closes.
+    void endpoint;
+    const context = await browser.newContext({
+      ...contextOptions,
+      ...(baseURL === undefined ? {} : { baseURL }),
+      ...(proxy === undefined ? {} : { proxy }),
+      serviceWorkers,
+      storageState: { cookies: [], origins: [] },
+    });
+    try { await use(context); } finally { await context.close(); }
+  },
+  endpoint: async ({ sia }, use) => {
+    const endpoint = await startMockServer(sia.mock);
+    try { await use(endpoint); } finally { await endpoint.close(); }
+  },
+  // Playwright parses fixture dependencies from destructured parameters.
+  // oxlint-disable-next-line no-empty-pattern
+  sia: async ({}, use) => {
+    await withSiaRun(runOptions, use);
+  },
 });
-export const test = base.extend<{ egress: Egress; fixture: Fixture }>({
+export const test = base.extend<{ egress: Egress; fixture: Fixture; registration: { page: Page; url: string } }>({
   // Playwright requires destructured parameters for fixtures without dependencies.
   // oxlint-disable-next-line no-empty-pattern
   egress: async ({}, use) => {
@@ -86,28 +111,39 @@ export const test = base.extend<{ egress: Egress; fixture: Fixture }>({
       url: "",
     });
   },
-  page: async ({ fixture, sia }, use) => {
-    const page = await sia.browser.open({
-      access: fixture.share.access,
-      async apply(page, data) {
-        const backend = data.backend;
-        fixture.url = new URL(
-          `${backend.connection.client}/`,
-          backend.connection.url,
-        ).href;
-        fixture.sharingSeed = backend.credential.keyHex;
-        await page.addInitScript((credential) => {
-          window.__siaDemoTest = { credential };
-        }, backend.credential);
-      },
-      mockActor: fixture.actor,
-    });
+  page: async ({ context, endpoint, fixture }, use) => {
+    const connection = endpoint.connection({ access: fixture.share.access, as: fixture.actor });
+    const page = await context.newPage();
+    fixture.url = new URL(`${connection.client}/`, connection.url).href;
+    fixture.sharingSeed = connection.credential.keyHex;
+    await page.addInitScript((credential) => {
+      window.__siaDemoTest = { credential };
+    }, connection.credential);
     await use(page);
   },
   // Firefox keeps intercepted worker fetches alive after termination. A proxy
   // rejects remote traffic while loopback payloads retain native cancellation.
   proxy: async ({ egress }, use) => {
     await use({ bypass: "127.0.0.1,localhost", server: egress.url });
+  },
+  registration: async ({ baseURL, browser, contextOptions, endpoint, fixture, proxy, serviceWorkers, sia }, use) => {
+    const connection = endpoint.connection({ access: sia.auth.registrationAccess, as: fixture.actor });
+    const context = await browser.newContext({
+      ...contextOptions,
+      ...(baseURL === undefined ? {} : { baseURL }),
+      ...(proxy === undefined ? {} : { proxy }),
+      serviceWorkers,
+      storageState: { cookies: [], origins: [] },
+    });
+    try {
+      const page = await context.newPage();
+      await page.addInitScript((credential) => {
+        window.__siaDemoTest = { credential };
+      }, { ...connection.credential, app: runOptions.backend.app, phrase: sia.auth.fixturePhrase });
+      await use({ page, url: new URL(`${connection.client}/`, connection.url).href });
+    } finally {
+      await context.close();
+    }
   },
 });
 export async function openDemo(page: Page, fixture: Fixture, disableNativePlayback = true) {
