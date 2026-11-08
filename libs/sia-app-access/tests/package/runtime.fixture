@@ -1,84 +1,118 @@
 /** Only the extracted package is visible to this runtime consumer. */
 import assert from "node:assert/strict";
-import * as access from "@lumeweb/sia-app-access";
+import { registerHooks } from "node:module";
 
 for (const peer of ["react", "zustand", "@siafoundation/sia-storage"])
   assert.throws(() => import.meta.resolve(peer), {
     code: "ERR_MODULE_NOT_FOUND",
   });
-assert.deepEqual(
-  Object.keys(access).sort(),
-  [
-    "AccessErrorCode",
-    "AccessFailure",
-    "AccessIntent",
-    "AccessOutcome",
-    "AccessPhase",
-    "AccessRecovery",
-    "ApprovalProgress",
-    "CredentialConfirmation",
-    "CredentialEffect",
-    "PhraseValidation",
-    "RegistrationEffect",
-    "SaveRecoveryProgress",
-    "createMemoryCredentialStore",
-    "createSiaAccess",
-    "SessionUnavailableError",
-  ].sort(),
-);
-const store = access.createMemoryCredentialStore();
-const scope = { appId: "a".repeat(64), indexerUrl: "https://indexer.example/" };
-const key = new Uint8Array([1, 2]);
-await store.write(scope, key);
-key.fill(0);
-const read = await store.read(scope);
-assert.deepEqual(read, new Uint8Array([1, 2]));
-assert.ok(read);
-read.fill(0);
-assert.deepEqual(await store.read(scope), new Uint8Array([1, 2]));
-await store.remove(scope);
-assert.equal(await store.read(scope), null);
-console.log("Packed credential consumer assertions completed");
-
-const unexpected = () =>
-  Promise.reject(new Error("Observation must not start adapter work"));
-const controller = access.createSiaAccess({
-  adapter: {
-    begin: unexpected,
-    generateRecoveryPhrase: unexpected,
-    reconnect: unexpected,
-    validateRecoveryPhrase: unexpected,
+const hooks = registerHooks({
+  resolve(specifier, context, next) {
+    if (
+      specifier === "@siafoundation/sia-storage" ||
+      specifier.startsWith("@siafoundation/sia-storage/")
+    )
+      throw Error(`Optional runtime peer requested: ${specifier}`);
+    return next(specifier, context);
   },
-  application: {
+});
+try {
+  const access = await import("@lumeweb/sia-app-access");
+  assert.deepEqual(
+    Object.keys(access).sort(),
+    [
+      "AccessErrorCode",
+      "AccessFailure",
+      "AccessIntent",
+      "AccessOutcome",
+      "AccessPhase",
+      "AccessRecovery",
+      "ApprovalProgress",
+      "CredentialConfirmation",
+      "CredentialEffect",
+      "PhraseValidation",
+      "RegistrationEffect",
+      "SaveRecoveryProgress",
+      "createMemoryCredentialStore",
+      "createSiaAccess",
+      "SessionUnavailableError",
+    ].sort(),
+  );
+  const store = access.createMemoryCredentialStore();
+  const scope = {
     appId: "a".repeat(64),
-    name: "Packed consumer",
-    description: "",
-    serviceUrl: "https://app.example/",
-  },
-  indexerUrl: "https://indexer.example/",
-});
-const initial = controller.getSnapshot();
-assert.equal(initial.state.phase, access.AccessPhase.Disconnected);
-assert.equal(controller.getSnapshot(), initial);
-assert.ok(Object.isFrozen(initial));
-assert.ok(Object.isFrozen(initial.state));
-let notifications = 0;
-const unsubscribe = controller.subscribe(() => {
-  notifications++;
-});
-controller.dispose();
-assert.equal(notifications, 1);
-assert.equal(controller.getSnapshot().state.phase, access.AccessPhase.Disposed);
-assert.equal(initial.state.phase, access.AccessPhase.Disconnected);
-await assert.rejects(
-  controller.withSession(() => "forbidden"),
-  access.SessionUnavailableError,
-);
-assert.equal(
-  new access.SessionUnavailableError().code,
-  "SIA_SESSION_UNAVAILABLE",
-);
-unsubscribe();
-controller.dispose();
-assert.equal(notifications, 1);
-console.log("Packed controller consumer assertions completed");
+    indexerUrl: "https://indexer.example/",
+  };
+  const key = new Uint8Array([1, 2]);
+  await store.write(scope, key);
+  key.fill(0);
+  const read = await store.read(scope);
+  assert.deepEqual(read, new Uint8Array([1, 2]));
+  assert.ok(read);
+  read.fill(0);
+  assert.deepEqual(await store.read(scope), new Uint8Array([1, 2]));
+  await store.remove(scope);
+  assert.equal(await store.read(scope), null);
+  console.log("Packed credential consumer assertions completed");
+
+  const unexpected = () =>
+    Promise.reject(new Error("Observation must not start adapter work"));
+  const controller = access.createSiaAccess({
+    adapter: {
+      begin: unexpected,
+      generateRecoveryPhrase: unexpected,
+      reconnect: unexpected,
+      validateRecoveryPhrase: unexpected,
+    },
+    application: {
+      appId: "a".repeat(64),
+      name: "Packed consumer",
+      description: "",
+      serviceUrl: "https://app.example/",
+    },
+    indexerUrl: "https://indexer.example/",
+  });
+  const initial = controller.getSnapshot();
+  assert.equal(initial.state.phase, access.AccessPhase.Disconnected);
+  assert.equal(controller.getSnapshot(), initial);
+  assert.ok(Object.isFrozen(initial));
+  assert.ok(Object.isFrozen(initial.state));
+  let notifications = 0;
+  const unsubscribe = controller.subscribe(() => {
+    notifications++;
+  });
+  controller.dispose();
+  assert.equal(notifications, 1);
+  assert.equal(
+    controller.getSnapshot().state.phase,
+    access.AccessPhase.Disposed,
+  );
+  assert.equal(initial.state.phase, access.AccessPhase.Disconnected);
+  await assert.rejects(
+    controller.withSession(() => "forbidden"),
+    access.SessionUnavailableError,
+  );
+  assert.equal(
+    new access.SessionUnavailableError().code,
+    "SIA_SESSION_UNAVAILABLE",
+  );
+  unsubscribe();
+  controller.dispose();
+  assert.equal(notifications, 1);
+  console.log("Packed controller consumer assertions completed");
+  const { createSiaAdapter } = await import("@lumeweb/sia-app-access/sia");
+  const adapter = createSiaAdapter();
+  assert.deepEqual(Object.keys(adapter).sort(), [
+    "begin",
+    "generateRecoveryPhrase",
+    "reconnect",
+    "validateRecoveryPhrase",
+  ]);
+  for (const method of Object.values(adapter))
+    assert.equal(typeof method, "function");
+  console.log(
+    "Packed SDK adapter construction completed without SDK resolution",
+  );
+} finally {
+  hooks.deregister();
+}

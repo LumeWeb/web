@@ -18,6 +18,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./sia": {
+      "types": "./dist/sia.d.ts",
+      "import": "./dist/sia.js"
     }
   },
   "scripts": {
@@ -27,9 +31,10 @@
     "format": "prettier --write . && prettier --parser typescript --write 'tests/package/*.fixture'",
     "format:check": "prettier --check . && prettier --parser typescript --check 'tests/package/*.fixture'",
     "test": "node --import tsx --test 'tests/*.test.ts'",
+    "test:offline": "node --import tsx --test 'tests/offline/*.test.ts'",
     "test:browser": "playwright test --config playwright.config.ts",
     "test:browser:build": "vite build",
-    "test:contracts": "pnpm run build && tsc -p tsconfig.contracts.json",
+    "test:contracts": "pnpm run build && tsc -p tsconfig.contracts.json && tsc -p tsconfig.sdk-contracts.json",
     "test:package": "pnpm run build && node --import tsx --test 'tests/package/*.test.ts'"
   },
   "dependencies": {
@@ -38,6 +43,7 @@
   "devDependencies": {
     "@lumeweb/sia-testing": "workspace:*",
     "@playwright/test": "^1.61.1",
+    "@siafoundation/sia-storage": "0.2.0",
     "@types/node": "catalog:",
     "msw": "catalog:",
     "oxlint": "^1.72.0",
@@ -46,5 +52,13 @@
     "tsx": "4.23.0",
     "typescript": "catalog:",
     "vite": "catalog:framework"
+  },
+  "peerDependencies": {
+    "@siafoundation/sia-storage": "0.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@siafoundation/sia-storage": {
+      "optional": true
+    }
   }
 }

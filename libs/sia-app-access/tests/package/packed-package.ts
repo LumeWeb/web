@@ -16,6 +16,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
+import { build } from "vite";
 
 export const workspace = fileURLToPath(new URL("../../", import.meta.url));
 const execute = promisify(execFile);
@@ -58,6 +59,15 @@ export async function checkPackage(input: string): Promise<void> {
     assert.ok("name" in manifest && "files" in manifest);
     assert.equal(manifest.name, "@lumeweb/sia-app-access");
     assert.deepEqual(manifest.files, ["dist"]);
+    assert.ok(
+      "peerDependencies" in manifest && "peerDependenciesMeta" in manifest,
+    );
+    assert.deepEqual(manifest.peerDependencies, {
+      "@siafoundation/sia-storage": "0.2.0",
+    });
+    assert.deepEqual(manifest.peerDependenciesMeta, {
+      "@siafoundation/sia-storage": { optional: true },
+    });
     assert.ok(manifest.exports && typeof manifest.exports === "object");
     for (const [entry, unchecked] of Object.entries(manifest.exports)) {
       const targets: unknown = unchecked;
@@ -130,12 +140,61 @@ export async function checkPackage(input: string): Promise<void> {
     );
     assert.match(output, /Packed credential consumer assertions completed/);
     assert.match(output, /Packed controller consumer assertions completed/);
+    assert.match(
+      output,
+      /Packed SDK adapter construction completed without SDK resolution/,
+    );
     await run(
       process.execPath,
       [
         fileURLToPath(import.meta.resolve("typescript/bin/tsc")),
         "-p",
         join(consumer, "tsconfig.json"),
+      ],
+      consumer,
+      cache,
+    );
+    await writeFile(
+      join(consumer, "index.html"),
+      '<script type="module" src="/main.js"></script>',
+    );
+    await writeFile(
+      join(consumer, "main.js"),
+      'import { createSiaAdapter } from "@lumeweb/sia-app-access/sia"; document.body.textContent = typeof createSiaAdapter().begin;',
+    );
+    // Vite must see the extracted package's optional-peer metadata, not checkout SDK links.
+    await build({
+      build: { outDir: join(owned, "browser") },
+      configFile: false,
+      logLevel: "silent",
+      root: consumer,
+    });
+    // SDK types are needed only after the framework-free consumer has compiled alone.
+    const sdk = findPackageJSON("@siafoundation/sia-storage", import.meta.url);
+    assert.ok(sdk);
+    await cp(
+      dirname(await realpath(sdk)),
+      join(consumer, "node_modules/@siafoundation/sia-storage"),
+      { recursive: true },
+    );
+    await cp(
+      new URL("./sia.fixture", import.meta.url),
+      join(consumer, "sia.ts"),
+    );
+    await writeFile(
+      join(consumer, "tsconfig.sdk.json"),
+      JSON.stringify({
+        compilerOptions: { lib: ["ES2022", "DOM", "ESNext.Disposable"] },
+        extends: "./tsconfig.json",
+        files: ["sia.ts"],
+      }),
+    );
+    await run(
+      process.execPath,
+      [
+        fileURLToPath(import.meta.resolve("typescript/bin/tsc")),
+        "-p",
+        join(consumer, "tsconfig.sdk.json"),
       ],
       consumer,
       cache,

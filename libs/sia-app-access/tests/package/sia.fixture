@@ -1,0 +1,29 @@
+/** An archive consumer must infer SDK operations without exposing session disposal. */
+import { createSiaAccess } from "@lumeweb/sia-app-access";
+import { createSiaAdapter } from "@lumeweb/sia-app-access/sia";
+import type { SiaSession } from "@lumeweb/sia-app-access/sia";
+
+const access = createSiaAccess({
+  adapter: createSiaAdapter(),
+  application: {
+    appId: "a".repeat(64),
+    description: "",
+    name: "Archive caller",
+    serviceUrl: "https://app.example/",
+  },
+  indexerUrl: "https://indexer.example/",
+});
+export const key: Promise<string> = access.withSession((session) => {
+  const key = session.appKey();
+  try {
+    return key.publicKey();
+  } finally {
+    key.free();
+  }
+});
+export function checkDisposal(session: SiaSession): void {
+  // @ts-expect-error The access controller owns top-level disposal.
+  session.free();
+  // @ts-expect-error Symbol disposal also belongs to the controller.
+  session[Symbol.dispose]();
+}
