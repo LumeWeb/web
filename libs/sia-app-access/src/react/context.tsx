@@ -7,6 +7,17 @@ import {
   useSiaAccessInteractions,
   useSiaAccessSelector,
 } from "./hooks/observation.ts";
+import {
+  useSiaApproval,
+  useSiaRecoveryPhrase,
+  useSiaSaveRecovery,
+} from "./hooks/tasks.ts";
+import {
+  SiaAccessView,
+  SiaApprovalView,
+  SiaRecoveryPhraseView,
+  SiaSaveRecoveryView,
+} from "./components/views.tsx";
 import type {
   SiaAccessBinding,
   SiaAccessInteractionBinding,
@@ -14,15 +25,34 @@ import type {
   SiaAccessReactOptions,
   SiaAccessSelector,
 } from "./hooks/observation.ts";
-import { SiaAccessView } from "./components/views.tsx";
-import type { SiaAccessRenderProps } from "./components/views.tsx";
+import type {
+  ApprovalTask,
+  RecoveryPhraseTask,
+  SaveRecoveryTask,
+} from "./hooks/tasks.ts";
+import type {
+  ApprovalRenderProps,
+  RecoveryPhraseRenderProps,
+  SaveRecoveryRenderProps,
+  SiaAccessRenderProps,
+} from "./components/views.tsx";
 
 export interface SiaAccessContext<Session> {
+  ApprovalView(props: ApprovalRenderProps): ReactNode;
   Provider(props: SiaAccessProviderProps<Session>): ReactNode;
+  RecoveryPhraseView(props: RecoveryPhraseRenderProps): ReactNode;
+  SaveRecoveryView(props: SaveRecoveryRenderProps): ReactNode;
   useAccess(options?: SiaAccessReactOptions): SiaAccessBinding<Session>;
+  useApproval(options?: SiaAccessInteractionReactOptions): ApprovalTask | null;
   useInteractions(
     options?: SiaAccessInteractionReactOptions,
   ): SiaAccessInteractionBinding<Session>;
+  useRecoveryPhrase(
+    options?: SiaAccessInteractionReactOptions,
+  ): null | RecoveryPhraseTask;
+  useSaveRecovery(
+    options?: SiaAccessInteractionReactOptions,
+  ): null | SaveRecoveryTask;
   useSelector<Selection>(
     selector: SiaAccessSelector<Selection>,
     options?: SiaAccessReactOptions,
@@ -49,19 +79,33 @@ export function createSiaAccessContext<Session>(): SiaAccessContext<Session> {
     const access = useController();
     if (!hasInteractions(access))
       throw new Error(
-        "Interaction observation requires a controller with interaction metadata",
+        "Interaction hooks require a controller with interaction metadata",
       );
     return access;
   }
   return {
+    ApprovalView: (props) => (
+      <SiaApprovalView {...props} access={useInteractions()} />
+    ),
     Provider({ access, children }) {
       return <Context value={access}>{children}</Context>;
     },
+    RecoveryPhraseView: (props) => (
+      <SiaRecoveryPhraseView {...props} access={useInteractions()} />
+    ),
+    SaveRecoveryView: (props) => (
+      <SiaSaveRecoveryView {...props} access={useInteractions()} />
+    ),
     useAccess(options) {
       return useSiaAccess(useController(), options);
     },
+    useApproval: (options) => useSiaApproval(useInteractions(), options),
     useInteractions: (options) =>
       useSiaAccessInteractions(useInteractions(), options),
+    useRecoveryPhrase: (options) =>
+      useSiaRecoveryPhrase(useInteractions(), options),
+    useSaveRecovery: (options) =>
+      useSiaSaveRecovery(useInteractions(), options),
     useSelector(selector, options) {
       return useSiaAccessSelector(useController(), selector, options);
     },

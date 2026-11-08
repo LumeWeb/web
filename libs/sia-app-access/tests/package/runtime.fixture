@@ -2,7 +2,12 @@
 import assert from "node:assert/strict";
 import { registerHooks } from "node:module";
 
-for (const peer of ["react", "zustand", "@siafoundation/sia-storage"])
+for (const peer of [
+  "react",
+  "zustand",
+  "react-hook-form",
+  "@siafoundation/sia-storage",
+])
   assert.throws(() => import.meta.resolve(peer), {
     code: "ERR_MODULE_NOT_FOUND",
   });
@@ -10,7 +15,13 @@ const hooks = registerHooks({
   resolve(specifier, context, next) {
     if (
       specifier === "@siafoundation/sia-storage" ||
-      specifier.startsWith("@siafoundation/sia-storage/")
+      specifier.startsWith("@siafoundation/sia-storage/") ||
+      specifier === "react" ||
+      specifier.startsWith("react/") ||
+      specifier === "zustand" ||
+      specifier.startsWith("zustand/") ||
+      specifier === "react-hook-form" ||
+      specifier.startsWith("react-hook-form/")
     )
       throw Error(`Optional runtime peer requested: ${specifier}`);
     return next(specifier, context);
@@ -119,6 +130,15 @@ try {
   assert.equal(observation.getState(), controller.getSnapshot());
   assert.equal("setState" in observation, false);
   assert.equal(Object.isFrozen(observation), true);
+  const { toRecoveryPhraseFieldError } =
+    await import("@lumeweb/sia-app-access/react-hook-form");
+  assert.deepEqual(
+    toRecoveryPhraseFieldError(
+      { kind: access.AccessOutcome.InvalidPhrase },
+      { invalidPhrase: "Application error", phraseMismatch: "Wrong account" },
+    ),
+    { type: access.AccessOutcome.InvalidPhrase, message: "Application error" },
+  );
 } finally {
   hooks.deregister();
 }

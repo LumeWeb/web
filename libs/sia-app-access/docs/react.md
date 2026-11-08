@@ -9,7 +9,7 @@ Applications that render DOM use matching React 19 and ReactDOM 19 versions. Rea
 `createSiaAccess` returns a `SiaAccessInteractions<Session>` controller. Its snapshot includes `presentation.availability`, which tells your UI which commands are currently allowed:
 
 ```tsx
-import { AccessIntent, type SiaAccessInteractions } from "@lumeweb/sia-app-access";
+import { AccessIntent, AccessOutcome, type SiaAccessInteractions } from "@lumeweb/sia-app-access";
 import { useSiaAccessInteractions } from "@lumeweb/sia-app-access/react";
 
 interface AccessActionsProps<Session> {
@@ -84,13 +84,219 @@ export function AccountStatus() {
 }
 ```
 
-Inside the provider, use `bindings.useAccess`, `useSelector` or `useInteractions` instead of passing the controller to each hook. Calling a context hook without a provider throws.
+Inside the provider, use `bindings.useAccess`, `useSelector` or `useInteractions` instead of passing the controller to each hook. Task hooks are available as `useApproval`, `useRecoveryPhrase` and `useSaveRecovery`. Calling them without a provider throws.
 
-Interaction observation requires a controller whose snapshots include `presentation`. Keep the factory's inferred `SiaAccessInteractions` type when passing it around; annotating it as `SiaAccess` hides that field from TypeScript. A custom controller that lacks presentation cannot use these hooks.
+Interaction and task hooks require a controller whose snapshots include `presentation`. Keep the factory's inferred `SiaAccessInteractions` type when passing it around; annotating it as `SiaAccess` hides that field from TypeScript. A custom controller that lacks presentation cannot use these hooks.
+
+## Task hooks
+
+A task groups the data and actions for one part of authorization. Each hook returns `null` when that task is absent. Tasks do not store form inputs or expose the SDK session.
+
+Actions activate in the task hook's passive effect. On initial mount, descendant layout or passive effects can run first: result-returning actions then return unavailable, and cancel does nothing. Availability flags describe the controller's presentation and can be true before activation. Use tasks in UI event handlers. For workflow automation, call the application-owned controller and handle its command outcomes.
+
+| Hook                   | Task data and actions                                                                                   |
+| ---------------------- | ------------------------------------------------------------------------------------------------------- |
+| `useSiaApproval`       | `interaction`, `progress`, `url`, `canCancel`, `cancel()`                                               |
+| `useSiaRecoveryPhrase` | `interaction`, `intent`, submission/generation/cancel flags, `submit(string)`, `generate()`, `cancel()` |
+| `useSiaSaveRecovery`   | `interaction`, save `progress`, original failure `effects`, retry/continuation/cancel flags and actions |
+
+`ApprovalProgress.Requesting` has `url: null`; `ApprovalProgress.Awaiting` has a validated HTTP or HTTPS string URL without user information. Save recovery uses `SaveRecoveryProgress.Idle` or `Pending`; retry and continuation are disabled during pending saving. Retry never registers again.
+
+The phrase task remains present during validation, with `canSubmit: false`. `submit` returns the controller's `SubmitRecoveryPhraseResult`; `generate` returns `GeneratedRecoveryPhrase`, which contains a phrase only when its kind is `AccessOutcome.Generated`. Your application decides whether to put that phrase in an input.
+
+Do not keep a task after its controller or authorization flow changes. Its result-returning actions then return unavailable, and its cancel action does nothing.
+
+Each authorization flow has an interaction sequence. The sequence increases when the controller accepts a new authorization and stays the same through phrase correction and saving. Cancel, disconnect, forget, reconnect and disposal end the interaction. A sequence from one controller does not identify a flow in another controller.
+
+## Render approval and phrase entry
+
+Use the approval task's URL when it is available. While the request is pending, the same component shows progress:
+
+```tsx
+import { useSiaApproval, useSiaRecoveryPhrase } from "@lumeweb/sia-app-access/react";
+
+export function ApprovalControls<Session>({ access }: AccessActionsProps<Session>) {
+  const task = useSiaApproval(access);
+  if (!task) return null;
+  return (
+    <section>
+      {task.url ? <a href={task.url}>Approve this application</a> : <p>Requesting approval…</p>}
+      <button disabled={!task.canCancel} onClick={() => task.cancel()}>
+        Cancel
+      </button>
+    </section>
+  );
+}
+
+export function PhraseControls<Session>({ access }: AccessActionsProps<Session>) {
+  const task = useSiaRecoveryPhrase(access);
+  return task ? <RecoveryForm access={access} task={task} /> : null;
+}
+```
+
+The application owns the form's input, backup checkbox and error message. This component ignores delayed results after edits, controller replacement or unmount:
+
+```tsx
+/** The application keeps phrase input and rejects async results after edits or replacement. */
+import { useLayoutEffect, useRef, useState } from "react";
+import type { RecoveryPhraseTask } from "@lumeweb/sia-app-access/react";
+
+interface RecoveryFormProps<Session> {
+  readonly access: SiaAccessInteractions<Session>;
+  readonly task: RecoveryPhraseTask;
+}
+
+export function RecoveryForm<Session>({ access, task }: RecoveryFormProps<Session>) {
+  const creating = task.intent === AccessIntent.Create;
+  const [phrase, setPhrase] = useState("");
+  const [issue, setIssue] = useState("");
+  const [saved, setSaved] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+  const revision = useRef(0);
+  const sequence = task.interaction.sequence;
+  // Cleanup runs before replacement layout effects can resolve an older request.
+  useLayoutEffect(
+    () => () => {
+      revision.current++;
+    },
+    [access, sequence],
+  );
+
+  return (
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        const submitted = ++revision.current;
+        void task.submit(phrase).then((outcome) => {
+          if (submitted !== revision.current) return;
+          const error = toRecoveryPhraseFieldError(outcome, {
+            invalidPhrase: "This phrase isn't valid. Check it and try again.",
+            phraseMismatch: "This phrase doesn't match the account you approved.",
+          });
+          if (error) setIssue(error.message);
+        });
+      }}>
+      <h1>{creating ? "Keep your recovery phrase" : "Enter your recovery phrase"}</h1>
+      <p>{creating ? "Generate your recovery phrase, then write it down and keep it private." : "Enter the recovery phrase you saved for this account."}</p>
+      <label htmlFor="recovery-phrase">Recovery phrase</label>
+      <input
+        aria-describedby={issue ? "phrase-issue" : undefined}
+        aria-invalid={Boolean(issue)}
+        autoComplete="off"
+        id="recovery-phrase"
+        onChange={(event) => {
+          revision.current++;
+          setPhrase(event.currentTarget.value);
+          setSaved(false);
+          setIssue("");
+        }}
+        type={revealed ? "text" : "password"}
+        value={phrase}
+      />
+      {issue && (
+        <p className="error" id="phrase-issue" role="alert">
+          {issue}
+        </p>
+      )}
+      {creating && (
+        <button
+          className="secondary"
+          disabled={!task.canGenerate}
+          onClick={() => {
+            const generated = ++revision.current;
+            void task.generate().then((outcome) => {
+              if (generated !== revision.current || outcome.kind !== AccessOutcome.Generated) return;
+              setPhrase(outcome.phrase);
+              setSaved(false);
+              setIssue("");
+            });
+          }}
+          type="button">
+          Generate phrase
+        </button>
+      )}
+      <button aria-pressed={revealed} className="secondary" disabled={!phrase} onClick={() => setRevealed(!revealed)} type="button">
+        {revealed ? "Hide phrase" : "Show phrase"}
+      </button>
+      {creating && (
+        <label className="check">
+          <input checked={saved} onChange={(event) => setSaved(event.currentTarget.checked)} type="checkbox" />I saved my recovery phrase
+        </label>
+      )}
+      <button disabled={!task.canSubmit || (creating && !saved) || !phrase.trim()} type="submit">
+        {creating ? "Finish account setup" : "Connect account"}
+      </button>
+      <button className="text-button" disabled={!task.canCancel} onClick={() => task.cancel()} type="button">
+        Cancel connection
+      </button>
+    </form>
+  );
+}
+```
+
+The revision changes on every edit, even if the user restores the same text. Layout cleanup invalidates handlers before replacement layout effects can resolve an older request. The controller's original outcomes are not rewritten.
+
+## Recover saving without registering again
+
+The save task appears when registration succeeded but saving the key could not be confirmed. Use its actions rather than starting authorization again:
+
+```tsx
+import { useSiaSaveRecovery } from "@lumeweb/sia-app-access/react";
+
+export function SaveRecoveryControls<Session>({ access }: AccessActionsProps<Session>) {
+  const task = useSiaSaveRecovery(access);
+  if (!task) return null;
+  return (
+    <section>
+      <p>Your account connected, but saving could not be confirmed.</p>
+      <button disabled={!task.canRetrySave} onClick={() => void task.retrySave()}>
+        Try saving again
+      </button>
+      <button disabled={!task.canContinueWithoutSaving} onClick={() => task.continueWithoutSaving()}>
+        Continue anyway
+      </button>
+      <button disabled={!task.canCancel} onClick={() => task.cancel()}>
+        Cancel
+      </button>
+    </section>
+  );
+}
+```
+
+Retry saving does not register the account again. Continuation keeps access ready with unconfirmed persistence. See [credential recovery](credentials.md).
+
+## Keep forms application-owned
+
+Manage input values, errors, dirty and touched state in your form. Call `submit(phrase)` from the submit handler: it can register an account and save credentials, so it must not run as a field validator.
+
+Before applying an asynchronous result, check whether the user has edited the input, replaced the dialog or controller, or left the page. The task cannot make that decision for your form. Keep or clear earlier errors according to your UI's behavior, and reset only when the result warrants it. Unavailable, failed and cancelled results are not success.
+
+The optional `/react-hook-form` entry converts invalid-phrase and phrase-mismatch outcomes to `{ type, message }`. Supply a message for each outcome; empty strings are allowed. Other outcomes return `undefined`, which means no mapped phrase error. It does not clear errors or imply success.
+
+After checking that a result still belongs to the current input, a submit handler can call this helper to show a phrase error. The helper leaves existing errors and values alone when there is no mapped error:
+
+```ts
+import type { UseFormReturn } from "react-hook-form";
+import type { SubmitRecoveryPhraseResult } from "@lumeweb/sia-app-access";
+import { toRecoveryPhraseFieldError } from "@lumeweb/sia-app-access/react-hook-form";
+
+interface PhraseFields {
+  phrase: string;
+}
+export function applyPhraseCorrection(form: UseFormReturn<PhraseFields>, outcome: SubmitRecoveryPhraseResult) {
+  const error = toRecoveryPhraseFieldError(outcome, {
+    invalidPhrase: "Enter a valid recovery phrase.",
+    phraseMismatch: "Use the recovery phrase for this account.",
+  });
+  if (error) form.setError("phrase", error);
+}
+```
+
+The mapper works without React or React Hook Form installed. If your form uses RHF, install it in your application. See the [RHF and plain React examples](../tests/browser/react-interactions.tsx) and their [browser tests](../tests/browser/react-interactions.spec.ts).
 
 ## Renderless views
 
-`SiaAccessView` calls its `children(binding)` callback. It accepts `access`; optional `serverSnapshot` is a direct prop. Context bindings expose `View` without the access prop.
+`SiaAccessView` calls its `children(binding)` callback. `SiaApprovalView`, `SiaRecoveryPhraseView` and `SiaSaveRecoveryView` call `children(task)` even when the task is null. Each accepts `access`; optional `serverSnapshot` is a direct prop. Context bindings expose `View`, `ApprovalView`, `RecoveryPhraseView` and `SaveRecoveryView` without the access prop.
 
 For example, this view renders a connection button using the application's class name:
 
@@ -115,7 +321,7 @@ Views render no DOM or CSS. Supply your own markup, labels, accessibility and fo
 
 ## Server rendering and hydration
 
-Pass `options.serverSnapshot` to hooks, or `serverSnapshot` to views, to render a supplied snapshot on the server and during initial hydration. Its application ID and indexer URL must match the controller. See [store SSR behavior](stores.md#server-snapshots) if you use both native React hooks and Zustand.
+Pass `options.serverSnapshot` to hooks, or `serverSnapshot` to views, to render a supplied snapshot on the server and during initial hydration. Its application ID and indexer URL must match the controller. Task hooks also need the snapshot's `presentation` field. See [store SSR behavior](stores.md#server-snapshots) if you use both native React hooks and Zustand.
 
 A component can take the server snapshot as a prop without starting an operation:
 
@@ -135,4 +341,4 @@ export function HydratedPhase<Session>({
 
 Create separate controllers for server requests. Pass only snapshot data to the client, never a live SDK session.
 
-Server rendering observes the supplied snapshot without subscribing or starting authorization. Run commands in application event handlers. Never serialize recovery input or credential bytes.
+Server rendering does not start authorization. Tasks created from serialized server data cannot start commands, even if their scope and sequence match the client. Their actions become usable only after the hook has switched to the live controller and activated those actions on the client. Use the current hook result in event handlers and handle unavailable results. Never serialize recovery input or credential bytes.
