@@ -92,6 +92,8 @@ Interaction and task hooks require a controller whose snapshots include `present
 
 A task groups the data and actions for one part of authorization. Each hook returns `null` when that task is absent. Tasks do not store form inputs or expose the SDK session.
 
+Actions activate in the task hook's passive effect. On initial mount, descendant layout or passive effects can run first: result-returning actions then return unavailable, and cancel does nothing. Availability flags describe the controller's presentation and can be true before activation. Use tasks in UI event handlers. For workflow automation, call the application-owned controller and handle its command outcomes.
+
 | Hook                   | Task data and actions                                                                                   |
 | ---------------------- | ------------------------------------------------------------------------------------------------------- |
 | `useSiaApproval`       | `interaction`, `progress`, `url`, `canCancel`, `cancel()`                                               |

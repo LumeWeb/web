@@ -4,6 +4,7 @@ import {
   StrictMode,
   useEffect,
   useLayoutEffect,
+  useRef,
 } from "react";
 import { createRoot, hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
@@ -386,8 +387,78 @@ async function replacement(action: string, contextual: boolean) {
 }
 Object.assign(window, { taskReplacement: { replacement } });
 
+/** Descendant mount effects precede the parent task's passive activation. */
+async function activation(contextual: boolean) {
+  const f = fixture();
+  await f.access.authorize(AccessIntent.Create);
+  let generated = 0;
+  f.adapter.generateRecoveryPhrase = async () => {
+    generated++;
+    return "generated after activation";
+  };
+  const committed = deferred<void>();
+  const captured: { task: null | RecoveryPhraseTask } = { task: null };
+  let layout: Promise<GeneratedRecoveryPhrase> | undefined;
+  let passive: Promise<GeneratedRecoveryPhrase> | undefined;
+  let enabled = false;
+  function Child({ task }: { readonly task: RecoveryPhraseTask }) {
+    const invoked = useRef({ layout: false, passive: false });
+    useLayoutEffect(() => {
+      if (invoked.current.layout) return;
+      invoked.current.layout = true;
+      layout = task.generate();
+    }, [task]);
+    useEffect(() => {
+      if (invoked.current.passive) return;
+      invoked.current.passive = true;
+      passive = task.generate();
+    }, [task]);
+    return null;
+  }
+  function useProbe(task: null | RecoveryPhraseTask) {
+    check(task, "phrase task is present");
+    captured.task = task;
+    enabled = task.canGenerate;
+    useEffect(() => {
+      committed.resolve();
+    }, []);
+    return h(Child, { task });
+  }
+  function Direct() {
+    return useProbe(useSiaRecoveryPhrase(f.access));
+  }
+  function Contextual() {
+    return useProbe(context.useRecoveryPhrase());
+  }
+  const root = createRoot(document.getElementById("root")!);
+  try {
+    root.render(
+      contextual
+        ? h(context.Provider, { access: f.access }, h(Contextual))
+        : h(Direct),
+    );
+    await committed.promise;
+    check(captured.task && layout && passive, "mount effects completed");
+    const before = generated;
+    const after = await captured.task.generate();
+    return {
+      after,
+      before,
+      enabled,
+      generated,
+      layout: await layout,
+      passive: await passive,
+    };
+  } finally {
+    root.unmount();
+    f.access.dispose();
+  }
+}
+Object.assign(window, { taskActivation: { activation } });
+
 declare global {
   interface Window {
+    readonly taskActivation: { readonly activation: typeof activation };
     readonly taskHydration: {
       readonly correlation: typeof correlation;
       readonly run: typeof run;

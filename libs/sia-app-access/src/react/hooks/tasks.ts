@@ -151,6 +151,7 @@ function useActionLease<Session>(
     },
     [lease],
   );
+  // Descendant mount effects can precede activation even when presentation flags allow an action.
   useEffect(() => {
     lease.active = liveObservation;
     return () => {

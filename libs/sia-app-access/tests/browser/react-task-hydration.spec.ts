@@ -1,4 +1,23 @@
 import { expect, test } from "@playwright/test";
+for (const contextual of [false, true]) {
+  test(`descendant mount effects precede passive activation through ${contextual ? "context" : "direct"} tasks`, async ({
+    page,
+  }) => {
+    await page.goto("/tests/browser/react-task-hydration.html");
+    const result = await page.evaluate(
+      (contextual) => window.taskActivation.activation(contextual),
+      contextual,
+    );
+    expect(result).toEqual({
+      after: { kind: "generated", phrase: "generated after activation" },
+      before: 0,
+      enabled: true,
+      generated: 1,
+      layout: { kind: "unavailable" },
+      passive: { kind: "unavailable" },
+    });
+  });
+}
 for (const kind of ["approval", "phrase", "save"]) {
   for (const contextual of [false, true]) {
     test(`StrictMode hydration retires ${kind} server closures through ${contextual ? "context" : "direct"} tasks`, async ({
