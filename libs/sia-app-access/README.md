@@ -1,44 +1,56 @@
 # Sia application access
 
-Scoped credential storage and framework-free TypeScript contracts for Sia access adapters. The package is private and does not include a controller implementation.
+Framework-free Sia authorization and session lifetime for application-owned interfaces. Supply an adapter for your backend; the controller keeps credential saving separate from registration and retains sessions through admitted work.
 
-## Store credentials in memory
+The package is private. Use it through the workspace or a local archive.
+
+## Create access for an application
 
 ```ts
-import { createMemoryCredentialStore } from "@lumeweb/sia-app-access";
+import { createSiaAccess, type SiaAccessAdapter } from "@lumeweb/sia-app-access";
 
-const credentials = createMemoryCredentialStore();
-const scope = {
-  appId: "a".repeat(64),
-  indexerUrl: "https://indexer.example/",
-};
-const key = new Uint8Array(32).fill(1);
-await credentials.write(scope, key);
-key.fill(0);
-
-const restored = await credentials.read(scope);
-if (restored?.[0] !== 1) throw new Error("Expected the stored copy");
-restored.fill(0);
-await credentials.remove(scope);
+export function applicationAccess<Session>(adapter: SiaAccessAdapter<Session>) {
+  return createSiaAccess({
+    adapter,
+    application: {
+      appId: "a".repeat(64),
+      name: "My app",
+      description: "Application storage",
+      serviceUrl: "https://app.example/",
+    },
+    indexerUrl: "https://indexer.example/",
+  });
+}
 ```
 
-Each store owns its records. Writes retain copies and reads return copies; removing one scope leaves other records intact. Read [credential ownership](docs/credentials.md) before implementing a persistent store.
+Create the controller once in application bootstrap. Read [getting started](docs/getting-started.md) for account choices and session work. [The API reference](docs/api.md) lists command outcomes and cancellation effects; [credential ownership](docs/credentials.md) covers custom stores and save recovery.
 
-The root entry also exports access states, command results and adapter interfaces. Import contracts such as `SiaAccessAdapter<Session>` with `import type`. Runtime constants use string enums; for example, `AccessOutcome.Ready` is `"ready"`.
+Forms and input errors belong to the application. Observing a controller does not authorize access or dispose it.
 
 ## Development
 
-Run these commands from this package directory:
+From the repository root, build the workspace testing dependency before checking this package:
+
+```sh
+pnpm --filter=@lumeweb/tsdown-config build:config
+pnpm --filter=@lumeweb/sia-testing build
+```
+
+From this package directory:
 
 ```sh
 pnpm run typecheck
 pnpm test
 pnpm run lint
 pnpm run format:check
+pnpm run test:browser:build
+pnpm run test:browser
+pnpm run test:browser --browser=firefox
 pnpm run test:contracts
 pnpm run test:package
+npm run test:package
 ```
 
-Private lifecycle tests check admission and recovery transitions. Command tests check settlement before publication; resource tests keep retired sessions alive until admitted borrowers settle. These implementation modules are not package exports.
+Typecheck, source tests and browser fixtures use access source without a prebuild. Artifact checks use the canonical TypeScript and `tsc-alias` build. Archive consumers run outside the workspace.
 
-Typecheck and source tests do not require a build. Contract and archive checks build the package with TypeScript and rewrite emitted import paths with `tsc-alias`. Run `npm run test:package` as well to check npm's archive output.
+Browser tests start Vite on port 4173; that port must be free. They use shared synthetic Sia fixtures for approval and application operations. Existing-account phrase matching is tested with a controlled adapter, not the shared synthetic protocol. These checks do not verify live Sia authorization.
