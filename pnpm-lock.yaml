@@ -2665,6 +2665,10 @@ importers:
         version: 4.1.9(@types/node@26.1.0)(@vitest/browser-playwright@4.1.9)(@vitest/coverage-v8@4.1.9)(happy-dom@20.10.6)(jsdom@29.1.1(@noble/hashes@2.4.0))(msw@2.14.6(@types/node@26.1.0)(typescript@6.0.3))(vite@8.0.16)
 
   libs/sia-app-access:
+    dependencies:
+      robot3:
+        specifier: 1.4.0
+        version: 1.4.0
     devDependencies:
       '@types/node':
         specifier: ^26.1.0
@@ -14758,6 +14762,9 @@ packages:
 
   robot3@1.2.0:
     resolution: {integrity: sha512-Xin8KHqCKrD9Rqk1ZzZQYjsb6S9DRggcfwBqnVPeM3DLtNCJLxWWTrPJDYm3E+ZiTO7H3VMdgyPSkIbuYnYP2Q==}
+
+  robot3@1.4.0:
+    resolution: {integrity: sha512-M7m12+Sx8SVgw72OMKcB9Eq6S0SKgj48sGRWHqFcND8+GDQBr7cZAdMlTWokcP6sslIdSW7hEYLjr17OJ+nh3w==}
 
   robust-predicates@3.0.3:
     resolution: {integrity: sha512-NS3levdsRIUOmiJ8FZWCP7LG3QpJyrs/TE0Zpf1yvZu8cAJJ6QMW92H1c7kWpdIHo8RvmLxN/o2JXTKHp74lUA==}
@@ -31515,6 +31522,8 @@ snapshots:
       glob: 7.2.3
 
   robot3@1.2.0: {}
+
+  robot3@1.4.0: {}
 
   robust-predicates@3.0.3:
     optional: true
