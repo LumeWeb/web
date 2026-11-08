@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.contracts.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "ESNext.Disposable"]
+  },
+  "include": ["dist/sia.d.ts", "tests/types/sdk.test-d.ts"]
+}

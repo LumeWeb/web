@@ -25,6 +25,8 @@ export function applicationAccess<Session>(adapter: SiaAccessAdapter<Session>) {
 
 Create the controller once in application bootstrap. Read [getting started](docs/getting-started.md) for account choices and session work. [The API reference](docs/api.md) lists command outcomes and cancellation effects; [credential ownership](docs/credentials.md) covers custom stores and save recovery.
 
+For SDK 0.2.0, import `createSiaAdapter` from `@lumeweb/sia-app-access/sia` and supply it as the adapter. Read [adapters](docs/adapters.md) for setup and resource ownership. The SDK peer is optional; root imports and adapter construction do not load it.
+
 Forms and input errors belong to the application. Observing a controller does not authorize access or dispose it.
 
 ## Development
@@ -41,6 +43,7 @@ From this package directory:
 ```sh
 pnpm run typecheck
 pnpm test
+pnpm run test:offline
 pnpm run lint
 pnpm run format:check
 pnpm run test:browser:build
@@ -53,4 +56,4 @@ npm run test:package
 
 Typecheck, source tests and browser fixtures use access source without a prebuild. Artifact checks use the canonical TypeScript and `tsc-alias` build. Archive consumers run outside the workspace.
 
-Browser tests start Vite on port 4173; that port must be free. They use shared synthetic Sia fixtures for approval and application operations. Existing-account phrase matching is tested with a controlled adapter, not the shared synthetic protocol. These checks do not verify live Sia authorization.
+Browser tests start Vite on port 4173; that port must be free. They use shared synthetic Sia fixtures for approval and application operations. Existing-account phrase matching is tested with a controlled adapter, not the shared synthetic protocol. Offline SDK tests run initialization scenarios in separate processes, including a missing Node facade and recovery after asset failure. These checks do not verify live Sia authorization, saved-account reconnect or worker execution.

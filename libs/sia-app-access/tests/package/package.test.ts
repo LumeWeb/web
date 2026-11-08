@@ -7,7 +7,7 @@ import { test } from "node:test";
 import { checkPackage, workspace } from "./packed-package.ts";
 
 void test(
-  "the archive provides the controller and generic contracts without optional runtimes",
+  "the archive provides the controller and lazy SDK adapter without optional runtimes",
   { timeout: 120000 },
   async () => {
     await checkPackage(workspace);
@@ -52,6 +52,32 @@ void test(
     await assert.rejects(
       checkPackage(input),
       /Packed export \. import target missing: \.\/src\/not-packed\.js/,
+    );
+  },
+);
+
+void test(
+  "archive checks reject an eager SDK import in the optional entry",
+  { timeout: 120000 },
+  async (t) => {
+    const input = await mkdtemp(join(tmpdir(), "sia-package-eager-sdk-"));
+    t.after(() => rm(input, { force: true, recursive: true }));
+    await cp(join(workspace, "dist"), join(input, "dist"), { recursive: true });
+    const manifest: unknown = JSON.parse(
+      await readFile(join(workspace, "package.json"), "utf8"),
+    );
+    assert.ok(manifest && typeof manifest === "object");
+    Reflect.deleteProperty(manifest, "devDependencies");
+    await writeFile(join(input, "package.json"), JSON.stringify(manifest));
+    const entry = join(input, "dist/sia.js");
+    await writeFile(
+      entry,
+      'import "@siafoundation/sia-storage/wasm";\n' +
+        (await readFile(entry, "utf8")),
+    );
+    await assert.rejects(
+      checkPackage(input),
+      /Optional runtime peer requested: @siafoundation\/sia-storage\/wasm/,
     );
   },
 );

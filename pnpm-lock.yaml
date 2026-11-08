@@ -2676,6 +2676,9 @@ importers:
       '@playwright/test':
         specifier: ^1.61.1
         version: 1.61.1
+      '@siafoundation/sia-storage':
+        specifier: 0.2.0
+        version: 0.2.0
       '@types/node':
         specifier: ^26.1.0
         version: 26.1.0
@@ -7878,8 +7881,18 @@ packages:
     cpu: [arm64]
     os: [darwin]
 
+  '@siafoundation/sia-storage-darwin-arm64@0.2.0':
+    resolution: {integrity: sha512-Ln8SHF4WyfC564WPwWXeuPvSzPdXJ0Z5Mck76SOisl/WvAj9EnFDXnvcY5QjpPFPP3KVn21Lr9UMMtGpj8fshw==}
+    cpu: [arm64]
+    os: [darwin]
+
   '@siafoundation/sia-storage-darwin-x64@0.1.4':
     resolution: {integrity: sha512-SoXbJ3aEznS5/mBL3fTE0gvLJ7ZYMaBKkNN8H2NS9QvQDAL25OGtm4KOeH0ZE7QmKQRGwO8n1pI9J4yVv9n7Tw==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@siafoundation/sia-storage-darwin-x64@0.2.0':
+    resolution: {integrity: sha512-M4ob5dEvkhuoerFIx6iiCZdizRcpcZPQwy664Ol9u8Rzo3Ryo26zDpcYepJQ281aiEf6dldLlRCR5NE+PCXCMw==}
     cpu: [x64]
     os: [darwin]
 
@@ -7888,8 +7901,18 @@ packages:
     cpu: [arm64]
     os: [linux]
 
+  '@siafoundation/sia-storage-linux-arm64-gnu@0.2.0':
+    resolution: {integrity: sha512-4/v4oeAafhxzTH7uz6Jkm5ZCeDt1KBiHjYqdNAhPRIclhqOmUKD1DzbyOEgvkba4XfKbkEUkzJN9IMprrmvQmg==}
+    cpu: [arm64]
+    os: [linux]
+
   '@siafoundation/sia-storage-linux-x64-gnu@0.1.4':
     resolution: {integrity: sha512-PGQvcaST1d2mu1CMt32Br7ghc3EMFRMBJ0aAFPRaOHcc5AlplQ6zMmf4JpMif14fa0qzVioCCxR8kW2gCorZ9w==}
+    cpu: [x64]
+    os: [linux]
+
+  '@siafoundation/sia-storage-linux-x64-gnu@0.2.0':
+    resolution: {integrity: sha512-ZW+Q9cIgHZfIiLFKecAZ+kcu6Bn3fNahkALLZxsCTlE/4CL27mlqjeXJJGuz3ghh98HGbfmjl7a+7cI88bOF6g==}
     cpu: [x64]
     os: [linux]
 
@@ -7898,8 +7921,17 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@siafoundation/sia-storage-win32-x64-msvc@0.2.0':
+    resolution: {integrity: sha512-79zSiWp5DOyeVLU6E+nyhfe4YbmolgtUSdZvnOnxVvX0ryh1zmYVqVFrIlPkn7rcBYFCJuasfqwGwwBbmXUwYg==}
+    cpu: [x64]
+    os: [win32]
+
   '@siafoundation/sia-storage@0.1.4':
     resolution: {integrity: sha512-oqVEpUOutHE9OX2XoE0yFbMapXLijN8OLvG8S5jXa4J5VuQyOJJMJEebnQKiUyyFXshvu2+C1wplJAUcyCeNjA==}
+    hasBin: true
+
+  '@siafoundation/sia-storage@0.2.0':
+    resolution: {integrity: sha512-LTl0+h+f8zhYjZNYzz/aYcSmIiUkWMRMcdGcAEo3MdIUaqsSBpVsUb/mYq/4kDXSI+YL+GgQ/4TEaAFhrBcv2w==}
     hasBin: true
 
   '@simple-git/args-pathspec@1.0.3':
@@ -22734,16 +22766,31 @@ snapshots:
   '@siafoundation/sia-storage-darwin-arm64@0.1.4':
     optional: true
 
+  '@siafoundation/sia-storage-darwin-arm64@0.2.0':
+    optional: true
+
   '@siafoundation/sia-storage-darwin-x64@0.1.4':
+    optional: true
+
+  '@siafoundation/sia-storage-darwin-x64@0.2.0':
     optional: true
 
   '@siafoundation/sia-storage-linux-arm64-gnu@0.1.4':
     optional: true
 
+  '@siafoundation/sia-storage-linux-arm64-gnu@0.2.0':
+    optional: true
+
   '@siafoundation/sia-storage-linux-x64-gnu@0.1.4':
     optional: true
 
+  '@siafoundation/sia-storage-linux-x64-gnu@0.2.0':
+    optional: true
+
   '@siafoundation/sia-storage-win32-x64-msvc@0.1.4':
+    optional: true
+
+  '@siafoundation/sia-storage-win32-x64-msvc@0.2.0':
     optional: true
 
   '@siafoundation/sia-storage@0.1.4':
@@ -22753,6 +22800,14 @@ snapshots:
       '@siafoundation/sia-storage-linux-arm64-gnu': 0.1.4
       '@siafoundation/sia-storage-linux-x64-gnu': 0.1.4
       '@siafoundation/sia-storage-win32-x64-msvc': 0.1.4
+
+  '@siafoundation/sia-storage@0.2.0':
+    optionalDependencies:
+      '@siafoundation/sia-storage-darwin-arm64': 0.2.0
+      '@siafoundation/sia-storage-darwin-x64': 0.2.0
+      '@siafoundation/sia-storage-linux-arm64-gnu': 0.2.0
+      '@siafoundation/sia-storage-linux-x64-gnu': 0.2.0
+      '@siafoundation/sia-storage-win32-x64-msvc': 0.2.0
 
   '@simple-git/args-pathspec@1.0.3': {}
 
