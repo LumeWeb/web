@@ -1,0 +1,39 @@
+/** Only the extracted package is visible to this runtime consumer. */
+import assert from "node:assert/strict";
+import * as access from "@lumeweb/sia-app-access";
+
+for (const peer of ["react", "zustand", "@siafoundation/sia-storage"])
+  assert.throws(() => import.meta.resolve(peer), {
+    code: "ERR_MODULE_NOT_FOUND",
+  });
+assert.deepEqual(
+  Object.keys(access).sort(),
+  [
+    "AccessErrorCode",
+    "AccessFailure",
+    "AccessIntent",
+    "AccessOutcome",
+    "AccessPhase",
+    "AccessRecovery",
+    "ApprovalProgress",
+    "CredentialConfirmation",
+    "CredentialEffect",
+    "PhraseValidation",
+    "RegistrationEffect",
+    "SaveRecoveryProgress",
+    "createMemoryCredentialStore",
+  ].sort(),
+);
+const store = access.createMemoryCredentialStore();
+const scope = { appId: "a".repeat(64), indexerUrl: "https://indexer.example/" };
+const key = new Uint8Array([1, 2]);
+await store.write(scope, key);
+key.fill(0);
+const read = await store.read(scope);
+assert.deepEqual(read, new Uint8Array([1, 2]));
+assert.ok(read);
+read.fill(0);
+assert.deepEqual(await store.read(scope), new Uint8Array([1, 2]));
+await store.remove(scope);
+assert.equal(await store.read(scope), null);
+console.log("Packed credential consumer assertions completed");

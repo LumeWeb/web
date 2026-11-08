@@ -1,0 +1,41 @@
+{
+  "name": "@lumeweb/sia-app-access",
+  "version": "0.0.0",
+  "description": "Scoped Sia credentials and framework-free access contracts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web",
+    "directory": "libs/sia-app-access"
+  },
+  "private": true,
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint --deny-warnings src tests --ignore-pattern 'tests/types/**'",
+    "format": "prettier --write . && prettier --parser typescript --write 'tests/package/*.fixture'",
+    "format:check": "prettier --check . && prettier --parser typescript --check 'tests/package/*.fixture'",
+    "test": "node --import tsx --test 'tests/*.test.ts'",
+    "test:contracts": "pnpm run build && tsc -p tsconfig.contracts.json",
+    "test:package": "pnpm run build && node --import tsx --test 'tests/package/*.test.ts'"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "oxlint": "^1.72.0",
+    "oxlint-tsgolint": "catalog:",
+    "tsc-alias": "1.9.10",
+    "tsx": "4.23.0",
+    "typescript": "catalog:"
+  }
+}

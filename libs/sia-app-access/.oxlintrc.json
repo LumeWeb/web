@@ -1,0 +1,11 @@
+{
+  "extends": ["../../.oxlintrc.json"],
+  "overrides": [
+    {
+      "files": ["src/credentials.ts"],
+      "rules": {
+        "typescript/require-await": "off"
+      }
+    }
+  ]
+}
