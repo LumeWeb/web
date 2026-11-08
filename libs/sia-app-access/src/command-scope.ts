@@ -25,6 +25,7 @@ export interface AccessCommand<Value> extends CommandScope<Value> {
   readonly promise: Promise<AccessCancelled | AccessFailed | Value>;
 }
 export interface CommandAdmission {
+  /** Rejects overlapping admission without cancelling the active command. */
   begin<Value>(settled?: () => void): AccessCommand<Value>;
 }
 export interface CommandControl extends CommandAdmission {
@@ -63,6 +64,7 @@ export class CommandCoordinator {
   ) {}
 
   begin<Value>(settled?: () => void): AccessCommand<Value> {
+    if (this.active) throw new Error("A command is already active");
     this.cancelGenerations();
     let resolve!: (result: AccessCancelled | AccessFailed | Value) => void;
     const promise = new Promise<AccessCancelled | AccessFailed | Value>((r) => {

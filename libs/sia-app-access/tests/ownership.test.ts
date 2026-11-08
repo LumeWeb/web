@@ -12,7 +12,7 @@ import {
   CredentialEffect,
   RegistrationEffect,
 } from "@/index";
-import type { AccessApproved } from "@/index";
+import type { AccessApproved, AccessConnection } from "@/index";
 import type { AccessCommand } from "@/command-scope";
 import { deferred } from "./helpers/core-async.ts";
 
@@ -75,6 +75,99 @@ void test("retirement denies new session work but waits for every admitted borro
   assert.equal(disposed, 1);
   resources.retire();
   assert.equal(disposed, 1);
+});
+
+for (const borrowing of [false, true]) {
+  void test(`installing over ${borrowing ? "a borrowed" : "an idle"} session preserves the existing owner`, async () => {
+    const resources = new AccessResources<number>();
+    const release = deferred<number>();
+    let firstDisposed = 0;
+    let secondDisposed = 0;
+    resources.installSession({
+      dispose() {
+        firstDisposed++;
+      },
+      exportAppKey: () => new Uint8Array(32),
+      value: 1,
+    });
+    const work = borrowing ? resources.run(() => release.promise) : undefined;
+    const incoming = {
+      dispose() {
+        secondDisposed++;
+      },
+      exportAppKey: () => new Uint8Array(32),
+      value: 2,
+    };
+    assert.throws(() => resources.installSession(incoming));
+    assert.equal(await resources.run((value) => value), 1);
+    assert.equal(firstDisposed, 0);
+    assert.equal(secondDisposed, 0);
+    resources.retireSession();
+    assert.equal(firstDisposed, borrowing ? 0 : 1);
+    resources.installSession(incoming);
+    assert.equal(await resources.run((value) => value), 2);
+    release.resolve(7);
+    if (work) assert.equal(await work, 7);
+    assert.equal(firstDisposed, 1);
+    assert.equal(secondDisposed, 0);
+    resources.retireSession();
+    assert.equal(secondDisposed, 1);
+  });
+}
+
+void test("installing over a connection preserves the existing owner", () => {
+  const resources = new AccessResources<number>();
+  let firstDisposed = 0;
+  let secondDisposed = 0;
+  const first: AccessConnection<number> = {
+    approvalUrl: "https://approval.example/",
+    dispose() {
+      firstDisposed++;
+    },
+    matchesExistingAppKey: () => Promise.resolve(false),
+    register: () => Promise.reject(new Error("Unexpected registration")),
+    waitForApproval: () => Promise.resolve(),
+  };
+  const second = {
+    ...first,
+    dispose() {
+      secondDisposed++;
+    },
+  };
+  resources.installConnection(first);
+  assert.throws(() => resources.installConnection(second));
+  assert.equal(resources.connection, first);
+  assert.equal(firstDisposed, 0);
+  assert.equal(secondDisposed, 0);
+  resources.retireConnection();
+  assert.equal(firstDisposed, 1);
+  resources.installConnection(second);
+  assert.equal(resources.connection, second);
+  resources.retireConnection();
+  assert.equal(secondDisposed, 1);
+});
+
+void test("overlapping command admission preserves the active command until cancellation", async () => {
+  const coordinator = quietCoordinator();
+  let settled = 0;
+  const first = coordinator.begin<AccessApproved>(() => {
+    settled++;
+  });
+  first.registrationEffect = RegistrationEffect.Unknown;
+  const effects = first.effects;
+  assert.throws(() => coordinator.begin<AccessApproved>());
+  assert.equal(first.current, true);
+  assert.equal(first.effects, effects);
+  assert.equal(settled, 0);
+  coordinator.cancel();
+  assert.deepEqual(await first.promise, {
+    effects,
+    kind: AccessOutcome.Cancelled,
+  });
+  assert.equal(settled, 1);
+  const next = coordinator.begin<AccessApproved>();
+  next.finish({ kind: AccessOutcome.Approved });
+  assert.deepEqual(await next.promise, { kind: AccessOutcome.Approved });
 });
 
 void test("failure captures effects and releases its scope before reentrant publication", async () => {

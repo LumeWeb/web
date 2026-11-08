@@ -11,6 +11,7 @@ interface HeldSession<Session> {
   readonly resource: AccessSession<Session>;
   retired: boolean;
 }
+/** A rejected installation leaves the incoming resource owned by its caller. */
 export class AccessResources<Session> {
   get connection(): AccessConnection<Session> {
     if (!this.ownedConnection) throw new Error("Missing approved connection");
@@ -32,9 +33,12 @@ export class AccessResources<Session> {
     return this.session !== undefined;
   }
   installConnection(connection: AccessConnection<Session>): void {
+    if (this.ownedConnection)
+      throw new Error("A connection is already installed");
     this.ownedConnection = connection;
   }
   installSession(resource: AccessSession<Session>): void {
+    if (this.session) throw new Error("A session is already installed");
     this.session = { borrows: 0, resource, retired: false };
   }
   retire(): void {
