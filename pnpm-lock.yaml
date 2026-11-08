@@ -2682,6 +2682,12 @@ importers:
       '@types/node':
         specifier: ^26.1.0
         version: 26.1.0
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: 'catalog:'
+        version: 19.2.3(@types/react@19.2.17)
       msw:
         specifier: 'catalog:'
         version: 2.14.6(@types/node@26.1.0)(typescript@6.0.3)
@@ -2691,6 +2697,12 @@ importers:
       oxlint-tsgolint:
         specifier: 'catalog:'
         version: 0.24.0
+      react:
+        specifier: 'catalog:'
+        version: 19.2.7
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.2.7(react@19.2.7)
       tsc-alias:
         specifier: 1.9.10
         version: 1.9.10
@@ -2703,6 +2715,9 @@ importers:
       vite:
         specifier: catalog:framework
         version: 8.0.16(@types/node@26.1.0)(@vitejs/devtools@0.1.22)(esbuild@0.28.1)(jiti@1.21.7)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
+      zustand:
+        specifier: 'catalog:'
+        version: 5.0.14(@types/react@19.2.17)(immer@11.1.11)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7))
 
   libs/sia-testing:
     devDependencies:

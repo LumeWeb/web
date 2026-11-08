@@ -14,7 +14,7 @@ import {
 import { findPackageJSON } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve, sep } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 import { build } from "vite";
 
@@ -64,9 +64,13 @@ export async function checkPackage(input: string): Promise<void> {
     );
     assert.deepEqual(manifest.peerDependencies, {
       "@siafoundation/sia-storage": "0.2.0",
+      "react": "^19.0.0",
+      "zustand": "^5.0.14",
     });
     assert.deepEqual(manifest.peerDependenciesMeta, {
       "@siafoundation/sia-storage": { optional: true },
+      "react": { optional: true },
+      "zustand": { optional: true },
     });
     assert.ok(manifest.exports && typeof manifest.exports === "object");
     for (const [entry, unchecked] of Object.entries(manifest.exports)) {
@@ -85,6 +89,10 @@ export async function checkPackage(input: string): Promise<void> {
         });
       }
     }
+    assert.match(
+      await readFile(join(packed, "dist/react.js"), "utf8"),
+      /^"use client";/,
+    );
     const modules = join(consumer, "node_modules/@lumeweb/sia-app-access");
     await mkdir(dirname(modules), { recursive: true });
     await cp(packed, modules, { recursive: true });
@@ -169,6 +177,69 @@ export async function checkPackage(input: string): Promise<void> {
       logLevel: "silent",
       root: consumer,
     });
+    const dependencies = join(consumer, "node_modules");
+    await copyPeer("react", dependencies);
+    await cp(
+      new URL("./react-runtime.fixture", import.meta.url),
+      join(consumer, "react-consumer.mjs"),
+    );
+    const reactOutput = await run(
+      process.execPath,
+      ["react-consumer.mjs"],
+      consumer,
+      cache,
+    );
+    assert.match(
+      reactOutput,
+      /Packed React observation imports without optional integrations/,
+    );
+    const reactTypes = await copyPeer("@types/react", dependencies);
+    await copyPeer("csstype", dependencies, pathToFileURL(reactTypes).href);
+    await cp(
+      new URL("./react.fixture", import.meta.url),
+      join(consumer, "react.ts"),
+    );
+    await writeFile(
+      join(consumer, "tsconfig.react.json"),
+      JSON.stringify({
+        compilerOptions: { lib: ["ES2022", "DOM"] },
+        extends: "./tsconfig.json",
+        files: ["react.ts"],
+      }),
+    );
+    await run(
+      process.execPath,
+      [
+        fileURLToPath(import.meta.resolve("typescript/bin/tsc")),
+        "-p",
+        join(consumer, "tsconfig.react.json"),
+      ],
+      consumer,
+      cache,
+    );
+    await copyPeer("react-dom", dependencies);
+    await cp(
+      new URL("./react-ssr.fixture", import.meta.url),
+      join(consumer, "react-ssr-consumer.mjs"),
+    );
+    const nativeOutput = await run(
+      process.execPath,
+      ["react-ssr-consumer.mjs"],
+      consumer,
+      cache,
+    );
+    assert.match(nativeOutput, /Packed React hooks render without Zustand/);
+    await copyPeer("zustand", dependencies);
+    const mixedOutput = await run(
+      process.execPath,
+      ["react-ssr-consumer.mjs", "--zustand"],
+      consumer,
+      cache,
+    );
+    assert.match(
+      mixedOutput,
+      /Packed React and Zustand readers share controller snapshots without synchronization/,
+    );
     // SDK types are needed only after the framework-free consumer has compiled alone.
     const sdk = findPackageJSON("@siafoundation/sia-storage", import.meta.url);
     assert.ok(sdk);
@@ -202,6 +273,21 @@ export async function checkPackage(input: string): Promise<void> {
   } finally {
     await rm(owned, { force: true, recursive: true });
   }
+}
+
+/** Realpaths keep copied peers from resolving through workspace dependency links. */
+async function copyPeer(
+  name: string,
+  modules: string,
+  base: string = import.meta.url,
+): Promise<string> {
+  const metadata = findPackageJSON(name, base);
+  assert.ok(metadata);
+  const physical = await realpath(metadata);
+  const destination = join(modules, name);
+  await mkdir(dirname(destination), { recursive: true });
+  await cp(dirname(physical), destination, { recursive: true });
+  return physical;
 }
 
 async function run(

@@ -1,0 +1,40 @@
+/** Published observation types retain application sessions and readonly command bindings. */
+import { createElement } from "react";
+import type { SiaAccess } from "../../dist/index.js";
+import {
+  createSiaAccessContext,
+  SiaAccessView,
+  useSiaAccess,
+  useSiaAccessSelector,
+} from "../../dist/react.js";
+import { createSiaAccessStore } from "../../dist/zustand.js";
+
+interface Destination {
+  write(content: Uint8Array): Promise<string>;
+}
+const context = createSiaAccessContext<Destination>();
+export function useDestination(access: SiaAccess<Destination>): void {
+  const binding = useSiaAccess(access);
+  const contextual = context.useAccess();
+  const key: Promise<string> = contextual.commands.withSession((destination) =>
+    destination.write(new Uint8Array()),
+  );
+  const phase: string = useSiaAccessSelector(
+    access,
+    (snapshot) => snapshot.state.phase,
+  );
+  const store = createSiaAccessStore(access);
+  void key;
+  void phase;
+  // @ts-expect-error Observation does not own controller disposal.
+  binding.commands.dispose();
+  // @ts-expect-error Command bindings are readonly.
+  binding.commands.cancel = () => undefined;
+  // @ts-expect-error The store does not own mutable controller state.
+  store.setState({});
+  void createElement(SiaAccessView<Destination>, {
+    access,
+    children: () => null,
+  });
+  void createElement(context.Provider, { access });
+}

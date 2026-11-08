@@ -1,0 +1,30 @@
+/** React observation must import without a renderer, SDK, form library or Zustand. */
+import assert from "node:assert/strict";
+import * as react from "@lumeweb/sia-app-access/react";
+
+assert.deepEqual(
+  Object.keys(react).sort(),
+  [
+    "SiaAccessView",
+    "createSiaAccessContext",
+    "useSiaAccess",
+    "useSiaAccessInteractions",
+    "useSiaAccessSelector",
+  ].sort(),
+);
+for (const method of Object.values(react))
+  assert.equal(typeof method, "function");
+for (const name of [
+  "zustand",
+  "react-dom",
+  "react-hook-form",
+  "@siafoundation/sia-storage",
+]) {
+  await assert.rejects(import(name), { code: "ERR_MODULE_NOT_FOUND" });
+}
+const context = react.createSiaAccessContext();
+assert.deepEqual(
+  Object.keys(context).sort(),
+  ["Provider", "View", "useAccess", "useInteractions", "useSelector"].sort(),
+);
+console.log("Packed React observation imports without optional integrations");

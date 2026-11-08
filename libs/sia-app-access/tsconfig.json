@@ -3,6 +3,7 @@
     "target": "ES2022",
     "lib": ["ES2022", "DOM", "ESNext.Disposable"],
     "module": "NodeNext",
+    "jsx": "react-jsx",
     "moduleResolution": "NodeNext",
     "strict": true,
     "noUncheckedIndexedAccess": true,
@@ -13,11 +14,12 @@
     "noEmit": true,
     "types": ["node"],
     "paths": {
-      "@/*": ["./src/*.ts"]
+      "@/*": ["./src/*.ts", "./src/*.tsx"]
     }
   },
   "include": [
     "src/**/*.ts",
+    "src/**/*.tsx",
     "tests/**/*.ts",
     "playwright.config.ts",
     "vite.config.ts"

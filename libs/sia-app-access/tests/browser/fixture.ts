@@ -37,9 +37,17 @@ const access = createSiaAccess({
 });
 const view = document.querySelector<HTMLElement>("#view")!;
 const controls = document.querySelector<HTMLElement>("#controls")!;
+const mountReact =
+  new URLSearchParams(location.search).get("mode") === "react"
+    ? (await import("./react-view.ts")).mountReact
+    : undefined;
 let unmount: () => void;
-// The plain fixture uses DOM rendering and the framework-independent observation port.
+// Remounting replaces only the view subscription; the application retains the controller.
 function mountView() {
+  if (mountReact) {
+    unmount = mountReact(view, access, access.getSnapshot());
+    return;
+  }
   function render() {
     const state = access.getSnapshot().state;
     view.replaceChildren();

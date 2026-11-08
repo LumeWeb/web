@@ -113,6 +113,12 @@ try {
   console.log(
     "Packed SDK adapter construction completed without SDK resolution",
   );
+  const { createSiaAccessStore } =
+    await import("@lumeweb/sia-app-access/zustand");
+  const observation = createSiaAccessStore(controller);
+  assert.equal(observation.getState(), controller.getSnapshot());
+  assert.equal("setState" in observation, false);
+  assert.equal(Object.isFrozen(observation), true);
 } finally {
   hooks.deregister();
 }

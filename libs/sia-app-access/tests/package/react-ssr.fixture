@@ -1,0 +1,99 @@
+/** Packed SSR exercises native React hooks before adding an independent Zustand reader. */
+import assert from "node:assert/strict";
+import { createElement } from "react";
+import { renderToString } from "react-dom/server";
+import { createSiaAccess } from "@lumeweb/sia-app-access";
+import { createSiaAccessStore } from "@lumeweb/sia-app-access/zustand";
+import {
+  createSiaAccessContext,
+  useSiaAccess,
+  useSiaAccessInteractions,
+  useSiaAccessSelector,
+} from "@lumeweb/sia-app-access/react";
+
+let protocolCalls = 0;
+let subscriptions = 0;
+const unused = async () => {
+  protocolCalls++;
+  throw Error("SSR must not start protocol work");
+};
+const base = createSiaAccess({
+  adapter: {
+    begin: unused,
+    generateRecoveryPhrase: unused,
+    reconnect: unused,
+    validateRecoveryPhrase: unused,
+  },
+  application: {
+    appId: "a".repeat(64),
+    description: "",
+    name: "Packed SSR",
+    serviceUrl: "https://app.test",
+  },
+  indexerUrl: "https://indexer.test",
+});
+const access = {
+  ...base,
+  /** @param {() => void} listener */
+  subscribe(listener) {
+    subscriptions++;
+    return base.subscribe(listener);
+  },
+};
+const serverSnapshot = Object.freeze({ ...access.getSnapshot() });
+const options = { serverSnapshot };
+const bindings = createSiaAccessContext();
+function NativeView() {
+  assert.equal(useSiaAccess(access, options).snapshot, serverSnapshot);
+  assert.equal(
+    useSiaAccessInteractions(access, options).snapshot,
+    serverSnapshot,
+  );
+  assert.equal(bindings.useAccess(options).snapshot, serverSnapshot);
+  assert.equal(
+    useSiaAccessSelector(access, (snapshot) => snapshot.scope.appId, options),
+    "a".repeat(64),
+  );
+  assert.equal(
+    bindings.useSelector((snapshot) => snapshot.scope.appId, options),
+    "a".repeat(64),
+  );
+  return createElement("p", null, "native observer");
+}
+
+try {
+  assert.match(
+    renderToString(
+      createElement(bindings.Provider, { access }, createElement(NativeView)),
+    ),
+    /native observer/,
+  );
+  if (process.argv.includes("--zustand")) {
+    const { useStore } = await import("zustand");
+    const store = createSiaAccessStore(access, options);
+    function ZustandView() {
+      assert.equal(useStore(store), serverSnapshot);
+      assert.equal(
+        useStore(store, (snapshot) => snapshot.scope.appId),
+        "a".repeat(64),
+      );
+      return createElement("p", null, "zustand observer");
+    }
+    assert.match(
+      renderToString(createElement(ZustandView)),
+      /zustand observer/,
+    );
+    assert.equal(store.getState(), access.getSnapshot());
+    console.log(
+      "Packed React and Zustand readers share controller snapshots without synchronization",
+    );
+  } else {
+    await assert.rejects(import("zustand"), { code: "ERR_MODULE_NOT_FOUND" });
+    console.log("Packed React hooks render without Zustand");
+  }
+  assert.equal(protocolCalls, 0);
+  assert.equal(subscriptions, 0);
+  assert.equal(access.getSnapshot().state.phase, "disconnected");
+} finally {
+  base.dispose();
+}
