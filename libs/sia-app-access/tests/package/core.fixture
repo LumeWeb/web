@@ -1,0 +1,24 @@
+/** The installed archive provides generic contracts without ambient framework types. */
+import {
+  createMemoryCredentialStore,
+  AccessOutcome,
+  CredentialConfirmation,
+} from "@lumeweb/sia-app-access";
+import type {
+  SiaAccess,
+  SubmitRecoveryPhraseResult,
+  MemoryCredentialStore,
+} from "@lumeweb/sia-app-access";
+
+const store: MemoryCredentialStore = createMemoryCredentialStore();
+void store;
+declare const access: SiaAccess<{ readonly id: string }>;
+const borrowed: Promise<string> = access.withSession((session) => session.id);
+void borrowed;
+// @ts-expect-error Session inference must not become any.
+access.withSession((session) => session.missing);
+declare const result: SubmitRecoveryPhraseResult;
+if (result.kind === AccessOutcome.Ready) {
+  const confirmed: CredentialConfirmation.Confirmed = result.credentials;
+  void confirmed;
+}

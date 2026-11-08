@@ -1,0 +1,45 @@
+name: sia-app-access
+
+on:
+  push:
+    paths:
+      - "libs/sia-app-access/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".oxlintrc.json"
+      - ".prettierrc.json"
+      - ".github/workflows/sia-app-access.yml"
+  pull_request:
+    paths:
+      - "libs/sia-app-access/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".oxlintrc.json"
+      - ".prettierrc.json"
+      - ".github/workflows/sia-app-access.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sia-app-access-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: LumeWeb/workflows/.github/actions/setup-all@develop
+      - run: pnpm install --frozen-lockfile
+      - run: test ! -d libs/sia-app-access/dist
+      - run: pnpm --filter=@lumeweb/sia-app-access typecheck
+      - run: pnpm --filter=@lumeweb/sia-app-access test
+      - run: pnpm --filter=@lumeweb/sia-app-access lint
+      - run: pnpm --filter=@lumeweb/sia-app-access format:check
+      - run: pnpm --filter=@lumeweb/sia-app-access test:contracts
+      - run: pnpm --filter=@lumeweb/sia-app-access test:package
+      - run: npm --prefix libs/sia-app-access run test:package
