@@ -69,11 +69,13 @@ export class CredentialOperations<Session> {
     if (!this.machine.send({ type: AccessEvent.Forget }))
       return Promise.resolve(unavailable);
     this.commands.cancel();
-    this.resources.retire();
     const op = this.commands.begin<AccessRemoved>(() => {
       this.forgetting = undefined;
     });
+    // Disposal can reenter forget(), so record its command before retiring resources.
     this.forgetting = op.promise;
+    this.resources.retire();
+    if (!op.current) return op.promise;
     op.publish();
     if (op.current) {
       op.credentialEffect = CredentialEffect.Remove;
@@ -145,7 +147,8 @@ export class CredentialOperations<Session> {
   }
   private async restore(op: AccessCommand<RestoredAccess>): Promise<void> {
     if (!op.current) return;
-    let bytes: null | Uint8Array;
+    // JavaScript stores can return values outside their declared contract.
+    let bytes: unknown;
     try {
       bytes = await this.queue.read(() => op.current);
     } catch {
@@ -153,7 +156,7 @@ export class CredentialOperations<Session> {
       return;
     }
     if (!op.current) {
-      bytes?.fill(0);
+      if (bytes instanceof Uint8Array && bytes.byteLength > 0) bytes.fill(0);
       return;
     }
     if (bytes === null) {
@@ -178,7 +181,8 @@ export class CredentialOperations<Session> {
       op.fail(AccessFailure.Connection, AccessRecovery.Reconnect);
       return;
     } finally {
-      bytes.fill(0);
+      // Detached views have no remaining bytes and reject fill().
+      if (bytes instanceof Uint8Array && bytes.byteLength > 0) bytes.fill(0);
     }
     if (!op.current) {
       resource?.dispose();

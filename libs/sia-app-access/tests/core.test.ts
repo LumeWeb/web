@@ -2,6 +2,7 @@
 import {
   AccessFailure,
   AccessIntent,
+  AccessOutcome,
   AccessPhase,
   createMemoryCredentialStore,
   createSiaAccess,
@@ -284,6 +285,85 @@ void test("cancelled registration reports unknown effects and retires its late s
     kind: "cancelled",
   });
 });
+for (const resourceName of ["connection", "session"]) {
+  void test(`forget tolerates replacement authorization from ${resourceName} disposal`, async () => {
+    let removed = 0;
+    const f = fixture(
+      credentialStore({
+        async remove() {
+          removed++;
+        },
+      }),
+    );
+    let replacement: ReturnType<typeof f.access.authorize> | undefined;
+    try {
+      await f.access.authorize(AccessIntent.Create);
+      if (resourceName === "session")
+        await f.access.submitRecoveryPhrase("private phrase");
+      const owned = resourceName === "session" ? f.session : f.connection;
+      const dispose = owned.dispose.bind(owned);
+      let retired = false;
+      owned.dispose = () => {
+        if (retired) return;
+        retired = true;
+        dispose();
+        f.access.cancel();
+        replacement = f.access.authorize(AccessIntent.Create);
+      };
+      f.adapter.begin = async () => ({
+        ...f.connection,
+        dispose() {
+          return;
+        },
+      });
+      const forgotten = await f.access.forget();
+      assert.deepEqual(forgotten, {
+        effects: { credentials: "none", registration: "none" },
+        kind: "cancelled",
+      });
+      assert.ok(replacement);
+      assert.equal((await replacement).kind, "approved");
+      assert.equal(
+        f.access.getSnapshot().state.phase,
+        AccessPhase.RecoveryPhrase,
+      );
+      assert.equal(removed, 0);
+    } finally {
+      f.access.dispose();
+    }
+  });
+}
+
+void test("forget coalesces a call made by the retiring session", async () => {
+  let removed = 0;
+  const f = fixture(
+    credentialStore({
+      async remove() {
+        removed++;
+      },
+    }),
+  );
+  let nested: ReturnType<typeof f.access.forget> | undefined;
+  try {
+    await f.access.authorize(AccessIntent.Create);
+    await f.access.submitRecoveryPhrase("private phrase");
+    const dispose = f.session.dispose.bind(f.session);
+    let retired = false;
+    f.session.dispose = () => {
+      if (retired) return;
+      retired = true;
+      dispose();
+      nested = f.access.forget();
+    };
+    const pending = f.access.forget();
+    assert.equal(nested, pending);
+    assert.equal((await pending).kind, "removed");
+    assert.equal(removed, 1);
+  } finally {
+    f.access.dispose();
+  }
+});
+
 void test("forget queues behind a write that commits then rejects and concurrent callers coalesce", async () => {
   const writing = deferred<void>();
   let bytes: null | Uint8Array = null;
@@ -468,6 +548,75 @@ void test("registration rejection is unknown and a save retry reports no earlier
     recovery: "save",
   });
 });
+for (const { name, value } of [
+  { name: "text", value: "encoded key" },
+  { name: "undefined", value: undefined },
+  { name: "object data", value: { key: "encoded" } },
+  { name: "array data", value: [1, 2] },
+]) {
+  void test(`reconnect rejects stored ${name} without a cleanup rejection`, async () => {
+    const store = credentialStore({});
+    // JavaScript stores can violate the declared read type.
+    Reflect.set(store, "read", () => Promise.resolve(value));
+    const f = fixture(store);
+    try {
+      const result = await f.access.reconnect();
+      assert.ok(result.kind === AccessOutcome.Failed);
+      assert.equal(result.failure, AccessFailure.UnregisteredKey);
+      if (Array.isArray(value)) assert.deepEqual(value, [1, 2]);
+      Reflect.set(store, "read", () => Promise.resolve(null));
+      assert.equal((await f.access.reconnect()).kind, "missing-credentials");
+      // Node's test runner reports detached-task rejections at the event-loop boundary.
+      await new Promise<void>((resolve) => setImmediate(resolve));
+    } finally {
+      f.access.dispose();
+    }
+  });
+}
+
+void test("reconnect rejects a detached stored key without a cleanup rejection", async () => {
+  const buffer = new ArrayBuffer(32);
+  const bytes = new Uint8Array(buffer);
+  structuredClone(buffer, { transfer: [buffer] });
+  const f = fixture(
+    credentialStore({
+      async read() {
+        return bytes;
+      },
+    }),
+  );
+  try {
+    const result = await f.access.reconnect();
+    assert.ok(result.kind === AccessOutcome.Failed);
+    assert.equal(result.failure, AccessFailure.UnregisteredKey);
+    await new Promise<void>((resolve) => setImmediate(resolve));
+  } finally {
+    f.access.dispose();
+  }
+});
+
+void test("cancelled reconnect ignores a malformed late read without a cleanup rejection", async () => {
+  const started = deferred<void>();
+  const read = deferred<unknown>();
+  const store = credentialStore({});
+  Reflect.set(store, "read", () => {
+    started.resolve();
+    return read.promise;
+  });
+  const f = fixture(store);
+  try {
+    const pending = f.access.reconnect();
+    await started.promise;
+    f.access.cancel();
+    assert.equal((await pending).kind, "cancelled");
+    read.resolve({ key: "malformed" });
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    assert.equal(f.access.getSnapshot().state.phase, AccessPhase.Disconnected);
+  } finally {
+    f.access.dispose();
+  }
+});
+
 void test("reconnect failures preserve stored credentials and distinguish missing and unknown keys", async () => {
   const store = createMemoryCredentialStore();
   const f = fixture(store);
