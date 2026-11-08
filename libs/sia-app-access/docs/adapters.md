@@ -6,6 +6,8 @@ An adapter implements the Sia operations used by `createSiaAccess`. Use `createS
 
 Import `createSiaAdapter` and `SiaSession` from `@lumeweb/sia-app-access/sia`. Your application supplies `@siafoundation/sia-storage` 0.2.0 and serves its WASM assets. The root package does not import the SDK. Importing `/sia` or calling `createSiaAdapter()` does not initialize it; initialization happens when an adapter method needs the SDK.
 
+Vite recognizes the optional peer when bundling a consuming application. A bundle that omits the SDK can construct the adapter but cannot run SDK operations; install the SDK before building an application that uses those operations.
+
 Create the controller at application startup. The adapter is supplied through the `adapter` option:
 
 ```ts
@@ -32,9 +34,9 @@ Adapter instances from the same module share initialization. If initialization f
 
 The adapter uses the SDK's `/wasm` classes under Node as well as in browsers. It does not use the SDK's Node N-API authorization implementation.
 
-## Initialize from file bytes in Node
+## Node initialization
 
-Node applications can supply file bytes before the first adapter operation to avoid fetching a file URL:
+Under Node's default SDK exports, the adapter loads installed WASM bytes without replacing global `fetch`. This also works when the native facade is absent. Applications can initialize the SDK themselves before the first adapter operation:
 
 ```ts
 import { readFile } from "node:fs/promises";
@@ -46,7 +48,7 @@ export async function prepareSiaWasm(): Promise<void> {
 }
 ```
 
-Await `prepareSiaWasm()` before calling an adapter method. Other SDK users in the same process must also wait for this initialization. Do not start a competing initialization while it is pending.
+If you initialize the SDK yourself, await `prepareSiaWasm()` before calling an adapter method. Other SDK users in the same process must also wait for this initialization. Do not start a competing initialization while it is pending.
 
 ## Current integration limits
 

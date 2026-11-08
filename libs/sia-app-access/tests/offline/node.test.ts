@@ -34,6 +34,6 @@ void test(
       await adapter.validateRecoveryPhrase("invalid"),
       PhraseValidation.Invalid,
     );
-    assert.equal(environment.loads, 1);
+    assert.equal(environment.loads, 0);
   },
 );

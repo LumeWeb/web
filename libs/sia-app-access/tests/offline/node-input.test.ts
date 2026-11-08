@@ -1,6 +1,7 @@
 /** Node callers can load WASM bytes before adapter work without a file-URL fetch. */
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { registerHooks } from "node:module";
 import { test } from "node:test";
 import { PhraseValidation } from "@/index";
 import { Facade, sdkEnvironment } from "./environment.ts";
@@ -18,6 +19,17 @@ void test(
       ),
     );
     await wasm.default({ module_or_path: new Uint8Array(bytes) });
+    const hooks = registerHooks({
+      resolve(specifier, context, next) {
+        if (
+          specifier ===
+          "@siafoundation/sia-storage/wasm/sia_storage_wasm_bg.wasm"
+        )
+          throw Error("Initialized WASM must not reload its installed asset");
+        return next(specifier, context);
+      },
+    });
+    t.after(() => hooks.deregister());
     const survivor = new wasm.AppKey(new Uint8Array(32).fill(9));
     t.after(() => survivor.free());
     const { createSiaAdapter } = await import("@/sia");

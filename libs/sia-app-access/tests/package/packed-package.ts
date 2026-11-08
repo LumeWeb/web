@@ -16,6 +16,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
+import { build } from "vite";
 
 export const workspace = fileURLToPath(new URL("../../", import.meta.url));
 const execute = promisify(execFile);
@@ -153,6 +154,21 @@ export async function checkPackage(input: string): Promise<void> {
       consumer,
       cache,
     );
+    await writeFile(
+      join(consumer, "index.html"),
+      '<script type="module" src="/main.js"></script>',
+    );
+    await writeFile(
+      join(consumer, "main.js"),
+      'import { createSiaAdapter } from "@lumeweb/sia-app-access/sia"; document.body.textContent = typeof createSiaAdapter().begin;',
+    );
+    // Vite must see the extracted package's optional-peer metadata, not checkout SDK links.
+    await build({
+      build: { outDir: join(owned, "browser") },
+      configFile: false,
+      logLevel: "silent",
+      root: consumer,
+    });
     // SDK types are needed only after the framework-free consumer has compiled alone.
     const sdk = findPackageJSON("@siafoundation/sia-storage", import.meta.url);
     assert.ok(sdk);

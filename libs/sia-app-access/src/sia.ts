@@ -135,6 +135,24 @@ function sdkModule(): Promise<SiaSdkModule> {
           facadeRejected = true;
           throw error;
         }
+      } else if (
+        facadeAppKey !== module.AppKey &&
+        typeof process !== "undefined" &&
+        typeof process.versions?.node === "string"
+      ) {
+        // Node cannot fetch the default file URL. The SDK skips this getter once initialized,
+        // so caller-supplied WASM does not require reading the installed asset.
+        await module.default({
+          get module_or_path() {
+            return import("node:fs/promises").then(async ({ readFile }) => {
+              const asset = new URL(
+                import.meta
+                  .resolve("@siafoundation/sia-storage/wasm/sia_storage_wasm_bg.wasm"),
+              );
+              return new Uint8Array(await readFile(asset));
+            });
+          },
+        });
       } else await module.default();
       return module;
     })
