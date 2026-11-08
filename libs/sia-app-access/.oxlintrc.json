@@ -2,6 +2,13 @@
   "extends": ["../../.oxlintrc.json"],
   "overrides": [
     {
+      "files": ["tests/**"],
+      "rules": {
+        "typescript/require-await": "off",
+        "typescript/unbound-method": "off"
+      }
+    },
+    {
       "files": ["src/credentials.ts"],
       "rules": {
         "typescript/require-await": "off"

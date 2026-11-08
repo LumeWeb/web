@@ -1,8 +1,9 @@
-/** Retirement and settlement protect admitted work without the controller. */
+/** Focused owners protect retirement, settlement and queued credential mutations. */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { AccessResources, SessionUnavailableError } from "@/access-resources";
 import { CommandCoordinator } from "@/command-scope";
+import { CredentialQueue } from "@/credential-operations";
 import { AccessEvent } from "@/access-machine";
 import {
   AccessErrorCode,
@@ -15,6 +16,52 @@ import {
 import type { AccessApproved, AccessConnection } from "@/index";
 import type { AccessCommand } from "@/command-scope";
 import { deferred } from "./helpers/core-async.ts";
+
+void test("a credential removal follows a write that commits then rejects without clearing borrowed bytes early", async () => {
+  const started = deferred<void>();
+  const release = deferred<void>();
+  const events: string[] = [];
+  const bytes = new Uint8Array(32).fill(9);
+  const failure = Error("write reply lost");
+  let reads = 0;
+  const queue = new CredentialQueue(
+    {
+      async read() {
+        reads++;
+        return null;
+      },
+      async remove() {
+        events.push("remove");
+      },
+      async write(_scope, input) {
+        assert.equal(input, bytes);
+        events.push("write");
+        started.resolve();
+        await release.promise;
+        assert.equal(input[0], 9);
+        events.push("committed");
+        throw failure;
+      },
+    },
+    { appId: "a".repeat(64), indexerUrl: "https://indexer/" },
+  );
+  const write = assert.rejects(
+    queue.write(bytes),
+    (error) => error === failure,
+  );
+  const removal = queue.remove();
+  const cancelledRead = queue.read(() => false);
+  await started.promise;
+  assert.deepEqual(events, ["write"]);
+  assert.equal(bytes[0], 9);
+  release.resolve();
+  await write;
+  await removal;
+  assert.equal(await cancelledRead, null);
+  assert.equal(reads, 0);
+  assert.deepEqual(events, ["write", "committed", "remove"]);
+  assert.ok(bytes.every((value) => value === 0));
+});
 
 function quietCoordinator(): CommandCoordinator {
   return new CommandCoordinator(

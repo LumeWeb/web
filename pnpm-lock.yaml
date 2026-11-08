@@ -2670,9 +2670,18 @@ importers:
         specifier: 1.4.0
         version: 1.4.0
     devDependencies:
+      '@lumeweb/sia-testing':
+        specifier: workspace:*
+        version: link:../sia-testing
+      '@playwright/test':
+        specifier: ^1.61.1
+        version: 1.61.1
       '@types/node':
         specifier: ^26.1.0
         version: 26.1.0
+      msw:
+        specifier: 'catalog:'
+        version: 2.14.6(@types/node@26.1.0)(typescript@6.0.3)
       oxlint:
         specifier: ^1.72.0
         version: 1.72.0(oxlint-tsgolint@0.24.0)
@@ -2688,6 +2697,9 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
+      vite:
+        specifier: catalog:framework
+        version: 8.0.16(@types/node@26.1.0)(@vitejs/devtools@0.1.22)(esbuild@0.28.1)(jiti@1.21.7)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
 
   libs/sia-testing:
     devDependencies:

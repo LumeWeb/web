@@ -23,10 +23,12 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
-    "lint": "oxlint --deny-warnings src tests --ignore-pattern 'tests/types/**'",
+    "lint": "oxlint --deny-warnings src tests playwright.config.ts vite.config.ts --ignore-pattern 'tests/types/**'",
     "format": "prettier --write . && prettier --parser typescript --write 'tests/package/*.fixture'",
     "format:check": "prettier --check . && prettier --parser typescript --check 'tests/package/*.fixture'",
     "test": "node --import tsx --test 'tests/*.test.ts'",
+    "test:browser": "playwright test --config playwright.config.ts",
+    "test:browser:build": "vite build",
     "test:contracts": "pnpm run build && tsc -p tsconfig.contracts.json",
     "test:package": "pnpm run build && node --import tsx --test 'tests/package/*.test.ts'"
   },
@@ -34,11 +36,15 @@
     "robot3": "1.4.0"
   },
   "devDependencies": {
+    "@lumeweb/sia-testing": "workspace:*",
+    "@playwright/test": "^1.61.1",
     "@types/node": "catalog:",
+    "msw": "catalog:",
     "oxlint": "^1.72.0",
     "oxlint-tsgolint": "catalog:",
     "tsc-alias": "1.9.10",
     "tsx": "4.23.0",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vite": "catalog:framework"
   }
 }

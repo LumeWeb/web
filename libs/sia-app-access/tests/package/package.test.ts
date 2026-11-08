@@ -7,7 +7,7 @@ import { test } from "node:test";
 import { checkPackage, workspace } from "./packed-package.ts";
 
 void test(
-  "the archive provides credential storage and generic contracts without optional runtimes",
+  "the archive provides the controller and generic contracts without optional runtimes",
   { timeout: 120000 },
   async () => {
     await checkPackage(workspace);

@@ -7,9 +7,11 @@ import {
   mkdtemp,
   readdir,
   readFile,
+  realpath,
   rm,
   writeFile,
 } from "node:fs/promises";
+import { findPackageJSON } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -76,6 +78,14 @@ export async function checkPackage(input: string): Promise<void> {
     const modules = join(consumer, "node_modules/@lumeweb/sia-app-access");
     await mkdir(dirname(modules), { recursive: true });
     await cp(packed, modules, { recursive: true });
+    const robot = findPackageJSON("robot3", import.meta.url);
+    assert.ok(robot);
+    // Linking would expose the workspace dependency graph to the isolated consumer.
+    await cp(
+      dirname(await realpath(robot)),
+      join(consumer, "node_modules/robot3"),
+      { recursive: true },
+    );
     for (const file of await readdir(join(packed, "dist"))) {
       if (file.endsWith(".js") || file.endsWith(".d.ts"))
         assert.doesNotMatch(
@@ -119,6 +129,7 @@ export async function checkPackage(input: string): Promise<void> {
       cache,
     );
     assert.match(output, /Packed credential consumer assertions completed/);
+    assert.match(output, /Packed controller consumer assertions completed/);
     await run(
       process.execPath,
       [

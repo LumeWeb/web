@@ -1,6 +1,7 @@
 /** The installed archive provides generic contracts without ambient framework types. */
 import {
   createMemoryCredentialStore,
+  createSiaAccess,
   AccessOutcome,
   CredentialConfirmation,
 } from "@lumeweb/sia-app-access";
@@ -8,10 +9,27 @@ import type {
   SiaAccess,
   SubmitRecoveryPhraseResult,
   MemoryCredentialStore,
+  SiaAccessAdapter,
+  SiaAccessInteractions,
 } from "@lumeweb/sia-app-access";
 
 const store: MemoryCredentialStore = createMemoryCredentialStore();
 void store;
+declare const adapter: SiaAccessAdapter<{ readonly id: string }>;
+const created = createSiaAccess({
+  adapter,
+  application: {
+    appId: "a".repeat(64),
+    name: "Types",
+    description: "",
+    serviceUrl: "https://app.example/",
+  },
+  indexerUrl: "https://indexer.example/",
+});
+const inferred: SiaAccessInteractions<{ readonly id: string }> = created;
+void inferred;
+// @ts-expect-error Factory inference must not admit unrelated session methods.
+created.withSession((session) => session.missing);
 declare const access: SiaAccess<{ readonly id: string }>;
 const borrowed: Promise<string> = access.withSession((session) => session.id);
 void borrowed;
