@@ -39,4 +39,6 @@ pnpm run test:contracts
 pnpm run test:package
 ```
 
+Private lifecycle tests check admission and recovery transitions. Command tests check settlement before publication; resource tests keep retired sessions alive until admitted borrowers settle. These implementation modules are not package exports.
+
 Typecheck and source tests do not require a build. Contract and archive checks build the package with TypeScript and rewrite emitted import paths with `tsc-alias`. Run `npm run test:package` as well to check npm's archive output.

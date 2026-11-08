@@ -30,6 +30,9 @@
     "test:contracts": "pnpm run build && tsc -p tsconfig.contracts.json",
     "test:package": "pnpm run build && node --import tsx --test 'tests/package/*.test.ts'"
   },
+  "dependencies": {
+    "robot3": "1.4.0"
+  },
   "devDependencies": {
     "@types/node": "catalog:",
     "oxlint": "^1.72.0",

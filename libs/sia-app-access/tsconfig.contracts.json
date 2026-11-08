@@ -10,5 +10,9 @@
     "types": [],
     "skipLibCheck": false
   },
-  "include": ["dist/index.d.ts", "tests/types/core.test-d.ts"]
+  "include": [
+    "dist/index.d.ts",
+    "tests/types/core.test-d.ts",
+    "tests/types/machine.test-d.ts"
+  ]
 }
