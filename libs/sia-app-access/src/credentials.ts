@@ -28,7 +28,8 @@ export function createMemoryCredentialStore(): MemoryCredentialStore {
       records.delete(key(scope));
     },
     async write(scope, bytes) {
-      records.set(key(scope), bytes.slice());
+      // Buffer.slice() shares its backing memory; construct a plain Uint8Array to copy Buffer inputs.
+      records.set(key(scope), new Uint8Array(bytes));
     },
   };
 }

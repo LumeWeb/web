@@ -1,5 +1,6 @@
 /** Credential copies keep caller-owned bytes and scoped records independent. */
 import assert from "node:assert/strict";
+import { Buffer } from "node:buffer";
 import { test } from "node:test";
 import { createMemoryCredentialStore } from "@/index";
 import { normalizeScope } from "@/credentials";
@@ -15,6 +16,21 @@ void test("memory credentials copy retained writes and returned reads", async ()
   assert.ok(read);
   read.fill(0);
   assert.deepEqual(await store.read(scope), new Uint8Array([1, 2]));
+});
+
+void test("memory credentials copy Buffer inputs and returned reads", async () => {
+  const store = createMemoryCredentialStore();
+  const scope = { appId: "a".repeat(64), indexerUrl: "https://one/" };
+  const bytes = Buffer.from([0, 1, 2, 0]).subarray(1, 3);
+  await store.write(scope, bytes);
+  bytes.fill(0);
+  const read = await store.read(scope);
+  assert.ok(read);
+  assert.deepEqual(Array.from(read), [1, 2]);
+  read.fill(0);
+  const retained = await store.read(scope);
+  assert.ok(retained);
+  assert.deepEqual(Array.from(retained), [1, 2]);
 });
 
 void test("memory credentials isolate application IDs and indexer URLs", async () => {
