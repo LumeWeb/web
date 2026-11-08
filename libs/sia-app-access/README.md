@@ -27,6 +27,8 @@ Create the controller once in application bootstrap. Read [getting started](docs
 
 For SDK 0.2.0, import `createSiaAdapter` from `@lumeweb/sia-app-access/sia` and supply it as the adapter. Read [adapters](docs/adapters.md) for setup and resource ownership. The SDK peer is optional; root imports and adapter construction do not load it.
 
+Use the optional React 19 [observation hooks and context](docs/react.md), or read the same controller through a [readonly store](docs/stores.md). React observation uses `useSyncExternalStore` without requiring Zustand. The application retains controller lifetime.
+
 Forms and input errors belong to the application. Observing a controller does not authorize access or dispose it.
 
 ## Development
