@@ -275,6 +275,72 @@ export async function checkPackage(input: string): Promise<void> {
   }
 }
 
+/** Packed caller templates must also typecheck before access declarations exist. */
+export async function checkSourceFixtures(): Promise<void> {
+  const owned = await mkdtemp(join(tmpdir(), "sia-source-fixtures-"));
+  try {
+    await writeFile(
+      join(owned, "package.json"),
+      JSON.stringify({ type: "module" }),
+    );
+    for (const name of ["core", "react", "runtime"]) {
+      await cp(
+        new URL(`./${name}.fixture`, import.meta.url),
+        join(owned, "fixture.ts"),
+      );
+      await writeFile(
+        join(owned, "tsconfig.json"),
+        JSON.stringify({
+          compilerOptions: {
+            allowImportingTsExtensions: true,
+            exactOptionalPropertyTypes: true,
+            jsx: "react-jsx",
+            lib: ["ES2022", "DOM", "ESNext.Disposable"],
+            module: "NodeNext",
+            moduleResolution: "NodeNext",
+            noEmit: true,
+            paths: {
+              "@/*": [
+                join(workspace, "src/*.ts"),
+                join(workspace, "src/*.tsx"),
+              ],
+              "@lumeweb/sia-app-access": [join(workspace, "src/index.ts")],
+              "@lumeweb/sia-app-access/react": [
+                join(workspace, "src/react.ts"),
+              ],
+              "@lumeweb/sia-app-access/react-hook-form": [
+                join(workspace, "src/react-hook-form.ts"),
+              ],
+              "@lumeweb/sia-app-access/sia": [join(workspace, "src/sia.ts")],
+              "@lumeweb/sia-app-access/zustand": [
+                join(workspace, "src/zustand.ts"),
+              ],
+            },
+            skipLibCheck: false,
+            strict: true,
+            target: "ES2022",
+            typeRoots: [join(workspace, "node_modules/@types")],
+            types: name === "runtime" ? ["node"] : [],
+          },
+          files: ["fixture.ts"],
+        }),
+      );
+      await run(
+        process.execPath,
+        [
+          fileURLToPath(import.meta.resolve("typescript/bin/tsc")),
+          "-p",
+          join(owned, "tsconfig.json"),
+        ],
+        owned,
+        join(owned, "cache"),
+      );
+    }
+  } finally {
+    await rm(owned, { force: true, recursive: true });
+  }
+}
+
 /** Realpaths keep copied peers from resolving through workspace dependency links. */
 async function copyPeer(
   name: string,

@@ -38,3 +38,37 @@ export function useDestination(access: SiaAccess<Destination>): void {
   });
   void createElement(context.Provider, { access });
 }
+
+import type {
+  SiaAccessInteractions,
+  AccessInteractionSnapshot,
+  SubmitRecoveryPhraseResult,
+} from "@lumeweb/sia-app-access";
+import {
+  useSiaApproval,
+  useSiaRecoveryPhrase,
+  useSiaSaveRecovery,
+} from "@lumeweb/sia-app-access/react";
+
+export function useTasks(
+  access: SiaAccessInteractions<Destination>,
+  legacy: SiaAccess<Destination>,
+): void {
+  const snapshot: AccessInteractionSnapshot = access.getSnapshot();
+  const task = useSiaRecoveryPhrase(access, { serverSnapshot: snapshot });
+  const outcome: Promise<SubmitRecoveryPhraseResult> | undefined =
+    task?.submit("application input");
+  void outcome;
+  void task?.generate();
+  void context.useApproval();
+  void context.useRecoveryPhrase();
+  void context.useSaveRecovery();
+  void useSiaApproval(access)?.url;
+  void useSiaSaveRecovery(access)?.retrySave();
+  // @ts-expect-error The application must supply its input.
+  void task?.submit();
+  // @ts-expect-error Task models do not own application form values.
+  void task?.value;
+  // @ts-expect-error Task hooks need truthful interaction metadata.
+  useSiaRecoveryPhrase(legacy);
+}

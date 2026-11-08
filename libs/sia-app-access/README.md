@@ -29,7 +29,9 @@ For SDK 0.2.0, import `createSiaAdapter` from `@lumeweb/sia-app-access/sia` and 
 
 Use the optional React 19 [observation hooks and context](docs/react.md), or read the same controller through a [readonly store](docs/stores.md). React observation uses `useSyncExternalStore` without requiring Zustand. The application retains controller lifetime.
 
-Forms and input errors belong to the application. Observing a controller does not authorize access or dispose it.
+Approval, phrase and save-recovery [tasks](docs/react.md#task-hooks) bind actions to the committed live interaction. Forms and input errors belong to the application; the optional `/react-hook-form` entry only maps phrase-correction outcomes to caller-supplied field messages. Observing a controller does not authorize access or dispose it.
+
+See the [documentation index](docs/README.md) and [test coverage](docs/testing.md).
 
 ## Development
 

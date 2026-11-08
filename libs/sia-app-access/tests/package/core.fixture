@@ -13,6 +13,17 @@ import type {
   SiaAccessInteractions,
 } from "@lumeweb/sia-app-access";
 
+import { toRecoveryPhraseFieldError } from "@lumeweb/sia-app-access/react-hook-form";
+export function inspectFieldErrorWithoutFormPeers(): string | undefined {
+  return toRecoveryPhraseFieldError(
+    { kind: AccessOutcome.PhraseMismatch },
+    {
+      invalidPhrase: "Invalid input",
+      phraseMismatch: "Different account",
+    },
+  )?.message;
+}
+
 const store: MemoryCredentialStore = createMemoryCredentialStore();
 void store;
 declare const adapter: SiaAccessAdapter<{ readonly id: string }>;

@@ -30,6 +30,10 @@
     "./zustand": {
       "types": "./dist/zustand.d.ts",
       "import": "./dist/zustand.js"
+    },
+    "./react-hook-form": {
+      "types": "./dist/react-hook-form.d.ts",
+      "import": "./dist/react-hook-form.js"
     }
   },
   "scripts": {
@@ -60,6 +64,7 @@
     "oxlint-tsgolint": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
+    "react-hook-form": "catalog:",
     "tsc-alias": "1.9.10",
     "tsx": "4.23.0",
     "typescript": "catalog:",

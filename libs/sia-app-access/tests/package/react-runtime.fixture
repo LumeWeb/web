@@ -6,10 +6,16 @@ assert.deepEqual(
   Object.keys(react).sort(),
   [
     "SiaAccessView",
+    "SiaApprovalView",
+    "SiaRecoveryPhraseView",
+    "SiaSaveRecoveryView",
     "createSiaAccessContext",
     "useSiaAccess",
     "useSiaAccessInteractions",
     "useSiaAccessSelector",
+    "useSiaApproval",
+    "useSiaRecoveryPhrase",
+    "useSiaSaveRecovery",
   ].sort(),
 );
 for (const method of Object.values(react))
@@ -25,6 +31,18 @@ for (const name of [
 const context = react.createSiaAccessContext();
 assert.deepEqual(
   Object.keys(context).sort(),
-  ["Provider", "View", "useAccess", "useInteractions", "useSelector"].sort(),
+  [
+    "Provider",
+    "View",
+    "useAccess",
+    "useInteractions",
+    "useSelector",
+    "ApprovalView",
+    "RecoveryPhraseView",
+    "SaveRecoveryView",
+    "useApproval",
+    "useRecoveryPhrase",
+    "useSaveRecovery",
+  ].sort(),
 );
 console.log("Packed React observation imports without optional integrations");

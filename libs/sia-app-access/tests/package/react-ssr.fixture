@@ -9,6 +9,7 @@ import {
   useSiaAccess,
   useSiaAccessInteractions,
   useSiaAccessSelector,
+  useSiaRecoveryPhrase,
 } from "@lumeweb/sia-app-access/react";
 
 let protocolCalls = 0;
@@ -58,6 +59,10 @@ function NativeView() {
     bindings.useSelector((snapshot) => snapshot.scope.appId, options),
     "a".repeat(64),
   );
+  assert.equal(useSiaRecoveryPhrase(access, options), null);
+  assert.equal(bindings.useApproval(options), null);
+  assert.equal(bindings.useRecoveryPhrase(options), null);
+  assert.equal(bindings.useSaveRecovery(options), null);
   return createElement("p", null, "native observer");
 }
 

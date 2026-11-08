@@ -9,6 +9,8 @@ export default defineConfig({
         "tests/browser/fixture.html",
         "tests/browser/react-observation.html",
         "tests/browser/react-components.html",
+        "tests/browser/react-interactions.html",
+        "tests/browser/react-task-hydration.html",
       ],
     },
   },

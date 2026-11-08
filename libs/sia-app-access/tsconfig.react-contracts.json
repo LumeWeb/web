@@ -6,6 +6,7 @@
   "include": [
     "dist/react.d.ts",
     "dist/zustand.d.ts",
-    "tests/types/react.test-d.ts"
+    "tests/types/react.test-d.ts",
+    "tests/types/react-hook-form.test-d.ts"
   ]
 }
