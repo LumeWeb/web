@@ -118,6 +118,11 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
   );
   await checkVitestDocs(testingTarball, directory);
   await cp(testingTarball, testing, { recursive: true });
+  const sessionTarball = await pack(
+    join(repo, "libs/sia-session"),
+    join(directory, "session-tarball"),
+  );
+  await dependencies(sessionTarball, {}, join(repo, "libs/sia-session"));
   for (const [source, target] of [
     ["libs/sia-video-source", library],
     ["apps/sia-video-demo", demo],
@@ -144,6 +149,7 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
     join(directory, "tsconfig.base.json"),
   );
   const localPackages = {
+    "@lumeweb/sia-session": sessionTarball,
     "@lumeweb/sia-testing": testing,
     "@lumeweb/sia-video-source": library,
     "@lumeweb/tsdown-config": join(repo, "libs/tsdown-config"),

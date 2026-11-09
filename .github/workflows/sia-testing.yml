@@ -36,9 +36,9 @@ jobs:
       - run: pnpm --filter=@lumeweb/sia-testing test:native:helpers
       - run: pnpm --filter=@lumeweb/sia-testing test:native:control
       - run: pnpm --filter=@lumeweb/tsdown-config build:config
+      - run: pnpm --filter=@lumeweb/sia-session build
       - run: pnpm --filter=@lumeweb/sia-testing test:package
       - run: pnpm --filter=@lumeweb/sia-testing test:consumers
-      - run: pnpm --filter=@lumeweb/sia-session build
       - run: pnpm --filter=@lumeweb/sia-video-source test:e2e:sdk:offline
       - run: pnpm --filter=@lumeweb/sia-video-source test:e2e:sdk:build
       - run: pnpm --filter=@lumeweb/sia-video-source exec tsc --noEmit -p tsconfig.contract.json
