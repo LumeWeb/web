@@ -57,6 +57,7 @@ export function RecoveryForm<Session>({
         aria-describedby={issue ? "phrase-issue" : undefined}
         aria-invalid={Boolean(issue)}
         autoComplete="off"
+        disabled={!task.canSubmit}
         id="recovery-phrase"
         onChange={(event) => {
           revision.current++;
@@ -105,6 +106,7 @@ export function RecoveryForm<Session>({
         <label className="check">
           <input
             checked={saved}
+            disabled={!task.canSubmit}
             onChange={(event) => setSaved(event.currentTarget.checked)}
             type="checkbox"
           />

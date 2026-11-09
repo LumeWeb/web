@@ -106,40 +106,105 @@ test("persisted pagehide keeps its controller and UI", async ({ page }) => {
   ).toBeVisible();
 });
 
-test("the example ignores validation after an edit", async ({ page }) => {
-  await page.goto("/tests/browser/onboarding-races.html");
-  await page
-    .getByRole("button", { exact: true, name: "Create account" })
-    .click();
-  await page
-    .getByRole("button", { exact: true, name: "Hold validation" })
-    .click();
-  await page
-    .getByLabel("Recovery phrase", { exact: true })
-    .fill("submitted input");
-  await page.getByLabel("I saved my recovery phrase").check();
-  await page
-    .getByRole("button", { exact: true, name: "Finish account setup" })
-    .click();
-  await expect(page.getByTestId("access-phase")).toHaveAttribute(
-    "data-phase",
-    "validating-phrase",
-  );
-  await page
-    .getByLabel("Recovery phrase", { exact: true })
-    .fill("my corrected input");
-  await page
-    .getByRole("button", { exact: true, name: "Release validation" })
-    .click();
-  await expect(page.getByTestId("access-phase")).toHaveAttribute(
-    "data-phase",
-    "recovery-phrase",
-  );
-  await expect(page.getByLabel("Recovery phrase", { exact: true })).toHaveValue(
-    "my corrected input",
-  );
-  await expect(page.getByRole("alert")).toHaveCount(0);
-});
+for (const result of ["invalid", "valid"]) {
+  test(`submission keeps the backed-up phrase fixed until ${result} validation finishes`, async ({
+    page,
+  }) => {
+    await page.goto("/tests/browser/onboarding-races.html");
+    await page
+      .getByRole("button", { exact: true, name: "Create account" })
+      .click();
+    await page
+      .getByRole("button", {
+        exact: true,
+        name: result === "valid" ? "Hold valid validation" : "Hold validation",
+      })
+      .click();
+    const input = page.getByLabel("Recovery phrase", { exact: true });
+    const backup = page.getByLabel("I saved my recovery phrase");
+    await input.fill("submitted input");
+    await backup.check();
+    await page
+      .getByRole("button", { exact: true, name: "Finish account setup" })
+      .click();
+    await expect(page.getByTestId("access-phase")).toHaveAttribute(
+      "data-phase",
+      "validating-phrase",
+    );
+    await expect(input).toBeDisabled();
+    await expect(input).toHaveValue("submitted input");
+    await expect(backup).toBeDisabled();
+    await expect(backup).toBeChecked();
+    await expect(
+      page.getByRole("button", { exact: true, name: "Generate phrase" }),
+    ).toBeDisabled();
+    await expect(page.getByTestId("registered-phrases")).toHaveText("[]");
+    await page
+      .getByRole("button", { exact: true, name: "Release validation" })
+      .click();
+    if (result === "valid") {
+      await expect(
+        page.getByRole("heading", { exact: true, name: "Set up your profile" }),
+      ).toBeVisible();
+      await expect(page.getByTestId("registered-phrases")).toHaveText(
+        '["submitted input"]',
+      );
+    } else {
+      await expect(input).toBeEnabled();
+      await expect(backup).toBeEnabled();
+      await expect(page.getByRole("alert")).toContainText(
+        "This phrase isn't valid",
+      );
+      await expect(page.getByTestId("registered-phrases")).toHaveText("[]");
+      await input.fill("my corrected input");
+      await expect(input).toHaveValue("my corrected input");
+      await expect(backup).not.toBeChecked();
+      await expect(page.getByRole("alert")).toHaveCount(0);
+    }
+  });
+}
+
+for (const choice of ["Create account", "Connect existing account"]) {
+  test(`a new authorization through ${choice} starts a blank profile`, async ({
+    page,
+  }) => {
+    await page.goto("/tests/browser/onboarding-races.html");
+    const connect = async (name: string) => {
+      await page.getByRole("button", { exact: true, name }).click();
+      await page
+        .getByLabel("Recovery phrase", { exact: true })
+        .fill("fixture phrase");
+      if (name === "Create account")
+        await page.getByLabel("I saved my recovery phrase").check();
+      await page
+        .getByRole("button", {
+          exact: true,
+          name:
+            name === "Create account"
+              ? "Finish account setup"
+              : "Connect account",
+        })
+        .click();
+    };
+    await connect("Create account");
+    await page.getByLabel("Display name").fill("Ada");
+    await page
+      .getByRole("button", { exact: true, name: "Continue to workspace" })
+      .click();
+    await expect(
+      page.getByRole("heading", { exact: true, name: "Welcome, Ada" }),
+    ).toBeVisible();
+    await page.getByRole("button", { exact: true, name: "Sign out" }).click();
+    await connect(choice);
+    await expect(
+      page.getByRole("heading", { exact: true, name: "Set up your profile" }),
+    ).toBeVisible();
+    await expect(page.getByLabel("Display name")).toHaveValue("");
+    await expect(
+      page.getByRole("heading", { exact: true, name: "Welcome, Ada" }),
+    ).toHaveCount(0);
+  });
+}
 
 async function approveAndFill(page: import("@playwright/test").Page) {
   await page

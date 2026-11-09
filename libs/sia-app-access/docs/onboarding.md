@@ -87,7 +87,7 @@ export function PhraseStep<Session>({ access }: { readonly access: SiaAccessInte
 }
 ```
 
-`RecoveryForm` checks whether input or the controller changed while an action was pending before applying its result. Try entering an invalid phrase: the form shows an error without erasing the input. Generating a replacement clears the backup checkbox, so the user confirms the current phrase.
+`RecoveryForm` checks whether input or the controller changed while an action was pending before applying its result. Try entering an invalid phrase: the form shows an error without erasing the input. Generating a replacement clears the backup checkbox, so the user confirms the current phrase. Submission locks the phrase input and backup checkbox until the check finishes; an invalid result unlocks them for correction.
 
 ## 4. Handle a failed save
 
@@ -124,7 +124,7 @@ export function ProfileStep({ onComplete }: { readonly onComplete: (name: string
 }
 ```
 
-Type a name and continue. The application remembers it while this page stays open.
+Type a name and continue. The application remembers it while this page stays open. Starting **Create account** or **Connect existing account** clears the previous name and requires profile setup again. **Sign out** followed by **Sign in again** keeps the name for the saved-key reconnect.
 
 ## 6. Sign out and return
 

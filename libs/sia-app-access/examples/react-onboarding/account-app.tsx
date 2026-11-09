@@ -198,6 +198,7 @@ export function AccountApp<Session>({
         <button
           disabled={!snapshot.presentation.availability.authorize}
           onClick={() => {
+            setName("");
             setStatus("");
             void commands.authorize(AccessIntent.Create);
           }}>
@@ -208,6 +209,7 @@ export function AccountApp<Session>({
             className="secondary"
             disabled={!snapshot.presentation.availability.authorize}
             onClick={() => {
+              setName("");
               setStatus("");
               void commands.authorize(AccessIntent.Existing);
             }}>
