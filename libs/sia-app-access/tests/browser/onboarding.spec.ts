@@ -272,6 +272,258 @@ test("a new user finishes onboarding and signs in again with saved access", asyn
   ).toBeVisible();
 });
 
+for (const stop of ["cancel approval", "deny approval", "cancel phrase"]) {
+  test(`saved-key reconnect retains the profile after ${stop}`, async ({
+    page,
+  }) => {
+    await page.goto(example);
+    await approveAndFill(page);
+    await page
+      .getByRole("button", { exact: true, name: "Finish account setup" })
+      .click();
+    await page.getByLabel("Display name").fill("Ada");
+    await page
+      .getByRole("button", { exact: true, name: "Continue to workspace" })
+      .click();
+    await expect(
+      page.getByRole("heading", { exact: true, name: "Welcome, Ada" }),
+    ).toBeVisible();
+    await page.getByRole("button", { exact: true, name: "Sign out" }).click();
+    await page
+      .getByRole("button", { exact: true, name: "Create account" })
+      .click();
+    if (stop === "cancel phrase") {
+      await page
+        .getByRole("button", { exact: true, name: "Allow connection" })
+        .click();
+      await expect(
+        page.getByRole("heading", {
+          exact: true,
+          name: "Keep your recovery phrase",
+        }),
+      ).toBeVisible();
+    }
+    await page
+      .getByRole("button", {
+        exact: true,
+        name: stop === "deny approval" ? "Decline" : "Cancel connection",
+      })
+      .click();
+    if (stop === "deny approval")
+      await page
+        .getByRole("button", { exact: true, name: "Start again" })
+        .click();
+    await page
+      .getByRole("button", { exact: true, name: "Sign in again" })
+      .click();
+    await expect(
+      page.getByRole("heading", { exact: true, name: "Welcome, Ada" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { exact: true, name: "Set up your profile" }),
+    ).toHaveCount(0);
+  });
+}
+
+test("a new saved account cannot inherit a profile when registration and cancellation finish while rendering is suspended", async ({
+  page,
+}) => {
+  await page.goto("/tests/browser/onboarding-races.html");
+  await page
+    .getByRole("button", { exact: true, name: "Create account" })
+    .click();
+  await page
+    .getByLabel("Recovery phrase", { exact: true })
+    .fill("first account phrase");
+  await page.getByLabel("I saved my recovery phrase").check();
+  await page
+    .getByRole("button", { exact: true, name: "Finish account setup" })
+    .click();
+  await page.getByLabel("Display name").fill("Ada");
+  await page
+    .getByRole("button", { exact: true, name: "Continue to workspace" })
+    .click();
+  await expect(
+    page.getByRole("heading", { exact: true, name: "Welcome, Ada" }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { exact: true, name: "Pause account rendering" })
+    .click();
+  await expect(page.getByText("Account rendering is paused")).toBeVisible();
+  await page
+    .getByRole("button", {
+      exact: true,
+      name: "Register and cancel",
+    })
+    .click();
+  await expect(page.getByTestId("registered-phrases")).toHaveAttribute(
+    "data-phase",
+    "disconnected",
+  );
+  await expect(page.getByTestId("registered-phrases")).toHaveText(
+    '["first account phrase","second account phrase"]',
+  );
+  await page
+    .getByRole("button", { exact: true, name: "Resume account rendering" })
+    .click();
+  await page
+    .getByRole("button", { exact: true, name: "Sign in again" })
+    .click();
+  await expect(page.getByTestId("restored-account")).toHaveText("second");
+  await expect(
+    page.getByRole("heading", { exact: true, name: "Set up your profile" }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Display name")).toHaveValue("");
+  await expect(
+    page.getByRole("heading", { exact: true, name: "Welcome, Ada" }),
+  ).toHaveCount(0);
+});
+
+for (const replace of [
+  "Replace ready controller",
+  "Register another account",
+]) {
+  test(`unfinished profile input is cleared after ${replace}`, async ({
+    page,
+  }) => {
+    await page.goto("/tests/browser/onboarding-races.html");
+    await page
+      .getByRole("button", { exact: true, name: "Create account" })
+      .click();
+    await page
+      .getByLabel("Recovery phrase", { exact: true })
+      .fill("first account phrase");
+    await page.getByLabel("I saved my recovery phrase").check();
+    await page
+      .getByRole("button", { exact: true, name: "Finish account setup" })
+      .click();
+    await page.getByLabel("Display name").fill("Unfinished Ada");
+    if (replace === "Register another account") {
+      await page
+        .getByRole("button", { exact: true, name: "Pause account rendering" })
+        .click();
+      await expect(page.getByText("Account rendering is paused")).toBeVisible();
+    }
+    await page.getByRole("button", { exact: true, name: replace }).click();
+    if (replace === "Replace ready controller") {
+      await expect(page.getByTestId("controller-id")).toHaveText("replacement");
+    } else {
+      await expect(page.getByTestId("registered-phrases")).toHaveText(
+        '["first account phrase","second account phrase"]',
+      );
+      await expect(page.getByTestId("registered-phrases")).toHaveAttribute(
+        "data-phase",
+        "ready",
+      );
+      await page
+        .getByRole("button", { exact: true, name: "Resume account rendering" })
+        .click();
+    }
+    await expect(page.getByTestId("access-phase")).toHaveAttribute(
+      "data-phase",
+      "ready",
+    );
+    await expect(page.getByLabel("Display name")).toHaveValue("");
+    await expect(
+      page.getByRole("button", { exact: true, name: "Continue to workspace" }),
+    ).toBeDisabled();
+    if (replace === "Replace ready controller") {
+      await page.getByLabel("Display name").fill("Current draft");
+      await page
+        .getByRole("button", { exact: true, name: "Register another account" })
+        .click();
+      await expect(page.getByTestId("registered-phrases")).toHaveText(
+        '["first account phrase","second account phrase"]',
+      );
+      await expect(page.getByLabel("Display name")).toHaveValue(
+        "Current draft",
+      );
+    }
+  });
+}
+
+test("a failed registration preserves the profile for the saved account", async ({
+  page,
+}) => {
+  await page.goto("/tests/browser/onboarding-races.html");
+  const submit = async () => {
+    await page
+      .getByRole("button", { exact: true, name: "Create account" })
+      .click();
+    await page
+      .getByLabel("Recovery phrase", { exact: true })
+      .fill("fixture phrase");
+    await page.getByLabel("I saved my recovery phrase").check();
+    await page
+      .getByRole("button", { exact: true, name: "Finish account setup" })
+      .click();
+  };
+  await submit();
+  await page.getByLabel("Display name").fill("Ada");
+  await page
+    .getByRole("button", { exact: true, name: "Continue to workspace" })
+    .click();
+  await expect(
+    page.getByRole("heading", { exact: true, name: "Welcome, Ada" }),
+  ).toBeVisible();
+  await page.getByRole("button", { exact: true, name: "Sign out" }).click();
+  await page
+    .getByRole("button", { exact: true, name: "Fail registration" })
+    .click();
+  await submit();
+  await expect(
+    page.getByRole("heading", { exact: true, name: "Try connecting again" }),
+  ).toBeVisible();
+  await page.getByRole("button", { exact: true, name: "Start again" }).click();
+  await page
+    .getByRole("button", { exact: true, name: "Sign in again" })
+    .click();
+  await expect(
+    page.getByRole("heading", { exact: true, name: "Welcome, Ada" }),
+  ).toBeVisible();
+});
+
+test("canceling save recovery does not give the new saved account the old profile", async ({
+  page,
+}) => {
+  await page.goto(example);
+  await approveAndFill(page);
+  await page
+    .getByRole("button", { exact: true, name: "Finish account setup" })
+    .click();
+  await page.getByLabel("Display name").fill("Ada");
+  await page
+    .getByRole("button", { exact: true, name: "Continue to workspace" })
+    .click();
+  await expect(
+    page.getByRole("heading", { exact: true, name: "Welcome, Ada" }),
+  ).toBeVisible();
+  await page.getByRole("button", { exact: true, name: "Sign out" }).click();
+  await page
+    .getByRole("button", { exact: true, name: "Simulate a save error" })
+    .click();
+  await approveAndFill(page);
+  await page
+    .getByRole("button", { exact: true, name: "Finish account setup" })
+    .click();
+  await expect(
+    page.getByRole("heading", { exact: true, name: "Save this sign-in" }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { exact: true, name: "Cancel connection" })
+    .click();
+  await page
+    .getByRole("button", { exact: true, name: "Sign in again" })
+    .click();
+  await expect(
+    page.getByRole("heading", { exact: true, name: "Set up your profile" }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Display name")).toHaveValue("");
+  await expect(
+    page.getByRole("heading", { exact: true, name: "Welcome, Ada" }),
+  ).toHaveCount(0);
+});
+
 test("invalid phrase input stays editable and can be corrected", async ({
   page,
 }) => {
