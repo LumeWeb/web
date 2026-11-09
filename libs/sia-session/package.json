@@ -1,0 +1,42 @@
+{
+  "name": "@lumeweb/sia-session",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared Sia SDK lifetimes with leases and disposal notifications",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./abort": {
+      "types": "./dist/abort.d.ts",
+      "import": "./dist/abort.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "oxlint --deny-warnings src tests vitest.config.ts vitest.package.config.ts --ignore-pattern 'tests/types/**'",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test:contracts": "pnpm run build && tsc -p tsconfig.contracts.json",
+    "test:package": "pnpm run build && vitest run --config vitest.package.config.ts"
+  },
+  "dependencies": {
+    "nanoevents": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "oxlint": "^1.72.0",
+    "prettier": "^3.9.4",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
