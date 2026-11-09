@@ -383,6 +383,7 @@ export class AccountApi {
         body: JSON.stringify(otpValidateRequest),
         method: "POST",
       },
+      true,
     );
 
     if (result.success && result.data?.token) {
@@ -523,11 +524,12 @@ export class AccountApi {
   private async fetchJson<T>(
     input: string,
     init: RequestInit = {},
+    omitAuthToken = false,
   ): Promise<Result<T>> {
     try {
       const response = await fetch(
         buildApiUrl(input, this.apiUrl),
-        buildJsonOptions(init, this.jwtToken, "include"),
+        buildJsonOptions(init, omitAuthToken ? undefined : this.jwtToken, "include"),
       );
 
       if (!response.ok) {
