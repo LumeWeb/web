@@ -6,6 +6,14 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { checkPackage, workspace } from "./packed-package.ts";
 
+function standaloneManifest(manifest: object): void {
+  const dependencies: unknown =
+    "dependencies" in manifest ? manifest.dependencies : undefined;
+  assert.ok(dependencies && typeof dependencies === "object");
+  Reflect.set(dependencies, "@lumeweb/sia-session", "0.0.0");
+  Reflect.deleteProperty(manifest, "devDependencies");
+}
+
 void test(
   "the archive provides the controller and lazy SDK adapter without optional runtimes",
   { timeout: 120000 },
@@ -39,7 +47,7 @@ void test(
       manifest && typeof manifest === "object" && "exports" in manifest,
     );
     assert.ok(manifest.exports && typeof manifest.exports === "object");
-    Reflect.deleteProperty(manifest, "devDependencies");
+    standaloneManifest(manifest);
     Reflect.set(manifest.exports, ".", {
       import: "./src/not-packed.js",
       types: "./src/not-packed.d.ts",
@@ -67,7 +75,7 @@ void test(
       await readFile(join(workspace, "package.json"), "utf8"),
     );
     assert.ok(manifest && typeof manifest === "object");
-    Reflect.deleteProperty(manifest, "devDependencies");
+    standaloneManifest(manifest);
     await writeFile(join(input, "package.json"), JSON.stringify(manifest));
     const entry = join(input, "dist/sia.js");
     await writeFile(

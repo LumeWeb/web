@@ -38,7 +38,8 @@ const register = original.connection.register.bind(original.connection);
 original.connection.register = async (phrase) => {
   registeredPhrases.push(phrase);
   if (failRegistration) throw new Error("Fixture registration failed");
-  return register(phrase);
+  const session = await register(phrase);
+  return { ...session, value: { ...session.value } };
 };
 let releaseValidation: () => void = () => undefined;
 const validation = new Promise<PhraseValidation>((resolve) => {

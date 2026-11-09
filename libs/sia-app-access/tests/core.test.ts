@@ -298,8 +298,6 @@ for (const resourceName of ["connection", "session"]) {
     let replacement: ReturnType<typeof f.access.authorize> | undefined;
     try {
       await f.access.authorize(AccessIntent.Create);
-      if (resourceName === "session")
-        await f.access.submitRecoveryPhrase("private phrase");
       const owned = resourceName === "session" ? f.session : f.connection;
       const dispose = owned.dispose.bind(owned);
       let retired = false;
@@ -310,6 +308,8 @@ for (const resourceName of ["connection", "session"]) {
         f.access.cancel();
         replacement = f.access.authorize(AccessIntent.Create);
       };
+      if (resourceName === "session")
+        await f.access.submitRecoveryPhrase("private phrase");
       f.adapter.begin = async () => ({
         ...f.connection,
         dispose() {
@@ -346,7 +346,6 @@ void test("forget coalesces a call made by the retiring session", async () => {
   let nested: ReturnType<typeof f.access.forget> | undefined;
   try {
     await f.access.authorize(AccessIntent.Create);
-    await f.access.submitRecoveryPhrase("private phrase");
     const dispose = f.session.dispose.bind(f.session);
     let retired = false;
     f.session.dispose = () => {
@@ -355,6 +354,7 @@ void test("forget coalesces a call made by the retiring session", async () => {
       dispose();
       nested = f.access.forget();
     };
+    await f.access.submitRecoveryPhrase("private phrase");
     const pending = f.access.forget();
     assert.equal(nested, pending);
     assert.equal((await pending).kind, "removed");
