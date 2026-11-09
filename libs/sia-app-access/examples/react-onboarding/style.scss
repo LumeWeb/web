@@ -1,0 +1,314 @@
+// The account form and demo instructions share colors and responsive spacing.
+$ink: #182e2a;
+$muted: #52655a;
+$accent: #226047;
+$border: #d3ddd4;
+
+:root {
+  font-family: system-ui, sans-serif;
+  color: $ink;
+  background: #f7f9f6;
+  font-synthesis: none;
+  line-height: 1.5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+a {
+  color: $accent;
+  text-underline-offset: 4px;
+}
+
+.page {
+  max-width: 1100px;
+  margin: auto;
+  padding: 32px 40px 48px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.wordmark {
+  font-size: 20px;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.demo-label {
+  color: $muted;
+  font-size: 13px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 620px) minmax(0, 1fr);
+  gap: 40px;
+  align-items: start;
+}
+
+.account-card {
+  border: 1px solid $border;
+  border-radius: 8px;
+  background: #fff;
+  padding: 28px 32px 20px;
+}
+
+.steps {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+
+  span {
+    flex: 1;
+    border-top: 2px solid $border;
+    padding-top: 8px;
+    color: $muted;
+    font-size: 12px;
+
+    &.active {
+      border-color: $accent;
+      color: $accent;
+      font-weight: 650;
+    }
+  }
+}
+
+h1 {
+  font-size: 28px;
+  line-height: 1.2;
+  margin: 0 0 16px;
+}
+
+p {
+  color: $muted;
+  margin: 0 0 20px;
+  font-size: 14px;
+}
+
+button,
+.button {
+  display: block;
+  width: 100%;
+  border: 1px solid $accent;
+  background: $accent;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-top: 12px;
+  color: #fff;
+  cursor: pointer;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover:not(:disabled) {
+    background: #164e39;
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  &.secondary {
+    background: #fff;
+    color: $accent;
+    border-color: $border;
+
+    &:hover:not(:disabled) {
+      background: #f0f5ed;
+    }
+  }
+
+  &.text-button {
+    color: $muted;
+    background: transparent;
+    border-color: transparent;
+    padding: 9px;
+
+    &:hover:not(:disabled) {
+      background: #f5f7f2;
+    }
+  }
+}
+
+label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 20px 0 8px;
+}
+
+input:not([type="checkbox"]) {
+  width: 100%;
+  min-width: 0;
+  background: #fafbf8;
+  border: 1px solid $border;
+  border-radius: 6px;
+  padding: 12px;
+  color: $ink;
+}
+
+input:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid #75ae90;
+  outline-offset: 3px;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 400;
+
+  input {
+    width: 16px;
+    height: 16px;
+    accent-color: $accent;
+  }
+}
+
+.fine-print {
+  font-size: 12px;
+  margin-top: 18px;
+}
+
+.error {
+  color: #963d35;
+  background: #fff3ee;
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 12px;
+}
+
+.notice {
+  color: #7a5b19;
+  background: #fff7dc;
+  padding: 12px;
+  border-radius: 6px;
+  margin-top: 20px;
+}
+
+.status {
+  font-size: 14px;
+  margin: 18px 0 0;
+
+  &:empty {
+    display: none;
+  }
+}
+
+footer {
+  border-top: 1px solid $border;
+  padding-top: 16px;
+  margin-top: 28px;
+  color: $muted;
+  font-size: 12px;
+}
+
+.guide-panel {
+  padding-top: 24px;
+
+  h2 {
+    font-size: 18px;
+    margin: 0 0 12px;
+  }
+}
+
+.guide-note {
+  border-top: 1px solid $border;
+  padding-top: 16px;
+  margin-top: 20px;
+
+  h3 {
+    font-size: 14px;
+    margin: 0 0 8px;
+  }
+
+  p {
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+}
+
+.demo-approval {
+  background: #f3f7ee;
+  padding: 16px;
+  border-radius: 6px;
+
+  p {
+    margin-bottom: 14px;
+  }
+}
+
+.account-summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid $border;
+  border-radius: 6px;
+  padding: 16px;
+  margin: 24px 0;
+
+  small {
+    display: block;
+    font-size: 13px;
+    color: $muted;
+  }
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #deeadb;
+  display: grid;
+  place-items: center;
+  font-weight: 650;
+}
+
+@media (width <= 720px) {
+  .page {
+    padding: 20px 16px 32px;
+  }
+
+  .page-header {
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .account-card {
+    padding: 24px 20px 18px;
+  }
+
+  .guide-panel {
+    padding: 8px;
+  }
+
+  h1 {
+    font-size: 26px;
+  }
+}

@@ -4,6 +4,8 @@ The `/react` entry requires React 19 and reads controller snapshots with `useSyn
 
 Applications that render DOM use matching React 19 and ReactDOM 19 versions. ReactDOM is not a runtime dependency of this library.
 
+The [runnable onboarding walkthrough](onboarding.md) combines these hooks with application-owned account screens and forms. Its development-only backend uses synthetic approval, not a real account.
+
 ## Observe available actions
 
 `createSiaAccess` returns a `SiaAccessInteractions<Session>` controller. Its snapshot includes `presentation.availability`, which tells your UI which commands are currently allowed:
