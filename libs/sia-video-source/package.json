@@ -70,6 +70,7 @@
     "test:e2e:sdk:offline": "node --test tests/contract/*.test.ts"
   },
   "dependencies": {
+    "@lumeweb/sia-session": "workspace:*",
     "@noble/ciphers": "^2.4.0",
     "@noble/curves": "^2.4.0",
     "@noble/hashes": "^2.4.0",

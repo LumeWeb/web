@@ -13,6 +13,7 @@ import type { MediaLoadResult, MediaPlayback } from '../../media/library-load.ts
 import type { SiaObjectLike } from '../../ranged-reader.ts';
 import type { LoadPipeline, LoadRequest } from '../../session/load-pipeline.ts';
 import type { AppendSink } from '../../sink/append-sink.ts';
+import type { ByteSource } from '../../transport/byte-source.ts';
 import type { SiaByteSourceSdk } from '../../transport/sia-byte-source.ts';
 
 export interface FakeSiaSdkResult {
@@ -33,8 +34,9 @@ export class FakeLoadPipeline implements LoadPipeline {
 
   run(request: LoadRequest): Promise<MediaLoadResult> {
     this.calls.push(request);
-    const next = this.results.shift();
-    return Promise.resolve(next ?? readyLoadResult());
+    const next = this.results.shift() ?? readyLoadResult();
+    if (next.status === 'ready' && next.playback instanceof FakeMediaPlayback) next.playback.attachSource(request.source);
+    return Promise.resolve(next);
   }
 }
 
@@ -50,6 +52,11 @@ export class FakeMediaPlayback implements MediaPlayback {
   #disposed = false;
   #onComplete: (() => void) | null = null;
   #onError: ((error: unknown) => void) | null = null;
+  #source: ByteSource | null = null;
+
+  attachSource(source: ByteSource): void {
+    this.#source = source;
+  }
 
   complete(): void {
     this.#onComplete?.();
@@ -59,6 +66,9 @@ export class FakeMediaPlayback implements MediaPlayback {
     if (this.#disposed) return;
     this.#disposed = true;
     this.disposed += 1;
+    // The real MediaPlayback disposes its CustomSource and cancels the byte source.
+    this.#source?.cancel();
+    this.#source = null;
   }
 
   fail(error: unknown): void {

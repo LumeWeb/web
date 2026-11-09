@@ -94,6 +94,7 @@ export class SiaByteSource implements ByteSource {
   readonly #cache: LruChunkCache;
   readonly #generationState = new LoadGenerationState();
   readonly #options: SiaByteSourceOptions;
+  readonly #readers = new Set<RangedReader>();
 
   constructor(options: SiaByteSourceOptions) {
     this.#options = options;
@@ -104,12 +105,19 @@ export class SiaByteSource implements ByteSource {
     this.#generationState.reset(reason);
   }
 
+  /** Keeps an owned SDK alive until abandoned downloads and cancels settle. */
+  async cancelAndWait(reason?: unknown): Promise<void> {
+    this.cancel(reason);
+    await Promise.all([...this.#readers].map((reader) => reader.whenIdle()));
+  }
+
   read(range: ByteRange, options: ReadOptions): ReadableStream<Uint8Array> {
     const loadGeneration = options.loadGeneration;
     let superseded = false;
     let settled = false;
     let controllerRef: null | ReadableStreamDefaultController<Uint8Array> = null;
     let readerRef: null | RangedReader = null;
+    let trackedReader: null | RangedReader = null;
 
     // `settle` references `handle` and vice versa; both are only invoked after
     // `read()` finishes building its stream, so neither forward reference is
@@ -160,6 +168,13 @@ export class SiaByteSource implements ByteSource {
       settled = true;
       signal?.removeEventListener('abort', onAbort);
       this.#generationState.settle(handle);
+      if (trackedReader) {
+        const reader = trackedReader;
+        void reader.whenIdle().then(
+          () => this.#readers.delete(reader),
+          () => this.#readers.delete(reader),
+        );
+      }
     };
 
     const { chunkSize, object, onMilestone, policy, requestId, sdk } = this.#options;
@@ -223,6 +238,8 @@ export class SiaByteSource implements ByteSource {
           sdk,
         });
         readerRef = reader;
+        trackedReader = reader;
+        this.#readers.add(reader);
         reader.start(start, end - start);
       },
     });
@@ -244,7 +261,7 @@ export class SiaByteSource implements ByteSource {
 export function createSiaByteSourceFactory(
   sdk: SiaByteSourceSdk,
   options: SiaByteSourceFactoryOptions = {},
-): (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared', refresh?: boolean) => Promise<ByteSource> {
+): (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared', refresh?: boolean) => Promise<SiaByteSource> {
   // One shared exact-window cache per factory, so every source it creates
   // replays already-downloaded windows across loads (like the worker's
   // per-core cache). An explicit caller-supplied cache still wins. One shared
@@ -253,7 +270,7 @@ export function createSiaByteSourceFactory(
   const cache = options.cache ?? new LruChunkCache();
   const policy = options.policy ?? createSiaTransportPolicy();
   const onMilestone = options.onMilestone;
-  return async (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared'): Promise<ByteSource> => {
+  return async (src: string, requestId?: null | RequestId, sourceKind?: 'app' | 'shared'): Promise<SiaByteSource> => {
     const object = await resolveSiaObject(sdk, src, sourceKind);
     // Emit only on successful resolution — a rejection already propagated
     // above. `share` is a plain boolean (`isSiaShareUrl`): the share URL
