@@ -1,0 +1,42 @@
+name: sia-session
+
+on:
+  push:
+    paths:
+      - "libs/sia-session/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".oxlintrc.json"
+      - ".prettierrc.json"
+      - ".github/workflows/sia-session.yml"
+  pull_request:
+    paths:
+      - "libs/sia-session/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".oxlintrc.json"
+      - ".prettierrc.json"
+      - ".github/workflows/sia-session.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sia-session-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: LumeWeb/workflows/.github/actions/setup-all@develop
+      - run: pnpm install --frozen-lockfile
+      - run: test ! -d libs/sia-session/dist
+      - run: pnpm --filter @lumeweb/sia-session typecheck
+      - run: pnpm --filter @lumeweb/sia-session test
+      - run: pnpm --filter @lumeweb/sia-session lint
+      - run: pnpm --filter @lumeweb/sia-session format:check
+      - run: pnpm --filter @lumeweb/sia-session test:contracts
+      - run: pnpm --filter @lumeweb/sia-session test:package

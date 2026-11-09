@@ -1,0 +1,12 @@
+{
+  "extends": ["../../.oxlintrc.json"],
+  "overrides": [
+    {
+      "files": ["tests/**/*.ts"],
+      "rules": {
+        "typescript/only-throw-error": "off",
+        "typescript/prefer-promise-reject-errors": "off"
+      }
+    }
+  ]
+}
