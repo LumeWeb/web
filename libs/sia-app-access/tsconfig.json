@@ -14,7 +14,12 @@
     "noEmit": true,
     "types": ["node"],
     "paths": {
-      "@/*": ["./src/*.ts", "./src/*.tsx"]
+      "@/*": ["./src/*.ts", "./src/*.tsx"],
+      "@lumeweb/sia-app-access": ["./src/index.ts"],
+      "@lumeweb/sia-app-access/react": ["./src/react.ts"],
+      "@lumeweb/sia-app-access/react-hook-form": ["./src/react-hook-form.ts"],
+      "@lumeweb/sia-app-access/sia": ["./src/sia.ts"],
+      "@lumeweb/sia-app-access/zustand": ["./src/zustand.ts"]
     }
   },
   "include": [
@@ -22,6 +27,8 @@
     "src/**/*.tsx",
     "tests/**/*.ts",
     "tests/**/*.tsx",
+    "examples/**/*.ts",
+    "examples/**/*.tsx",
     "playwright.config.ts",
     "vite.config.ts"
   ],

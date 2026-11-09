@@ -48,6 +48,7 @@ jobs:
       - run: pnpm --filter=@lumeweb/sia-app-access lint
       - run: pnpm --filter=@lumeweb/sia-app-access format:check
       - run: pnpm --filter=@lumeweb/sia-app-access test:browser:build
+      - run: pnpm --filter=@lumeweb/sia-app-access example:react:build
       - run: pnpm --filter=@lumeweb/sia-app-access test:contracts
       - run: pnpm --filter=@lumeweb/sia-app-access test:package
       - run: npm --prefix libs/sia-app-access run test:package

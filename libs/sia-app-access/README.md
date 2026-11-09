@@ -4,6 +4,8 @@ Framework-free Sia authorization and session lifetime for application-owned inte
 
 The package is private. Use it through the workspace or a local archive.
 
+Run the [React login and onboarding example](docs/onboarding.md) with `pnpm run example:react` from this package directory, then open `http://127.0.0.1:4174/`. It uses synthetic approval and memory-only saving; never enter a real recovery phrase.
+
 ## Create access for an application
 
 ```ts
@@ -51,6 +53,7 @@ pnpm run test:offline
 pnpm run lint
 pnpm run format:check
 pnpm run test:browser:build
+pnpm run example:react:build
 pnpm run test:browser
 pnpm run test:browser --browser=firefox
 pnpm run test:contracts
@@ -60,4 +63,4 @@ npm run test:package
 
 Typecheck, source tests and browser fixtures use access source without a prebuild. Artifact checks use the canonical TypeScript and `tsc-alias` build. Archive consumers run outside the workspace.
 
-Browser tests start Vite on port 4173; that port must be free. They use shared synthetic Sia fixtures for approval and application operations. Existing-account phrase matching is tested with a controlled adapter, not the shared synthetic protocol. Offline SDK tests run initialization scenarios in separate processes, including a missing Node facade and recovery after asset failure. These checks do not verify live Sia authorization, saved-account reconnect or worker execution.
+Browser tests start Vite fixtures on port 4173 and the standalone example on port 4174; both ports must be free. They use shared synthetic Sia fixtures for approval and application operations. Existing-account phrase matching is tested with a controlled adapter, not the shared synthetic protocol. Offline SDK tests run initialization scenarios in separate processes, including a missing Node facade and recovery after asset failure. These checks do not verify live Sia authorization, saved-account reconnect or worker execution.

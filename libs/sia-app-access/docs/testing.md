@@ -27,17 +27,26 @@ pnpm run test:offline
 pnpm run test:browser
 pnpm run test:browser --browser=firefox
 pnpm run test:browser:build
+pnpm run example:react:build
 pnpm run lint
 pnpm run format:check
 ```
 
 Node tests load TypeScript source through `tsx`. Browser fixtures load source through Vite. `pnpm test` also typechecks the package-consumer fixtures against source.
 
-Playwright starts the Vite fixture server on `127.0.0.1:4173`; that port must be free. The browser fixtures close their contexts before closing mock HTTP endpoints and cleaning up the test run. `test:browser:build` bundles the library fixtures.
+Playwright starts the Vite fixture server on `127.0.0.1:4173` and the example's dedicated server on `127.0.0.1:4174`; both ports must be free. The browser fixtures close their contexts before closing mock HTTP endpoints and cleaning up the test run. `test:browser:build` bundles the library fixtures. `example:react:build` bundles the standalone example without starting its mock backend.
 
-Lint checks source types and style, then runs React's hook rules. Declaration fixtures contain intentional type errors checked by `test:contracts`. Prettier covers source and consumer templates.
+Lint checks source types and style, then runs React's hook rules and Stylelint for the example's SCSS. Vite uses Sass to compile that stylesheet. Declaration fixtures contain intentional type errors checked by `test:contracts`. Prettier covers source and consumer templates.
 
 To verify that source checks do not depend on a previous build, move access `dist` out of the package before running them. They must not recreate it. Restore the saved directory afterward, or rebuild it for artifact checks.
+
+## Run the onboarding example
+
+From the package directory, run `pnpm run example:react` and open `http://127.0.0.1:4174/`. Follow the [walkthrough](onboarding.md) for signup, save recovery and saved-key sign-in. Never enter a real recovery phrase.
+
+The example uses a separate dependency cache so its server cannot overwrite the library fixtures' optimized modules. Its synthetic mock starts only in development and closes with the Vite server. Build and preview do not provide that backend.
+
+Run its browser group alone with `pnpm exec playwright test tests/browser/onboarding.spec.ts`. The controlled race fixture covers edits, controller replacement and unmount. Existing-account phrase matching is checked with a controlled adapter, not the shared synthetic protocol. The walkthrough images illustrate the UI; they are not live authorization evidence or screenshot comparison tests.
 
 ## Build and artifact checks
 

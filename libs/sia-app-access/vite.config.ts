@@ -11,6 +11,7 @@ export default defineConfig({
         "tests/browser/react-components.html",
         "tests/browser/react-interactions.html",
         "tests/browser/react-task-hydration.html",
+        "tests/browser/onboarding-races.html",
       ],
     },
   },
