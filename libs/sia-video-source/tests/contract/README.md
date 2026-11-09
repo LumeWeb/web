@@ -1,6 +1,6 @@
 # Read-only real-SDK compatibility check
 
-This manual check uses SDK 0.1.4 and its streaming service worker through the public video-library streaming service. It checks known HTTP range bytes and decodes video before and after a seek. A valid sharing credential must read its shared fixture but receive HTTP 401, 403 or 404 when requesting the separate private app fixture.
+This manual check uses SDK 0.2.0 and its streaming service worker through the public video-library streaming service. It checks known HTTP range bytes and decodes video before and after a seek. A valid sharing credential must read its shared fixture but receive HTTP 401, 403 or 404 when requesting the separate private app fixture.
 
 No account is created or deleted. The check does not upload, pin or change sharing permissions. Downloads can incur charges: the app key and sharing key must belong to an explicitly approved, pre-provisioned test account.
 
