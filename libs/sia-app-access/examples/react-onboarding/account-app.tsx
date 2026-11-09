@@ -7,6 +7,7 @@ import {
   AccessOutcome,
   AccessPhase,
   CredentialConfirmation,
+  RegistrationEffect,
 } from "@lumeweb/sia-app-access";
 import type { SiaAccessInteractions } from "@lumeweb/sia-app-access";
 import {
@@ -23,6 +24,13 @@ interface AccountAppProps<Session> {
   readonly renderApproval?: (url: string) => ReactNode;
 }
 
+/** A reconnect keeps the profile from the last established authorization. */
+interface AccountProfile<Session> {
+  readonly access: SiaAccessInteractions<Session>;
+  readonly name: string;
+  readonly sequence: null | number;
+}
+
 interface ProfileSetupProps {
   readonly onComplete: (name: string) => void;
 }
@@ -36,10 +44,30 @@ export function AccountApp<Session>({
   const approval = useSiaApproval(access);
   const phrase = useSiaRecoveryPhrase(access);
   const saving = useSiaSaveRecovery(access);
-  const [name, setName] = useState("");
+  const [profile, setProfile] = useState<AccountProfile<Session>>({
+    access,
+    name: "",
+    sequence: null,
+  });
   const [status, setStatus] = useState("");
   const state = snapshot.state;
   const ready = state.phase === AccessPhase.Ready;
+  const established =
+    ready ||
+    state.phase === AccessPhase.Saving ||
+    saving?.effects.registration === RegistrationEffect.Registered;
+  const sequence = established
+    ? (snapshot.presentation.interaction?.sequence ?? null)
+    : null;
+  const resetProfile =
+    profile.access !== access ||
+    (sequence !== null && sequence !== profile.sequence);
+  // Reset before committing children so a new session never displays the previous profile.
+  if (resetProfile) setProfile({ access, name: "", sequence });
+  const name = resetProfile ? "" : profile.name;
+  const setName = (value: string) => {
+    setProfile((current) => ({ ...current, name: value }));
+  };
   let content: ReactNode;
 
   if (ready && !name) {
@@ -198,7 +226,6 @@ export function AccountApp<Session>({
         <button
           disabled={!snapshot.presentation.availability.authorize}
           onClick={() => {
-            setName("");
             setStatus("");
             void commands.authorize(AccessIntent.Create);
           }}>
@@ -209,7 +236,6 @@ export function AccountApp<Session>({
             className="secondary"
             disabled={!snapshot.presentation.availability.authorize}
             onClick={() => {
-              setName("");
               setStatus("");
               void commands.authorize(AccessIntent.Existing);
             }}>

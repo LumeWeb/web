@@ -13,9 +13,11 @@ let generated: Promise<unknown> | undefined;
 let holdValidation = false;
 let validationResult = PhraseValidation.Invalid;
 const registeredPhrases: string[] = [];
+let failRegistration = false;
 const register = original.connection.register.bind(original.connection);
 original.connection.register = async (phrase) => {
   registeredPhrases.push(phrase);
+  if (failRegistration) throw new Error("Fixture registration failed");
   return register(phrase);
 };
 let releaseValidation: () => void = () => undefined;
@@ -51,6 +53,12 @@ function Harness() {
           holdValidation = true;
         }}>
         Hold valid validation
+      </button>
+      <button
+        onClick={() => {
+          failRegistration = true;
+        }}>
+        Fail registration
       </button>
       <output
         data-phase={snapshot.state.phase}
