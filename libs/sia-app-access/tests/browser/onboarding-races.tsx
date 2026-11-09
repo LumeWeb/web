@@ -1,12 +1,32 @@
-/** Controlled phrase work checks the guide's form without changing the controller's outcomes. */
-import { StrictMode, useState } from "react";
+/** Controlled session work and suspended renders check application-owned onboarding state. */
+import { StrictMode, Suspense, use, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { AccessIntent, PhraseValidation } from "@/index";
+import {
+  AccessIntent,
+  createMemoryCredentialStore,
+  PhraseValidation,
+} from "@/index";
 import { useSiaAccess } from "@/react";
 import { AccountApp } from "../../examples/react-onboarding/account-app.tsx";
 import { fixture } from "../helpers/core-fixture.ts";
 
-const original = fixture();
+const memory = createMemoryCredentialStore();
+let afterWrite: () => void = () => undefined;
+let restoredAccount = "none";
+const original = fixture({
+  async read(scope) {
+    const bytes = await memory.read(scope);
+    restoredAccount = bytes?.[0] === 2 ? "second" : "first";
+    return bytes;
+  },
+  remove: (scope) => memory.remove(scope),
+  async write(scope, bytes) {
+    await memory.write(scope, bytes);
+    afterWrite();
+  },
+});
+original.session.exportAppKey = () =>
+  new Uint8Array(32).fill(original.counts().registrations);
 const replacement = fixture();
 let release: () => void = () => undefined;
 let generated: Promise<unknown> | undefined;
@@ -34,11 +54,24 @@ original.adapter.generateRecoveryPhrase = () => {
   return pending;
 };
 
+let resumeRendering: () => void = () => undefined;
+const rendering = new Promise<void>((resolve) => {
+  resumeRendering = resolve;
+});
+/** The store commits its copy before cancellation can retire the new session. */
+async function establishAccount(cancel: boolean) {
+  afterWrite = cancel ? () => original.access.cancel() : () => undefined;
+  original.access.disconnect();
+  await original.access.authorize(AccessIntent.Create);
+  await original.access.submitRecoveryPhrase("second account phrase");
+}
+
 function Harness() {
   const { snapshot } = useSiaAccess(original.access);
   const [access, setAccess] = useState(original.access);
   const [visible, setVisible] = useState(true);
   const [released, setReleased] = useState(false);
+  const [paused, setPaused] = useState(false);
   return (
     <>
       <button
@@ -65,6 +98,32 @@ function Harness() {
         data-testid="registered-phrases">
         {JSON.stringify(registeredPhrases)}
       </output>
+      <output data-testid="restored-account">{restoredAccount}</output>
+      <button
+        onClick={() => {
+          void establishAccount(true);
+        }}>
+        Register and cancel
+      </button>
+      <button
+        onClick={() => {
+          void establishAccount(false);
+        }}>
+        Register another account
+      </button>
+      <button
+        onClick={() => {
+          void replacement.access
+            .authorize(AccessIntent.Create)
+            .then(async () => {
+              await replacement.access.submitRecoveryPhrase(
+                "replacement phrase",
+              );
+              setAccess(replacement.access);
+            });
+        }}>
+        Replace ready controller
+      </button>
       <button
         onClick={() => {
           releaseValidation();
@@ -104,9 +163,24 @@ function Harness() {
       <output data-testid="generation-released">
         {released ? "released" : "pending"}
       </output>
-      {visible && <AccountApp access={access} />}
+      <button onClick={() => setPaused(true)}>Pause account rendering</button>
+      <button
+        onClick={() => {
+          resumeRendering();
+          setPaused(false);
+        }}>
+        Resume account rendering
+      </button>
+      <Suspense fallback={<p>Account rendering is paused</p>}>
+        <PauseAccount paused={paused} />
+        {visible && <AccountApp access={access} />}
+      </Suspense>
     </>
   );
+}
+function PauseAccount({ paused }: { readonly paused: boolean }) {
+  if (paused) use(rendering);
+  return null;
 }
 const element = document.querySelector("#app");
 if (!element) throw new Error("Fixture root is missing");

@@ -1,5 +1,5 @@
 /** Account access follows controller state; profile setup remains application state. */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import {
   AccessFailure,
@@ -9,7 +9,10 @@ import {
   CredentialConfirmation,
   RegistrationEffect,
 } from "@lumeweb/sia-app-access";
-import type { SiaAccessInteractions } from "@lumeweb/sia-app-access";
+import type {
+  AccessInteractionSnapshot,
+  SiaAccessInteractions,
+} from "@lumeweb/sia-app-access";
 import {
   useSiaAccessInteractions,
   useSiaApproval,
@@ -28,6 +31,8 @@ interface AccountAppProps<Session> {
 interface AccountProfile<Session> {
   readonly access: SiaAccessInteractions<Session>;
   readonly name: string;
+  // A replacement controller can reuse a sequence, so drafts need a separate reset key.
+  readonly revision: number;
   readonly sequence: null | number;
 }
 
@@ -47,31 +52,44 @@ export function AccountApp<Session>({
   const [profile, setProfile] = useState<AccountProfile<Session>>({
     access,
     name: "",
+    revision: 0,
     sequence: null,
   });
   const [status, setStatus] = useState("");
   const state = snapshot.state;
   const ready = state.phase === AccessPhase.Ready;
-  const established =
-    ready ||
-    state.phase === AccessPhase.Saving ||
-    saving?.effects.registration === RegistrationEffect.Registered;
-  const sequence = established
-    ? (snapshot.presentation.interaction?.sequence ?? null)
-    : null;
-  const resetProfile =
-    profile.access !== access ||
-    (sequence !== null && sequence !== profile.sequence);
+  const currentProfile = profileFor(
+    profile,
+    access,
+    establishedSequence(snapshot),
+  );
   // Reset before committing children so a new session never displays the previous profile.
-  if (resetProfile) setProfile({ access, name: "", sequence });
-  const name = resetProfile ? "" : profile.name;
+  if (currentProfile !== profile) setProfile(currentProfile);
+  const name = currentProfile.name;
+  useEffect(() => {
+    // Passive subscriptions remain active while Suspense hides the UI, unlike layout effects.
+    const observe = () => {
+      const sequence = establishedSequence(access.getSnapshot());
+      if (sequence === null) return;
+      setProfile((current) =>
+        current.access === access
+          ? profileFor(current, access, sequence)
+          : current,
+      );
+    };
+    const unsubscribe = access.subscribe(observe);
+    observe();
+    return unsubscribe;
+  }, [access]);
   const setName = (value: string) => {
     setProfile((current) => ({ ...current, name: value }));
   };
   let content: ReactNode;
 
   if (ready && !name) {
-    content = <ProfileSetup onComplete={setName} />;
+    content = (
+      <ProfileSetup key={currentProfile.revision} onComplete={setName} />
+    );
   } else if (ready) {
     content = (
       <>
@@ -295,6 +313,36 @@ export function AccountApp<Session>({
     </section>
   );
 }
+/** Saving publishes before a credential write can outlive cancellation. */
+function establishedSequence(
+  snapshot: AccessInteractionSnapshot,
+): null | number {
+  const established =
+    snapshot.state.phase === AccessPhase.Ready ||
+    snapshot.state.phase === AccessPhase.Saving ||
+    snapshot.presentation.saveRecovery?.effects.registration ===
+      RegistrationEffect.Registered;
+  return established
+    ? (snapshot.presentation.interaction?.sequence ?? null)
+    : null;
+}
+
+/** Reconnect has no interaction sequence and must retain the established profile. */
+function profileFor<Session>(
+  profile: AccountProfile<Session>,
+  access: SiaAccessInteractions<Session>,
+  sequence: null | number,
+): AccountProfile<Session> {
+  // React can replay a queued publication after a newer render has reset the profile.
+  if (
+    profile.access === access &&
+    (sequence === null ||
+      (profile.sequence !== null && sequence <= profile.sequence))
+  )
+    return profile;
+  return { access, name: "", revision: profile.revision + 1, sequence };
+}
+
 function ProfileSetup({ onComplete }: ProfileSetupProps) {
   const [name, setName] = useState("");
   return (

@@ -126,6 +126,8 @@ export function ProfileStep({ onComplete }: { readonly onComplete: (name: string
 
 Type a name and continue. The application remembers it while this page stays open. Cancellation or failure before registration succeeds keeps the previous profile. Once new authorization advances to saving or becomes ready, the previous name is discarded and profile setup is required again, even if saving later fails. **Sign out** followed by **Sign in again** keeps the current account's name for the saved-key reconnect.
 
+The example observes controller publications to reset the profile even when React skips an intermediate saving render. Changing the controller or establishing another authorization also resets unfinished profile input.
+
 ## 6. Sign out and return
 
 ![Connected workspace](images/onboarding-ready.png)
