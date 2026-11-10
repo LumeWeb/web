@@ -1,11 +1,44 @@
 import { describe, expect, it } from "vitest";
-import { type AuthFlowInput, selectAuthStep } from "./authFlow";
+import {
+  type AuthFlowInput,
+  selectAuthStep,
+  shouldAutoReconnect,
+} from "./authFlow";
 
 const gate: AuthFlowInput = {
   reconnecting: false,
   sharingKeyHex: null,
   status: "disconnected",
 };
+
+describe("automatic account reconnect", () => {
+  const saved = {
+    accountError: null,
+    reconnectError: null,
+    savedUserKeyHex: "a1".repeat(32),
+    sharingKeyHex: null,
+    status: "disconnected" as const,
+  };
+
+  it("starts from a saved key on initial entry", () => {
+    expect(shouldAutoReconnect(saved)).toBe(true);
+  });
+
+  it("keeps a failed account entry visible until the user retries", () => {
+    expect(
+      shouldAutoReconnect({ ...saved, accountError: "Could not register" }),
+    ).toBe(false);
+  });
+
+  it("does not retry an automatic reconnect error or a sharing session", () => {
+    expect(
+      shouldAutoReconnect({ ...saved, reconnectError: "Could not reconnect" }),
+    ).toBe(false);
+    expect(
+      shouldAutoReconnect({ ...saved, sharingKeyHex: "b2".repeat(32) }),
+    ).toBe(false);
+  });
+});
 
 describe("selectAuthStep", () => {
   it("lands on the gate by default (disconnected, no sharing key)", () => {

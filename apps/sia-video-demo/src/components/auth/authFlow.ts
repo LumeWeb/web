@@ -35,6 +35,12 @@ export type AuthStatus = (typeof AuthStatus)[keyof typeof AuthStatus];
 
 export type AuthStep = "approve" | "gate" | "loading" | "player" | "recovery";
 
+export interface AutoReconnectInput extends AuthFlowInput {
+  accountError: null | string;
+  reconnectError: null | string;
+  savedUserKeyHex: string;
+}
+
 export function selectAuthStep(state: AuthFlowInput): AuthStep {
   // A sharing key is a complete credential (indexer + share key = SSO): when
   // one is present, the keyless shared player is the entry point no matter
@@ -53,4 +59,14 @@ export function selectAuthStep(state: AuthFlowInput): AuthStep {
     default:
       return "gate";
   }
+}
+
+export function shouldAutoReconnect(state: AutoReconnectInput): boolean {
+  return (
+    state.status === AuthStatus.Disconnected &&
+    !!state.savedUserKeyHex &&
+    !state.sharingKeyHex &&
+    !state.reconnectError &&
+    !state.accountError
+  );
 }

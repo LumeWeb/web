@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useStore } from "zustand";
 import { useAuthStore } from "../../stores/auth";
 import { PlayerScreen } from "../player/PlayerScreen";
-import { AuthStatus, selectAuthStep } from "./authFlow";
+import { selectAuthStep, shouldAutoReconnect } from "./authFlow";
 import { ApproveScreen } from "./ApproveScreen";
 import { GateScreen } from "./GateScreen";
 import { LoadingScreen } from "./LoadingScreen";
@@ -15,19 +15,30 @@ export function AuthFlow() {
   const savedUserKeyHex = useStore(useAuthStore, (s) => s.savedUserKeyHex);
   const reconnect = useStore(useAuthStore, (s) => s.reconnect);
   const reconnectError = useStore(useAuthStore, (s) => s.reconnectError);
+  const accountError = useStore(useAuthStore, (s) => s.accountError);
 
-  // Retaining the account key after failure must not rearm automatic reconnect.
-  // Sharing sessions use their own credential without opening an account SDK.
+  // Automatic reconnect after a failed account request would replace its error
+  // before the user can retry. Sharing sessions do not open an account SDK.
   useEffect(() => {
     if (
-      status === AuthStatus.Disconnected &&
-      savedUserKeyHex &&
-      !sharingKeyHex &&
-      !reconnectError
+      shouldAutoReconnect({
+        accountError,
+        reconnectError,
+        savedUserKeyHex,
+        sharingKeyHex,
+        status,
+      })
     ) {
       void reconnect();
     }
-  }, [reconnect, reconnectError, savedUserKeyHex, sharingKeyHex, status]);
+  }, [
+    accountError,
+    reconnect,
+    reconnectError,
+    savedUserKeyHex,
+    sharingKeyHex,
+    status,
+  ]);
 
   const step = selectAuthStep({ sharingKeyHex, status });
 
