@@ -118,6 +118,13 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
   );
   await checkVitestDocs(testingTarball, directory);
   await cp(testingTarball, testing, { recursive: true });
+  // The session archive contains dist only; packing before build omits its exports.
+  execFileSync("npm", ["run", "build"], {
+    cwd: join(repo, "libs/sia-session"),
+    env: environment,
+    stdio: "inherit",
+    timeout: 30_000,
+  });
   const sessionTarball = await pack(
     join(repo, "libs/sia-session"),
     join(directory, "session-tarball"),
