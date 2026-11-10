@@ -34,12 +34,19 @@ export async function connectAppKey(
     await import("@siafoundation/sia-storage");
   await initSia();
   const key = new AppKey(fromHex(userKeyHex));
-  const builder = new Builder(indexerUrl, APP_META);
-  const sdk = await builder.connected(key);
-  builder.free();
-  if (!sdk)
-    throw new Error("The Sia app key is not registered with the indexer.");
-  return sdk;
+  try {
+    const builder = new Builder(indexerUrl, APP_META);
+    try {
+      const sdk = await builder.connected(key);
+      if (!sdk)
+        throw new Error("The Sia app key is not registered with the indexer.");
+      return sdk;
+    } finally {
+      builder.free();
+    }
+  } finally {
+    key.free();
+  }
 }
 /** The WASM chunk is deferred until the application receives a sharing seed. */
 export async function connectSharedObjects(
@@ -56,6 +63,11 @@ export async function openAuthRequest(
   const { Builder, initSia } = await import("@siafoundation/sia-storage");
   await initSia();
   const request = new Builder(indexerUrl, APP_META);
-  await request.requestConnection();
-  return request;
+  try {
+    await request.requestConnection();
+    return request;
+  } catch (error) {
+    request.free();
+    throw error;
+  }
 }
