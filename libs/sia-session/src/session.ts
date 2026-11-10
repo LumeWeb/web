@@ -23,6 +23,7 @@ import type {
   SdkSnapshot,
   SdkSource,
   SdkWork,
+  SetHandleOptions,
   SetOptions,
 } from "./types.ts";
 
@@ -135,10 +136,16 @@ export function createSiaSdkSession<T>(
     );
     return typeof admission === "symbol" ? admission : install(admission);
   }
-  function setHandle(handle: SdkHandle<T>, setOptions?: SetOptions): symbol {
+  function setHandle(
+    handle: SdkHandle<T>,
+    setOptions?: SetHandleOptions,
+  ): symbol {
     const before = snapshot;
     const expected = setOptions?.expectedSnapshot;
-    return install(adoptHandle(handle, () => check(before, expected)));
+    const sharedValue = setOptions?.valueOwnership === "shared";
+    return install(
+      adoptHandle(handle, () => check(before, expected), sharedValue),
+    );
   }
 
   const source: SdkSource<T> = Object.freeze({
