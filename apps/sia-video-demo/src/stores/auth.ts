@@ -250,7 +250,11 @@ export const useAuthStore = createStore<AuthState>()(
         // non-disconnected state: only an explicitly disconnected store may
         // (re)start the SSO-free app-key reconnect.
         if (status !== AuthStatus.Disconnected) return;
-        set({ reconnectError: null, status: AuthStatus.Reconnecting });
+        set({
+          accountError: null,
+          reconnectError: null,
+          status: AuthStatus.Reconnecting,
+        });
         let controller: DemoAccess | null = null;
         try {
           controller = accountAccess(indexerUrl);

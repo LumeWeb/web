@@ -265,6 +265,24 @@ describe("reconnect", () => {
     expect(state.userKeyHex).toBe(SEED);
   });
 
+  it("an explicit saved-account reconnect replaces an account-entry error", async () => {
+    stubWindow("");
+    const { useAuthStore } = await importStore();
+    useAuthStore.setState({
+      accountError: "Could not register the account. Start again.",
+      savedUserKeyHex: SEED,
+      status: "disconnected",
+      userKeyHex: SEED,
+    });
+
+    await useAuthStore.getState().reconnect();
+
+    expect(backend.connectAppKey).toHaveBeenCalledTimes(1);
+    expect(useAuthStore.getState().accountError).toBeNull();
+    expect(useAuthStore.getState().reconnectError).not.toBeNull();
+    expect(useAuthStore.getState().savedUserKeyHex).toBe(SEED);
+  });
+
   it("preserves userKeyHex on a transient reconnect failure", async () => {
     stubWindow("");
     const { useAuthStore } = await importStore();
@@ -319,6 +337,31 @@ describe("account authorization", () => {
     expect(useAuthStore.getState().accountError).toContain("register");
     await useAuthStore.getState().requestConnection("https://indexer.test");
     expect(backend.openAuthRequest).toHaveBeenCalledTimes(2);
+  });
+
+  it("reconnects a saved account after another registration fails", async () => {
+    stubWindow("");
+    backend.openAuthRequest.mockResolvedValue({
+      free: vi.fn(),
+      register: vi
+        .fn()
+        .mockRejectedValue(new Error("Registration unavailable")),
+      responseUrl: () => "https://indexer.test/approve",
+      waitForApproval: () => Promise.resolve(),
+    });
+    backend.connectAppKey.mockResolvedValue({ free: vi.fn() });
+    const { useAuthStore } = await importStore();
+    useAuthStore.setState({ savedUserKeyHex: SEED, userKeyHex: SEED });
+    await useAuthStore.getState().requestConnection("https://indexer.test");
+    await useAuthStore.getState().waitForApproval();
+    await expect(
+      useAuthStore.getState().register("valid phrase"),
+    ).rejects.toThrow("register");
+
+    await useAuthStore.getState().reconnect();
+    expect(backend.connectAppKey).toHaveBeenCalledTimes(1);
+    expect(useAuthStore.getState().status).toBe("connected");
+    expect(useAuthStore.getState().accountError).toBeNull();
   });
 
   it("phrase-check failure returns to account entry for a new approval", async () => {

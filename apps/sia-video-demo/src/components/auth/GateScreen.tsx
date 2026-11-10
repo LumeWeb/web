@@ -30,6 +30,7 @@ export function GateScreen() {
   const reconnect = useStore(useAuthStore, (s) => s.reconnect);
   const reconnectError = useStore(useAuthStore, (s) => s.reconnectError);
   const accountError = useStore(useAuthStore, (s) => s.accountError);
+  const savedUserKeyHex = useStore(useAuthStore, (s) => s.savedUserKeyHex);
   const storedIndexer = useStore(useAuthStore, (s) => s.indexerUrl);
   const [shareInput, setShareInput] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -134,6 +135,11 @@ export function GateScreen() {
         <p className="text-danger mb-3 text-xs" role="alert">
           {accountError}
         </p>
+      ) : null}
+      {accountError && savedUserKeyHex ? (
+        <button onClick={() => void reconnect()} type="button">
+          Reconnect saved account
+        </button>
       ) : null}
       <button
         aria-expanded={showSso}
