@@ -1,4 +1,5 @@
 /** Native ownership survives retirement until synchronously admitted session work settles. */
+import { createSiaSdkSession } from "@lumeweb/sia-session";
 import { AccessErrorCode } from "./access-types.ts";
 import type {
   AccessConnection,
@@ -6,11 +7,6 @@ import type {
   SessionWork,
 } from "./access-types.ts";
 
-interface HeldSession<Session> {
-  borrows: number;
-  readonly resource: AccessSession<Session>;
-  retired: boolean;
-}
 /** A rejected installation leaves the incoming resource owned by its caller. */
 export class AccessResources<Session> {
   get connection(): AccessConnection<Session> {
@@ -19,10 +15,11 @@ export class AccessResources<Session> {
   }
   private ownedConnection: AccessConnection<Session> | undefined;
 
-  private session: HeldSession<Session> | undefined;
+  private readonly sdkSession = createSiaSdkSession<Session>();
+  private session: AccessSession<Session> | undefined;
   exportAppKey(): Uint8Array {
     if (!this.session) throw new SessionUnavailableError();
-    const bytes = this.session.resource.exportAppKey();
+    const bytes = this.session.exportAppKey();
     if (!(bytes instanceof Uint8Array) || bytes.length !== 32) {
       bytes?.fill(0);
       throw new Error("Invalid app key");
@@ -39,7 +36,8 @@ export class AccessResources<Session> {
   }
   installSession(resource: AccessSession<Session>): void {
     if (this.session) throw new Error("A session is already installed");
-    this.session = { borrows: 0, resource, retired: false };
+    this.sdkSession.setHandle(resource, { valueOwnership: "shared" });
+    this.session = resource;
   }
   retire(): void {
     this.retireConnection();
@@ -51,28 +49,23 @@ export class AccessResources<Session> {
     owned?.dispose();
   }
   retireSession(): void {
-    const owned = this.session;
+    if (!this.session) return;
     this.session = undefined;
-    if (!owned) return;
-    owned.retired = true;
-    if (!owned.borrows) owned.resource.dispose();
+    // Clear denies new borrows before the old handle can run its disposer.
+    void this.sdkSession.clear();
   }
   run<Result>(work: SessionWork<Session, Result>): Promise<Result> {
-    const owned = this.session;
-    if (!owned) return Promise.reject(new SessionUnavailableError());
-    owned.borrows++;
+    if (!this.session) return Promise.reject(new SessionUnavailableError());
+    const lease = this.sdkSession.source.acquire();
     let result: ReturnType<typeof work>;
     try {
-      result = work(owned.resource.value);
+      result = work(lease.value);
     } catch (error) {
       // Application failures must reach the borrower unchanged, including non-Error values.
       // oxlint-disable-next-line typescript/prefer-promise-reject-errors
       result = Promise.reject(error);
     }
-    return Promise.resolve(result).finally(() => {
-      owned.borrows--;
-      if (owned.retired && !owned.borrows) owned.resource.dispose();
-    });
+    return Promise.resolve(result).finally(() => lease.release());
   }
 }
 /** Denied admission is distinguishable from an unchanged application-work error. */

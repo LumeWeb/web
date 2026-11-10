@@ -119,13 +119,18 @@ export interface SdkSession<T> {
   set(this: void, client: SdkClient & T, options?: SetOptions): symbol;
   /**
    * Adopts an adapter's value and cleanup method without requiring a free method on the view.
-   * Accepted handles and object values cannot be adopted again through another handle.
+   * Handles remain single-use. By default, object values cannot have another owner;
+   * shared values require independently safe cleanup for every handle.
    * A failed adoption does not invoke the supplied disposer.
-   * @param options - An optional expected snapshot checked before ownership transfers.
+   * @param options - Snapshot check and optional shared-value ownership.
    * @returns The accepted SDK view's identity.
    * @throws SdkSessionError for closure, invalid input, conflicts or known identity reuse.
    */
-  setHandle(this: void, handle: SdkHandle<T>, options?: SetOptions): symbol;
+  setHandle(
+    this: void,
+    handle: SdkHandle<T>,
+    options?: SetHandleOptions,
+  ): symbol;
   readonly source: SdkSource<T>;
 }
 export interface SdkSessionOptions {
@@ -169,6 +174,10 @@ export type SdkWork<T, R> = (
   sdk: T,
   context: LeaseContext,
 ) => PromiseLike<R> | R;
+export interface SetHandleOptions extends SetOptions {
+  /** Shared values can have separate handles; their disposers must not invalidate each other's leases. */
+  readonly valueOwnership?: "exclusive" | "shared";
+}
 export interface SetOptions {
   readonly expectedSnapshot?: SdkSnapshot;
 }

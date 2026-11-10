@@ -87,6 +87,32 @@ void test("authorization requests input then installs confirmed access without e
   assert.ok(!JSON.stringify(f.access.getSnapshot()).includes("secret"));
   assert.deepEqual(await f.access.reconnect(), { kind: "unavailable" });
 });
+void test("reconnect accepts a fresh handle for the same shared client", async () => {
+  const f = fixture(createMemoryCredentialStore());
+  let restoredDisposed = 0;
+  try {
+    await f.access.authorize(AccessIntent.Create);
+    assert.equal(
+      (await f.access.submitRecoveryPhrase("phrase")).kind,
+      AccessOutcome.Ready,
+    );
+    f.access.disconnect();
+    f.adapter.reconnect = async () => ({
+      dispose() {
+        restoredDisposed++;
+      },
+      exportAppKey: () => new Uint8Array(32).fill(9),
+      value: f.session.value,
+    });
+    assert.equal((await f.access.reconnect()).kind, AccessOutcome.Ready);
+    assert.equal(await f.access.withSession((sdk) => sdk.id), 7);
+  } finally {
+    f.access.dispose();
+  }
+  assert.equal(f.counts().ended, 1);
+  assert.equal(restoredDisposed, 1);
+});
+
 void test("invalid and mismatching phrases preserve correction without registering", async () => {
   const f = fixture();
   await f.access.authorize(AccessIntent.Existing);
@@ -298,8 +324,6 @@ for (const resourceName of ["connection", "session"]) {
     let replacement: ReturnType<typeof f.access.authorize> | undefined;
     try {
       await f.access.authorize(AccessIntent.Create);
-      if (resourceName === "session")
-        await f.access.submitRecoveryPhrase("private phrase");
       const owned = resourceName === "session" ? f.session : f.connection;
       const dispose = owned.dispose.bind(owned);
       let retired = false;
@@ -310,6 +334,8 @@ for (const resourceName of ["connection", "session"]) {
         f.access.cancel();
         replacement = f.access.authorize(AccessIntent.Create);
       };
+      if (resourceName === "session")
+        await f.access.submitRecoveryPhrase("private phrase");
       f.adapter.begin = async () => ({
         ...f.connection,
         dispose() {
@@ -346,7 +372,6 @@ void test("forget coalesces a call made by the retiring session", async () => {
   let nested: ReturnType<typeof f.access.forget> | undefined;
   try {
     await f.access.authorize(AccessIntent.Create);
-    await f.access.submitRecoveryPhrase("private phrase");
     const dispose = f.session.dispose.bind(f.session);
     let retired = false;
     f.session.dispose = () => {
@@ -355,6 +380,7 @@ void test("forget coalesces a call made by the retiring session", async () => {
       dispose();
       nested = f.access.forget();
     };
+    await f.access.submitRecoveryPhrase("private phrase");
     const pending = f.access.forget();
     assert.equal(nested, pending);
     assert.equal((await pending).kind, "removed");

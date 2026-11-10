@@ -233,6 +233,7 @@ export interface AccessSession<Session> {
   dispose(): void;
   /** Returns a fresh caller-owned 32-byte app key, never retained session memory. */
   exportAppKey(): Uint8Array;
+  /** A shared object value must outlive every handle and admitted use that still needs it. */
   readonly value: Session;
 }
 export interface AccessSnapshot {

@@ -52,6 +52,7 @@
     "test:package": "pnpm run build && node --import tsx --test 'tests/package/*.test.ts'"
   },
   "dependencies": {
+    "@lumeweb/sia-session": "workspace:*",
     "robot3": "1.4.0"
   },
   "devDependencies": {

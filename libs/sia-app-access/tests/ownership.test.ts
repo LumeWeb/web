@@ -124,6 +124,46 @@ void test("retirement denies new session work but waits for every admitted borro
   assert.equal(disposed, 1);
 });
 
+void test("independent access handles can share a client while each use retains its handle", async () => {
+  const sdk = { read: () => "document" };
+  const first = new AccessResources<typeof sdk>();
+  const second = new AccessResources<typeof sdk>();
+  const release = deferred<void>();
+  let firstDisposed = 0;
+  let secondDisposed = 0;
+  first.installSession({
+    dispose() {
+      firstDisposed++;
+    },
+    exportAppKey: () => new Uint8Array(32),
+    value: sdk,
+  });
+  const pending = first.run(async (value) => {
+    assert.equal(value, sdk);
+    await release.promise;
+  });
+  first.retireSession();
+  try {
+    second.installSession({
+      dispose() {
+        secondDisposed++;
+      },
+      exportAppKey: () => new Uint8Array(32),
+      value: sdk,
+    });
+    assert.equal(await second.run((value) => value.read()), "document");
+    assert.equal(firstDisposed, 0);
+    assert.equal(secondDisposed, 0);
+  } finally {
+    release.resolve();
+    await pending;
+  }
+  assert.equal(firstDisposed, 1);
+  assert.equal(secondDisposed, 0);
+  second.retireSession();
+  assert.equal(secondDisposed, 1);
+});
+
 for (const borrowing of [false, true]) {
   void test(`installing over ${borrowing ? "a borrowed" : "an idle"} session preserves the existing owner`, async () => {
     const resources = new AccessResources<number>();

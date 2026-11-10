@@ -96,6 +96,39 @@ export async function checkPackage(input: string): Promise<void> {
     const modules = join(consumer, "node_modules/@lumeweb/sia-app-access");
     await mkdir(dirname(modules), { recursive: true });
     await cp(packed, modules, { recursive: true });
+    const sessionArchive = join(owned, "session-archive");
+    const sessionWorkspace = fileURLToPath(
+      new URL("../../../sia-session/", import.meta.url),
+    );
+    await mkdir(sessionArchive);
+    await run(
+      process.execPath,
+      [cli, "pack", "--pack-destination", sessionArchive],
+      sessionWorkspace,
+      cache,
+    );
+    const sessionTarballs = (await readdir(sessionArchive)).filter((name) =>
+      name.endsWith(".tgz"),
+    );
+    assert.equal(sessionTarballs.length, 1);
+    const sessionTarball = sessionTarballs[0];
+    assert.ok(sessionTarball);
+    await run(
+      "tar",
+      ["-xzf", join(sessionArchive, sessionTarball), "-C", sessionArchive],
+      owned,
+      cache,
+    );
+    await cp(
+      join(sessionArchive, "package"),
+      join(consumer, "node_modules/@lumeweb/sia-session"),
+      { recursive: true },
+    );
+    await cp(
+      await realpath(join(sessionWorkspace, "node_modules/nanoevents")),
+      join(consumer, "node_modules/nanoevents"),
+      { recursive: true },
+    );
     const robot = findPackageJSON("robot3", import.meta.url);
     assert.ok(robot);
     // Linking would expose the workspace dependency graph to the isolated consumer.

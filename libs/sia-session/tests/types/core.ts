@@ -73,6 +73,10 @@ if (snapshot.state === SdkState.Available) {
 }
 const empty = createSiaSdkSession<ReadView>();
 empty.set(client);
+const shared = createSiaSdkSession<ReadView>();
+shared.setHandle({ dispose() {}, value: client }, { valueOwnership: "shared" });
+// @ts-expect-error Only handle adoption can share a value.
+shared.set(client, { valueOwnership: "shared" });
 // @ts-expect-error Managed clients need a real destructor.
 empty.set({
   read() {

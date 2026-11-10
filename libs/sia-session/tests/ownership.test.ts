@@ -173,6 +173,47 @@ it("rejects a value claimed as a descriptor while the outer dispose getter runs"
   expect(sdk.free).toHaveBeenCalledOnce();
 });
 
+it("separate handles can borrow one value without making it a second cleanup owner", async () => {
+  const sdk = { free: vi.fn<() => void>(), read: () => "document" };
+  const first = createSiaSdkSession<typeof sdk>();
+  const second = createSiaSdkSession<typeof sdk>();
+  const peer = createSiaSdkSession<typeof sdk>();
+  const firstDispose = vi.fn<() => void>();
+  const secondDispose = vi.fn<() => void>();
+  try {
+    first.setHandle(
+      { dispose: firstDispose, value: sdk },
+      { valueOwnership: "shared" },
+    );
+    second.setHandle(
+      { dispose: secondDispose, value: sdk },
+      { valueOwnership: "shared" },
+    );
+    const lease = first.source.acquire();
+    const borrowed = second.source.acquire();
+    try {
+      expect(borrowed.value).toBe(sdk);
+    } finally {
+      borrowed.release();
+    }
+    expect(() => peer.set(sdk)).toThrowError(
+      expect.objectContaining({ code: SdkSessionErrorCode.AlreadyUsed }),
+    );
+    const closing = first.close();
+    expect(firstDispose).not.toHaveBeenCalled();
+    lease.release();
+    await closing;
+    expect(firstDispose).toHaveBeenCalledOnce();
+    expect(secondDispose).not.toHaveBeenCalled();
+  } finally {
+    await first.close();
+    await second.close();
+    await peer.close();
+  }
+  expect(secondDispose).toHaveBeenCalledOnce();
+  expect(sdk.free).not.toHaveBeenCalled();
+});
+
 it("a self-valued handle keeps its identity when set as the same current client", async () => {
   const owner = createSiaSdkSession<object>();
   const sdk = {

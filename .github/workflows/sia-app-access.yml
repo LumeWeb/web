@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "libs/sia-app-access/**"
+      - "libs/sia-session/**"
       - "libs/sia-testing/**"
       - "libs/tsdown-config/**"
       - "package.json"
@@ -15,6 +16,7 @@ on:
   pull_request:
     paths:
       - "libs/sia-app-access/**"
+      - "libs/sia-session/**"
       - "libs/sia-testing/**"
       - "libs/tsdown-config/**"
       - "package.json"
@@ -41,6 +43,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter=@lumeweb/tsdown-config build:config
       - run: pnpm --filter=@lumeweb/sia-testing build
+      - run: pnpm --filter=@lumeweb/sia-session build
       - run: test ! -d libs/sia-app-access/dist
       - run: pnpm --filter=@lumeweb/sia-app-access typecheck
       - run: pnpm --filter=@lumeweb/sia-app-access test
@@ -64,6 +67,7 @@ jobs:
       - uses: LumeWeb/workflows/.github/actions/setup-all@develop
       - run: pnpm --filter=@lumeweb/tsdown-config build:config
       - run: pnpm --filter=@lumeweb/sia-testing build
+      - run: pnpm --filter=@lumeweb/sia-session build
       - run: pnpm --filter=@lumeweb/sia-app-access exec playwright install --with-deps ${{ matrix.browser }}
       - run: test ! -d libs/sia-app-access/dist
       - run: pnpm --filter=@lumeweb/sia-app-access run test:browser --browser=${{ matrix.browser }}
