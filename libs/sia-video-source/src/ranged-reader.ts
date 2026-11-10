@@ -262,6 +262,7 @@ export class RangedReader {
   /** Cumulative bytes handed to `onChunk` since construction; monotonic across all reads of this reader. */
   #bytesRead = 0;
   readonly #cache: LruChunkCache;
+  readonly #cancellations = new Set<Promise<void>>();
   // Per-run supersede counter; `start()`/`stop()` bump it so an abandoned run
   // can never clobber the streams of the run that replaced it.
   #loadGeneration = 0;
@@ -273,9 +274,8 @@ export class RangedReader {
   // run-scoped, refreshed by every `start()`; the reader holds no position
   // of its own between runs.
   #rangeEnd: null | number = null;
-
   #reader: null | ReadableStreamDefaultReader = null;
-
+  readonly #runs = new Set<Promise<void>>();
   #stream: null | ReadableStream = null;
 
   constructor(options: RangedReaderOptions) {
@@ -294,7 +294,12 @@ export class RangedReader {
     this.stop();
     this.#rangeEnd = length === undefined ? null : Math.max(offset, offset + length);
     const loadGeneration = ++this.#loadGeneration;
-    void this.#run(offset, loadGeneration);
+    const run = this.#run(offset, loadGeneration);
+    this.#runs.add(run);
+    void run.then(
+      () => this.#runs.delete(run),
+      () => this.#runs.delete(run),
+    );
   }
 
   /** Cancels the in-flight stream; the cache survives for later re-reads. */
@@ -304,8 +309,15 @@ export class RangedReader {
     const stream = this.#stream;
     this.#reader = null;
     this.#stream = null;
-    if (reader) void reader.cancel().catch(() => { /* empty */ });
-    if (stream) void stream.cancel().catch(() => { /* empty */ });
+    if (reader) this.#trackCancel(reader.cancel());
+    if (stream) this.#trackCancel(stream.cancel());
+  }
+
+  /** Waits for abandoned downloads and stream cancellation before SDK disposal. */
+  async whenIdle(): Promise<void> {
+    while (this.#runs.size > 0 || this.#cancellations.size > 0) {
+      await Promise.all([...this.#runs, ...this.#cancellations]);
+    }
   }
 
   /**
@@ -384,8 +396,8 @@ export class RangedReader {
     return new Promise<ReadableStreamReadResult<Uint8Array>>((resolve, reject) => {
       const timer = setTimeout(() => {
         if (this.#loadGeneration === loadGeneration) {
-          this.#reader?.cancel().catch(() => { /* empty */ });
-          this.#stream?.cancel().catch(() => { /* empty */ });
+          if (this.#reader) this.#trackCancel(this.#reader.cancel());
+          if (this.#stream) this.#trackCancel(this.#stream.cancel());
           this.#reader = null;
           this.#stream = null;
           // Only an in-flight run's watchdog reports the stall (a superseded
@@ -532,7 +544,7 @@ export class RangedReader {
             // stalled WASM cancel never blocks this run's unwinding and permit
             // release.
             if (this.#loadGeneration !== loadGeneration) {
-              void stream.cancel().catch(() => { /* empty */ });
+              this.#trackCancel(stream.cancel());
               return;
             }
             this.#stream = stream;
@@ -591,7 +603,7 @@ export class RangedReader {
             // slab-recovery tasks ahead of a dead read head are the reason the
             // stream is always aborted deterministically.
             if (this.#loadGeneration === loadGeneration) {
-              void this.#reader?.cancel().catch(() => { /* empty */ });
+              if (this.#reader) this.#trackCancel(this.#reader.cancel());
               this.#reader = null;
               this.#stream = null;
             }
@@ -633,7 +645,7 @@ export class RangedReader {
         // supersede right after permit acquire). Same generation-scoped rule:
         // only the current load generation may touch the refs.
         if (this.#loadGeneration === loadGeneration) {
-          void this.#reader?.cancel().catch(() => { /* empty */ });
+          if (this.#reader) this.#trackCancel(this.#reader.cancel());
           this.#reader = null;
           this.#stream = null;
         }
@@ -657,6 +669,12 @@ export class RangedReader {
         onError?.(error);
       }
     }
+  }
+
+  #trackCancel(promise: Promise<unknown>): void {
+    const settled = promise.then(() => undefined, () => undefined);
+    this.#cancellations.add(settled);
+    void settled.then(() => this.#cancellations.delete(settled));
   }
 }
 

@@ -19,6 +19,7 @@
  */
 
 import { sha256 } from '@noble/hashes/sha2.js';
+import { createSiaSdkSession } from '@lumeweb/sia-session';
 import { redactUrls } from '../redact-urls.ts';
 import type { PlaybackCapabilities } from '../capabilities/browser-capabilities.ts';
 import {
@@ -31,7 +32,7 @@ import {
   type WorkerToMainMessage,
   WorkerToMainMessageType,
 } from '../protocol.ts';
-import type { ByteSource } from '../transport/byte-source.ts';
+import { type ByteSource, supersededStream } from '../transport/byte-source.ts';
 import type { Clock } from './clock.ts';
 import type { LoadPipeline } from './load-pipeline.ts';
 import type { SessionHandshake } from './session-coordinator.ts';
@@ -416,6 +417,7 @@ function createLazySiaByteSourceFactory(deps: {
   const { byteSource, createSdk, handshake, logSink } = deps;
   interface Connection {
     createSource: ReturnType<typeof createSiaByteSourceFactory>;
+    id: symbol;
     sdk: SiaByteSourceSdk;
   }
   interface CachedConnection extends Connection {
@@ -424,14 +426,16 @@ function createLazySiaByteSourceFactory(deps: {
     sharingSeedFingerprint: null | Uint8Array;
   }
   let cached: CachedConnection | null = null;
+  const session = createSiaSdkSession<SiaByteSourceSdk>();
+  const adopted = new WeakSet<SiaByteSourceSdk>();
 
   let destroyed = false;
   const released = new WeakSet<SiaByteSourceSdk>();
-  // Obsolete builds can return the same SDK as the current connection.
+  // Late builds can return an SDK this session already owns, including a retired one.
   const release = (sdk: SiaByteSourceSdk): void => {
-    if (sdk === cached?.sdk || released.has(sdk)) return;
+    if (adopted.has(sdk) || released.has(sdk)) return;
     released.add(sdk);
-    disposeSdk(sdk);
+    void disposeSdk(sdk);
   };
   let buildGeneration = 0;
   let pending: null | {
@@ -485,11 +489,13 @@ function createLazySiaByteSourceFactory(deps: {
         // SDK builds belong to the connection, without an owning SOURCE request.
         // Only indexer identity is safe here; share URLs contain decryption keys.
         emitLog(logSink, handshake.log, workerLogLevel.info, workerLogEventName.sdkBuilt, { indexerUrl: config?.indexerUrl });
-        const previous = cached?.sdk;
-        const connection = { createSource: createSiaByteSourceFactory(built, byteSource), sdk: built };
+        const previous = cached;
+        const id = previous?.sdk === built
+          ? previous.id
+          : session.setHandle({ dispose: () => disposeSdk(built), value: built });
+        adopted.add(built);
+        const connection = { createSource: createSiaByteSourceFactory(built, byteSource), id, sdk: built };
         cached = { ...connection, config, seedFingerprint, sharingSeedFingerprint };
-        // Defer disposal so a synchronous throw cannot reject the new build.
-        if (previous && previous !== built) queueMicrotask(() => release(previous));
         return connection;
       }).finally(() => {
         // An older rejection must not clear a replacement that is still building.
@@ -498,11 +504,36 @@ function createLazySiaByteSourceFactory(deps: {
       pending = { config, promise, seedFingerprint, sharingSeedFingerprint };
       connection = await promise;
     }
-    // Destroy can release the cached SDK before the awaiting source resumes.
+    // Destroy can retire the cached SDK before the awaiting source resumes.
     if (destroyed) throw new Error('SDK factory destroyed');
     // The SOURCE requestId travels into the per-load source so its milestones
     // keep the owning load's identity even though the SDK is connection-scoped.
-    return connection.createSource(src, requestId, sourceKind);
+    const lease = session.source.acquire({ expectedId: connection.id });
+    try {
+      const source = await connection.createSource(src, requestId, sourceKind);
+      if (destroyed) {
+        await source.cancelAndWait();
+        throw new Error('SDK factory destroyed');
+      }
+      let cancelled = false;
+      return {
+        cancel(reason) {
+          if (cancelled) return;
+          cancelled = true;
+          void source.cancelAndWait(reason).then(
+            () => lease.release(),
+            () => lease.release(),
+          );
+        },
+        read(range, options) {
+          return cancelled ? supersededStream() : source.read(range, options);
+        },
+        get size() { return source.size; },
+      };
+    } catch (error) {
+      lease.release();
+      throw error;
+    }
   };
   return {
     createSource,
@@ -511,21 +542,21 @@ function createLazySiaByteSourceFactory(deps: {
       destroyed = true;
       ++buildGeneration;
       pending = null;
-      const sdk = cached?.sdk;
       cached = null;
-      if (sdk) release(sdk);
+      void session.close();
     },
   };
 }
 
 /** Calls receiver-dependent SDK teardown and consumes asynchronous failures. */
-function disposeSdk(sdk: unknown): void {
-  void Promise.resolve()
+function disposeSdk(sdk: unknown): Promise<void> {
+  return Promise.resolve()
     .then(() => {
       const dispose = (sdk as { dispose?: () => unknown }).dispose;
       if (typeof dispose === 'function') return dispose.call(sdk);
     })
-    .catch(() => {
-      /* best-effort teardown; never propagates */
-    });
+    .then(
+      () => undefined,
+      () => undefined,
+    );
 }

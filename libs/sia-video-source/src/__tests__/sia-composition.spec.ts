@@ -620,6 +620,7 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
     }));
     const messages: WorkerToMainMessage[] = [];
     const handshake = createSessionHandshake();
+    const pipeline = new FakeLoadPipeline();
     const coordinator = createSiaWorkerComposition({
       capabilities: permissiveCapabilities(),
       createSdk,
@@ -632,7 +633,7 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
           },
         }),
       } : {}),
-      loadPipeline: new FakeLoadPipeline(),
+      loadPipeline: pipeline,
       post: (message) => messages.push(message),
       supportsWorkerMse: () => false,
     });
@@ -647,7 +648,7 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
     const source = (requestId: number, refreshSdk = false) => coordinator.handleMessage({
       preload: 'auto', refreshSdk, requestId, src: 'fmp4', type: MainToWorkerMessageType.SOURCE,
     });
-    return { builds, coordinator, createSdk, handshake, messages, publicKey: hello.publicKey, source };
+    return { builds, coordinator, createSdk, handshake, messages, pipeline, publicKey: hello.publicKey, source };
   }
 
   it.each(['method', 'message'] as const)('releases the resolved SDK once on destroy by %s', async (path) => {
@@ -736,6 +737,103 @@ describe('createSiaWorkerComposition (lazy real-transport root binding)', () => 
     expect(disposeLatest).toHaveBeenCalledTimes(1);
     expect(messages.filter((message) => message.type === WorkerToMainMessageType.SOURCE_OK ||
       message.type === WorkerToMainMessageType.ERROR)).toEqual([]);
+  });
+
+  it('keeps the old SDK alive while a superseded object lookup is still pending', async () => {
+    const { builds, coordinator, source } = await pendingSdkSession();
+    let resolveObject!: (object: SiaObjectLike) => void;
+    const pendingObject = new Promise<SiaObjectLike>((resolve) => { resolveObject = resolve; });
+    const oldSdk = {
+      ...fakeSiaSdk(new Uint8Array(2048)).sdk,
+      dispose: vi.fn(),
+      object: vi.fn(() => pendingObject),
+    };
+    const first = source(3);
+    await flush();
+    builds[0].resolve(oldSdk);
+    await flush();
+    expect(oldSdk.object).toHaveBeenCalledTimes(1);
+    const second = source(4, true);
+    await flush();
+    const nextSdk = { ...fakeSiaSdk(new Uint8Array(2048)).sdk, dispose: vi.fn() };
+    builds[1].resolve(nextSdk);
+    try {
+      await second;
+      await flush();
+      expect(oldSdk.dispose).not.toHaveBeenCalled();
+    } finally {
+      resolveObject(fakeObject(2048));
+      await first;
+      coordinator.destroy();
+    }
+    await flush();
+    expect(oldSdk.dispose).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the old SDK alive until a cancelled download finishes opening', async () => {
+    const { builds, coordinator, pipeline, source } = await pendingSdkSession();
+    let resolveDownload!: (stream: ReadableStream<Uint8Array>) => void;
+    const pendingDownload = new Promise<ReadableStream<Uint8Array>>((resolve) => { resolveDownload = resolve; });
+    const oldSdk = {
+      ...fakeSiaSdk(new Uint8Array(2048)).sdk,
+      dispose: vi.fn(),
+      download: vi.fn(() => pendingDownload),
+    };
+    const first = source(3);
+    await flush();
+    builds[0].resolve(oldSdk);
+    await first;
+    // The fake pipeline records the source without starting a read.
+    const byteSource = pipeline.calls[0].source;
+    const read = byteSource.read({ length: 8, offset: 0 }, { loadGeneration: 1 }).getReader().read().catch(() => undefined);
+    await flush();
+    expect(oldSdk.download).toHaveBeenCalledTimes(1);
+    const second = source(4, true);
+    await flush();
+    builds[1].resolve({ ...fakeSiaSdk(new Uint8Array(2048)).sdk });
+    try {
+      await second;
+      await flush();
+      expect(oldSdk.dispose).not.toHaveBeenCalled();
+    } finally {
+      resolveDownload(new ReadableStream({ start(controller) { controller.close(); } }));
+      await read;
+      coordinator.destroy();
+    }
+    await flush();
+    expect(oldSdk.dispose).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the old SDK alive until a cancelled download closes', async () => {
+    const { builds, coordinator, pipeline, source } = await pendingSdkSession();
+    let finishCancel!: () => void;
+    const cancellation = new Promise<void>((resolve) => { finishCancel = resolve; });
+    const oldSdk = {
+      ...fakeSiaSdk(new Uint8Array(2048)).sdk,
+      dispose: vi.fn(),
+      download: vi.fn(() => new ReadableStream<Uint8Array>({ cancel: () => cancellation })),
+    };
+    const first = source(3);
+    await flush();
+    builds[0].resolve(oldSdk);
+    await first;
+    const read = pipeline.calls[0].source.read({ length: 8, offset: 0 }, { loadGeneration: 1 }).getReader().read().catch(() => undefined);
+    await flush();
+    expect(oldSdk.download).toHaveBeenCalledTimes(1);
+    const second = source(4, true);
+    await flush();
+    builds[1].resolve({ ...fakeSiaSdk(new Uint8Array(2048)).sdk });
+    try {
+      await second;
+      await flush();
+      expect(oldSdk.dispose).not.toHaveBeenCalled();
+    } finally {
+      finishCancel();
+      await read;
+      coordinator.destroy();
+    }
+    await flush();
+    expect(oldSdk.dispose).toHaveBeenCalledTimes(1);
   });
 
   it('keeps a shared SDK owned until destroy and releases it once', async () => {
