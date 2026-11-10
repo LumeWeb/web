@@ -13,11 +13,12 @@
     "test:watch": "vitest --config vitest.config.unit.ts",
     "lint": "oxlint src --max-warnings 0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test:e2e:mock": "pnpm --filter @lumeweb/tsdown-config build:config && pnpm --filter @lumeweb/sia-testing build && pnpm --filter @lumeweb/sia-video-source build && playwright test --config playwright.mock.config.ts",
+    "test:e2e:mock": "pnpm --filter @lumeweb/tsdown-config build:config && pnpm --filter @lumeweb/sia-session build && pnpm --filter @lumeweb/sia-app-access build && pnpm --filter @lumeweb/sia-testing build && pnpm --filter @lumeweb/sia-video-source build && playwright test --config playwright.mock.config.ts",
     "test:e2e:mock:build": "vite build --config tests/playback/vite.config.ts",
-    "test:e2e:mock:collect": "pnpm --filter @lumeweb/tsdown-config build:config && pnpm --filter @lumeweb/sia-testing build && playwright test --config playwright.mock.config.ts --list"
+    "test:e2e:mock:collect": "pnpm --filter @lumeweb/tsdown-config build:config && pnpm --filter @lumeweb/sia-session build && pnpm --filter @lumeweb/sia-app-access build && pnpm --filter @lumeweb/sia-testing build && playwright test --config playwright.mock.config.ts --list"
   },
   "dependencies": {
+    "@lumeweb/sia-app-access": "workspace:*",
     "@lumeweb/sia-video-source": "workspace:*",
     "@siafoundation/sia-storage": "0.2.0",
     "@videojs/core": "10.0.0-beta.32",

@@ -1,5 +1,9 @@
 # Sia video demo
 
+## Account access
+
+The demo uses `@lumeweb/sia-app-access` for account approval, recovery phrase checks, registration, and saved-key reconnect. `src/lib/accessAdapter.ts` connects the controller to the demo's lazy SDK ports. The auth store keeps its existing persisted app-key field, indexer setting, and sharing-key route; sharing links still open the player without account approval. The controller owns account SDK sessions until logout or an indexer change.
+
 ## Browser playback E2E without Sia services
 
 Run `pnpm --filter @lumeweb/sia-video-demo test:e2e:mock` from the repository root after installing Playwright Chromium and Firefox. It builds the shared dependencies and runs the production demo UI and packaged media pipeline.

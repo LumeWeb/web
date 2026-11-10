@@ -1,10 +1,21 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AuthState } from "./auth";
 
-const backend = vi.hoisted(() => ({ connectAppKey: vi.fn() }));
+const backend = vi.hoisted(() => ({
+  connectAppKey: vi.fn(),
+  initSia: vi.fn(),
+  openAuthRequest: vi.fn(),
+}));
 vi.mock("../lib/storageBackend", () => ({
   connectAppKey: backend.connectAppKey,
-  openAuthRequest: vi.fn(),
+  openAuthRequest: backend.openAuthRequest,
+}));
+vi.mock("@siafoundation/sia-storage", () => ({
+  generateRecoveryPhrase: () => "valid phrase",
+  initSia: backend.initSia,
+  validateRecoveryPhrase: (value: string) => {
+    if (value !== "valid phrase") throw new Error("Invalid phrase");
+  },
 }));
 
 const SEED = "d778398e336858ddc1a7de0c78ca22bbe9c821e2786d7b5a941c729e1e5ceb1f";
@@ -68,6 +79,8 @@ async function importStore() {
 beforeEach(() => {
   backend.connectAppKey.mockReset();
   backend.connectAppKey.mockRejectedValue(new Error("Indexer unavailable"));
+  backend.initSia.mockReset().mockResolvedValue(undefined);
+  backend.openAuthRequest.mockReset();
   storage = stubStorage();
   Object.defineProperty(globalThis, "localStorage", {
     configurable: true,
@@ -179,7 +192,7 @@ describe("setSharingKeySeed (manual paste)", () => {
 });
 
 describe("persist migration", () => {
-  it("carries a legacy sharingKeySeed payload over to sharingKeyHex (v1 → v2)", async () => {
+  it("carries a legacy sharingKeySeed payload over to sharingKeyHex", async () => {
     stubWindow("");
     storage.setItem(
       AUTH_STORAGE_KEY,
@@ -187,6 +200,42 @@ describe("persist migration", () => {
     );
     const { useAuthStore } = await importStore();
     expect(useAuthStore.getState().sharingKeyHex).toBe(SEED);
+  });
+
+  it("restores a version 2 saved account key for reconnect", async () => {
+    stubWindow("");
+    storage.setItem(
+      AUTH_STORAGE_KEY,
+      JSON.stringify({
+        state: {
+          indexerUrl: "https://indexer.test",
+          sharingKeyHex: null,
+          userKeyHex: SEED,
+        },
+        version: 2,
+      }),
+    );
+    const { useAuthStore } = await importStore();
+    expect(useAuthStore.getState().savedUserKeyHex).toBe(SEED);
+    expect(useAuthStore.getState().userKeyHex).toBe(SEED);
+  });
+
+  it("restores the saved account key from a current-version payload", async () => {
+    stubWindow("");
+    storage.setItem(
+      AUTH_STORAGE_KEY,
+      JSON.stringify({
+        state: {
+          indexerUrl: "https://indexer.test",
+          sharingKeyHex: null,
+          userKeyHex: SEED,
+        },
+        version: 3,
+      }),
+    );
+    const { useAuthStore } = await importStore();
+    expect(useAuthStore.getState().userKeyHex).toBe(SEED);
+    expect(useAuthStore.getState().savedUserKeyHex).toBe(SEED);
   });
 
   it("starts disconnected with no sharing key when nothing was persisted", async () => {
@@ -203,7 +252,11 @@ describe("reconnect", () => {
   it("skips the reconnect when the status is already non-disconnected", async () => {
     stubWindow("");
     const { useAuthStore } = await importStore();
-    useAuthStore.setState({ status: "connected", userKeyHex: SEED });
+    useAuthStore.setState({
+      savedUserKeyHex: SEED,
+      status: "connected",
+      userKeyHex: SEED,
+    });
 
     await useAuthStore.getState().reconnect();
 
@@ -212,10 +265,32 @@ describe("reconnect", () => {
     expect(state.userKeyHex).toBe(SEED);
   });
 
+  it("an explicit saved-account reconnect replaces an account-entry error", async () => {
+    stubWindow("");
+    const { useAuthStore } = await importStore();
+    useAuthStore.setState({
+      accountError: "Could not register the account. Start again.",
+      savedUserKeyHex: SEED,
+      status: "disconnected",
+      userKeyHex: SEED,
+    });
+
+    await useAuthStore.getState().reconnect();
+
+    expect(backend.connectAppKey).toHaveBeenCalledTimes(1);
+    expect(useAuthStore.getState().accountError).toBeNull();
+    expect(useAuthStore.getState().reconnectError).not.toBeNull();
+    expect(useAuthStore.getState().savedUserKeyHex).toBe(SEED);
+  });
+
   it("preserves userKeyHex on a transient reconnect failure", async () => {
     stubWindow("");
     const { useAuthStore } = await importStore();
-    useAuthStore.setState({ status: "disconnected", userKeyHex: SEED });
+    useAuthStore.setState({
+      savedUserKeyHex: SEED,
+      status: "disconnected",
+      userKeyHex: SEED,
+    });
 
     await useAuthStore.getState().reconnect();
 
@@ -223,6 +298,292 @@ describe("reconnect", () => {
     expect(useAuthStore.getState().status).toBe("disconnected");
     expect(useAuthStore.getState().reconnectError).not.toBeNull();
     expect(backend.connectAppKey).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("account authorization", () => {
+  it("shows a connection error after the connecting screen closes", async () => {
+    stubWindow("");
+    backend.openAuthRequest.mockRejectedValue(new Error("Indexer offline"));
+    const { useAuthStore } = await importStore();
+
+    await expect(
+      useAuthStore.getState().requestConnection("https://indexer.test"),
+    ).rejects.toThrow("Could not connect");
+    expect(useAuthStore.getState().status).toBe("disconnected");
+    expect(useAuthStore.getState().accountError).toContain("connect");
+  });
+
+  it("registration failure returns to an account entry that can retry", async () => {
+    stubWindow("");
+    backend.openAuthRequest.mockImplementation(() =>
+      Promise.resolve({
+        free: vi.fn(),
+        register: vi
+          .fn()
+          .mockRejectedValue(new Error("Registration unavailable")),
+        responseUrl: () => "https://indexer.test/approve",
+        waitForApproval: () => Promise.resolve(),
+      }),
+    );
+    const { useAuthStore } = await importStore();
+    await useAuthStore.getState().requestConnection("https://indexer.test");
+    await useAuthStore.getState().waitForApproval();
+
+    await expect(
+      useAuthStore.getState().register("valid phrase"),
+    ).rejects.toThrow("register");
+    expect(useAuthStore.getState().status).toBe("disconnected");
+    expect(useAuthStore.getState().accountError).toContain("register");
+    await useAuthStore.getState().requestConnection("https://indexer.test");
+    expect(backend.openAuthRequest).toHaveBeenCalledTimes(2);
+  });
+
+  it("reconnects a saved account after another registration fails", async () => {
+    stubWindow("");
+    backend.openAuthRequest.mockResolvedValue({
+      free: vi.fn(),
+      register: vi
+        .fn()
+        .mockRejectedValue(new Error("Registration unavailable")),
+      responseUrl: () => "https://indexer.test/approve",
+      waitForApproval: () => Promise.resolve(),
+    });
+    backend.connectAppKey.mockResolvedValue({ free: vi.fn() });
+    const { useAuthStore } = await importStore();
+    useAuthStore.setState({ savedUserKeyHex: SEED, userKeyHex: SEED });
+    await useAuthStore.getState().requestConnection("https://indexer.test");
+    await useAuthStore.getState().waitForApproval();
+    await expect(
+      useAuthStore.getState().register("valid phrase"),
+    ).rejects.toThrow("register");
+
+    await useAuthStore.getState().reconnect();
+    expect(backend.connectAppKey).toHaveBeenCalledTimes(1);
+    expect(useAuthStore.getState().status).toBe("connected");
+    expect(useAuthStore.getState().accountError).toBeNull();
+  });
+
+  it("phrase-check failure returns to account entry for a new approval", async () => {
+    stubWindow("");
+    backend.openAuthRequest.mockResolvedValue({
+      free: vi.fn(),
+      register: vi.fn(),
+      responseUrl: () => "https://indexer.test/approve",
+      waitForApproval: () => Promise.resolve(),
+    });
+    const { useAuthStore } = await importStore();
+    await useAuthStore.getState().requestConnection("https://indexer.test");
+    await useAuthStore.getState().waitForApproval();
+    backend.initSia.mockRejectedValueOnce(new Error("WASM unavailable"));
+
+    await expect(
+      useAuthStore.getState().register("valid phrase"),
+    ).rejects.toThrow("check the recovery phrase");
+    expect(useAuthStore.getState().status).toBe("disconnected");
+    expect(useAuthStore.getState().accountError).toContain(
+      "check the recovery phrase",
+    );
+    await useAuthStore.getState().requestConnection("https://indexer.test");
+    expect(backend.openAuthRequest).toHaveBeenCalledTimes(2);
+  });
+
+  it("saves an approved account key and owns its session until logout", async () => {
+    const { reload } = stubWindow("");
+    let approve!: () => void;
+    const freeRequest = vi.fn();
+    const freeSdk = vi.fn();
+    const freeKey = vi.fn();
+    backend.openAuthRequest.mockResolvedValue({
+      free: freeRequest,
+      register: vi.fn().mockResolvedValue({
+        appKey: () => ({
+          export: () => Uint8Array.from(Buffer.from(SEED, "hex")),
+          free: freeKey,
+        }),
+        free: freeSdk,
+      }),
+      responseUrl: () => "https://indexer.test/approve",
+      waitForApproval: () =>
+        new Promise<void>((resolve) => {
+          approve = resolve;
+        }),
+    });
+    const { useAuthStore } = await importStore();
+    await useAuthStore.getState().requestConnection("https://indexer.test");
+    expect(useAuthStore.getState().approvalUrl).toBe(
+      "https://indexer.test/approve",
+    );
+    const waiting = useAuthStore.getState().waitForApproval();
+    approve();
+    await waiting;
+    await useAuthStore.getState().register("valid phrase");
+
+    expect(useAuthStore.getState().status).toBe("connected");
+    expect(useAuthStore.getState().userKeyHex).toBe(SEED);
+    expect(freeKey).toHaveBeenCalledTimes(1);
+    expect(freeSdk).not.toHaveBeenCalled();
+    expect(freeRequest).toHaveBeenCalledTimes(1);
+    useAuthStore.getState().logout();
+    expect(freeSdk).toHaveBeenCalledTimes(1);
+    expect(reload).toHaveBeenCalledTimes(1);
+  });
+
+  it("retries a failed key save without registering again", async () => {
+    stubWindow("");
+    let approve!: () => void;
+    const register = vi.fn().mockResolvedValue({
+      appKey: () => ({
+        export: () => Uint8Array.from(Buffer.from(SEED, "hex")),
+        free: vi.fn(),
+      }),
+      free: vi.fn(),
+    });
+    backend.openAuthRequest.mockResolvedValue({
+      free: vi.fn(),
+      register,
+      responseUrl: () => "https://indexer.test/approve",
+      waitForApproval: () =>
+        new Promise<void>((resolve) => {
+          approve = resolve;
+        }),
+    });
+    const { useAuthStore } = await importStore();
+    const save = storage.setItem.bind(storage);
+    const savedKey = (value: string) =>
+      (JSON.parse(value) as { state: { userKeyHex?: string } }).state
+        .userKeyHex;
+    let fail = true;
+    storage.setItem = (key, value) => {
+      if (fail && key === AUTH_STORAGE_KEY && savedKey(value) === SEED) {
+        fail = false;
+        throw new Error("Storage full");
+      }
+      save(key, value);
+    };
+    await useAuthStore.getState().requestConnection("https://indexer.test");
+    const waiting = useAuthStore.getState().waitForApproval();
+    approve();
+    await waiting;
+    await expect(
+      useAuthStore.getState().register("valid phrase"),
+    ).rejects.toThrow("Could not save");
+    expect(useAuthStore.getState().saveError).not.toBeNull();
+    expect(useAuthStore.getState().status).toBe("registering");
+    expect(savedKey(storage.getItem(AUTH_STORAGE_KEY)!)).toBe("");
+    await useAuthStore.getState().retrySave();
+    expect(useAuthStore.getState().status).toBe("connected");
+    expect(register).toHaveBeenCalledTimes(1);
+    expect(savedKey(storage.getItem(AUTH_STORAGE_KEY)!)).toBe(SEED);
+  });
+
+  it("continues after a failed key save without persisting the active key", async () => {
+    stubWindow("");
+    let approve!: () => void;
+    backend.openAuthRequest.mockResolvedValue({
+      free: vi.fn(),
+      register: vi.fn().mockResolvedValue({
+        appKey: () => ({
+          export: () => Uint8Array.from(Buffer.from(SEED, "hex")),
+          free: vi.fn(),
+        }),
+        free: vi.fn(),
+      }),
+      responseUrl: () => "https://indexer.test/approve",
+      waitForApproval: () =>
+        new Promise<void>((resolve) => {
+          approve = resolve;
+        }),
+    });
+    const { useAuthStore } = await importStore();
+    const save = storage.setItem.bind(storage);
+    storage.setItem = (key, value) => {
+      if (
+        key === AUTH_STORAGE_KEY &&
+        (JSON.parse(value) as { state: { userKeyHex: string } }).state
+          .userKeyHex === SEED
+      )
+        throw new Error("Storage full");
+      save(key, value);
+    };
+    await useAuthStore.getState().requestConnection("https://indexer.test");
+    const waiting = useAuthStore.getState().waitForApproval();
+    approve();
+    await waiting;
+    await expect(
+      useAuthStore.getState().register("valid phrase"),
+    ).rejects.toThrow("Could not save");
+
+    useAuthStore.getState().continueWithoutSaving();
+    useAuthStore.getState().setObjectKey(OBJECT);
+    expect(useAuthStore.getState().status).toBe("connected");
+    expect(useAuthStore.getState().userKeyHex).toBe(SEED);
+    expect(useAuthStore.getState().savedUserKeyHex).toBe("");
+    const stored = JSON.parse(storage.getItem(AUTH_STORAGE_KEY)!) as {
+      state: { userKeyHex: string };
+    };
+    expect(stored.state.userKeyHex).toBe("");
+    useAuthStore.getState().setIndexerUrl("https://another.test");
+    await useAuthStore.getState().reconnect();
+    expect(backend.connectAppKey).not.toHaveBeenCalled();
+  });
+
+  it("a failed approval releases its request and can start a new one", async () => {
+    stubWindow("");
+    let rejectApproval!: () => void;
+    const free = vi.fn();
+    backend.openAuthRequest
+      .mockResolvedValueOnce({
+        free,
+        register: vi.fn(),
+        responseUrl: () => "https://indexer.test/approve",
+        waitForApproval: () =>
+          new Promise<void>((_resolve, reject) => {
+            rejectApproval = () => reject(new Error("Approval denied"));
+          }),
+      })
+      .mockResolvedValueOnce({
+        free: vi.fn(),
+        register: vi.fn(),
+        responseUrl: () => "https://indexer.test/retry",
+        waitForApproval: () => new Promise<void>(() => undefined),
+      });
+    const { useAuthStore } = await importStore();
+    await useAuthStore.getState().requestConnection("https://indexer.test");
+    const waiting = useAuthStore.getState().waitForApproval();
+    rejectApproval();
+    await expect(waiting).rejects.toThrow("Connection approval failed");
+    await vi.waitFor(() => expect(free).toHaveBeenCalledTimes(1));
+
+    await useAuthStore.getState().requestConnection("https://indexer.test");
+    expect(useAuthStore.getState().approvalUrl).toBe(
+      "https://indexer.test/retry",
+    );
+    expect(backend.openAuthRequest).toHaveBeenCalledTimes(2);
+  });
+
+  it("changing the indexer retires an approval and cannot open recovery", async () => {
+    stubWindow("");
+    let finishApproval!: () => void;
+    const free = vi.fn();
+    backend.openAuthRequest.mockResolvedValue({
+      free,
+      register: vi.fn(),
+      responseUrl: () => "https://indexer.test/approve",
+      waitForApproval: () =>
+        new Promise<void>((resolve) => {
+          finishApproval = resolve;
+        }),
+    });
+    const { useAuthStore } = await importStore();
+    await useAuthStore.getState().requestConnection("https://indexer.test");
+    const pending = useAuthStore.getState().waitForApproval();
+    useAuthStore.getState().setIndexerUrl("https://another.test");
+    finishApproval();
+    await pending;
+
+    expect(useAuthStore.getState().status).toBe("disconnected");
+    await vi.waitFor(() => expect(free).toHaveBeenCalledTimes(1));
   });
 });
 
@@ -259,7 +620,11 @@ describe("logout", () => {
   it("retains the full window reload for an SSO/app-key logout", async () => {
     const { reload } = stubWindow("");
     const { useAuthStore } = await importStore();
-    useAuthStore.setState({ status: "connected", userKeyHex: SEED });
+    useAuthStore.setState({
+      savedUserKeyHex: SEED,
+      status: "connected",
+      userKeyHex: SEED,
+    });
 
     useAuthStore.getState().logout();
 

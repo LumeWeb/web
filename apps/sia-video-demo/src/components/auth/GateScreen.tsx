@@ -29,6 +29,8 @@ export function GateScreen() {
   const sharingError = useStore(useAuthStore, (s) => s.sharingError);
   const reconnect = useStore(useAuthStore, (s) => s.reconnect);
   const reconnectError = useStore(useAuthStore, (s) => s.reconnectError);
+  const accountError = useStore(useAuthStore, (s) => s.accountError);
+  const savedUserKeyHex = useStore(useAuthStore, (s) => s.savedUserKeyHex);
   const storedIndexer = useStore(useAuthStore, (s) => s.indexerUrl);
   const [shareInput, setShareInput] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -55,8 +57,12 @@ export function GateScreen() {
       <section className="bg-canvas-subtle border-border-default mb-4 rounded-lg border p-5">
         {reconnectError ? (
           <div className="mb-3">
-            <p className="text-danger text-xs" role="alert">{reconnectError}</p>
-            <button onClick={() => void reconnect()} type="button">Retry connection</button>
+            <p className="text-danger text-xs" role="alert">
+              {reconnectError}
+            </p>
+            <button onClick={() => void reconnect()} type="button">
+              Retry connection
+            </button>
           </div>
         ) : null}
         <h2 className="mt-0 mb-1 text-lg">Open a share</h2>
@@ -125,6 +131,16 @@ export function GateScreen() {
           </div>
         ) : null}
       </section>
+      {accountError ? (
+        <p className="text-danger mb-3 text-xs" role="alert">
+          {accountError}
+        </p>
+      ) : null}
+      {accountError && savedUserKeyHex ? (
+        <button onClick={() => void reconnect()} type="button">
+          Reconnect saved account
+        </button>
+      ) : null}
       <button
         aria-expanded={showSso}
         className={cn(

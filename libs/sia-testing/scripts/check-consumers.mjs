@@ -130,6 +130,22 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
     join(directory, "session-tarball"),
   );
   await dependencies(sessionTarball, {}, join(repo, "libs/sia-session"));
+  // The copied demo must resolve access from an archive with built exports.
+  execFileSync("npm", ["run", "build"], {
+    cwd: join(repo, "libs/sia-app-access"),
+    env: environment,
+    stdio: "inherit",
+    timeout: 30_000,
+  });
+  const accessTarball = await pack(
+    join(repo, "libs/sia-app-access"),
+    join(directory, "access-tarball"),
+  );
+  await dependencies(
+    accessTarball,
+    { "@lumeweb/sia-session": sessionTarball },
+    join(repo, "libs/sia-app-access"),
+  );
   for (const [source, target] of [
     ["libs/sia-video-source", library],
     ["apps/sia-video-demo", demo],
@@ -156,6 +172,7 @@ await withTemporaryDirectory("sia-consumer-check-", async (directory) => {
     join(directory, "tsconfig.base.json"),
   );
   const localPackages = {
+    "@lumeweb/sia-app-access": accessTarball,
     "@lumeweb/sia-session": sessionTarball,
     "@lumeweb/sia-testing": testing,
     "@lumeweb/sia-video-source": library,

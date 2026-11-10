@@ -3,14 +3,14 @@ import { useStore } from "zustand";
 import { useAuthStore } from "../../stores/auth";
 
 export function ApproveScreen() {
-  const request = useStore(useAuthStore, (s) => s.request);
+  const approvalUrl = useStore(useAuthStore, (s) => s.approvalUrl);
   const waitForApproval = useStore(useAuthStore, (s) => s.waitForApproval);
+  const requestConnection = useStore(useAuthStore, (s) => s.requestConnection);
+  const indexerUrl = useStore(useAuthStore, (s) => s.indexerUrl);
   const [waiting, setWaiting] = useState(false);
   const [error, setError] = useState<null | string>(null);
-  const responseUrl = request?.responseUrl();
-
   const handleContinue = async () => {
-    if (!request) return;
+    if (!approvalUrl) return;
     setError(null);
     setWaiting(true);
     try {
@@ -32,16 +32,31 @@ export function ApproveScreen() {
       <div className="my-3 wrap-anywhere">
         <a
           className="text-accent"
-          href={responseUrl}
+          href={approvalUrl ?? undefined}
           rel="noreferrer"
           target="_blank">
-          {responseUrl}
+          {approvalUrl}
         </a>
       </div>
       {error ? (
-        <p className="text-danger" role="alert">
-          {error}
-        </p>
+        <>
+          <p className="text-danger" role="alert">
+            {error}
+          </p>
+          <button
+            onClick={() => {
+              void requestConnection(indexerUrl).then(
+                () => setError(null),
+                (cause: unknown) =>
+                  setError(
+                    cause instanceof Error ? cause.message : String(cause),
+                  ),
+              );
+            }}
+            type="button">
+            Start again
+          </button>
+        </>
       ) : null}
       <button
         disabled={waiting}

@@ -887,6 +887,9 @@ importers:
 
   apps/sia-video-demo:
     dependencies:
+      '@lumeweb/sia-app-access':
+        specifier: workspace:*
+        version: link:../../libs/sia-app-access
       '@lumeweb/sia-video-source':
         specifier: workspace:*
         version: link:../../libs/sia-video-source

@@ -1,21 +1,30 @@
 import { type FormEvent, useState } from "react";
-// The SDK value imports stay dynamic so the sia-storage WASM module is not
-// pulled into the main-thread graph until a phrase is generated or registered.
 import { useStore } from "zustand";
 import { useAuthStore } from "../../stores/auth";
 
 export function RecoveryScreen() {
   const register = useStore(useAuthStore, (s) => s.register);
+  const continueWithoutSaving = useStore(
+    useAuthStore,
+    (s) => s.continueWithoutSaving,
+  );
+  const generateRecoveryPhrase = useStore(
+    useAuthStore,
+    (s) => s.generateRecoveryPhrase,
+  );
+  const retrySave = useStore(useAuthStore, (s) => s.retrySave);
+  const saveError = useStore(useAuthStore, (s) => s.saveError);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<null | string>(null);
   const [phrase, setPhrase] = useState("");
 
   const handleGenerate = async () => {
-    const { generateRecoveryPhrase, initSia } =
-      await import("@siafoundation/sia-storage");
-    await initSia();
     setError(null);
-    setPhrase(generateRecoveryPhrase());
+    try {
+      setPhrase(await generateRecoveryPhrase());
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause));
+    }
   };
 
   const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
@@ -23,21 +32,9 @@ export function RecoveryScreen() {
     const value = phrase.trim();
     if (!value) return;
     setError(null);
-    try {
-      const { initSia, validateRecoveryPhrase } =
-        await import("@siafoundation/sia-storage");
-      // Auth adapters may not load SDK WASM; validation must initialize its phrase parser.
-      await initSia();
-      validateRecoveryPhrase(value);
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause));
-      return;
-    }
     setBusy(true);
     try {
       await register(value);
-      // Registration resolves to `status: "connected"` and the router takes
-      // the account into the player.
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
       setBusy(false);
@@ -67,11 +64,32 @@ export function RecoveryScreen() {
             {error}
           </p>
         ) : null}
+        {saveError ? (
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={() =>
+                void retrySave().catch((cause: unknown) =>
+                  setError(
+                    cause instanceof Error ? cause.message : String(cause),
+                  ),
+                )
+              }
+              type="button">
+              Try saving again
+            </button>
+            <button onClick={continueWithoutSaving} type="button">
+              Continue without saving
+            </button>
+          </div>
+        ) : null}
         <div className="flex gap-2">
-          <button onClick={() => void handleGenerate()} type="button">
+          <button
+            disabled={Boolean(saveError)}
+            onClick={() => void handleGenerate()}
+            type="button">
             Generate
           </button>
-          <button disabled={busy} type="submit">
+          <button disabled={busy || Boolean(saveError)} type="submit">
             {busy ? "Registering…" : "Register"}
           </button>
         </div>
