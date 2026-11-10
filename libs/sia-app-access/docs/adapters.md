@@ -77,7 +77,7 @@ Calling `dispose()` must not throw, and repeated calls must be safe. If a connec
 
 ### Sessions
 
-Registration and successful reconnect return an `AccessSession<Session>` with `value`, `exportAppKey()` and `dispose()`. `exportAppKey()` must return a fresh 32-byte buffer that the controller can clear without changing the session's retained key. Session disposal must also be safe to call repeatedly and must not throw.
+Registration and successful reconnect return an `AccessSession<Session>` with `value`, `exportAppKey()` and `dispose()`. `exportAppKey()` must return a fresh 32-byte buffer that the controller can clear without changing the session's retained key. Session disposal must also be safe to call repeatedly and must not throw. Separate handles may share the same object-valued `value`, but each handle must keep that value usable while another handle or its admitted work still uses it. If disposal frees a shared client, the adapter must coordinate its lifetime across handles; the released adapter instead obtains each session's SDK through its builder.
 
 The controller disposes of connections and sessions that arrive after cancellation instead of using them. Cancelling a command does not guarantee that its network requests stopped.
 

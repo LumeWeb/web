@@ -36,7 +36,7 @@ export class AccessResources<Session> {
   }
   installSession(resource: AccessSession<Session>): void {
     if (this.session) throw new Error("A session is already installed");
-    this.sdkSession.setHandle(resource);
+    this.sdkSession.setHandle(resource, { valueOwnership: "shared" });
     this.session = resource;
   }
   retire(): void {
