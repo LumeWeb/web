@@ -89,6 +89,7 @@ export async function openAuthRequest(
     free() {
       void auth.close();
     },
+    matchesExistingAppKey: () => Promise.resolve(false),
     async register(phrase) {
       return session(await auth.register(request, phrase));
     },
@@ -98,7 +99,10 @@ export async function openAuthRequest(
 }
 function session(key: MockCredential): AuthSession {
   return {
-    appKey: () => ({ export: () => fromHex(key.keyHex), free: () => undefined }),
+    appKey: () => ({
+      export: () => fromHex(key.keyHex),
+      free: () => undefined,
+    }),
     free: () => undefined,
   };
 }

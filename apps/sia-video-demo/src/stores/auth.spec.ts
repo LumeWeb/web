@@ -1,10 +1,20 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AuthState } from "./auth";
 
-const backend = vi.hoisted(() => ({ connectAppKey: vi.fn() }));
+const backend = vi.hoisted(() => ({
+  connectAppKey: vi.fn(),
+  openAuthRequest: vi.fn(),
+}));
 vi.mock("../lib/storageBackend", () => ({
   connectAppKey: backend.connectAppKey,
-  openAuthRequest: vi.fn(),
+  openAuthRequest: backend.openAuthRequest,
+}));
+vi.mock("@siafoundation/sia-storage", () => ({
+  generateRecoveryPhrase: () => "valid phrase",
+  initSia: () => Promise.resolve(),
+  validateRecoveryPhrase: (value: string) => {
+    if (value !== "valid phrase") throw new Error("Invalid phrase");
+  },
 }));
 
 const SEED = "d778398e336858ddc1a7de0c78ca22bbe9c821e2786d7b5a941c729e1e5ceb1f";
@@ -68,6 +78,7 @@ async function importStore() {
 beforeEach(() => {
   backend.connectAppKey.mockReset();
   backend.connectAppKey.mockRejectedValue(new Error("Indexer unavailable"));
+  backend.openAuthRequest.mockReset();
   storage = stubStorage();
   Object.defineProperty(globalThis, "localStorage", {
     configurable: true,
@@ -223,6 +234,154 @@ describe("reconnect", () => {
     expect(useAuthStore.getState().status).toBe("disconnected");
     expect(useAuthStore.getState().reconnectError).not.toBeNull();
     expect(backend.connectAppKey).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("account authorization", () => {
+  it("saves an approved account key and owns its session until logout", async () => {
+    const { reload } = stubWindow("");
+    let approve!: () => void;
+    const freeRequest = vi.fn();
+    const freeSdk = vi.fn();
+    const freeKey = vi.fn();
+    backend.openAuthRequest.mockResolvedValue({
+      free: freeRequest,
+      register: vi.fn().mockResolvedValue({
+        appKey: () => ({
+          export: () => Uint8Array.from(Buffer.from(SEED, "hex")),
+          free: freeKey,
+        }),
+        free: freeSdk,
+      }),
+      responseUrl: () => "https://indexer.test/approve",
+      waitForApproval: () =>
+        new Promise<void>((resolve) => {
+          approve = resolve;
+        }),
+    });
+    const { useAuthStore } = await importStore();
+    await useAuthStore.getState().requestConnection("https://indexer.test");
+    expect(useAuthStore.getState().approvalUrl).toBe(
+      "https://indexer.test/approve",
+    );
+    const waiting = useAuthStore.getState().waitForApproval();
+    approve();
+    await waiting;
+    await useAuthStore.getState().register("valid phrase");
+
+    expect(useAuthStore.getState().status).toBe("connected");
+    expect(useAuthStore.getState().userKeyHex).toBe(SEED);
+    expect(freeKey).toHaveBeenCalledTimes(1);
+    expect(freeSdk).not.toHaveBeenCalled();
+    expect(freeRequest).toHaveBeenCalledTimes(1);
+    useAuthStore.getState().logout();
+    expect(freeSdk).toHaveBeenCalledTimes(1);
+    expect(reload).toHaveBeenCalledTimes(1);
+  });
+
+  it("retries a failed key save without registering again", async () => {
+    stubWindow("");
+    let approve!: () => void;
+    const register = vi.fn().mockResolvedValue({
+      appKey: () => ({
+        export: () => Uint8Array.from(Buffer.from(SEED, "hex")),
+        free: vi.fn(),
+      }),
+      free: vi.fn(),
+    });
+    backend.openAuthRequest.mockResolvedValue({
+      free: vi.fn(),
+      register,
+      responseUrl: () => "https://indexer.test/approve",
+      waitForApproval: () =>
+        new Promise<void>((resolve) => {
+          approve = resolve;
+        }),
+    });
+    const { useAuthStore } = await importStore();
+    const save = storage.setItem.bind(storage);
+    const savedKey = (value: string) =>
+      (JSON.parse(value) as { state: { userKeyHex?: string } }).state
+        .userKeyHex;
+    let fail = true;
+    storage.setItem = (key, value) => {
+      if (fail && key === AUTH_STORAGE_KEY && savedKey(value) === SEED) {
+        fail = false;
+        throw new Error("Storage full");
+      }
+      save(key, value);
+    };
+    await useAuthStore.getState().requestConnection("https://indexer.test");
+    const waiting = useAuthStore.getState().waitForApproval();
+    approve();
+    await waiting;
+    await expect(
+      useAuthStore.getState().register("valid phrase"),
+    ).rejects.toThrow("Could not save");
+    expect(useAuthStore.getState().saveError).not.toBeNull();
+    expect(useAuthStore.getState().status).toBe("registering");
+    await useAuthStore.getState().retrySave();
+    expect(useAuthStore.getState().status).toBe("connected");
+    expect(register).toHaveBeenCalledTimes(1);
+    expect(savedKey(storage.getItem(AUTH_STORAGE_KEY)!)).toBe(SEED);
+  });
+
+  it("a failed approval releases its request and can start a new one", async () => {
+    stubWindow("");
+    let rejectApproval!: () => void;
+    const free = vi.fn();
+    backend.openAuthRequest
+      .mockResolvedValueOnce({
+        free,
+        register: vi.fn(),
+        responseUrl: () => "https://indexer.test/approve",
+        waitForApproval: () =>
+          new Promise<void>((_resolve, reject) => {
+            rejectApproval = () => reject(new Error("Approval denied"));
+          }),
+      })
+      .mockResolvedValueOnce({
+        free: vi.fn(),
+        register: vi.fn(),
+        responseUrl: () => "https://indexer.test/retry",
+        waitForApproval: () => new Promise<void>(() => undefined),
+      });
+    const { useAuthStore } = await importStore();
+    await useAuthStore.getState().requestConnection("https://indexer.test");
+    const waiting = useAuthStore.getState().waitForApproval();
+    rejectApproval();
+    await expect(waiting).rejects.toThrow("Connection approval failed");
+    await vi.waitFor(() => expect(free).toHaveBeenCalledTimes(1));
+
+    await useAuthStore.getState().requestConnection("https://indexer.test");
+    expect(useAuthStore.getState().approvalUrl).toBe(
+      "https://indexer.test/retry",
+    );
+    expect(backend.openAuthRequest).toHaveBeenCalledTimes(2);
+  });
+
+  it("changing the indexer retires an approval and cannot open recovery", async () => {
+    stubWindow("");
+    let finishApproval!: () => void;
+    const free = vi.fn();
+    backend.openAuthRequest.mockResolvedValue({
+      free,
+      register: vi.fn(),
+      responseUrl: () => "https://indexer.test/approve",
+      waitForApproval: () =>
+        new Promise<void>((resolve) => {
+          finishApproval = resolve;
+        }),
+    });
+    const { useAuthStore } = await importStore();
+    await useAuthStore.getState().requestConnection("https://indexer.test");
+    const pending = useAuthStore.getState().waitForApproval();
+    useAuthStore.getState().setIndexerUrl("https://another.test");
+    finishApproval();
+    await pending;
+
+    expect(useAuthStore.getState().status).toBe("disconnected");
+    await vi.waitFor(() => expect(free).toHaveBeenCalledTimes(1));
   });
 });
 

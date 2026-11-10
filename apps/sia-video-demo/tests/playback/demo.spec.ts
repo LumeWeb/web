@@ -56,6 +56,24 @@ test("an account can play a managed video after registration and reconnect", asy
   )).toBe(true);
 });
 
+test("a denied account approval can start a fresh request", async ({
+  fixture,
+  registration,
+  sia,
+}) => {
+  const { page, url } = registration;
+  await openDemo(page, { ...fixture, url });
+  await page.getByRole("button", { name: "Sign in with your Sia account" }).click();
+  await page.getByRole("button", { exact: true, name: "Connect" }).click();
+  const firstUrl = await page.getByRole("link").getAttribute("href");
+  expect(firstUrl).not.toBeNull();
+  await sia.auth.deny(firstUrl!);
+  await page.getByRole("button", { exact: true, name: "Continue" }).click();
+  await expect(page.getByRole("alert")).toContainText("Connection approval failed");
+  await page.getByRole("button", { name: "Start again" }).click();
+  await expect(page.getByRole("link")).not.toHaveAttribute("href", firstUrl!);
+});
+
 test("a well-formed unknown sharing seed cannot list the fixture", async ({
   fixture,
   page,

@@ -4,6 +4,7 @@ import { APP_META } from "./constants";
 import { fromHex } from "./hex";
 export interface AuthRequest {
   free(): void;
+  matchesExistingAppKey(phrase: string): Promise<boolean>;
   register(phrase: string): Promise<AuthSession>;
   responseUrl(): string;
   waitForApproval(): Promise<void>;
