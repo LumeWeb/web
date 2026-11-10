@@ -50,6 +50,8 @@ export interface AuthActions {
 }
 
 export interface AuthState extends AuthActions {
+  /** Account command errors remain visible after the screen that started them closes. */
+  accountError: null | string;
   /** The approval URL is presentation data; the access controller owns its request. */
   approvalUrl: null | string;
   indexerUrl: string;
@@ -61,6 +63,8 @@ export interface AuthState extends AuthActions {
   objectKey: string;
   /** A failed automatic reconnect waits for a user action instead of rearming the effect. */
   reconnectError: null | string;
+  /** Only this confirmed key is written to the persisted userKeyHex field. */
+  savedUserKeyHex: string;
   /** A failed credential write can be retried without registering again. */
   saveError: null | string;
   /**
@@ -82,20 +86,24 @@ export interface AuthState extends AuthActions {
 
 const initialState: Pick<
   AuthState,
+  | "accountError"
   | "approvalUrl"
   | "indexerUrl"
   | "objectKey"
   | "reconnectError"
+  | "savedUserKeyHex"
   | "saveError"
   | "sharingError"
   | "sharingKeyHex"
   | "status"
   | "userKeyHex"
 > = {
+  accountError: null,
   approvalUrl: null,
   indexerUrl: DEFAULT_INDEXER_URL,
   objectKey: "",
   reconnectError: null,
+  savedUserKeyHex: "",
   saveError: null,
   sharingError: null,
   sharingKeyHex: null,
@@ -119,15 +127,30 @@ function accountAccess(indexerUrl: string): DemoAccess {
     // Keep the demo's one saved key when a user switches indexers to retry reconnect.
     credentials: {
       read() {
-        const key = useAuthStore.getState().userKeyHex;
+        const key = useAuthStore.getState().savedUserKeyHex;
         return Promise.resolve(key ? fromHex(key) : null);
       },
       remove() {
-        useAuthStore.setState({ userKeyHex: "" });
+        useAuthStore.setState({ savedUserKeyHex: "", userKeyHex: "" });
         return Promise.resolve();
       },
       write(_scope, bytes) {
-        useAuthStore.setState({ userKeyHex: toHex(bytes) });
+        const previous = useAuthStore.getState().savedUserKeyHex;
+        try {
+          useAuthStore.setState({
+            savedUserKeyHex: toHex(bytes),
+            userKeyHex: toHex(bytes),
+          });
+        } catch (error) {
+          // Zustand publishes state before localStorage rejects the write.
+          // A later state update must not persist a key whose save failed.
+          try {
+            useAuthStore.setState({ savedUserKeyHex: previous });
+          } catch {
+            // The in-memory rollback still runs before persistence rejects again.
+          }
+          throw error;
+        }
         return Promise.resolve();
       },
     },
@@ -154,6 +177,7 @@ function accountAccess(indexerUrl: string): DemoAccess {
         break;
       case AccessPhase.Ready:
         useAuthStore.setState({
+          accountError: null,
           approvalUrl: null,
           reconnectError: null,
           saveError: null,
@@ -220,8 +244,8 @@ export const useAuthStore = createStore<AuthState>()(
       },
 
       reconnect: async () => {
-        const { indexerUrl, status, userKeyHex } = get();
-        if (!userKeyHex) return;
+        const { indexerUrl, savedUserKeyHex, status } = get();
+        if (!savedUserKeyHex) return;
         // Reconnect is idempotent once the store is in (or heading for) a
         // non-disconnected state: only an explicitly disconnected store may
         // (re)start the SSO-free app-key reconnect.
@@ -238,8 +262,8 @@ export const useAuthStore = createStore<AuthState>()(
         } catch {
           if (controller && access !== controller) return;
           // A transient failure ends the in-flight retry but must NOT discard
-          // the persisted app-key credential: keep userKeyHex so the user can
-          // retry or switch indexers from the gate screen.
+          // the persisted app-key credential: keep savedUserKeyHex so the user
+          // can retry or switch indexers from the entry screen.
           set({
             reconnectError:
               "Could not reconnect your account. Retry or choose another indexer.",
@@ -250,8 +274,10 @@ export const useAuthStore = createStore<AuthState>()(
 
       register: async (phrase) => {
         if (!access) throw new Error("No approved connection");
-        const result = await access.submitRecoveryPhrase(phrase);
-        if (result.kind === AccessOutcome.Ready) return;
+        const controller = access;
+        const result = await controller.submitRecoveryPhrase(phrase);
+        if (access !== controller || result.kind === AccessOutcome.Ready)
+          return;
         if (result.kind === AccessOutcome.InvalidPhrase)
           throw new Error("Enter a valid recovery phrase.");
         if (result.kind === AccessOutcome.PhraseMismatch)
@@ -261,7 +287,17 @@ export const useAuthStore = createStore<AuthState>()(
           result.failure === AccessFailure.CredentialsWrite
         )
           throw new Error("Could not save your account key. Try saving again.");
-        throw new Error("Could not register the account.");
+        const message =
+          result.kind === AccessOutcome.Failed &&
+          result.failure === AccessFailure.PhraseCheck
+            ? "Could not check the recovery phrase. Start again."
+            : "Could not register the account. Start again.";
+        set({
+          accountError: message,
+          approvalUrl: null,
+          status: AuthStatus.Disconnected,
+        });
+        throw new Error(message);
       },
 
       requestConnection: async (indexerUrl) => {
@@ -269,6 +305,7 @@ export const useAuthStore = createStore<AuthState>()(
         if (!controller.getSnapshot().presentation.availability.authorize)
           throw new Error("Account connection is unavailable.");
         set({
+          accountError: null,
           indexerUrl,
           reconnectError: null,
           saveError: null,
@@ -282,7 +319,10 @@ export const useAuthStore = createStore<AuthState>()(
               resolve();
             } else if (phase === AccessPhase.Failed) {
               unsubscribe();
-              set({ status: AuthStatus.Disconnected });
+              set({
+                accountError: "Could not connect to the indexer. Try again.",
+                status: AuthStatus.Disconnected,
+              });
               reject(new Error("Could not connect to the indexer."));
             } else if (
               phase === AccessPhase.Disposed ||
@@ -309,6 +349,7 @@ export const useAuthStore = createStore<AuthState>()(
         access = null;
         pendingAuthorization = null;
         set({
+          accountError: null,
           approvalUrl: null,
           indexerUrl,
           reconnectError: null,
@@ -342,6 +383,16 @@ export const useAuthStore = createStore<AuthState>()(
       },
     }),
     {
+      // The confirmed key uses the existing userKeyHex storage slot, so it
+      // needs restoring even when the stored version needs no migration.
+      merge: (persisted, current) => {
+        const state = (persisted ?? {}) as Partial<AuthState>;
+        return {
+          ...current,
+          ...state,
+          savedUserKeyHex: state.userKeyHex ?? "",
+        };
+      },
       // `sharingKeyHex` replaces the earlier `sharingKeySeed` field: the value
       // is identical (a hex-encoded sharing-key seed), so a stored payload is
       // carried over by renaming rather than dropped.
@@ -357,6 +408,7 @@ export const useAuthStore = createStore<AuthState>()(
         }
         return {
           indexerUrl: state.indexerUrl ?? "",
+          savedUserKeyHex: state.userKeyHex ?? "",
           sharingKeyHex: state.sharingKeyHex ?? null,
           userKeyHex: state.userKeyHex ?? "",
         };
@@ -365,9 +417,9 @@ export const useAuthStore = createStore<AuthState>()(
       partialize: (state) => ({
         indexerUrl: state.indexerUrl,
         sharingKeyHex: state.sharingKeyHex,
-        userKeyHex: state.userKeyHex,
+        userKeyHex: state.savedUserKeyHex,
       }),
-      version: 2,
+      version: 3,
     },
   ),
 );

@@ -12,17 +12,22 @@ export function AuthFlow() {
   const indexerUrl = useStore(useAuthStore, (s) => s.indexerUrl);
   const sharingKeyHex = useStore(useAuthStore, (s) => s.sharingKeyHex);
   const status = useStore(useAuthStore, (s) => s.status);
-  const userKeyHex = useStore(useAuthStore, (s) => s.userKeyHex);
+  const savedUserKeyHex = useStore(useAuthStore, (s) => s.savedUserKeyHex);
   const reconnect = useStore(useAuthStore, (s) => s.reconnect);
   const reconnectError = useStore(useAuthStore, (s) => s.reconnectError);
 
   // Retaining the account key after failure must not rearm automatic reconnect.
   // Sharing sessions use their own credential without opening an account SDK.
   useEffect(() => {
-    if (status === AuthStatus.Disconnected && userKeyHex && !sharingKeyHex && !reconnectError) {
+    if (
+      status === AuthStatus.Disconnected &&
+      savedUserKeyHex &&
+      !sharingKeyHex &&
+      !reconnectError
+    ) {
       void reconnect();
     }
-  }, [reconnect, reconnectError, sharingKeyHex, status, userKeyHex]);
+  }, [reconnect, reconnectError, savedUserKeyHex, sharingKeyHex, status]);
 
   const step = selectAuthStep({ sharingKeyHex, status });
 
