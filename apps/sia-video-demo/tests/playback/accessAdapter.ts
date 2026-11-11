@@ -35,7 +35,7 @@ export function createSiaAdapter(): SiaAccessAdapter<SiaSession> {
       try {
         return ownConnection(request);
       } catch (error) {
-        request.free();
+        await request.free();
         throw error;
       }
     },
@@ -109,7 +109,8 @@ function ownConnection(request: AuthRequest): AccessConnection<SiaSession> {
         try {
           return ownSession(await request.register(phrase));
         } finally {
-          dispose();
+          // Waiting here would deadlock until perform clears its busy flag.
+          void dispose();
         }
       }),
     waitForApproval: () => perform(() => request.waitForApproval()),

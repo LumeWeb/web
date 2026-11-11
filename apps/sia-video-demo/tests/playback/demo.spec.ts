@@ -82,7 +82,7 @@ test("a failed key save stays on recovery until the user retries", async ({
 }) => {
   const { page, url } = registration;
   await page.addInitScript(() => {
-    const write = Storage.prototype.setItem;
+    const write = Storage.prototype.setItem.bind(localStorage);
     let fail = true;
     Storage.prototype.setItem = function (key, value) {
       const payload: unknown = key.startsWith("sia-auth-")
@@ -119,8 +119,10 @@ test("a failed key save stays on recovery until the user retries", async ({
   const storageKey = `sia-auth-${APP_ID.slice(0, 8)}`;
   const storedKey = () =>
     page.evaluate((key) => {
-      const payload = JSON.parse(localStorage.getItem(key)!);
-      return payload.state.userKeyHex as string;
+      const payload = JSON.parse(localStorage.getItem(key)!) as {
+        state: { userKeyHex: string };
+      };
+      return payload.state.userKeyHex;
     }, storageKey);
   expect(await storedKey()).toBe("");
 

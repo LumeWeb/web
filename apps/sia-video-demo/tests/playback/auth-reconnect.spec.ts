@@ -92,10 +92,12 @@ test("changing indexers after reconnect failure uses the new account scope", asy
     page.getByRole("button", { exact: true, name: "Retry connection" }),
   ).toBeVisible();
   expect(attempts[1]).toContain(new URL(replacement).pathname);
-  const storedIndexer = await page.evaluate(
-    (key) => JSON.parse(localStorage.getItem(key)!).state.indexerUrl as string,
-    storageKey,
-  );
+  const storedIndexer = await page.evaluate((key) => {
+    const payload = JSON.parse(localStorage.getItem(key)!) as {
+      state: { indexerUrl: string };
+    };
+    return payload.state.indexerUrl;
+  }, storageKey);
   expect(storedIndexer).toBe(replacement);
 });
 
