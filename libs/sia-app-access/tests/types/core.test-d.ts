@@ -8,6 +8,7 @@ import {
   SessionUnavailableError,
   CredentialConfirmation,
   createMemoryCredentialStore,
+  observeSiaAccess,
 } from "../../dist/index.js";
 import type {
   AccessEffects,
@@ -19,6 +20,7 @@ import type {
   RecoveryPhraseIssue,
   SiaAccess,
   SiaAccessAdapter,
+  SiaAccessInteractions,
   SubmitRecoveryPhraseResult,
 } from "../../dist/index.js";
 
@@ -36,8 +38,33 @@ void writePromise;
 scope.appId = "changed";
 
 declare const access: SiaAccess<{ readonly id: string }>;
+declare const interactions: SiaAccessInteractions<{ readonly id: string }>;
+const stopBase = observeSiaAccess(access, (snapshot) => {
+  // @ts-expect-error Base controllers need not expose interaction presentation.
+  void snapshot.presentation;
+});
+const stopInteractions = observeSiaAccess(interactions, (snapshot) => {
+  void snapshot.presentation;
+});
+stopBase();
+stopInteractions();
 const borrowed: Promise<string> = access.withSession((session) => session.id);
 void borrowed;
+const operation = access.openOperationScope();
+const independent: Promise<string> = operation.run((session) => session.id);
+void independent;
+void operation.close();
+void operation.closed;
+const activeId: string | null = access.getSnapshot().activeSessionId;
+const activeHex: string | null = access.activeAppKeyHex();
+const activeBytes: Uint8Array = access.copyActiveAppKeySeed();
+void activeId;
+void activeHex;
+void activeBytes;
+// @ts-expect-error Account operation scopes do not expose a source.
+operation.source;
+// @ts-expect-error Account operation scopes do not expose an SDK value.
+operation.value;
 // @ts-expect-error The session type must not become any.
 access.withSession((session) => session.unknownProperty);
 

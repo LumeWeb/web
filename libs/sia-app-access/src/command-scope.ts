@@ -43,6 +43,7 @@ export interface CommandScope<Value> {
     failure: CommandFailure,
     recovery: AccessRecovery,
     keepSession?: boolean,
+    cause?: unknown,
   ): void;
   finish(result: AccessCancelled | Value, next?: LifecycleEvent): void;
   publish(): void;
@@ -106,7 +107,7 @@ export class CommandCoordinator {
       get effects() {
         return effects;
       },
-      fail: (failure, recovery, keepSession = false) => {
+      fail: (failure, recovery, keepSession = false, cause?: unknown) => {
         if (!current()) return;
         this.resources.retireConnection();
         if (!keepSession) this.resources.retireSession();
@@ -116,7 +117,11 @@ export class CommandCoordinator {
           recovery,
         });
         settle(
-          { kind: AccessOutcome.Failed, ...info },
+          {
+            kind: AccessOutcome.Failed,
+            ...info,
+            ...(failure === AccessFailure.CredentialsRead ? { cause } : {}),
+          },
           { type: AccessEvent.Failed, ...info },
         );
       },

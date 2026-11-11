@@ -2,8 +2,10 @@
 export const events: string[] = [];
 export let validationFails = false;
 export let initFails = false;
+export let builderFreeError: Error | undefined;
 export let pending: (() => Promise<void>) | undefined;
 interface ControlledSdkOptions {
+  readonly builderFreeError?: Error;
   readonly initFails?: boolean;
   readonly pending?: () => Promise<void>;
   readonly validationFails?: boolean;
@@ -30,6 +32,7 @@ export class Builder {
   }
   free() {
     events.push("builder:free");
+    if (builderFreeError) throw builderFreeError;
   }
   async matchesExistingAppKey(_phrase: string) {
     events.push("match");
@@ -63,6 +66,7 @@ export class Sdk {
 export function configure(options: ControlledSdkOptions = {}) {
   validationFails = options.validationFails ?? false;
   initFails = options.initFails ?? false;
+  builderFreeError = options.builderFreeError;
   pending = options.pending;
   events.length = 0;
 }

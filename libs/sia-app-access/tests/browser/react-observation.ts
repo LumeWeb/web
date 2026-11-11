@@ -37,7 +37,7 @@ function observedAccess(label: string): SiaAccess<number> {
     dispose() {
       disposals++;
       report("disposals", disposals);
-      base.dispose();
+      return base.dispose();
     },
     reconnect() {
       if (this !== access) throw Error("Controller receiver was lost");

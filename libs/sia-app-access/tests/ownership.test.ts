@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { AccessResources, SessionUnavailableError } from "@/access-resources";
 import { CommandCoordinator } from "@/command-scope";
-import { CredentialQueue } from "@/credential-operations";
+import { CredentialQueue } from "@/credential-queue";
 import { AccessEvent } from "@/access-machine";
 import {
   AccessErrorCode,
@@ -108,7 +108,7 @@ void test("retirement denies new session work but waits for every admitted borro
     return second.promise;
   });
   assert.equal(admitted, 2);
-  resources.retire();
+  void resources.retire();
   assert.equal(disposed, 0);
   await assert.rejects(
     resources.run(() => 0),
@@ -120,8 +120,44 @@ void test("retirement denies new session work but waits for every admitted borro
   second.resolve(2);
   assert.equal(await two, 2);
   assert.equal(disposed, 1);
-  resources.retire();
+  void resources.retire();
   assert.equal(disposed, 1);
+});
+
+void test("retirement reports both connection and session cleanup failures", async () => {
+  const connectionFailure = new Error("builder cleanup failed");
+  const sessionFailure = new Error("session cleanup failed");
+  const reported: unknown[] = [];
+  const resources = new AccessResources<number>((error) =>
+    reported.push(error),
+  );
+  resources.installConnection({
+    approvalUrl: "https://approve.test",
+    dispose: () => Promise.reject(connectionFailure),
+    matchesExistingAppKey: () => Promise.resolve(false),
+    register: () => Promise.reject(new Error("not registered")),
+    waitForApproval: () => Promise.resolve(),
+  });
+  resources.installSession({
+    dispose() {
+      throw sessionFailure;
+    },
+    exportAppKey: () => new Uint8Array(32),
+    value: 7,
+  });
+
+  await assert.rejects(
+    resources.retire(),
+    (error: unknown) =>
+      error instanceof AggregateError &&
+      error.errors.length === 2 &&
+      error.errors[0] === connectionFailure &&
+      error.errors[1] === sessionFailure,
+  );
+  assert.deepEqual(
+    new Set(reported),
+    new Set([connectionFailure, sessionFailure]),
+  );
 });
 
 void test("independent access handles can share a client while each use retains its handle", async () => {
@@ -142,7 +178,7 @@ void test("independent access handles can share a client while each use retains 
     assert.equal(value, sdk);
     await release.promise;
   });
-  first.retireSession();
+  void first.retireSession();
   try {
     second.installSession({
       dispose() {
@@ -160,7 +196,7 @@ void test("independent access handles can share a client while each use retains 
   }
   assert.equal(firstDisposed, 1);
   assert.equal(secondDisposed, 0);
-  second.retireSession();
+  void second.retireSession();
   assert.equal(secondDisposed, 1);
 });
 
@@ -189,7 +225,7 @@ for (const borrowing of [false, true]) {
     assert.equal(await resources.run((value) => value), 1);
     assert.equal(firstDisposed, 0);
     assert.equal(secondDisposed, 0);
-    resources.retireSession();
+    void resources.retireSession();
     assert.equal(firstDisposed, borrowing ? 0 : 1);
     resources.installSession(incoming);
     assert.equal(await resources.run((value) => value), 2);
@@ -197,7 +233,7 @@ for (const borrowing of [false, true]) {
     if (work) assert.equal(await work, 7);
     assert.equal(firstDisposed, 1);
     assert.equal(secondDisposed, 0);
-    resources.retireSession();
+    void resources.retireSession();
     assert.equal(secondDisposed, 1);
   });
 }
@@ -226,11 +262,11 @@ void test("installing over a connection preserves the existing owner", () => {
   assert.equal(resources.connection, first);
   assert.equal(firstDisposed, 0);
   assert.equal(secondDisposed, 0);
-  resources.retireConnection();
+  void resources.retireConnection();
   assert.equal(firstDisposed, 1);
   resources.installConnection(second);
   assert.equal(resources.connection, second);
-  resources.retireConnection();
+  void resources.retireConnection();
   assert.equal(secondDisposed, 1);
 });
 
@@ -343,7 +379,7 @@ void test("save failure keeps its session available for internal recovery", asyn
   assert.equal(resources.hasSession(), true);
   assert.equal(disposed, 0);
   assert.deepEqual(resources.exportAppKey(), new Uint8Array(32).fill(9));
-  resources.retire();
+  void resources.retire();
   assert.equal(disposed, 1);
 });
 
@@ -389,7 +425,7 @@ for (const failure of [new Error("application failed"), "application failed"]) {
       value: 7,
     });
     const result = resources.run(() => {
-      resources.retire();
+      void resources.retire();
       // Borrowers may throw non-Error values; retirement must preserve their identity.
       // oxlint-disable-next-line typescript/only-throw-error
       throw failure;
@@ -416,7 +452,7 @@ void test("invalid exported keys are cleared and unavailable sessions deny expor
   });
   assert.throws(() => resources.exportAppKey());
   assert.ok(key.every((byte) => byte === 0));
-  resources.retire();
+  void resources.retire();
   assert.throws(() => resources.exportAppKey(), SessionUnavailableError);
 });
 

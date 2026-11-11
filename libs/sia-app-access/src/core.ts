@@ -8,10 +8,8 @@ import {
 } from "./access-resources.ts";
 import { Authorization } from "./authorization.ts";
 import { CommandCoordinator, unavailable } from "./command-scope.ts";
-import {
-  CredentialOperations,
-  CredentialQueue,
-} from "./credential-operations.ts";
+import { CredentialOperations } from "./credential-operations.ts";
+import { CredentialQueue } from "./credential-queue.ts";
 import { AccessPhase } from "./access-types.ts";
 import type {
   AccessInteractionSnapshot,
@@ -31,6 +29,7 @@ class AccessPublication {
   constructor(
     private readonly scope: CredentialScope,
     private readonly machine: AccessMachine,
+    private readonly activeSessionId: () => null | string,
     private readonly onError: ((error: unknown) => void) | undefined,
   ) {
     this.publishedSnapshot = this.project();
@@ -68,6 +67,7 @@ class AccessPublication {
   }
   private project(): AccessInteractionSnapshot {
     return Object.freeze({
+      activeSessionId: this.machine.canBorrow() ? this.activeSessionId() : null,
       presentation: this.machine.presentation(),
       scope: this.scope,
       state: Object.freeze(this.machine.project()),
@@ -80,12 +80,13 @@ export function createSiaAccess<Session>(
 ): SiaAccessInteractions<Session> {
   const environment = createAccessEnvironment(options);
   const machine = createAccessMachine();
+  const resources = new AccessResources<Session>(options.onResourceError);
   const publication = new AccessPublication(
     environment.scope,
     machine,
+    () => resources.activeSessionId,
     options.onSubscriberError,
   );
-  const resources = new AccessResources<Session>();
   const commands = new CommandCoordinator(publication, resources);
   const publish = () => publication.publish();
   const queue = new CredentialQueue(environment.credentials, environment.scope);
@@ -105,18 +106,49 @@ export function createSiaAccess<Session>(
     credentials,
     publish,
   );
+  let cleanup: Promise<void> = Promise.resolve();
   function stop(
     event: AccessEvent.Cancel | AccessEvent.Disconnect | AccessEvent.Dispose,
-  ): void {
-    if (!machine.send({ type: event })) return;
+  ): Promise<void> {
+    if (!machine.send({ type: event })) return cleanup;
     commands.cancel();
-    resources.retire();
+    cleanup =
+      event === AccessEvent.Dispose ? resources.dispose() : resources.retire();
     publication.publish();
+    return cleanup;
   }
   return {
+    activeAppKeyHex: () => {
+      if (!machine.canBorrow()) return null;
+      const id = resources.activeSessionId;
+      const bytes = resources.exportAppKey();
+      try {
+        if (!machine.canBorrow() || resources.activeSessionId !== id)
+          return null;
+        return Array.from(bytes, (byte) =>
+          byte.toString(16).padStart(2, "0"),
+        ).join("");
+      } finally {
+        bytes.fill(0);
+      }
+    },
     authorize: (intent) => authorization.authorize(intent),
-    cancel: () => stop(AccessEvent.Cancel),
+    cancel: () => {
+      void stop(AccessEvent.Cancel);
+    },
     continueWithoutSaving: () => credentials.continueWithoutSaving(),
+    copyActiveAppKeySeed: () => {
+      if (!machine.canBorrow()) throw new SessionUnavailableError();
+      const id = resources.activeSessionId;
+      const bytes = resources.exportAppKey();
+      try {
+        if (!machine.canBorrow() || resources.activeSessionId !== id)
+          throw new SessionUnavailableError();
+        return Uint8Array.from(bytes);
+      } finally {
+        bytes.fill(0);
+      }
+    },
     disconnect: () => stop(AccessEvent.Disconnect),
     dispose: () => stop(AccessEvent.Dispose),
     forget: () => credentials.forget(),
@@ -125,6 +157,16 @@ export function createSiaAccess<Session>(
         ? commands.generate(() => environment.adapter.generateRecoveryPhrase())
         : Promise.resolve(unavailable),
     getSnapshot: () => publication.snapshot,
+    openOperationScope: () => {
+      if (!machine.canBorrow()) throw new SessionUnavailableError();
+      const scope = resources.openOperationScope();
+      return Object.freeze({
+        close: () => scope.close(),
+        closed: scope.closed,
+        run: <Result>(work: (session: Session) => Promise<Result> | Result) =>
+          scope.run((session) => work(session)),
+      });
+    },
     reconnect: () => credentials.reconnect(),
     retrySave: () => credentials.retrySave(),
     submitRecoveryPhrase: (phrase) =>

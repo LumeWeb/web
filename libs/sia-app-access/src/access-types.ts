@@ -126,8 +126,8 @@ export interface AccessCancelled {
  */
 export interface AccessConnection<Session> {
   readonly approvalUrl: string;
-  /** Requests idempotent, nonthrowing retirement; admitted native work retains its handles. */
-  dispose(): void;
+  /** Denies new work without throwing; return completion if native cleanup must drain. */
+  dispose(): Promise<void> | void;
   matchesExistingAppKey(phrase: string): Promise<boolean>;
   register(phrase: string): Promise<AccessSession<Session>>;
   waitForApproval(): Promise<void>;
@@ -140,6 +140,8 @@ export interface AccessEffects {
   readonly registration: RegistrationEffect;
 }
 export interface AccessFailed extends AccessFailureInfo {
+  /** A reconnect credential-read error is available only on that command's result. */
+  readonly cause?: unknown;
   readonly kind: AccessOutcome.Failed;
 }
 export interface AccessFailedState extends AccessFailureInfo {
@@ -186,6 +188,14 @@ export interface AccessLifecycleState {
 }
 export interface AccessMissingCredentials {
   readonly kind: AccessOutcome.MissingCredentials;
+}
+/** Independent account work without a second SDK owner or an exposed session source. */
+export interface AccessOperationScope<Session> {
+  /** Denies new work and waits for admitted work before releasing its parent borrow. */
+  close(): Promise<void>;
+  readonly closed: Promise<void>;
+  /** Admits work before returning its promise; adapters own their native child handles. */
+  run<Result>(work: SessionWork<Session, Result>): Promise<Result>;
 }
 export interface AccessPhraseMismatch {
   readonly kind: AccessOutcome.PhraseMismatch;
@@ -237,6 +247,8 @@ export interface AccessSession<Session> {
   readonly value: Session;
 }
 export interface AccessSnapshot {
+  /** Nonsecret identity of the ready account SDK, distinct across controller instances. */
+  readonly activeSessionId: null | string;
   readonly scope: CredentialScope;
   readonly state: AccessState;
 }
@@ -284,8 +296,15 @@ export type SessionWork<Session, Result> = (
   session: Session,
 ) => Promise<Result> | Result;
 export interface SiaAccess<Session> extends SiaAccessOperations<Session> {
-  dispose(): void;
+  /** Returns a string for the existing native stream auth source, or null when not ready. */
+  activeAppKeyHex(): null | string;
+  /** Returns a fresh caller-owned copy while ready; callers must clear their copy. */
+  copyActiveAppKeySeed(): Uint8Array;
+  /** Terminally stops admission, then waits for accepted work and SDK cleanup. */
+  dispose(): Promise<void>;
   getSnapshot(): AccessSnapshot;
+  /** Opens a generation-bound work handle only while ready. */
+  openOperationScope(): AccessOperationScope<Session>;
   subscribe(listener: () => void): () => void;
 }
 export interface SiaAccessAdapter<Session> {
@@ -310,7 +329,7 @@ export interface SiaAccessOperations<Session> {
   authorize(intent: AccessIntent): Promise<AuthorizeResult>;
   cancel(): void;
   continueWithoutSaving(): ContinueWithoutSavingResult;
-  disconnect(): void;
+  disconnect(): Promise<void>;
   forget(): Promise<ForgetResult>;
   generateRecoveryPhrase(): Promise<GeneratedRecoveryPhrase>;
   reconnect(): Promise<ReconnectResult>;
@@ -324,6 +343,8 @@ export interface SiaAccessOptions<Session> {
   readonly approvalTimeoutMs?: number;
   readonly credentials?: CredentialStore;
   readonly indexerUrl: string;
+  /** Observes detached SDK disposal failures without replacing a work failure. */
+  readonly onResourceError?: (error: unknown) => void;
   readonly onSubscriberError?: (error: unknown) => void;
 }
 export interface SiaApplication {

@@ -137,5 +137,5 @@ window.addEventListener("pagehide", (event) => {
   // A page in the back/forward cache can resume with the same controller.
   if (event.persisted) return;
   root.unmount();
-  access.dispose();
+  void access.dispose();
 });

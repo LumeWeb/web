@@ -46,6 +46,7 @@ try {
       "SaveRecoveryProgress",
       "createMemoryCredentialStore",
       "createSiaAccess",
+      "observeSiaAccess",
       "SessionUnavailableError",
     ].sort(),
   );
@@ -92,8 +93,20 @@ try {
   const unsubscribe = controller.subscribe(() => {
     notifications++;
   });
+  // This file runs as JavaScript and compiles as TypeScript; derive the empty
+  // array's element type from the enum without TypeScript-only syntax.
+  const observed = Object.values(access.AccessPhase).slice(0, 0);
+  const stop = access.observeSiaAccess(controller, (snapshot) => {
+    observed.push(snapshot.state.phase);
+  });
+  assert.deepEqual(observed, [access.AccessPhase.Disconnected]);
   controller.dispose();
   assert.equal(notifications, 1);
+  assert.deepEqual(observed, [
+    access.AccessPhase.Disconnected,
+    access.AccessPhase.Disposed,
+  ]);
+  stop();
   assert.equal(
     controller.getSnapshot().state.phase,
     access.AccessPhase.Disposed,

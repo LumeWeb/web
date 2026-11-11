@@ -105,7 +105,7 @@ for (const recovery of ["retry", "continue"] as const) {
             );
             try {
               await hold.started();
-              access.disconnect();
+              void access.disconnect();
               await assert.rejects(
                 access.withSession(async () => "forbidden"),
                 { code: "SIA_SESSION_UNAVAILABLE" },
@@ -129,7 +129,7 @@ for (const recovery of ["retry", "continue"] as const) {
               "missing-credentials",
             );
           } finally {
-            access.dispose();
+            void access.dispose();
           }
         });
         assert.equal(result.summary.cleanup, "clean");
@@ -195,7 +195,7 @@ void test(
             );
           }
         } finally {
-          access.dispose();
+          void access.dispose();
         }
       });
     } finally {

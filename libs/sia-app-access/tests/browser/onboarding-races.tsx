@@ -62,7 +62,7 @@ const rendering = new Promise<void>((resolve) => {
 /** The store commits its copy before cancellation can retire the new session. */
 async function establishAccount(cancel: boolean) {
   afterWrite = cancel ? () => original.access.cancel() : () => undefined;
-  original.access.disconnect();
+  void original.access.disconnect();
   await original.access.authorize(AccessIntent.Create);
   await original.access.submitRecoveryPhrase("second account phrase");
 }
@@ -193,8 +193,8 @@ createRoot(element).render(
 window.addEventListener(
   "pagehide",
   () => {
-    original.access.dispose();
-    replacement.access.dispose();
+    void original.access.dispose();
+    void replacement.access.dispose();
   },
   { once: true },
 );

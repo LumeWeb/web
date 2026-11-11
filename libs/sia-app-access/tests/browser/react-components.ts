@@ -16,7 +16,7 @@ const access: SiaAccess<TestSession> = {
     document.querySelector("[data-testid=disposals]")!.textContent = String(
       ++disposals,
     );
-    f.access.dispose();
+    return f.access.dispose();
   },
   reconnect() {
     if (this !== access) throw new Error("Controller receiver was lost");

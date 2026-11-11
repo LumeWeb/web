@@ -121,7 +121,7 @@ export function AccountApp<Session>({
           className="secondary"
           onClick={() => {
             setStatus("");
-            commands.disconnect();
+            void commands.disconnect();
           }}>
           Sign out
         </button>
@@ -209,7 +209,12 @@ export function AccountApp<Session>({
             ? "The connection wasn't approved. You can try again."
             : "We couldn't connect your account. Please try again."}
         </p>
-        <button onClick={() => commands.disconnect()}>Start again</button>
+        <button
+          onClick={() => {
+            void commands.disconnect();
+          }}>
+          Start again
+        </button>
       </>
     );
   } else if (state.phase === AccessPhase.Disposed) {

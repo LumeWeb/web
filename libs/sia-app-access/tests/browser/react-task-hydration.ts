@@ -107,7 +107,7 @@ async function correlation() {
     applicationValue === "edited by app",
     "unmount never resets application value",
   );
-  f.access.dispose();
+  void f.access.dispose();
   return "PASS";
 }
 async function run(kind: string, contextual: boolean) {
@@ -249,8 +249,8 @@ async function run(kind: string, contextual: boolean) {
     check(writes === 2, "only live retry wrote");
   }
   root.unmount();
-  server.access.dispose();
-  live.access.dispose();
+  void server.access.dispose();
+  void live.access.dispose();
   return "PASS";
 }
 Object.assign(window, { taskHydration: { correlation, run } });
@@ -381,8 +381,8 @@ async function replacement(action: string, contextual: boolean) {
     };
   } finally {
     root.unmount();
-    old.access.dispose();
-    next.access.dispose();
+    void old.access.dispose();
+    void next.access.dispose();
   }
 }
 Object.assign(window, { taskReplacement: { replacement } });
@@ -451,7 +451,7 @@ async function activation(contextual: boolean) {
     };
   } finally {
     root.unmount();
-    f.access.dispose();
+    void f.access.dispose();
   }
 }
 Object.assign(window, { taskActivation: { activation } });

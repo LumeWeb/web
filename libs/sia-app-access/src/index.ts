@@ -7,3 +7,8 @@ export type {
   CredentialStore,
   MemoryCredentialStore,
 } from "./credentials.ts";
+export { observeSiaAccess } from "./observation.ts";
+export type {
+  AccessObservationSource,
+  AccessSnapshotObserver,
+} from "./observation.ts";

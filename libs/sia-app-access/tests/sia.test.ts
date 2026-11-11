@@ -45,7 +45,7 @@ void test("retirement waits for pending approval and denies later calls", async 
   });
   const approval = connection.waitForApproval();
   await Promise.resolve();
-  connection.dispose();
+  void connection.dispose();
   assert.equal(events.includes("builder:free"), false);
   release();
   await approval;
@@ -65,7 +65,7 @@ void test("late registration transfers session ownership and export releases its
   });
   const registration = connection.register("valid phrase");
   await Promise.resolve();
-  connection.dispose();
+  void connection.dispose();
   assert.equal(events.includes("builder:free"), false);
   release();
   const resource = await registration;
@@ -117,7 +117,7 @@ void test("failed registration consumes and frees the connection once", async ()
     connection.register("valid phrase"),
     /Connection unavailable/,
   );
-  connection.dispose();
+  void connection.dispose();
   assert.equal(events.filter((event) => event === "builder:free").length, 1);
 });
 
@@ -144,7 +144,7 @@ void test("a pending phrase match blocks other calls and delays retirement", asy
     connection.register("valid phrase"),
     /Connection unavailable/,
   );
-  connection.dispose();
+  void connection.dispose();
   assert.equal(events.includes("builder:free"), false);
   pending.resolve();
   assert.equal(await match, true);

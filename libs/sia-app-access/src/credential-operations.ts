@@ -1,4 +1,4 @@
-/** Credential workflows preserve store order and separate session readiness from acknowledged saving. */
+/** Credential workflows keep session readiness separate from acknowledged saving. */
 import { AccessEvent } from "./access-machine.ts";
 import type { AccessMachine } from "./access-machine.ts";
 import type { AccessEnvironment } from "./access-environment.ts";
@@ -8,7 +8,7 @@ import type {
   CommandControl,
   CommandScope,
 } from "./command-scope.ts";
-import type { CredentialScope, CredentialStore } from "./credentials.ts";
+import type { CredentialStorage } from "./credential-queue.ts";
 import {
   AccessFailure,
   AccessOutcome,
@@ -27,14 +27,6 @@ import type {
   RetrySaveResult,
 } from "./access-types.ts";
 
-/** Scoped operations serialize mutations and check read admission at dispatch.
- * Writes own their input until settlement, then clear it even after rejection.
- */
-export interface CredentialStorage {
-  read(current: () => boolean): Promise<null | Uint8Array>;
-  remove(): Promise<void>;
-  write(bytes: Uint8Array): Promise<void>;
-}
 export type SavedAccess = AccessReady<CredentialConfirmation.Confirmed>;
 interface CredentialResources<Session> {
   exportAppKey(): Uint8Array;
@@ -145,14 +137,42 @@ export class CredentialOperations<Session> {
       op.fail(AccessFailure.CredentialsWrite, AccessRecovery.Save, true);
     }
   }
+  /** Native reconnect borrows a stored key until settlement, including rejection. */
+  private async reconnectWithStoredKey(
+    op: AccessCommand<RestoredAccess>,
+    bytes: unknown,
+  ): Promise<AccessSession<Session> | null | undefined> {
+    try {
+      if (!(bytes instanceof Uint8Array) || bytes.length !== 32) {
+        op.fail(AccessFailure.UnregisteredKey, AccessRecovery.Authorize);
+        return;
+      }
+      return await this.environment.adapter.reconnect(
+        this.environment.scope,
+        this.environment.application,
+        bytes,
+      );
+    } catch {
+      op.fail(AccessFailure.Connection, AccessRecovery.Reconnect);
+      return;
+    } finally {
+      // Detached views have no remaining bytes and reject fill().
+      if (bytes instanceof Uint8Array && bytes.byteLength > 0) bytes.fill(0);
+    }
+  }
   private async restore(op: AccessCommand<RestoredAccess>): Promise<void> {
     if (!op.current) return;
     // JavaScript stores can return values outside their declared contract.
     let bytes: unknown;
     try {
       bytes = await this.queue.read(() => op.current);
-    } catch {
-      op.fail(AccessFailure.CredentialsRead, AccessRecovery.Reconnect);
+    } catch (cause) {
+      op.fail(
+        AccessFailure.CredentialsRead,
+        AccessRecovery.Reconnect,
+        false,
+        cause,
+      );
       return;
     }
     if (!op.current) {
@@ -166,24 +186,7 @@ export class CredentialOperations<Session> {
       );
       return;
     }
-    let resource;
-    try {
-      if (!(bytes instanceof Uint8Array) || bytes.length !== 32) {
-        op.fail(AccessFailure.UnregisteredKey, AccessRecovery.Authorize);
-        return;
-      }
-      resource = await this.environment.adapter.reconnect(
-        this.environment.scope,
-        this.environment.application,
-        bytes,
-      );
-    } catch {
-      op.fail(AccessFailure.Connection, AccessRecovery.Reconnect);
-      return;
-    } finally {
-      // Detached views have no remaining bytes and reject fill().
-      if (bytes instanceof Uint8Array && bytes.byteLength > 0) bytes.fill(0);
-    }
+    const resource = await this.reconnectWithStoredKey(op, bytes);
     if (!op.current) {
       resource?.dispose();
       return;
@@ -200,38 +203,5 @@ export class CredentialOperations<Session> {
       },
       { type: AccessEvent.Restored },
     );
-  }
-}
-/** Once admitted, mutations keep their position even if their caller is cancelled. */
-export class CredentialQueue {
-  private tail = Promise.resolve();
-  constructor(
-    private readonly store: CredentialStore,
-    private readonly scope: CredentialScope,
-  ) {}
-  read(current: () => boolean): Promise<null | Uint8Array> {
-    return this.enqueue(() =>
-      current() ? this.store.read(this.scope) : Promise.resolve(null),
-    );
-  }
-  remove(): Promise<void> {
-    return this.enqueue(() => this.store.remove(this.scope));
-  }
-  write(bytes: Uint8Array): Promise<void> {
-    return this.enqueue(async () => {
-      try {
-        await this.store.write(this.scope, bytes);
-      } finally {
-        bytes.fill(0);
-      }
-    });
-  }
-  private enqueue<Value>(work: () => Promise<Value>): Promise<Value> {
-    const pending = this.tail.then(work);
-    this.tail = pending.then(
-      () => undefined,
-      () => undefined,
-    );
-    return pending;
   }
 }

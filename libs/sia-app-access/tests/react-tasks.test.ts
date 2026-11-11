@@ -36,7 +36,7 @@ void test("task hooks render no interaction effects on the server", (t) => {
     "<p>application markup</p>",
   );
   assert.equal(errors.mock.callCount(), 0);
-  access.dispose();
+  void access.dispose();
 });
 
 import { fixture } from "./helpers/core-fixture.ts";
@@ -70,7 +70,7 @@ void test("task SSR exposes Sia metadata without owning form values or errors", 
     ),
     "<p>create</p>",
   );
-  f.access.dispose();
+  void f.access.dispose();
 });
 void test("task SSR rejects a snapshot from a different credential scope", () => {
   const f = fixture();
@@ -85,7 +85,7 @@ void test("task SSR rejects a snapshot from a different credential scope", () =>
     return null;
   }
   assert.throws(() => renderToString(createElement(View)), /scope.*match/);
-  f.access.dispose();
+  void f.access.dispose();
 });
 
 import { AccessOutcome } from "@/index";
@@ -114,5 +114,5 @@ void test("server phrase task actions stay unavailable and expose no form manage
     "PhraseRequestStatus",
   ])
     assert.equal(removed in react, false);
-  f.access.dispose();
+  void f.access.dispose();
 });
