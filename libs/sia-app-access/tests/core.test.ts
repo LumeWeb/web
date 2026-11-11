@@ -68,7 +68,7 @@ void test("controller construction canonicalizes scope and rejects invalid confi
         TypeError,
       );
   } finally {
-    access.dispose();
+    void access.dispose();
   }
 });
 
@@ -96,7 +96,7 @@ void test("reconnect accepts a fresh handle for the same shared client", async (
       (await f.access.submitRecoveryPhrase("phrase")).kind,
       AccessOutcome.Ready,
     );
-    f.access.disconnect();
+    void f.access.disconnect();
     f.adapter.reconnect = async () => ({
       dispose() {
         restoredDisposed++;
@@ -107,7 +107,7 @@ void test("reconnect accepts a fresh handle for the same shared client", async (
     assert.equal((await f.access.reconnect()).kind, AccessOutcome.Ready);
     assert.equal(await f.access.withSession((sdk) => sdk.id), 7);
   } finally {
-    f.access.dispose();
+    void f.access.dispose();
   }
   assert.equal(f.counts().ended, 1);
   assert.equal(restoredDisposed, 1);
@@ -153,7 +153,7 @@ void test("reentrant observers cannot change the completed result and throwing o
   f.access.subscribe(() => {
     if (f.access.getSnapshot().state.phase === AccessPhase.Ready) {
       errors++;
-      f.access.disconnect();
+      void f.access.disconnect();
     }
   });
   await f.access.authorize(AccessIntent.Create);
@@ -222,7 +222,7 @@ void test("session work is admitted synchronously and holds ownership through di
     return hold.promise;
   });
   assert.equal(invoked, true);
-  f.access.dispose();
+  void f.access.dispose();
   assert.equal(f.counts().ended, 0);
   await assert.rejects(
     f.access.withSession(() => 0),
@@ -268,7 +268,7 @@ void test("disconnect during connection retirement releases the returned registr
   f.connection.dispose = () => {
     if (retired) return;
     retired = true;
-    f.access.disconnect();
+    void f.access.disconnect();
   };
   try {
     await f.access.authorize(AccessIntent.Create);
@@ -281,7 +281,7 @@ void test("disconnect during connection retirement releases the returned registr
     assert.equal(f.counts().ended, 1);
     assert.equal(f.counts().registrations, 1);
   } finally {
-    f.access.dispose();
+    void f.access.dispose();
   }
 });
 
@@ -330,7 +330,7 @@ for (const resourceName of ["connection", "session"]) {
       owned.dispose = () => {
         if (retired) return;
         retired = true;
-        dispose();
+        void dispose();
         f.access.cancel();
         replacement = f.access.authorize(AccessIntent.Create);
       };
@@ -355,7 +355,7 @@ for (const resourceName of ["connection", "session"]) {
       );
       assert.equal(removed, 0);
     } finally {
-      f.access.dispose();
+      void f.access.dispose();
     }
   });
 }
@@ -386,7 +386,7 @@ void test("forget coalesces a call made by the retiring session", async () => {
     assert.equal((await pending).kind, "removed");
     assert.equal(removed, 1);
   } finally {
-    f.access.dispose();
+    void f.access.dispose();
   }
 });
 
@@ -451,7 +451,7 @@ void test("reconnect coalesces and retains borrowed read bytes until late comple
   const p = f.access.reconnect();
   assert.equal(f.access.reconnect(), p);
   await drainMicrotasks();
-  f.access.disconnect();
+  void f.access.disconnect();
   assert.equal((await p).kind, "cancelled");
   assert.equal(supplied?.[0], 3);
   d.resolve(f.session);
@@ -546,6 +546,26 @@ void test("cancelling approval and validation prevents subsequent registration",
     assert.equal(f.counts().retired, 1);
   }
 });
+void test("cancelling after a valid phrase is published prevents registration", async () => {
+  const f = fixture();
+  await f.access.authorize(AccessIntent.Create);
+  const unsubscribe = f.access.subscribe(() => {
+    if (f.access.getSnapshot().state.phase === AccessPhase.Registering)
+      f.access.cancel();
+  });
+  try {
+    const result = await f.access.submitRecoveryPhrase("phrase");
+    assert.deepEqual(result, {
+      effects: { credentials: "none", registration: "none" },
+      kind: "cancelled",
+    });
+    assert.equal(f.counts().registrations, 0);
+    assert.equal(f.access.getSnapshot().state.phase, AccessPhase.Disconnected);
+  } finally {
+    unsubscribe();
+    await f.access.dispose();
+  }
+});
 void test("registration rejection is unknown and a save retry reports no earlier registration", async () => {
   const f = fixture();
   await f.access.authorize(AccessIntent.Create);
@@ -595,7 +615,7 @@ for (const { name, value } of [
       // Node's test runner reports detached-task rejections at the event-loop boundary.
       await new Promise<void>((resolve) => setImmediate(resolve));
     } finally {
-      f.access.dispose();
+      void f.access.dispose();
     }
   });
 }
@@ -617,7 +637,7 @@ void test("reconnect rejects a detached stored key without a cleanup rejection",
     assert.equal(result.failure, AccessFailure.UnregisteredKey);
     await new Promise<void>((resolve) => setImmediate(resolve));
   } finally {
-    f.access.dispose();
+    void f.access.dispose();
   }
 });
 
@@ -639,7 +659,7 @@ void test("cancelled reconnect ignores a malformed late read without a cleanup r
     await new Promise<void>((resolve) => setImmediate(resolve));
     assert.equal(f.access.getSnapshot().state.phase, AccessPhase.Disconnected);
   } finally {
-    f.access.dispose();
+    void f.access.dispose();
   }
 });
 
@@ -739,7 +759,7 @@ void test("save input is cleared only after the store settles and retry cancella
   const retry = f.access.retrySave();
   await drainMicrotasks();
   assert.equal(supplied?.[0], 9);
-  f.access.disconnect();
+  void f.access.disconnect();
   assert.deepEqual(await retry, {
     effects: { credentials: "write", registration: "none" },
     kind: "cancelled",
@@ -772,7 +792,7 @@ void test("subscriber errors reach the configured reporter and snapshots stay st
   assert.equal(reported, error);
   assert.ok(Object.isFrozen(g.getSnapshot()));
   assert.ok(Object.isFrozen(g.getSnapshot().state));
-  g.dispose();
+  void g.dispose();
 });
 void test("a subscriber added during notification starts on the next publication", async () => {
   const f = fixture();
@@ -785,17 +805,17 @@ void test("a subscriber added during notification starts on the next publication
   });
   await f.access.authorize(AccessIntent.Create);
   assert.deepEqual(phases, ["awaiting-approval", "recovery-phrase"]);
-  f.access.dispose();
+  void f.access.dispose();
 });
 
 void test("disposal publishes the terminal snapshot before removing observers", () => {
   const f = fixture();
   const phases: string[] = [];
   f.access.subscribe(() => phases.push(f.access.getSnapshot().state.phase));
-  f.access.dispose();
+  void f.access.dispose();
   assert.deepEqual(phases, ["disposed"]);
-  f.access.disconnect();
-  f.access.dispose();
+  void f.access.disconnect();
+  void f.access.dispose();
   assert.deepEqual(phases, ["disposed"]);
 });
 
@@ -806,7 +826,7 @@ void test("reentrant disposal publishes the terminal state without resuming an o
   f.access.subscribe(() => {
     const phase = f.access.getSnapshot().state.phase;
     first.push(phase);
-    if (phase === AccessPhase.RequestingApproval) f.access.dispose();
+    if (phase === AccessPhase.RequestingApproval) void f.access.dispose();
   });
   f.access.subscribe(() => second.push(f.access.getSnapshot().state.phase));
   const result = await f.access.authorize(AccessIntent.Create);
@@ -824,9 +844,9 @@ void test("ready cancel preserves admission and disposal denies every command", 
   f.access.cancel();
   assert.equal(f.access.getSnapshot(), ready);
   assert.equal(await f.access.withSession((s) => s.id), 7);
-  f.access.dispose();
+  void f.access.dispose();
   const snapshot = f.access.getSnapshot();
-  f.access.disconnect();
+  void f.access.disconnect();
   f.access.cancel();
   assert.equal(f.access.getSnapshot(), snapshot);
   for (const result of [
@@ -840,21 +860,23 @@ void test("ready cancel preserves admission and disposal denies every command", 
   ])
     assert.deepEqual(result, { kind: "unavailable" });
 });
-void test("a read failure is distinct from absence and generation failure carries no phrase", async () => {
+void test("a read failure returns its cause while generation failure carries no phrase", async () => {
+  const cause = Error("credentials");
   const f = fixture(
     credentialStore({
       async read() {
-        throw Error("credentials");
+        throw cause;
       },
     }),
   );
   assert.deepEqual(await f.access.reconnect(), {
+    cause,
     effects: { credentials: "none", registration: "none" },
     failure: "credentials-read",
     kind: "failed",
     recovery: "reconnect",
   });
-  f.access.disconnect();
+  void f.access.disconnect();
   f.adapter.generateRecoveryPhrase = async () => {
     throw Error("phrase");
   };
@@ -883,7 +905,7 @@ void test("a completed approval releases admission before an observer submits a 
     kind: "ready",
   });
   assert.equal(f.counts().registrations, 1);
-  f.access.dispose();
+  void f.access.dispose();
 });
 
 void test("a late begin cannot replace a newer approved connection", async () => {
@@ -915,7 +937,7 @@ void test("a late begin cannot replace a newer approved connection", async () =>
     credentials: "confirmed",
     kind: "ready",
   });
-  f.access.dispose();
+  void f.access.dispose();
 });
 
 void test("a save-failure observer can retry without changing the first command effects", async () => {
@@ -951,7 +973,7 @@ void test("a save-failure observer can retry without changing the first command 
   assert.ok("effects" in failed && Object.isFrozen(failed.effects));
   assert.equal(writes, 2);
   assert.equal(f.counts().registrations, 1);
-  f.access.dispose();
+  void f.access.dispose();
 });
 
 void test("a reconnect cancelled behind a pending write never reads credentials at dispatch", async () => {
@@ -973,7 +995,7 @@ void test("a reconnect cancelled behind a pending write never reads credentials 
   await f.access.authorize(AccessIntent.Create);
   const save = f.access.submitRecoveryPhrase("phrase");
   await started.promise;
-  f.access.disconnect();
+  void f.access.disconnect();
   assert.deepEqual(await save, {
     effects: { credentials: "write", registration: "registered" },
     kind: "cancelled",
@@ -988,7 +1010,7 @@ void test("a reconnect cancelled behind a pending write never reads credentials 
   await drainMicrotasks();
   assert.equal(reads, 0);
   assert.equal(f.access.getSnapshot().state.phase, AccessPhase.Disconnected);
-  f.access.dispose();
+  void f.access.dispose();
 });
 
 for (const timeout of [2147483647, 2147483648, 4294967295, Number.MAX_VALUE]) {

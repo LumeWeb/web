@@ -2,6 +2,7 @@
 import { AccessEvent } from "./access-machine.ts";
 import type { AccessMachine } from "./access-machine.ts";
 import type { AccessEnvironment } from "./access-environment.ts";
+import { waitForApproval } from "./approval-wait.ts";
 import { unavailable } from "./command-scope.ts";
 import type {
   AccessCommand,
@@ -28,7 +29,10 @@ import type {
 } from "./access-types.ts";
 
 interface AuthorizationResources<Session> {
+  admitAcquisition(): (cleanup?: Promise<void>) => void;
   readonly connection: AccessConnection<Session>;
+  disposeConnection(connection: AccessConnection<Session>): Promise<void>;
+  disposeSession(resource: AccessSession<Session>): Promise<void>;
   installConnection(connection: AccessConnection<Session>): void;
   installSession(resource: AccessSession<Session>): void;
   retireConnection(): void;
@@ -38,7 +42,6 @@ interface CredentialSaving {
 }
 type PhraseResult = AccessInvalidPhrase | AccessPhraseMismatch | SavedAccess;
 export class Authorization<Session> {
-  private readonly timeoutMarker = new Error("Approval timeout");
   constructor(
     private readonly environment: AccessEnvironment<Session>,
     private readonly machine: AccessMachine,
@@ -67,7 +70,8 @@ export class Authorization<Session> {
     void this.register(op, owned, phrase);
     return op.promise;
   }
-  private async register(
+  /** Invalid input stays on the approved connection instead of starting registration. */
+  private async checkPhrase(
     op: AccessCommand<PhraseResult>,
     owned: AccessConnection<Session>,
     phrase: string,
@@ -103,34 +107,48 @@ export class Authorization<Session> {
       return;
     }
     this.publish();
+  }
+  private async register(
+    op: AccessCommand<PhraseResult>,
+    owned: AccessConnection<Session>,
+    phrase: string,
+  ): Promise<void> {
+    await this.checkPhrase(op, owned, phrase);
     if (!op.current) return;
     op.registrationEffect = RegistrationEffect.Unknown;
+    const finishAcquisition = this.resources.admitAcquisition();
     let resource: AccessSession<Session>;
     try {
       resource = await owned.register(phrase);
     } catch {
+      finishAcquisition();
       op.fail(AccessFailure.Registration, AccessRecovery.Authorize);
       return;
     }
-    if (!op.current) {
-      resource.dispose();
-      return;
+    try {
+      if (!op.current) {
+        finishAcquisition(this.resources.disposeSession(resource));
+        return;
+      }
+      op.registrationEffect = RegistrationEffect.Registered;
+      this.resources.retireConnection();
+      // Connection disposal may reenter the controller and cancel this registration.
+      if (!op.current) {
+        finishAcquisition(this.resources.disposeSession(resource));
+        return;
+      }
+      this.resources.installSession(resource);
+      this.machine.send({ type: AccessEvent.Registered });
+    } finally {
+      finishAcquisition();
     }
-    op.registrationEffect = RegistrationEffect.Registered;
-    this.resources.retireConnection();
-    // Connection disposal may reenter the controller and cancel this registration.
-    if (!op.current) {
-      resource.dispose();
-      return;
-    }
-    this.resources.installSession(resource);
-    this.machine.send({ type: AccessEvent.Registered });
     await this.credentials.save(op);
   }
   private async requestApproval(
     op: AccessCommand<AccessApproved>,
   ): Promise<void> {
     if (!op.current) return;
+    const finishAcquisition = this.resources.admitAcquisition();
     let owned: AccessConnection<Session>;
     try {
       owned = await this.environment.adapter.begin(
@@ -138,14 +156,19 @@ export class Authorization<Session> {
         this.environment.application,
       );
     } catch {
+      finishAcquisition();
       op.fail(AccessFailure.Connection, AccessRecovery.Authorize);
       return;
     }
     if (!op.current) {
-      owned.dispose();
+      finishAcquisition(this.resources.disposeConnection(owned));
       return;
     }
-    this.resources.installConnection(owned);
+    try {
+      this.resources.installConnection(owned);
+    } finally {
+      finishAcquisition();
+    }
     try {
       validateApprovalUrl(owned.approvalUrl);
     } catch {
@@ -158,40 +181,23 @@ export class Authorization<Session> {
     });
     this.publish();
     if (!op.current) return;
-    let timer: ReturnType<typeof setTimeout> | undefined;
     try {
-      await Promise.race([
+      const outcome = await waitForApproval(
         owned.waitForApproval(),
         op.promise,
-        new Promise<never>((_resolve, reject) => {
-          // Native timers overflow above the signed 32-bit delay limit.
-          let remaining = this.environment.approvalTimeoutMs;
-          const schedule = () => {
-            const delay = Math.min(remaining, 2147483647);
-            timer = setTimeout(() => {
-              remaining -= delay;
-              if (remaining > 0) schedule();
-              else reject(this.timeoutMarker);
-            }, delay);
-          };
-          schedule();
-        }),
-      ]);
-      if (op.current)
+        this.environment.approvalTimeoutMs,
+      );
+      if (outcome === "approved" && op.current)
         op.finish(
           { kind: AccessOutcome.Approved },
           { type: AccessEvent.Approved },
         );
-    } catch (error) {
-      op.fail(
-        error === this.timeoutMarker
-          ? AccessFailure.ApprovalTimeout
-          : AccessFailure.Approval,
-        AccessRecovery.Authorize,
-      );
-    } finally {
-      if (timer !== undefined) clearTimeout(timer);
+      if (outcome !== "timed-out") return;
+    } catch {
+      op.fail(AccessFailure.Approval, AccessRecovery.Authorize);
+      return;
     }
+    op.fail(AccessFailure.ApprovalTimeout, AccessRecovery.Authorize);
   }
 }
 function validateApprovalUrl(value: string): void {

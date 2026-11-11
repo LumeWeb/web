@@ -16,7 +16,7 @@ const hooks = registerHooks({
     return next(specifier, context);
   },
 });
-const { createSiaAdapter } = await import("@/sia");
+const { createSiaAccess, createSiaAdapter } = await import("@/sia");
 const scope = { appId: "a".repeat(64), indexerUrl: "https://indexer.test/" };
 const application = {
   appId: scope.appId,
@@ -33,6 +33,34 @@ void test("validation separates invalid input from initialization failure", asyn
   assert.equal(await adapter.validateRecoveryPhrase("bad"), "invalid");
   assert.equal(await adapter.validateRecoveryPhrase("valid phrase"), "valid");
 });
+void test("the Sia factory uses the released adapter when none is supplied", async () => {
+  configure();
+  const access = createSiaAccess({ application, indexerUrl: scope.indexerUrl });
+  assert.deepEqual(await access.generateRecoveryPhrase(), {
+    kind: "generated",
+    phrase: "valid phrase",
+  });
+  await access.dispose();
+});
+void test("the Sia factory accepts an explicit adapter", async () => {
+  configure();
+  const adapter = {
+    ...createSiaAdapter(),
+    generateRecoveryPhrase: async () => "override phrase",
+  };
+  const access = createSiaAccess({
+    adapter,
+    application,
+    indexerUrl: scope.indexerUrl,
+  });
+  assert.deepEqual(await access.generateRecoveryPhrase(), {
+    kind: "generated",
+    phrase: "override phrase",
+  });
+  assert.equal(events.includes("init"), false);
+  await access.dispose();
+});
+
 void test("retirement waits for pending approval and denies later calls", async () => {
   configure();
   const connection = await createSiaAdapter().begin(scope, application);
@@ -45,13 +73,38 @@ void test("retirement waits for pending approval and denies later calls", async 
   });
   const approval = connection.waitForApproval();
   await Promise.resolve();
-  connection.dispose();
+  const cleanup = Promise.resolve(connection.dispose());
+  let closed = false;
+  void cleanup.then(() => {
+    closed = true;
+  });
+  await new Promise<void>((resolve) => setImmediate(resolve));
+  assert.equal(closed, false);
   assert.equal(events.includes("builder:free"), false);
   release();
   await approval;
+  await cleanup;
+  assert.equal(closed, true);
   assert.equal(events.filter((e) => e === "builder:free").length, 1);
   await assert.rejects(connection.register("valid phrase"));
 });
+void test("repeated retirement shares one drain and frees the builder once", async () => {
+  configure();
+  const connection = await createSiaAdapter().begin(scope, application);
+  const finish = deferred<void>();
+  configure({ pending: () => finish.promise });
+  const waiting = connection.waitForApproval();
+  await Promise.resolve();
+  const first = connection.dispose();
+  const second = connection.dispose();
+  assert.equal(first, second);
+  assert.equal(events.includes("builder:free"), false);
+  finish.resolve();
+  await waiting;
+  await first;
+  assert.equal(events.filter((event) => event === "builder:free").length, 1);
+});
+
 void test("late registration transfers session ownership and export releases its temporary key", async () => {
   configure();
   const connection = await createSiaAdapter().begin(scope, application);
@@ -65,10 +118,11 @@ void test("late registration transfers session ownership and export releases its
   });
   const registration = connection.register("valid phrase");
   await Promise.resolve();
-  connection.dispose();
+  const cleanup = connection.dispose();
   assert.equal(events.includes("builder:free"), false);
   release();
   const resource = await registration;
+  await cleanup;
   assert.equal(events.includes("sdk:free"), false);
   assert.deepEqual(resource.exportAppKey(), new Uint8Array(32).fill(7));
   assert.equal(events.filter((e) => e === "key:free").length, 1);
@@ -117,7 +171,50 @@ void test("failed registration consumes and frees the connection once", async ()
     connection.register("valid phrase"),
     /Connection unavailable/,
   );
-  connection.dispose();
+  await connection.dispose();
+  assert.equal(events.filter((event) => event === "builder:free").length, 1);
+});
+
+void test("registration keeps its failure when builder cleanup fails", async () => {
+  configure();
+  const connection = await createSiaAdapter().begin(scope, application);
+  await connection.waitForApproval();
+  const workFailure = new Error("registration failed");
+  const cleanupFailure = new Error("builder cleanup failed");
+  configure({
+    builderFreeError: cleanupFailure,
+    pending: () => Promise.reject(workFailure),
+  });
+  await assert.rejects(
+    connection.register("valid phrase"),
+    (error: unknown) => error === workFailure,
+  );
+  await assert.rejects(
+    Promise.resolve(connection.dispose()),
+    (error: unknown) => error === cleanupFailure,
+  );
+  assert.equal(events.filter((event) => event === "builder:free").length, 1);
+});
+
+void test("registration preserves a non-Error failure when cleanup also fails", async () => {
+  configure();
+  const connection = await createSiaAdapter().begin(scope, application);
+  await connection.waitForApproval();
+  const failure = { cause: "registration unavailable" };
+  const cleanup = new Error("builder cleanup failed");
+  configure({
+    builderFreeError: cleanup,
+    // oxlint-disable-next-line typescript/prefer-promise-reject-errors
+    pending: () => Promise.reject(failure),
+  });
+  await assert.rejects(
+    connection.register("valid phrase"),
+    (error: unknown) => error === failure,
+  );
+  await assert.rejects(
+    Promise.resolve(connection.dispose()),
+    (error: unknown) => error === cleanup,
+  );
   assert.equal(events.filter((event) => event === "builder:free").length, 1);
 });
 
@@ -144,10 +241,11 @@ void test("a pending phrase match blocks other calls and delays retirement", asy
     connection.register("valid phrase"),
     /Connection unavailable/,
   );
-  connection.dispose();
+  const cleanup = connection.dispose();
   assert.equal(events.includes("builder:free"), false);
   pending.resolve();
   assert.equal(await match, true);
+  await cleanup;
   assert.equal(events.filter((event) => event === "builder:free").length, 1);
   await assert.rejects(
     connection.matchesExistingAppKey("valid phrase"),

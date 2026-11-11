@@ -157,7 +157,7 @@ void test("direct and context selectors use the supplied server snapshot without
     /restoring/,
   );
   assert.equal(access.getSnapshot().state.phase, "disconnected");
-  access.dispose();
+  void access.dispose();
 });
 
 void test("context observation outside its provider reports the missing owner", () => {
@@ -215,5 +215,5 @@ void test("SSR command bindings retain the controller receiver", async () => {
   );
   await Promise.all(pending);
   assert.equal(cancelled, true);
-  base.dispose();
+  void base.dispose();
 });

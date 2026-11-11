@@ -46,6 +46,7 @@ try {
       "SaveRecoveryProgress",
       "createMemoryCredentialStore",
       "createSiaAccess",
+      "observeSiaAccess",
       "SessionUnavailableError",
     ].sort(),
   );
@@ -92,8 +93,20 @@ try {
   const unsubscribe = controller.subscribe(() => {
     notifications++;
   });
+  // This file runs as JavaScript and compiles as TypeScript; derive the empty
+  // array's element type from the enum without TypeScript-only syntax.
+  const observed = Object.values(access.AccessPhase).slice(0, 0);
+  const stop = access.observeSiaAccess(controller, (snapshot) => {
+    observed.push(snapshot.state.phase);
+  });
+  assert.deepEqual(observed, [access.AccessPhase.Disconnected]);
   controller.dispose();
   assert.equal(notifications, 1);
+  assert.deepEqual(observed, [
+    access.AccessPhase.Disconnected,
+    access.AccessPhase.Disposed,
+  ]);
+  stop();
   assert.equal(
     controller.getSnapshot().state.phase,
     access.AccessPhase.Disposed,
@@ -111,7 +124,22 @@ try {
   controller.dispose();
   assert.equal(notifications, 1);
   console.log("Packed controller consumer assertions completed");
-  const { createSiaAdapter } = await import("@lumeweb/sia-app-access/sia");
+  const { createSiaAccess: createSdkAccess, createSiaAdapter } =
+    await import("@lumeweb/sia-app-access/sia");
+  const defaultController = createSdkAccess({
+    application: {
+      appId: "a".repeat(64),
+      description: "",
+      name: "Packed consumer",
+      serviceUrl: "https://app.example/",
+    },
+    indexerUrl: "https://indexer.example/",
+  });
+  assert.equal(
+    defaultController.getSnapshot().state.phase,
+    access.AccessPhase.Disconnected,
+  );
+  await defaultController.dispose();
   const adapter = createSiaAdapter();
   assert.deepEqual(Object.keys(adapter).sort(), [
     "begin",

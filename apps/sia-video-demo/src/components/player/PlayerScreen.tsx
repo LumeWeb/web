@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { useStore } from "zustand";
-import { useAuthStore } from "../../stores/auth";
+import {
+  copyDemoActiveAppKeySeed,
+  demoAccount,
+  useDemoAccountSnapshot,
+} from "../../stores/auth";
+import { demoSettingsStore } from "../../stores/authSettings";
 import {
   autoplayIntentForPreselection,
   autoplayIntentForRowToggle,
@@ -48,8 +53,8 @@ export const LOGOUT_LABEL = "Log out";
  * consumes. The mode panels are presentational and report selection changes
  * up through callbacks. The union and selection state carry only public
  * fetch/source data plus supplier callbacks, never plaintext seeds (the
- * shared armed identity is a SHA-256 digest; seeds stay in the auth store as
- * callbacks). Clearing the sharing key flips the mode to publish, which drops
+ * shared armed identity is a SHA-256 digest; the sharing seed stays in the auth
+ * store and access supplies fresh app-key bytes). Clearing the sharing key flips the mode to publish, which drops
  * the shared selection so a stale key can never quietly re-arm.
  *
  * A separately-hoisted best-effort autoplay intent is armed ONLY by the two
@@ -59,15 +64,14 @@ export const LOGOUT_LABEL = "Log out";
  * UserPlayBridge.
  */
 export function PlayerScreen() {
+  const activeSessionId = useDemoAccountSnapshot()?.activeSessionId ?? null;
   const clearSharingKeySeed = useStore(
-    useAuthStore,
+    demoSettingsStore,
     (s) => s.clearSharingKeySeed,
   );
-  const indexerUrl = useStore(useAuthStore, (s) => s.indexerUrl);
-  const logout = useStore(useAuthStore, (s) => s.logout);
-  const objectKey = useStore(useAuthStore, (s) => s.objectKey);
-  const sharingKeyHex = useStore(useAuthStore, (s) => s.sharingKeyHex);
-  const userKeyHex = useStore(useAuthStore, (s) => s.userKeyHex);
+  const indexerUrl = useStore(demoSettingsStore, (s) => s.indexerUrl);
+  const objectKey = useStore(demoSettingsStore, (s) => s.objectKey);
+  const sharingKeyHex = useStore(demoSettingsStore, (s) => s.sharingKeyHex);
 
   const mode: PlayerMode = sharingKeyHex ? "shared" : "publish";
 
@@ -87,8 +91,13 @@ export function PlayerScreen() {
   }, [mode]);
 
   const publishSuppliersValue = useMemo(
-    () => publishSuppliers({ appKeyHex: userKeyHex || null }),
-    [userKeyHex],
+    () =>
+      publishSuppliers({
+        getAppKeySeed: activeSessionId
+          ? () => copyDemoActiveAppKeySeed(activeSessionId)
+          : null,
+      }),
+    [activeSessionId],
   );
   const sharedSuppliersValue = useMemo(
     () => sharedSuppliers({ sharingKeyHex }),
@@ -150,8 +159,11 @@ export function PlayerScreen() {
   // request when the current source changes.
   const armedIdentity = useMemo(() => {
     if (selectedSource === null) return null;
-    return siaVideoMountReloadKey(selectedSource, { indexerUrl });
-  }, [indexerUrl, selectedSource]);
+    return siaVideoMountReloadKey(selectedSource, {
+      activeSessionId,
+      indexerUrl,
+    });
+  }, [activeSessionId, indexerUrl, selectedSource]);
 
   // A different armed source (or unarming) starts a fresh opening: drop any
   // pending play request so the new source never inherits the old one.
@@ -233,7 +245,7 @@ export function PlayerScreen() {
         <div className="ml-auto flex items-center gap-2">
           <button
             className="px-2.5 py-[5px] text-xs"
-            onClick={sharingKeyHex ? clearSharingKeySeed : logout}
+            onClick={sharingKeyHex ? clearSharingKeySeed : demoAccount.logout}
             type="button">
             {topBarActionLabel(sharingKeyHex)}
           </button>
@@ -269,8 +281,11 @@ export function PlayerScreen() {
         onClick={() => {
           const started = facts?.playback.started ?? false;
           if (
-            selectedSource !== null && !started && !playRequested &&
-            !failedOpening && !facts?.error.present
+            selectedSource !== null &&
+            !started &&
+            !playRequested &&
+            !failedOpening &&
+            !facts?.error.present
           ) {
             setPlayRequested(true);
           }
@@ -278,6 +293,7 @@ export function PlayerScreen() {
         {selectedSource ? (
           <>
             <SiaVideoMount
+              activeSessionId={activeSessionId}
               autoplayPending={autoplayPending}
               indexerUrl={indexerUrl}
               onAutoplayConsumed={consumeAutoplayIntent}

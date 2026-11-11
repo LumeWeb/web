@@ -1,12 +1,19 @@
+import { AccessFailure, AccessPhase } from "@lumeweb/sia-app-access";
+import type { AccessInteractionSnapshot } from "@lumeweb/sia-app-access";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { AuthState } from "./auth";
+import { selectAuthStep } from "../components/auth/authFlow";
+import type { DemoSettingsState } from "./authSettings";
 
 const backend = vi.hoisted(() => ({
   connectAppKey: vi.fn(),
   initSia: vi.fn(),
   openAuthRequest: vi.fn(),
 }));
-vi.mock("../lib/storageBackend", () => ({
+vi.mock(
+  "@lumeweb/sia-app-access/sia",
+  async () => import("../../tests/playback/accessAdapter"),
+);
+vi.mock("../../tests/playback/backend", () => ({
   connectAppKey: backend.connectAppKey,
   openAuthRequest: backend.openAuthRequest,
 }));
@@ -70,10 +77,21 @@ function stubWindow(hash = ""): {
 
 let storage: Storage;
 
-/** Loads the store module fresh so its boot-time fragment ingest sees current globals. */
+let accountSnapshot: () => AccessInteractionSnapshot | null = () => null;
+let demoAccount: typeof import("./auth").demoAccount;
+function accountStep() {
+  return selectAuthStep({ sharingKeyHex: null, snapshot: accountSnapshot() });
+}
+
+/** Fresh settings import reads the test's URL fragment before the first render. */
 async function importStore() {
   vi.resetModules();
-  return import("./auth");
+  const module = await import("./auth");
+  const { demoSettingsStore, ingestSharingFragment } =
+    await import("./authSettings");
+  accountSnapshot = module.currentDemoAccountSnapshot;
+  demoAccount = module.demoAccount;
+  return { ...module, demoSettingsStore, ingestSharingFragment };
 }
 
 beforeEach(() => {
@@ -95,28 +113,28 @@ afterEach(() => {
 describe("boot-time share-fragment ingest", () => {
   it("applies a #sharing_key seed, persists it, and canonicalizes the fragment", async () => {
     const { history } = stubWindow(`#sharing_key=${SEED.toUpperCase()}`);
-    const { useAuthStore } = await importStore();
+    const { demoSettingsStore } = await importStore();
 
-    expect(useAuthStore.getState().sharingKeyHex).toBe(SEED);
+    expect(demoSettingsStore.getState().sharingKeyHex).toBe(SEED);
     expect(history.replaceState).toHaveBeenCalledWith(
       null,
       "",
       `#sharing_key=${SEED}`,
     );
     const stored = JSON.parse(storage.getItem(AUTH_STORAGE_KEY)!) as {
-      state: Partial<AuthState>;
+      state: Partial<DemoSettingsState>;
     };
     expect(stored.state.sharingKeyHex).toBe(SEED);
   });
 
   it("stashes a one-shot object key and keeps it transient (not persisted)", async () => {
     stubWindow(`#sharing_key=${SEED}&object=${OBJECT}`);
-    const { useAuthStore } = await importStore();
+    const { demoSettingsStore } = await importStore();
 
-    const state = useAuthStore.getState();
+    const state = demoSettingsStore.getState();
     expect(state.objectKey).toBe(OBJECT);
     const stored = JSON.parse(storage.getItem(AUTH_STORAGE_KEY)!) as {
-      state: Partial<AuthState>;
+      state: Partial<DemoSettingsState>;
     };
     expect(stored.state.objectKey).toBeUndefined();
   });
@@ -134,57 +152,58 @@ describe("boot-time share-fragment ingest", () => {
 
   it("ignores a malformed seed fragment instead of arming the player", async () => {
     const { history } = stubWindow("#sharing_key=nothex");
-    const { useAuthStore } = await importStore();
+    const { demoSettingsStore } = await importStore();
 
-    expect(useAuthStore.getState().sharingKeyHex).toBeNull();
+    expect(demoSettingsStore.getState().sharingKeyHex).toBeNull();
     expect(history.replaceState).not.toHaveBeenCalled();
   });
 
   it("re-ingests on a later hashchange via the exported handler", async () => {
     const { location } = stubWindow("");
-    const { ingestSharingFragment: ingest, useAuthStore } = await importStore();
-    expect(useAuthStore.getState().sharingKeyHex).toBeNull();
+    const { demoSettingsStore, ingestSharingFragment: ingest } =
+      await importStore();
+    expect(demoSettingsStore.getState().sharingKeyHex).toBeNull();
 
     location.hash = `#sharing_key=${SEED}`;
     ingest();
-    expect(useAuthStore.getState().sharingKeyHex).toBe(SEED);
+    expect(demoSettingsStore.getState().sharingKeyHex).toBe(SEED);
   });
 });
 
 describe("setSharingKeySeed (manual paste)", () => {
   it("validates and persists a raw pasted seed", async () => {
     stubWindow("");
-    const { useAuthStore } = await importStore();
-    useAuthStore.getState().setSharingKeySeed(SEED.toUpperCase());
+    const { demoSettingsStore } = await importStore();
+    demoSettingsStore.getState().setSharingKeySeed(SEED.toUpperCase());
 
-    const state = useAuthStore.getState();
+    const state = demoSettingsStore.getState();
     expect(state.sharingKeyHex).toBe(SEED);
     expect(state.sharingError).toBeNull();
   });
 
   it("reports an inline error for an invalid paste and leaves the seed unset", async () => {
     stubWindow("");
-    const { useAuthStore } = await importStore();
-    useAuthStore.getState().setSharingKeySeed("nope");
+    const { demoSettingsStore } = await importStore();
+    demoSettingsStore.getState().setSharingKeySeed("nope");
 
-    const state = useAuthStore.getState();
+    const state = demoSettingsStore.getState();
     expect(state.sharingKeyHex).toBeNull();
     expect(state.sharingError).toContain("valid sharing key");
   });
 
   it("clears the seed (and its object key + error) on clearSharingKeySeed", async () => {
     const { history } = stubWindow("");
-    const { useAuthStore } = await importStore();
-    useAuthStore.getState().setSharingKeySeed(SEED);
-    useAuthStore.getState().setObjectKey(OBJECT);
-    useAuthStore.getState().clearSharingKeySeed();
+    const { demoSettingsStore } = await importStore();
+    demoSettingsStore.getState().setSharingKeySeed(SEED);
+    demoSettingsStore.getState().setObjectKey(OBJECT);
+    demoSettingsStore.getState().clearSharingKeySeed();
 
     expect(history.replaceState).toHaveBeenLastCalledWith(
       null,
       "",
       "/watch?mode=demo",
     );
-    const state = useAuthStore.getState();
+    const state = demoSettingsStore.getState();
     expect(state.sharingKeyHex).toBeNull();
     expect(state.objectKey).toBe("");
     expect(state.sharingError).toBeNull();
@@ -198,8 +217,8 @@ describe("persist migration", () => {
       AUTH_STORAGE_KEY,
       JSON.stringify({ state: { sharingKeySeed: SEED }, version: 1 }),
     );
-    const { useAuthStore } = await importStore();
-    expect(useAuthStore.getState().sharingKeyHex).toBe(SEED);
+    const { demoSettingsStore } = await importStore();
+    expect(demoSettingsStore.getState().sharingKeyHex).toBe(SEED);
   });
 
   it("restores a version 2 saved account key for reconnect", async () => {
@@ -215,9 +234,9 @@ describe("persist migration", () => {
         version: 2,
       }),
     );
-    const { useAuthStore } = await importStore();
-    expect(useAuthStore.getState().savedUserKeyHex).toBe(SEED);
-    expect(useAuthStore.getState().userKeyHex).toBe(SEED);
+    const { demoSettingsStore } = await importStore();
+    expect(demoSettingsStore.getState().savedUserKeyHex).toBe(SEED);
+    expect("userKeyHex" in demoSettingsStore.getState()).toBe(false);
   });
 
   it("restores the saved account key from a current-version payload", async () => {
@@ -233,70 +252,168 @@ describe("persist migration", () => {
         version: 3,
       }),
     );
-    const { useAuthStore } = await importStore();
-    expect(useAuthStore.getState().userKeyHex).toBe(SEED);
-    expect(useAuthStore.getState().savedUserKeyHex).toBe(SEED);
+    const { demoSettingsStore } = await importStore();
+    expect(demoSettingsStore.getState().savedUserKeyHex).toBe(SEED);
+    expect("userKeyHex" in demoSettingsStore.getState()).toBe(false);
   });
 
   it("starts disconnected with no sharing key when nothing was persisted", async () => {
     stubWindow("");
-    const { useAuthStore } = await importStore();
-    const state = useAuthStore.getState();
+    const { demoSettingsStore } = await importStore();
+    const state = demoSettingsStore.getState();
     expect(state.sharingKeyHex).toBeNull();
-    expect(state.userKeyHex).toBe("");
-    expect(state.status).toBe("disconnected");
+    expect(state.savedUserKeyHex).toBe("");
+    expect(accountStep()).toBe("gate");
   });
 });
 
 describe("reconnect", () => {
-  it("skips the reconnect when the status is already non-disconnected", async () => {
+  it("skips a second reconnect once account access is ready", async () => {
     stubWindow("");
-    const { useAuthStore } = await importStore();
-    useAuthStore.setState({
-      savedUserKeyHex: SEED,
-      status: "connected",
-      userKeyHex: SEED,
-    });
+    backend.connectAppKey.mockResolvedValue({ free: vi.fn() });
+    const { demoSettingsStore } = await importStore();
+    demoSettingsStore.setState({ savedUserKeyHex: SEED });
 
-    await useAuthStore.getState().reconnect();
+    await demoAccount.reconnect();
+    await demoAccount.reconnect();
 
-    const state = useAuthStore.getState();
-    expect(state.status).toBe("connected");
-    expect(state.userKeyHex).toBe(SEED);
+    expect(backend.connectAppKey).toHaveBeenCalledTimes(1);
+    expect(accountStep()).toBe("player");
+    expect(demoSettingsStore.getState().savedUserKeyHex).toBe(SEED);
   });
 
   it("an explicit saved-account reconnect replaces an account-entry error", async () => {
     stubWindow("");
-    const { useAuthStore } = await importStore();
-    useAuthStore.setState({
+    const { demoSettingsStore } = await importStore();
+    demoSettingsStore.setState({
       accountError: "Could not register the account. Start again.",
       savedUserKeyHex: SEED,
-      status: "disconnected",
-      userKeyHex: SEED,
     });
 
-    await useAuthStore.getState().reconnect();
+    await demoAccount.reconnect();
 
     expect(backend.connectAppKey).toHaveBeenCalledTimes(1);
-    expect(useAuthStore.getState().accountError).toBeNull();
-    expect(useAuthStore.getState().reconnectError).not.toBeNull();
-    expect(useAuthStore.getState().savedUserKeyHex).toBe(SEED);
+    expect(demoSettingsStore.getState().accountError).toBeNull();
+    expect(demoSettingsStore.getState().reconnectError).not.toBeNull();
+    expect(demoSettingsStore.getState().savedUserKeyHex).toBe(SEED);
   });
 
-  it("preserves userKeyHex on a transient reconnect failure", async () => {
+  it("an old player's seed supplier cannot read a replacement account", async () => {
     stubWindow("");
-    const { useAuthStore } = await importStore();
-    useAuthStore.setState({
-      savedUserKeyHex: SEED,
-      status: "disconnected",
-      userKeyHex: SEED,
+    backend.connectAppKey.mockImplementation(() =>
+      Promise.resolve({
+        appKey: () => ({
+          export: () => Uint8Array.from(Buffer.from(SEED, "hex")),
+          free: vi.fn(),
+        }),
+        free: vi.fn(),
+      }),
+    );
+    const { copyDemoActiveAppKeySeed, demoSettingsStore } = await importStore();
+    demoSettingsStore.setState({ savedUserKeyHex: SEED });
+    await demoAccount.reconnect();
+    const oldSessionId = accountSnapshot()?.activeSessionId ?? null;
+    expect(oldSessionId).toMatch(/^access:/);
+    demoAccount.setIndexerUrl("https://second.test");
+    await demoAccount.reconnect();
+    const newSessionId = accountSnapshot()?.activeSessionId ?? null;
+
+    expect(newSessionId).toMatch(/^access:/);
+    expect(newSessionId).not.toBe(oldSessionId);
+    expect(() => copyDemoActiveAppKeySeed(oldSessionId)).toThrow(
+      "Session unavailable",
+    );
+    expect(copyDemoActiveAppKeySeed(newSessionId)).toEqual(
+      Uint8Array.from(Buffer.from(SEED, "hex")),
+    );
+    expect(demoSettingsStore.getState().savedUserKeyHex).toBe(SEED);
+  });
+
+  it("a failing account observer cannot block replacement notifications or SDK cleanup", async () => {
+    stubWindow("");
+    const free = vi.fn();
+    backend.connectAppKey.mockResolvedValue({ free });
+    const {
+      currentDemoAccountSnapshot,
+      demoSettingsStore,
+      subscribeDemoAccount,
+    } = await importStore();
+    demoSettingsStore.setState({ savedUserKeyHex: SEED });
+    await demoAccount.reconnect();
+    const observed: (AccessPhase | null)[] = [];
+    const stopFailing = subscribeDemoAccount(() => {
+      throw new Error(SEED);
     });
+    const stopObserving = subscribeDemoAccount(() => {
+      observed.push(currentDemoAccountSnapshot()?.state.phase ?? null);
+    });
+    try {
+      expect(() =>
+        demoAccount.setIndexerUrl("https://second.test"),
+      ).not.toThrow();
+      expect(observed).toEqual([null]);
+      await vi.waitFor(() => expect(free).toHaveBeenCalledTimes(1));
+      const { useEventLogStore } = await import("./eventLog");
+      expect(useEventLogStore.getState().lines.at(-1)?.message).toBe(
+        "Account observer failed",
+      );
+      expect(JSON.stringify(useEventLogStore.getState().lines)).not.toContain(
+        SEED,
+      );
+    } finally {
+      stopFailing();
+      stopObserving();
+    }
+  });
 
-    await useAuthStore.getState().reconnect();
+  it("notifies account subscribers when settings cannot persist the ready state", async () => {
+    stubWindow("");
+    let finish!: (sdk: { free: ReturnType<typeof vi.fn> }) => void;
+    backend.connectAppKey.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    );
+    const {
+      currentDemoAccountSnapshot,
+      demoSettingsStore,
+      subscribeDemoAccount,
+    } = await importStore();
+    demoSettingsStore.setState({ savedUserKeyHex: SEED });
+    const observed: (AccessPhase | null)[] = [];
+    const unsubscribe = subscribeDemoAccount(() => {
+      observed.push(currentDemoAccountSnapshot()?.state.phase ?? null);
+    });
+    const reconnect = demoAccount.reconnect();
+    await vi.waitFor(() =>
+      expect(backend.connectAppKey).toHaveBeenCalledTimes(1),
+    );
+    const save = storage.setItem.bind(storage);
+    try {
+      storage.setItem = () => {
+        throw new Error("Storage full");
+      };
+      finish({ free: vi.fn() });
+      await reconnect;
+      expect(accountStep()).toBe("player");
+      expect(observed).toContain(AccessPhase.Ready);
+    } finally {
+      storage.setItem = save;
+      unsubscribe();
+    }
+  });
 
-    expect(useAuthStore.getState().userKeyHex).toBe(SEED);
-    expect(useAuthStore.getState().status).toBe("disconnected");
-    expect(useAuthStore.getState().reconnectError).not.toBeNull();
+  it("preserves the confirmed key on a transient reconnect failure", async () => {
+    stubWindow("");
+    const { demoSettingsStore } = await importStore();
+    demoSettingsStore.setState({ savedUserKeyHex: SEED });
+
+    await demoAccount.reconnect();
+
+    expect(demoSettingsStore.getState().savedUserKeyHex).toBe(SEED);
+    expect(accountStep()).toBe("gate");
+    expect(demoSettingsStore.getState().reconnectError).not.toBeNull();
     expect(backend.connectAppKey).toHaveBeenCalledTimes(1);
   });
 });
@@ -305,13 +422,13 @@ describe("account authorization", () => {
   it("shows a connection error after the connecting screen closes", async () => {
     stubWindow("");
     backend.openAuthRequest.mockRejectedValue(new Error("Indexer offline"));
-    const { useAuthStore } = await importStore();
+    const { demoSettingsStore } = await importStore();
 
     await expect(
-      useAuthStore.getState().requestConnection("https://indexer.test"),
+      demoAccount.requestConnection("https://indexer.test"),
     ).rejects.toThrow("Could not connect");
-    expect(useAuthStore.getState().status).toBe("disconnected");
-    expect(useAuthStore.getState().accountError).toContain("connect");
+    expect(accountStep()).toBe("gate");
+    expect(demoSettingsStore.getState().accountError).toContain("connect");
   });
 
   it("registration failure returns to an account entry that can retry", async () => {
@@ -326,17 +443,52 @@ describe("account authorization", () => {
         waitForApproval: () => Promise.resolve(),
       }),
     );
-    const { useAuthStore } = await importStore();
-    await useAuthStore.getState().requestConnection("https://indexer.test");
-    await useAuthStore.getState().waitForApproval();
+    const { demoSettingsStore } = await importStore();
+    await demoAccount.requestConnection("https://indexer.test");
+    await demoAccount.waitForApproval();
 
-    await expect(
-      useAuthStore.getState().register("valid phrase"),
-    ).rejects.toThrow("register");
-    expect(useAuthStore.getState().status).toBe("disconnected");
-    expect(useAuthStore.getState().accountError).toContain("register");
-    await useAuthStore.getState().requestConnection("https://indexer.test");
+    await expect(demoAccount.register("valid phrase")).rejects.toThrow(
+      "register",
+    );
+    expect(accountStep()).toBe("gate");
+    expect(demoSettingsStore.getState().accountError).toContain("register");
+    await demoAccount.requestConnection("https://indexer.test");
     expect(backend.openAuthRequest).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps a registration failure when request cleanup also fails", async () => {
+    stubWindow("");
+    const free = vi.fn(() => {
+      throw new Error(SEED);
+    });
+    backend.openAuthRequest.mockResolvedValue({
+      free,
+      register: vi
+        .fn()
+        .mockRejectedValue(new Error("Registration unavailable")),
+      responseUrl: () => "https://indexer.test/approve",
+      waitForApproval: () => Promise.resolve(),
+    });
+    await importStore();
+    await demoAccount.requestConnection("https://indexer.test");
+    await demoAccount.waitForApproval();
+
+    await expect(demoAccount.register("valid phrase")).rejects.toThrow(
+      "Could not register the account",
+    );
+    expect(accountStep()).toBe("gate");
+    expect(free).toHaveBeenCalledTimes(1);
+    const { useEventLogStore } = await import("./eventLog");
+    await vi.waitFor(() =>
+      expect(
+        useEventLogStore
+          .getState()
+          .lines.some((line) => line.message === "Account SDK cleanup failed"),
+      ).toBe(true),
+    );
+    expect(JSON.stringify(useEventLogStore.getState().lines)).not.toContain(
+      SEED,
+    );
   });
 
   it("reconnects a saved account after another registration fails", async () => {
@@ -350,18 +502,18 @@ describe("account authorization", () => {
       waitForApproval: () => Promise.resolve(),
     });
     backend.connectAppKey.mockResolvedValue({ free: vi.fn() });
-    const { useAuthStore } = await importStore();
-    useAuthStore.setState({ savedUserKeyHex: SEED, userKeyHex: SEED });
-    await useAuthStore.getState().requestConnection("https://indexer.test");
-    await useAuthStore.getState().waitForApproval();
-    await expect(
-      useAuthStore.getState().register("valid phrase"),
-    ).rejects.toThrow("register");
+    const { demoSettingsStore } = await importStore();
+    demoSettingsStore.setState({ savedUserKeyHex: SEED });
+    await demoAccount.requestConnection("https://indexer.test");
+    await demoAccount.waitForApproval();
+    await expect(demoAccount.register("valid phrase")).rejects.toThrow(
+      "register",
+    );
 
-    await useAuthStore.getState().reconnect();
+    await demoAccount.reconnect();
     expect(backend.connectAppKey).toHaveBeenCalledTimes(1);
-    expect(useAuthStore.getState().status).toBe("connected");
-    expect(useAuthStore.getState().accountError).toBeNull();
+    expect(accountStep()).toBe("player");
+    expect(demoSettingsStore.getState().accountError).toBeNull();
   });
 
   it("phrase-check failure returns to account entry for a new approval", async () => {
@@ -372,23 +524,23 @@ describe("account authorization", () => {
       responseUrl: () => "https://indexer.test/approve",
       waitForApproval: () => Promise.resolve(),
     });
-    const { useAuthStore } = await importStore();
-    await useAuthStore.getState().requestConnection("https://indexer.test");
-    await useAuthStore.getState().waitForApproval();
+    const { demoSettingsStore } = await importStore();
+    await demoAccount.requestConnection("https://indexer.test");
+    await demoAccount.waitForApproval();
     backend.initSia.mockRejectedValueOnce(new Error("WASM unavailable"));
 
-    await expect(
-      useAuthStore.getState().register("valid phrase"),
-    ).rejects.toThrow("check the recovery phrase");
-    expect(useAuthStore.getState().status).toBe("disconnected");
-    expect(useAuthStore.getState().accountError).toContain(
+    await expect(demoAccount.register("valid phrase")).rejects.toThrow(
       "check the recovery phrase",
     );
-    await useAuthStore.getState().requestConnection("https://indexer.test");
+    expect(accountStep()).toBe("gate");
+    expect(demoSettingsStore.getState().accountError).toContain(
+      "check the recovery phrase",
+    );
+    await demoAccount.requestConnection("https://indexer.test");
     expect(backend.openAuthRequest).toHaveBeenCalledTimes(2);
   });
 
-  it("saves an approved account key and owns its session until logout", async () => {
+  it("saves an approved account key and reports cleanup failure without exposing the key", async () => {
     const { reload } = stubWindow("");
     let approve!: () => void;
     const freeRequest = vi.fn();
@@ -409,23 +561,50 @@ describe("account authorization", () => {
           approve = resolve;
         }),
     });
-    const { useAuthStore } = await importStore();
-    await useAuthStore.getState().requestConnection("https://indexer.test");
-    expect(useAuthStore.getState().approvalUrl).toBe(
-      "https://indexer.test/approve",
-    );
-    const waiting = useAuthStore.getState().waitForApproval();
+    const { copyDemoActiveAppKeySeed, demoSettingsStore } = await importStore();
+    await demoAccount.requestConnection("https://indexer.test");
+    expect(accountSnapshot()?.state).toMatchObject({
+      approvalUrl: "https://indexer.test/approve",
+      phase: AccessPhase.AwaitingApproval,
+    });
+    const waiting = demoAccount.waitForApproval();
     approve();
     await waiting;
-    await useAuthStore.getState().register("valid phrase");
+    await demoAccount.register("valid phrase");
 
-    expect(useAuthStore.getState().status).toBe("connected");
-    expect(useAuthStore.getState().userKeyHex).toBe(SEED);
-    expect(freeKey).toHaveBeenCalledTimes(1);
+    expect(accountStep()).toBe("player");
+    expect(demoSettingsStore.getState().savedUserKeyHex).toBe(SEED);
+    expect(accountSnapshot()?.activeSessionId).toMatch(/^access:/);
+    expect(() => copyDemoActiveAppKeySeed("access:stale")).toThrow(
+      "Session unavailable",
+    );
+    const first = copyDemoActiveAppKeySeed(
+      accountSnapshot()?.activeSessionId ?? null,
+    );
+    first.fill(0);
+    expect(
+      copyDemoActiveAppKeySeed(accountSnapshot()?.activeSessionId ?? null),
+    ).toEqual(Uint8Array.from(Buffer.from(SEED, "hex")));
+    expect("userKeyHex" in demoSettingsStore.getState()).toBe(false);
+    expect(freeKey).toHaveBeenCalledTimes(3);
     expect(freeSdk).not.toHaveBeenCalled();
     expect(freeRequest).toHaveBeenCalledTimes(1);
-    useAuthStore.getState().logout();
+    const { useEventLogStore } = await import("./eventLog");
+    freeSdk.mockImplementationOnce(() => {
+      throw new Error(SEED);
+    });
+    demoAccount.logout();
     expect(freeSdk).toHaveBeenCalledTimes(1);
+    await vi.waitFor(() => {
+      expect(
+        useEventLogStore
+          .getState()
+          .lines.some((line) => line.message === "Account SDK cleanup failed"),
+      ).toBe(true);
+    });
+    expect(JSON.stringify(useEventLogStore.getState().lines)).not.toContain(
+      SEED,
+    );
     expect(reload).toHaveBeenCalledTimes(1);
   });
 
@@ -448,7 +627,7 @@ describe("account authorization", () => {
           approve = resolve;
         }),
     });
-    const { useAuthStore } = await importStore();
+    await importStore();
     const save = storage.setItem.bind(storage);
     const savedKey = (value: string) =>
       (JSON.parse(value) as { state: { userKeyHex?: string } }).state
@@ -461,18 +640,21 @@ describe("account authorization", () => {
       }
       save(key, value);
     };
-    await useAuthStore.getState().requestConnection("https://indexer.test");
-    const waiting = useAuthStore.getState().waitForApproval();
+    await demoAccount.requestConnection("https://indexer.test");
+    const waiting = demoAccount.waitForApproval();
     approve();
     await waiting;
-    await expect(
-      useAuthStore.getState().register("valid phrase"),
-    ).rejects.toThrow("Could not save");
-    expect(useAuthStore.getState().saveError).not.toBeNull();
-    expect(useAuthStore.getState().status).toBe("registering");
+    await expect(demoAccount.register("valid phrase")).rejects.toThrow(
+      "Could not save",
+    );
+    expect(accountSnapshot()?.state).toMatchObject({
+      failure: AccessFailure.CredentialsWrite,
+      phase: AccessPhase.Failed,
+    });
+    expect(accountStep()).toBe("recovery");
     expect(savedKey(storage.getItem(AUTH_STORAGE_KEY)!)).toBe("");
-    await useAuthStore.getState().retrySave();
-    expect(useAuthStore.getState().status).toBe("connected");
+    await demoAccount.retrySave();
+    expect(accountStep()).toBe("player");
     expect(register).toHaveBeenCalledTimes(1);
     expect(savedKey(storage.getItem(AUTH_STORAGE_KEY)!)).toBe(SEED);
   });
@@ -495,7 +677,7 @@ describe("account authorization", () => {
           approve = resolve;
         }),
     });
-    const { useAuthStore } = await importStore();
+    const { copyDemoActiveAppKeySeed, demoSettingsStore } = await importStore();
     const save = storage.setItem.bind(storage);
     storage.setItem = (key, value) => {
       if (
@@ -506,25 +688,27 @@ describe("account authorization", () => {
         throw new Error("Storage full");
       save(key, value);
     };
-    await useAuthStore.getState().requestConnection("https://indexer.test");
-    const waiting = useAuthStore.getState().waitForApproval();
+    await demoAccount.requestConnection("https://indexer.test");
+    const waiting = demoAccount.waitForApproval();
     approve();
     await waiting;
-    await expect(
-      useAuthStore.getState().register("valid phrase"),
-    ).rejects.toThrow("Could not save");
+    await expect(demoAccount.register("valid phrase")).rejects.toThrow(
+      "Could not save",
+    );
 
-    useAuthStore.getState().continueWithoutSaving();
-    useAuthStore.getState().setObjectKey(OBJECT);
-    expect(useAuthStore.getState().status).toBe("connected");
-    expect(useAuthStore.getState().userKeyHex).toBe(SEED);
-    expect(useAuthStore.getState().savedUserKeyHex).toBe("");
+    demoAccount.continueWithoutSaving();
+    demoSettingsStore.getState().setObjectKey(OBJECT);
+    expect(accountStep()).toBe("player");
+    expect(demoSettingsStore.getState().savedUserKeyHex).toBe("");
+    expect(
+      copyDemoActiveAppKeySeed(accountSnapshot()?.activeSessionId ?? null),
+    ).toEqual(Uint8Array.from(Buffer.from(SEED, "hex")));
     const stored = JSON.parse(storage.getItem(AUTH_STORAGE_KEY)!) as {
       state: { userKeyHex: string };
     };
     expect(stored.state.userKeyHex).toBe("");
-    useAuthStore.getState().setIndexerUrl("https://another.test");
-    await useAuthStore.getState().reconnect();
+    demoAccount.setIndexerUrl("https://another.test");
+    await demoAccount.reconnect();
     expect(backend.connectAppKey).not.toHaveBeenCalled();
   });
 
@@ -548,18 +732,58 @@ describe("account authorization", () => {
         responseUrl: () => "https://indexer.test/retry",
         waitForApproval: () => new Promise<void>(() => undefined),
       });
-    const { useAuthStore } = await importStore();
-    await useAuthStore.getState().requestConnection("https://indexer.test");
-    const waiting = useAuthStore.getState().waitForApproval();
+    await importStore();
+    await demoAccount.requestConnection("https://indexer.test");
+    const waiting = demoAccount.waitForApproval();
     rejectApproval();
     await expect(waiting).rejects.toThrow("Connection approval failed");
+    expect(accountStep()).toBe("gate");
+    expect(accountSnapshot()?.state).toMatchObject({
+      failure: AccessFailure.Approval,
+      phase: AccessPhase.Failed,
+    });
     await vi.waitFor(() => expect(free).toHaveBeenCalledTimes(1));
 
-    await useAuthStore.getState().requestConnection("https://indexer.test");
-    expect(useAuthStore.getState().approvalUrl).toBe(
-      "https://indexer.test/retry",
-    );
+    await demoAccount.requestConnection("https://indexer.test");
+    expect(accountSnapshot()?.state).toMatchObject({
+      approvalUrl: "https://indexer.test/retry",
+      phase: AccessPhase.AwaitingApproval,
+    });
     expect(backend.openAuthRequest).toHaveBeenCalledTimes(2);
+  });
+
+  it("an old approval cannot replace a new indexer's approval link", async () => {
+    stubWindow("");
+    let finishOld!: () => void;
+    backend.openAuthRequest
+      .mockResolvedValueOnce({
+        free: vi.fn(),
+        register: vi.fn(),
+        responseUrl: () => "https://first.test/approve",
+        waitForApproval: () =>
+          new Promise<void>((resolve) => {
+            finishOld = resolve;
+          }),
+      })
+      .mockResolvedValueOnce({
+        free: vi.fn(),
+        register: vi.fn(),
+        responseUrl: () => "https://second.test/approve",
+        waitForApproval: () => new Promise<void>(() => undefined),
+      });
+    await importStore();
+    await demoAccount.requestConnection("https://first.test");
+    const oldApproval = demoAccount.waitForApproval();
+    demoAccount.setIndexerUrl("https://second.test");
+    await demoAccount.requestConnection("https://second.test");
+    finishOld();
+    await oldApproval;
+
+    expect(accountSnapshot()?.state).toMatchObject({
+      approvalUrl: "https://second.test/approve",
+      phase: AccessPhase.AwaitingApproval,
+    });
+    expect(accountStep()).toBe("approve");
   });
 
   it("changing the indexer retires an approval and cannot open recovery", async () => {
@@ -575,16 +799,48 @@ describe("account authorization", () => {
           finishApproval = resolve;
         }),
     });
-    const { useAuthStore } = await importStore();
-    await useAuthStore.getState().requestConnection("https://indexer.test");
-    const pending = useAuthStore.getState().waitForApproval();
-    useAuthStore.getState().setIndexerUrl("https://another.test");
+    await importStore();
+    await demoAccount.requestConnection("https://indexer.test");
+    const pending = demoAccount.waitForApproval();
+    demoAccount.setIndexerUrl("https://another.test");
     finishApproval();
     await pending;
 
-    expect(useAuthStore.getState().status).toBe("disconnected");
+    expect(accountSnapshot()).toBeNull();
+    expect(accountStep()).toBe("gate");
     await vi.waitFor(() => expect(free).toHaveBeenCalledTimes(1));
   });
+});
+
+it("reports a rejected account cleanup after replacing the indexer", async () => {
+  stubWindow("");
+  const free = vi.fn(() => Promise.reject(new Error("cleanup failed")));
+  let finishApproval!: () => void;
+  backend.openAuthRequest.mockResolvedValue({
+    free,
+    register: vi.fn(),
+    responseUrl: () => "https://indexer.test/approve",
+    waitForApproval: () =>
+      new Promise<void>((resolve) => {
+        finishApproval = resolve;
+      }),
+  });
+  await importStore();
+  const { useEventLogStore } = await import("./eventLog");
+  useEventLogStore.setState({ lines: [] });
+
+  await demoAccount.requestConnection("https://indexer.test");
+  const waiting = demoAccount.waitForApproval();
+  demoAccount.setIndexerUrl("https://another.test");
+  finishApproval();
+  await waiting;
+
+  await vi.waitFor(() => expect(free).toHaveBeenCalledTimes(1));
+  const cleanupMessages = useEventLogStore
+    .getState()
+    .lines.filter((line) => line.message.startsWith("Account "))
+    .map((line) => line.message);
+  expect(cleanupMessages).toContain("Account controller cleanup failed");
 });
 
 describe("logout", () => {
@@ -592,13 +848,13 @@ describe("logout", () => {
     const { history, reload } = stubWindow(
       `#sharing_key=${SEED}&object=${OBJECT}`,
     );
-    const { useAuthStore } = await importStore();
-    expect(useAuthStore.getState().sharingKeyHex).toBe(SEED);
-    expect(useAuthStore.getState().objectKey).toBe(OBJECT);
+    const { demoSettingsStore } = await importStore();
+    expect(demoSettingsStore.getState().sharingKeyHex).toBe(SEED);
+    expect(demoSettingsStore.getState().objectKey).toBe(OBJECT);
 
-    useAuthStore.getState().logout();
+    demoAccount.logout();
 
-    const state = useAuthStore.getState();
+    const state = demoSettingsStore.getState();
     expect(state.sharingKeyHex).toBeNull();
     expect(state.objectKey).toBe("");
     // Sharing-key logout must NOT reload the window: the store now routes to
@@ -619,16 +875,12 @@ describe("logout", () => {
 
   it("retains the full window reload for an SSO/app-key logout", async () => {
     const { reload } = stubWindow("");
-    const { useAuthStore } = await importStore();
-    useAuthStore.setState({
-      savedUserKeyHex: SEED,
-      status: "connected",
-      userKeyHex: SEED,
-    });
+    const { demoSettingsStore } = await importStore();
+    demoSettingsStore.setState({ savedUserKeyHex: SEED });
 
-    useAuthStore.getState().logout();
+    demoAccount.logout();
 
     expect(reload).toHaveBeenCalledTimes(1);
-    expect(useAuthStore.getState().userKeyHex).toBe("");
+    expect(demoSettingsStore.getState().savedUserKeyHex).toBe("");
   });
 });

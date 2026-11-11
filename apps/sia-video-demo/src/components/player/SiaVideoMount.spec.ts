@@ -191,6 +191,30 @@ describe("siaVideoMountReloadKey (display-safe in-place reload identity)", () =>
     );
   });
 
+  it("reloads a publish object when the active account SDK changes on the same indexer", () => {
+    const first = siaVideoMountReloadKey(publishSource(), {
+      activeSessionId: "access:1",
+      indexerUrl: INDEXER_URL,
+    });
+    const second = siaVideoMountReloadKey(publishSource(), {
+      activeSessionId: "access:2",
+      indexerUrl: INDEXER_URL,
+    });
+    expect(first).not.toBe(second);
+    expect(first).not.toContain(FETCH_FORM);
+    expect(
+      siaVideoMountReloadKey(sharedSource(), {
+        activeSessionId: "access:1",
+        indexerUrl: INDEXER_URL,
+      }),
+    ).toBe(
+      siaVideoMountReloadKey(sharedSource(), {
+        activeSessionId: "access:2",
+        indexerUrl: INDEXER_URL,
+      }),
+    );
+  });
+
   it("changes when the indexer (worker config) changes, so a re-handshake ties to the new indexer", () => {
     const deps = { indexerUrl: INDEXER_URL };
     const nextDeps = { indexerUrl: OTHER_INDEXER_URL };

@@ -88,9 +88,9 @@ void test("published task policy is immutable, secret-free and retains save reco
     f.access.getSnapshot().presentation.interaction,
     recovery.interaction,
   );
-  f.access.disconnect();
+  void f.access.disconnect();
   assert.equal(f.access.getSnapshot().presentation.interaction, null);
-  f.access.dispose();
+  void f.access.dispose();
   assert.ok(
     Object.values(f.access.getSnapshot().presentation.availability).every(
       (value) => value === false,
@@ -129,5 +129,5 @@ void test("save recovery explicitly reports a pending retry while retaining orig
   assert.equal(failed.kind, AccessOutcome.Failed);
   assert.equal(JSON.stringify(failed), originating);
   assert.equal(f.counts().registrations, 1);
-  f.access.dispose();
+  void f.access.dispose();
 });

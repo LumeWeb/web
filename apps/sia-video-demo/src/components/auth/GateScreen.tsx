@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { AccessFailure, AccessPhase } from "@lumeweb/sia-app-access";
 import { useStore } from "zustand";
 import { DEFAULT_INDEXER_URL, resolveIndexerUrl } from "../../lib/constants";
 import { extractSharingSeed } from "../../lib/sharingLink";
 import { cn } from "../../lib/utils";
-import { useAuthStore } from "../../stores/auth";
+import { demoAccount, useDemoAccountSnapshot } from "../../stores/auth";
+import { demoSettingsStore } from "../../stores/authSettings";
 import { ConnectScreen } from "./ConnectScreen";
 
 /**
@@ -24,14 +26,23 @@ const expanderToggle =
   "block bg-transparent border-0 px-0 py-1 text-[13px] cursor-pointer text-left hover:underline";
 
 export function GateScreen() {
-  const setIndexerUrl = useStore(useAuthStore, (s) => s.setIndexerUrl);
-  const setSharingKeySeed = useStore(useAuthStore, (s) => s.setSharingKeySeed);
-  const sharingError = useStore(useAuthStore, (s) => s.sharingError);
-  const reconnect = useStore(useAuthStore, (s) => s.reconnect);
-  const reconnectError = useStore(useAuthStore, (s) => s.reconnectError);
-  const accountError = useStore(useAuthStore, (s) => s.accountError);
-  const savedUserKeyHex = useStore(useAuthStore, (s) => s.savedUserKeyHex);
-  const storedIndexer = useStore(useAuthStore, (s) => s.indexerUrl);
+  const setSharingKeySeed = useStore(
+    demoSettingsStore,
+    (s) => s.setSharingKeySeed,
+  );
+  const sharingError = useStore(demoSettingsStore, (s) => s.sharingError);
+  const reconnectError = useStore(demoSettingsStore, (s) => s.reconnectError);
+  const accountError = useStore(demoSettingsStore, (s) => s.accountError);
+  const accountState = useDemoAccountSnapshot()?.state;
+  const approvalFailed =
+    accountState?.phase === AccessPhase.Failed &&
+    (accountState.failure === AccessFailure.Approval ||
+      accountState.failure === AccessFailure.ApprovalTimeout);
+  const accountMessage =
+    accountError ??
+    (approvalFailed ? "Connection approval failed. Start again." : null);
+  const savedUserKeyHex = useStore(demoSettingsStore, (s) => s.savedUserKeyHex);
+  const storedIndexer = useStore(demoSettingsStore, (s) => s.indexerUrl);
   const [shareInput, setShareInput] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showSso, setShowSso] = useState(false);
@@ -49,7 +60,7 @@ export function GateScreen() {
   const handleApplyIndexer = () => {
     const url = indexerUrl.trim();
     if (!url) return;
-    setIndexerUrl(url);
+    demoAccount.setIndexerUrl(url);
   };
 
   return (
@@ -60,7 +71,7 @@ export function GateScreen() {
             <p className="text-danger text-xs" role="alert">
               {reconnectError}
             </p>
-            <button onClick={() => void reconnect()} type="button">
+            <button onClick={() => void demoAccount.reconnect()} type="button">
               Retry connection
             </button>
           </div>
@@ -131,13 +142,24 @@ export function GateScreen() {
           </div>
         ) : null}
       </section>
-      {accountError ? (
+      {accountMessage ? (
         <p className="text-danger mb-3 text-xs" role="alert">
-          {accountError}
+          {accountMessage}
         </p>
       ) : null}
-      {accountError && savedUserKeyHex ? (
-        <button onClick={() => void reconnect()} type="button">
+      {approvalFailed ? (
+        <button
+          onClick={() =>
+            void demoAccount
+              .requestConnection(storedIndexer)
+              .catch(() => undefined)
+          }
+          type="button">
+          Start again
+        </button>
+      ) : null}
+      {accountMessage && savedUserKeyHex ? (
+        <button onClick={() => void demoAccount.reconnect()} type="button">
           Reconnect saved account
         </button>
       ) : null}

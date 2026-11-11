@@ -132,18 +132,17 @@ The example observes controller publications to reset the profile even when Reac
 
 ![Connected workspace](images/onboarding-ready.png)
 
-**Check connection** demonstrates a `withSession` callback; it does not upload or read a file. **Sign out** ends the session but keeps the saved key. Click **Sign in again** to reconnect and return to the workspace. **Remove saved sign-in** removes that key and clears the example's profile.
+**Check connection** calls the example's account service, which uses `withSession` to check readiness. It does not upload or read a file. **Sign out** ends the session but keeps the saved key. Click **Sign in again** to reconnect and return to the workspace. **Remove saved sign-in** removes that key and clears the example's profile.
 
 The demo does not implement importing an existing account's recovery phrase. Its shared synthetic adapter supports creating access and reconnecting with saved keys. The copied UI also offers **Connect existing account** when used without the demo restriction. That path uses the released SDK adapter to match the supplied phrase; it does not offer generation or ask for a new backup confirmation.
 
 ## Use a real SDK controller
 
-Copy the UI components into your application and provide a controller using `createSiaAdapter()`. Replace the example addresses and configure the SDK's WASM assets. Remove demo-only text from the copied form; do not include the mock server or approval buttons.
+Copy the UI components into your application and import `createSiaAccess` from `@lumeweb/sia-app-access/sia`. It uses `createSiaAdapter()` unless you pass an adapter. Replace the example addresses and configure the SDK's WASM assets. Remove demo-only text from the copied form; do not include the mock server or approval buttons.
 
 ```tsx
 import { createRoot } from "react-dom/client";
-import { createSiaAccess } from "@lumeweb/sia-app-access";
-import { createSiaAdapter } from "@lumeweb/sia-app-access/sia";
+import { createSiaAccess } from "@lumeweb/sia-app-access/sia";
 import { AccountApp } from "../examples/react-onboarding/account-app.tsx";
 
 export function mountAccountApplication(element: HTMLElement) {
@@ -155,7 +154,6 @@ export function mountAccountApplication(element: HTMLElement) {
       serviceUrl: "https://app.example",
     },
     indexerUrl: "https://indexer.example/",
-    adapter: createSiaAdapter(),
   });
   const root = createRoot(element);
   root.render(<AccountApp access={access} />);

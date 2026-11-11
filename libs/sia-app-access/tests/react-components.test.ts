@@ -57,7 +57,7 @@ for (const contextual of [false, true]) {
       );
       assert.deepEqual(f.counts(), { ended: 0, registrations: 0, retired: 0 });
     } finally {
-      f.access.dispose();
+      void f.access.dispose();
     }
   });
 
@@ -82,7 +82,7 @@ for (const contextual of [false, true]) {
         AccessPhase.Disconnected,
       );
     } finally {
-      f.access.dispose();
+      void f.access.dispose();
     }
   });
 
@@ -109,7 +109,7 @@ for (const contextual of [false, true]) {
           });
       assert.throws(() => renderToStaticMarkup(element), /scope.*match/i);
     } finally {
-      f.access.dispose();
+      void f.access.dispose();
     }
   });
 }

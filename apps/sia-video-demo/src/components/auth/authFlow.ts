@@ -1,72 +1,66 @@
-/**
- * Pure entry-flow routing. Kept free of React and store side effects so the
- * exact routing decision (who sees the gate vs. the keyless player vs. SSO
- * screens) is a plain function that unit tests can pin down.
- */
+/** Routes account phases to demo screens while giving sharing seeds their own entry path. */
+import { AccessFailure, AccessPhase } from "@lumeweb/sia-app-access";
+import type { AccessInteractionSnapshot } from "@lumeweb/sia-app-access";
 
-/** The slice of auth state the router needs to pick a screen. */
 export interface AuthFlowInput {
-  /**
-   * Legacy spellings of the reconnecting state as a standalone boolean, kept
-   * so existing router tests keep pinning the loading route. New callers
-   * should rely on `status === "reconnecting"` instead.
-   */
-  reconnecting?: boolean;
-  sharingKeyHex: null | string;
-  status: AuthStatus;
+  readonly approvalContinueRequired?: boolean;
+  readonly sharingKeyHex: null | string;
+  readonly snapshot: null | Pick<AccessInteractionSnapshot, "state">;
 }
-
-/**
- * The auth-status vocabulary as a const object, so the store and the router
- * share one spelling of every state. `reconnecting` is the label for the
- * transient "reconnecting a persisted app key" state (previously a standalone
- * `reconnecting: boolean` on the store); as a status member it can be routed
- * by `selectAuthStep` exactly like any other state.
- */
-export const AuthStatus = {
-  AwaitingApproval: "awaiting-approval",
-  Connected: "connected",
-  Disconnected: "disconnected",
-  Reconnecting: "reconnecting",
-  Registering: "registering",
-} as const;
-
-export type AuthStatus = (typeof AuthStatus)[keyof typeof AuthStatus];
 
 export type AuthStep = "approve" | "gate" | "loading" | "player" | "recovery";
 
 export interface AutoReconnectInput extends AuthFlowInput {
-  accountError: null | string;
-  reconnectError: null | string;
-  savedUserKeyHex: string;
+  readonly accountError: null | string;
+  readonly reconnectError: null | string;
+  readonly savedUserKeyHex: string;
 }
 
-export function selectAuthStep(state: AuthFlowInput): AuthStep {
-  // A sharing key is a complete credential (indexer + share key = SSO): when
-  // one is present, the keyless shared player is the entry point no matter
-  // the app-key/SSO state, a share must never wait behind a sign-in flow.
-  if (state.sharingKeyHex) return "player";
-  if (state.reconnecting) return "loading";
-  switch (state.status) {
-    case "awaiting-approval":
+export function selectAuthStep({
+  approvalContinueRequired,
+  sharingKeyHex,
+  snapshot,
+}: AuthFlowInput): AuthStep {
+  if (sharingKeyHex) return "player";
+  const state = snapshot?.state;
+  switch (state?.phase) {
+    case AccessPhase.AwaitingApproval:
       return "approve";
-    case "connected":
+    case AccessPhase.Failed:
+      return state.failure === AccessFailure.CredentialsWrite
+        ? "recovery"
+        : "gate";
+    case AccessPhase.Ready:
       return "player";
-    case "reconnecting":
+    case AccessPhase.RecoveryPhrase:
+      return approvalContinueRequired ? "approve" : "recovery";
+    case AccessPhase.Registering:
+      return "recovery";
+    case AccessPhase.RequestingApproval:
       return "loading";
-    case "registering":
+    case AccessPhase.Restoring:
+      return "loading";
+    case AccessPhase.Saving:
+      return "recovery";
+    case AccessPhase.ValidatingPhrase:
       return "recovery";
     default:
       return "gate";
   }
 }
 
-export function shouldAutoReconnect(state: AutoReconnectInput): boolean {
+export function shouldAutoReconnect({
+  accountError,
+  reconnectError,
+  savedUserKeyHex,
+  sharingKeyHex,
+  snapshot,
+}: AutoReconnectInput): boolean {
   return (
-    state.status === AuthStatus.Disconnected &&
-    !!state.savedUserKeyHex &&
-    !state.sharingKeyHex &&
-    !state.reconnectError &&
-    !state.accountError
+    (!snapshot || snapshot.state.phase === AccessPhase.Disconnected) &&
+    !!savedUserKeyHex &&
+    !sharingKeyHex &&
+    !reconnectError &&
+    !accountError
   );
 }

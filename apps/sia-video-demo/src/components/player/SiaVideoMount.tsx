@@ -44,7 +44,7 @@ import type { WorkerConfig } from "@lumeweb/sia-video-source";
 import { APP_META } from "../../lib/constants";
 import { eventLogLogger } from "../../lib/eventLogLogger";
 import { resolvePlaybackBackend } from "../../lib/playbackBackend";
-import { getDemoNativeStreamService } from "../../lib/streamService";
+import { getDemoNativeStreamService } from "../../lib/demoStreamService";
 import { useDeveloperOptionsStore } from "../../stores/developerOptions";
 import { useEventLogStore } from "../../stores/eventLog";
 import { AutoPlayBridge } from "./AutoPlayBridge";
@@ -77,6 +77,8 @@ const demoNativeStreamProvider: SiaNativeStreamProvider =
 
 /** Inputs the mount derivation needs that are not part of the selected union. */
 export interface SiaVideoMountDeps {
+  /** Nonsecret identity of the ready account SDK for publish reloads. */
+  readonly activeSessionId?: null | string;
   /**
    * The deterministic playback backend resolved from the centralized
    * developer options (`resolvePlaybackBackend`).
@@ -90,6 +92,8 @@ export interface SiaVideoMountDeps {
 
 /** Props accepted by the Sia player wiring component. */
 export interface SiaVideoMountProps {
+  /** Nonsecret identity of the ready account SDK for publish reloads. */
+  readonly activeSessionId?: null | string;
   /**
    * A pending best-effort autoplay intent (a shared row user selection or a
    * share-fragment preselection); routed to the inside-Player AutoPlayBridge.
@@ -146,6 +150,7 @@ export interface SiaVideoMountState {
  * hoist their typed snapshots up through `onStatus`/`onFacts`.
  */
 export function SiaVideoMount({
+  activeSessionId,
   autoplayPending,
   indexerUrl,
   onAutoplayConsumed,
@@ -205,19 +210,30 @@ export function SiaVideoMount({
   const backend = useMemo(
     () =>
       // Remounting during preparation loses the player's consumed play intent.
-      (preparationFailed || (wasWorkerOnly && !streamingPrepared)) && !disableWorkerPlayback
+      (preparationFailed || (wasWorkerOnly && !streamingPrepared)) &&
+      !disableWorkerPlayback
         ? SIA_PLAYBACK_BACKENDS.MEDIA_WORKER
-        : resolvePlaybackBackend({ disableNativePlayback, disableWorkerPlayback }),
-    [disableNativePlayback, disableWorkerPlayback, preparationFailed, streamingPrepared, wasWorkerOnly],
+        : resolvePlaybackBackend({
+            disableNativePlayback,
+            disableWorkerPlayback,
+          }),
+    [
+      disableNativePlayback,
+      disableWorkerPlayback,
+      preparationFailed,
+      streamingPrepared,
+      wasWorkerOnly,
+    ],
   );
   const mount = useMemo(
     () =>
       siaVideoMountState(selectedSource, {
+        activeSessionId,
         backend,
         indexerUrl,
         nativeStreamProvider: demoNativeStreamProvider,
       }),
-    [backend, indexerUrl, selectedSource],
+    [activeSessionId, backend, indexerUrl, selectedSource],
   );
   if (!shouldMountSiaVideo(mount, streamingPrepared)) return null;
   return (
@@ -264,15 +280,18 @@ export function shouldMountSiaVideo(
  * `reloadConfiguration()` instead of a remount. Shared identity adds the
  * SHA-256 `sourceId` digest (it folds the sharing-key seed in, so a seed
  * swap bumps the reload even though the object and `src` are unchanged);
- * publish identity is the public object key, never the key-bearing
- * `fetchForm`.
+ * publish identity includes the public object key and nonsecret active account
+ * session ID, never the key-bearing `fetchForm`.
  */
 export function siaVideoMountReloadKey(
   selectedSource: SelectedSource,
-  deps: Pick<SiaVideoMountDeps, "indexerUrl">,
+  deps: Pick<SiaVideoMountDeps, "activeSessionId" | "indexerUrl">,
 ): string {
   if (selectedSource.mode === "publish") {
-    return `${selectedSource.mode}|${selectedSource.source.objectKey}|${deps.indexerUrl}`;
+    const base = `${selectedSource.mode}|${selectedSource.source.objectKey}|${deps.indexerUrl}`;
+    return deps.activeSessionId
+      ? `${base}|account:${deps.activeSessionId}`
+      : base;
   }
   return [
     selectedSource.mode,

@@ -1,10 +1,8 @@
 /** An archive consumer must infer SDK operations without exposing session disposal. */
-import { createSiaAccess } from "@lumeweb/sia-app-access";
-import { createSiaAdapter } from "@lumeweb/sia-app-access/sia";
+import { createSiaAccess } from "@lumeweb/sia-app-access/sia";
 import type { SiaSession } from "@lumeweb/sia-app-access/sia";
 
 const access = createSiaAccess({
-  adapter: createSiaAdapter(),
   application: {
     appId: "a".repeat(64),
     description: "",

@@ -9,13 +9,87 @@ import type {
   AccessConnection,
   AccessSession,
   SiaAccessAdapter,
+  SiaAccessInteractions,
+  SiaAccessOptions,
   SiaApplication,
 } from "./access-types.ts";
 import type { CredentialScope } from "./credentials.ts";
+import { createSiaAccess as createCoreSiaAccess } from "./core.ts";
+export interface SiaSdkAccessOptions extends Omit<
+  SiaAccessOptions<SiaSession>,
+  "adapter"
+> {
+  readonly adapter?: SiaAccessAdapter<SiaSession>;
+}
 export type SiaSession = Omit<Sdk, "free" | symbol>;
 type SiaSdkModule = typeof import("@siafoundation/sia-storage/wasm");
+
+export function createSiaAccess(
+  options: SiaSdkAccessOptions,
+): SiaAccessInteractions<SiaSession> {
+  return createCoreSiaAccess({
+    ...options,
+    adapter: options.adapter ?? createSiaAdapter(),
+  });
+}
+
 let initialized: Promise<SiaSdkModule> | undefined;
 let facadeRejected = false;
+
+/** Retirement denies new work while an uncancellable Builder call keeps its handle. */
+class BuilderConnectionLifetime {
+  private busy = false;
+  private readonly closed: Promise<void>;
+  private consumed = false;
+  private freed = false;
+  private retired = false;
+
+  constructor(private readonly builder: Builder) {
+    this.closed = new Promise<void>((resolve, reject) => {
+      this.resolveClosed = resolve;
+      this.rejectClosed = reject;
+    });
+    void this.closed.catch(() => undefined);
+  }
+
+  consume(): void {
+    this.consumed = true;
+  }
+
+  retire(): Promise<void> {
+    this.retired = true;
+    this.release();
+    return this.closed;
+  }
+
+  run<T>(work: () => Promise<T>): Promise<T> {
+    if (this.retired || this.busy || this.consumed)
+      return Promise.reject(new Error("Connection unavailable"));
+    this.busy = true;
+    return Promise.resolve()
+      .then(work)
+      .finally(() => {
+        this.busy = false;
+        this.release();
+      });
+  }
+
+  private rejectClosed: (error: unknown) => void = () => undefined;
+
+  private release(): void {
+    if (!this.retired || this.busy || this.freed) return;
+    this.freed = true;
+    try {
+      this.builder.free();
+      this.resolveClosed();
+    } catch (error) {
+      this.rejectClosed(error);
+    }
+  }
+
+  private resolveClosed: () => void = () => undefined;
+}
+
 export function createSiaAdapter(): SiaAccessAdapter<SiaSession> {
   return {
     async begin(scope, application) {
@@ -62,58 +136,34 @@ export function createSiaAdapter(): SiaAccessAdapter<SiaSession> {
     },
   };
 }
-/** Retirement denies new borrows while uncancellable calls retain their builder. */
 function connection(
   builder: Builder,
   approvalUrl: string,
 ): AccessConnection<SiaSession> {
-  let retired = false;
-  let busy = false;
-  let freed = false;
-  let consumed = false;
-  function release() {
-    if (retired && !busy && !freed) {
-      freed = true;
-      builder.free();
-    }
-  }
-  function dispose() {
-    retired = true;
-    release();
-  }
-  function perform<T>(work: () => Promise<T>): Promise<T> {
-    if (retired || busy || consumed)
-      return Promise.reject(new Error("Connection unavailable"));
-    busy = true;
-    return Promise.resolve()
-      .then(work)
-      .finally(() => {
-        busy = false;
-        release();
-      });
-  }
+  const lifetime = new BuilderConnectionLifetime(builder);
   return {
     approvalUrl,
-    dispose,
+    dispose: () => lifetime.retire(),
     matchesExistingAppKey(phrase) {
-      return perform(() => builder.matchesExistingAppKey(phrase));
+      return lifetime.run(() => builder.matchesExistingAppKey(phrase));
     },
     register(phrase) {
-      return perform(async () => {
-        consumed = true;
+      return lifetime.run(async () => {
+        lifetime.consume();
         try {
           // The controller owns every returned session, including one returned after cancellation.
           return session(await builder.register(phrase));
         } finally {
-          dispose();
+          void lifetime.retire();
         }
       });
     },
     waitForApproval() {
-      return perform(() => builder.waitForApproval());
+      return lifetime.run(() => builder.waitForApproval());
     },
   };
 }
+
 function metadata(scope: CredentialScope, app: SiaApplication): AppMetadata {
   if (scope.appId !== app.appId)
     throw new TypeError("Application does not match scope");

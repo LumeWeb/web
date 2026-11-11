@@ -1,7 +1,8 @@
 import { type FormEvent, useState } from "react";
 import { useStore } from "zustand";
 import { resolveIndexerUrl } from "../../lib/constants";
-import { useAuthStore } from "../../stores/auth";
+import { demoAccount } from "../../stores/auth";
+import { demoSettingsStore } from "../../stores/authSettings";
 
 /**
  * Account (SSO) entry panel. The advanced indexer setting is NOT repeated
@@ -9,8 +10,7 @@ import { useAuthStore } from "../../stores/auth";
  * connects through the same stored value (resolved via `resolveIndexerUrl`).
  */
 export function ConnectScreen() {
-  const requestConnection = useStore(useAuthStore, (s) => s.requestConnection);
-  const storedIndexer = useStore(useAuthStore, (s) => s.indexerUrl);
+  const storedIndexer = useStore(demoSettingsStore, (s) => s.indexerUrl);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<null | string>(null);
 
@@ -19,7 +19,7 @@ export function ConnectScreen() {
     setError(null);
     setBusy(true);
     try {
-      await requestConnection(resolveIndexerUrl(storedIndexer));
+      await demoAccount.requestConnection(resolveIndexerUrl(storedIndexer));
       // Success transitions the router to the approval screen.
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));

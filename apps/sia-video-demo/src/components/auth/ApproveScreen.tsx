@@ -1,20 +1,22 @@
 import { useState } from "react";
+import { AccessPhase } from "@lumeweb/sia-app-access";
 import { useStore } from "zustand";
-import { useAuthStore } from "../../stores/auth";
+import { demoAccount, useDemoAccountSnapshot } from "../../stores/auth";
+import { demoSettingsStore } from "../../stores/authSettings";
 
 export function ApproveScreen() {
-  const approvalUrl = useStore(useAuthStore, (s) => s.approvalUrl);
-  const waitForApproval = useStore(useAuthStore, (s) => s.waitForApproval);
-  const requestConnection = useStore(useAuthStore, (s) => s.requestConnection);
-  const indexerUrl = useStore(useAuthStore, (s) => s.indexerUrl);
+  const state = useDemoAccountSnapshot()?.state;
+  const approvalUrl =
+    state?.phase === AccessPhase.AwaitingApproval ? state.approvalUrl : null;
+  const indexerUrl = useStore(demoSettingsStore, (s) => s.indexerUrl);
   const [waiting, setWaiting] = useState(false);
   const [error, setError] = useState<null | string>(null);
   const handleContinue = async () => {
-    if (!approvalUrl) return;
+    if (!approvalUrl && state?.phase !== AccessPhase.RecoveryPhrase) return;
     setError(null);
     setWaiting(true);
     try {
-      await waitForApproval();
+      await demoAccount.waitForApproval();
       // Approval resolved: the router moves on to the recovery screen.
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
@@ -26,18 +28,21 @@ export function ApproveScreen() {
     <section className="bg-canvas-subtle border-border-default mb-4 rounded-lg border p-5">
       <h2 className="mt-0 mb-3 text-lg">Approve the connection</h2>
       <p>
-        Open the approval link below in another tab, approve the request, then
-        continue here.
+        {approvalUrl
+          ? "Open the approval link below in another tab, approve the request, then continue here."
+          : "Connection approved. Continue to your recovery phrase."}
       </p>
-      <div className="my-3 wrap-anywhere">
-        <a
-          className="text-accent"
-          href={approvalUrl ?? undefined}
-          rel="noreferrer"
-          target="_blank">
-          {approvalUrl}
-        </a>
-      </div>
+      {approvalUrl ? (
+        <div className="my-3 wrap-anywhere">
+          <a
+            className="text-accent"
+            href={approvalUrl}
+            rel="noreferrer"
+            target="_blank">
+            {approvalUrl}
+          </a>
+        </div>
+      ) : null}
       {error ? (
         <>
           <p className="text-danger" role="alert">
@@ -45,7 +50,7 @@ export function ApproveScreen() {
           </p>
           <button
             onClick={() => {
-              void requestConnection(indexerUrl).then(
+              void demoAccount.requestConnection(indexerUrl).then(
                 () => setError(null),
                 (cause: unknown) =>
                   setError(

@@ -294,7 +294,7 @@ export function applyPhraseCorrection(form: UseFormReturn<PhraseFields>, outcome
 }
 ```
 
-The mapper works without React or React Hook Form installed. If your form uses RHF, install it in your application. See the [RHF and plain React examples](../tests/browser/react-interactions.tsx) and their [browser tests](../tests/browser/react-interactions.spec.ts).
+The mapper works without React or React Hook Form installed. If your form uses React Hook Form, install it in your application and see the [recovery phrase form](react-hook-form.md). The [browser example](../tests/browser/react-interactions.tsx) tests both form approaches.
 
 ## Renderless views
 

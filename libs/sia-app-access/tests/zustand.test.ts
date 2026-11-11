@@ -26,7 +26,7 @@ void test("the readonly store returns controller snapshots without subscribing d
   assert.equal(store.getState(), f.access.getSnapshot());
   assert.equal(store.getState().state.phase, "recovery-phrase");
   assert.equal(store.getInitialState(), initial);
-  f.access.dispose();
+  void f.access.dispose();
 });
 
 void test("store notifications report the controller's current and previous snapshots", async () => {
@@ -50,9 +50,9 @@ void test("store notifications report the controller's current and previous snap
   assert.equal(changes[1]?.previous, changes[0]?.current);
   assert.equal(changes[2]?.previous, changes[1]?.current);
   unsubscribe();
-  f.access.disconnect();
+  void f.access.disconnect();
   assert.equal(changes.length, 3);
-  f.access.dispose();
+  void f.access.dispose();
 });
 
 void test("independent adapters share snapshots while keeping their subscriptions separate", async () => {
@@ -73,10 +73,10 @@ void test("independent adapters share snapshots while keeping their subscription
   assert.equal(firstChanges, 3);
   assert.equal(first.getState(), second.getState());
   stopFirst();
-  f.access.disconnect();
+  void f.access.disconnect();
   assert.equal(firstChanges, 3);
   assert.equal(first.getState(), second.getState());
-  f.access.dispose();
+  void f.access.dispose();
   assert.equal(second.getState(), f.access.getSnapshot());
   assert.deepEqual(phases, [
     "requesting-approval",
@@ -108,7 +108,7 @@ void test("store methods preserve a controller receiver", () => {
   subscribe(() => {
     return;
   })();
-  f.access.dispose();
+  void f.access.dispose();
 });
 
 void test("a supplied server snapshot is presentation only and must match the controller scope", () => {
@@ -128,5 +128,5 @@ void test("a supplied server snapshot is presentation only and must match the co
       }),
     /scope.*match|match.*scope/i,
   );
-  f.access.dispose();
+  void f.access.dispose();
 });

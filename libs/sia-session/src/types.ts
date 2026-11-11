@@ -88,6 +88,15 @@ export interface SdkLease<T> extends LeaseContext {
 }
 /** Snapshot observers read current state separately from the change notification. */
 export type SdkObserver = () => unknown;
+/** Child work retains one parent SDK without gaining replacement or disposal authority. */
+export interface SdkOperationScope<T> {
+  /** Stops new work and waits for admitted callbacks before releasing the parent lease. */
+  close(this: void): Promise<void>;
+  /** Resolves after local closure and all admitted work; parent cleanup may finish later. */
+  readonly closed: Promise<void>;
+  /** Admits a callback before returning its promise, preserving its failure value. */
+  run<R>(this: void, work: SdkWork<T, R>): Promise<R>;
+}
 /** A projection changes the borrowed view without creating another SDK owner. */
 export type SdkSelector<T, View> = (sdk: T) => View;
 export interface SdkSession<T> {

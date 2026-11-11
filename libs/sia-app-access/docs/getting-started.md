@@ -1,13 +1,13 @@
 # Connect your application
 
-The access package coordinates authorization and credential saving through an application-supplied `SiaAccessAdapter<Session>`. It is private; these examples assume a workspace dependency or a local archive.
+The access package coordinates authorization and credential saving through an application-supplied `SiaAccessAdapter<Session>`. Use this controller for an account; it owns the SDK returned by its adapter, so app screens should not create a second `@lumeweb/sia-session` owner. It is private; these examples assume a workspace dependency or a local archive.
 
 ## Construct the controller
 
 Choose a stable 64-character hexadecimal application ID. Supply an adapter for your backend and replace the example service addresses with your own.
 
 ```ts
-import { AccessIntent, AccessOutcome, AccessPhase, createSiaAccess, type AccessInteractionSnapshot, type RecoveryPhraseIssue, type SiaAccessAdapter, type SiaAccessInteractions } from "@lumeweb/sia-app-access";
+import { AccessOutcome, createSiaAccess, type SiaAccessAdapter, type SiaAccessInteractions } from "@lumeweb/sia-app-access";
 
 interface DocumentSession {
   read(name: string): Promise<Uint8Array>;
@@ -29,43 +29,42 @@ export function createApplicationAccess(adapter: SiaAccessAdapter<DocumentSessio
 
 Create one controller in application bootstrap, outside view rendering. On a server, create a separate controller for each request so users cannot share sessions.
 
-The adapter supplies connection approval, phrase generation and validation, and saved-key reconnect. An approved connection matches existing-account phrases and registers a session. Its `dispose()` requests retirement without throwing; admitted native work must retain its handles. A session's `exportAppKey()` returns a fresh caller-owned 32-byte key. The [source contracts](../src/access-types.ts) define ownership and method results.
+The adapter supplies connection approval, phrase generation and validation, and saved-key reconnect. An approved connection matches existing-account phrases and registers a session. Its `dispose()` requests retirement without throwing; admitted native work must retain its handles. Return a promise from `dispose()` if native cleanup can finish after the call, so `disconnect()` waits for it. A session's `exportAppKey()` returns a fresh caller-owned 32-byte key. The [source contracts](../src/access-types.ts) define ownership and method results.
 
 The default credential store is private to that controller and loses keys on reload. Supply a [custom store](credentials.md) when your application needs persistent storage.
 
 ## Connect your UI
 
-Implement the view methods in the application. This subscription renders observations without starting commands or disposing the controller.
+React screens read state and commands through the packaged hook. It owns the subscription, while the application owns the controller and its form values.
 
-```ts
-interface AccountView {
-  renderState(snapshot: AccessInteractionSnapshot): void;
-  showApprovalLink(url: string): void;
-  showRecoveryPhraseForm(issue: RecoveryPhraseIssue | undefined): void;
-}
+```tsx
+import { AccessIntent, AccessPhase } from "@lumeweb/sia-app-access";
+import type { SiaAccessInteractions } from "@lumeweb/sia-app-access";
+import { useSiaAccessInteractions } from "@lumeweb/sia-app-access/react";
 
-export function attachAccountView<Session>(access: SiaAccessInteractions<Session>, view: AccountView) {
-  const render = () => {
-    const snapshot = access.getSnapshot();
-    view.renderState(snapshot);
-    if (snapshot.state.phase === AccessPhase.AwaitingApproval) view.showApprovalLink(snapshot.state.approvalUrl);
-    if (snapshot.state.phase === AccessPhase.RecoveryPhrase) view.showRecoveryPhraseForm(snapshot.state.issue);
-  };
-  const unsubscribe = access.subscribe(render);
-  render();
-  return {
-    restore: () => access.reconnect(),
-    connectExistingAccount: () => access.authorize(AccessIntent.Existing),
-    createAccount: () => access.authorize(AccessIntent.Create),
-    submitPhrase: (phrase: string) => access.submitRecoveryPhrase(phrase),
-    unsubscribe,
-  };
+export function AccountChoices<Session>({ access }: { access: SiaAccessInteractions<Session> }) {
+  const { commands, snapshot } = useSiaAccessInteractions(access);
+  const available = snapshot.presentation.availability;
+  return (
+    <section>
+      <p>{snapshot.state.phase}</p>
+      {snapshot.state.phase === AccessPhase.AwaitingApproval && <a href={snapshot.state.approvalUrl}>Approve this application</a>}
+      <button type="button" disabled={!available.reconnect} onClick={() => void commands.reconnect()}>
+        Restore saved access
+      </button>
+      <button type="button" disabled={!available.authorize} onClick={() => void commands.authorize(AccessIntent.Existing)}>
+        Connect existing account
+      </button>
+    </section>
+  );
 }
 ```
 
-`subscribe()` does not invoke its listener immediately, so the helper reads the initial snapshot. Keep form values and correction errors in your application.
+Bind phrase submission to your form's own state. The [onboarding example](onboarding.md) shows approval, phrase correction and save recovery in a full screen. Unmounting this component stops observation but does not dispose the controller.
 
-Call `restore()` when the application chooses to try saved credentials. A missing-credentials result means the user needs an account choice; an operational failure is a different outcome:
+For plain TypeScript, import `observeSiaAccess` from the root package and pass it an existing snapshot renderer: `const stop = observeSiaAccess(access, renderAccount)`. It delivers the current snapshot and later changes, then `stop()` ends observation. No separate snapshot-read callback is needed.
+
+Call `access.reconnect()` when the application chooses to try saved credentials. A missing-credentials result means the user needs an account choice; an operational failure is a different outcome:
 
 ```ts
 export async function restoreMessage<Session>(access: SiaAccessInteractions<Session>) {
@@ -85,7 +84,7 @@ If registration succeeds but saving fails, offer `retrySave()` or `continueWitho
 
 ## Use and release a session
 
-Run work that needs a ready session inside `withSession(work)`. Its callback receives the adapter's inferred session type:
+An SDK-backed service can run one complete operation inside `withSession(work)`. Keep this borrow inside the service so screens call its methods rather than pass SDK callbacks. Its callback receives the adapter's inferred session type:
 
 ```ts
 export function documentSize(access: SiaAccessInteractions<DocumentSession>) {

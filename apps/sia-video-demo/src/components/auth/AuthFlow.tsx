@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useStore } from "zustand";
-import { useAuthStore } from "../../stores/auth";
+import { demoAccount, useDemoAccountSnapshot } from "../../stores/auth";
+import { demoSettingsStore } from "../../stores/authSettings";
 import { PlayerScreen } from "../player/PlayerScreen";
 import { selectAuthStep, shouldAutoReconnect } from "./authFlow";
 import { ApproveScreen } from "./ApproveScreen";
@@ -9,13 +10,16 @@ import { LoadingScreen } from "./LoadingScreen";
 import { RecoveryScreen } from "./RecoveryScreen";
 
 export function AuthFlow() {
-  const indexerUrl = useStore(useAuthStore, (s) => s.indexerUrl);
-  const sharingKeyHex = useStore(useAuthStore, (s) => s.sharingKeyHex);
-  const status = useStore(useAuthStore, (s) => s.status);
-  const savedUserKeyHex = useStore(useAuthStore, (s) => s.savedUserKeyHex);
-  const reconnect = useStore(useAuthStore, (s) => s.reconnect);
-  const reconnectError = useStore(useAuthStore, (s) => s.reconnectError);
-  const accountError = useStore(useAuthStore, (s) => s.accountError);
+  const indexerUrl = useStore(demoSettingsStore, (s) => s.indexerUrl);
+  const sharingKeyHex = useStore(demoSettingsStore, (s) => s.sharingKeyHex);
+  const approvalContinueRequired = useStore(
+    demoSettingsStore,
+    (s) => s.approvalContinueRequired,
+  );
+  const snapshot = useDemoAccountSnapshot();
+  const savedUserKeyHex = useStore(demoSettingsStore, (s) => s.savedUserKeyHex);
+  const reconnectError = useStore(demoSettingsStore, (s) => s.reconnectError);
+  const accountError = useStore(demoSettingsStore, (s) => s.accountError);
 
   // Automatic reconnect after a failed account request would replace its error
   // before the user can retry. Sharing sessions do not open an account SDK.
@@ -26,21 +30,18 @@ export function AuthFlow() {
         reconnectError,
         savedUserKeyHex,
         sharingKeyHex,
-        status,
+        snapshot,
       })
     ) {
-      void reconnect();
+      void demoAccount.reconnect();
     }
-  }, [
-    accountError,
-    reconnect,
-    reconnectError,
-    savedUserKeyHex,
-    sharingKeyHex,
-    status,
-  ]);
+  }, [accountError, reconnectError, savedUserKeyHex, sharingKeyHex, snapshot]);
 
-  const step = selectAuthStep({ sharingKeyHex, status });
+  const step = selectAuthStep({
+    approvalContinueRequired,
+    sharingKeyHex,
+    snapshot,
+  });
 
   switch (step) {
     case "approve":
