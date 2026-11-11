@@ -24,6 +24,7 @@ import {
   type ListingSummary,
 } from "./storageBackend";
 import { normalizeObjectKeyHex } from "./hex";
+import { useEventLogStore } from "../stores/eventLog";
 
 const DEFAULT_PAGE_SIZE = 100;
 const DEFAULT_RETRIES = 2;
@@ -90,10 +91,14 @@ export interface SharedObjectsListingResult {
 
 /**
  * Injected SDK/client boundary: returns one already-decoded page starting at
- * `offset`. A thrown error is treated as transient and retried per page.
+ * `offset`. Read failures are retried per page; native cleanup failures stop the walk.
  */
 export interface SharedObjectsPageClient {
-  fetchPage(offset: number, pageSize: number, signal?: AbortSignal): Promise<SharedObjectRow[]>;
+  fetchPage(
+    offset: number,
+    pageSize: number,
+    signal?: AbortSignal,
+  ): Promise<SharedObjectRow[]>;
 }
 
 /** The walker's resolved options: `listSharedObjects` defaults each field. */
@@ -104,6 +109,16 @@ interface WalkPagesOptions {
   readonly retryBaseDelayMs: number;
   readonly retryMaxDelayMs: number;
   readonly signal?: AbortSignal;
+}
+
+/** A native cleanup failure must not be retried as an indexer read. */
+class SharedObjectsCleanupError extends Error {
+  readonly cause: unknown;
+
+  constructor(cause: unknown) {
+    super("Shared object cleanup failed");
+    this.cause = cause;
+  }
 }
 
 /** A retryable listing failure, raised once one page's retries run out. */
@@ -154,7 +169,20 @@ export async function createSharedObjectsClient(
   const client: SharedObjectsPageClient = {
     fetchPage: async (offset, pageSize, signal) => {
       signal?.throwIfAborted();
-      const rows = (await sdk.objectSummaries(offset, pageSize, signal)).map(rowOf);
+      const summaries = await sdk.objectSummaries(offset, pageSize, signal);
+      const rows: SharedObjectRow[] = [];
+      let cleanupFailure: unknown;
+      let cleanupFailed = false;
+      for (const summary of summaries) {
+        try {
+          rows.push(rowOf(summary));
+        } catch (error) {
+          // A failed native free must not strand the rest of the page's handles.
+          if (!cleanupFailed) cleanupFailure = error;
+          cleanupFailed = true;
+        }
+      }
+      if (cleanupFailed) throw new SharedObjectsCleanupError(cleanupFailure);
       // Native SDK reads cannot be aborted; free every returned summary before cancellation escapes.
       signal?.throwIfAborted();
       return rows;
@@ -217,8 +245,9 @@ export function decodeObjectName(id: string, metadata: Uint8Array): string {
  * rows as they land. Each page is its own atomic retry unit: a flaky page is
  * re-fetched in place from the same offset with exponential backoff, and once
  * its retries run out a `SharedObjectsListingError` (always retryable) is
- * thrown. The full deduped listing is still returned for callers that only
- * want the final snapshot.
+ * thrown. Native cleanup failures stop the walk without another fetch. The
+ * full deduped listing is still returned for callers that only want the final
+ * snapshot.
  */
 export async function listSharedObjects(
   client: SharedObjectsPageClient,
@@ -236,6 +265,35 @@ export async function listSharedObjects(
     retryMaxDelayMs: options?.retryMaxDelayMs ?? DEFAULT_RETRY_MAX_MS,
     signal: options?.signal,
   });
+}
+
+/** Connect can finish after cancellation; the listing service still frees its SDK. */
+export async function loadSharedObjects(
+  indexerUrl: string,
+  seedHex: string,
+  options?: SharedObjectsListingOptions,
+  connect: Parameters<
+    typeof createSharedObjectsClient
+  >[2] = connectSharedObjects,
+): Promise<SharedObjectsListingResult> {
+  const handle = await createSharedObjectsClient(indexerUrl, seedHex, connect);
+  try {
+    options?.signal?.throwIfAborted();
+    return await listSharedObjects(handle.client, options);
+  } finally {
+    try {
+      handle.dispose();
+    } catch {
+      // Reporting cannot replace a listing error or expose a sharing seed.
+      try {
+        useEventLogStore
+          .getState()
+          .push("Shared object SDK cleanup failed", "error");
+      } catch {
+        // A failed reporter cannot turn detached cleanup into an unhandled rejection.
+      }
+    }
+  }
 }
 
 /**
@@ -275,9 +333,13 @@ async function fetchPageWithRetry(
   for (;;) {
     signal?.throwIfAborted();
     try {
-      return await (signal ? client.fetchPage(offset, pageSize, signal) : client.fetchPage(offset, pageSize));
+      return await (signal
+        ? client.fetchPage(offset, pageSize, signal)
+        : client.fetchPage(offset, pageSize));
     } catch (cause) {
       signal?.throwIfAborted();
+      // A new read cannot repair a failed free and would allocate more native handles.
+      if (cause instanceof SharedObjectsCleanupError) throw cause;
       if (attemptCount >= retries) {
         throw new SharedObjectsListingError(
           pageIndex,
