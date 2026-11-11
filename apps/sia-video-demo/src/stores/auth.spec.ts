@@ -366,6 +366,44 @@ describe("reconnect", () => {
     }
   });
 
+  it("notifies account subscribers when settings cannot persist the ready state", async () => {
+    stubWindow("");
+    let finish!: (sdk: { free: ReturnType<typeof vi.fn> }) => void;
+    backend.connectAppKey.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    );
+    const {
+      currentDemoAccountSnapshot,
+      demoSettingsStore,
+      subscribeDemoAccount,
+    } = await importStore();
+    demoSettingsStore.setState({ savedUserKeyHex: SEED });
+    const observed: (AccessPhase | null)[] = [];
+    const unsubscribe = subscribeDemoAccount(() => {
+      observed.push(currentDemoAccountSnapshot()?.state.phase ?? null);
+    });
+    const reconnect = demoAccount.reconnect();
+    await vi.waitFor(() =>
+      expect(backend.connectAppKey).toHaveBeenCalledTimes(1),
+    );
+    const save = storage.setItem.bind(storage);
+    try {
+      storage.setItem = () => {
+        throw new Error("Storage full");
+      };
+      finish({ free: vi.fn() });
+      await reconnect;
+      expect(accountStep()).toBe("player");
+      expect(observed).toContain(AccessPhase.Ready);
+    } finally {
+      storage.setItem = save;
+      unsubscribe();
+    }
+  });
+
   it("preserves the confirmed key on a transient reconnect failure", async () => {
     stubWindow("");
     const { demoSettingsStore } = await importStore();

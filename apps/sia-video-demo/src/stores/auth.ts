@@ -215,13 +215,17 @@ function replaceAccount(next: DemoAccess | null): void {
   unsubscribeAccess =
     next?.subscribe(() => {
       if (access !== next) return;
-      if (next.getSnapshot().state.phase === AccessPhase.Ready) {
-        demoSettingsStore.setState({
-          accountError: null,
-          reconnectError: null,
-        });
+      try {
+        if (next.getSnapshot().state.phase === AccessPhase.Ready) {
+          demoSettingsStore.setState({
+            accountError: null,
+            reconnectError: null,
+          });
+        }
+      } finally {
+        // Zustand updates memory before persistence, so a storage failure cannot hide Ready.
+        publishAccount();
       }
-      publishAccount();
     }) ?? null;
   publishAccount();
   void previous?.dispose().catch(() => {
