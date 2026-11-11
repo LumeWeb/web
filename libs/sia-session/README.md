@@ -1,6 +1,6 @@
 # Sia session
 
-`@lumeweb/sia-session` lets components borrow one Sia SDK while one owner controls its cleanup. A lease keeps an SDK alive until its borrower finishes, even after replacement or closure. The package uses nanoevents and has no SDK or framework runtime dependency.
+`@lumeweb/sia-session` is a lifetime tool for services that own a Sia SDK. It admits concurrent work and delays cleanup until the final borrow releases, even after replacement or closure. It does not create SDKs or manage account access. Apps connecting an account should start with [app access](../sia-app-access/docs/getting-started.md); authors of SDK-owning services can read [service usage](docs/usage.md) and [SDK ownership](docs/ownership.md).
 
 ## Get started
 
@@ -10,7 +10,7 @@ The package is private and ESM-only. From a consumer package in this pnpm worksp
 pnpm add @lumeweb/sia-session@workspace:*
 ```
 
-Pass a WASM SDK your application has already connected to `createSessionFromClient`. This example reads an object's size and then closes the SDK. Its type import selects the WASM client explicitly:
+An SDK-owning service can adopt a connected WASM SDK through `createSessionFromClient`. This example reads an object's size and then closes the SDK. Its type import selects the WASM client explicitly:
 
 ```ts
 import { createSessionFromClient } from "@lumeweb/sia-session";
@@ -24,6 +24,7 @@ async function readObjectSize(sdk: Sdk, objectKey: string): Promise<number> {
       try {
         return object.size();
       } finally {
+        // The SDK must outlive the native object handle, including its cleanup.
         object.free();
       }
     });
@@ -39,7 +40,7 @@ The Sia storage 0.2.0 WASM client exposes `free()`. The native Node client selec
 
 SDK 0.2.0's WASM declarations reference `Symbol.dispose`. Include `ESNext.Disposable` (or a library set that contains it) in your TypeScript `lib` configuration when compiling these SDK examples. That requirement comes from the SDK types, not this package's root entry.
 
-For an application-wide SDK, keep the session until shutdown and pass `session.source` to components. A source cannot replace or close the SDK. Do not call `sdk.free()` after successful adoption or pass that SDK to another disposal owner. `session.close()` waits for existing borrowers before calling the captured `free()` method with its original receiver.
+For a shared SDK, keep the session inside its owning service until shutdown. Expose service operations to application code instead of passing its source to views. A source cannot replace or close the SDK. Do not call `sdk.free()` after successful adoption or pass that SDK to another disposal owner. `session.close()` waits for existing borrowers before calling the captured `free()` method with its original receiver.
 
 Borrowed types from `createSessionFromClient` omit `free` and all symbol members, including disposal symbols. The runtime SDK object is unchanged; these types do not prevent a caller from bypassing ownership through a cast.
 
@@ -52,8 +53,13 @@ Import these functions from `@lumeweb/sia-session`:
 | `createSessionFromClient<Client extends SdkClient>(client, options?: SdkSessionOptions)` | `SdkSession<Omit<Client, "free" \| symbol>>`, with the supplied SDK already available. |
 | `createSiaSdkSession<T>(options?: SdkSessionOptions)`                                    | An empty `SdkSession<T>`. `T` is the borrowed view your consumers need.                |
 | `mapSiaSdkSession<T, View>(source: SdkSource<T>, select: SdkSelector<T, View>)`          | An `SdkSource<View>` with its parent's SDK IDs and lifetime.                           |
+| `openSiaSdkOperationScope<T>(source: SdkSource<T>)`                                      | An `SdkOperationScope<T>` that retains one parent lease for independent operations.    |
 
 An empty source rejects ordinary acquisition until `set` or `setHandle` supplies an SDK. None of these factories creates a new SDK connection.
+
+An operation scope admits work through `run(work)` before returning its promise. `close()` denies new work immediately and waits for admitted callbacks, then releases its parent lease. Parent retirement closes admission too; `closed` observes that drain without starting closure. Closing twice returns the same promise. The scope cannot replace or dispose the parent SDK and exposes neither its SDK value nor another source. Do not await `close()` from a callback admitted by the same scope. `closed` does not wait for parent cleanup if another borrower keeps that SDK alive; SDK cleanup failures reach the parent's `clear()` or `close()` and `onError`, not `closed`. A failing external retirement unsubscribe rejects `closed` after the parent borrow is released.
+
+A callback must free its native child handles before it settles, or retain its operation until a managed stream releases them. The scope cannot identify child handles returned from an SDK method.
 
 Mapping runs `select` for each acquisition or short operation. If selection or mapped-lease construction fails, mapping attempts to release the parent lease and preserves the original error even if a supplied release method throws. Release of a mapped lease releases its parent lease. Mapping forwards observations and does not gain replacement or disposal authority. Selected views can contain primitive values, including `undefined`.
 
@@ -75,29 +81,11 @@ Copying `sdk.object` into the view would lose its SDK receiver.
 
 ## Owner API
 
-`SdkSession<T>` exposes the owner methods below. Its `source` is an `SdkSource<T>`. These methods do not require a receiver and can be passed as callbacks.
-
-| Method                                                        | Return          | Behavior                                                                                                                                                                              |
-| ------------------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `set(client: SdkClient & T, options?: SetOptions)`            | `symbol`        | Captures `client.free`, adopts the SDK and retires its predecessor. Setting the same current standard client again returns its existing ID after expectation checks.                  |
-| `setHandle(handle: SdkHandle<T>, options?: SetHandleOptions)` | `symbol`        | Adopts a custom value and captures its disposer. Handles cannot be reused. Object values are exclusive by default; `valueOwnership: "shared"` permits separate handles for one value. |
-| `clear()`                                                     | `Promise<void>` | Immediately publishes an empty source and retires its current SDK. Waits only for the SDK removed by this call, not for other previously retired SDKs. The session remains reusable.  |
-| `drain()`                                                     | `Promise<void>` | Waits for SDKs already retired and still pending cleanup when called. Excludes the active SDK and later retirements.                                                                  |
-| `close()`                                                     | `Promise<void>` | Permanently publishes a closed source, rejects new admission and waits for every pending SDK captured at closure. Repeated calls return the same promise.                             |
-
-Clearing an empty session still creates a new snapshot. After closure, `clear()` returns the existing close promise. A completed cleanup failure is no longer pending and is not collected by a later `drain()`.
-
-Replacement becomes current before the predecessor's retirement callbacks run. Those callbacks can replace or close the session again before the outer `set` returns. The returned symbol identifies the SDK that call accepted; use a fresh snapshot to find the current SDK.
-
-The session invokes a retired SDK's captured cleanup once, after its final lease releases. Retirement cannot undo requests already sent, and the package does not force cleanup after a timeout. Do not await `clear`, `drain` or `close` from work retaining an SDK that the promise must wait for. Release that retention and await cleanup outside it.
+`SdkSession<T>` selects the current SDK through `set` or `setHandle`; `clear`, `drain`, and `close` retire and wait for cleanup with different boundaries. Its `source` cannot call any of them. Read [SDK ownership](docs/ownership.md) for the method table, replacement, error paths, and what a caller must free after failed adoption.
 
 ### Custom handles and ownership limits
 
-`SdkClient` requires `free(): void`. `SdkHandle<T>` contains a readonly `value: T` and a `dispose(): void | PromiseLike<void>` method. The session preserves the handle receiver and waits for asynchronous custom cleanup. Use `setHandle` when cleanup is asynchronous or the adopted value is a capability view rather than a standard SDK client.
-
-Both adoption methods check object identities across clients, handle descriptors and object values. By default, a claimed object cannot gain another disposal owner by changing roles, even after retirement or cleanup. `setHandle(handle, { valueOwnership: "shared" })` reserves the object value without claiming it exclusively, so separate handles can use it; those handles still cannot be reused. A shared value cannot later be adopted by `set` or an exclusive handle. Each shared handle's disposer must leave the value usable by other handles and their outstanding leases; the session does not coordinate cleanup across separate handles. Admission rechecks identities after caller-controlled getters. Primitive values have no object identity to track. A rejected unused client or handle remains caller-owned; rejection does not call its disposer.
-
-Identity checks apply within one loaded package implementation. They cannot detect every hidden alias, wrapper or separately loaded copy. Create one owner for each SDK and share its source. The session captures a cleanup method at adoption and does not also invoke an aliased symbol destructor.
+`setHandle` accepts a value with captured `dispose()` cleanup. Separate handles can share a value only when their cleanup leaves it safe for every other borrower. See [accepted and rejected handles](docs/ownership.md#rejected-adoption-and-shared-handles) for identity checks, receiver rules, and cleanup authority.
 
 ## Source API
 
@@ -159,7 +147,7 @@ The package freezes the sessions, sources, leases and snapshots it creates. `wit
 
 Notification callbacks return `unknown` so ordinary functions and async callbacks are accepted. Returned promises are observed for failure but do not delay cleanup completion. Listener exceptions and rejections reach `onError` without interrupting other listeners or reversing an accepted transition. The error reporter's own failures are ignored. There is no automatic logging.
 
-A cleanup barrier waits for all SDKs it captured, then rejects with `AggregateError` if any cleanup failed. Its `errors` contains the original cleanup failures. Listener failures do not reject cleanup barriers. Adoption errors and `withSdk` work failures reach their callers rather than being reported as listener failures.
+A cleanup barrier waits for all SDKs it captured, then rejects with `AggregateError` if any cleanup failed. Its `errors` contains the original cleanup failures. Listener failures do not reject cleanup barriers. Adoption errors and `withSdk` work failures reach their callers rather than being reported as listener failures. [Cleanup failure behavior](docs/ownership.md#report-cleanup-failures-without-losing-work-errors) explains how closure and `onError` report the same failure.
 
 If you await closure in a `finally` block, a closure rejection follows normal JavaScript rules and can replace an earlier operation error. Handle those two failures separately when both must be retained.
 
@@ -196,6 +184,7 @@ async function waitAndRun<T, R>(source: SdkSource<T>, work: AbortWork<T, R>, sig
       linked.dispose();
     }
   } finally {
+    // Aborting requests a stop; the lease stays held until native work settles.
     lease.release();
   }
 }
