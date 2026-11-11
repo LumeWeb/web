@@ -24,6 +24,7 @@ export class AccessResources<Session> {
   }
   private currentSessionId: null | string = null;
   private ownedConnection: AccessConnection<Session> | undefined;
+  private readonly pendingAcquisitions = new Set<Promise<void>>();
   private readonly pendingConnections = new Set<Promise<void>>();
   private readonly sdkSession;
   private session: AccessSession<Session> | undefined;
@@ -32,13 +33,37 @@ export class AccessResources<Session> {
       onError: (issue) => onResourceError?.(issue.error),
     });
   }
+  admitAcquisition(): (cleanup?: Promise<void>) => void {
+    let resolve!: () => void;
+    let reject!: (reason: unknown) => void;
+    const pending = new Promise<void>((done, fail) => {
+      resolve = done;
+      reject = fail;
+    });
+    this.pendingAcquisitions.add(pending);
+    void pending.then(
+      () => this.pendingAcquisitions.delete(pending),
+      () => this.pendingAcquisitions.delete(pending),
+    );
+    void pending.catch(() => undefined);
+    let finished = false;
+    return (cleanup = Promise.resolve()) => {
+      if (finished) return;
+      finished = true;
+      void cleanup.then(resolve, reject);
+    };
+  }
   dispose(): Promise<void> {
     const connection = this.retireConnection();
     this.session = undefined;
     this.currentSessionId = null;
-    return waitForCleanup(connection, this.sdkSession.close());
+    return waitForCleanup(
+      connection,
+      this.sdkSession.close(),
+      ...this.pendingAcquisitions,
+    );
   }
-  disposeConnection(owned: AccessConnection<Session>): void {
+  disposeConnection(owned: AccessConnection<Session>): Promise<void> {
     let completion: Promise<void>;
     try {
       completion = Promise.resolve(owned.dispose());
@@ -59,6 +84,7 @@ export class AccessResources<Session> {
         }
       },
     );
+    return completion;
   }
   exportAppKey(): Uint8Array {
     if (!this.session) throw new SessionUnavailableError();
@@ -91,12 +117,16 @@ export class AccessResources<Session> {
   }
   retire(): Promise<void> {
     const connection = this.retireConnection();
-    return waitForCleanup(connection, this.retireSession());
+    return waitForCleanup(
+      connection,
+      this.retireSession(),
+      ...this.pendingAcquisitions,
+    );
   }
   retireConnection(): Promise<void> {
     const owned = this.ownedConnection;
     this.ownedConnection = undefined;
-    if (owned) this.disposeConnection(owned);
+    if (owned) void this.disposeConnection(owned);
     return waitForCleanup(...this.pendingConnections);
   }
   retireSession(): Promise<void> {

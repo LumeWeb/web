@@ -29,6 +29,7 @@ import type {
 
 export type SavedAccess = AccessReady<CredentialConfirmation.Confirmed>;
 interface CredentialResources<Session> {
+  admitAcquisition(): (cleanup?: Promise<void>) => void;
   exportAppKey(): Uint8Array;
   hasSession(): boolean;
   installSession(resource: AccessSession<Session>): void;
@@ -186,22 +187,27 @@ export class CredentialOperations<Session> {
       );
       return;
     }
-    const resource = await this.reconnectWithStoredKey(op, bytes);
-    if (!op.current) {
-      resource?.dispose();
-      return;
+    const finishAcquisition = this.resources.admitAcquisition();
+    try {
+      const resource = await this.reconnectWithStoredKey(op, bytes);
+      if (!op.current) {
+        resource?.dispose();
+        return;
+      }
+      if (!resource) {
+        op.fail(AccessFailure.UnregisteredKey, AccessRecovery.Authorize);
+        return;
+      }
+      this.resources.installSession(resource);
+      op.finish(
+        {
+          credentials: CredentialConfirmation.Confirmed,
+          kind: AccessOutcome.Ready,
+        },
+        { type: AccessEvent.Restored },
+      );
+    } finally {
+      finishAcquisition();
     }
-    if (!resource) {
-      op.fail(AccessFailure.UnregisteredKey, AccessRecovery.Authorize);
-      return;
-    }
-    this.resources.installSession(resource);
-    op.finish(
-      {
-        credentials: CredentialConfirmation.Confirmed,
-        kind: AccessOutcome.Ready,
-      },
-      { type: AccessEvent.Restored },
-    );
   }
 }

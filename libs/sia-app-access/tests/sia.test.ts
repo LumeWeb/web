@@ -45,10 +45,18 @@ void test("retirement waits for pending approval and denies later calls", async 
   });
   const approval = connection.waitForApproval();
   await Promise.resolve();
-  void connection.dispose();
+  const cleanup = Promise.resolve(connection.dispose());
+  let closed = false;
+  void cleanup.then(() => {
+    closed = true;
+  });
+  await new Promise<void>((resolve) => setImmediate(resolve));
+  assert.equal(closed, false);
   assert.equal(events.includes("builder:free"), false);
   release();
   await approval;
+  await cleanup;
+  assert.equal(closed, true);
   assert.equal(events.filter((e) => e === "builder:free").length, 1);
   await assert.rejects(connection.register("valid phrase"));
 });

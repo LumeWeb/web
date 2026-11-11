@@ -29,8 +29,9 @@ import type {
 } from "./access-types.ts";
 
 interface AuthorizationResources<Session> {
+  admitAcquisition(): (cleanup?: Promise<void>) => void;
   readonly connection: AccessConnection<Session>;
-  disposeConnection(connection: AccessConnection<Session>): void;
+  disposeConnection(connection: AccessConnection<Session>): Promise<void>;
   installConnection(connection: AccessConnection<Session>): void;
   installSession(resource: AccessSession<Session>): void;
   retireConnection(): void;
@@ -114,32 +115,39 @@ export class Authorization<Session> {
     await this.checkPhrase(op, owned, phrase);
     if (!op.current) return;
     op.registrationEffect = RegistrationEffect.Unknown;
+    const finishAcquisition = this.resources.admitAcquisition();
     let resource: AccessSession<Session>;
     try {
       resource = await owned.register(phrase);
     } catch {
+      finishAcquisition();
       op.fail(AccessFailure.Registration, AccessRecovery.Authorize);
       return;
     }
-    if (!op.current) {
-      resource.dispose();
-      return;
+    try {
+      if (!op.current) {
+        resource.dispose();
+        return;
+      }
+      op.registrationEffect = RegistrationEffect.Registered;
+      this.resources.retireConnection();
+      // Connection disposal may reenter the controller and cancel this registration.
+      if (!op.current) {
+        resource.dispose();
+        return;
+      }
+      this.resources.installSession(resource);
+      this.machine.send({ type: AccessEvent.Registered });
+    } finally {
+      finishAcquisition();
     }
-    op.registrationEffect = RegistrationEffect.Registered;
-    this.resources.retireConnection();
-    // Connection disposal may reenter the controller and cancel this registration.
-    if (!op.current) {
-      resource.dispose();
-      return;
-    }
-    this.resources.installSession(resource);
-    this.machine.send({ type: AccessEvent.Registered });
     await this.credentials.save(op);
   }
   private async requestApproval(
     op: AccessCommand<AccessApproved>,
   ): Promise<void> {
     if (!op.current) return;
+    const finishAcquisition = this.resources.admitAcquisition();
     let owned: AccessConnection<Session>;
     try {
       owned = await this.environment.adapter.begin(
@@ -147,14 +155,19 @@ export class Authorization<Session> {
         this.environment.application,
       );
     } catch {
+      finishAcquisition();
       op.fail(AccessFailure.Connection, AccessRecovery.Authorize);
       return;
     }
     if (!op.current) {
-      this.resources.disposeConnection(owned);
+      finishAcquisition(this.resources.disposeConnection(owned));
       return;
     }
-    this.resources.installConnection(owned);
+    try {
+      this.resources.installConnection(owned);
+    } finally {
+      finishAcquisition();
+    }
     try {
       validateApprovalUrl(owned.approvalUrl);
     } catch {

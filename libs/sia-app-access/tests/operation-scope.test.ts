@@ -111,7 +111,7 @@ void test("a synchronous connection disposal failure still publishes disconnect"
   await access.dispose();
 });
 
-void test("a connection returned after disconnect reports its cleanup failure", async () => {
+void test("disconnect waits for a late connection and reports its cleanup failure", async () => {
   const failure = new Error("late connection cleanup failed");
   const reported: unknown[] = [];
   const { adapter, connection } = fixture();
@@ -125,11 +125,71 @@ void test("a connection returned after disconnect reports its cleanup failure", 
     onResourceError: (error) => reported.push(error),
   });
   const authorization = access.authorize(AccessIntent.Create);
-  await access.disconnect();
-  started.resolve(connection);
-  await authorization;
+  let complete = false;
+  const cleanup = access.disconnect().finally(() => {
+    complete = true;
+  });
+  assert.equal((await authorization).kind, AccessOutcome.Cancelled);
   await new Promise<void>((resolve) => setImmediate(resolve));
+  assert.equal(complete, false);
+  started.resolve(connection);
+  await assert.rejects(
+    cleanup,
+    (error: unknown) =>
+      error instanceof AggregateError && error.errors[0] === failure,
+  );
+  assert.equal(complete, true);
   assert.deepEqual(reported, [failure]);
+});
+
+void test("dispose waits for a late reconnect session to be freed", async () => {
+  const { access, adapter, counts, session } = fixture(
+    credentialStore({ read: async () => new Uint8Array(32).fill(9) }),
+  );
+  const started = deferred<void>();
+  const connected = deferred<typeof session>();
+  adapter.reconnect = () => {
+    started.resolve();
+    return connected.promise;
+  };
+  const reconnect = access.reconnect();
+  await started.promise;
+  let complete = false;
+  const cleanup = access.dispose().then(() => {
+    complete = true;
+  });
+  assert.equal((await reconnect).kind, AccessOutcome.Cancelled);
+  await new Promise<void>((resolve) => setImmediate(resolve));
+  assert.equal(complete, false);
+  connected.resolve(session);
+  await cleanup;
+  assert.equal(counts().ended, 1);
+});
+
+void test("disconnect waits for a late registration session even when connection cleanup is synchronous", async () => {
+  const { access, connection, counts, session } = fixture();
+  assert.equal(
+    (await access.authorize(AccessIntent.Create)).kind,
+    AccessOutcome.Approved,
+  );
+  const started = deferred<void>();
+  const registered = deferred<typeof session>();
+  connection.register = () => {
+    started.resolve();
+    return registered.promise;
+  };
+  const registration = access.submitRecoveryPhrase("valid phrase");
+  await started.promise;
+  let complete = false;
+  const cleanup = access.disconnect().then(() => {
+    complete = true;
+  });
+  assert.equal((await registration).kind, AccessOutcome.Cancelled);
+  await new Promise<void>((resolve) => setImmediate(resolve));
+  assert.equal(complete, false);
+  registered.resolve(session);
+  await cleanup;
+  assert.equal(counts().ended, 1);
 });
 
 void test("terminal disposal from disconnected prevents another reconnect", async () => {
