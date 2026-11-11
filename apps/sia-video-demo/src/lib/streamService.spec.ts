@@ -2,19 +2,17 @@
 /* oxlint-disable perfectionist/sort-objects */
 /* oxlint-disable typescript/unbound-method */
 /* oxlint-disable typescript(require-await) */
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   createSiaNativeStreamProvider,
   type SiaNativeStreamService,
 } from "@lumeweb/sia-video-source";
 import type { Sdk, Streams } from "@siafoundation/sia-storage";
 import {
-  configureDemoStreamAuth,
   createDemoNativeStreamService,
-  getDemoNativeStreamService,
+  createDemoStreamAuthSource,
   resolveDemoStreamSource,
 } from "./streamService";
-import { useAuthStore } from "../stores/auth";
 
 const OBJECT_KEY =
   "a1b2c3d4e5f60718293a4b5c6d7e8f90112233445566778899aabbccddeeff01";
@@ -25,12 +23,7 @@ const auth = {
     sharingKeyHex: null,
   }),
 };
-
 describe("demo stream service", () => {
-  beforeAll(() => {
-    configureDemoStreamAuth(useAuthStore);
-  });
-
   it("models a rejected preparation retry before native readiness succeeds", async () => {
     let attempts = 0;
     const service: SiaNativeStreamService = {
@@ -56,15 +49,14 @@ describe("demo stream service", () => {
 
   it("prepares streaming once and exposes readiness", async () => {
     const enableStreaming = vi.fn(() => Promise.resolve(true));
-    const service = createDemoNativeStreamService({ auth, enableStreaming });
+    const service = createDemoNativeStreamService(auth, { enableStreaming });
     await expect(service.prepare()).resolves.toBe(true);
     await expect(service.isAvailable()).resolves.toBe(true);
     expect(enableStreaming).toHaveBeenCalledTimes(1);
   });
 
   it("reports unavailable native streaming without opening a session", async () => {
-    const service = createDemoNativeStreamService({
-      auth,
+    const service = createDemoNativeStreamService(auth, {
       enableStreaming: () => Promise.resolve(false),
     });
     await expect(service.isAvailable()).resolves.toBe(false);
@@ -102,8 +94,7 @@ describe("demo stream service", () => {
         }),
       ),
     })) as unknown as () => Streams;
-    const service = createDemoNativeStreamService({
-      auth: rotatingAuth,
+    const service = createDemoNativeStreamService(rotatingAuth, {
       connectApp,
       enableStreaming: () => Promise.resolve(true),
       openStreams,
@@ -139,18 +130,32 @@ describe("demo stream service", () => {
     expect(secondSdk.free).toHaveBeenCalledTimes(1);
   });
 
-  it("subscribes to the real auth store and retires cached SDK credentials on logout", async () => {
-    const original = useAuthStore.getState();
-    useAuthStore.setState({
-      indexerUrl: "https://indexer.example",
-      userKeyHex: "aa".repeat(32),
-      sharingKeyHex: null,
-    });
+  it("retires cached SDK credentials when access clears its active key", async () => {
+    let activeAccountKey: null | string = "aa".repeat(32);
+    let notifyAccount: () => void = () => undefined;
+    const source = createDemoStreamAuthSource(
+      {
+        getState: () => ({
+          indexerUrl: "https://indexer.example",
+          sharingKeyHex: null,
+        }),
+        subscribe: () => () => undefined,
+      },
+      {
+        activeAppKeyHex: () => activeAccountKey,
+        subscribe(listener) {
+          notifyAccount = listener;
+          return () => {
+            notifyAccount = () => undefined;
+          };
+        },
+      },
+    );
     const sdk = {
       free: vi.fn(),
       object: vi.fn(() => Promise.resolve({ free: vi.fn() })),
     } as unknown as Sdk;
-    const service = createDemoNativeStreamService({
+    const service = createDemoNativeStreamService(source, {
       connectApp: vi.fn(() => Promise.resolve(sdk)),
       enableStreaming: () => Promise.resolve(true),
       openStreams: () =>
@@ -172,18 +177,11 @@ describe("demo stream service", () => {
     const file = await session.url(null, { name: "a", type: "video/mp4" });
     file.release();
 
-    useAuthStore.setState({ userKeyHex: "" });
+    activeAccountKey = null;
+    notifyAccount();
     // oxlint-disable-next-line typescript(unbound-method)
     expect(sdk.free).toHaveBeenCalledTimes(1);
     service.dispose();
-    useAuthStore.setState(original, true);
-  });
-
-  it("rejects auth reconfiguration after the shared service is constructed", () => {
-    getDemoNativeStreamService();
-    expect(() => configureDemoStreamAuth(useAuthStore)).toThrow(
-      "configureDemoStreamAuth must run before the demo stream service is constructed",
-    );
   });
 
   it("resolves object keys and share URLs through the public source contract", () => {
@@ -215,8 +213,7 @@ describe("demo stream service", () => {
     } as unknown as Sdk;
     const connectApp = vi.fn(() => Promise.resolve(sdk));
     const openStreams = vi.fn(() => streams);
-    const service = createDemoNativeStreamService({
-      auth,
+    const service = createDemoNativeStreamService(auth, {
       connectApp,
       enableStreaming: () => Promise.resolve(true),
       openStreams,

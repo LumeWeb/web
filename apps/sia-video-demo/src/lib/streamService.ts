@@ -1,70 +1,70 @@
 /* oxlint-disable perfectionist/sort-objects, perfectionist/sort-modules */
+/** Adapts demo account and sharing state to the video service without owning either SDK. */
 import { parseSiaShareUrl } from "@lumeweb/sia-video-source";
 import {
   createSiaStreamService,
   type SiaNativeStreamSourceKind,
   type SiaStreamAuthSource,
+  type SiaStreamAuthState,
   type SiaStreamService,
   type SiaStreamSource,
 } from "@lumeweb/sia-video-source/sia";
-import { createSiaStreamAuthSource } from "@lumeweb/sia-video-source/sia/zustand";
 
 export type DemoStreamSource = SiaStreamSource;
 export type DemoNativeStreamService = SiaStreamService;
 
-/**
- * The demo keeps the auth store out of the library service. This adapter lets
- * the player configure the live Zustand store without importing the browser
- * store in Node-only stream tests.
- */
-const authSource: SiaStreamAuthSource = {
-  get: () => ({ indexerUrl: "", userKeyHex: "", sharingKeyHex: null }),
-};
-let configured = false;
-type DemoAuthStore = Parameters<typeof createSiaStreamAuthSource>[0];
-let configuredStore: DemoAuthStore | null = null;
-let demoService: DemoNativeStreamService | null = null;
+interface DemoAuthStore {
+  getState(): Pick<SiaStreamAuthState, "indexerUrl" | "sharingKeyHex">;
+  subscribe(listener: () => void): () => void;
+}
+interface DemoAccountSource {
+  activeAppKeyHex(): null | string;
+  subscribe(listener: () => void): () => void;
+}
 
-/** Wires the live app store before the first native service is created. */
-export function configureDemoStreamAuth<TState extends object>(
-  store: Parameters<typeof createSiaStreamAuthSource<TState>>[0],
-): void {
-  if (demoService) {
-    throw new Error(
-      "configureDemoStreamAuth must run before the demo stream service is constructed",
-    );
-  }
-  if (configured) {
-    if (configuredStore !== store) {
-      throw new Error(
-        "configureDemoStreamAuth was already configured with a different store",
-      );
-    }
-    return;
-  }
-  const source = createSiaStreamAuthSource(store);
-  Object.assign(authSource, source);
-  configuredStore = store;
-  configured = true;
+export function createDemoStreamAuthSource(
+  store: DemoAuthStore,
+  account: DemoAccountSource,
+): SiaStreamAuthSource {
+  const read = (): SiaStreamAuthState => {
+    const state = store.getState();
+    return {
+      indexerUrl: state.indexerUrl,
+      sharingKeyHex: state.sharingKeyHex,
+      userKeyHex: account.activeAppKeyHex() ?? "",
+    };
+  };
+  return {
+    get: read,
+    subscribe(listener) {
+      let previous = read();
+      const onChange = () => {
+        const next = read();
+        if (
+          next.indexerUrl === previous.indexerUrl &&
+          next.sharingKeyHex === previous.sharingKeyHex &&
+          next.userKeyHex === previous.userKeyHex
+        )
+          return;
+        previous = next;
+        listener(next);
+      };
+      const unsubscribeStore = store.subscribe(onChange);
+      // Account readiness can change without a persisted-key store write.
+      const unsubscribeAccount = account.subscribe(onChange);
+      return () => {
+        unsubscribeStore();
+        unsubscribeAccount();
+      };
+    },
+  };
 }
 
 export function createDemoNativeStreamService(
-  options: Omit<Parameters<typeof createSiaStreamService>[0], "auth"> & {
-    auth?: SiaStreamAuthSource;
-  } = {},
+  auth: SiaStreamAuthSource,
+  options: Omit<Parameters<typeof createSiaStreamService>[0], "auth"> = {},
 ): DemoNativeStreamService {
-  const service = createSiaStreamService({
-    ...options,
-    auth: options.auth ?? authSource,
-  });
-  demoService = service;
-  return service;
-}
-
-/** Returns the app-wide service after startup has wired the live auth store. */
-export function getDemoNativeStreamService(): DemoNativeStreamService {
-  demoService ??= createDemoNativeStreamService();
-  return demoService;
+  return createSiaStreamService({ ...options, auth });
 }
 
 /** Resolves a source with the library's canonical Sia URL parser. */
@@ -77,5 +77,3 @@ export function resolveDemoStreamSource(
   const parsed = parseSiaShareUrl(src);
   return { objectKey: parsed.objectKey, shared: true };
 }
-
-export { authSource as demoStreamAuthSource };

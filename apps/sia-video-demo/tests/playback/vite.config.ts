@@ -1,6 +1,11 @@
 /** Serves the demo with managed auth/read ports and synthetic native stream URLs. */
 import { fileURLToPath } from "node:url";
-import { defineConfig, mergeConfig, type Plugin, searchForWorkspaceRoot } from "vite";
+import {
+  defineConfig,
+  mergeConfig,
+  type Plugin,
+  searchForWorkspaceRoot,
+} from "vite";
 import applicationConfig from "../../vite.config";
 
 const workerEntry = fileURLToPath(
@@ -8,8 +13,12 @@ const workerEntry = fileURLToPath(
 );
 const fixtureWorker = fileURLToPath(new URL("./worker.ts", import.meta.url));
 const fixtureBackend = fileURLToPath(new URL("./backend.ts", import.meta.url));
+const fixtureAccessAdapter = fileURLToPath(
+  new URL("./accessAdapter.ts", import.meta.url),
+);
 const phraseWasm = fileURLToPath(
-  import.meta.resolve("@siafoundation/sia-storage/wasm/sia_storage_wasm_bg.wasm"),
+  import.meta
+    .resolve("@siafoundation/sia-storage/wasm/sia_storage_wasm_bg.wasm"),
 );
 
 function payloadWorker(): Plugin {
@@ -30,12 +39,18 @@ export default defineConfig((environment) => {
     resolve: {
       alias: [
         {
+          find: "@lumeweb/sia-app-access/sia",
+          replacement: fixtureAccessAdapter,
+        },
+        {
           find: /^(?:.*\/)?storageBackend(?:\.ts)?$/,
           replacement: fixtureBackend,
         },
         {
-          find: /^(?:.*\/)?streamService(?:\.ts)?$/,
-          replacement: fileURLToPath(new URL("./nativeService.ts", import.meta.url)),
+          find: /^(?:.*\/)?demoStreamService(?:\.ts)?$/,
+          replacement: fileURLToPath(
+            new URL("./nativeService.ts", import.meta.url),
+          ),
         },
       ],
     },
@@ -44,7 +59,9 @@ export default defineConfig((environment) => {
       // Linked dependencies can put the phrase parser outside the worktree.
       fs: {
         allow: [
-          searchForWorkspaceRoot(fileURLToPath(new URL("../../", import.meta.url))),
+          searchForWorkspaceRoot(
+            fileURLToPath(new URL("../../", import.meta.url)),
+          ),
           phraseWasm,
         ],
       },

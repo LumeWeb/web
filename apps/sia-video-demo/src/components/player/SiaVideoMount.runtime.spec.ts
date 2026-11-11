@@ -58,20 +58,7 @@ const preparation = vi.hoisted(() => {
   };
 });
 
-vi.mock("../../lib/streamService", () => ({
-  createDemoNativeStreamService: vi.fn(() => ({
-    isAvailable: () => Promise.resolve(preparation.available),
-    prepare: () => {
-      preparation.started();
-      return preparation.promise;
-    },
-    resolve: (src: string) =>
-      Promise.resolve({ objectKey: src, shared: false }),
-    session: () =>
-      Promise.resolve({
-        url: () => Promise.resolve({ release: () => {}, url: "blob:test" }),
-      }),
-  })),
+vi.mock("../../lib/demoStreamService", () => ({
   getDemoNativeStreamService: vi.fn(() => ({
     isAvailable: () => Promise.resolve(preparation.available),
     prepare: () => {
@@ -123,13 +110,16 @@ class StubWorker extends EventTarget {
 }
 
 function MountWithCapture({
+  activeSessionId,
   indexerUrl = "https://indexer.test",
   source = selectedSource,
 }: {
+  activeSessionId?: string;
   indexerUrl?: string;
   source?: PublishSelectedSource;
 }): ReactElement {
   return createElement(SiaVideoMount, {
+    activeSessionId,
     autoplayPending: false,
     indexerUrl,
     onAutoplayConsumed: () => {},
@@ -340,6 +330,37 @@ describe("SiaVideoMount preparation effect", () => {
       .filter((message) => message.type === "HELLO");
     expect(hellos).toHaveLength(initialHelloCount + 1);
     expect(hellos.at(-1)?.config?.indexerUrl).toBe("https://indexer.changed");
+    expect(observedMedia).toBe(media);
+    expect(container!.querySelector("video")).toBe(video);
+  });
+
+  it("reloads a mounted publish worker when the active account changes", async () => {
+    useDeveloperOptionsStore.getState().setDisableNativePlayback(true);
+    root!.render(
+      createElement(MountWithCapture, { activeSessionId: "access:1" }),
+    );
+    await flush();
+    const video = container!.querySelector("video");
+    const media = observedMedia;
+    const firstHellos = workerMessages
+      .filter(
+        (message): message is { type: string } =>
+          typeof message === "object" && message !== null && "type" in message,
+      )
+      .filter((message) => message.type === "HELLO").length;
+    expect(firstHellos).toBeGreaterThan(0);
+
+    root!.render(
+      createElement(MountWithCapture, { activeSessionId: "access:2" }),
+    );
+    await flush();
+    const nextHellos = workerMessages
+      .filter(
+        (message): message is { type: string } =>
+          typeof message === "object" && message !== null && "type" in message,
+      )
+      .filter((message) => message.type === "HELLO").length;
+    expect(nextHellos).toBe(firstHellos + 1);
     expect(observedMedia).toBe(media);
     expect(container!.querySelector("video")).toBe(video);
   });

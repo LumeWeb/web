@@ -7,11 +7,19 @@ import {
 } from "@lumeweb/sia-testing/client";
 import { APP_ID, APP_META } from "../../src/lib/constants";
 import { fromHex } from "../../src/lib/hex";
-import type {
-  AuthRequest,
-  AuthSession,
-  ListingSession,
-} from "../../src/lib/storageBackend";
+import type { ListingSession } from "../../src/lib/storageBackend";
+
+export interface AuthRequest {
+  free(): Promise<void> | void;
+  matchesExistingAppKey(phrase: string): Promise<boolean>;
+  register(phrase: string): Promise<AuthSession>;
+  responseUrl(): string;
+  waitForApproval(): Promise<void>;
+}
+export interface AuthSession {
+  appKey(): { export(): Uint8Array; free(): void };
+  free(): void;
+}
 
 declare global {
   interface Window {
@@ -87,7 +95,7 @@ export async function openAuthRequest(
   });
   return {
     free() {
-      void auth.close();
+      return auth.close();
     },
     matchesExistingAppKey: () => Promise.resolve(false),
     async register(phrase) {

@@ -27,7 +27,7 @@ function basePublishDeps(): SelectedSourceDeps {
   return {
     mode: "publish",
     publishSuppliers: publishSuppliers({
-      appKeyHex: APP_KEY_HEX,
+      getAppKeySeed: () => fromHex(APP_KEY_HEX),
     }),
     sharedArmed: armedSharedSource(),
     sharedSuppliers: sharedSuppliers({
@@ -218,7 +218,7 @@ describe("normalizeSelectedSource", () => {
     const selected = normalizeSelectedSource(state, {
       ...basePublishDeps(),
       publishSuppliers: publishSuppliers({
-        appKeyHex: null,
+        getAppKeySeed: null,
       }),
     });
     if (selected === null || selected.mode !== "publish") return;

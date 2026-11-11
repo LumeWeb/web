@@ -4,12 +4,12 @@
 import { createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useAuthStore } from "../../stores/auth";
+import { demoAccount } from "../../stores/auth";
+import { demoSettingsStore } from "../../stores/authSettings";
 import { GateScreen } from "./GateScreen";
 
 let container: HTMLDivElement;
 let root: Root;
-const originalReconnect = useAuthStore.getState().reconnect;
 
 beforeEach(() => {
   container = document.createElement("div");
@@ -20,11 +20,8 @@ beforeEach(() => {
 afterEach(() => {
   root.unmount();
   container.remove();
-  useAuthStore.setState({
-    accountError: null,
-    reconnect: originalReconnect,
-    savedUserKeyHex: "",
-  });
+  vi.restoreAllMocks();
+  demoSettingsStore.setState({ accountError: null, savedUserKeyHex: "" });
 });
 
 async function renderGate(): Promise<void> {
@@ -34,12 +31,10 @@ async function renderGate(): Promise<void> {
 
 describe("account entry after a failed request", () => {
   it("lets the user reconnect a saved account", async () => {
-    const reconnect = vi.fn().mockResolvedValue(undefined);
-    useAuthStore.setState({
+    const reconnect = vi.spyOn(demoAccount, "reconnect").mockResolvedValue();
+    demoSettingsStore.setState({
       accountError: "Could not register the account. Start again.",
-      reconnect,
       savedUserKeyHex: "a1".repeat(32),
-      status: "disconnected",
     });
     await renderGate();
 
@@ -52,10 +47,9 @@ describe("account entry after a failed request", () => {
   });
 
   it("does not offer saved-account reconnect without a saved key", async () => {
-    useAuthStore.setState({
+    demoSettingsStore.setState({
       accountError: "Could not connect to the indexer. Try again.",
       savedUserKeyHex: "",
-      status: "disconnected",
     });
     await renderGate();
 

@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { AuthFlow } from "./components/auth/AuthFlow";
 import { DeveloperTools } from "./components/DeveloperTools";
-import { ingestSharingFragment } from "./stores/auth";
+import { ingestSharingFragment } from "./stores/authSettings";
 
 export function App() {
   // Share fragments are ingested at the app entrypoint: once at module load
-  // (stores/auth.ts) and again on every `hashchange` here, so a sharing key
+  // (stores/authSettings.ts) and again on every `hashchange` here, so a sharing key
   // pasted into the address bar mid-session starts a fresh keyless session.
   useEffect(() => {
     window.addEventListener("hashchange", ingestSharingFragment);

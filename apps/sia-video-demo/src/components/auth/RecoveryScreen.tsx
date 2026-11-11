@@ -1,19 +1,14 @@
 import { type FormEvent, useState } from "react";
-import { useStore } from "zustand";
-import { useAuthStore } from "../../stores/auth";
+import { AccessFailure, AccessPhase } from "@lumeweb/sia-app-access";
+import { demoAccount, useDemoAccountSnapshot } from "../../stores/auth";
 
 export function RecoveryScreen() {
-  const register = useStore(useAuthStore, (s) => s.register);
-  const continueWithoutSaving = useStore(
-    useAuthStore,
-    (s) => s.continueWithoutSaving,
-  );
-  const generateRecoveryPhrase = useStore(
-    useAuthStore,
-    (s) => s.generateRecoveryPhrase,
-  );
-  const retrySave = useStore(useAuthStore, (s) => s.retrySave);
-  const saveError = useStore(useAuthStore, (s) => s.saveError);
+  const accountState = useDemoAccountSnapshot()?.state;
+  const saveError =
+    accountState?.phase === AccessPhase.Failed &&
+    accountState.failure === AccessFailure.CredentialsWrite
+      ? "Could not save your account key. Try saving again."
+      : null;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<null | string>(null);
   const [phrase, setPhrase] = useState("");
@@ -21,7 +16,7 @@ export function RecoveryScreen() {
   const handleGenerate = async () => {
     setError(null);
     try {
-      setPhrase(await generateRecoveryPhrase());
+      setPhrase(await demoAccount.generateRecoveryPhrase());
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
     }
@@ -34,7 +29,7 @@ export function RecoveryScreen() {
     setError(null);
     setBusy(true);
     try {
-      await register(value);
+      await demoAccount.register(value);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
       setBusy(false);
@@ -68,16 +63,18 @@ export function RecoveryScreen() {
           <div className="flex flex-col gap-2">
             <button
               onClick={() =>
-                void retrySave().catch((cause: unknown) =>
-                  setError(
-                    cause instanceof Error ? cause.message : String(cause),
-                  ),
-                )
+                void demoAccount
+                  .retrySave()
+                  .catch((cause: unknown) =>
+                    setError(
+                      cause instanceof Error ? cause.message : String(cause),
+                    ),
+                  )
               }
               type="button">
               Try saving again
             </button>
-            <button onClick={continueWithoutSaving} type="button">
+            <button onClick={demoAccount.continueWithoutSaving} type="button">
               Continue without saving
             </button>
           </div>

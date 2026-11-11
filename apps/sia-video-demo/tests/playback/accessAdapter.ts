@@ -1,19 +1,34 @@
-/** Adapts the demo's lazy SDK ports to access-owned approval and session lifetimes. */
-import { PhraseValidation } from "@lumeweb/sia-app-access";
+/** Supplies controlled account sessions while mock-browser tests exercise the real access controller. */
+import {
+  createSiaAccess as createCoreSiaAccess,
+  PhraseValidation,
+} from "@lumeweb/sia-app-access";
 import type {
   AccessConnection,
   AccessSession,
   SiaAccessAdapter,
 } from "@lumeweb/sia-app-access";
+import type {
+  SiaSdkAccessOptions,
+  SiaSession,
+} from "@lumeweb/sia-app-access/sia";
 import {
   type AuthRequest,
   type AuthSession,
   connectAppKey,
   openAuthRequest,
-} from "./storageBackend";
-import { toHex } from "./hex";
+} from "./backend";
+import { toHex } from "../../src/lib/hex";
 
-export function createDemoAccessAdapter(): SiaAccessAdapter<AuthSession> {
+// The mock /sia entry supplies the controlled adapter while keeping the real controller.
+export function createSiaAccess(options: SiaSdkAccessOptions) {
+  return createCoreSiaAccess({
+    ...options,
+    adapter: options.adapter ?? createSiaAdapter(),
+  });
+}
+
+export function createSiaAdapter(): SiaAccessAdapter<SiaSession> {
   return {
     async begin(scope) {
       const request = await openAuthRequest(scope.indexerUrl);
@@ -25,7 +40,6 @@ export function createDemoAccessAdapter(): SiaAccessAdapter<AuthSession> {
       }
     },
     async generateRecoveryPhrase() {
-      // A rendered account form must not initialize SDK WASM before phrase work starts.
       const { generateRecoveryPhrase, initSia } =
         await import("@siafoundation/sia-storage");
       await initSia();
@@ -37,7 +51,6 @@ export function createDemoAccessAdapter(): SiaAccessAdapter<AuthSession> {
     async validateRecoveryPhrase(phrase) {
       const { initSia, validateRecoveryPhrase } =
         await import("@siafoundation/sia-storage");
-      // A custom auth backend may not have loaded the phrase parser.
       await initSia();
       try {
         validateRecoveryPhrase(phrase);
@@ -49,19 +62,31 @@ export function createDemoAccessAdapter(): SiaAccessAdapter<AuthSession> {
   };
 }
 
-function ownConnection(request: AuthRequest): AccessConnection<AuthSession> {
+function ownConnection(request: AuthRequest): AccessConnection<SiaSession> {
   let retired = false;
   let busy = false;
   let freed = false;
+  let resolveClosed: () => void = () => undefined;
+  let rejectClosed: (error: unknown) => void = () => undefined;
+  const closed = new Promise<void>((resolve, reject) => {
+    resolveClosed = resolve;
+    rejectClosed = reject;
+  });
+  void closed.catch(() => undefined);
   function release() {
     if (retired && !busy && !freed) {
       freed = true;
-      request.free();
+      try {
+        void Promise.resolve(request.free()).then(resolveClosed, rejectClosed);
+      } catch (error) {
+        rejectClosed(error);
+      }
     }
   }
-  function dispose() {
+  function dispose(): Promise<void> {
     retired = true;
     release();
+    return closed;
   }
   function perform<T>(work: () => Promise<T>): Promise<T> {
     if (retired || busy)
@@ -91,7 +116,7 @@ function ownConnection(request: AuthRequest): AccessConnection<AuthSession> {
   };
 }
 
-function ownSession(sdk: AuthSession): AccessSession<AuthSession> {
+function ownSession(sdk: AuthSession): AccessSession<SiaSession> {
   let disposed = false;
   return {
     dispose() {
@@ -107,6 +132,6 @@ function ownSession(sdk: AuthSession): AccessSession<AuthSession> {
         key.free();
       }
     },
-    value: sdk,
+    value: sdk as unknown as SiaSession,
   };
 }

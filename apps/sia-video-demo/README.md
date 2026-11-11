@@ -2,7 +2,9 @@
 
 ## Account access
 
-The demo uses `@lumeweb/sia-app-access` for account approval, recovery phrase checks, registration, and saved-key reconnect. `src/lib/accessAdapter.ts` connects the controller to the demo's lazy SDK ports. The auth store keeps its existing persisted app-key field, indexer setting, and sharing-key route; sharing links still open the player without account approval. The controller owns account SDK sessions until logout or an indexer change.
+The demo uses `@lumeweb/sia-app-access` for account approval, recovery phrase checks, registration, and saved-key reconnect. The account controller uses `@lumeweb/sia-app-access/sia` to own its lazy SDK connections and sessions. The auth store keeps its existing persisted app-key field, indexer setting, and sharing-key route; sharing links still open the player without account approval. The controller owns account SDK sessions until logout or an indexer change.
+
+The player gets its native stream service from `src/lib/demoStreamService.ts`. That module reads the live account key and the separate sharing key when video needs them; startup has no auth configuration call. Video creates and owns its own SDKs. A saved account key is not used for playback until access has an active session.
 
 ## Browser playback E2E without Sia services
 
