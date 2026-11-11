@@ -41,7 +41,9 @@ describe("listing cancellation", () => {
     const abort = new AbortController();
     abort.abort();
     const fetchPage = vi.fn();
-    await expect(listSharedObjects({ fetchPage }, { signal: abort.signal })).rejects.toBe(abort.signal.reason);
+    await expect(
+      listSharedObjects({ fetchPage }, { signal: abort.signal }),
+    ).rejects.toBe(abort.signal.reason);
     expect(fetchPage).not.toHaveBeenCalled();
   });
 
@@ -49,11 +51,13 @@ describe("listing cancellation", () => {
     const abort = new AbortController();
     const { calls, client } = clientFor([[row(A)], [row(B)]], 1);
     const reason = new Error("listing replaced");
-    await expect(listSharedObjects(client, {
-      onPage: () => abort.abort(reason),
-      pageSize: 1,
-      signal: abort.signal,
-    })).rejects.toBe(reason);
+    await expect(
+      listSharedObjects(client, {
+        onPage: () => abort.abort(reason),
+        pageSize: 1,
+        signal: abort.signal,
+      }),
+    ).rejects.toBe(reason);
     expect(calls).toEqual([[0, 1]]);
   });
 
@@ -61,11 +65,13 @@ describe("listing cancellation", () => {
     const abort = new AbortController();
     const { client } = clientFor([[row(A)]], 2);
     const reason = { message: "listing replaced" };
-    await expect(listSharedObjects(client, {
-      onPage: () => abort.abort(reason),
-      pageSize: 2,
-      signal: abort.signal,
-    })).rejects.toBe(reason);
+    await expect(
+      listSharedObjects(client, {
+        onPage: () => abort.abort(reason),
+        pageSize: 2,
+        signal: abort.signal,
+      }),
+    ).rejects.toBe(reason);
   });
 
   it("preserves a non-Error reason during retry cancellation", async () => {
@@ -73,8 +79,13 @@ describe("listing cancellation", () => {
     try {
       const abort = new AbortController();
       const reason = { message: "listing replaced" };
-      const fetchPage = vi.fn(() => Promise.reject(new Error("temporary failure")));
-      const pending = listSharedObjects({ fetchPage }, { signal: abort.signal });
+      const fetchPage = vi.fn(() =>
+        Promise.reject(new Error("temporary failure")),
+      );
+      const pending = listSharedObjects(
+        { fetchPage },
+        { signal: abort.signal },
+      );
       const cancelled = expect(pending).rejects.toBe(reason);
       await vi.advanceTimersByTimeAsync(0);
       abort.abort(reason);
@@ -90,9 +101,16 @@ describe("listing cancellation", () => {
     vi.useFakeTimers();
     try {
       const abort = new AbortController();
-      const fetchPage = vi.fn(() => Promise.reject(new Error("temporary failure")));
-      const pending = listSharedObjects({ fetchPage }, { signal: abort.signal });
-      const cancelled = expect(pending).rejects.toMatchObject({ name: "AbortError" });
+      const fetchPage = vi.fn(() =>
+        Promise.reject(new Error("temporary failure")),
+      );
+      const pending = listSharedObjects(
+        { fetchPage },
+        { signal: abort.signal },
+      );
+      const cancelled = expect(pending).rejects.toMatchObject({
+        name: "AbortError",
+      });
       await vi.advanceTimersByTimeAsync(0);
       abort.abort();
       await cancelled;
@@ -331,6 +349,41 @@ describe("createSharedObjectsClient — lazy SDK boundary", () => {
     expect(first.free).toHaveBeenCalledTimes(1);
     expect(second.free).toHaveBeenCalledTimes(1);
     handle.dispose();
+    expect(sdk.free).toHaveBeenCalledTimes(1);
+  });
+
+  it("frees the rest of a page and does not retry when one summary fails to free", async () => {
+    const sdk = fakeSdk();
+    const failure = new Error(SEED);
+    const first = objectSummary(A, "clip-a.mp4");
+    first.free.mockImplementation(() => {
+      throw failure;
+    });
+    const second = objectSummary(B, "clip-b.mp4");
+    sdk.objectSummaries.mockResolvedValue([first, second]);
+    const handle = await createSharedObjectsClient(
+      "https://indexer.example",
+      SEED,
+      () => Promise.resolve(sdk as never),
+    );
+
+    try {
+      await expect(
+        listSharedObjects(handle.client, {
+          pageSize: 2,
+          retries: 2,
+          retryBaseDelayMs: 0,
+        }),
+      ).rejects.toMatchObject({
+        cause: failure,
+        message: "Shared object cleanup failed",
+      });
+      expect(first.free).toHaveBeenCalledTimes(1);
+      expect(second.free).toHaveBeenCalledTimes(1);
+      expect(sdk.objectSummaries).toHaveBeenCalledTimes(1);
+    } finally {
+      handle.dispose();
+    }
     expect(sdk.free).toHaveBeenCalledTimes(1);
   });
 

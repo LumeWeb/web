@@ -1,7 +1,7 @@
 /**
  * Shared-mode object listing UI (a mode panel of the player screen). A valid
- * persisted sharing key drives a progressive paged listing via
- * `createSharedObjectsClient` + `listSharedObjects`; the picker renders a
+ * persisted sharing key drives a progressive paged listing through
+ * `loadSharedObjects`; the picker renders a
  * loading status (rows appended as pages land), a stats/rows view, and a
  * retryable error with a Retry action.
  *
@@ -9,7 +9,7 @@
  * renders the hoisted `selectedKey`, reports row clicks up through
  * `onSelectObject` (toggle semantics live in the hoisted reducer), and the
  * in-row check mark is the selection feedback. The seed is a prop consumed
- * only at the `createSharedObjectsClient` boundary, never rendered, logged,
+ * only at the listing-service boundary, never rendered, logged,
  * or held in React state. Selection is a canonical key, normalized identically
  * to listing ids and share-fragment object keys.
  *
@@ -19,11 +19,9 @@
 
 import { useEffect, useState } from "react";
 import {
-  createSharedObjectsClient,
-  listSharedObjects,
+  loadSharedObjects,
   type SharedObjectPageView,
   type SharedObjectRow,
-  type SharedObjectsClientHandle,
   SharedObjectsListingError,
   type SharedObjectsListingResult,
 } from "../../lib/sharingObjects";
@@ -152,19 +150,14 @@ export function SharedObjectPicker({
   );
   const [reloadKey, setReloadKey] = useState(0);
 
-  // Progressively list the sharing key's objects; Retry re-runs the walk.
-  // Native reads settle before their WASM session is freed; cancellation stops later pages.
   // Selection is owned by the player screen: row clicks only report up.
   useEffect(() => {
     let cancelled = false;
     const abort = new AbortController();
-    let handle: null | SharedObjectsClientHandle = null;
     setListing(emptySharedPickerListing());
     const run = async (): Promise<void> => {
       try {
-        handle = await createSharedObjectsClient(indexerUrl, sharingKeyHex);
-        if (cancelled) return;
-        const result = await listSharedObjects(handle.client, {
+        const result = await loadSharedObjects(indexerUrl, sharingKeyHex, {
           onPage: (page) => {
             if (cancelled) return;
             setListing((current) => appendSharedPickerPage(current, page));
@@ -178,8 +171,6 @@ export function SharedObjectPicker({
         setListing((current) =>
           failSharedPickerListing(current, sharedPickerErrorMessage(error)),
         );
-      } finally {
-        handle?.dispose();
       }
     };
     void run();
