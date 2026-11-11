@@ -2,6 +2,7 @@ import {
   createSessionFromClient,
   createSiaSdkSession,
   mapSiaSdkSession,
+  openSiaSdkOperationScope,
   SdkState,
 } from "@lumeweb/sia-session";
 import type {
@@ -35,6 +36,15 @@ const source: SdkSource<ReadView> = session.source;
 const work: SdkWork<ReadView, string> = (sdk) => sdk.read();
 const result: Promise<string> = source.withSdk(work);
 void result;
+const operation = openSiaSdkOperationScope(source);
+const operationResult: Promise<string> = operation.run(work);
+void operationResult;
+void operation.close();
+void operation.closed;
+// @ts-expect-error A child cannot publish a raw SDK source.
+operation.source;
+// @ts-expect-error A child cannot reveal its SDK outside run.
+operation.value;
 const observer: SdkObserver = () => 1;
 const unsubscribe: Unsubscribe = source.subscribe(observer);
 unsubscribe();
