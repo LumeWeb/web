@@ -32,6 +32,7 @@ interface AuthorizationResources<Session> {
   admitAcquisition(): (cleanup?: Promise<void>) => void;
   readonly connection: AccessConnection<Session>;
   disposeConnection(connection: AccessConnection<Session>): Promise<void>;
+  disposeSession(resource: AccessSession<Session>): Promise<void>;
   installConnection(connection: AccessConnection<Session>): void;
   installSession(resource: AccessSession<Session>): void;
   retireConnection(): void;
@@ -126,14 +127,14 @@ export class Authorization<Session> {
     }
     try {
       if (!op.current) {
-        resource.dispose();
+        finishAcquisition(this.resources.disposeSession(resource));
         return;
       }
       op.registrationEffect = RegistrationEffect.Registered;
       this.resources.retireConnection();
       // Connection disposal may reenter the controller and cancel this registration.
       if (!op.current) {
-        resource.dispose();
+        finishAcquisition(this.resources.disposeSession(resource));
         return;
       }
       this.resources.installSession(resource);

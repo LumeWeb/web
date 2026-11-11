@@ -192,6 +192,77 @@ void test("disconnect waits for a late registration session even when connection
   assert.equal(counts().ended, 1);
 });
 
+void test("late reconnect cleanup failure rejects disposal and reaches the resource reporter", async () => {
+  const failure = new Error("late reconnect cleanup failed");
+  const reported: unknown[] = [];
+  const { adapter, session } = fixture();
+  const started = deferred<void>();
+  const connected = deferred<typeof session>();
+  adapter.reconnect = () => {
+    started.resolve();
+    return connected.promise;
+  };
+  session.dispose = () => {
+    throw failure;
+  };
+  const access = createSiaAccess({
+    adapter,
+    application: app,
+    credentials: credentialStore({
+      read: async () => new Uint8Array(32).fill(9),
+    }),
+    indexerUrl: "https://indexer/",
+    onResourceError: (error) => reported.push(error),
+  });
+  const reconnect = access.reconnect();
+  await started.promise;
+  const cleanup = access.dispose();
+  assert.equal((await reconnect).kind, AccessOutcome.Cancelled);
+  connected.resolve(session);
+  await assert.rejects(
+    cleanup,
+    (error: unknown) =>
+      error instanceof AggregateError && error.errors[0] === failure,
+  );
+  assert.deepEqual(reported, [failure]);
+});
+
+void test("late registration cleanup failure rejects disconnect and reaches the resource reporter", async () => {
+  const failure = new Error("late registration cleanup failed");
+  const reported: unknown[] = [];
+  const { adapter, connection, session } = fixture();
+  const access = createSiaAccess({
+    adapter,
+    application: app,
+    indexerUrl: "https://indexer/",
+    onResourceError: (error) => reported.push(error),
+  });
+  assert.equal(
+    (await access.authorize(AccessIntent.Create)).kind,
+    AccessOutcome.Approved,
+  );
+  const started = deferred<void>();
+  const registered = deferred<typeof session>();
+  connection.register = () => {
+    started.resolve();
+    return registered.promise;
+  };
+  session.dispose = () => {
+    throw failure;
+  };
+  const registration = access.submitRecoveryPhrase("valid phrase");
+  await started.promise;
+  const cleanup = access.disconnect();
+  assert.equal((await registration).kind, AccessOutcome.Cancelled);
+  registered.resolve(session);
+  await assert.rejects(
+    cleanup,
+    (error: unknown) =>
+      error instanceof AggregateError && error.errors[0] === failure,
+  );
+  assert.deepEqual(reported, [failure]);
+});
+
 void test("terminal disposal from disconnected prevents another reconnect", async () => {
   const { access } = fixture(
     credentialStore({ read: async () => new Uint8Array(32).fill(9) }),

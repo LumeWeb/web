@@ -30,6 +30,7 @@ import type {
 export type SavedAccess = AccessReady<CredentialConfirmation.Confirmed>;
 interface CredentialResources<Session> {
   admitAcquisition(): (cleanup?: Promise<void>) => void;
+  disposeSession(resource: AccessSession<Session>): Promise<void>;
   exportAppKey(): Uint8Array;
   hasSession(): boolean;
   installSession(resource: AccessSession<Session>): void;
@@ -191,7 +192,8 @@ export class CredentialOperations<Session> {
     try {
       const resource = await this.reconnectWithStoredKey(op, bytes);
       if (!op.current) {
-        resource?.dispose();
+        if (resource)
+          finishAcquisition(this.resources.disposeSession(resource));
         return;
       }
       if (!resource) {

@@ -77,13 +77,21 @@ export class AccessResources<Session> {
       () => this.pendingConnections.delete(completion),
       (error: unknown) => {
         this.pendingConnections.delete(completion);
-        try {
-          this.onResourceError?.(error);
-        } catch {
-          // Reporting cannot strand another resource's cleanup.
-        }
+        this.reportResourceError(error);
       },
     );
+    return completion;
+  }
+  disposeSession(owned: AccessSession<Session>): Promise<void> {
+    let completion: Promise<void>;
+    try {
+      completion = Promise.resolve(owned.dispose());
+    } catch (error) {
+      // Custom adapters can throw despite the session's disposal contract.
+      // oxlint-disable-next-line typescript/prefer-promise-reject-errors
+      completion = Promise.reject(error);
+    }
+    void completion.catch((error: unknown) => this.reportResourceError(error));
     return completion;
   }
   exportAppKey(): Uint8Array {
@@ -148,6 +156,13 @@ export class AccessResources<Session> {
       result = Promise.reject(error);
     }
     return Promise.resolve(result).finally(() => lease.release());
+  }
+  private reportResourceError(error: unknown): void {
+    try {
+      this.onResourceError?.(error);
+    } catch {
+      // Reporting cannot strand another resource's cleanup.
+    }
   }
 }
 
