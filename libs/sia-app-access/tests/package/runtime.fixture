@@ -124,7 +124,22 @@ try {
   controller.dispose();
   assert.equal(notifications, 1);
   console.log("Packed controller consumer assertions completed");
-  const { createSiaAdapter } = await import("@lumeweb/sia-app-access/sia");
+  const { createSiaAccess: createSdkAccess, createSiaAdapter } =
+    await import("@lumeweb/sia-app-access/sia");
+  const defaultController = createSdkAccess({
+    application: {
+      appId: "a".repeat(64),
+      description: "",
+      name: "Packed consumer",
+      serviceUrl: "https://app.example/",
+    },
+    indexerUrl: "https://indexer.example/",
+  });
+  assert.equal(
+    defaultController.getSnapshot().state.phase,
+    access.AccessPhase.Disconnected,
+  );
+  await defaultController.dispose();
   const adapter = createSiaAdapter();
   assert.deepEqual(Object.keys(adapter).sort(), [
     "begin",

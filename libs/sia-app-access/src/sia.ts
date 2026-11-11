@@ -9,9 +9,18 @@ import type {
   AccessConnection,
   AccessSession,
   SiaAccessAdapter,
+  SiaAccessInteractions,
+  SiaAccessOptions,
   SiaApplication,
 } from "./access-types.ts";
 import type { CredentialScope } from "./credentials.ts";
+import { createSiaAccess as createCoreSiaAccess } from "./core.ts";
+export interface SiaSdkAccessOptions extends Omit<
+  SiaAccessOptions<SiaSession>,
+  "adapter"
+> {
+  readonly adapter?: SiaAccessAdapter<SiaSession>;
+}
 export type SiaSession = Omit<Sdk, "free" | symbol>;
 type SiaSdkModule = typeof import("@siafoundation/sia-storage/wasm");
 let initialized: Promise<SiaSdkModule> | undefined;
@@ -69,6 +78,15 @@ class BuilderConnectionLifetime {
   }
 
   private resolveClosed: () => void = () => undefined;
+}
+
+export function createSiaAccess(
+  options: SiaSdkAccessOptions,
+): SiaAccessInteractions<SiaSession> {
+  return createCoreSiaAccess({
+    ...options,
+    adapter: options.adapter ?? createSiaAdapter(),
+  });
 }
 
 export function createSiaAdapter(): SiaAccessAdapter<SiaSession> {
