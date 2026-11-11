@@ -23,7 +23,45 @@ restored.fill(0);
 await credentials.remove(scope);
 ```
 
-Each controller orders its own storage operations. If multiple controllers or tabs share a store, provide any coordination they need in the application or store.
+Each controller orders its own storage operations. If multiple controllers share one store instance, a wrapper can serialize their reads, writes, and removals. Copy write input before queuing it: the controller may clear its buffer while another operation is pending.
+
+```ts
+import type { CredentialStore } from "@lumeweb/sia-app-access";
+
+export function serializedCredentials(store: CredentialStore): CredentialStore {
+  let tail: Promise<void> = Promise.resolve();
+
+  function enqueue<T>(operation: () => Promise<T>): Promise<T> {
+    const result = tail.then(operation);
+    tail = result.then(
+      () => undefined,
+      () => undefined,
+    );
+    return result;
+  }
+
+  return {
+    read(scope) {
+      return enqueue(() => store.read(scope));
+    },
+    write(scope, appKey) {
+      const copy = appKey.slice();
+      return enqueue(async () => {
+        try {
+          await store.write(scope, copy);
+        } finally {
+          copy.fill(0);
+        }
+      });
+    },
+    remove(scope) {
+      return enqueue(() => store.remove(scope));
+    },
+  };
+}
+```
+
+Use the same wrapper for controllers that share a backing store. Its queue continues after a rejected operation, while that caller still receives the rejection. Separate tabs need coordination in the backing store; this in-memory queue cannot order their writes.
 
 ## Implement a custom store
 

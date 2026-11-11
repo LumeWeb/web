@@ -1,18 +1,17 @@
 # Adapters
 
-An adapter implements the Sia operations used by `createSiaAccess`. Use `createSiaAdapter()` with SDK 0.2.0, or implement `SiaAccessAdapter<Session>` for another client.
+An adapter implements the Sia operations used by `createSiaAccess`. The `/sia` entry creates the SDK 0.2.0 adapter by default; pass a custom adapter there or use the root entry for other session types.
 
 ## Released WASM adapter
 
-Import `createSiaAdapter` and `SiaSession` from `@lumeweb/sia-app-access/sia`. Your application supplies `@siafoundation/sia-storage` 0.2.0 and serves its WASM assets. The root package does not import the SDK. Importing `/sia` or calling `createSiaAdapter()` does not initialize it; initialization happens when an adapter method needs the SDK.
+Import `createSiaAccess` from `@lumeweb/sia-app-access/sia`. Your application supplies `@siafoundation/sia-storage` 0.2.0 and serves its WASM assets. The root package does not import the SDK. Importing `/sia` or creating a controller does not initialize it; initialization happens when an adapter method needs the SDK.
 
-Vite recognizes the optional peer when bundling a consuming application. A bundle that omits the SDK can construct the adapter but cannot run SDK operations; install the SDK before building an application that uses those operations.
+Vite recognizes the optional peer when bundling a consuming application. A bundle that omits the SDK can construct the controller but cannot run SDK operations; install the SDK before building an application that uses those operations.
 
-Create the controller at application startup. The adapter is supplied through the `adapter` option:
+Create the controller at application startup. The `/sia` factory uses `createSiaAdapter()` unless you pass `adapter`:
 
 ```ts
-import { createSiaAccess } from "@lumeweb/sia-app-access";
-import { createSiaAdapter } from "@lumeweb/sia-app-access/sia";
+import { createSiaAccess } from "@lumeweb/sia-app-access/sia";
 
 export function createStorageAccess() {
   return createSiaAccess({
@@ -23,7 +22,6 @@ export function createStorageAccess() {
       serviceUrl: "https://app.example",
     },
     indexerUrl: "https://indexer.example/",
-    adapter: createSiaAdapter(),
   });
 }
 ```
@@ -88,7 +86,7 @@ import type { Sdk } from "@siafoundation/sia-storage/wasm";
 import type { AccessSession } from "@lumeweb/sia-app-access";
 import type { SiaSession } from "@lumeweb/sia-app-access/sia";
 
-export function ownedSdkSession(sdk: Sdk): AccessSession<SiaSession> {
+export function wrapSdkSession(sdk: Sdk): AccessSession<SiaSession> {
   let disposed = false;
   return {
     value: sdk,
@@ -117,3 +115,48 @@ Keep this wrapper inside your adapter. Application code uses `withSession` rathe
 `withSession` accepts work only while the controller is ready. Once accepted, its callback keeps the session alive until it finishes, even if the application disconnects or disposes of the controller meanwhile. New callbacks are rejected after disconnection.
 
 Finish all session-dependent work inside the callback. Do not retain the session or return native handles that need it to stay alive. See [session ownership](getting-started.md#use-and-release-a-session).
+
+An application service can expose object details without giving screens a session callback. A scope admits several independent reads before it closes. Each native object closes inside its own callback, before access releases the SDK.
+
+```ts
+import type { SiaAccess } from "@lumeweb/sia-app-access";
+import type { SiaSession } from "@lumeweb/sia-app-access/sia";
+
+export function createObjectSizeService(access: SiaAccess<SiaSession>) {
+  async function readSize(sdk: SiaSession, key: string): Promise<number> {
+    const object = await sdk.object(key);
+    try {
+      return object.size();
+    } finally {
+      object.free();
+    }
+  }
+
+  return {
+    size(key: string): Promise<number> {
+      return access.withSession((sdk) => readSize(sdk, key));
+    },
+    async describe(key: string): Promise<{ id: string; size: number; encodedSize: number }> {
+      return access.withSession(async (sdk) => {
+        const object = await sdk.object(key);
+        try {
+          return { id: object.id(), size: object.size(), encodedSize: object.encodedSize() };
+        } finally {
+          object.free();
+        }
+      });
+    },
+    async sizes(keys: readonly string[]): Promise<number[]> {
+      if (keys.length === 0) return [];
+      const scope = access.openOperationScope();
+      try {
+        return await Promise.all(keys.map((key) => scope.run((sdk) => readSize(sdk, key))));
+      } finally {
+        await scope.close();
+      }
+    },
+  };
+}
+```
+
+A size call admitted before `disconnect()` finishes before the SDK is freed. `openOperationScope()` rejects if access is no longer ready; once opened, `close()` waits for admitted reads even when one rejects. The service keeps native cleanup inside each read.

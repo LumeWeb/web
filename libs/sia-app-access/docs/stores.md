@@ -1,4 +1,4 @@
-# Stores and selectors
+# Zustand and selectors
 
 Use `createSiaAccessStore` to read a controller through Zustand. The returned store exposes the controller's snapshots without copying them. Each call creates a separate store with its own subscriptions.
 
@@ -16,21 +16,29 @@ Import the factory from `@lumeweb/sia-app-access/zustand`. Construction imports 
 
 Change access through controller commands, not `setState`. The store has no `setState`, disposal method or middleware API. Unsubscribe when you stop observing it; disposing of the controller remains the responsibility of the code that created it.
 
-For a view outside React, subscribe and render the current snapshot immediately:
+For a view outside React, call `observeSiaAccess(access, render)` from the root package. It passes the current snapshot to your renderer and then passes later snapshots, so the view does not need a separate initial store read. Call its returned unsubscribe function when the view closes. The application can still use the controller after that.
+
+The DOM view below observes the current phase immediately and stops observing when it is removed. The controller remains available to its owner.
 
 ```ts
-import type { AccessSnapshot, SiaAccess } from "@lumeweb/sia-app-access";
-import { createSiaAccessStore } from "@lumeweb/sia-app-access/zustand";
+import { observeSiaAccess } from "@lumeweb/sia-app-access";
+import type { SiaAccess } from "@lumeweb/sia-app-access";
 
-export function watchPhase<Session>(access: SiaAccess<Session>, render: (phase: string) => void) {
-  const store = createSiaAccessStore(access);
-  const unsubscribe = store.subscribe((snapshot) => render(snapshot.state.phase));
-  render(store.getState().state.phase);
-  return unsubscribe;
+export function mountAccessPhase<Session>(access: SiaAccess<Session>, host: HTMLElement): () => void {
+  const phase = document.createElement("output");
+  host.append(phase);
+  const unsubscribe = observeSiaAccess(access, (snapshot) => {
+    phase.textContent = snapshot.state.phase;
+  });
+
+  return () => {
+    unsubscribe();
+    phase.remove();
+  };
 }
 ```
 
-Call the returned unsubscribe function when the view closes. The application can still use the controller after that.
+If `observeSiaAccess` throws on its first render, it unsubscribes. A later render failure follows the controller's `onSubscriberError` policy.
 
 ## Use Zustand's reader
 
@@ -39,6 +47,8 @@ Install Zustand `^5.0.14` to use its `useStore` hook with the readonly store:
 ```tsx
 import { useMemo } from "react";
 import { useStore } from "zustand";
+import { createSiaAccessStore } from "@lumeweb/sia-app-access/zustand";
+import type { SiaAccess } from "@lumeweb/sia-app-access";
 
 interface PhaseViewProps<Session> {
   readonly access: SiaAccess<Session>;
@@ -71,7 +81,35 @@ export function ConnectionBadge<Session>({ access }: PhaseViewProps<Session>) {
 }
 ```
 
-Memoizing a selector function does not fix a selector that returns a new object on every call. Selectors only read state. Call controller commands to change access, and use `withSession` for work that needs the session.
+If a component needs a derived object, cache it by the controller-owned state identity. The selector below returns the same object until the controller publishes a different state.
+
+```tsx
+import { useMemo } from "react";
+import { AccessPhase, type AccessSnapshot, type SiaAccess } from "@lumeweb/sia-app-access";
+import { useSiaAccessSelector } from "@lumeweb/sia-app-access/react";
+
+function connectionLabelSelector() {
+  let lastState: AccessSnapshot["state"] | undefined;
+  let lastValue: { label: string } | undefined;
+  return (snapshot: AccessSnapshot): { label: string } => {
+    if (!lastValue || snapshot.state !== lastState) {
+      lastState = snapshot.state;
+      lastValue = {
+        label: snapshot.state.phase === AccessPhase.Ready ? "Connected" : "Not connected",
+      };
+    }
+    return lastValue;
+  };
+}
+
+export function CachedConnectionBadge<Session>({ access }: { readonly access: SiaAccess<Session> }) {
+  const selector = useMemo(connectionLabelSelector, []);
+  const status = useSiaAccessSelector(access, selector);
+  return <span>{status.label}</span>;
+}
+```
+
+Selectors only read state. Call controller commands to change access, and use `withSession` for work that needs the session.
 
 ## Server snapshots
 
@@ -80,12 +118,32 @@ Memoizing a selector function does not fix a selector that returns a new object 
 For example, construct a store with the snapshot your server rendered:
 
 ```ts
+import type { AccessSnapshot, SiaAccess } from "@lumeweb/sia-app-access";
+import { createSiaAccessStore } from "@lumeweb/sia-app-access/zustand";
+
 export function hydratedStore<Session>(access: SiaAccess<Session>, serverSnapshot: AccessSnapshot) {
   return createSiaAccessStore(access, { serverSnapshot });
 }
 ```
 
 Pass that same snapshot to the native React hook when both readers render the page. See the [hydration component](react.md#server-rendering-and-hydration).
+
+A store and a hook can receive the same initial snapshot while each reads the live controller after hydration. Keep the store stable while the controller and server snapshot remain the same.
+
+```tsx
+import { useMemo } from "react";
+import { useStore } from "zustand";
+import { createSiaAccessStore } from "@lumeweb/sia-app-access/zustand";
+import { useSiaAccessSelector } from "@lumeweb/sia-app-access/react";
+import type { AccessInteractionSnapshot, SiaAccessInteractions } from "@lumeweb/sia-app-access";
+
+export function PhaseReaders<Session>({ access, serverSnapshot }: { readonly access: SiaAccessInteractions<Session>; readonly serverSnapshot: AccessInteractionSnapshot }) {
+  const store = useMemo(() => createSiaAccessStore(access, { serverSnapshot }), [access, serverSnapshot]);
+  const zustandPhase = useStore(store, (snapshot) => snapshot.state.phase);
+  const reactPhase = useSiaAccessSelector(access, (snapshot) => snapshot.state.phase, { serverSnapshot });
+  return <output>{zustandPhase === reactPhase ? reactPhase : "Updating"}</output>;
+}
+```
 
 Without an explicit server snapshot, initial state is the controller snapshot observed at construction. Each adapter retains its own initial state, so two adapters made at different times can have different initial snapshots while sharing live reads. Supply the same server snapshot if native React and Zustand must render the same hydration presentation.
 

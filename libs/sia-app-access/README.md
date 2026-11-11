@@ -25,13 +25,13 @@ export function applicationAccess<Session>(adapter: SiaAccessAdapter<Session>) {
 }
 ```
 
-Create the controller once in application bootstrap. Read [getting started](docs/getting-started.md) for account choices and session work. [The API reference](docs/api.md) lists command outcomes and cancellation effects; [credential ownership](docs/credentials.md) covers custom stores and save recovery.
+Create the controller once in application bootstrap. Start with [the ownership map](docs/ownership-map.md) to see which account choices and credential policies remain with your application. Read [getting started](docs/getting-started.md) for account choices and session work. [The API reference](docs/api.md) lists command outcomes and cancellation effects; [credential ownership](docs/credentials.md) covers custom stores and save recovery.
 
-For SDK 0.2.0, import `createSiaAdapter` from `@lumeweb/sia-app-access/sia` and supply it as the adapter. Read [adapters](docs/adapters.md) for setup and resource ownership. The SDK peer is optional; root imports and adapter construction do not load it.
+For SDK 0.2.0, import `createSiaAccess` from `@lumeweb/sia-app-access/sia`; it supplies `createSiaAdapter()` when you omit `adapter`. The root factory above still requires an adapter for custom session types. Read [adapters](docs/adapters.md) for SDK setup and resource ownership. The SDK peer is optional; importing the root or creating the default controller does not load it.
 
-Use the optional React 19 [observation hooks and context](docs/react.md), or read the same controller through a [readonly store](docs/stores.md). React observation uses `useSyncExternalStore` without requiring Zustand. The application retains controller lifetime.
+Use the optional React 19 [observation hooks and context](docs/react.md), pass a renderer to `observeSiaAccess(access, render)` for plain TypeScript, or read the same controller through a [Zustand store](docs/stores.md). React observation uses `useSyncExternalStore` without requiring Zustand. The application retains controller lifetime.
 
-Approval, phrase and save-recovery [tasks](docs/react.md#task-hooks) bind actions to the committed live interaction. Forms and input errors belong to the application; the optional `/react-hook-form` entry only maps phrase-correction outcomes to caller-supplied field messages. Observing a controller does not authorize access or dispose it.
+Approval, phrase and save-recovery [tasks](docs/react.md#task-hooks) bind actions to the committed live interaction. Forms and input errors belong to the application; the optional `/react-hook-form` entry maps phrase-correction outcomes to caller-supplied field messages. See the [React Hook Form example](docs/react-hook-form.md). Observing a controller does not authorize access or dispose it.
 
 See the [documentation index](docs/README.md) and [test coverage](docs/testing.md).
 

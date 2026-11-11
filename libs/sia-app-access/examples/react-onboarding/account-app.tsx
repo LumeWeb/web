@@ -1,5 +1,5 @@
 /** Account access follows controller state; profile setup remains application state. */
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import {
   AccessFailure,
@@ -19,6 +19,7 @@ import {
   useSiaRecoveryPhrase,
   useSiaSaveRecovery,
 } from "@lumeweb/sia-app-access/react";
+import { createAccountService } from "./account-service.ts";
 import { RecoveryForm } from "./recovery-form.tsx";
 
 interface AccountAppProps<Session> {
@@ -46,6 +47,7 @@ export function AccountApp<Session>({
   renderApproval,
 }: AccountAppProps<Session>) {
   const { commands, snapshot } = useSiaAccessInteractions(access);
+  const accountService = useMemo(() => createAccountService(access), [access]);
   const approval = useSiaApproval(access);
   const phrase = useSiaRecoveryPhrase(access);
   const saving = useSiaSaveRecovery(access);
@@ -107,13 +109,13 @@ export function AccountApp<Session>({
         </div>
         <button
           onClick={() => {
-            void commands
-              .withSession(() => "Your account is connected.")
-              .then(setStatus, () =>
+            void accountService.checkConnection().then(
+              () => setStatus("Your account is connected."),
+              () =>
                 setStatus(
                   "You're no longer connected. Sign in again to continue.",
                 ),
-              );
+            );
           }}>
           Check connection
         </button>

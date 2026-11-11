@@ -4,7 +4,7 @@ The root entry exports `createSiaAccess`, `SessionUnavailableError`, lifecycle m
 
 ## Controller options
 
-`createSiaAccess<Session>(options)` returns `SiaAccessInteractions<Session>`, which extends `SiaAccess<Session>`. Invalid scope or timeout configuration throws synchronously.
+The root `createSiaAccess<Session>(options)` returns `SiaAccessInteractions<Session>`, which extends `SiaAccess<Session>`. Its `adapter` is required. The `/sia` entry also exports `createSiaAccess(options)` for `SiaSession`; it uses `createSiaAdapter()` when `adapter` is omitted. Invalid scope or timeout configuration throws synchronously.
 
 | Option              | Contract                                                                                 |
 | ------------------- | ---------------------------------------------------------------------------------------- |
@@ -14,6 +14,7 @@ The root entry exports `createSiaAccess`, `SessionUnavailableError`, lifecycle m
 | `credentials`       | Optional `CredentialStore`; defaults to a new memory store for this controller           |
 | `approvalTimeoutMs` | Positive finite number; defaults to `300000`                                             |
 | `onSubscriberError` | Optional callback for exceptions thrown by subscribers; its own exceptions are swallowed |
+| `onResourceError`   | Optional callback for detached SDK cleanup failures; its own exceptions are swallowed    |
 
 Application IDs contain 64 hexadecimal characters and normalize to lowercase. The indexer URL normalizes through `URL`; its canonical `href` and the application ID form `CredentialScope`. Application metadata does not change that identity.
 
@@ -57,9 +58,37 @@ export async function restoreMessage<Session>(access: SiaAccess<Session>): Promi
 
 `unavailable` means the call was not allowed and started no work. Results are immutable and describe only that call. A subscriber can start another command before your `await` resumes, so `getSnapshot()` may already show a different operation.
 
-Failed command results include `failure`, `recovery` and `effects`; cancelled results include `effects`. The exception is `generateRecoveryPhrase()`, whose failure and cancellation results have no effect fields. Check the command's result type before reading those properties.
+Failed command results include `failure`, `recovery` and `effects`; a failed `reconnect()` caused by a credential-store read also returns that call's `cause`. Snapshots do not contain the cause. Cancelled results include `effects`. The exception is `generateRecoveryPhrase()`, whose failure and cancellation results have no effect fields. Check the command's result type before reading those properties.
 
-`cancel()`, `disconnect()` and `dispose()` return `void`. Disposal permanently ends the controller; disconnect retains credentials. Cancel has no effect in ready state. `withSession<Result>(work)` returns `Promise<Result>`, rejects calls made without a ready session with `SessionUnavailableError` (`code: "SIA_SESSION_UNAVAILABLE"`), and propagates application callback failures unchanged. See [session ownership](getting-started.md#use-and-release-a-session).
+`cancel()` returns `void`. `disconnect()` and terminal `dispose()` stop admission synchronously and return promises for admitted work and SDK cleanup, including connection cleanup that the adapter returns as a promise. Cleanup failures reject them. A connection returned by `begin()` after cancellation is retired when it arrives; an earlier cleanup promise cannot wait for a connection it has not received. Disconnect retains credentials. Cancel has no effect in ready state. `withSession<Result>(work)` returns `Promise<Result>`, rejects calls made without a ready session with `SessionUnavailableError` (`code: "SIA_SESSION_UNAVAILABLE"`), and propagates application callback failures unchanged. See [session ownership](getting-started.md#use-and-release-a-session).
+
+`openOperationScope()` is available only while ready. Its `run(work)` admits independent work, and `close()` stops new work and waits for its accepted callbacks. Access disconnect or disposal also closes it. The scope exposes no SDK value or source outside `run`; an SDK-specific adapter must release its native child handles before its callback settles. Its passive `closed` promise does not wait for parent SDK cleanup if other borrowers remain.
+
+A service can admit several object reads together and retain each result, including individual read failures. The scope closes after every accepted callback has freed its native child.
+
+```ts
+import type { SiaAccess } from "@lumeweb/sia-app-access";
+import type { SiaSession } from "@lumeweb/sia-app-access/sia";
+
+export async function inspectObjectSizes(access: SiaAccess<SiaSession>, keys: readonly string[]): Promise<PromiseSettledResult<number>[]> {
+  const scope = access.openOperationScope();
+  const reads = keys.map((key) =>
+    scope.run(async (sdk) => {
+      const object = await sdk.object(key);
+      try {
+        return object.size();
+      } finally {
+        object.free();
+      }
+    }),
+  );
+  const results = await Promise.allSettled(reads);
+  await scope.close();
+  return results;
+}
+```
+
+`copyActiveAppKeySeed()` returns fresh caller-owned bytes while ready; callers clear them after use. `activeAppKeyHex()` returns a string for the existing native-stream auth source, or `null` when not ready. Strings cannot be scrubbed. Neither key appears in a snapshot.
 
 ## When commands are allowed
 
@@ -69,12 +98,55 @@ An invalid phrase or a phrase mismatch leaves the approved connection open so th
 
 `retrySave()` and `continueWithoutSaving()` need the session kept after a save failure. Retrying saves that session without registering again. Concurrent `forget()` calls share the pending result. Forget cancels other access work and queues removal after earlier credential operations finish.
 
+A user choice can call either recovery command and report whether storage confirmed the key. A failed retry may have queued a credential write; its effect says what started, not what the store ultimately kept.
+
+```ts
+import { AccessOutcome, CredentialConfirmation, CredentialEffect } from "@lumeweb/sia-app-access";
+import type { SiaAccess } from "@lumeweb/sia-app-access";
+
+export async function resolveSaveChoice<Session>(access: SiaAccess<Session>, choice: "retry" | "continue"): Promise<string> {
+  const result = choice === "retry" ? await access.retrySave() : access.continueWithoutSaving();
+  if (result.kind === AccessOutcome.Ready) {
+    return result.credentials === CredentialConfirmation.Confirmed ? "Saved access was confirmed." : "Connected; saving could not be confirmed.";
+  }
+  if (result.kind === AccessOutcome.Failed) {
+    return result.effects.credentials === CredentialEffect.Write ? "The save may have reached storage. Try again." : "Saving did not start. Try again.";
+  }
+  return `Access is ${result.kind}.`;
+}
+```
+
+To remove a local key, inspect `forget()` separately from `disconnect()`. A failed or cancelled removal does not confirm that the key is absent.
+
+```ts
+import { AccessOutcome, CredentialEffect } from "@lumeweb/sia-app-access";
+import type { SiaAccess } from "@lumeweb/sia-app-access";
+
+export async function endAccount<Session>(access: SiaAccess<Session>, removeSavedKey: boolean): Promise<string> {
+  if (!removeSavedKey) {
+    await access.disconnect();
+    return "Signed out; saved access remains.";
+  }
+  const result = await access.forget();
+  switch (result.kind) {
+    case AccessOutcome.Removed:
+      return "Local saved access was removed.";
+    case AccessOutcome.Failed:
+      return "Local removal failed; check saved access before reconnecting.";
+    case AccessOutcome.Cancelled:
+      return result.effects.credentials === CredentialEffect.Remove ? "Removal was queued and may finish after cancellation." : "Removal stopped before storage work started.";
+    case AccessOutcome.Unavailable:
+      return "Removal is unavailable in the current state.";
+  }
+}
+```
+
 `generateRecoveryPhrase()` is allowed while disconnected or waiting for phrase input. Starting another access command, or calling `cancel()`, `disconnect()` or `dispose()`, cancels pending generation. Disposed controllers do not accept new commands or `withSession` callbacks. Session callbacks already running can still finish; see [session ownership](getting-started.md#use-and-release-a-session).
 
 To stop a pending connection request, call `cancel()` on the same controller. To remove saved credentials, inspect the result of `forget()`:
 
 ```ts
-import { AccessIntent } from "@lumeweb/sia-app-access";
+import { AccessIntent, AccessOutcome, type SiaAccess } from "@lumeweb/sia-app-access";
 
 export function beginConnection<Session>(access: SiaAccess<Session>) {
   const completion = access.authorize(AccessIntent.Create);
@@ -91,24 +163,40 @@ Disconnecting without removal uses `access.disconnect()` instead.
 
 ## Snapshots and subscriptions
 
-`getSnapshot()` returns the same immutable object until the next snapshot update. `subscribe(listener)` takes a no-argument listener and returns an unsubscribe function; it does not call the listener immediately. A listener added during a notification starts receiving later updates. Disposal notifies listeners of the final snapshot before removing them.
+`getSnapshot()` includes a nonsecret `activeSessionId` while ready, or `null` otherwise. It changes when a new account SDK becomes active, including across controller replacements; saving the current key does not change it. The snapshot returns the same immutable object until the next update. `subscribe(listener)` takes a no-argument listener and returns an unsubscribe function; it does not call the listener immediately. A listener added during a notification starts receiving later updates. Disposal notifies listeners of the final snapshot before removing them.
 
-A throwing listener does not prevent other listeners from running. If a listener causes another snapshot update, the controller notifies listeners of the newer snapshot and stops sending the older notification.
-
-Subscribe, then read the initial snapshot so the view does not wait for an update:
+For results tied to the current account, compare the session ID after the read before publishing it. A disconnect can happen between the initial observation and `withSession()` admission.
 
 ```ts
-import type { AccessSnapshot } from "@lumeweb/sia-app-access";
+import { SessionUnavailableError, type SiaAccess } from "@lumeweb/sia-app-access";
+import type { SiaSession } from "@lumeweb/sia-app-access/sia";
 
-export function observeAccess<Session>(access: SiaAccess<Session>, render: (snapshot: AccessSnapshot) => void) {
-  const update = () => render(access.getSnapshot());
-  const unsubscribe = access.subscribe(update);
-  update();
-  return unsubscribe;
+export async function currentObjectSize(access: SiaAccess<SiaSession>, objectKey: string): Promise<number | null> {
+  const sessionId = access.getSnapshot().activeSessionId;
+  if (sessionId === null) return null;
+
+  try {
+    const size = await access.withSession(async (sdk) => {
+      const object = await sdk.object(objectKey);
+      try {
+        return object.size();
+      } finally {
+        object.free();
+      }
+    });
+    return access.getSnapshot().activeSessionId === sessionId ? size : null;
+  } catch (error) {
+    if (error instanceof SessionUnavailableError) return null;
+    throw error;
+  }
 }
 ```
 
-Call the returned function when the view closes. The application that created the controller decides when to dispose of it.
+A throwing listener does not prevent other listeners from running. If a listener causes another snapshot update, the controller notifies listeners of the newer snapshot and stops sending the older notification.
+
+Use `observeSiaAccess(access, render)` from the root package when a plain TypeScript view needs both the current snapshot and later changes. Pass your existing render function directly; no callback that reads `getSnapshot()` is needed. It subscribes before the initial read, skips duplicate snapshot identities, and returns an unsubscribe function. If the first render throws, it unsubscribes and rethrows that value. Later listener failures follow the controller's `onSubscriberError` policy.
+
+React callers use `useSiaAccessInteractions(access)` instead. End plain TypeScript observation when the view closes; the application that created the controller decides when to dispose of it.
 
 `AccessSnapshot` contains `scope` and `state`. `AccessInteractionSnapshot` adds `presentation`. Neither carries credential bytes or recovery phrases.
 
@@ -145,7 +233,7 @@ Cancellation returns a result promptly, but SDK calls and queued credential chan
 Use the effects when deciding what a failure message can safely claim:
 
 ```ts
-import { RegistrationEffect } from "@lumeweb/sia-app-access";
+import { AccessOutcome, RegistrationEffect } from "@lumeweb/sia-app-access";
 import type { SubmitRecoveryPhraseResult } from "@lumeweb/sia-app-access";
 
 export function registrationMessage(result: SubmitRecoveryPhraseResult): string {
