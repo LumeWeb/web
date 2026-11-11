@@ -23,6 +23,16 @@ export interface SiaSdkAccessOptions extends Omit<
 }
 export type SiaSession = Omit<Sdk, "free" | symbol>;
 type SiaSdkModule = typeof import("@siafoundation/sia-storage/wasm");
+
+export function createSiaAccess(
+  options: SiaSdkAccessOptions,
+): SiaAccessInteractions<SiaSession> {
+  return createCoreSiaAccess({
+    ...options,
+    adapter: options.adapter ?? createSiaAdapter(),
+  });
+}
+
 let initialized: Promise<SiaSdkModule> | undefined;
 let facadeRejected = false;
 
@@ -78,15 +88,6 @@ class BuilderConnectionLifetime {
   }
 
   private resolveClosed: () => void = () => undefined;
-}
-
-export function createSiaAccess(
-  options: SiaSdkAccessOptions,
-): SiaAccessInteractions<SiaSession> {
-  return createCoreSiaAccess({
-    ...options,
-    adapter: options.adapter ?? createSiaAdapter(),
-  });
 }
 
 export function createSiaAdapter(): SiaAccessAdapter<SiaSession> {

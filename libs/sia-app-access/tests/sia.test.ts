@@ -73,9 +73,9 @@ void test("retirement waits for pending approval and denies later calls", async 
   });
   const approval = connection.waitForApproval();
   await Promise.resolve();
-  const cleanup = connection.dispose();
+  const cleanup = Promise.resolve(connection.dispose());
   let closed = false;
-  void Promise.resolve(cleanup).then(() => {
+  void cleanup.then(() => {
     closed = true;
   });
   await new Promise<void>((resolve) => setImmediate(resolve));
