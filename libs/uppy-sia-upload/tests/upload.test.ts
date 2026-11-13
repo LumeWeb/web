@@ -85,6 +85,38 @@ describe("WASM-shaped upload handle ownership", () => {
     }
   });
 
+  test("failed cleanup after an acknowledged pin reports uncertainty instead of success", async () => {
+    const sdk = {
+      pinObject: vi.fn(async () => undefined),
+      upload: vi.fn(async () => {
+        const { PinnedObject } =
+          await import("@siafoundation/sia-storage/wasm");
+        const child = new PinnedObject();
+        handles[1]!.failFree = true;
+        return child;
+      }),
+    };
+    const { uppy } = setup(sdk);
+    try {
+      const errors: Error[] = [];
+      const successes: string[] = [];
+      uppy.on("upload-error", (_file, error) => errors.push(error));
+      uppy.on("upload-success", (_file, response) =>
+        successes.push(response.body?.objectId ?? ""),
+      );
+      expect((await uppy.upload())?.failed).toHaveLength(1);
+      expect(errors[0]).toBeInstanceOf(SiaUploadUncertainError);
+      expect((errors[0] as SiaUploadUncertainError).objectId).toBe("object-1");
+      expect(successes).toHaveLength(0);
+      expect(sdk.pinObject).toHaveBeenCalledTimes(1);
+      expect(handles[1]?.freed).toBe(1);
+      await uppy.retryAll();
+      expect(sdk.upload).toHaveBeenCalledTimes(1);
+    } finally {
+      uppy.destroy();
+    }
+  });
+
   test("a file stream that cannot open frees the draft without a remote write", async () => {
     const sdk = {
       pinObject: vi.fn(async () => undefined),
@@ -103,6 +135,38 @@ describe("WASM-shaped upload handle ownership", () => {
       );
       expect(sdk.upload).not.toHaveBeenCalled();
       expect(handles[0]?.freed).toBe(1);
+    } finally {
+      uppy.destroy();
+    }
+  });
+
+  test("a rejected SDK upload leaves the draft with the SDK and allows retry", async () => {
+    const failure = new Error("native upload failed");
+    const sdk = {
+      pinObject: vi.fn(async () => undefined),
+      upload: vi
+        .fn(async () => {
+          const { PinnedObject } =
+            await import("@siafoundation/sia-storage/wasm");
+          return new PinnedObject();
+        })
+        .mockRejectedValueOnce(failure),
+    };
+    const { uppy } = setup(sdk);
+    try {
+      const errors: Error[] = [];
+      uppy.on("upload-error", (_file, error) => errors.push(error));
+      expect((await uppy.upload())?.failed).toHaveLength(1);
+      expect(errors[0]).toBe(failure);
+      expect(sdk.pinObject).not.toHaveBeenCalled();
+      expect(handles).toHaveLength(1);
+      expect(handles[0]?.freed).toBe(0);
+      expect((await uppy.retryAll())?.failed).toHaveLength(0);
+      expect(sdk.upload).toHaveBeenCalledTimes(2);
+      expect(sdk.pinObject).toHaveBeenCalledTimes(1);
+      expect(handles).toHaveLength(3);
+      expect(handles[1]?.freed).toBe(0);
+      expect(handles[2]?.freed).toBe(1);
     } finally {
       uppy.destroy();
     }
