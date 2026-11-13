@@ -32,10 +32,16 @@ export interface SiaUploadOptions {
   readonly access: UploadAccess;
   readonly id?: string;
   readonly metadata?: SiaWriteOptions["metadata"];
+  readonly onUncertain?: (
+    file: UppyFile<Meta, SiaUploadBody>,
+    error: SiaUploadUncertainError,
+    sessionId: string,
+  ) => void;
 }
 
 interface Pending {
   controller: AbortController;
+  settled: Promise<void>;
 }
 
 export default class SiaUpload extends BasePlugin<
@@ -80,22 +86,84 @@ export default class SiaUpload extends BasePlugin<
     this.#pending.get(file.id)?.controller.abort();
   };
 
+  #reportUncertain(
+    file: UppyFile<Meta, SiaUploadBody>,
+    error: SiaUploadUncertainError,
+    sessionId: string,
+  ): void {
+    this.#uncertain.add(file.id);
+    try {
+      this.opts.onUncertain?.(file, error, sessionId);
+    } catch (reportError) {
+      // A reporting failure cannot change whether the remote pin committed.
+      this.uppy.log(
+        reportError instanceof Error
+          ? reportError.message
+          : "Uncertain upload callback failed",
+        "error",
+      );
+    }
+  }
+
   readonly #upload = async (fileIDs: string[]): Promise<void> => {
     const files = this.uppy
       .getFilesByIds(fileIDs)
       .filter((file) => !file.progress.uploadComplete);
     if (!files.length) return;
+    const sessionId = this.opts.access.getSnapshot().activeSessionId;
     this.uppy.emit("upload-start", files);
     const generation = this.#generation;
     for (const file of files) {
       if (!this.#installed || generation !== this.#generation) break;
       if (!this.uppy.getFile(file.id)) continue;
-      await this.#uploadFile(file);
+      if (!sessionId) {
+        this.uppy.emit(
+          "upload-error",
+          file,
+          new Error("A Sia account is required to upload"),
+        );
+        continue;
+      }
+      await this.#uploadFile(file, sessionId, generation);
     }
   };
 
-  async #uploadFile(file: UppyFile<Meta, SiaUploadBody>): Promise<void> {
-    if (this.#pending.has(file.id)) return;
+  async #uploadFile(
+    file: UppyFile<Meta, SiaUploadBody>,
+    sessionId: string,
+    generation: number,
+  ): Promise<void> {
+    if (this.#pending.has(file.id)) {
+      let removedWhileWaiting = false;
+      const onRemoved = (removed: UppyFile<Meta, SiaUploadBody>) => {
+        if (removed.id === file.id) removedWhileWaiting = true;
+      };
+      this.uppy.on("file-removed", onRemoved);
+      try {
+        while (this.#pending.has(file.id)) {
+          const previous = this.#pending.get(file.id)!;
+          if (!previous.controller.signal.aborted) return;
+          await previous.settled;
+        }
+      } finally {
+        this.uppy.off("file-removed", onRemoved);
+      }
+      if (
+        removedWhileWaiting ||
+        !this.#installed ||
+        generation !== this.#generation ||
+        !this.uppy.getFile(file.id)
+      )
+        return;
+    }
+    if (this.opts.access.getSnapshot().activeSessionId !== sessionId) {
+      this.uppy.emit(
+        "upload-error",
+        file,
+        new Error("The Sia account changed during this upload batch"),
+      );
+      return;
+    }
     if (this.#uncertain.has(file.id)) {
       this.uppy.emit("upload-error", file, new SiaUploadUncertainError());
       return;
@@ -109,7 +177,11 @@ export default class SiaUpload extends BasePlugin<
       return;
     }
     const controller = new AbortController();
-    const pending: Pending = { controller };
+    let settle!: () => void;
+    const settled = new Promise<void>((resolve) => {
+      settle = resolve;
+    });
+    const pending: Pending = { controller, settled };
     this.#pending.set(file.id, pending);
     try {
       const result = await uploadToSia(this.opts.access, file.data, {
@@ -121,7 +193,11 @@ export default class SiaUpload extends BasePlugin<
         !this.#installed ||
         !this.uppy.getFile(file.id)
       ) {
-        this.#uncertain.add(file.id);
+        this.#reportUncertain(
+          file,
+          new SiaUploadUncertainError(result.objectId),
+          sessionId,
+        );
         return;
       }
       this.uppy.emit("upload-success", file, {
@@ -130,7 +206,7 @@ export default class SiaUpload extends BasePlugin<
       });
     } catch (error) {
       if (error instanceof SiaUploadUncertainError)
-        this.#uncertain.add(file.id);
+        this.#reportUncertain(file, error, sessionId);
       if (
         !controller.signal.aborted &&
         this.#installed &&
@@ -144,6 +220,7 @@ export default class SiaUpload extends BasePlugin<
       }
     } finally {
       if (this.#pending.get(file.id) === pending) this.#pending.delete(file.id);
+      settle();
     }
   }
 }

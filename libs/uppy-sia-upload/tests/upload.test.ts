@@ -161,11 +161,21 @@ describe("Sia Uppy uploads", () => {
     });
     const deleteObject = vi.fn(async () => undefined);
     const sdk = { deleteObject, pinObject, upload };
-    const { uppy } = setup(sdk);
+    const { access, uppy } = setup(sdk);
+    const outcomes: { objectId: string | undefined; sessionId: string }[] = [];
+    uppy.removePlugin(uppy.getPlugin("SiaUpload")!);
+    uppy.use(SiaUpload, {
+      access,
+      onUncertain: (_file, error, sessionId) =>
+        outcomes.push({ objectId: error.objectId, sessionId }),
+    });
     const errors: Error[] = [];
     uppy.on("upload-error", (_, error) => errors.push(error));
     await uppy.upload();
     expect(errors[0]).toBeInstanceOf(SiaUploadUncertainError);
+    expect(outcomes).toEqual([
+      { objectId: "object-1", sessionId: "account-1" },
+    ]);
     expect(handles[0]?.freed).toBe(1);
     await uppy.retryAll();
     expect(upload).toHaveBeenCalledTimes(1);
@@ -305,6 +315,113 @@ describe("Sia Uppy uploads", () => {
     }
   });
 
+  test("a queued file does not switch accounts after its batch starts", async () => {
+    const pin = deferred<void>();
+    const started = deferred<void>();
+    const sdk = {
+      pinObject: vi.fn(() => {
+        started.resolve();
+        return pin.promise;
+      }),
+      upload: vi.fn(async () => handles.at(-1)),
+    };
+    const { replace, uppy } = setup(sdk);
+    uppy.addFile({
+      data: new File(["second"], "second.txt"),
+      name: "second.txt",
+      type: "text/plain",
+    });
+    const errors: { error: Error; file: string }[] = [];
+    uppy.on("upload-error", (file, error) =>
+      errors.push({ error, file: file?.name ?? "" }),
+    );
+    const writing = uppy.upload();
+    await started.promise;
+    replace();
+    pin.resolve();
+    await writing;
+    expect(sdk.upload).toHaveBeenCalledTimes(1);
+    expect(
+      errors.find(({ file }) => file === "second.txt")?.error.message,
+    ).toBe("The Sia account changed during this upload batch");
+    uppy.destroy();
+  });
+
+  test("a replacement file waits for its removed predecessor before uploading", async () => {
+    const first = deferred<unknown>();
+    const started = deferred<void>();
+    const sdk = {
+      pinObject: vi.fn(async () => undefined),
+      upload: vi.fn((draft: unknown) => {
+        if (sdk.upload.mock.calls.length === 1) {
+          started.resolve();
+          return first.promise;
+        }
+        return Promise.resolve(draft);
+      }),
+    };
+    const { uppy } = setup(sdk);
+    const oldFile = uppy.getFiles()[0]!;
+    const successes: string[] = [];
+    uppy.on("upload-success", (file) => successes.push(file?.id ?? ""));
+    const original = uppy.upload();
+    await started.promise;
+    uppy.removeFile(oldFile.id);
+    const replacementId = uppy.addFile({
+      data: oldFile.data!,
+      name: oldFile.name,
+      type: oldFile.type,
+    });
+    expect(replacementId).toBe(oldFile.id);
+    const replacement = uppy.upload();
+    expect(sdk.upload).toHaveBeenCalledTimes(1);
+    first.resolve(handles[0]);
+    await Promise.all([original, replacement]);
+    expect(sdk.upload).toHaveBeenCalledTimes(2);
+    expect(sdk.pinObject).toHaveBeenCalledTimes(1);
+    expect(successes).toEqual([replacementId]);
+    uppy.destroy();
+  });
+
+  test("a replacement file cannot retry while its old pin outcome is uncertain", async () => {
+    const pin = deferred<void>();
+    const started = deferred<void>();
+    const sdk = {
+      pinObject: vi.fn(() => {
+        started.resolve();
+        return pin.promise;
+      }),
+      upload: vi.fn(async (draft: unknown) => draft),
+    };
+    const { access, uppy } = setup(sdk);
+    const outcomes: (string | undefined)[] = [];
+    uppy.removePlugin(uppy.getPlugin("SiaUpload")!);
+    uppy.use(SiaUpload, {
+      access,
+      onUncertain: (_file, error) => outcomes.push(error.objectId),
+    });
+    const oldFile = uppy.getFiles()[0]!;
+    const original = uppy.upload();
+    await started.promise;
+    uppy.removeFile(oldFile.id);
+    const replacementId = uppy.addFile({
+      data: oldFile.data!,
+      name: oldFile.name,
+      type: oldFile.type,
+    });
+    expect(replacementId).toBe(oldFile.id);
+    const errors: Error[] = [];
+    uppy.on("upload-error", (_, error) => errors.push(error));
+    const replacement = uppy.upload();
+    expect(sdk.upload).toHaveBeenCalledTimes(1);
+    pin.resolve();
+    await Promise.all([original, replacement]);
+    expect(sdk.upload).toHaveBeenCalledTimes(1);
+    expect(outcomes).toEqual(["object-1"]);
+    expect(errors[0]).toBeInstanceOf(SiaUploadUncertainError);
+    uppy.destroy();
+  });
+
   test("cancel all never starts a queued second file while the first native pin drains", async () => {
     const pin = deferred<void>();
     const firstStarted = deferred<void>();
@@ -358,7 +475,7 @@ describe("Sia Uppy uploads", () => {
     uppy.destroy();
   });
 
-  test("cancel all during pin cannot publish late success or retry the uncertain write", async () => {
+  test("cancel all during pin reports the uncertain object without late success", async () => {
     const pin = deferred<void>();
     const started = deferred<void>();
     const sdk = {
@@ -368,7 +485,19 @@ describe("Sia Uppy uploads", () => {
       }),
       upload: vi.fn(async () => handles[0]),
     };
-    const { uppy } = setup(sdk);
+    const { access, uppy } = setup(sdk);
+    const outcomes: {
+      fileId: string;
+      objectId: string | undefined;
+      sessionId: string;
+    }[] = [];
+    uppy.removePlugin(uppy.getPlugin("SiaUpload")!);
+    uppy.use(SiaUpload, {
+      access,
+      onUncertain: (file, error, sessionId) =>
+        outcomes.push({ fileId: file.id, objectId: error.objectId, sessionId }),
+    });
+    const fileId = uppy.getFiles()[0]!.id;
     const successes: unknown[] = [];
     uppy.on("upload-success", (_, response) => successes.push(response));
     const upload = uppy.upload();
@@ -377,6 +506,9 @@ describe("Sia Uppy uploads", () => {
     pin.resolve();
     await upload;
     expect(successes).toEqual([]);
+    expect(outcomes).toEqual([
+      { fileId, objectId: "object-1", sessionId: "account-1" },
+    ]);
     expect(handles[0]?.freed).toBe(1);
     expect(sdk.upload).toHaveBeenCalledTimes(1);
     uppy.destroy();
