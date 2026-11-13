@@ -2896,11 +2896,10 @@ importers:
         version: 0.22.3(@vitejs/devtools@0.3.4)(publint@0.3.21)(tsx@4.23.0)(typescript@6.0.3)(unrun@0.2.37)
 
   libs/uppy-sia-upload:
-    dependencies:
+    devDependencies:
       '@lumeweb/sia-app-access':
         specifier: workspace:*
         version: link:../sia-app-access
-    devDependencies:
       '@lumeweb/sia-testing':
         specifier: workspace:*
         version: link:../sia-testing
