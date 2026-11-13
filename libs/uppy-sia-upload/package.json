@@ -20,7 +20,7 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "lint": "oxlint --deny-warnings src tests/upload.test.ts",
+    "lint": "oxlint --deny-warnings src tests/*.test.ts",
     "format:check": "prettier --check .",
     "test:package": "pnpm run build && node --check tests/package.test.mjs && node --test tests/package.test.mjs"
   },
@@ -30,6 +30,7 @@
     "@siafoundation/sia-storage": "0.2.0"
   },
   "devDependencies": {
+    "@lumeweb/sia-testing": "workspace:*",
     "@uppy/core": "catalog:",
     "@siafoundation/sia-storage": "0.2.0",
     "@types/node": "catalog:",

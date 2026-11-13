@@ -2901,6 +2901,9 @@ importers:
         specifier: workspace:*
         version: link:../sia-app-access
     devDependencies:
+      '@lumeweb/sia-testing':
+        specifier: workspace:*
+        version: link:../sia-testing
       '@siafoundation/sia-storage':
         specifier: 0.2.0
         version: 0.2.0

@@ -33,4 +33,4 @@ Cancellation or file removal stops Uppy from reporting a late success. The insta
 
 ## Checks
 
-From the workspace root run `pnpm --filter @lumeweb/sia-session build && pnpm --filter @lumeweb/sia-app-access build`, then `pnpm --filter @lumeweb/uppy-sia-upload test`, `typecheck`, `build`, `lint`, and `test:package`. Controlled tests do not establish behavior against a deployed indexd, live storage hosts, or a real account; qualify those separately before claiming live compatibility.
+From the workspace root run `pnpm --filter @lumeweb/sia-testing build && pnpm --filter @lumeweb/sia-session build && pnpm --filter @lumeweb/sia-app-access build`, then run `pnpm --filter @lumeweb/uppy-sia-upload` with `test`, `typecheck`, `build`, `lint`, and `test:package`. The integration tests use a test-only SDK adapter over Sia testing's synthetic application port for staged upload, pin and lost replies. The other tests check handle cleanup with a WASM-shaped fake. These checks do not establish behavior against a deployed indexd, live storage hosts, or a real account.
