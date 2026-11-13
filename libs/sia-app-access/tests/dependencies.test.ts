@@ -1,15 +1,15 @@
-/** Shared fixtures retain their declared native SDK without changing the access adapter's release. */
+/** Checks both packages' SDK resolution without relying on workspace hoisting. */
 import assert from "node:assert/strict";
 import { readFileSync, realpathSync } from "node:fs";
 import { findPackageJSON } from "node:module";
 import { test } from "node:test";
 import { pathToFileURL } from "node:url";
 
-void test("access and shared testing resolve their own supported SDK versions", () => {
+void test("access and shared testing both resolve SDK 0.2.0", () => {
   const testing = findPackageJSON("@lumeweb/sia-testing", import.meta.url);
   assert.ok(testing);
   assert.equal(sdkVersion(import.meta.url), "0.2.0");
-  assert.equal(sdkVersion(pathToFileURL(realpathSync(testing)).href), "0.1.4");
+  assert.equal(sdkVersion(pathToFileURL(realpathSync(testing)).href), "0.2.0");
 });
 
 function sdkVersion(base: string): string {

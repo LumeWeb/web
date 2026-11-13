@@ -203,7 +203,7 @@ async function checkPackage(unpacked, directory) {
     )
   );
   const sdkVersion = sdkMetadata.version;
-  if (sdkVersion !== "0.1.4")
+  if (sdkVersion !== "0.2.0")
     throw new Error(`Unchecked storage SDK ${sdkVersion}`);
   runNode(consumer, [tsc, "-p", "tsconfig.packed-node.json"]);
   runNode(consumer, [tsc, "-p", "tsconfig.packed-browser.json"]);

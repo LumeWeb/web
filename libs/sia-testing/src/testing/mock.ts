@@ -3,6 +3,7 @@ import type { FinishedPayload } from "../sdk/payload-store.js";
 import { collectPayload } from "./streaming-source.js";
 /** Managed mock runs bind readers to owner or recipient access and clean only their own fixtures. */
 import { createPackedSdk } from "./packed.js";
+import { createUploadSdk } from "./sdk-upload.js";
 import { digest } from "./files.js";
 import { boundedByteView } from "./byte-view.js";
 import { snapshotApplicationMetadata } from "./application-metadata.js";
@@ -1897,6 +1898,35 @@ export function createMockSiaWithBackend(
         },
         value,
       };
+    },
+    uploadSdk({ access, as, maxBytes }) {
+      environmentOpen();
+      if (
+        !Number.isSafeInteger(maxBytes) ||
+        maxBytes < 1 ||
+        maxBytes > 16 * 1024 * 1024
+      )
+        throw failure("invalid-input", "Invalid upload byte allowance");
+      const grant = grants.get(access);
+      if (!grant || grant.key !== null || grant.credential.kind !== "app-key")
+        throw failure("denied", "Owner access is unavailable");
+      const writer = environment.application({ access, as });
+      const key = `ed25519:${grant.context.id}`;
+      return createUploadSdk(
+        writer,
+        maxBytes,
+        key,
+        (close) => {
+          grant.context.transportCleanup.add(close);
+          return () => {
+            grant.context.transportCleanup.delete(close);
+          };
+        },
+        (error) => {
+          if (!grant.context.cleanupErrors.includes(error))
+            grant.context.cleanupErrors.push(error);
+        },
+      );
     },
   };
   registerRuntime(environment, {

@@ -137,7 +137,7 @@ Consent must explicitly set `transfers: true` and `mutations: true` and name the
 
 ## SDK lifetime
 
-The installed SDK must be version `0.1.4`. Authority reaches the agent over Node IPC rather than command-line arguments. The agent uses a small environment allowlist, with inherited module-loader and native-loader overrides removed. Its stdout and stderr are discarded; RPC failures contain fixed messages and classified codes.
+The installed SDK must be version `0.2.0`. Authority reaches the agent over Node IPC rather than command-line arguments. The agent uses a small environment allowlist, with inherited module-loader and native-loader overrides removed. Its stdout and stderr are discarded; RPC failures contain fixed messages and classified codes.
 
 The parent owns the process lifetime. The agent still uses the network and operating-system permissions of the caller. A request deadline or abort stops the process before the request rejects. Shutdown first sends SIGTERM, then SIGKILL if the child remains alive. Failure to confirm exit within the cleanup deadline is reported as uncertain termination.
 

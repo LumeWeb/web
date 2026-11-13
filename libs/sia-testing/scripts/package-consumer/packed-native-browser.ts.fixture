@@ -1,4 +1,4 @@
-/** Checks only consumed native 0.1.4 calls; seal output is deliberately excluded from the mock. */
+/** Checks only consumed native 0.2.0 calls; seal output is deliberately excluded from the mock. */
 import type {
   Sdk,
   PackedUpload,
@@ -51,6 +51,12 @@ export type NativeDelete = Assert<
 >;
 export type MockSealOutput = Assert<
   Equal<ReturnType<PackedObject["seal"]>, void>
+>;
+export type NativeStreamUpload = Assert<
+  Equal<ReturnType<Sdk["upload"]>, Promise<PinnedObject>>
+>;
+export type NativeUploadInput = Assert<
+  Equal<Parameters<Sdk["upload"]>[0], PinnedObject>
 >;
 export type NativePin = Assert<
   Equal<Parameters<Sdk["pinObject"]>, [PinnedObject]>

@@ -53,7 +53,7 @@
     "test:mutation": "node scripts/mutation-regression.mjs"
   },
   "peerDependencies": {
-    "@siafoundation/sia-storage": "0.1.4",
+    "@siafoundation/sia-storage": "0.2.0",
     "msw": "^2.14.6",
     "vitest": "^4.1.9"
   },
@@ -72,7 +72,7 @@
     "@lumeweb/tsdown-config": "workspace:*",
     "@noble/hashes": "^2.0.1",
     "@playwright/test": "^1.61.1",
-    "@siafoundation/sia-storage": "0.1.4",
+    "@siafoundation/sia-storage": "0.2.0",
     "@types/node": "catalog:",
     "@vitest/browser-playwright": "catalog:",
     "happy-dom": "catalog:",
