@@ -1,6 +1,6 @@
 /** Runs the direct packed simulation from the extracted tarball without native initialization. */
 import assert from "node:assert/strict";
-import { bytesFixture, createMockSia } from "@lumeweb/sia-testing/mock";
+import { bytesFixture, createMockSia, MockPinnedObject } from "@lumeweb/sia-testing/mock";
 const mock = createMockSia();
 const app = {
   id: "a".repeat(64),
@@ -72,6 +72,36 @@ try {
   await mock.close();
 }
 console.log("packed SDK-shaped direct simulation passed");
+
+const direct = createMockSia();
+try {
+  await direct.run({ app }, async (run) => {
+    const sdk = direct.uploadSdk({
+      access: run.ownerAccess,
+      as: direct.actor("direct writer"),
+      maxBytes: 8,
+    });
+    const reader = direct.reader({
+      access: run.ownerAccess,
+      as: direct.actor("direct reader"),
+    });
+    try {
+      const draft = new MockPinnedObject();
+      draft.updateMetadata(Uint8Array.of(9));
+      const object = await sdk.upload(draft, new Blob([Uint8Array.of(4, 5)]).stream());
+      await sdk.pinObject(object);
+      assert.deepEqual([...(await reader.object(object.id())).metadata], [9]);
+      assert.deepEqual([...(await new Response(await reader.download({ id: object.id() })).bytes())], [4, 5]);
+      object.free();
+    } finally {
+      await sdk.close();
+      await reader.close();
+    }
+  });
+} finally {
+  await direct.close();
+}
+console.log("direct SDK upload simulation passed");
 
 // The extracted Node entry must select the real temporary-file mode, not a source alias.
 const { withSiaRun } = await import("@lumeweb/sia-testing/node");

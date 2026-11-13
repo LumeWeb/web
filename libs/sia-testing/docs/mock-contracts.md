@@ -388,12 +388,57 @@ releases registrations. A lost first targets reply can leave an unreferenced
 session until run or endpoint cleanup. Calls do not retry or recover sessions
 automatically.
 
+## Direct SDK 0.2 upload simulation
+
+`mock.uploadSdk({ access: run.ownerAccess, as: actor, maxBytes })` provides a
+small, direct SDK-shaped upload surface. Import `MockPinnedObject` from `mock`
+and pass a fresh handle to `sdk.upload(handle, stream)`. The input handle is
+freed when upload starts; the returned handle can be pinned with
+`sdk.pinObject(handle)` and must be freed by its caller. `appKey().publicKey()`
+returns a synthetic account label, not a cryptographic key. Close the SDK to
+join its application port before ending the run.
+
+```ts
+const sdk = mock.uploadSdk({
+  access: run.ownerAccess,
+  as: mock.actor("uploader"),
+  maxBytes: 1024,
+});
+try {
+  const draft = new MockPinnedObject();
+  draft.updateMetadata(Uint8Array.of(7));
+  const object = await sdk.upload(draft, new Blob([Uint8Array.of(1)]).stream());
+  try {
+    await sdk.pinObject(object);
+  } finally {
+    object.free();
+  }
+} finally {
+  await sdk.close();
+}
+```
+
+The upload collects at most `maxBytes` (from 1 through 16 MiB) before calling
+the owned application port, which applies the run's upload limits and fault
+controls. Metadata is copied before the source opens and again when pin starts;
+a metadata change on the returned handle is included in that pin. `free()`
+invalidates a local handle without deleting its staged or pinned object.
+`mutationFaults` for `upload` and `pin`, including lost replies, retain their
+application-port behavior. The run owns unpublished object data and cleans it
+up after the test. Source overflow cancels the source before any upload effect.
+
+This mock does not encrypt, upload to hosts, seal handles, resume uploads or
+simulate `UploadOptions`. Passing nonempty upload options rejects as
+unsupported. It does not replace a native SDK 0.2 binding or provide a full
+`Sdk` implementation. A lost upload reply can leave an inaccessible staged
+object; a lost pin reply can leave a readable pinned object.
+
 ## Direct SDK-shaped packed simulation
 
 `mock.packedSdk({ access, as, platform, maxBytes, maxObjects })` uses original
 owner access and actor capabilities. `platform` is `"node"` or `"browser"`;
 `add(stream)` returns `Promise<bigint>` or `Promise<number>` respectively,
-matching that part of SDK 0.1.4. The handle from `uploadPacked(options?)` is
+matching that part of SDK 0.2.0. The handle from `uploadPacked(options?)` is
 synchronous. The supported options are positive safe integer `dataShards`,
 `parityShards` and `maxBufferedSlabs`. They validate caller configuration;
 they do not change simulated storage layout. Host progress callbacks are
@@ -485,7 +530,7 @@ mutate or seal. `seal(key)` validates the original object and key and returns
 `void`. It does not create a sealed record, signature, encryption proof or
 recovery capability. Code needing sealed output is unsupported by this mock.
 The surface is not assignable to full native nominal classes. Package checks
-separately check the consumed Node/browser 0.1.4 signatures and the intentional
+separately check the consumed Node/browser 0.2.0 signatures and the intentional
 seal output omission; no compatibility with SDK 0.0.12 is established.
 
 ### Chunked fixtures and collection controls

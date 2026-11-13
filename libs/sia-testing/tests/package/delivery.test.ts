@@ -132,6 +132,13 @@ beforeEach(async () => {
       export interface PackedAppKey { readonly [packedBrand]: "key"; }
       export interface PackedObject { readonly [packedBrand]: "object"; id(): string; updateMetadata(bytes: Uint8Array): void; seal(key: PackedAppKey): void; }
       export interface PackedOptions { dataShards?: number; parityShards?: number; maxBufferedSlabs?: number; }
+      export declare class MockPinnedObject {
+        constructor(id?: string);
+        id(): string;
+        metadata(): Uint8Array;
+        updateMetadata(bytes: Uint8Array): void;
+        free(): void;
+      }
       export interface PackedSdk<P extends "node" | "browser"> {
         appKey(): PackedAppKey;
         pinObject(object: PackedObject): Promise<void>;
@@ -141,6 +148,7 @@ beforeEach(async () => {
       }
       export interface MockSia {
         packedSdk<P extends "node" | "browser">(options: { access: object; as: object; platform: P; maxBytes: number; maxObjects: number }): PackedSdk<P>;
+        uploadSdk(options: { access: object; as: object; maxBytes: number }): { upload(object: MockPinnedObject, source: ReadableStream<Uint8Array>): Promise<MockPinnedObject>; pinObject(object: MockPinnedObject): Promise<void>; close(): Promise<void> };
         faults: {
           fail(selector: ReadSelector, options: {code: "denied" | "not-found" | "unavailable"; times: number}): void;
           hold(selector: ReadSelector): Hold;
@@ -160,6 +168,13 @@ beforeEach(async () => {
       export declare function createMockSia(): MockSia;
       export declare function bytesFixture(input: {bytes: Uint8Array; name: string}): Promise<TestFile>;`,
     "mock.js": `
+      export class MockPinnedObject {
+        constructor(id = "draft") { this.objectId = id; this.bytes = new Uint8Array(); }
+        id() { return this.objectId; }
+        metadata() { return this.bytes.slice(); }
+        updateMetadata(bytes) { this.bytes = bytes.slice(); }
+        free() {}
+      }
       export async function bytesFixture({bytes, name}) { return {bytes, name, sizeBytes: bytes.length, open: () => new Blob([bytes]).stream()}; }
       export function createMockSia() {
         const data = new Map();
@@ -178,6 +193,10 @@ beforeEach(async () => {
         const mock = { data, application: () => ({
           upload: async ({file, metadata}) => {const id = String(data.size); const object = {id}; data.set(id, {id, bytes: file.bytes, sizeBytes: file.sizeBytes, metadata}); return object;},
           pin: async () => {}, close: async () => {}
+        }), uploadSdk: () => ({
+          upload: async (draft, stream) => { const bytes = await new Response(stream).bytes(); const id = String(data.size); data.set(id, {id, bytes, sizeBytes: bytes.length, metadata: draft.metadata()}); const object = new MockPinnedObject(id); object.updateMetadata(draft.metadata()); return object; },
+          pinObject: async object => { data.get(object.id()).metadata = object.metadata(); },
+          close: async () => {}
         }), packedSdk: ({platform}) => {
           const owned = new WeakSet();
           const key = {};

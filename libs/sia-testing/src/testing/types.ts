@@ -1,5 +1,6 @@
 /** Scoped storage contracts keep fixture mutation handles separate from readable object data. */
 import type { PackedSdk, PackedSdkOptions } from "./packed.js";
+import type { UploadSdk, UploadSdkOptions } from "./sdk-upload.js";
 import type { MockMutationFaults } from "./mutations.js";
 import type { MockFaults, RequestReceipt } from "./controls.js";
 declare const ownership: unique symbol;
@@ -193,6 +194,7 @@ export interface MockSia {
     options: MockRunOptions,
     use: (run: MockRun) => Promise<T>,
   ): Promise<RunResult<T, MockRunSummary>>;
+  uploadSdk(input: UploadSdkOptions): UploadSdk;
 }
 export interface ObjectCursor {
   readonly after: string;

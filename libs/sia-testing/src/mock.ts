@@ -16,6 +16,8 @@ export type {
 } from "./testing/packed.js";
 
 export { PackedFinalizeError } from "./testing/packed.js";
+export { MockPinnedObject } from "./testing/sdk-upload.js";
+export type { UploadSdk, UploadSdkOptions } from "./testing/sdk-upload.js";
 
 export type {
   ActorRef,

@@ -62,7 +62,7 @@ async function authenticate(
     const metadata = JSON.parse(
       await readFile(join(dirname(dirname(entry)), "package.json"), "utf8"),
     ) as { version?: unknown };
-    if (metadata.version !== "0.1.4") throw new Error("Unexpected SDK version");
+    if (metadata.version !== "0.2.0") throw new Error("Unexpected SDK version");
     api = await import("@siafoundation/sia-storage");
     await api.initSia();
     code = "authentication";
@@ -91,7 +91,9 @@ async function authenticate(
       sdk = await builder.register(document.auth.phrase);
     } else {
       sdk = await builder.connectPreAuthorized(
-        Buffer.from(document.auth.preauthorizedKeyHex, "hex"),
+        api.PreAuthorizedKey.import(
+          Buffer.from(document.auth.preauthorizedKeyHex, "hex"),
+        ),
         document.auth.phrase,
       );
     }
