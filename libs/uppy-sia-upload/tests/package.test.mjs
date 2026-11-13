@@ -95,6 +95,7 @@ void test(
     declare const access: UploadAccess;
     const uppy = new Uppy<Meta, SiaUploadBody>();
     uppy.use(SiaUpload, { access });
+    void uppy.getPlugin<SiaUpload>("SiaUpload")?.clearUncertain("file-id");
     uppy.on("upload-success", (_file, response) => { if (response.body) { const id: string = response.body.objectId; void id; } });
   `,
     );

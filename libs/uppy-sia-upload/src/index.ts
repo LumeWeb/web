@@ -54,12 +54,24 @@ export default class SiaUpload extends BasePlugin<
   #generation = 0;
   #installed = false;
   readonly #pending = new Map<string, Pending>();
-  readonly #uncertain = new Set<string>();
+  // Session IDs change on reconnect; the public key keeps unknown pins bound to the account.
+  readonly #uncertain = new Map<string, Map<string, SiaUploadUncertainError>>();
 
   constructor(uppy: Uppy<Meta, SiaUploadBody>, options: SiaUploadOptions) {
     super(uppy, options);
     this.id = options.id ?? SiaUpload.id;
     this.type = "uploader";
+  }
+
+  async clearUncertain(fileId: string): Promise<boolean> {
+    const sessionId = this.opts.access.getSnapshot().activeSessionId;
+    if (!sessionId)
+      throw new Error("A Sia account is required to clear an uncertain upload");
+    const accountKey = await this.#accountKey(sessionId);
+    const files = this.#uncertain.get(accountKey);
+    const cleared = files?.delete(fileId) ?? false;
+    if (!files?.size) this.#uncertain.delete(accountKey);
+    return cleared;
   }
 
   install(): void {
@@ -77,6 +89,20 @@ export default class SiaUpload extends BasePlugin<
     this.#onCancelAll();
   }
 
+  async #accountKey(sessionId: string): Promise<string> {
+    const accountKey = await this.opts.access.withSession((sdk) => {
+      const key = sdk.appKey();
+      try {
+        return key.publicKey();
+      } finally {
+        key.free();
+      }
+    });
+    if (this.opts.access.getSnapshot().activeSessionId !== sessionId)
+      throw new Error("The Sia account changed before its identity was read");
+    return accountKey;
+  }
+
   readonly #onCancelAll = (): void => {
     this.#generation++;
     for (const entry of this.#pending.values()) entry.controller.abort();
@@ -90,8 +116,13 @@ export default class SiaUpload extends BasePlugin<
     file: UppyFile<Meta, SiaUploadBody>,
     error: SiaUploadUncertainError,
     sessionId: string,
+    accountKey: string,
   ): void {
-    this.#uncertain.add(file.id);
+    const files =
+      this.#uncertain.get(accountKey) ??
+      new Map<string, SiaUploadUncertainError>();
+    files.set(file.id, error);
+    this.#uncertain.set(accountKey, files);
     try {
       this.opts.onUncertain?.(file, error, sessionId);
     } catch (reportError) {
@@ -111,26 +142,47 @@ export default class SiaUpload extends BasePlugin<
       .filter((file) => !file.progress.uploadComplete);
     if (!files.length) return;
     const sessionId = this.opts.access.getSnapshot().activeSessionId;
-    this.uppy.emit("upload-start", files);
-    const generation = this.#generation;
-    for (const file of files) {
-      if (!this.#installed || generation !== this.#generation) break;
-      if (!this.uppy.getFile(file.id)) continue;
-      if (!sessionId) {
-        this.uppy.emit(
-          "upload-error",
-          file,
-          new Error("A Sia account is required to upload"),
-        );
-        continue;
+    const removed = new Set<string>();
+    const onRemoved = (file: UppyFile<Meta, SiaUploadBody>) => {
+      removed.add(file.id);
+    };
+    this.uppy.on("file-removed", onRemoved);
+    try {
+      this.uppy.emit("upload-start", files);
+      const generation = this.#generation;
+      let accountKey: string | undefined;
+      let identityError: unknown;
+      if (sessionId) {
+        try {
+          accountKey = await this.#accountKey(sessionId);
+        } catch (error) {
+          identityError = error;
+        }
       }
-      await this.#uploadFile(file, sessionId, generation);
+      for (const file of files) {
+        if (!this.#installed || generation !== this.#generation) break;
+        if (removed.has(file.id) || !this.uppy.getFile(file.id)) continue;
+        if (!sessionId || !accountKey) {
+          this.uppy.emit(
+            "upload-error",
+            file,
+            identityError instanceof Error
+              ? identityError
+              : new Error("A Sia account is required to upload"),
+          );
+          continue;
+        }
+        await this.#uploadFile(file, sessionId, accountKey, generation);
+      }
+    } finally {
+      this.uppy.off("file-removed", onRemoved);
     }
   };
 
   async #uploadFile(
     file: UppyFile<Meta, SiaUploadBody>,
     sessionId: string,
+    accountKey: string,
     generation: number,
   ): Promise<void> {
     if (this.#pending.has(file.id)) {
@@ -164,8 +216,9 @@ export default class SiaUpload extends BasePlugin<
       );
       return;
     }
-    if (this.#uncertain.has(file.id)) {
-      this.uppy.emit("upload-error", file, new SiaUploadUncertainError());
+    const uncertain = this.#uncertain.get(accountKey)?.get(file.id);
+    if (uncertain) {
+      this.uppy.emit("upload-error", file, uncertain);
       return;
     }
     if (file.isRemote || !(file.data instanceof File)) {
@@ -197,6 +250,7 @@ export default class SiaUpload extends BasePlugin<
           file,
           new SiaUploadUncertainError(result.objectId),
           sessionId,
+          accountKey,
         );
         return;
       }
@@ -206,7 +260,7 @@ export default class SiaUpload extends BasePlugin<
       });
     } catch (error) {
       if (error instanceof SiaUploadUncertainError)
-        this.#reportUncertain(file, error, sessionId);
+        this.#reportUncertain(file, error, sessionId, accountKey);
       if (
         !controller.signal.aborted &&
         this.#installed &&

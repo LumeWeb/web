@@ -55,13 +55,25 @@ function setup(sdk: {
   upload: (...args: unknown[]) => Promise<unknown>;
 }) {
   let sessionId: null | string = "account-1";
+  let freedKeys = 0;
   const access = {
     getSnapshot: () => ({ activeSessionId: sessionId }),
     withSession: async <T>(
       work: (sdk: SiaSession) => Promise<T> | T,
     ): Promise<T> => {
       if (!sessionId) throw new Error("No account");
-      return work(sdk as unknown as SiaSession);
+      return work({
+        ...sdk,
+        appKey: () => ({
+          free: () => {
+            freedKeys++;
+          },
+          publicKey: () =>
+            sessionId === "account-2"
+              ? "ed25519:account-2"
+              : "ed25519:account-1",
+        }),
+      } as unknown as SiaSession);
     },
   } as SiaAccess<SiaSession>;
   const uppy = new Uppy<Meta, SiaUploadBody>();
@@ -76,8 +88,12 @@ function setup(sdk: {
     disconnect: () => {
       sessionId = null;
     },
+    freedKeys: () => freedKeys,
     replace: () => {
       sessionId = "account-2";
+    },
+    restore: () => {
+      sessionId = "account-1-reconnected";
     },
     uppy,
   };
@@ -91,7 +107,7 @@ describe("Sia Uppy uploads", () => {
   test("an acknowledged pin completes a file without waiting for an object event", async () => {
     const upload = vi.fn(async () => handles[0]);
     const pinObject = vi.fn(async () => undefined);
-    const { uppy } = setup({ pinObject, upload });
+    const { freedKeys, uppy } = setup({ pinObject, upload });
     const successes: unknown[] = [];
     uppy.on("upload-success", (_, response) => successes.push(response.body));
     const result = await uppy.upload();
@@ -102,6 +118,7 @@ describe("Sia Uppy uploads", () => {
     expect(pinObject).toHaveBeenCalledWith(handles[0]);
     expect(handles).toHaveLength(1);
     expect(handles[0]?.freed).toBe(1);
+    expect(freedKeys()).toBe(1);
     uppy.destroy();
   });
 
@@ -184,6 +201,55 @@ describe("Sia Uppy uploads", () => {
     uppy.destroy();
   });
 
+  test("an uncertain file ID blocks its account until that account clears it", async () => {
+    const sdk = {
+      pinObject: vi
+        .fn(async () => undefined)
+        .mockRejectedValueOnce(new Error("pin reply lost")),
+      upload: vi.fn(async (draft: unknown) => draft),
+    };
+    const { replace, restore, uppy } = setup(sdk);
+    const file = uppy.getFiles()[0]!;
+    const plugin = uppy.getPlugin("SiaUpload") as SiaUpload;
+    const errors: Error[] = [];
+    uppy.on("upload-error", (_, error) => errors.push(error));
+    await uppy.upload();
+    expect(errors[0]).toBeInstanceOf(SiaUploadUncertainError);
+    replace();
+    await expect(plugin.clearUncertain(file.id)).resolves.toBe(false);
+    await uppy.retryAll();
+    expect(sdk.upload).toHaveBeenCalledTimes(2);
+    expect(sdk.pinObject).toHaveBeenCalledTimes(2);
+    restore();
+    uppy.removeFile(file.id);
+    uppy.addFile({ data: file.data!, name: file.name, type: file.type });
+    await uppy.upload();
+    expect(sdk.upload).toHaveBeenCalledTimes(2);
+    expect(errors.at(-1)).toBeInstanceOf(SiaUploadUncertainError);
+    expect((errors.at(-1) as SiaUploadUncertainError).objectId).toBe(
+      "object-1",
+    );
+    await expect(plugin.clearUncertain(file.id)).resolves.toBe(true);
+    await uppy.retryAll();
+    expect(sdk.upload).toHaveBeenCalledTimes(3);
+    uppy.destroy();
+  });
+
+  test("reconnecting the same account does not clear an unknown pin", async () => {
+    const sdk = {
+      pinObject: vi.fn(async () => {
+        throw new Error("pin reply lost");
+      }),
+      upload: vi.fn(async (draft: unknown) => draft),
+    };
+    const { restore, uppy } = setup(sdk);
+    await uppy.upload();
+    restore();
+    await uppy.retryAll();
+    expect(sdk.upload).toHaveBeenCalledTimes(1);
+    uppy.destroy();
+  });
+
   test("removing a file during pin suppresses late success and retains the account borrow", async () => {
     const pin = deferred<void>();
     const sdk = {
@@ -215,6 +281,10 @@ describe("Sia Uppy uploads", () => {
     const pinStarted = deferred<void>();
     let disposed = 0;
     const sdk = {
+      appKey: () => ({
+        free: () => undefined,
+        publicKey: () => "ed25519:account-1",
+      }),
       object: vi.fn(async () => 77),
       pinObject: vi.fn(() => {
         pinStarted.resolve();
@@ -313,6 +383,45 @@ describe("Sia Uppy uploads", () => {
       expect(sdk.upload).toHaveBeenCalledTimes(2);
       uppy.destroy();
     }
+  });
+
+  test("a removed queued file does not upload when its ID is reused", async () => {
+    const pin = deferred<void>();
+    const started = deferred<void>();
+    const sdk = {
+      pinObject: vi.fn(() => {
+        started.resolve();
+        return pin.promise;
+      }),
+      upload: vi.fn(async (draft: unknown) => draft),
+    };
+    const { uppy } = setup(sdk);
+    uppy.addFile({
+      data: new File(["second"], "second.txt"),
+      name: "second.txt",
+      type: "text/plain",
+    });
+    const queued = uppy.getFiles().find((file) => file.name === "second.txt")!;
+    const successes: string[] = [];
+    uppy.on("upload-success", (file) => successes.push(file?.name ?? ""));
+    const writing = uppy.upload();
+    await started.promise;
+    uppy.removeFile(queued.id);
+    const replacementId = uppy.addFile({
+      data: queued.data!,
+      name: queued.name,
+      type: queued.type,
+    });
+    expect(replacementId).toBe(queued.id);
+    pin.resolve();
+    await writing;
+    expect(sdk.upload).toHaveBeenCalledTimes(1);
+    expect(successes).toEqual(["notes.txt"]);
+    expect(uppy.getFile(replacementId)?.progress.uploadComplete).toBe(false);
+    await uppy.upload();
+    expect(sdk.upload).toHaveBeenCalledTimes(2);
+    expect(successes).toEqual(["notes.txt", "second.txt"]);
+    uppy.destroy();
   });
 
   test("a queued file does not switch accounts after its batch starts", async () => {
