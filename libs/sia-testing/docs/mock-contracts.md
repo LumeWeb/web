@@ -429,10 +429,14 @@ An uploaded handle from another SDK is not a fresh upload input.
 application-port behavior. The run owns unpublished object data and cleans it
 up after the test. Source overflow cancels the source before any upload effect.
 
+This mock accepts `dataShards`, `parityShards` and `onShardUploaded`. After a
+successful staged upload, it reports one synthetic callback for each encoded
+shard, using the SDK's sector size and zero elapsed time. The mock requires a
+positive `dataShards`, nonnegative `parityShards` and a combined count at most 255. It sends no callback when staging fails, and it does not simulate host
+transfers, shard retries or callback timing during upload. Other upload options
+reject as unsupported.
 This mock does not encrypt, upload to hosts, seal handles, resume uploads or
-simulate `UploadOptions`. Passing nonempty upload options rejects as
-unsupported. It does not replace a native SDK 0.2 binding or provide a full
-`Sdk` implementation. A lost upload reply can leave an inaccessible staged
+replace a native SDK 0.2 binding with a full `Sdk` implementation. A lost upload reply can leave an inaccessible staged
 object; a lost pin reply can leave a readable pinned object.
 
 ## Direct SDK-shaped packed simulation

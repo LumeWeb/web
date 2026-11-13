@@ -19,7 +19,7 @@ export interface UploadSdk {
   upload(
     object: MockPinnedObject,
     source: ReadableStream<Uint8Array>,
-    options?: object,
+    options?: MockUploadOptions,
   ): Promise<MockPinnedObject>;
 }
 export interface UploadSdkOptions {
@@ -27,6 +27,21 @@ export interface UploadSdkOptions {
   readonly as: ActorRef;
   /** Maximum bytes collected from one source before staging it. */
   readonly maxBytes: number;
+}
+
+/** Mirrors SDK shard reports without requiring the optional native package in mock consumers. */
+interface MockShardProgress {
+  elapsedMs: number;
+  hostKey: string;
+  shardIndex: number;
+  shardSize: number;
+  slabIndex: number;
+}
+
+interface MockUploadOptions {
+  dataShards?: number;
+  onShardUploaded?: (progress: MockShardProgress) => void;
+  parityShards?: number;
 }
 
 /** A test handle; `free` invalidates this reference but cannot undo a staged upload. */
@@ -143,8 +158,24 @@ export function createUploadSdk(
         open();
         if (!(draft instanceof MockPinnedObject) || uploadedHandles.has(draft))
           throw fail("invalid-input", "Upload requires a new object handle");
-        if (options && Object.keys(options).length)
+        if (
+          options &&
+          Object.keys(options).some(
+            (key) =>
+              !["dataShards", "onShardUploaded", "parityShards"].includes(key),
+          )
+        )
           throw fail("unsupported", "Upload options are not simulated");
+        const dataShards = options?.dataShards ?? 10;
+        const parityShards = options?.parityShards ?? 20;
+        if (
+          !Number.isSafeInteger(dataShards) ||
+          dataShards < 1 ||
+          !Number.isSafeInteger(parityShards) ||
+          parityShards < 0 ||
+          dataShards + parityShards > 255
+        )
+          throw fail("invalid-input", "Invalid shard counts");
         const metadata = draft.metadata();
         draft.free();
         const bytes = await collectSource(
@@ -161,6 +192,27 @@ export function createUploadSdk(
           metadata,
           signal: abort.signal,
         });
+        const shardSize = 4_194_304;
+        const slabs = Math.ceil(bytes.length / (dataShards * shardSize));
+        for (let slabIndex = 0; slabIndex < slabs; slabIndex++) {
+          for (
+            let shardIndex = 0;
+            shardIndex < dataShards + parityShards;
+            shardIndex++
+          ) {
+            try {
+              options?.onShardUploaded?.({
+                elapsedMs: 0,
+                hostKey: `ed25519:${shardIndex.toString(16).padStart(64, "0")}`,
+                shardIndex,
+                shardSize,
+                slabIndex,
+              });
+            } catch {
+              // WASM does not propagate JavaScript progress callback failures.
+            }
+          }
+        }
         const object = new MockPinnedObject(original.id);
         object.updateMetadata(metadata);
         originals.set(object, original);

@@ -24,6 +24,7 @@ import SiaUpload, {
 } from "../src/index.ts";
 
 vi.mock("@siafoundation/sia-storage/wasm", () => ({
+  encodedSize: () => 125_829_120,
   PinnedObject: MockPinnedObject,
 }));
 
@@ -178,6 +179,49 @@ siaTest(
       },
       { metadata: () => Uint8Array.of(9, 8) },
     );
+  },
+);
+
+siaTest(
+  "host shard acknowledgements advance Uppy progress before pin",
+  async ({ sia }) => {
+    await withUpload(sia, async ({ actor, uppy }) => {
+      const file = uppy.getFiles()[0]!;
+      const queuedId = addSecond(uppy);
+      const progress: { bytesTotal: null | number; bytesUploaded: number }[] =
+        [];
+      uppy.on("upload-progress", (current, event) => {
+        if (current?.id === file.id)
+          progress.push({
+            bytesTotal: event.bytesTotal,
+            bytesUploaded: event.bytesUploaded,
+          });
+      });
+      const hold = sia.mock.mutationFaults.hold({
+        actor,
+        operation: "pin",
+        stage: "beforeCommit",
+      });
+      const writing = uppy.upload();
+      try {
+        await Promise.race([
+          hold.started(),
+          writing.then(() => {
+            throw new Error("Upload ended before pin started");
+          }),
+        ]);
+        expect(progress).toHaveLength(30);
+        expect(progress[0]).toEqual({ bytesTotal: 3, bytesUploaded: 0.1 });
+        expect(progress.at(-1)).toEqual({ bytesTotal: 3, bytesUploaded: 3 });
+        expect(uppy.getFile(file.id)?.progress.uploadComplete).toBe(false);
+        expect(uppy.getFile(queuedId)?.progress.bytesTotal).toBe(6);
+        expect(uppy.getFile(queuedId)?.progress.bytesUploaded).toBe(0);
+      } finally {
+        hold.release();
+      }
+      expect((await writing)?.failed).toHaveLength(0);
+      expect(uppy.getFile(file.id)?.progress.uploadComplete).toBe(true);
+    });
   },
 );
 

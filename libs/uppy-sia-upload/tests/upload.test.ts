@@ -1,7 +1,8 @@
-/** Guards cleanup of WASM-shaped handles, which the synthetic SDK cannot inspect. */
+/** Checks uploader handle ownership and progress at the WASM-shaped boundary. */
 /* oxlint-disable eslint/no-empty-function, typescript/require-await -- The native boundary doubles return SDK-shaped promises. */
 import { afterEach, describe, expect, test, vi } from "vitest";
 import Uppy, { type Meta } from "@uppy/core";
+import type { UploadOptions } from "@siafoundation/sia-storage/wasm";
 import type { SiaSession } from "@lumeweb/sia-app-access/sia";
 import SiaUpload, {
   type SiaUploadBody,
@@ -12,6 +13,7 @@ import SiaUpload, {
 
 const handles: { failFree?: boolean; freed: number }[] = [];
 vi.mock("@siafoundation/sia-storage/wasm", () => ({
+  encodedSize: () => 125_829_120,
   PinnedObject: class {
     failFree = false;
     freed = 0;
@@ -59,7 +61,92 @@ afterEach(() => {
   handles.length = 0;
 });
 
-describe("WASM-shaped upload handle ownership", () => {
+describe("WASM-shaped upload boundary", () => {
+  test("a repeated shard acknowledgement does not advance host progress twice", async () => {
+    const sdk = {
+      pinObject: vi.fn(async () => undefined),
+      upload: vi.fn(async (...args: unknown[]) => {
+        const { PinnedObject } =
+          await import("@siafoundation/sia-storage/wasm");
+        const options = args[2] as UploadOptions;
+        const shard = {
+          elapsedMs: 1,
+          hostKey: `ed25519:${"a".repeat(64)}`,
+          shardIndex: 0,
+          shardSize: 4_194_304,
+          slabIndex: 0,
+        };
+        options.onShardUploaded?.(shard);
+        options.onShardUploaded?.({
+          ...shard,
+          hostKey: `ed25519:${"b".repeat(64)}`,
+        });
+        options.onShardUploaded?.({ ...shard, shardIndex: 1 });
+        return new PinnedObject();
+      }),
+    };
+    const { access, uppy } = setup(sdk);
+    try {
+      const progress: number[] = [];
+      await uploadToSia(access, new File(["hello"], "document.bin"), {
+        onProgress: (event) => {
+          expect(event.bytesTotal).toBe(125_829_120);
+          progress.push(event.bytesUploaded);
+        },
+      });
+      expect(progress).toEqual([4_194_304, 8_388_608]);
+      expect(sdk.pinObject).toHaveBeenCalledTimes(1);
+    } finally {
+      uppy.destroy();
+    }
+  });
+
+  test("a removed file does not receive a late shard acknowledgement", async () => {
+    let notifyEntered!: () => void;
+    let resumeUpload!: () => void;
+    const entered = new Promise<void>((resolve) => {
+      notifyEntered = resolve;
+    });
+    const resumed = new Promise<void>((resolve) => {
+      resumeUpload = resolve;
+    });
+    const sdk = {
+      pinObject: vi.fn(async () => undefined),
+      upload: vi.fn(async (...args: unknown[]) => {
+        const { PinnedObject } =
+          await import("@siafoundation/sia-storage/wasm");
+        notifyEntered();
+        await resumed;
+        (args[2] as UploadOptions).onShardUploaded?.({
+          elapsedMs: 1,
+          hostKey: `ed25519:${"a".repeat(64)}`,
+          shardIndex: 0,
+          shardSize: 4_194_304,
+          slabIndex: 0,
+        });
+        return new PinnedObject();
+      }),
+    };
+    const { uppy } = setup(sdk);
+    const progress: number[] = [];
+    uppy.on("upload-progress", (_file, event) =>
+      progress.push(event.bytesUploaded),
+    );
+    const writing = uppy.upload();
+    try {
+      await entered;
+      uppy.removeFile(uppy.getFiles()[0]!.id);
+      resumeUpload();
+      await writing;
+      expect(progress).toHaveLength(0);
+      expect(sdk.pinObject).not.toHaveBeenCalled();
+    } finally {
+      resumeUpload();
+      await writing;
+      uppy.destroy();
+    }
+  });
+
   test("failed cleanup after a lost pin reply does not hide uncertainty", async () => {
     const sdk = {
       pinObject: vi.fn(async () => {

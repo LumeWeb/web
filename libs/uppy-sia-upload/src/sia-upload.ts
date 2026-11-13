@@ -2,12 +2,19 @@
 import type { SiaAccess } from "@lumeweb/sia-app-access";
 import type { SiaSession } from "@lumeweb/sia-app-access/sia";
 
+/** Completed encoded shard bytes; parity and padding make the total differ from File.size. */
+export interface SiaUploadProgress {
+  readonly bytesTotal: number;
+  readonly bytesUploaded: number;
+}
+
 export interface SiaUploadResult {
   readonly objectId: string;
 }
 
 export interface SiaWriteOptions {
   readonly metadata?: (file: File) => Promise<Uint8Array> | Uint8Array;
+  readonly onProgress?: (progress: SiaUploadProgress) => void;
   readonly signal?: AbortSignal;
 }
 
@@ -54,7 +61,8 @@ export async function uploadToSia(
       throw new Error("The Sia account changed before the write started");
 
     // The released Sia app adapter initializes WASM before admitting this SDK.
-    const { PinnedObject } = await import("@siafoundation/sia-storage/wasm");
+    const { encodedSize, PinnedObject } =
+      await import("@siafoundation/sia-storage/wasm");
     const metadata = await options.metadata?.(file);
     if (options.signal?.aborted) throw new SiaUploadCancelledError();
     if (access.getSnapshot().activeSessionId !== sessionId)
@@ -73,8 +81,42 @@ export async function uploadToSia(
       if (options.signal?.aborted) throw new SiaUploadCancelledError();
       const source = file.stream();
       // WASM consumes draft when upload is called, including when its promise rejects.
-      transferred = true;
-      uploaded = await sdk.upload(draft, source);
+      const onProgress = options.onProgress;
+      if (onProgress) {
+        const dataShards = 10;
+        const parityShards = 20;
+        const bytesTotal = encodedSize(file.size, dataShards, parityShards);
+        const uploadedShards = new Set<string>();
+        let bytesUploaded = 0;
+        transferred = true;
+        uploaded = await sdk.upload(draft, source, {
+          dataShards,
+          onShardUploaded: (shard) => {
+            if (
+              options.signal?.aborted ||
+              access.getSnapshot().activeSessionId !== sessionId
+            )
+              return;
+            const identity = `${shard.slabIndex}:${shard.shardIndex}`;
+            // A shard can be uploaded again if its first host loses the slab.
+            if (uploadedShards.has(identity)) return;
+            uploadedShards.add(identity);
+            bytesUploaded = Math.min(
+              bytesTotal,
+              bytesUploaded + shard.shardSize,
+            );
+            try {
+              onProgress({ bytesTotal, bytesUploaded });
+            } catch {
+              // Reporting cannot change whether a remote upload committed.
+            }
+          },
+          parityShards,
+        });
+      } else {
+        transferred = true;
+        uploaded = await sdk.upload(draft, source);
+      }
       objectId = uploaded.id();
       if (options.signal?.aborted) throw new SiaUploadCancelledError();
       if (access.getSnapshot().activeSessionId !== sessionId)
