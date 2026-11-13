@@ -58,6 +58,97 @@ it("an uploaded handle keeps its metadata and bytes after pin", async () => {
   }
 });
 
+it("only a staged upload reports synthetic shard progress before pin", async () => {
+  const mock = createMockSia();
+  try {
+    await mock.run({ app }, async (run) => {
+      const actor = mock.actor("uploader");
+      const sdk = mock.uploadSdk({
+        access: run.ownerAccess,
+        as: actor,
+        maxBytes: 8,
+      });
+      try {
+        const shards: {
+          shardIndex: number;
+          shardSize: number;
+          slabIndex: number;
+        }[] = [];
+        const options = {
+          dataShards: 10,
+          onShardUploaded: (shard: {
+            shardIndex: number;
+            shardSize: number;
+            slabIndex: number;
+          }) => shards.push(shard),
+          parityShards: 20,
+        };
+        mock.mutationFaults.fail(
+          { actor, operation: "upload", stage: "beforeCommit" },
+          { code: "unavailable", times: 1 },
+        );
+        await expect(
+          sdk.upload(
+            new MockPinnedObject(),
+            new Blob([Uint8Array.of(1, 2, 3)]).stream(),
+            options,
+          ),
+        ).rejects.toMatchObject({ code: "unavailable" });
+        expect(shards).toHaveLength(0);
+        const object = await sdk.upload(
+          new MockPinnedObject(),
+          new Blob([Uint8Array.of(1, 2, 3)]).stream(),
+          options,
+        );
+        expect(shards).toHaveLength(30);
+        expect(shards[0]).toMatchObject({
+          shardIndex: 0,
+          shardSize: 4_194_304,
+          slabIndex: 0,
+        });
+        expect(shards[29]).toMatchObject({ shardIndex: 29, slabIndex: 0 });
+        expect(
+          mock.history().filter((row) => row.operation === "pin"),
+        ).toHaveLength(0);
+        await sdk.pinObject(object);
+      } finally {
+        await sdk.close();
+      }
+    });
+  } finally {
+    await mock.close();
+  }
+});
+
+it("an excessive shard count rejects before staging an upload", async () => {
+  const mock = createMockSia();
+  try {
+    await mock.run({ app }, async (run) => {
+      const sdk = mock.uploadSdk({
+        access: run.ownerAccess,
+        as: mock.actor("uploader"),
+        maxBytes: 8,
+      });
+      try {
+        await expect(
+          sdk.upload(
+            new MockPinnedObject(),
+            new Blob([Uint8Array.of(1)]).stream(),
+            { dataShards: 255, parityShards: 20 },
+          ),
+        ).rejects.toMatchObject({ code: "invalid-input" });
+        expect(
+          mock.history().filter((row) => row.operation === "upload"),
+        ).toHaveLength(0);
+      } finally {
+        await sdk.close();
+      }
+    });
+  } finally {
+    await mock.close();
+  }
+});
+
 it("a lost pin reply leaves a readable object without retrying the write", async () => {
   const mock = createMockSia();
   try {

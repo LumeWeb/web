@@ -19,6 +19,7 @@ export {
   uploadToSia,
 } from "./sia-upload.ts";
 export type {
+  SiaUploadProgress,
   SiaUploadResult,
   SiaWriteOptions,
   UploadAccess,
@@ -229,6 +230,7 @@ export default class SiaUpload extends BasePlugin<
       );
       return;
     }
+    const data = file.data;
     const controller = new AbortController();
     let settle!: () => void;
     const settled = new Promise<void>((resolve) => {
@@ -237,9 +239,27 @@ export default class SiaUpload extends BasePlugin<
     const pending: Pending = { controller, settled };
     this.#pending.set(file.id, pending);
     try {
-      const result = await uploadToSia(this.opts.access, file.data, {
+      const result = await uploadToSia(this.opts.access, data, {
         signal: controller.signal,
         ...(this.opts.metadata ? { metadata: this.opts.metadata } : {}),
+        onProgress: (progress) => {
+          const current = this.uppy.getFile(file.id);
+          if (
+            controller.signal.aborted ||
+            !this.#installed ||
+            generation !== this.#generation ||
+            current?.data !== data ||
+            current.progress.uploadStarted == null
+          )
+            return;
+          // Uppy totals include queued files by their source size, so preserve that weight.
+          this.uppy.emit("upload-progress", current, {
+            bytesTotal: data.size,
+            bytesUploaded:
+              (data.size * progress.bytesUploaded) / progress.bytesTotal,
+            uploadStarted: current.progress.uploadStarted,
+          });
+        },
       });
       if (
         controller.signal.aborted ||
