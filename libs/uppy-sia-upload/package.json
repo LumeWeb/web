@@ -1,0 +1,43 @@
+{
+  "name": "@lumeweb/uppy-sia-upload",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Uppy uploads through an application-owned Sia account",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "oxlint --deny-warnings src tests/*.test.ts",
+    "format:check": "prettier --check .",
+    "test:package": "pnpm run build && node --check tests/package.test.mjs && node --test tests/package.test.mjs"
+  },
+  "peerDependencies": {
+    "@uppy/core": "catalog:",
+    "@lumeweb/sia-app-access": "workspace:*",
+    "@siafoundation/sia-storage": "0.2.0"
+  },
+  "devDependencies": {
+    "@lumeweb/sia-app-access": "workspace:*",
+    "@lumeweb/sia-testing": "workspace:*",
+    "@uppy/core": "catalog:",
+    "@siafoundation/sia-storage": "0.2.0",
+    "@types/node": "catalog:",
+    "oxlint": "^1.72.0",
+    "prettier": "^3.9.4",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
