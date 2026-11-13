@@ -1912,7 +1912,21 @@ export function createMockSiaWithBackend(
         throw failure("denied", "Owner access is unavailable");
       const writer = environment.application({ access, as });
       const key = `ed25519:${grant.context.id}`;
-      return createUploadSdk(writer, maxBytes, key);
+      return createUploadSdk(
+        writer,
+        maxBytes,
+        key,
+        (close) => {
+          grant.context.transportCleanup.add(close);
+          return () => {
+            grant.context.transportCleanup.delete(close);
+          };
+        },
+        (error) => {
+          if (!grant.context.cleanupErrors.includes(error))
+            grant.context.cleanupErrors.push(error);
+        },
+      );
     },
   };
   registerRuntime(environment, {

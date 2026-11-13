@@ -396,7 +396,8 @@ and pass a fresh handle to `sdk.upload(handle, stream)`. The input handle is
 freed when upload starts; the returned handle can be pinned with
 `sdk.pinObject(handle)` and must be freed by its caller. `appKey().publicKey()`
 returns a synthetic account label, not a cryptographic key. Close the SDK to
-join its application port before ending the run.
+join its application port before ending the run. Run cleanup also closes an
+unclosed SDK and reports source cancellation failures.
 
 ```ts
 const sdk = mock.uploadSdk({
@@ -423,6 +424,7 @@ the owned application port, which applies the run's upload limits and fault
 controls. Metadata is copied before the source opens and again when pin starts;
 a metadata change on the returned handle is included in that pin. `free()`
 invalidates a local handle without deleting its staged or pinned object.
+An uploaded handle from another SDK is not a fresh upload input.
 `mutationFaults` for `upload` and `pin`, including lost replies, retain their
 application-port behavior. The run owns unpublished object data and cleans it
 up after the test. Source overflow cancels the source before any upload effect.

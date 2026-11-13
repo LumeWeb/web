@@ -58,15 +58,20 @@ export class MockPinnedObject {
   }
 }
 
+const uploadedHandles = new WeakSet<MockPinnedObject>();
+
 /** Reuses the run's writer so SDK-shaped calls share its upload and pin fault controls. */
 export function createUploadSdk(
   writer: ApplicationPort,
   maxBytes: number,
   publicKey: string,
+  register: (close: () => Promise<void>) => () => void,
+  reportCleanup: (error: Error) => void,
 ): UploadSdk {
   const abort = new AbortController();
   const originals = new WeakMap<MockPinnedObject, ApplicationObject>();
   const pending = new Set<Promise<unknown>>();
+  const cleanupFailures: Error[] = [];
   let closing: Promise<void> | undefined;
   function open() {
     if (abort.signal.aborted) throw fail("closed", "Upload SDK has closed");
@@ -80,7 +85,7 @@ export function createUploadSdk(
     );
     return call;
   }
-  return {
+  const sdk: UploadSdk = {
     appKey() {
       open();
       let freed = false;
@@ -98,8 +103,26 @@ export function createUploadSdk(
       if (closing) return closing;
       abort.abort();
       closing = (async () => {
-        await Promise.allSettled([...pending]);
-        await writer.close();
+        try {
+          await Promise.allSettled([...pending]);
+          const results = await Promise.allSettled([writer.close()]);
+          const failures = [
+            ...cleanupFailures,
+            ...results.flatMap((result) =>
+              result.status === "rejected" ? [result.reason as unknown] : [],
+            ),
+          ];
+          if (failures.length) {
+            const failure = new AggregateError(
+              failures,
+              "Upload SDK cleanup failed",
+            );
+            reportCleanup(failure);
+            throw failure;
+          }
+        } finally {
+          unregister();
+        }
       })();
       return closing;
     },
@@ -118,13 +141,20 @@ export function createUploadSdk(
     upload(draft, source, options) {
       return track(async () => {
         open();
-        if (!(draft instanceof MockPinnedObject) || originals.has(draft))
+        if (!(draft instanceof MockPinnedObject) || uploadedHandles.has(draft))
           throw fail("invalid-input", "Upload requires a new object handle");
         if (options && Object.keys(options).length)
           throw fail("unsupported", "Upload options are not simulated");
         const metadata = draft.metadata();
         draft.free();
-        const bytes = await collectSource(source, maxBytes, abort.signal);
+        const bytes = await collectSource(
+          source,
+          maxBytes,
+          abort.signal,
+          (error) => {
+            cleanupFailures.push(error);
+          },
+        );
         const file = await bytesFixture({ bytes, name: "sdk-upload" });
         const original = await writer.upload({
           file,
@@ -134,10 +164,13 @@ export function createUploadSdk(
         const object = new MockPinnedObject(original.id);
         object.updateMetadata(metadata);
         originals.set(object, original);
+        uploadedHandles.add(object);
         return object;
       });
     },
   };
+  const unregister = register(() => sdk.close());
+  return sdk;
 }
 
 /** Joins source cancellation before the SDK can finish closing its run-owned writer. */
@@ -145,6 +178,7 @@ async function collectSource(
   source: ReadableStream<Uint8Array>,
   limit: number,
   signal: AbortSignal,
+  cleanupFailure: (error: Error) => void,
 ): Promise<Uint8Array> {
   signal.throwIfAborted();
   const reader = source.getReader();
@@ -190,13 +224,14 @@ async function collectSource(
     error = failure;
   }
   const cleanup = await lifetime.finish(complete, error);
-  if (cleanup.failed && error !== undefined)
-    throw new AggregateError(
-      [error, cleanup.error],
+  if (cleanup.failed) {
+    const failure = new AggregateError(
+      error === undefined ? [cleanup.error] : [error, cleanup.error],
       "Upload source cleanup failed",
     );
-  if (cleanup.failed)
-    throw new AggregateError([cleanup.error], "Upload source cleanup failed");
+    cleanupFailure(failure);
+    throw failure;
+  }
   if (error !== undefined) {
     if (error instanceof Error) throw error;
     throw new Error("Upload source failed", { cause: error });

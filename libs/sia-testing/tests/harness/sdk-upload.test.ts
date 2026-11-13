@@ -188,6 +188,133 @@ it("closing the SDK waits for a cancelled source before the run ends", async () 
   }
 });
 
+it("run cleanup cancels and joins an SDK upload source left open", async () => {
+  const mock = createMockSia();
+  const started = Promise.withResolvers<void>();
+  let cancelled = false;
+  const source = new ReadableStream<Uint8Array>(
+    {
+      cancel() {
+        cancelled = true;
+      },
+      pull() {
+        started.resolve();
+      },
+    },
+    { highWaterMark: 0 },
+  );
+  let sdk: ReturnType<typeof mock.uploadSdk> | undefined;
+  let upload: Promise<unknown> | undefined;
+  try {
+    await mock.run({ app }, async (run) => {
+      sdk = mock.uploadSdk({
+        access: run.ownerAccess,
+        as: mock.actor("uploader"),
+        maxBytes: 8,
+      });
+      upload = sdk
+        .upload(new MockPinnedObject(), source)
+        .catch((error: unknown) => error);
+      await started.promise;
+    });
+    expect(cancelled).toBe(true);
+    expect(source.locked).toBe(false);
+    expect(await upload).toBeInstanceOf(Error);
+  } finally {
+    await sdk?.close();
+    await upload;
+    await mock.close();
+  }
+});
+
+it("run cleanup reports a failed SDK source cancellation", async () => {
+  const mock = createMockSia();
+  const started = Promise.withResolvers<void>();
+  let upload: Promise<unknown> | undefined;
+  try {
+    await expect(
+      mock.run({ app }, async (run) => {
+        const sdk = mock.uploadSdk({
+          access: run.ownerAccess,
+          as: mock.actor("uploader"),
+          maxBytes: 8,
+        });
+        const source = new ReadableStream<Uint8Array>(
+          {
+            cancel() {
+              throw new Error("source cancellation failed");
+            },
+            pull() {
+              started.resolve();
+            },
+          },
+          { highWaterMark: 0 },
+        );
+        upload = sdk
+          .upload(new MockPinnedObject(), source)
+          .catch((error: unknown) => error);
+        await started.promise;
+      }),
+    ).rejects.toThrow("Mock cleanup failed");
+    expect(await upload).toBeInstanceOf(AggregateError);
+  } finally {
+    await mock.close();
+  }
+});
+
+it("another SDK rejects an uploaded handle without freeing it", async () => {
+  const mock = createMockSia();
+  try {
+    await mock.run({ app }, async (run) => {
+      const first = mock.uploadSdk({
+        access: run.ownerAccess,
+        as: mock.actor("first"),
+        maxBytes: 8,
+      });
+      const second = mock.uploadSdk({
+        access: run.ownerAccess,
+        as: mock.actor("second"),
+        maxBytes: 8,
+      });
+      try {
+        const object = await first.upload(
+          new MockPinnedObject(),
+          new Blob([Uint8Array.of(1)]).stream(),
+        );
+        const source = new Blob([Uint8Array.of(2)]).stream();
+        await expect(second.upload(object, source)).rejects.toMatchObject({
+          code: "invalid-input",
+        });
+        expect(source.locked).toBe(false);
+        await first.pinObject(object);
+        const reader = mock.reader({
+          access: run.ownerAccess,
+          as: mock.actor("reader"),
+        });
+        try {
+          expect(
+            new Uint8Array(
+              await new Response(
+                await reader.download({ id: object.id() }),
+              ).arrayBuffer(),
+            ),
+          ).toEqual(Uint8Array.of(1));
+          expect(
+            mock.history().filter((row) => row.operation === "upload"),
+          ).toHaveLength(1);
+        } finally {
+          await reader.close();
+        }
+      } finally {
+        await first.close();
+        await second.close();
+      }
+    });
+  } finally {
+    await mock.close();
+  }
+});
+
 it("a failed upload before commit can be retried with a new handle", async () => {
   const mock = createMockSia();
   try {
