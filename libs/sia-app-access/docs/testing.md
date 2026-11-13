@@ -12,7 +12,7 @@ pnpm --filter=@lumeweb/tsdown-config build:config
 pnpm --filter=@lumeweb/sia-testing build
 ```
 
-Testing uses its declared SDK 0.1.4, while the access adapter uses SDK 0.2.0. `tests/dependencies.test.ts` checks that each resolves to its own version. The synthetic tests do not pass native SDK objects between those versions.
+Testing and the access adapter both use SDK 0.2.0. `tests/dependencies.test.ts` checks that each resolves the declared version from its own package. Synthetic tests still use mock handles rather than native SDK objects.
 
 Browser checks need Playwright's Chromium and Firefox binaries. Archive checks need the system `tar` command on Linux and an npm or pnpm CLI.
 
