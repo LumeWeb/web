@@ -69,6 +69,7 @@ export async function uploadPackedBatch(
       parityShards: 20,
     });
     let objects: PinnedObject[] = [];
+    let packedConsumed = false;
     const abortIfAllStopped = () => {
       if (
         finalized ||
@@ -127,6 +128,8 @@ export async function uploadPackedBatch(
         if (bytesUploaded && access.getSnapshot().activeSessionId === sessionId)
           reportProgress();
         try {
+          // WASM consumes the handle as soon as finalize() is called, even if it rejects.
+          packedConsumed = true;
           objects = await packed.finalize();
           finalized = true;
           if (objects.length !== added.length)
@@ -193,10 +196,12 @@ export async function uploadPackedBatch(
           cleanupError ??= error;
         }
       }
-      try {
-        packed.free();
-      } catch (error) {
-        cleanupError ??= error;
+      if (!packedConsumed) {
+        try {
+          packed.free();
+        } catch (error) {
+          cleanupError ??= error;
+        }
       }
       if (cleanupError) {
         for (const [index, outcome] of outcomes.entries()) {

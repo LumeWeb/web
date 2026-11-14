@@ -143,7 +143,7 @@ export default class SiaUpload extends BasePlugin<
   ): void {
     for (const [index, { file, pending }] of admitted.entries()) {
       const outcome = outcomes[index]!;
-      if (outcome.error !== undefined) {
+      if ("error" in outcome) {
         if (outcome.error instanceof SiaUploadUncertainError)
           this.#reportUncertain(file, outcome.error, sessionId, accountKey);
         if (

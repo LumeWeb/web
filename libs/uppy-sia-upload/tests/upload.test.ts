@@ -116,13 +116,17 @@ describe("WASM-shaped upload boundary", () => {
       shardSize: 4_194_304,
       slabIndex: 0,
     };
+    let consumed = false;
     const finalize = vi.fn(async () => {
+      consumed = true;
       report?.(shard);
       report?.({ ...shard, hostKey: `ed25519:${"b".repeat(64)}` });
       report?.({ ...shard, shardIndex: 1 });
       return [first, second];
     });
-    const free = vi.fn();
+    const free = vi.fn(() => {
+      if (consumed) throw new Error("null pointer passed to rust");
+    });
     const sdk = {
       pinObject: vi.fn(async (_object: unknown) => undefined),
       upload: vi.fn(async () => {
@@ -166,7 +170,42 @@ describe("WASM-shaped upload boundary", () => {
       ];
       expect(progress.get("document.bin")).toEqual(fileBytes);
       expect(progress.get("second.bin")).toEqual(fileBytes);
-      expect(free).toHaveBeenCalledTimes(1);
+      expect(free).not.toHaveBeenCalled();
+    } finally {
+      uppy.destroy();
+    }
+  });
+
+  test("a failed packed finalization does not free its consumed handle", async () => {
+    const failure = new Error("packed finalization failed");
+    let consumed = false;
+    const free = vi.fn(() => {
+      if (consumed) throw new Error("null pointer passed to rust");
+    });
+    const sdk = {
+      pinObject: vi.fn(async () => undefined),
+      upload: vi.fn(async () => {
+        throw new Error("direct upload is not packed");
+      }),
+      uploadPacked: vi.fn(() => ({
+        add: async () => 5,
+        cancel: () => undefined,
+        finalize: async () => {
+          consumed = true;
+          throw failure;
+        },
+        free,
+        length: () => 5,
+      })),
+    };
+    const { uppy } = setup(sdk);
+    try {
+      const errors: Error[] = [];
+      uppy.on("upload-error", (_file, error) => errors.push(error));
+      expect((await uppy.upload())?.failed).toHaveLength(1);
+      expect(errors).toEqual([failure]);
+      expect(free).not.toHaveBeenCalled();
+      expect(sdk.pinObject).not.toHaveBeenCalled();
     } finally {
       uppy.destroy();
     }

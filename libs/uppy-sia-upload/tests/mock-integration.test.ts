@@ -340,6 +340,35 @@ siaTest(
 );
 
 siaTest(
+  "a metadata rejection with no value does not fail another packed file",
+  async ({ sia }) => {
+    await withUpload(
+      sia,
+      async ({ uppy }) => {
+        addSecond(uppy);
+        const successes: string[] = [];
+        const errors: string[] = [];
+        uppy.on("upload-success", (file) => successes.push(file!.name));
+        uppy.on("upload-error", (file) => errors.push(file!.name));
+        const result = await uppy.upload();
+        expect(result?.failed?.map((file) => file.name)).toEqual([
+          "document.bin",
+        ]);
+        expect(successes).toEqual(["second.txt"]);
+        expect(errors).toEqual(["document.bin"]);
+      },
+      {
+        metadata: (file) => {
+          // oxlint-disable-next-line typescript/only-throw-error -- A metadata callback may reject with any JavaScript value.
+          if (file.name === "document.bin") throw undefined;
+          return Uint8Array.of(2);
+        },
+      },
+    );
+  },
+);
+
+siaTest(
   "packed mock does not invent host shard progress before pin",
   async ({ sia }) => {
     await withUpload(sia, async ({ actor, uppy }) => {
