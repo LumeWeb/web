@@ -6,7 +6,11 @@ import {
   type Uppy,
   type UppyFile,
 } from "@uppy/core";
-import { type PackedBatchFile, uploadPackedBatch } from "./packed-batch.ts";
+import {
+  type PackedBatchFile,
+  type PackedBatchOutcome,
+  uploadPackedBatch,
+} from "./packed-batch.ts";
 import {
   SiaUploadUncertainError,
   type SiaWriteOptions,
@@ -38,6 +42,12 @@ export interface SiaUploadOptions {
     error: SiaUploadUncertainError,
     sessionId: string,
   ) => void;
+}
+
+interface AdmittedFile {
+  entry: PackedBatchFile;
+  file: UppyFile<Meta, SiaUploadBody>;
+  pending: Pending;
 }
 
 interface Pending {
@@ -125,6 +135,57 @@ export default class SiaUpload extends BasePlugin<
     }
   }
 
+  #reportOutcomes(
+    admitted: readonly AdmittedFile[],
+    outcomes: readonly PackedBatchOutcome[],
+    sessionId: string,
+    accountKey: string,
+  ): void {
+    for (const [index, { file, pending }] of admitted.entries()) {
+      const outcome = outcomes[index]!;
+      if (outcome.error !== undefined) {
+        if (outcome.error instanceof SiaUploadUncertainError)
+          this.#reportUncertain(file, outcome.error, sessionId, accountKey);
+        if (
+          !pending.controller.signal.aborted &&
+          this.#installed &&
+          this.uppy.getFile(file.id)
+        )
+          this.#reportFileEvent(() =>
+            this.uppy.emit(
+              "upload-error",
+              file,
+              outcome.error instanceof Error
+                ? outcome.error
+                : new Error("Sia upload failed"),
+            ),
+          );
+        continue;
+      }
+      if (!outcome.result)
+        throw new Error("Packed upload did not return an outcome");
+      if (
+        pending.controller.signal.aborted ||
+        !this.#installed ||
+        !this.uppy.getFile(file.id)
+      ) {
+        this.#reportUncertain(
+          file,
+          new SiaUploadUncertainError(outcome.result.objectId),
+          sessionId,
+          accountKey,
+        );
+        continue;
+      }
+      this.#reportFileEvent(() =>
+        this.uppy.emit("upload-success", file, {
+          body: { objectId: outcome.result.objectId },
+          status: 200,
+        }),
+      );
+    }
+  }
+
   #reportUncertain(
     file: UppyFile<Meta, SiaUploadBody>,
     error: SiaUploadUncertainError,
@@ -173,11 +234,7 @@ export default class SiaUpload extends BasePlugin<
           identityError = error;
         }
       }
-      const admitted: {
-        entry: PackedBatchFile;
-        file: UppyFile<Meta, SiaUploadBody>;
-        pending: Pending;
-      }[] = [];
+      const admitted: AdmittedFile[] = [];
       for (const file of files) {
         if (!this.#installed || generation !== this.#generation) break;
         if (removed.has(file.id) || !this.uppy.getFile(file.id)) continue;
@@ -271,54 +328,7 @@ export default class SiaUpload extends BasePlugin<
           this.opts.access,
           admitted.map(({ entry }) => entry),
         );
-        for (const [index, { file, pending }] of admitted.entries()) {
-          const outcome = outcomes[index]!;
-          if (outcome.error !== undefined) {
-            if (outcome.error instanceof SiaUploadUncertainError)
-              this.#reportUncertain(
-                file,
-                outcome.error,
-                sessionId!,
-                accountKey!,
-              );
-            if (
-              !pending.controller.signal.aborted &&
-              this.#installed &&
-              this.uppy.getFile(file.id)
-            )
-              this.#reportFileEvent(() =>
-                this.uppy.emit(
-                  "upload-error",
-                  file,
-                  outcome.error instanceof Error
-                    ? outcome.error
-                    : new Error("Sia upload failed"),
-                ),
-              );
-            continue;
-          }
-          if (!outcome.result)
-            throw new Error("Packed upload did not return an outcome");
-          if (
-            pending.controller.signal.aborted ||
-            !this.#installed ||
-            !this.uppy.getFile(file.id)
-          ) {
-            this.#reportUncertain(
-              file,
-              new SiaUploadUncertainError(outcome.result.objectId),
-              sessionId!,
-              accountKey!,
-            );
-            continue;
-          }
-          this.#reportFileEvent(() =>
-            this.uppy.emit("upload-success", file, {
-              body: { objectId: outcome.result.objectId },
-              status: 200,
-            }),
-          );
-        }
+        this.#reportOutcomes(admitted, outcomes, sessionId!, accountKey!);
       } catch (error) {
         for (const { file, pending } of admitted) {
           if (
