@@ -7,7 +7,11 @@ Accepted (2026-09-08; implemented in `libs/sia-video-source`)
 Scope note: this decision covers the package-owned media-worker engine. ADR
 [0011](0011-backend-policy-and-native-stream-provider.md) defines the boundary
 for an app-owned native stream provider. The package does not install or own a
-Service Worker.
+Service Worker. The worker connection retains its SDK while any source using
+it is still active. On replacement, `src/session/sia-composition.ts` retires
+the old SDK but holds a source lease until its cancelled downloads settle;
+otherwise a pending lookup or download can use a freed SDK. SDKs injected by
+a caller remain caller-owned.
 
 ## Context
 
@@ -54,3 +58,4 @@ appending stale data.
 - Ranged reads and deferred seeks: [0004](0004-ranged-seeking-and-deferred-seek.md)
 - Worker wire protocol: [0005](0005-custom-zero-copy-proto-over-comlink.md)
 - Native provider boundary: [0011](0011-backend-policy-and-native-stream-provider.md)
+- Host recovery decisions: [0013](0013-playback-recovery-policy.md)

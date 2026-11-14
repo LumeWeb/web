@@ -23,9 +23,10 @@ It writes forced packet copies to CMAF output and sends the resulting fragments
 to the MSE append sink. The pipeline does not use a package-local MP4 box
 parser, `container-probe.ts`, `sniffContainer`, or mux.js.
 
-The output MIME is the codec-qualified `DEFAULT_FMP4_MIME` from
-`src/protocol.ts` when the pipeline has established the track codecs. The worker
-and host check that MIME through the shared capability layer before appending.
+The pipeline builds a codec-qualified output MIME from the selected tracks.
+`DEFAULT_FMP4_MIME` in `src/protocol.ts` is the host fallback when an accepted
+source has no `info.mime`. The MSE append thread checks the output MIME before
+accepting a source (ADR [0012](0012-append-thread-mse-capabilities.md)).
 A source that mediabunny cannot recognize, convert, or describe for the target
 MSE surface reports `unsupported`; a browser append failure reports `decode` or
 `quota` according to the failure kind.
@@ -40,9 +41,9 @@ mediabunny owns recognition and serialization. Unsupported content fails at the
 media pipeline instead of being presented as a successful source assignment.
 
 Progressive containers and codecs that the selected browser cannot append remain
-unsupported. Consumers must provide content with browser-supported video and
-audio tracks. Declared transport MIME is metadata; it does not prove that the
-bytes can be appended.
+unsupported. A source needs a supported video track; audio is optional, but
+any selected audio track must have a supported codec. Declared transport MIME
+is metadata; it does not prove that the bytes can be appended.
 
 ## Supersession and related ADRs
 
