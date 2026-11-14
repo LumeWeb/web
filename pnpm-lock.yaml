@@ -2672,6 +2672,9 @@ importers:
       '@lumeweb/sia-session':
         specifier: workspace:*
         version: link:../sia-session
+      '@noble/hashes':
+        specifier: 2.4.0
+        version: 2.4.0
       robot3:
         specifier: 1.4.0
         version: 1.4.0
@@ -2727,6 +2730,9 @@ importers:
       tsx:
         specifier: 4.23.0
         version: 4.23.0
+      unstorage:
+        specifier: 1.17.5
+        version: 1.17.5(idb-keyval@6.2.6)
       typescript:
         specifier: 'catalog:'
         version: 6.0.3

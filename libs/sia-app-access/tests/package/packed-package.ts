@@ -65,11 +65,13 @@ export async function checkPackage(input: string): Promise<void> {
     assert.deepEqual(manifest.peerDependencies, {
       "@siafoundation/sia-storage": "0.2.0",
       "react": "^19.0.0",
+      "unstorage": "^1.17.5",
       "zustand": "^5.0.14",
     });
     assert.deepEqual(manifest.peerDependenciesMeta, {
       "@siafoundation/sia-storage": { optional: true },
       "react": { optional: true },
+      "unstorage": { optional: true },
       "zustand": { optional: true },
     });
     assert.ok(manifest.exports && typeof manifest.exports === "object");
@@ -137,6 +139,7 @@ export async function checkPackage(input: string): Promise<void> {
       join(consumer, "node_modules/robot3"),
       { recursive: true },
     );
+    await copyPeer("@noble/hashes", join(consumer, "node_modules"));
     for (const file of await readdir(join(packed, "dist"))) {
       if (file.endsWith(".js") || file.endsWith(".d.ts"))
         assert.doesNotMatch(
@@ -180,6 +183,7 @@ export async function checkPackage(input: string): Promise<void> {
       cache,
     );
     assert.match(output, /Packed credential consumer assertions completed/);
+    assert.match(output, /Packed unstorage adapter imports without unstorage/);
     assert.match(output, /Packed controller consumer assertions completed/);
     assert.match(
       output,
@@ -345,6 +349,9 @@ export async function checkSourceFixtures(): Promise<void> {
                 join(workspace, "src/react-hook-form.ts"),
               ],
               "@lumeweb/sia-app-access/sia": [join(workspace, "src/sia.ts")],
+              "@lumeweb/sia-app-access/unstorage": [
+                join(workspace, "src/unstorage.ts"),
+              ],
               "@lumeweb/sia-app-access/zustand": [
                 join(workspace, "src/zustand.ts"),
               ],

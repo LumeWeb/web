@@ -27,6 +27,10 @@
       "types": "./dist/react.d.ts",
       "import": "./dist/react.js"
     },
+    "./unstorage": {
+      "types": "./dist/unstorage.d.ts",
+      "import": "./dist/unstorage.js"
+    },
     "./zustand": {
       "types": "./dist/zustand.d.ts",
       "import": "./dist/zustand.js"
@@ -53,6 +57,7 @@
   },
   "dependencies": {
     "@lumeweb/sia-session": "workspace:*",
+    "@noble/hashes": "2.4.0",
     "robot3": "1.4.0"
   },
   "devDependencies": {
@@ -73,6 +78,7 @@
     "stylelint-config-standard-scss": "17.0.0",
     "tsc-alias": "1.9.10",
     "tsx": "4.23.0",
+    "unstorage": "1.17.5",
     "typescript": "catalog:",
     "vite": "catalog:framework",
     "zustand": "catalog:"
@@ -80,6 +86,7 @@
   "peerDependencies": {
     "@siafoundation/sia-storage": "0.2.0",
     "react": "^19.0.0",
+    "unstorage": "^1.17.5",
     "zustand": "^5.0.14"
   },
   "peerDependenciesMeta": {
@@ -87,6 +94,9 @@
       "optional": true
     },
     "react": {
+      "optional": true
+    },
+    "unstorage": {
       "optional": true
     },
     "zustand": {
