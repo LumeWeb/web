@@ -1,5 +1,5 @@
 /** Released WASM classes keep authorization independent of Node's native facade. */
-import { PhraseValidation } from "./access-types.ts";
+import { PhraseValidation, RegistrationLimitError } from "./access-types.ts";
 import type {
   AppMetadata,
   Builder,
@@ -153,6 +153,16 @@ function connection(
         try {
           // The controller owns every returned session, including one returned after cancellation.
           return session(await builder.register(phrase));
+        } catch (error) {
+          // The released SDK exposes the indexer's status and body only in Error.message.
+          // Match the whole registration response; other 403s and lost replies stay uncertain.
+          if (
+            error instanceof Error &&
+            error.message.trim() ===
+              "client error: indexd responded with an error: 403 Forbidden: key has no remaining uses"
+          )
+            throw new RegistrationLimitError();
+          throw error;
         } finally {
           void lifetime.retire();
         }

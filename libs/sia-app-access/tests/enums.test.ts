@@ -73,6 +73,7 @@ void test("public string enums retain the serialized contract", () => {
     "credentials-write",
     "phrase-check",
     "registration",
+    "registration-limit",
     "session",
     "unregistered-key",
     "phrase-generation",

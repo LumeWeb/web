@@ -4,10 +4,12 @@ export let validationFails = false;
 export let initFails = false;
 export let builderFreeError: Error | undefined;
 export let pending: (() => Promise<void>) | undefined;
+export let registrationError: Error | undefined;
 interface ControlledSdkOptions {
   readonly builderFreeError?: Error;
   readonly initFails?: boolean;
   readonly pending?: () => Promise<void>;
+  readonly registrationError?: Error;
   readonly validationFails?: boolean;
 }
 export class AppKey {
@@ -42,6 +44,7 @@ export class Builder {
   async register(_phrase: string) {
     events.push("register");
     await pending?.();
+    if (registrationError) throw registrationError;
     return new Sdk();
   }
   async requestConnection() {
@@ -68,6 +71,7 @@ export function configure(options: ControlledSdkOptions = {}) {
   initFails = options.initFails ?? false;
   builderFreeError = options.builderFreeError;
   pending = options.pending;
+  registrationError = options.registrationError;
   events.length = 0;
 }
 export function generateRecoveryPhrase() {
