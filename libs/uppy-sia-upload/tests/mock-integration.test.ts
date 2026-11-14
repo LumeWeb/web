@@ -110,8 +110,13 @@ function packedAdapter(sia: SiaFixture, actor: ReturnType<MockSia["actor"]>) {
     },
     uploadPacked: () => {
       const upload = packed.uploadPacked();
+      let length = 0;
       return {
-        add: (stream: ReadableStream<Uint8Array>) => upload.add(stream),
+        add: async (stream: ReadableStream<Uint8Array>) => {
+          const bytes = await upload.add(stream);
+          length += bytes;
+          return bytes;
+        },
         cancel: () => upload.cancel(),
         finalize: async () =>
           (await upload.finalize()).map((object) => {
@@ -125,6 +130,7 @@ function packedAdapter(sia: SiaFixture, actor: ReturnType<MockSia["actor"]>) {
             return handle;
           }),
         free: () => undefined,
+        length: () => length,
       };
     },
   };
@@ -273,6 +279,65 @@ siaTest("two packed files stay separate and readable", async ({ sia }) => {
     }
   });
 });
+
+siaTest(
+  "each packed file keeps its metadata when the callback reuses a buffer",
+  async ({ sia }) => {
+    const metadata = Uint8Array.of(0);
+    await withUpload(
+      sia,
+      async ({ uppy }) => {
+        addSecond(uppy);
+        expect((await uppy.upload())?.failed).toHaveLength(0);
+        const reader = sia.mock.reader({
+          access: sia.ownerAccess,
+          as: sia.mock.actor("reader"),
+        });
+        try {
+          for (const [name, expected] of [
+            ["document.bin", 1],
+            ["second.txt", 2],
+          ] as const) {
+            const file = uppy.getFiles().find((entry) => entry.name === name)!;
+            expect(
+              (await reader.object(file.response!.body!.objectId)).metadata,
+            ).toEqual(Uint8Array.of(expected));
+          }
+        } finally {
+          await reader.close();
+        }
+      },
+      {
+        metadata: (file) => {
+          metadata[0] = file.name === "document.bin" ? 1 : 2;
+          return metadata;
+        },
+      },
+    );
+  },
+);
+
+siaTest(
+  "a throwing success listener does not fail other packed files",
+  async ({ sia }) => {
+    await withUpload(sia, async ({ uppy }) => {
+      addSecond(uppy);
+      const successes: string[] = [];
+      const errors: Error[] = [];
+      uppy.on("upload-success", (file) => {
+        successes.push(file!.name);
+        if (file!.name === "document.bin") throw new Error("listener failed");
+      });
+      uppy.on("upload-error", (_file, error) => errors.push(error));
+      expect((await uppy.upload())?.failed).toHaveLength(0);
+      expect(successes).toEqual(["document.bin", "second.txt"]);
+      expect(errors).toHaveLength(0);
+      expect(
+        uppy.getFiles().every((file) => file.progress.uploadComplete),
+      ).toBe(true);
+    });
+  },
+);
 
 siaTest(
   "packed mock does not invent host shard progress before pin",

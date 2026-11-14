@@ -37,10 +37,24 @@ export async function uploadPackedBatch(
     const metadataByIndex = new Map<number, Uint8Array>();
     const added: number[] = [];
     const totalSize = files.reduce((sum, entry) => sum + entry.file.size, 0);
-    const bytesTotal = totalSize > 0 ? encodedSize(totalSize, 10, 20) : 0;
+    let bytesTotal = totalSize > 0 ? encodedSize(totalSize, 10, 20) : 0;
     const seen = new Set<string>();
     let bytesUploaded = 0;
     let finalized = false;
+    const reportProgress = () => {
+      for (const index of added) {
+        const entry = files[index]!;
+        if (entry.signal.aborted || !entry.isCurrent()) continue;
+        try {
+          entry.onProgress?.({
+            bytesTotal,
+            bytesUploaded: Math.min(bytesTotal, bytesUploaded),
+          });
+        } catch {
+          // A progress callback cannot change the outcome of a remote write.
+        }
+      }
+    };
     const packed = sdk.uploadPacked({
       dataShards: 10,
       onShardUploaded(shard) {
@@ -49,15 +63,8 @@ export async function uploadPackedBatch(
         const identity = `${shard.slabIndex}:${shard.shardIndex}`;
         if (seen.has(identity)) return;
         seen.add(identity);
-        bytesUploaded = Math.min(bytesTotal, bytesUploaded + shard.shardSize);
-        for (const entry of files) {
-          if (entry.signal.aborted || !entry.isCurrent()) continue;
-          try {
-            entry.onProgress?.({ bytesTotal, bytesUploaded });
-          } catch {
-            // A progress callback cannot change the outcome of a remote write.
-          }
-        }
+        bytesUploaded += shard.shardSize;
+        if (added.length) reportProgress();
       },
       parityShards: 20,
     });
@@ -97,19 +104,28 @@ export async function uploadPackedBatch(
           continue;
         }
         try {
-          const metadata = await entry.metadata?.(entry.file);
+          const metadata = (await entry.metadata?.(entry.file))?.slice();
           if (entry.signal.aborted || !entry.isCurrent())
             throw new SiaUploadCancelledError();
           if (access.getSnapshot().activeSessionId !== sessionId)
             throw new Error("The Sia account changed during this upload batch");
           await packed.add(entry.file.stream());
           added.push(index);
+          if (
+            bytesUploaded &&
+            access.getSnapshot().activeSessionId === sessionId
+          )
+            reportProgress();
           if (metadata) metadataByIndex.set(index, metadata);
         } catch (error) {
           outcomes[index] = { error };
         }
       }
       if (added.length) {
+        // A failed add can leave padding in a slab; length() includes it in the encoding total.
+        bytesTotal = encodedSize(packed.length(), 10, 20);
+        if (bytesUploaded && access.getSnapshot().activeSessionId === sessionId)
+          reportProgress();
         try {
           objects = await packed.finalize();
           finalized = true;

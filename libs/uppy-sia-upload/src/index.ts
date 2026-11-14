@@ -114,6 +114,17 @@ export default class SiaUpload extends BasePlugin<
     this.#pending.get(file.id)?.controller.abort();
   };
 
+  #reportFileEvent(report: () => void): void {
+    try {
+      report();
+    } catch (error) {
+      this.uppy.log(
+        error instanceof Error ? error.message : "Upload event listener failed",
+        "error",
+      );
+    }
+  }
+
   #reportUncertain(
     file: UppyFile<Meta, SiaUploadBody>,
     error: SiaUploadUncertainError,
@@ -275,12 +286,14 @@ export default class SiaUpload extends BasePlugin<
               this.#installed &&
               this.uppy.getFile(file.id)
             )
-              this.uppy.emit(
-                "upload-error",
-                file,
-                outcome.error instanceof Error
-                  ? outcome.error
-                  : new Error("Sia upload failed"),
+              this.#reportFileEvent(() =>
+                this.uppy.emit(
+                  "upload-error",
+                  file,
+                  outcome.error instanceof Error
+                    ? outcome.error
+                    : new Error("Sia upload failed"),
+                ),
               );
             continue;
           }
@@ -299,10 +312,12 @@ export default class SiaUpload extends BasePlugin<
             );
             continue;
           }
-          this.uppy.emit("upload-success", file, {
-            body: { objectId: outcome.result.objectId },
-            status: 200,
-          });
+          this.#reportFileEvent(() =>
+            this.uppy.emit("upload-success", file, {
+              body: { objectId: outcome.result.objectId },
+              status: 200,
+            }),
+          );
         }
       } catch (error) {
         for (const { file, pending } of admitted) {
@@ -311,10 +326,12 @@ export default class SiaUpload extends BasePlugin<
             this.#installed &&
             this.uppy.getFile(file.id)
           )
-            this.uppy.emit(
-              "upload-error",
-              file,
-              error instanceof Error ? error : new Error("Sia upload failed"),
+            this.#reportFileEvent(() =>
+              this.uppy.emit(
+                "upload-error",
+                file,
+                error instanceof Error ? error : new Error("Sia upload failed"),
+              ),
             );
         }
       } finally {
