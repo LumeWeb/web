@@ -14,6 +14,18 @@ import type {
 } from "@lumeweb/sia-app-access";
 
 import { toRecoveryPhraseFieldError } from "@lumeweb/sia-app-access/react-hook-form";
+import { createUnstorageCredentialStore } from "@lumeweb/sia-app-access/unstorage";
+import type {
+  CredentialCodec,
+  UnstorageCredentialStorage,
+} from "@lumeweb/sia-app-access/unstorage";
+
+declare const unstorage: UnstorageCredentialStorage;
+declare const codec: CredentialCodec;
+const persisted = createUnstorageCredentialStore(unstorage, codec);
+void persisted;
+// @ts-expect-error An unencrypted driver cannot be used as a credential store.
+createUnstorageCredentialStore(unstorage);
 export function inspectFieldErrorWithoutFormPeers(): string | undefined {
   return toRecoveryPhraseFieldError(
     { kind: AccessOutcome.PhraseMismatch },

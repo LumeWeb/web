@@ -6,6 +6,7 @@ for (const peer of [
   "react",
   "zustand",
   "react-hook-form",
+  "unstorage",
   "@siafoundation/sia-storage",
 ])
   assert.throws(() => import.meta.resolve(peer), {
@@ -21,7 +22,9 @@ const hooks = registerHooks({
       specifier === "zustand" ||
       specifier.startsWith("zustand/") ||
       specifier === "react-hook-form" ||
-      specifier.startsWith("react-hook-form/")
+      specifier.startsWith("react-hook-form/") ||
+      specifier === "unstorage" ||
+      specifier.startsWith("unstorage/")
     )
       throw Error(`Optional runtime peer requested: ${specifier}`);
     return next(specifier, context);
@@ -66,6 +69,35 @@ try {
   await store.remove(scope);
   assert.equal(await store.read(scope), null);
   console.log("Packed credential consumer assertions completed");
+  const { createUnstorageCredentialStore } =
+    await import("@lumeweb/sia-app-access/unstorage");
+  const records = new Map();
+  const persistent = createUnstorageCredentialStore(
+    {
+      getItem: async (id) => records.get(id) ?? null,
+      removeItem: async (id) => {
+        records.delete(id);
+      },
+      setItem: async (id, value) => {
+        records.set(id, value);
+      },
+    },
+    {
+      encrypt: (bytes) =>
+        Array.from(bytes, (byte) =>
+          (byte ^ 0xa5).toString(16).padStart(2, "0"),
+        ).join(""),
+      decrypt: (record) =>
+        Uint8Array.from(
+          { length: record.length / 2 },
+          (_, index) =>
+            Number.parseInt(record.slice(index * 2, index * 2 + 2), 16) ^ 0xa5,
+        ),
+    },
+  );
+  await persistent.write(scope, new Uint8Array([9]));
+  assert.deepEqual(await persistent.read(scope), new Uint8Array([9]));
+  console.log("Packed unstorage adapter imports without unstorage");
 
   const unexpected = () =>
     Promise.reject(new Error("Observation must not start adapter work"));

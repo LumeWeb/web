@@ -63,6 +63,28 @@ export function serializedCredentials(store: CredentialStore): CredentialStore {
 
 Use the same wrapper for controllers that share a backing store. Its queue continues after a rejected operation, while that caller still receives the rejection. Separate tabs need coordination in the backing store; this in-memory queue cannot order their writes.
 
+## Encrypted unstorage records
+
+`@lumeweb/sia-app-access/unstorage` adapts an application-owned unstorage instance to `CredentialStore`. Supply an encryption codec backed by your application's vault. The adapter does not create a key, choose a cipher, or store recovery phrases. A driver alone does not protect the app private key.
+
+```ts
+import { createStorage } from "unstorage";
+import indexedDbDriver from "unstorage/drivers/indexedb";
+import { createUnstorageCredentialStore } from "@lumeweb/sia-app-access/unstorage";
+
+export function credentialsForVault(vault: { encryptCredential(appKey: Uint8Array): Promise<string>; decryptCredential(record: string): Promise<Uint8Array> }) {
+  const storage = createStorage({ driver: indexedDbDriver({ base: "sia-access" }) });
+  return createUnstorageCredentialStore(storage, {
+    encrypt: (appKey) => vault.encryptCredential(appKey),
+    decrypt: (record) => vault.decryptCredential(record),
+  });
+}
+```
+
+`vault.encryptCredential` must return a nonempty encrypted string; `vault.decryptCredential` must return a fresh `Uint8Array` that the adapter may clear. The adapter copies the input before calling the codec, clears that copy after storage settles (including failures), and returns an owned copy from `read`. A failed decryption rejects the read; it does not treat a damaged or locked record as a missing key. The application must provide its own authenticated encryption, key management and unlock flow. Avoid storing plaintext or reversible encodings in the codec's result.
+
+Keys encode both the application ID and indexer URL under the `sia-access:credential:` prefix. Existing credential records use other keys or formats and are not read automatically; migrate them after unlocking the vault before switching controllers to this store. The default controller still uses memory storage unless `credentials` is supplied. Importing the root entry does not load unstorage.
+
 ## Implement a custom store
 
 Import `CredentialStore` from the root entry and implement its methods:
