@@ -2,7 +2,10 @@
 
 ## Status
 
-Accepted (2026-09-08; implemented and audit-hardened in `libs/sia-video-source`)
+Accepted (2026-09-08; implemented in `libs/sia-video-source`)
+
+Scope note: ADR [0012](0012-append-thread-mse-capabilities.md) records how the
+worker checks MIME support on the append thread when main-thread MSE is selected.
 
 ## Context
 
@@ -43,8 +46,9 @@ layout, actual codecs, whether MSE can store it) live in the object's bytes
 and the platform's `MediaSource.isTypeSupported`, neither of which a MIME
 string vouches for. Routing therefore happens inside the pipeline: browser
 support checks are performed against a _codec-qualified_ MIME only (see
-`#beginMainThreadMse` and the worker pipeline in `src/sia-video-source.ts`); bare container MIMEs like `video/mp4` are
-not decisive, because browsers reject the string while the appended fMP4
+`#beginMainThreadMse` in `src/sia-video-source.ts` and the worker
+pipeline in `src/media/library-load.ts`); bare container MIMEs such as
+`video/mp4` are not decisive, because browsers reject the string while the appended fMP4
 bytes play fine. This keeps video.js routing to this source via the
 programmatic engine contract rather than a per-type check.
 
@@ -72,9 +76,8 @@ on the packaged `HlsJsMedia`:
 
 **Easier**
 
-- Composing with video.js v10 features is zero glue: the host reads like any
-  packaged media class to the player, so `errorFeature`, `ErrorDialog`, skins,
-  and the React `Player` context work without special cases.
+- The host implements the media contract used by video.js v10 features, so
+  `errorFeature`, `ErrorDialog`, skins, and the React `Player` context can use it.
 - Error UX is uniform: worker failures surface as the
   `HTMLMediaElement`-shaped `MediaError` contract UI already renders, not as
   a second, library-specific error channel.
@@ -88,13 +91,12 @@ on the packaged `HlsJsMedia`:
   one: async engine loads mean "unsupported content" fails after `src` was
   assigned, so code that expects synchronous `canPlayType` truth gets `''`
   always and must rely on the `error` event instead.
-- The host carries lifecycle bookkeeping the v8 model delechecked to the
-  player: idempotent re-attach negotiation, pending-message gating until
-  `HELLO_OK`, and per-attach source replay. (See ADR
-  [0005](0005-custom-zero-copy-proto-over-comlink.md) for the wire side.)
-- MIME truth is now split between two runtimes (worker and main thread); both
-  perform the codec-qualified `MediaSource.isTypeSupported` check and must
-  stay aligned: enforced today only by a shared constant and mirror comments.
+- The host handles re-attachment, holds messages until the worker handshake
+  completes, and replays the source on attach. ADR
+  [0005](0005-custom-zero-copy-proto-over-comlink.md) covers the wire protocol.
+- Worker-mode loads check codec-qualified MIME in the worker. Main-mode loads
+  ask the host to check it on the thread that appends media, as described in
+  ADR [0012](0012-append-thread-mse-capabilities.md).
 
 **Follow-on ADRs**
 

@@ -31,9 +31,9 @@ consumers at once:
 
 Adopt a tiny, dependency-free internal `Logger` interface as the only logging
 surface every internal call site speaks, plus a default console-backed implementation,
-and keep third-party loggers (loglevel/LogTape) out of `dependencies` as
-optional adapters. Worker milestones cross the wire as coarse `LOG` protocol
-messages checked by the HELLO log threshold, capped per connection.
+and keep third-party loggers (loglevel and LogTape) out of `dependencies`.
+Worker milestones cross the wire as `LOG` protocol messages, subject to a live
+log threshold and a per-sink message cap.
 
 ### 1. `Logger` interface + default console logger
 
@@ -55,9 +55,8 @@ untouched. `loglevel` is **not** added to `dependencies`: the adapter depends
 only on the structural `LoglevelLike` shape, so integrators who don't use
 loglevel never load it, and those who do wrap their own instance (never a
 module-global singleton the library forces on them). The same user-supplied
-sink-shim approach is documented for LogTape (a ~10-line adapter implementing
-`Logger` over `getLogger`). The dependency list stays at its current
-size, and integrators who want loglevel or LogTape wire their own sink.
+sink adapter approach is documented for LogTape through `getLogger`.
+Integrators who want loglevel or LogTape supply their own sink.
 
 ### 3. Worker milestone LOG wire channel
 
@@ -71,10 +70,11 @@ Forwarding is opt-in: the host HELLO carries a `log` threshold derived by
 `logThresholdFor` from its logger's level, and an absent threshold means the
 worker posts nothing: a muted host keeps the wire byte-identical to before.
 The composition's `emitLog` checks every milestone against the live threshold
-and a per-sink `MAX_WORKER_LOG_MESSAGES = 256` cap, so a pathologically
-failing source can never flood the postMessage channel. The host renders each
-received `LOG` onto
-`logger.child('worker')` via `forwardWorkerLog`. Credential discipline is part
+and a per-sink `MAX_WORKER_LOG_MESSAGES = 256` cap, so one sink can forward
+no more than 256 messages. The host can also update the threshold through
+`LOG_LEVEL` without reloading the source. It renders each received `LOG` onto
+`logger.child('worker')` via `forwardWorkerLog` and emits
+`sia-worker-milestone-change` for listeners. Credential discipline is part
 of the channel's contract: logs never carry seeds, decrypted key material, or
 share URLs (which embed their decryption key); share-URL playback appears only
 as the boolean `share: true` detail on `object.resolved`.
@@ -83,8 +83,8 @@ as the boolean `share: true` detail on `object.resolved`.
 
 **Easier**
 
-- Zero-config defaults give every app useful output, and embedding apps merge
-  library lines into their existing stack through a ~5-line adapter.
+- The default console logger reports info-level lines outside production and
+  warn-level lines in production. Applications can supply their own `Logger`.
 - Call sites stay uniform (`Logger` everywhere), so the worker isolate and the
   host share one vocabulary even though their transport differs.
 - Rejected alternatives stay out of the tree: winston/pino are Node-first and
@@ -94,13 +94,13 @@ as the boolean `share: true` detail on `object.resolved`.
   stack for them and drag in global-singleton semantics. The structural
   `LoglevelLike` shape captures the parts of loglevel worth standardizing on
   without the dependency.
-- The HELLO-checked, capped, scalar-only wire keeps worker-to-main logging
-  bounded and credentials-safe by construction.
+- The threshold and per-sink cap bound forwarded worker milestones. The
+  scalar detail shape and URL redaction keep credentials out of those events.
 
 **Harder**
 
 - The worker can only forward what it is told to (threshold + cap), so deep
   worker-side debugging beyond the milestone catalog needs a future,
   explicitly opted-in per-event wire channel instead of an open firehose.
-- Two decisions must stay in sync: the host `Logger` level and the HELLO wire
-  threshold, so `logThresholdFor` must stay a pure, bucketed mapping.
+- The host maps its logger level to a worker threshold in `HELLO` or
+  `LOG_LEVEL`; both paths must use the same `logThresholdFor` mapping.

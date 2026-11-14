@@ -17,8 +17,10 @@ to reach the current sink.
 `RangedReader` in `src/ranged-reader.ts` is an exact-range reader. It exposes
 `start(offset, length)` and `stop()` for a read window; it does not own a
 persistent playback position or a `seek(offset)` method. The session coordinator
-starts a new conversion and reader window for a new seek target. The default
-transport budget and cache limit concurrent ranged reads.
+starts a new conversion and reader window for a new seek target. The reader
+reuses cached bytes when they cover the requested window. There is no shared
+read-concurrency budget; `SiaTransportPolicy` sets the stall timeout and the
+SDK's per-download buffered-chunk cap.
 
 `SessionCoordinator` stores a deferred target in `#pendingSeekTime` when a seek
 arrives before streaming can start. The current load and attach lifecycle decide
@@ -35,12 +37,13 @@ remains the current-time authority once buffered output is available.
 Playback can request only the range needed for the current conversion window,
 and a pending seek does not disappear during source setup. Cancellation closes
 an active reader before a replacement starts. Request checks keep late worker
-messages from the current load.
+messages from a replaced load.
 
 A seek can be approximate until media timestamps and buffered ranges are
 available. Applications should treat a pending seek as asynchronous and rely on
 standard media events for completion. Changes to seek indexing or duration
-mapping require a new decision.
+mapping require a new decision. ADR [0013](0013-playback-recovery-policy.md)
+records the host's response to failed reads and stalled seeks.
 
 ## Related ADRs
 

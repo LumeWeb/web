@@ -18,11 +18,12 @@ Comlink. `PROTOCOL_VERSION` is currently `0`. Runtime guards validate every
 incoming message before it reaches the session state machine.
 
 The main-to-worker union contains `HELLO`, `APP_KEY`, `ATTACH`, `DETACH`,
-`SOURCE`, `PLAY`, `SEEK`, `BUFFERED_STATE`, `PLAYHEAD`, and `DESTROY`. The
-worker-to-main union contains `HELLO_OK`, `ATTACH_OK`, `SOURCE_OK`, `HANDLE`,
-`CHUNK`, `PROGRESS`, `ENDED`, `ERROR`, and `LOG`. Optional additive
-fields, including credential presence metadata, remain compatible with the
-current protocol version.
+`SOURCE`, `PLAY`, `SEEK`, `BUFFERED_STATE`, `PLAYHEAD`, `DESTROY`, `LOG_LEVEL`,
+and `MSE_RESULT`. The worker-to-main union contains `HELLO_OK`, `ATTACH_OK`,
+`SOURCE_OK`, `HANDLE`, `CHUNK`, `PROGRESS`, `ENDED`, `ERROR`, `LOG`, and
+`MSE_QUERY`. `MSE_QUERY` and `MSE_RESULT` carry load and query identities
+(ADR [0012](0012-append-thread-mse-capabilities.md)). Optional fields,
+including credential presence metadata, leave the protocol version at `0`.
 
 `nextRequestId()` allocates load identity on the host. The host filters source,
 chunk, progress, handle, and error messages against its current request. The
@@ -34,7 +35,7 @@ buffer before transfer when the source view does not own its backing buffer.
 `DEFAULT_FMP4_MIME` and error kinds live in the protocol module so worker and
 host MSE paths share the same values. The protocol also carries worker log
 milestones when the host opts into a logger threshold; the worker caps that
-stream at 256 messages per connection.
+stream at 256 messages per log sink (ADR [0009](0009-pluggable-logging.md)).
 
 ## Consequences
 

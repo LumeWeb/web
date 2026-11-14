@@ -33,8 +33,9 @@ with `auto` as the default.
   `release()` method. The package does not install or control a Service Worker.
 - `auto` asks the provider whether it is available. An unavailable provider or
   a native acquisition failure selects the media-worker path once per attached
-  source instance. The forced `service-worker` policy reports the failure instead of
-  selecting another backend.
+  source instance. Call `reselectBackend()` to recheck the current source after
+  provider readiness changes; explicit backend policies do not reselect. The
+  forced `service-worker` policy reports a failure rather than switching backends.
 
 The provider owns Sia SDK setup, service-worker scope, URL authorization, and
 source resolution. Its `open` callback may receive a MIME type, a name, an
