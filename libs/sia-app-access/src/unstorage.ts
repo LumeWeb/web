@@ -1,4 +1,6 @@
 /** Optional unstorage adapter keeps encrypted credentials in application-owned storage. */
+import { sha256 } from "@noble/hashes/sha2.js";
+import { bytesToHex } from "@noble/hashes/utils.js";
 import type { CredentialScope, CredentialStore } from "./credentials.ts";
 
 // Unstorage parses JSON-looking strings on getItem; the prefix keeps ciphertext a string.
@@ -30,7 +32,7 @@ export function createUnstorageCredentialStore(
     const identity = new TextEncoder().encode(
       JSON.stringify([scope.appId, scope.indexerUrl]),
     );
-    return `sia-access:credential:${Array.from(identity, (byte) => byte.toString(16).padStart(2, "0")).join("")}`;
+    return `sia-access:credential:${bytesToHex(sha256(identity))}`;
   };
 
   return {

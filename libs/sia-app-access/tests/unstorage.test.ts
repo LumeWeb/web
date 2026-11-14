@@ -1,15 +1,22 @@
 /** The optional store keeps codec records separate from caller-owned key buffers. */
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { mkdtemp, rm } from "node:fs/promises";
 import { createRequire } from "node:module";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { test } from "node:test";
 import { createUnstorageCredentialStore } from "@/unstorage";
 import type { UnstorageCredentialStorage } from "@/unstorage";
 
-const { createStorage } = createRequire(import.meta.url)("unstorage") as {
-  createStorage(): UnstorageCredentialStorage & {
+const require = createRequire(import.meta.url);
+const { createStorage } = require("unstorage") as {
+  createStorage(options?: { driver: unknown }): UnstorageCredentialStorage & {
     getKeys(): Promise<string[]>;
   };
 };
+const fsLiteDriver = require("unstorage/drivers/fs-lite") as (options: {
+  base: string;
+}) => unknown;
 
 const scope = { appId: "a".repeat(64), indexerUrl: "https://one/" };
 const second = { ...scope, indexerUrl: "https://two/" };
@@ -61,6 +68,21 @@ void test("unstorage stores codec output by scope and returns owned reads", asyn
   assert.equal(await first.read(scope), null);
   assert.deepEqual(await first.read(second), new Uint8Array([4]));
   assert.deepEqual(await first.read(third), new Uint8Array([5]));
+});
+
+void test("unstorage persists long indexer scopes through the filesystem driver", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "sia-access-fs-"));
+  t.after(() => rm(directory, { force: true, recursive: true }));
+  const storage = createStorage({ driver: fsLiteDriver({ base: directory }) });
+  const store = createUnstorageCredentialStore(storage, codec);
+  const longScope = {
+    ...scope,
+    indexerUrl: `https://indexer.example/${"a".repeat(100)}`,
+  };
+  await store.write(longScope, new Uint8Array([1, 2, 3]));
+  assert.deepEqual(await store.read(longScope), new Uint8Array([1, 2, 3]));
+  await store.remove(longScope);
+  assert.equal(await store.read(longScope), null);
 });
 
 void test("unstorage reads codec strings that resemble JSON values", async () => {

@@ -12,9 +12,13 @@ for (const peer of [
   assert.throws(() => import.meta.resolve(peer), {
     code: "ERR_MODULE_NOT_FOUND",
   });
+let allowHash = false;
 const hooks = registerHooks({
   resolve(specifier, context, next) {
     if (
+      (!allowHash &&
+        (specifier === "@noble/hashes" ||
+          specifier.startsWith("@noble/hashes/"))) ||
       specifier === "@siafoundation/sia-storage" ||
       specifier.startsWith("@siafoundation/sia-storage/") ||
       specifier === "react" ||
@@ -69,6 +73,7 @@ try {
   await store.remove(scope);
   assert.equal(await store.read(scope), null);
   console.log("Packed credential consumer assertions completed");
+  allowHash = true;
   const { createUnstorageCredentialStore } =
     await import("@lumeweb/sia-app-access/unstorage");
   const records = new Map();

@@ -2672,6 +2672,9 @@ importers:
       '@lumeweb/sia-session':
         specifier: workspace:*
         version: link:../sia-session
+      '@noble/hashes':
+        specifier: 2.4.0
+        version: 2.4.0
       robot3:
         specifier: 1.4.0
         version: 1.4.0

@@ -139,6 +139,7 @@ export async function checkPackage(input: string): Promise<void> {
       join(consumer, "node_modules/robot3"),
       { recursive: true },
     );
+    await copyPeer("@noble/hashes", join(consumer, "node_modules"));
     for (const file of await readdir(join(packed, "dist"))) {
       if (file.endsWith(".js") || file.endsWith(".d.ts"))
         assert.doesNotMatch(

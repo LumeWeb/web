@@ -57,6 +57,7 @@
   },
   "dependencies": {
     "@lumeweb/sia-session": "workspace:*",
+    "@noble/hashes": "2.4.0",
     "robot3": "1.4.0"
   },
   "devDependencies": {
