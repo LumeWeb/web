@@ -5,6 +5,7 @@ import {
   type BrowserAccess,
   MockPinnedObject,
   type MockSia,
+  type PackedObject,
   type UploadSdk,
 } from "@lumeweb/sia-testing/mock";
 import { createSiaTest } from "@lumeweb/sia-testing/vitest";
@@ -45,7 +46,10 @@ interface Scenario {
   actor: ReturnType<MockSia["actor"]>;
   replace: () => void;
   restore: () => void;
-  sdk: UploadSdk;
+  sdk: {
+    appKey(): { free(): void; publicKey(): string };
+    close(): Promise<void>;
+  };
   uppy: Uppy<Meta, SiaUploadBody>;
 }
 interface SiaFixture {
@@ -64,7 +68,73 @@ function addSecond(uppy: Uppy<Meta, SiaUploadBody>) {
 function attempts(mock: MockSia, operation: "pin" | "upload") {
   return mock
     .history()
-    .filter((row) => row.operation === operation && !row.stage);
+    .filter(
+      (row) =>
+        row.operation === (operation === "upload" ? "packed-add" : operation) &&
+        !row.stage,
+    );
+}
+
+function packedAdapter(sia: SiaFixture, actor: ReturnType<MockSia["actor"]>) {
+  const packed = sia.mock.packedSdk({
+    access: sia.ownerAccess,
+    as: actor,
+    maxBytes: 32,
+    maxObjects: 2,
+    platform: "browser",
+  });
+  const originals = new WeakMap<object, PackedObject>();
+  let direct: undefined | UploadSdk;
+  const sdk = {
+    appKey: () => ({
+      free: () => undefined,
+      publicKey: () => "ed25519:account-1",
+    }),
+    close: async () => {
+      await packed.close();
+      await direct?.close();
+    },
+    pinObject: (object: object) =>
+      originals.has(object)
+        ? packed.pinObject(originals.get(object)!)
+        : direct!.pinObject(object as MockPinnedObject),
+    updateObjectMetadata: (object: object) =>
+      packed.updateObjectMetadata(originals.get(object)!),
+    upload: (draft: MockPinnedObject, stream: ReadableStream<Uint8Array>) => {
+      direct ??= sia.mock.uploadSdk({
+        access: sia.ownerAccess,
+        as: actor,
+        maxBytes: 32,
+      });
+      return direct.upload(draft, stream);
+    },
+    uploadPacked: () => {
+      const upload = packed.uploadPacked();
+      let length = 0;
+      return {
+        add: async (stream: ReadableStream<Uint8Array>) => {
+          const bytes = await upload.add(stream);
+          length += bytes;
+          return bytes;
+        },
+        cancel: () => upload.cancel(),
+        finalize: async () =>
+          (await upload.finalize()).map((object) => {
+            const handle = {
+              free: () => undefined,
+              id: () => object.id(),
+              updateMetadata: (bytes: Uint8Array) =>
+                object.updateMetadata(bytes),
+            };
+            originals.set(handle, object);
+            return handle;
+          }),
+        free: () => undefined,
+        length: () => length,
+      };
+    },
+  };
+  return sdk;
 }
 
 async function withUpload(
@@ -80,14 +150,10 @@ async function withUpload(
   } = {},
 ): Promise<void> {
   const actor = sia.mock.actor("uppy upload");
-  const sdk = sia.mock.uploadSdk({
-    access: sia.ownerAccess,
-    as: actor,
-    maxBytes: 1024,
-  });
+  const sdk = packedAdapter(sia, actor);
   let sessionId: null | string = "account-1";
   // Only the account identity changes here; upload and pin still run through the mock SDK.
-  const otherAccount = Object.assign(Object.create(sdk) as UploadSdk, {
+  const otherAccount = Object.assign(Object.create(sdk) as typeof sdk, {
     appKey: () => ({
       free: () => undefined,
       publicKey: () => "ed25519:account-2",
@@ -182,8 +248,128 @@ siaTest(
   },
 );
 
+siaTest("two packed files stay separate and readable", async ({ sia }) => {
+  await withUpload(sia, async ({ uppy }) => {
+    addSecond(uppy);
+    const objects = new Map<string, string>();
+    uppy.on("upload-success", (file, response) =>
+      objects.set(file!.name, response.body!.objectId),
+    );
+    expect((await uppy.upload())?.failed).toHaveLength(0);
+    expect(
+      sia.mock
+        .history()
+        .filter((row) => row.operation === "packed-finalize" && !row.stage),
+    ).toHaveLength(2);
+    expect(objects.size).toBe(2);
+    expect(objects.get("document.bin")).not.toBe(objects.get("second.txt"));
+    const reader = sia.mock.reader({
+      access: sia.ownerAccess,
+      as: sia.mock.actor("reader"),
+    });
+    try {
+      const first = await reader.download({ id: objects.get("document.bin")! });
+      expect(new Uint8Array(await new Response(first).arrayBuffer())).toEqual(
+        Uint8Array.of(1, 2, 3),
+      );
+      const second = await reader.download({ id: objects.get("second.txt")! });
+      expect(await new Response(second).text()).toBe("second");
+    } finally {
+      await reader.close();
+    }
+  });
+});
+
 siaTest(
-  "host shard acknowledgements advance Uppy progress before pin",
+  "each packed file keeps its metadata when the callback reuses a buffer",
+  async ({ sia }) => {
+    const metadata = Uint8Array.of(0);
+    await withUpload(
+      sia,
+      async ({ uppy }) => {
+        addSecond(uppy);
+        expect((await uppy.upload())?.failed).toHaveLength(0);
+        const reader = sia.mock.reader({
+          access: sia.ownerAccess,
+          as: sia.mock.actor("reader"),
+        });
+        try {
+          for (const [name, expected] of [
+            ["document.bin", 1],
+            ["second.txt", 2],
+          ] as const) {
+            const file = uppy.getFiles().find((entry) => entry.name === name)!;
+            expect(
+              (await reader.object(file.response!.body!.objectId)).metadata,
+            ).toEqual(Uint8Array.of(expected));
+          }
+        } finally {
+          await reader.close();
+        }
+      },
+      {
+        metadata: (file) => {
+          metadata[0] = file.name === "document.bin" ? 1 : 2;
+          return metadata;
+        },
+      },
+    );
+  },
+);
+
+siaTest(
+  "a throwing success listener does not fail other packed files",
+  async ({ sia }) => {
+    await withUpload(sia, async ({ uppy }) => {
+      addSecond(uppy);
+      const successes: string[] = [];
+      const errors: Error[] = [];
+      uppy.on("upload-success", (file) => {
+        successes.push(file!.name);
+        if (file!.name === "document.bin") throw new Error("listener failed");
+      });
+      uppy.on("upload-error", (_file, error) => errors.push(error));
+      expect((await uppy.upload())?.failed).toHaveLength(0);
+      expect(successes).toEqual(["document.bin", "second.txt"]);
+      expect(errors).toHaveLength(0);
+      expect(
+        uppy.getFiles().every((file) => file.progress.uploadComplete),
+      ).toBe(true);
+    });
+  },
+);
+
+siaTest(
+  "a metadata rejection with no value does not fail another packed file",
+  async ({ sia }) => {
+    await withUpload(
+      sia,
+      async ({ uppy }) => {
+        addSecond(uppy);
+        const successes: string[] = [];
+        const errors: string[] = [];
+        uppy.on("upload-success", (file) => successes.push(file!.name));
+        uppy.on("upload-error", (file) => errors.push(file!.name));
+        const result = await uppy.upload();
+        expect(result?.failed?.map((file) => file.name)).toEqual([
+          "document.bin",
+        ]);
+        expect(successes).toEqual(["second.txt"]);
+        expect(errors).toEqual(["document.bin"]);
+      },
+      {
+        metadata: (file) => {
+          // oxlint-disable-next-line typescript/only-throw-error -- A metadata callback may reject with any JavaScript value.
+          if (file.name === "document.bin") throw undefined;
+          return Uint8Array.of(2);
+        },
+      },
+    );
+  },
+);
+
+siaTest(
+  "packed mock does not invent host shard progress before pin",
   async ({ sia }) => {
     await withUpload(sia, async ({ actor, uppy }) => {
       const file = uppy.getFiles()[0]!;
@@ -210,9 +396,7 @@ siaTest(
             throw new Error("Upload ended before pin started");
           }),
         ]);
-        expect(progress).toHaveLength(30);
-        expect(progress[0]).toEqual({ bytesTotal: 3, bytesUploaded: 0.1 });
-        expect(progress.at(-1)).toEqual({ bytesTotal: 3, bytesUploaded: 3 });
+        expect(progress).toHaveLength(0);
         expect(uppy.getFile(file.id)?.progress.uploadComplete).toBe(false);
         expect(uppy.getFile(queuedId)?.progress.bytesTotal).toBe(6);
         expect(uppy.getFile(queuedId)?.progress.bytesUploaded).toBe(0);
@@ -233,7 +417,7 @@ siaTest("a failed staged upload can retry before pinning", async ({ sia }) => {
       const errors: Error[] = [];
       uppy.on("upload-error", (_file, error) => errors.push(error));
       sia.mock.mutationFaults.fail(
-        { actor, operation: "upload", stage: "beforeCommit" },
+        { actor, operation: "packed-add", stage: "beforeCommit" },
         { code: "unavailable", times: 1 },
       );
       expect((await uppy.upload())?.failed).toHaveLength(1);
@@ -243,7 +427,7 @@ siaTest("a failed staged upload can retry before pinning", async ({ sia }) => {
       expect(outcomes).toHaveLength(0);
       expect((await uppy.retryAll())?.failed).toHaveLength(0);
       expect(attempts(sia.mock, "upload")).toMatchObject([
-        { committed: false, status: "failed" },
+        { status: "failed" },
         { committed: true, status: "completed" },
       ]);
       expect(attempts(sia.mock, "pin")).toHaveLength(1);
@@ -397,7 +581,7 @@ siaTest(
       addSecond(uppy);
       const hold = sia.mock.mutationFaults.hold({
         actor,
-        operation: "upload",
+        operation: "packed-add",
         stage: "beforeCommit",
       });
       const writing = uppy.upload();
@@ -415,7 +599,7 @@ siaTest(
 );
 
 siaTest(
-  "a removed queued file does not upload when its ID is reused",
+  "a removed packed file is not pinned or confused with its replacement",
   async ({ sia }) => {
     await withUpload(sia, async ({ actor, uppy }) => {
       const queuedId = addSecond(uppy);
@@ -442,11 +626,12 @@ siaTest(
         hold.release();
       }
       await writing;
-      expect(attempts(sia.mock, "upload")).toHaveLength(1);
+      expect(attempts(sia.mock, "upload")).toHaveLength(2);
+      expect(attempts(sia.mock, "pin")).toHaveLength(1);
       expect(successes).toEqual(["document.bin"]);
       expect(uppy.getFile(queuedId)?.progress.uploadComplete).toBe(false);
       await uppy.upload();
-      expect(attempts(sia.mock, "upload")).toHaveLength(2);
+      expect(attempts(sia.mock, "upload")).toHaveLength(3);
       expect(successes).toEqual(["document.bin", "second.txt"]);
     });
   },
@@ -474,7 +659,7 @@ siaTest(
         hold.release();
       }
       await writing;
-      expect(attempts(sia.mock, "upload")).toHaveLength(1);
+      expect(attempts(sia.mock, "upload")).toHaveLength(2);
       expect(
         errors.find(({ file }) => file === "second.txt")?.error.message,
       ).toBe("The Sia account changed during this upload batch");
@@ -489,7 +674,7 @@ siaTest(
       const file = uppy.getFiles()[0]!;
       const hold = sia.mock.mutationFaults.hold({
         actor,
-        operation: "upload",
+        operation: "packed-add",
         stage: "beforeCommit",
       });
       const successes: string[] = [];
@@ -561,7 +746,7 @@ siaTest(
 );
 
 siaTest(
-  "cancel all never starts a queued second file while the first pin drains",
+  "cancel all does not pin the second packed file while the first pin drains",
   async ({ sia }) => {
     await withUpload(sia, async ({ actor, uppy }) => {
       addSecond(uppy);
@@ -573,13 +758,14 @@ siaTest(
       const writing = uppy.upload();
       try {
         await hold.started();
-        expect(attempts(sia.mock, "upload")).toHaveLength(1);
+        expect(attempts(sia.mock, "upload")).toHaveLength(2);
         uppy.cancelAll();
       } finally {
         hold.release();
       }
       await writing;
-      expect(attempts(sia.mock, "upload")).toHaveLength(1);
+      expect(attempts(sia.mock, "upload")).toHaveLength(2);
+      expect(attempts(sia.mock, "pin")).toHaveLength(1);
     });
   },
 );
@@ -696,11 +882,7 @@ siaTest(
   "the shared account drains an upload and other work before disconnect",
   async ({ sia }) => {
     const actor = sia.mock.actor("shared uploader");
-    const sdk = sia.mock.uploadSdk({
-      access: sia.ownerAccess,
-      as: actor,
-      maxBytes: 1024,
-    });
+    const sdk = packedAdapter(sia, actor);
     let disposed = 0;
     const adapter: SiaAccessAdapter<SiaSession> = {
       begin() {

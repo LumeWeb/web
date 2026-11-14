@@ -7,13 +7,15 @@ import type { SiaSession } from "@lumeweb/sia-app-access/sia";
 import SiaUpload, {
   type SiaUploadBody,
   SiaUploadUncertainError,
+  type SiaWriteOptions,
   type UploadAccess,
   uploadToSia,
 } from "../src/index.ts";
 
 const handles: { failFree?: boolean; freed: number }[] = [];
+const encodedSize = vi.hoisted(() => vi.fn((_bytes: number) => 125_829_120));
 vi.mock("@siafoundation/sia-storage/wasm", () => ({
-  encodedSize: () => 125_829_120,
+  encodedSize,
   PinnedObject: class {
     failFree = false;
     freed = 0;
@@ -27,13 +29,39 @@ vi.mock("@siafoundation/sia-storage/wasm", () => ({
     id() {
       return "object-1";
     }
+    updateMetadata(_metadata: Uint8Array) {}
   },
 }));
 
-function setup(sdk: {
-  pinObject: (...args: unknown[]) => Promise<void>;
-  upload: (...args: unknown[]) => Promise<unknown>;
-}) {
+function setup(
+  sdk: {
+    pinObject: (...args: unknown[]) => Promise<void>;
+    upload: (...args: unknown[]) => Promise<unknown>;
+    uploadPacked?: (options: UploadOptions) => unknown;
+  },
+  options: { metadata?: SiaWriteOptions["metadata"] } = {},
+) {
+  const packed = () => {
+    const objects: unknown[] = [];
+    let length = 0;
+    return {
+      add: async (stream: ReadableStream<Uint8Array>) => {
+        const { PinnedObject } =
+          await import("@siafoundation/sia-storage/wasm");
+        objects.push(
+          await sdk.upload(new PinnedObject(), stream, packedOptions),
+        );
+        length += 5;
+        return 5;
+      },
+      cancel: () => undefined,
+      finalize: async () => objects,
+      free: () => undefined,
+      length: () => length,
+    };
+  };
+  let packedOptions: { onShardUploaded?: UploadOptions["onShardUploaded"] } =
+    {};
   const access = {
     getSnapshot: () => ({ activeSessionId: "account-1" }),
     withSession: async <T>(
@@ -45,10 +73,17 @@ function setup(sdk: {
           free: () => undefined,
           publicKey: () => "ed25519:account-1",
         }),
+        updateObjectMetadata: async () => undefined,
+        uploadPacked:
+          sdk.uploadPacked ??
+          ((options: typeof packedOptions) => {
+            packedOptions = options;
+            return packed();
+          }),
       } as unknown as SiaSession),
   } as UploadAccess;
   const uppy = new Uppy<Meta, SiaUploadBody>();
-  uppy.use(SiaUpload, { access });
+  uppy.use(SiaUpload, { access, ...options });
   uppy.addFile({
     data: new File(["hello"], "document.bin"),
     name: "document.bin",
@@ -59,9 +94,288 @@ function setup(sdk: {
 
 afterEach(() => {
   handles.length = 0;
+  encodedSize.mockImplementation(() => 125_829_120);
 });
 
 describe("WASM-shaped upload boundary", () => {
+  test("two Uppy files share one packed upload and pin their own objects", async () => {
+    const { PinnedObject } = await import("@siafoundation/sia-storage/wasm");
+    const first = new PinnedObject();
+    const second = new PinnedObject();
+    let length = 0;
+    const add = vi.fn(async (stream: ReadableStream<Uint8Array>) => {
+      const bytes = new Uint8Array(await new Response(stream).arrayBuffer());
+      length += bytes.byteLength;
+      return bytes.byteLength;
+    });
+    let report: UploadOptions["onShardUploaded"];
+    const shard = {
+      elapsedMs: 1,
+      hostKey: `ed25519:${"a".repeat(64)}`,
+      shardIndex: 0,
+      shardSize: 4_194_304,
+      slabIndex: 0,
+    };
+    let consumed = false;
+    const finalize = vi.fn(async () => {
+      consumed = true;
+      report?.(shard);
+      report?.({ ...shard, hostKey: `ed25519:${"b".repeat(64)}` });
+      report?.({ ...shard, shardIndex: 1 });
+      return [first, second];
+    });
+    const free = vi.fn(() => {
+      if (consumed) throw new Error("null pointer passed to rust");
+    });
+    const sdk = {
+      pinObject: vi.fn(async (_object: unknown) => undefined),
+      upload: vi.fn(async () => {
+        throw new Error("direct upload is not packed");
+      }),
+      uploadPacked: vi.fn((options: UploadOptions) => {
+        report = options.onShardUploaded;
+        return { add, finalize, free, length: () => length };
+      }),
+    };
+    const { uppy } = setup(sdk);
+    uppy.addFile({
+      data: new File(["world"], "second.bin"),
+      name: "second.bin",
+      type: "application/octet-stream",
+    });
+    try {
+      const successes: string[] = [];
+      const progress = new Map<string, number[]>();
+      uppy.on("upload-success", (file) => successes.push(file?.name ?? ""));
+      uppy.on("upload-progress", (file, event) => {
+        const name = file?.name ?? "";
+        progress.set(name, [
+          ...(progress.get(name) ?? []),
+          event.bytesUploaded,
+        ]);
+      });
+      expect((await uppy.upload())?.failed).toHaveLength(0);
+      expect(sdk.upload).not.toHaveBeenCalled();
+      expect(sdk.uploadPacked).toHaveBeenCalledTimes(1);
+      expect(add).toHaveBeenCalledTimes(2);
+      expect(finalize).toHaveBeenCalledTimes(1);
+      expect(sdk.pinObject.mock.calls.map(([object]) => object)).toEqual([
+        first,
+        second,
+      ]);
+      expect(successes).toEqual(["document.bin", "second.bin"]);
+      const fileBytes = [
+        (5 * 4_194_304) / 125_829_120,
+        (5 * 8_388_608) / 125_829_120,
+      ];
+      expect(progress.get("document.bin")).toEqual(fileBytes);
+      expect(progress.get("second.bin")).toEqual(fileBytes);
+      expect(free).not.toHaveBeenCalled();
+    } finally {
+      uppy.destroy();
+    }
+  });
+
+  test("a failed packed finalization does not free its consumed handle", async () => {
+    const failure = new Error("packed finalization failed");
+    let consumed = false;
+    const free = vi.fn(() => {
+      if (consumed) throw new Error("null pointer passed to rust");
+    });
+    const sdk = {
+      pinObject: vi.fn(async () => undefined),
+      upload: vi.fn(async () => {
+        throw new Error("direct upload is not packed");
+      }),
+      uploadPacked: vi.fn(() => ({
+        add: async () => 5,
+        cancel: () => undefined,
+        finalize: async () => {
+          consumed = true;
+          throw failure;
+        },
+        free,
+        length: () => 5,
+      })),
+    };
+    const { uppy } = setup(sdk);
+    try {
+      const errors: Error[] = [];
+      uppy.on("upload-error", (_file, error) => errors.push(error));
+      expect((await uppy.upload())?.failed).toHaveLength(1);
+      expect(errors).toEqual([failure]);
+      expect(free).not.toHaveBeenCalled();
+      expect(sdk.pinObject).not.toHaveBeenCalled();
+    } finally {
+      uppy.destroy();
+    }
+  });
+
+  test("a skipped file does not hold back the packed transfer bar", async () => {
+    encodedSize.mockImplementation((bytes) => bytes * 2);
+    let notifyMetadataEntered!: () => void;
+    let releaseMetadata!: () => void;
+    const metadataEntered = new Promise<void>((resolve) => {
+      notifyMetadataEntered = resolve;
+    });
+    const metadataReleased = new Promise<void>((resolve) => {
+      releaseMetadata = resolve;
+    });
+    let length = 0;
+    let report: UploadOptions["onShardUploaded"];
+    const { PinnedObject } = await import("@siafoundation/sia-storage/wasm");
+    const sdk = {
+      pinObject: vi.fn(async () => undefined),
+      upload: vi.fn(async () => {
+        throw new Error("direct upload is not packed");
+      }),
+      uploadPacked: vi.fn((options: UploadOptions) => {
+        report = options.onShardUploaded;
+        return {
+          add: async (stream: ReadableStream<Uint8Array>) => {
+            const bytes = (await new Response(stream).arrayBuffer()).byteLength;
+            length += bytes;
+            report?.({
+              elapsedMs: 1,
+              hostKey: "host",
+              shardIndex: 0,
+              shardSize: 10,
+              slabIndex: 0,
+            });
+            return bytes;
+          },
+          cancel: () => undefined,
+          finalize: async () => [new PinnedObject()],
+          free: () => undefined,
+          length: () => length,
+        };
+      }),
+    };
+    const { uppy } = setup(sdk, {
+      metadata: async (file) => {
+        if (file.name === "skipped.bin") {
+          notifyMetadataEntered();
+          await metadataReleased;
+          throw new Error("metadata unavailable");
+        }
+        return Uint8Array.of(1);
+      },
+    });
+    uppy.addFile({
+      data: new File(["x".repeat(50)], "skipped.bin"),
+      name: "skipped.bin",
+      type: "application/octet-stream",
+    });
+    try {
+      const progress: number[] = [];
+      const skippedProgress: number[] = [];
+      uppy.on("upload-progress", (file, event) => {
+        if (file?.name === "document.bin") progress.push(event.bytesUploaded);
+        if (file?.name === "skipped.bin")
+          skippedProgress.push(event.bytesUploaded);
+      });
+      const writing = uppy.upload();
+      try {
+        await metadataEntered;
+        expect(progress.length).toBeGreaterThan(0);
+      } finally {
+        releaseMetadata();
+        await writing;
+      }
+      expect((await writing)?.failed).toHaveLength(1);
+      expect(progress.at(-1)).toBe(5);
+      expect(skippedProgress).toEqual([]);
+      expect(sdk.pinObject).toHaveBeenCalledTimes(1);
+    } finally {
+      uppy.destroy();
+    }
+  });
+
+  test("a lost pin reply for one packed file does not hide another file's success", async () => {
+    const { PinnedObject } = await import("@siafoundation/sia-storage/wasm");
+    const objects = [new PinnedObject(), new PinnedObject()];
+    let length = 0;
+    const sdk = {
+      pinObject: vi
+        .fn()
+        .mockRejectedValueOnce(new Error("lost pin reply"))
+        .mockResolvedValue(undefined),
+      upload: vi.fn(async () => {
+        throw new Error("direct upload is not packed");
+      }),
+      uploadPacked: vi.fn(() => ({
+        add: async () => {
+          length += 5;
+          return 5;
+        },
+        cancel: () => undefined,
+        finalize: async () => objects,
+        free: () => undefined,
+        length: () => length,
+      })),
+    };
+    const { uppy } = setup(sdk);
+    uppy.addFile({
+      data: new File(["world"], "second.bin"),
+      name: "second.bin",
+      type: "application/octet-stream",
+    });
+    try {
+      const errors: Error[] = [];
+      const successes: string[] = [];
+      uppy.on("upload-error", (_file, error) => errors.push(error));
+      uppy.on("upload-success", (file) => successes.push(file?.name ?? ""));
+      expect((await uppy.upload())?.failed).toHaveLength(1);
+      expect(errors[0]).toBeInstanceOf(SiaUploadUncertainError);
+      expect(successes).toEqual(["second.bin"]);
+      expect(sdk.pinObject).toHaveBeenCalledTimes(2);
+      expect(handles.map((object) => object.freed)).toEqual([1, 1]);
+    } finally {
+      uppy.destroy();
+    }
+  });
+
+  test("cancel all interrupts a packed add before any pin", async () => {
+    let entered!: () => void;
+    let resume!: () => void;
+    const adding = new Promise<void>((resolve) => {
+      entered = resolve;
+    });
+    const interrupted = new Promise<void>((resolve) => {
+      resume = resolve;
+    });
+    const cancel = vi.fn(() => resume());
+    const free = vi.fn();
+    const sdk = {
+      pinObject: vi.fn(async () => undefined),
+      upload: vi.fn(async () => {
+        throw new Error("direct upload is not packed");
+      }),
+      uploadPacked: vi.fn(() => ({
+        add: async () => {
+          entered();
+          await interrupted;
+          throw new Error("interrupted");
+        },
+        cancel,
+        finalize: async () => [],
+        free,
+      })),
+    };
+    const { uppy } = setup(sdk);
+    try {
+      const writing = uppy.upload();
+      await adding;
+      uppy.cancelAll();
+      await writing;
+      expect(cancel).toHaveBeenCalledTimes(1);
+      expect(free).toHaveBeenCalledTimes(1);
+      expect(sdk.pinObject).not.toHaveBeenCalled();
+    } finally {
+      uppy.destroy();
+    }
+  });
+
   test("a repeated shard acknowledgement does not advance host progress twice", async () => {
     const sdk = {
       pinObject: vi.fn(async () => undefined),
