@@ -7,6 +7,7 @@ import {
   createMemoryCredentialStore,
   createSiaAccess,
   PhraseValidation,
+  RegistrationLimitError,
   SessionUnavailableError,
 } from "@/index";
 import type { AccessConnection, AccessSession, CredentialStore } from "@/index";
@@ -565,6 +566,22 @@ void test("cancelling after a valid phrase is published prevents registration", 
     unsubscribe();
     await f.access.dispose();
   }
+});
+void test("an exhausted connect key reports a dispatched rejection", async () => {
+  const f = fixture();
+  await f.access.authorize(AccessIntent.Create);
+  let attempts = 0;
+  f.connection.register = async () => {
+    attempts++;
+    throw new RegistrationLimitError();
+  };
+  assert.deepEqual(await f.access.submitRecoveryPhrase("phrase"), {
+    effects: { credentials: "none", registration: "rejected" },
+    failure: "registration-limit",
+    kind: "failed",
+    recovery: "authorize",
+  });
+  assert.equal(attempts, 1);
 });
 void test("registration rejection is unknown and a save retry reports no earlier registration", async () => {
   const f = fixture();

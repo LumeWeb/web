@@ -15,6 +15,7 @@ export enum AccessFailure {
   CredentialsWrite = "credentials-write",
   PhraseCheck = "phrase-check",
   Registration = "registration",
+  RegistrationLimit = "registration-limit",
   Session = "session",
   UnregisteredKey = "unregistered-key",
   PhraseGeneration = "phrase-generation",
@@ -86,6 +87,7 @@ export enum RegistrationEffect {
   None = "none",
   Registered = "registered",
   Unknown = "unknown",
+  Rejected = "rejected",
 }
 export enum SaveRecoveryProgress {
   Idle = "idle",
@@ -360,3 +362,10 @@ export type SubmitRecoveryPhraseResult =
   | AccessInvalidPhrase
   | AccessPhraseMismatch
   | AccessReady<CredentialConfirmation.Confirmed>;
+
+export class RegistrationLimitError extends Error {
+  constructor() {
+    super("Connect key has no remaining app registrations");
+    this.name = "RegistrationLimitError";
+  }
+}

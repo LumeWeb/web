@@ -17,6 +17,7 @@ const hooks = registerHooks({
   },
 });
 const { createSiaAccess, createSiaAdapter } = await import("@/sia");
+const { RegistrationLimitError } = await import("@/index");
 const scope = { appId: "a".repeat(64), indexerUrl: "https://indexer.test/" };
 const application = {
   appId: scope.appId,
@@ -61,6 +62,36 @@ void test("the Sia factory accepts an explicit adapter", async () => {
   await access.dispose();
 });
 
+void test("only the indexer app limit response becomes a definitive registration error", async () => {
+  for (const [message, limited] of [
+    [
+      "client error: indexd responded with an error: 403 Forbidden: key has no remaining uses\n",
+      true,
+    ],
+    [
+      "client error: indexd responded with an error: 403 Forbidden: other refusal",
+      false,
+    ],
+    [
+      "client error: indexd responded with an error: 500 Internal Server Error: key has no remaining uses",
+      false,
+    ],
+    ["reply lost", false],
+  ] as const) {
+    const original = new Error(message);
+    configure({ registrationError: original });
+    const connection = await createSiaAdapter().begin(scope, application);
+    await assert.rejects(
+      connection.register("valid phrase"),
+      (error: unknown) => {
+        if (limited) assert.ok(error instanceof RegistrationLimitError);
+        else assert.equal(error, original);
+        return true;
+      },
+    );
+    await connection.dispose();
+  }
+});
 void test("retirement waits for pending approval and denies later calls", async () => {
   configure();
   const connection = await createSiaAdapter().begin(scope, application);

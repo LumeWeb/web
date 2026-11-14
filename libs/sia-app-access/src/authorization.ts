@@ -17,6 +17,7 @@ import {
   AccessRecovery,
   PhraseValidation,
   RegistrationEffect,
+  RegistrationLimitError,
 } from "./access-types.ts";
 import type {
   AccessApproved,
@@ -120,9 +121,12 @@ export class Authorization<Session> {
     let resource: AccessSession<Session>;
     try {
       resource = await owned.register(phrase);
-    } catch {
+    } catch (error) {
       finishAcquisition();
-      op.fail(AccessFailure.Registration, AccessRecovery.Authorize);
+      if (error instanceof RegistrationLimitError) {
+        op.registrationEffect = RegistrationEffect.Rejected;
+        op.fail(AccessFailure.RegistrationLimit, AccessRecovery.Authorize);
+      } else op.fail(AccessFailure.Registration, AccessRecovery.Authorize);
       return;
     }
     try {
