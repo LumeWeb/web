@@ -1,6 +1,9 @@
 /** Optional unstorage adapter keeps encrypted credentials in application-owned storage. */
 import type { CredentialScope, CredentialStore } from "./credentials.ts";
 
+// Unstorage parses JSON-looking strings on getItem; the prefix keeps ciphertext a string.
+const recordPrefix = "sia-access:v1:";
+
 export interface CredentialCodec {
   decrypt(record: string): Promise<Uint8Array> | Uint8Array;
   encrypt(appKey: Uint8Array): Promise<string> | string;
@@ -34,9 +37,9 @@ export function createUnstorageCredentialStore(
     async read(scope) {
       const record = await storage.getItem(key(scope));
       if (record === null) return null;
-      if (typeof record !== "string")
+      if (typeof record !== "string" || !record.startsWith(recordPrefix))
         throw new TypeError("Invalid encrypted credential record");
-      const bytes = await codec.decrypt(record);
+      const bytes = await codec.decrypt(record.slice(recordPrefix.length));
       try {
         return new Uint8Array(bytes);
       } finally {
@@ -53,7 +56,7 @@ export function createUnstorageCredentialStore(
         const record = await codec.encrypt(bytes);
         if (typeof record !== "string" || record.length === 0)
           throw new TypeError("Invalid encrypted credential record");
-        await storage.setItem(key(scope), record);
+        await storage.setItem(key(scope), recordPrefix + record);
       } finally {
         bytes.fill(0);
       }

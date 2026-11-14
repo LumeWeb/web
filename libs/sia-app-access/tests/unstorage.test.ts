@@ -63,6 +63,25 @@ void test("unstorage stores codec output by scope and returns owned reads", asyn
   assert.deepEqual(await first.read(third), new Uint8Array([5]));
 });
 
+void test("unstorage reads codec strings that resemble JSON values", async () => {
+  for (const record of ["1234", "null", "true", '{"cipher":"value"}']) {
+    const storage = createStorage();
+    const store = createUnstorageCredentialStore(storage, {
+      decrypt(saved) {
+        assert.equal(saved, record);
+        return new Uint8Array([9]);
+      },
+      encrypt() {
+        return record;
+      },
+    });
+    await store.write(scope, new Uint8Array([9]));
+    const [key] = await storage.getKeys();
+    assert.equal(await storage.getItem(key!), `sia-access:v1:${record}`);
+    assert.deepEqual(await store.read(scope), new Uint8Array([9]));
+  }
+});
+
 void test("unstorage copies writes before an asynchronous codec can retain them", async () => {
   const storage = createStorage();
   let resume!: () => void;
@@ -120,6 +139,6 @@ void test("unstorage rejects unreadable records without returning a key", async 
     }
   ).setItem(key!, { exposed: true });
   await assert.rejects(store.read(scope), TypeError);
-  await storage.setItem(key!, "bad record");
+  await storage.setItem(key!, "sia-access:v1:bad record");
   await assert.rejects(store.read(scope), /Invalid record/);
 });
