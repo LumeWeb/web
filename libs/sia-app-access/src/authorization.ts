@@ -124,7 +124,7 @@ export class Authorization<Session> {
     } catch (error) {
       finishAcquisition();
       if (error instanceof RegistrationLimitError) {
-        op.registrationEffect = RegistrationEffect.None;
+        op.registrationEffect = RegistrationEffect.Rejected;
         op.fail(AccessFailure.RegistrationLimit, AccessRecovery.Authorize);
       } else op.fail(AccessFailure.Registration, AccessRecovery.Authorize);
       return;

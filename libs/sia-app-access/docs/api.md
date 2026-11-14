@@ -217,14 +217,15 @@ The interaction sequence identifies an authorization flow within one controller.
 
 `AccessEffects` contains `registration: RegistrationEffect` and `credentials: CredentialEffect`. It describes the returning command, not global account state or other controllers.
 
-| Enum member                     | Meaning                                                                               |
-| ------------------------------- | ------------------------------------------------------------------------------------- |
-| `RegistrationEffect.None`       | This command did not dispatch registration                                            |
-| `RegistrationEffect.Registered` | Registration returned confirmation                                                    |
-| `RegistrationEffect.Unknown`    | Registration was attempted, but no success was confirmed before this command finished |
-| `CredentialEffect.None`         | This command did not start or queue a credential write or removal                     |
-| `CredentialEffect.Write`        | A credential write started or was queued                                              |
-| `CredentialEffect.Remove`       | A credential removal started or was queued                                            |
+| Enum member                     | Meaning                                                                             |
+| ------------------------------- | ----------------------------------------------------------------------------------- |
+| `RegistrationEffect.None`       | This command did not dispatch registration                                          |
+| `RegistrationEffect.Registered` | Registration returned confirmation                                                  |
+| `RegistrationEffect.Unknown`    | Registration was attempted without a definitive reply before this command finished  |
+| `RegistrationEffect.Rejected`   | The indexer confirmed that the attempted registration did not create an app account |
+| `CredentialEffect.None`         | This command did not start or queue a credential write or removal                   |
+| `CredentialEffect.Write`        | A credential write started or was queued                                            |
+| `CredentialEffect.Remove`       | A credential removal started or was queued                                          |
 
 An operation can report failure after changing the server or credential store. In particular, a registration error can mean the server registered the account but its response was lost. Do not call `register()` again on that connection; start a new authorization flow.
 
@@ -240,6 +241,9 @@ export function registrationMessage(result: SubmitRecoveryPhraseResult): string 
   if (result.kind !== AccessOutcome.Failed && result.kind !== AccessOutcome.Cancelled) return "";
   if (result.effects.registration === RegistrationEffect.Unknown) {
     return "Registration may have completed. Restart authorization instead of reusing the connection.";
+  }
+  if (result.effects.registration === RegistrationEffect.Rejected) {
+    return "Registration was rejected. Start a new authorization with another connect key.";
   }
   return result.effects.registration === RegistrationEffect.Registered ? "Registration succeeded, but access setup did not finish." : "Registration was not started by this call.";
 }

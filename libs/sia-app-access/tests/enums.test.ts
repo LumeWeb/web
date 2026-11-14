@@ -52,6 +52,7 @@ void test("public string enums retain the serialized contract", () => {
     "none",
     "registered",
     "unknown",
+    "rejected",
   ]);
   assert.deepEqual(Object.values(CredentialEffect), [
     "none",

@@ -87,6 +87,7 @@ export enum RegistrationEffect {
   None = "none",
   Registered = "registered",
   Unknown = "unknown",
+  Rejected = "rejected",
 }
 export enum SaveRecoveryProgress {
   Idle = "idle",
